@@ -1,111 +1,94 @@
-<!DOCTYPE html>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
 
-<html lang="en">
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f6f9;
+}
 
-<head>
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+}
 
-```
-<meta charset="UTF-8">
+.login-card {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
 
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
+.logo-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-<title>LOGIS-TECH | Login</title>
+.logo-container img {
+    max-width: 100%;
+    height: auto;
+}
 
-<link
-    rel="stylesheet"
-    href="css/login.css"
->
-```
+.input-group {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+}
 
-</head>
+.input-group label {
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #333;
+}
 
-<body>
+.input-group input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
 
-```
-<div class="login-container">
+.login-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
 
-    <div class="login-card">
+.login-btn:hover {
+    background-color: #0056b3;
+}
 
-        <div class="logo-container">
+/* Flexbox para sa mga links */
+.login-links {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+}
 
-            <img
-                src="assets/logo.png"
-                alt="LOGI-TECH Logo"
-            >
+.login-links a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 14px;
+}
 
-        </div>
+.login-links a:hover {
+    text-decoration: underline;
+}
 
-
-        <form id="loginForm">
-
-            <div class="input-group">
-
-                <label for="username">
-                    Username
-                </label>
-
-                <input
-                    type="text"
-                    id="username"
-                    placeholder="Enter username"
-                    required
-                >
-
-            </div>
-
-
-            <div class="input-group">
-
-                <label for="password">
-                    Password
-                </label>
-
-                <input
-                    type="password"
-                    id="password"
-                    placeholder="Enter password"
-                    required
-                >
-
-            </div>
-
-
-            <button
-                type="submit"
-                class="login-btn"
-            >
-                LOGIN
-            </button>
-
-        </form>
-
-
-        <p id="loginMessage"></p>
-
-
-        <div class="login-links">
-
-            <a href="signup.html">
-                Sign Up
-            </a>
-
-            <a href="forgot-password.html">
-                Forgot Password?
-            </a>
-
-        </div>
-
-    </div>
-
-</div>
-
-
-<script src="js/login.js"></script>
-```
-
-</body>
-
-</html>
+/* Itutulak ang Forgot Password lang sa pinakakanan */
+.login-links .forgot-password {
+    margin-left: auto;
+}
