@@ -23,13 +23,153 @@
 
     <div class="dashboard-container">
 
-        <h1>LOGI-TECH Dashboard</h1>
+        <!-- DASHBOARD HEADER -->
 
-        <p>
-            Dashboard content will be placed here.
-        </p>
+        <div class="dashboard-header">
+
+            <div>
+                <h1>Dashboard</h1>
+
+                <p>
+                    LOGI-TECH System Overview
+                </p>
+            </div>
+
+        </div>
+
+
+        <!-- DASHBOARD CARDS -->
+
+        <div class="cards">
+
+            <div class="card">
+
+                <div class="card-title">
+                    Total Sales Orders
+                </div>
+
+                <div
+                    class="card-number"
+                    id="dashboardSOCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    Job Orders
+                </div>
+
+                <div
+                    class="card-number"
+                    id="dashboardJOCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    Deliveries
+                </div>
+
+                <div
+                    class="card-number"
+                    id="dashboardDeliveryCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    Pending
+                </div>
+
+                <div
+                    class="card-number"
+                    id="dashboardPendingCount"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RECENT SALES ORDERS -->
+
+        <div class="section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>
+                        Recent Sales Orders
+                    </h2>
+
+                    <p>
+                        Latest Sales Order transactions
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>
+                                SO Number
+                            </th>
+
+                            <th>
+                                Client
+                            </th>
+
+                            <th>
+                                Project
+                            </th>
+
+                            <th>
+                                Status
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="recentSOBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
 
     </div>
+
 
     <script src="../js/dashboard.js"></script>
 
