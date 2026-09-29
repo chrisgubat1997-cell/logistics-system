@@ -257,7 +257,180 @@ td {
 
     font-size: 12px;
 }
+/* SALES ORDER */
 
+.page-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+
+}
+
+.subtitle {
+
+    color: #777;
+
+    margin-top: 5px;
+
+    font-size: 14px;
+
+}
+
+
+.action-bar {
+
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+
+}
+
+
+.btn {
+
+    border: none;
+
+    padding: 10px 18px;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+}
+
+
+.btn-primary {
+
+    background: #2563eb;
+
+    color: white;
+
+}
+
+
+.btn-primary:hover {
+
+    background: #1d4ed8;
+
+}
+
+
+.btn-secondary {
+
+    background: #64748b;
+
+    color: white;
+
+}
+
+
+.btn-danger {
+
+    background: #dc2626;
+
+    color: white;
+
+}
+
+
+.btn:disabled {
+
+    background: #d1d5db;
+
+    color: #888;
+
+    cursor: not-allowed;
+
+}
+
+
+.table-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+
+}
+
+
+.table-header input {
+
+    width: 250px;
+
+    padding: 10px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 6px;
+
+}
+
+
+.table-container {
+
+    overflow-x: auto;
+
+}
+
+
+.so-row {
+
+    cursor: pointer;
+
+    transition: 0.15s;
+
+}
+
+
+.so-row:hover {
+
+    background: #f1f5f9;
+
+}
+
+
+.so-row.selected {
+
+    background: #dbeafe;
+
+}
+
+
+.selected-so {
+
+    margin-top: 20px;
+
+    padding: 15px;
+
+    background: #eff6ff;
+
+    border: 1px solid #bfdbfe;
+
+    border-radius: 8px;
+
+    color: #1e40af;
+
+    font-size: 14px;
+
+}
+    
 /* MOBILE */
 
 @media(max-width:900px) {
@@ -602,28 +775,200 @@ td {
 
         </div>
 
-
         <!-- SALES ORDER -->
 
-        <div
-        id="sales"
-        class="page">
+<div id="sales" class="page">
 
+    <div class="page-header">
+
+        <div>
             <h1>Sales Order</h1>
+            <p class="subtitle">
+                Manage Sales Orders
+            </p>
+        </div>
 
-            <div class="section">
+        <button
+            class="btn btn-primary"
+            onclick="openCreateSO()">
 
-                <h2>
-                    Sales Order Management
-                </h2>
+            + CREATE SO
 
-                <p>
-                    Create and manage Sales Orders.
-                </p>
+        </button>
 
-            </div>
+    </div>
+
+
+    <!-- ACTION BUTTONS -->
+
+    <div class="action-bar">
+
+        <button
+            id="updateSOButton"
+            class="btn btn-secondary"
+            onclick="updateSelectedSO()"
+            disabled>
+
+            UPDATE
+
+        </button>
+
+
+        <button
+            id="cancelSOButton"
+            class="btn btn-danger"
+            onclick="cancelSelectedSO()"
+            disabled>
+
+            CANCEL
+
+        </button>
+
+    </div>
+
+
+    <!-- SO LIST -->
+
+    <div class="section">
+
+        <div class="table-header">
+
+            <h2>Sales Order List</h2>
+
+            <input
+                type="text"
+                id="soSearch"
+                placeholder="Search SO Number..."
+                onkeyup="searchSO()">
 
         </div>
+
+
+        <div class="table-container">
+
+            <table id="soTable">
+
+                <thead>
+
+                    <tr>
+
+                        <th>SO Number</th>
+
+                        <th>Date Creation</th>
+
+                        <th>Customer</th>
+
+                        <th>Project</th>
+
+                        <th>PO Number</th>
+
+                        <th>Terms</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="soTableBody">
+
+                    <!-- SAMPLE DATA -->
+
+                    <tr
+                        class="so-row"
+                        onclick="selectSO(this, 'SO-2026-00125')">
+
+                        <td>SO-2026-00125</td>
+
+                        <td>09/29/2026</td>
+
+                        <td>ABC Corporation</td>
+
+                        <td>Project Alpha</td>
+
+                        <td>PO-2026-0055</td>
+
+                        <td>COD</td>
+
+                        <td>
+                            <span class="status">
+                                ACTIVE
+                            </span>
+                        </td>
+
+                    </tr>
+
+
+                    <tr
+                        class="so-row"
+                        onclick="selectSO(this, 'SO-2026-00124')">
+
+                        <td>SO-2026-00124</td>
+
+                        <td>09/28/2026</td>
+
+                        <td>XYZ Industries</td>
+
+                        <td>Project Beta</td>
+
+                        <td>PO-2026-0054</td>
+
+                        <td>30 Days</td>
+
+                        <td>
+                            <span class="status">
+                                ACTIVE
+                            </span>
+                        </td>
+
+                    </tr>
+
+
+                    <tr
+                        class="so-row"
+                        onclick="selectSO(this, 'SO-2026-00123')">
+
+                        <td>SO-2026-00123</td>
+
+                        <td>09/27/2026</td>
+
+                        <td>Sample Client</td>
+
+                        <td>Project Gamma</td>
+
+                        <td>PO-2026-0053</td>
+
+                        <td>COD</td>
+
+                        <td>
+                            <span class="status">
+                                ACTIVE
+                            </span>
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- SELECTED SO -->
+
+    <div
+        id="selectedSOInfo"
+        class="selected-so">
+
+        No Sales Order selected.
+
+    </div>
+
+</div>
 
 
         <!-- JOB ORDER -->
@@ -793,7 +1138,144 @@ function showPage(pageId, button) {
     button.innerText.trim();
 
 }
+let selectedSO = null;
 
+
+function selectSO(row, soNumber) {
+
+    // Remove previous selection
+
+    document
+        .querySelectorAll('.so-row')
+        .forEach(function(item) {
+
+            item.classList.remove('selected');
+
+        });
+
+
+    // Select current row
+
+    row.classList.add('selected');
+
+
+    // Save selected SO
+
+    selectedSO = soNumber;
+
+
+    // Enable buttons
+
+    document.getElementById('updateSOButton')
+        .disabled = false;
+
+
+    document.getElementById('cancelSOButton')
+        .disabled = false;
+
+
+    // Show selected SO
+
+    document.getElementById('selectedSOInfo')
+        .innerHTML =
+        'Selected Sales Order: <strong>' +
+        soNumber +
+        '</strong>';
+
+}
+
+
+function openCreateSO() {
+
+    alert(
+        'CREATE SO page natin ang susunod na gagawin.'
+    );
+
+}
+
+
+function updateSelectedSO() {
+
+    if (!selectedSO) {
+
+        return;
+
+    }
+
+
+    alert(
+        'Update Sales Order: ' +
+        selectedSO
+    );
+
+}
+
+
+function cancelSelectedSO() {
+
+    if (!selectedSO) {
+
+        return;
+
+    }
+
+
+    const confirmCancel = confirm(
+
+        'Are you sure you want to cancel ' +
+        selectedSO +
+        '?'
+
+    );
+
+
+    if (confirmCancel) {
+
+        alert(
+            selectedSO +
+            ' has been cancelled.'
+        );
+
+    }
+
+}
+
+
+function searchSO() {
+
+    const searchValue =
+        document
+        .getElementById('soSearch')
+        .value
+        .toUpperCase();
+
+
+    const rows =
+        document.querySelectorAll('.so-row');
+
+
+    rows.forEach(function(row) {
+
+        const soNumber =
+            row.cells[0]
+            .innerText
+            .toUpperCase();
+
+
+        if (soNumber.includes(searchValue)) {
+
+            row.style.display = '';
+
+        } else {
+
+            row.style.display = 'none';
+
+        }
+
+    });
+
+}
+    
 </script>
 
 
