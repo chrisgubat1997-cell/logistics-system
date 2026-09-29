@@ -5,7 +5,7 @@ const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 
 if (!loginForm) {
-    console.error("loginForm not found");
+    console.error("loginForm not found!");
     return;
 }
 
@@ -13,19 +13,17 @@ loginForm.addEventListener("submit", function (event) {
 
     event.preventDefault();
 
-    const username =
-        document.getElementById("username").value.trim();
+    const username = document
+        .getElementById("username")
+        .value
+        .trim();
 
-    const password =
-        document.getElementById("password").value;
-
-    loginMessage.textContent = "Naglo-login...";
-    loginMessage.style.color = "#2563eb";
+    const password = document
+        .getElementById("password")
+        .value;
 
 
-    /* =========================================
-       GET SAVED ACCOUNT
-    ========================================= */
+    /* GET SAVED ACCOUNT */
 
     const savedUser =
         localStorage.getItem("logitechUser");
@@ -42,9 +40,7 @@ loginForm.addEventListener("submit", function (event) {
     }
 
 
-    /* =========================================
-       READ ACCOUNT
-    ========================================= */
+    /* READ ACCOUNT */
 
     let user;
 
@@ -54,33 +50,25 @@ loginForm.addEventListener("submit", function (event) {
 
     } catch (error) {
 
+        console.error(error);
+
         loginMessage.textContent =
             "Account data error.";
 
         loginMessage.style.color = "red";
 
-        console.error(error);
-
         return;
     }
 
 
-    /* =========================================
-       CHECK USERNAME AND PASSWORD
-    ========================================= */
+    /* CHECK USERNAME AND PASSWORD */
 
     if (
         username === user.username &&
         password === user.password
     ) {
 
-        loginMessage.textContent =
-            "Login successful!";
-
-        loginMessage.style.color = "green";
-
-
-        /* SAVE LOGIN STATUS */
+        /* SAVE LOGIN SESSION */
 
         localStorage.setItem(
             "logitechLoggedIn",
@@ -88,27 +76,38 @@ loginForm.addEventListener("submit", function (event) {
         );
 
 
-        /* =====================================
-           GO TO MAIN SYSTEM
-        ===================================== */
+        /* SUCCESS */
+
+        loginMessage.textContent =
+            "Login successful!";
+
+        loginMessage.style.color =
+            "green";
+
+
+        /* REDIRECT */
 
         setTimeout(function () {
 
-            window.location.href =
-                "index.html";
+            window.location.replace(
+                "index.html"
+            );
 
         }, 500);
 
-    }
 
-    else {
-
-        loginMessage.textContent =
-            "Invalid username or password.";
-
-        loginMessage.style.color = "red";
+        return;
 
     }
+
+
+    /* INVALID LOGIN */
+
+    loginMessage.textContent =
+        "Invalid username or password.";
+
+    loginMessage.style.color =
+        "red";
 
 });
 ```
