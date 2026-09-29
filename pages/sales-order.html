@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>LOGI-TECH | Sales Order</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/sales-order.css"
+    >
+
+</head>
+
+<body>
+
+    <div class="sales-order-container">
+
+        <div class="page-header">
+
+            <div>
+
+                <h1>Sales Order</h1>
+
+                <p class="subtitle">
+                    Manage Sales Orders
+                </p>
+
+            </div>
+
+            <button
+                class="btn btn-primary"
+                onclick="openCreateSO()"
+            >
+                + CREATE SO
+            </button>
+
+        </div>
+
+        <div class="action-bar">
+
+            <button
+                id="updateSOButton"
+                class="btn btn-secondary"
+                onclick="updateSelectedSO()"
+                disabled
+            >
+                UPDATE
+            </button>
+
+            <button
+                id="cancelSOButton"
+                class="btn btn-danger"
+                onclick="cancelSelectedSO()"
+                disabled
+            >
+                CANCEL
+            </button>
+
+        </div>
+
+        <div class="section">
+
+            <div class="table-header">
+
+                <h2>
+                    Sales Order List
+                </h2>
+
+                <input
+                    type="text"
+                    id="soSearch"
+                    placeholder="Search SO Number..."
+                    onkeyup="searchSO()"
+                >
+
+            </div>
+
+            <div class="table-container">
+
+                <table id="soTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th>SO Number</th>
+                            <th>Date Creation</th>
+                            <th>Client Name</th>
+                            <th>SE</th>
+                            <th>Project</th>
+                            <th>PO Number</th>
+                            <th>Terms</th>
+                            <th>Grand Total</th>
+                            <th>Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="soTableBody">
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        <div
+            id="selectedSOInfo"
+            class="selected-so"
+        >
+            No Sales Order selected.
+        </div>
+
+    </div>
+
+    <script src="../js/sales-order.js"></script>
+
+</body>
+
+</html>
