@@ -1,58 +1,30 @@
-/* =========================================
-   LOGI-TECH SIGN UP
-========================================= */
+document.addEventListener("DOMContentLoaded", function () {
 
-document
-    .getElementById("signupForm")
-    .addEventListener("submit", function (event) {
+    const signupForm = document.getElementById("signupForm");
+
+    signupForm.addEventListener("submit", function (event) {
 
         event.preventDefault();
 
-
-        const fullname =
-            document.getElementById("fullname").value.trim();
-
-        const username =
-            document.getElementById("signupUsername").value.trim();
-
-        const password =
-            document.getElementById("signupPassword").value;
-
-        const confirmPassword =
-            document.getElementById("confirmPassword").value;
-
-        const message =
-            document.getElementById("signupMessage");
-
-
-        /* CHECK PASSWORD */
+        const password = document.getElementById("signupPassword").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+        const message = document.getElementById("signupMessage");
 
         if (password !== confirmPassword) {
 
-            message.textContent =
-                "Passwords do not match.";
-
+            message.textContent = "Passwords do not match.";
             message.style.color = "red";
 
             return;
         }
 
-
-        /* DEMO SUCCESS */
-
-        message.textContent =
-            "Account created successfully!";
-
+        message.textContent = "Account created successfully!";
         message.style.color = "green";
 
-
-        /* RETURN TO LOGIN */
-
         setTimeout(function () {
-
-            window.location.href =
-                "login.html";
-
+            window.location.href = "login.html";
         }, 1000);
 
     });
+
+});
