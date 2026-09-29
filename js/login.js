@@ -1,115 +1,98 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-```
-const loginForm = document.getElementById("loginForm");
-const loginMessage = document.getElementById("loginMessage");
+    const loginForm = document.getElementById("loginForm");
+    const loginMessage = document.getElementById("loginMessage");
 
-if (!loginForm) {
-    console.error("loginForm not found!");
-    return;
-}
-
-loginForm.addEventListener("submit", function (event) {
-
-    event.preventDefault();
-
-    const username = document
-        .getElementById("username")
-        .value
-        .trim();
-
-    const password = document
-        .getElementById("password")
-        .value;
-
-
-    /* GET SAVED ACCOUNT */
-
-    const savedUser =
-        localStorage.getItem("logitechUser");
-
-
-    if (!savedUser) {
-
-        loginMessage.textContent =
-            "No registered account found.";
-
-        loginMessage.style.color = "red";
-
+    if (!loginForm) {
+        console.error("loginForm not found");
         return;
     }
 
+    loginForm.addEventListener("submit", function (event) {
 
-    /* READ ACCOUNT */
+        event.preventDefault();
 
-    let user;
+        const username =
+            document.getElementById("username").value.trim();
 
-    try {
+        const password =
+            document.getElementById("password").value;
 
-        user = JSON.parse(savedUser);
+        loginMessage.textContent = "Naglo-login...";
+        loginMessage.style.color = "#2563eb";
 
-    } catch (error) {
+        const savedUser =
+            localStorage.getItem("logitechUser");
 
-        console.error(error);
+        console.log("Saved User:", savedUser);
 
-        loginMessage.textContent =
-            "Account data error.";
+        if (!savedUser) {
 
-        loginMessage.style.color = "red";
+            loginMessage.textContent =
+                "Walang registered account. Mag-Sign Up muna.";
 
-        return;
-    }
+            loginMessage.style.color = "red";
 
+            return;
+        }
 
-    /* CHECK USERNAME AND PASSWORD */
+        let user;
 
-    if (
-        username === user.username &&
-        password === user.password
-    ) {
+        try {
 
-        /* SAVE LOGIN SESSION */
+            user = JSON.parse(savedUser);
 
-        localStorage.setItem(
-            "logitechLoggedIn",
-            "true"
-        );
+        } catch (error) {
 
+            console.error("JSON ERROR:", error);
 
-        /* SUCCESS */
+            loginMessage.textContent =
+                "May error sa account data.";
 
-        loginMessage.textContent =
-            "Login successful!";
+            loginMessage.style.color = "red";
 
-        loginMessage.style.color =
-            "green";
+            return;
+        }
 
+        console.log("Username entered:", username);
+        console.log("Saved username:", user.username);
 
-        /* REDIRECT */
+        if (
+            username === user.username &&
+            password === user.password
+        ) {
 
-        setTimeout(function () {
+            loginMessage.textContent =
+                "Login successful!";
 
-            window.location.replace(
-                "index.html"
+            loginMessage.style.color = "green";
+
+            localStorage.setItem(
+                "logitechLoggedIn",
+                "true"
             );
 
-        }, 500);
+            console.log("LOGIN SUCCESS");
 
+            setTimeout(function () {
 
-        return;
+                window.location.replace(
+                    "./index.html"
+                );
 
-    }
+            }, 500);
 
+        } else {
 
-    /* INVALID LOGIN */
+            loginMessage.textContent =
+                "Invalid username or password.";
 
-    loginMessage.textContent =
-        "Invalid username or password.";
+            loginMessage.style.color = "red";
 
-    loginMessage.style.color =
-        "red";
+            console.log("LOGIN FAILED");
 
-});
-```
+        }
+
+    });
 
 });
