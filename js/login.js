@@ -1,24 +1,118 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('loginForm');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const loginMessage = document.getElementById('loginMessage');
+document.addEventListener("DOMContentLoaded", function () {
 
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
+```
+const loginForm = document.getElementById("loginForm");
+const message = document.getElementById("loginMessage");
 
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
+if (!loginForm) {
+    console.error("loginForm not found!");
+    return;
+}
 
-        if (username === "" || password === "") {
-            loginMessage.style.color = "#d9534f";
-            loginMessage.textContent = "Pakilagay ang username at password.";
-            return;
-        }
+loginForm.addEventListener("submit", function (event) {
 
-        loginMessage.style.color = "#28a745";
-        loginMessage.textContent = "Naglo-login...";
+    event.preventDefault();
 
-        console.log("Logging in with:", { username, password });
-    });
+    const username =
+        document.getElementById("username").value.trim();
+
+    const password =
+        document.getElementById("password").value;
+
+    const savedUser =
+        localStorage.getItem("logitechUser");
+
+
+    /* =========================================
+       NO ACCOUNT
+    ========================================= */
+
+    if (!savedUser) {
+
+        message.textContent =
+            "No registered account found.";
+
+        message.style.color = "red";
+
+        return;
+    }
+
+
+    /* =========================================
+       READ ACCOUNT
+    ========================================= */
+
+    let user;
+
+    try {
+
+        user = JSON.parse(savedUser);
+
+    } catch (error) {
+
+        console.error(
+            "Invalid saved account:",
+            error
+        );
+
+        message.textContent =
+            "Invalid account data.";
+
+        message.style.color = "red";
+
+        return;
+    }
+
+
+    /* =========================================
+       CHECK LOGIN
+    ========================================= */
+
+    if (
+        username === user.username &&
+        password === user.password
+    ) {
+
+        message.textContent =
+            "Login successful!";
+
+        message.style.color =
+            "green";
+
+
+        /* SAVE LOGIN SESSION */
+
+        localStorage.setItem(
+            "logitechLoggedIn",
+            "true"
+        );
+
+
+        /* =====================================
+           REDIRECT TO MAIN SYSTEM
+        ===================================== */
+
+        setTimeout(function () {
+
+            window.location.replace(
+                "./index.html"
+            );
+
+        }, 500);
+
+    }
+
+    else {
+
+        message.textContent =
+            "Invalid username or password.";
+
+        message.style.color =
+            "red";
+
+    }
+
+});
+```
+
 });
