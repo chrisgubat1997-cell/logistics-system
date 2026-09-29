@@ -76,9 +76,10 @@ body {
 }
 
 .logo-container img {
-    max-width: 300px;
     width: 100%;
+    max-width: 300px;
     height: auto;
+
     object-fit: contain;
 }
 
@@ -284,7 +285,9 @@ body {
 }
 
 
-/* SIGN UP LOGO */
+/* =========================================
+   SIGN UP LOGO
+========================================= */
 
 .login-card:has(#signupForm) .logo-container {
 
@@ -294,12 +297,16 @@ body {
 
 .login-card:has(#signupForm) .logo-container img {
 
-    max-width: 175px;
+    width: 100%;
+    max-width: 300px;
+    height: auto;
 
 }
 
 
-/* SIGN UP TITLE */
+/* =========================================
+   SIGN UP TITLE
+========================================= */
 
 .login-card:has(#signupForm) h1 {
 
@@ -310,7 +317,9 @@ body {
 }
 
 
-/* SIGN UP SUBTITLE */
+/* =========================================
+   SIGN UP SUBTITLE
+========================================= */
 
 .login-card:has(#signupForm) .subtitle {
 
@@ -321,7 +330,9 @@ body {
 }
 
 
-/* SIGN UP INPUT GROUP */
+/* =========================================
+   SIGN UP INPUT GROUP
+========================================= */
 
 .login-card:has(#signupForm) .input-group {
 
@@ -330,7 +341,9 @@ body {
 }
 
 
-/* SIGN UP LABEL */
+/* =========================================
+   SIGN UP LABEL
+========================================= */
 
 .login-card:has(#signupForm) .input-group label {
 
@@ -347,7 +360,9 @@ body {
 }
 
 
-/* SIGN UP INPUT */
+/* =========================================
+   SIGN UP INPUT
+========================================= */
 
 .login-card:has(#signupForm) .input-group input {
 
@@ -360,7 +375,9 @@ body {
 }
 
 
-/* SIGN UP BUTTON */
+/* =========================================
+   SIGN UP BUTTON
+========================================= */
 
 .login-card:has(#signupForm) .login-btn {
 
@@ -371,7 +388,9 @@ body {
 }
 
 
-/* SIGN UP MESSAGE */
+/* =========================================
+   SIGN UP MESSAGE
+========================================= */
 
 .login-card:has(#signupForm) #signupMessage {
 
@@ -382,7 +401,9 @@ body {
 }
 
 
-/* SIGN UP BACK LINK */
+/* =========================================
+   SIGN UP BACK LINK
+========================================= */
 
 .login-card:has(#signupForm) .login-links {
 
@@ -392,7 +413,7 @@ body {
 
 
 /* =========================================
-   MOBILE
+   MOBILE / SMALL SCREEN
 ========================================= */
 
 @media (max-height: 700px) {
@@ -407,10 +428,15 @@ body {
     }
 
     .logo-container img {
-        max-width: 180px;
+        max-width: 280px;
     }
 
 }
+
+
+/* =========================================
+   MOBILE WIDTH
+========================================= */
 
 @media (max-width: 480px) {
 
@@ -420,8 +446,17 @@ body {
 
     .login-card {
         max-width: 100%;
+
         padding-left: 22px;
         padding-right: 22px;
+    }
+
+    .logo-container img {
+        max-width: 280px;
+    }
+
+    .login-card:has(#signupForm) .logo-container img {
+        max-width: 280px;
     }
 
 }
