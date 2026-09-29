@@ -10,6 +10,13 @@ content="width=device-width, initial-scale=1.0">
 
 <title>Logistics Management System</title>
 
+    .dashboard-frame {
+    width: 100%;
+    height: calc(100vh - 80px);
+    border: none;
+    display: block;
+}
+    
 <style>
 
 * {
@@ -637,88 +644,20 @@ td {
 
     <div class="content">
 
-        <!-- DASHBOARD -->
+       <!-- DASHBOARD -->
 
-        <div
-        id="dashboard"
-        class="page active">
+<div
+    id="dashboard"
+    class="page active"
+>
 
-            <h1>Dashboard</h1>
+    <iframe
+        src="pages/dashboard.html"
+        class="dashboard-frame"
+        title="LOGI-TECH Dashboard"
+    ></iframe>
 
-            <div class="cards">
-
-                <div class="card">
-                    <div class="card-title">
-                        Total Sales Orders
-                    </div>
-
-                    <div
-                    class="card-number"
-                    id="dashboardSOCount">
-                        0
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        Job Orders
-                    </div>
-
-                    <div class="card-number">
-                        0
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        Deliveries
-                    </div>
-
-                    <div class="card-number">
-                        0
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        Pending
-                    </div>
-
-                    <div class="card-number">
-                        0
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="section">
-
-                <h2>
-                    Recent Sales Orders
-                </h2>
-
-                <table>
-
-                    <thead>
-
-                        <tr>
-                            <th>SO Number</th>
-                            <th>Client</th>
-                            <th>Project</th>
-                            <th>Status</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="recentSOBody">
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
+</div>
 
         <!-- SALES ORDER -->
 
