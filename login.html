@@ -1,60 +1,119 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LOGIS-TECH System Login</title>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Link sa login.css File -->
-    <link rel="stylesheet" href="login.css">
+
+```
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>LOGI-TECH | Login</title>
+
+<link
+    rel="stylesheet"
+    href="css/login.css"
+>
+```
+
 </head>
+
 <body>
 
-    <div class="login-container">
-        <div class="login-wrapper">
-            <div class="login-card">
-                <!-- Logo Image mula sa assets folder -->
-                <div class="logo-container">
-                    <img src="assets/logo.jfif" alt="LOGIS-TECH System Logo">
-                </div>
+```
+<div class="login-container">
 
-                <div class="card-body">
-                    <h1>Login</h1>
-                    
-                    <form id="loginForm">
-                        <div class="input-group">
-                            <i class="fa-regular fa-user input-icon"></i>
-                            <input type="text" id="username" placeholder="username" required>
-                        </div>
+    <div class="login-card">
 
-                        <div class="input-group">
-                            <i class="fa-solid fa-lock input-icon"></i>
-                            <input type="password" id="password" placeholder="Password" required>
-                        </div>
+        <div class="logo-container">
 
-                        <div class="options-row">
-                            <a href="#" class="forgot-pass">Forgot password?</a>
-                        </div>
+            <img
+                src="assets/logo.jfif"
+                alt="LOGI-TECH Logo"
+            >
 
-                        <button type="submit" class="login-btn">Login</button>
-
-                        <div class="login-links">
-                            <a href="#">Create Account</a>
-                        </div>
-                    </form>
-
-                    <div id="loginMessage"></div>
-                </div>
-            </div>
-
-            <div class="designer-tag">
-                designed by Cris G
-            </div>
         </div>
+
+        <h1>
+            LOGI-TECH
+        </h1>
+
+        <p class="subtitle">
+            Logistics Management System
+        </p>
+
+
+        <form id="loginForm">
+
+            <div class="input-group">
+
+                <label for="username">
+                    Username
+                </label>
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="Enter username"
+                    required
+                >
+
+            </div>
+
+
+            <div class="input-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter password"
+                    required
+                >
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-btn"
+            >
+                LOGIN
+            </button>
+
+        </form>
+
+
+        <p id="loginMessage"></p>
+
+
+        <div class="login-links">
+
+            <a href="signup.html">
+                Sign Up
+            </a>
+
+            <a href="forgot-password.html">
+                Forgot Password?
+            </a>
+
+        </div>
+
     </div>
 
-    <!-- Link sa login.js File -->
-    <script src="login.js"></script>
+</div>
+
+
+<script src="js/login.js"></script>
+```
+
 </body>
+
 </html>
