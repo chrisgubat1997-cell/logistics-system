@@ -2061,17 +2061,182 @@ function closeCreateSO() {
 function saveSO() {
 
     const soNumber =
-        document.getElementById('soNumber').value;
+        document.getElementById('soNumber').value.trim();
 
+    const soDate =
+        document.getElementById('soDate').value;
+
+    const billingAddress =
+        document.getElementById('billingAddress').value.trim();
+
+    const attention =
+        document.getElementById('attention').value.trim();
+
+    const deliveryAddress =
+        document.getElementById('deliveryAddress').value.trim();
+
+    const project =
+        document.getElementById('project').value.trim();
+
+    const tin =
+        document.getElementById('tin').value.trim();
+
+    const poNumber =
+        document.getElementById('poNumber').value.trim();
+
+    const terms =
+        document.getElementById('terms').value.trim();
+
+    const jobOrder =
+        document.getElementById('jobOrder').value.trim();
+
+
+    // Check SO Number
     if (!soNumber) {
         alert('Sales Order Number is missing.');
         return;
     }
 
+
+    // Get Items
+    const itemRows =
+        document.querySelectorAll('#soItemsBody tr');
+
+    const items = [];
+
+
+    itemRows.forEach(function(row) {
+
+        const inputs =
+            row.querySelectorAll('input');
+
+        const itemName =
+            inputs[0] ? inputs[0].value.trim() : '';
+
+        const description =
+            inputs[1] ? inputs[1].value.trim() : '';
+
+        const qty =
+            inputs[2] ? inputs[2].value : '';
+
+        const unitSelect =
+            row.querySelector('select');
+
+        let unit = '';
+
+        if (unitSelect) {
+
+            unit = unitSelect.value;
+
+            // Custom unit
+            if (unit === 'custom') {
+
+                const customInput =
+                    unitSelect.parentElement
+                    .querySelector('input');
+
+                if (customInput) {
+                    unit = customInput.value.trim();
+                }
+
+            }
+
+        }
+
+
+        items.push({
+            itemName: itemName,
+            description: description,
+            qty: qty,
+            unit: unit
+        });
+
+    });
+
+
+    // Create SO Object
+    const newSO = {
+
+        soNumber: soNumber,
+        dateCreation: soDate,
+
+        billingAddress: billingAddress,
+        attention: attention,
+        deliveryAddress: deliveryAddress,
+
+        project: project,
+        tin: tin,
+        poNumber: poNumber,
+        terms: terms,
+        jobOrder: jobOrder,
+
+        status: 'ACTIVE',
+
+        items: items
+
+    };
+
+
+    // Get existing SO data
+    let salesOrders =
+        JSON.parse(
+            localStorage.getItem('salesOrders')
+        ) || [];
+
+
+    // Check duplicate SO Number
+    const existingSO =
+        salesOrders.find(function(so) {
+            return so.soNumber === soNumber;
+        });
+
+
+    if (existingSO) {
+
+        alert(
+            soNumber +
+            ' already exists.'
+        );
+
+        return;
+
+    }
+
+
+    // Save SO
+    salesOrders.push(newSO);
+
+    localStorage.setItem(
+        'salesOrders',
+        JSON.stringify(salesOrders)
+    );
+
+
+    // Refresh SO List
+    loadSOList();
+
+
+    // Return to Sales Order page
+    document.querySelectorAll('.page').forEach(function(page) {
+        page.classList.remove('active');
+    });
+
+    document.getElementById('sales')
+        .classList.add('active');
+
+    document.getElementById('pageTitle').innerText =
+        'Sales Order';
+
+
+    // Clear Create SO form
+    clearCreateSOForm();
+
+
     alert(
         soNumber +
-        ' is ready to be saved.'
+        ' has been successfully saved.'
     );
+
 }
 </script>
 
