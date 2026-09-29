@@ -6,64 +6,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
         event.preventDefault();
 
-        const username =
-            document.getElementById("username").value.trim();
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value;
+        const message = document.getElementById("loginMessage");
 
-        const password =
-            document.getElementById("password").value;
+        const savedUser = localStorage.getItem("logitechUser");
 
-        const message =
-            document.getElementById("loginMessage");
+        console.log("Saved User:", savedUser);
+        console.log("Entered Username:", username);
+        console.log("Entered Password:", password);
 
-        // Get saved account
-        const savedUser =
-            JSON.parse(localStorage.getItem("logitechUser"));
-
-        // Check saved account
-        if (
-            savedUser &&
-            username === savedUser.username &&
-            password === savedUser.password
-        ) {
-
-            message.textContent =
-                "Login successful...";
-
-            message.style.color = "green";
-
-            setTimeout(function () {
-
-                window.location.href = "index.html";
-
-            }, 500);
-
+        if (!savedUser) {
+            message.textContent = "No account found.";
+            message.style.color = "red";
             return;
         }
 
-        // Demo admin account
+        const user = JSON.parse(savedUser);
+
+        console.log("Saved Username:", user.username);
+        console.log("Saved Password:", user.password);
+
         if (
-            username === "admin" &&
-            password === "admin123"
+            username === user.username &&
+            password === user.password
         ) {
 
-            message.textContent =
-                "Login successful...";
-
+            message.textContent = "LOGIN SUCCESSFUL!";
             message.style.color = "green";
 
+            localStorage.setItem("logitechLoggedIn", "true");
+
             setTimeout(function () {
-
                 window.location.href = "index.html";
+            }, 1000);
 
-            }, 500);
+        } else {
 
-            return;
+            message.textContent = "Username or password is incorrect.";
+            message.style.color = "red";
+
         }
-
-        message.textContent =
-            "Invalid username or password.";
-
-        message.style.color = "red";
 
     });
 
