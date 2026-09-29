@@ -27,112 +27,98 @@
 ```
 <div class="login-container">
 
-    <div class="login-card">
+    <div class="login-wrapper">
 
+        <div class="login-card">
 
-        <!-- LOGO -->
+            <!-- LOGO -->
 
-        <div class="logo-container">
+            <div class="logo-container">
 
-            <img
-                src="assets/logo.png"
-                alt="LOGI-TECH Logo"
-            >
-
-        </div>
-
-
-        <!-- TITLE -->
-
-        <h1>
-            LOGI-TECH
-        </h1>
-
-        <p class="subtitle">
-            Logistics Management System
-        </p>
-
-
-        <!-- LOGIN FORM -->
-
-        <form id="loginForm">
-
-
-            <!-- USERNAME -->
-
-            <div class="input-group">
-
-                <label for="username">
-                    Username
-                </label>
-
-                <input
-                    type="text"
-                    id="username"
-                    placeholder="Enter username"
-                    required
+                <img
+                    src="assets/logo.png"
+                    alt="LOGI-TECH Logo"
                 >
 
             </div>
 
 
-            <!-- PASSWORD -->
+            <!-- CARD CONTENT -->
 
-            <div class="input-group">
+            <div class="card-body">
 
-                <label for="password">
-                    Password
-                </label>
+                <h1>
+                    LOGI-TECH LOGIN
+                </h1>
 
-                <input
-                    type="password"
-                    id="password"
-                    placeholder="Enter password"
-                    required
-                >
+
+                <!-- LOGIN FORM -->
+
+                <form id="loginForm">
+
+                    <div class="input-group">
+
+                        <input
+                            type="text"
+                            id="username"
+                            placeholder="Username"
+                            required
+                        >
+
+                    </div>
+
+
+                    <div class="input-group">
+
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Password"
+                            required
+                        >
+
+                    </div>
+
+
+                    <button
+                        type="submit"
+                        class="login-btn"
+                    >
+                        LOGIN
+                    </button>
+
+                </form>
+
+
+                <!-- MESSAGE -->
+
+                <p id="loginMessage"></p>
+
+
+                <!-- LINKS -->
+
+                <div class="login-links">
+
+                    <a href="signup.html">
+                        Sign Up
+                    </a>
+
+                    <br><br>
+
+                    <a href="forgot-password.html">
+                        Forgot Password?
+                    </a>
+
+                </div>
 
             </div>
 
-
-            <!-- LOGIN BUTTON -->
-
-            <button
-                type="submit"
-                class="login-btn"
-            >
-                LOGIN
-            </button>
-
-
-        </form>
-
-
-        <!-- LOGIN MESSAGE -->
-
-        <p id="loginMessage"></p>
-
-
-        <!-- SIGN UP / FORGOT PASSWORD -->
-
-        <div class="login-links">
-
-            <a href="signup.html">
-                Sign Up
-            </a>
-
-            <a href="forgot-password.html">
-                Forgot Password?
-            </a>
-
         </div>
-
 
     </div>
 
 </div>
 
-
-<!-- LOGIN JAVASCRIPT -->
 
 <script src="js/login.js"></script>
 ```
