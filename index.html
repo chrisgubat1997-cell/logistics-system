@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -191,6 +190,12 @@ td {
     color: #b91c1c;
 }
 
+.total-cell {
+    font-weight: bold;
+    color: #111827;
+    white-space: nowrap;
+}
+
 /* SALES ORDER */
 
 .page-header {
@@ -339,7 +344,9 @@ td {
 }
 
 #soItemsTable input,
-#soItemsTable select {
+#soItemsTable select,
+#soDetailsItemsTable input,
+#soDetailsItemsTable select {
     width: 100%;
     padding: 8px;
     border: 1px solid #d1d5db;
@@ -364,6 +371,80 @@ td {
     background: #b91c1c;
 }
 
+/* SO TOTALS */
+
+.so-totals {
+    margin-top: 20px;
+    margin-left: auto;
+    width: 420px;
+    max-width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.so-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    background: white;
+}
+
+.so-total-row:last-child {
+    border-bottom: none;
+}
+
+.so-total-label {
+    font-weight: bold;
+    color: #374151;
+}
+
+.so-total-value {
+    font-weight: bold;
+    text-align: right;
+}
+
+.so-total-input {
+    width: 180px !important;
+    text-align: right;
+    padding: 9px !important;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+}
+
+.vatable-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vatable-check input {
+    width: auto !important;
+}
+
+.grand-total-row {
+    background: #eff6ff;
+    font-size: 17px;
+}
+
+.grand-total-row .so-total-label,
+.grand-total-row .so-total-value {
+    color: #1d4ed8;
+}
+
+/* DETAIL SUMMARY */
+
+.detail-summary {
+    margin-top: 20px;
+    margin-left: auto;
+    width: 420px;
+    max-width: 100%;
+}
+
+/* DR */
+
 .dr-info {
     background: #f8fafc;
     border: 1px solid #e2e8f0;
@@ -382,6 +463,11 @@ td {
 
     .cards {
         grid-template-columns: repeat(2, 1fr);
+    }
+
+    .so-totals,
+    .detail-summary {
+        width: 100%;
     }
 
 }
@@ -419,6 +505,23 @@ td {
 
     .cards {
         grid-template-columns: 1fr;
+    }
+
+}
+
+/* PRINT */
+
+@media print {
+
+    .sidebar,
+    .topbar,
+    .action-bar,
+    .btn {
+        display: none !important;
+    }
+
+    .main {
+        margin-left: 0;
     }
 
 }
@@ -489,8 +592,6 @@ td {
 <!-- MAIN -->
 
 <div class="main">
-
-    <!-- TOP BAR -->
 
     <div class="topbar">
 
@@ -673,6 +774,7 @@ td {
                                 <th>Project</th>
                                 <th>PO Number</th>
                                 <th>Terms</th>
+                                <th>Grand Total</th>
                                 <th>Status</th>
 
                             </tr>
@@ -954,6 +1056,10 @@ td {
 
                                 <th>Unit</th>
 
+                                <th>Amount</th>
+
+                                <th>Total</th>
+
                                 <th>Action</th>
 
                             </tr>
@@ -964,6 +1070,113 @@ td {
                         </tbody>
 
                     </table>
+
+                </div>
+
+
+                <!-- SO TOTALS -->
+
+                <div class="so-totals">
+
+                    <div class="so-total-row">
+
+                        <span class="so-total-label">
+                            Subtotal
+                        </span>
+
+                        <span
+                            class="so-total-value"
+                            id="soSubtotal">
+
+                            ₱0.00
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="so-total-row">
+
+                        <label
+                            class="so-total-label"
+                            for="soDiscount">
+
+                            Less Discount
+
+                        </label>
+
+                        <input
+                            type="number"
+                            id="soDiscount"
+                            class="so-total-input"
+                            min="0"
+                            step="0.01"
+                            value="0"
+                            placeholder="0.00"
+                            oninput="calculateSOTotals()">
+
+                    </div>
+
+
+                    <div class="so-total-row">
+
+                        <label class="so-total-label">
+
+                            <span class="vatable-check">
+
+                                <input
+                                    type="checkbox"
+                                    id="soVatable"
+                                    onchange="calculateSOTotals()">
+
+                                Vatable
+
+                            </span>
+
+                        </label>
+
+                        <span
+                            class="so-total-value"
+                            id="soVAT">
+
+                            ₱0.00
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="so-total-row">
+
+                        <span class="so-total-label">
+                            VAT Rate
+                        </span>
+
+                        <span
+                            class="so-total-value">
+
+                            12%
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="so-total-row grand-total-row">
+
+                        <span class="so-total-label">
+                            GRAND TOTAL
+                        </span>
+
+                        <span
+                            class="so-total-value"
+                            id="soGrandTotal">
+
+                            ₱0.00
+
+                        </span>
+
+                    </div>
 
                 </div>
 
@@ -1238,6 +1451,8 @@ td {
                                 <th>Description</th>
                                 <th>QTY</th>
                                 <th>Unit</th>
+                                <th>Amount</th>
+                                <th>Total</th>
                                 <th>Action</th>
 
                             </tr>
@@ -1248,6 +1463,111 @@ td {
                         </tbody>
 
                     </table>
+
+                </div>
+
+
+                <!-- DETAIL TOTALS -->
+
+                <div class="detail-summary">
+
+                    <div class="so-total-row">
+
+                        <span class="so-total-label">
+                            Subtotal
+                        </span>
+
+                        <span
+                            class="so-total-value"
+                            id="detailSubtotal">
+
+                            ₱0.00
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="so-total-row">
+
+                        <label
+                            class="so-total-label"
+                            for="detailDiscount">
+
+                            Less Discount
+
+                        </label>
+
+                        <input
+                            type="number"
+                            id="detailDiscount"
+                            class="so-total-input"
+                            min="0"
+                            step="0.01"
+                            value="0"
+                            disabled
+                            oninput="calculateDetailTotals()">
+
+                    </div>
+
+
+                    <div class="so-total-row">
+
+                        <label class="so-total-label">
+
+                            <span class="vatable-check">
+
+                                <input
+                                    type="checkbox"
+                                    id="detailVatable"
+                                    disabled
+                                    onchange="calculateDetailTotals()">
+
+                                Vatable
+
+                            </span>
+
+                        </label>
+
+                        <span
+                            class="so-total-value"
+                            id="detailVAT">
+
+                            ₱0.00
+
+                        </span>
+
+                    </div>
+
+
+                    <div class="so-total-row">
+
+                        <span class="so-total-label">
+                            VAT Rate
+                        </span>
+
+                        <span class="so-total-value">
+                            12%
+                        </span>
+
+                    </div>
+
+
+                    <div class="so-total-row grand-total-row">
+
+                        <span class="so-total-label">
+                            GRAND TOTAL
+                        </span>
+
+                        <span
+                            class="so-total-value"
+                            id="detailGrandTotal">
+
+                            ₱0.00
+
+                        </span>
+
+                    </div>
 
                 </div>
 
@@ -1350,7 +1670,7 @@ td {
         </div>
 
 
-        <!-- DR PRINTING -->
+        <!-- DR PRINTING - UNCHANGED -->
 
         <div
         id="dr"
@@ -1657,6 +1977,10 @@ function showPage(pageId, button) {
     if (pageId === 'dashboard') {
         loadDashboard();
     }
+
+    if (pageId === 'sales') {
+        loadSOList();
+    }
 }
 
 
@@ -1668,6 +1992,8 @@ let selectedSO = null;
 let soItemCount = 0;
 let detailEditMode = false;
 
+const VAT_RATE = 0.12;
+
 
 /* =====================================================
    GET SALES ORDERS
@@ -1678,6 +2004,102 @@ function getSalesOrders() {
     return JSON.parse(
         localStorage.getItem('salesOrders')
     ) || [];
+
+}
+
+
+/* =====================================================
+   FORMAT MONEY
+===================================================== */
+
+function formatMoney(value) {
+
+    const number =
+        Number(value) || 0;
+
+    return '₱' +
+        number.toLocaleString(
+            'en-PH',
+            {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }
+        );
+
+}
+
+
+/* =====================================================
+   CALCULATE SO TOTAL DATA
+===================================================== */
+
+function calculateSOData(items, discount, vatable) {
+
+    let subtotal = 0;
+
+
+    items.forEach(function(item) {
+
+        const qty =
+            Number(item.qty) || 0;
+
+        const amount =
+            Number(item.amount) || 0;
+
+        item.total =
+            qty * amount;
+
+        subtotal +=
+            item.total;
+
+    });
+
+
+    discount =
+        Math.max(
+            0,
+            Number(discount) || 0
+        );
+
+
+    const taxableAmount =
+        Math.max(
+            0,
+            subtotal - discount
+        );
+
+
+    const vatAmount =
+        vatable
+        ? taxableAmount * VAT_RATE
+        : 0;
+
+
+    const grandTotal =
+        taxableAmount + vatAmount;
+
+
+    return {
+
+        subtotal:
+            subtotal,
+
+        discount:
+            discount,
+
+        vatable:
+            Boolean(vatable),
+
+        vatRate:
+            VAT_RATE,
+
+        vatAmount:
+            vatAmount,
+
+        grandTotal:
+            grandTotal
+
+    };
 
 }
 
@@ -1698,14 +2120,88 @@ function selectSO(row, soNumber) {
 
     selectedSO = soNumber;
 
-    document.getElementById('updateSOButton').disabled = false;
+    const salesOrders =
+        getSalesOrders();
 
-    document.getElementById('cancelSOButton').disabled = false;
+    const so =
+        salesOrders.find(function(item) {
+            return item.soNumber === soNumber;
+        });
 
-    document.getElementById('selectedSOInfo').innerHTML =
-        'Selected Sales Order: <strong>' +
-        soNumber +
-        '</strong>';
+
+    document.getElementById('updateSOButton').disabled =
+        !so || so.status === 'CANCELLED';
+
+    document.getElementById('cancelSOButton').disabled =
+        !so || so.status === 'CANCELLED';
+
+
+    if (so) {
+
+        document.getElementById('selectedSOInfo').innerHTML =
+            'Selected Sales Order: <strong>' +
+            escapeHTML(soNumber) +
+            '</strong>' +
+            ' &nbsp; | &nbsp; Client: <strong>' +
+            escapeHTML(so.clientName || '') +
+            '</strong>' +
+            ' &nbsp; | &nbsp; PO: <strong>' +
+            escapeHTML(so.poNumber || '') +
+            '</strong>' +
+            ' &nbsp; | &nbsp; Total: <strong>' +
+            formatMoney(
+                getSOTotal(so)
+            ) +
+            '</strong>';
+
+    }
+
+}
+
+
+/* =====================================================
+   GET SO TOTAL
+===================================================== */
+
+function getSOTotal(so) {
+
+    if (
+        so &&
+        typeof so.grandTotal !== 'undefined'
+    ) {
+
+        return Number(so.grandTotal) || 0;
+
+    }
+
+
+    const items =
+        (so && so.items)
+        ? so.items.map(function(item) {
+
+            return {
+
+                qty:
+                    Number(item.qty) || 0,
+
+                amount:
+                    Number(item.amount) || 0
+
+            };
+
+        })
+        : [];
+
+
+    const result =
+        calculateSOData(
+            items,
+            Number(so && so.discount) || 0,
+            Boolean(so && so.vatable)
+        );
+
+
+    return result.grandTotal;
 
 }
 
@@ -1718,11 +2214,14 @@ function openSODetails(soNumber) {
 
     selectedSO = soNumber;
 
-    const salesOrders = getSalesOrders();
+    const salesOrders =
+        getSalesOrders();
 
-    const so = salesOrders.find(function(item) {
-        return item.soNumber === soNumber;
-    });
+    const so =
+        salesOrders.find(function(item) {
+            return item.soNumber === soNumber;
+        });
+
 
     if (!so) {
 
@@ -1782,11 +2281,37 @@ function openSODetails(soNumber) {
         so.jobOrder || '';
 
 
+    document.getElementById('detailDiscount').value =
+        Number(so.discount) || 0;
+
+    document.getElementById('detailVatable').checked =
+        Boolean(so.vatable);
+
+
     detailEditMode = false;
 
     setDetailsEditMode(false);
 
+    document.getElementById('detailEditButton').style.display =
+        so.status === 'CANCELLED'
+        ? 'none'
+        : 'inline-block';
+
+    document.getElementById('detailCancelButton').style.display =
+        so.status === 'CANCELLED'
+        ? 'none'
+        : 'inline-block';
+
+    document.getElementById('detailSaveButton').style.display =
+        'none';
+
+    document.getElementById('detailAddItemButton').style.display =
+        'none';
+
+
     loadDetailItems(so);
+
+    calculateDetailTotals();
 
 }
 
@@ -1805,123 +2330,197 @@ function loadDetailItems(so) {
 
     (so.items || []).forEach(function(item, index) {
 
-        const row =
-            document.createElement('tr');
-
-
-        row.innerHTML = `
-
-            <td class="item-number">
-                ${index + 1}
-            </td>
-
-            <td>
-                <input
-                    type="text"
-                    value="${escapeHTML(item.itemName || '')}"
-                    disabled>
-            </td>
-
-            <td>
-                <input
-                    type="text"
-                    value="${escapeHTML(item.description || '')}"
-                    disabled>
-            </td>
-
-            <td>
-                <input
-                    type="number"
-                    min="0"
-                    step="any"
-                    value="${escapeHTML(item.qty || '')}"
-                    disabled>
-            </td>
-
-            <td>
-
-                <select disabled>
-
-                    <option value="">Select Unit</option>
-
-                    <option value="pcs">pcs</option>
-                    <option value="assy">assy</option>
-                    <option value="set">set</option>
-                    <option value="length">length</option>
-                    <option value="meter">meter</option>
-                    <option value="lot">lot</option>
-                    <option value="box">box</option>
-                    <option value="roll">roll</option>
-                    <option value="amount">amount</option>
-                    <option value="custom">Other / Custom</option>
-
-                </select>
-
-            </td>
-
-            <td>
-
-                <button
-                    class="delete-item"
-                    onclick="deleteDetailItem(this)"
-                    style="display:none;">
-
-                    DELETE
-
-                </button>
-
-            </td>
-
-        `;
-
-
-        const select =
-            row.querySelector('select');
-
-        const unit = item.unit || '';
-
-        const standardUnits = [
-            'pcs',
-            'assy',
-            'set',
-            'length',
-            'meter',
-            'lot',
-            'box',
-            'roll',
-            'amount'
-        ];
-
-
-        if (standardUnits.includes(unit)) {
-
-            select.value = unit;
-
-        } else if (unit) {
-
-            select.value = 'custom';
-
-            const customInput =
-                document.createElement('input');
-
-            customInput.type = 'text';
-
-            customInput.value = unit;
-
-            customInput.placeholder = 'Enter unit';
-
-            customInput.style.marginTop = '5px';
-
-            customInput.disabled = true;
-
-            select.parentElement.appendChild(customInput);
-
-        }
-
-
-        itemsBody.appendChild(row);
+        createDetailItemRow(
+            item,
+            index
+        );
 
     });
+
+}
+
+
+/* =====================================================
+   CREATE DETAIL ITEM ROW
+===================================================== */
+
+function createDetailItemRow(item, index) {
+
+    const itemsBody =
+        document.getElementById(
+            'soDetailsItemsBody'
+        );
+
+
+    const row =
+        document.createElement('tr');
+
+
+    const amount =
+        Number(item.amount) || 0;
+
+    const qty =
+        Number(item.qty) || 0;
+
+    const total =
+        qty * amount;
+
+
+    row.innerHTML = `
+
+        <td class="item-number">
+            ${index + 1}
+        </td>
+
+        <td>
+            <input
+                type="text"
+                class="detail-item-name"
+                value="${escapeHTML(item.itemName || '')}"
+                disabled>
+        </td>
+
+        <td>
+            <input
+                type="text"
+                class="detail-item-description"
+                value="${escapeHTML(item.description || '')}"
+                disabled>
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="detail-item-qty"
+                min="0"
+                step="any"
+                value="${qty}"
+                disabled
+                oninput="calculateDetailItemTotal(this)">
+        </td>
+
+        <td>
+
+            <select
+                class="detail-item-unit"
+                disabled
+                onchange="handleDetailUnitChange(this)">
+
+                <option value="">Select Unit</option>
+
+                <option value="pcs">pcs</option>
+                <option value="assy">assy</option>
+                <option value="set">set</option>
+                <option value="length">length</option>
+                <option value="meter">meter</option>
+                <option value="lot">lot</option>
+                <option value="box">box</option>
+                <option value="roll">roll</option>
+                <option value="amount">amount</option>
+                <option value="custom">Other / Custom</option>
+
+            </select>
+
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="detail-item-amount"
+                min="0"
+                step="0.01"
+                value="${amount}"
+                disabled
+                oninput="calculateDetailItemTotal(this)">
+        </td>
+
+        <td
+            class="detail-item-total total-cell"
+            data-total="${total}">
+
+            ${formatMoney(total)}
+
+        </td>
+
+        <td>
+
+            <button
+                class="delete-item"
+                onclick="deleteDetailItem(this)"
+                style="display:none;">
+
+                DELETE
+
+            </button>
+
+        </td>
+
+    `;
+
+
+    const select =
+        row.querySelector('.detail-item-unit');
+
+
+    const standardUnits = [
+        'pcs',
+        'assy',
+        'set',
+        'length',
+        'meter',
+        'lot',
+        'box',
+        'roll',
+        'amount'
+    ];
+
+
+    const unit =
+        item.unit || '';
+
+
+    if (standardUnits.includes(unit)) {
+
+        select.value =
+            unit;
+
+    }
+    else if (unit) {
+
+        select.value =
+            'custom';
+
+
+        const customInput =
+            document.createElement('input');
+
+
+        customInput.type =
+            'text';
+
+        customInput.className =
+            'custom-unit-input';
+
+        customInput.value =
+            unit;
+
+        customInput.placeholder =
+            'Enter unit';
+
+        customInput.style.marginTop =
+            '5px';
+
+        customInput.disabled =
+            true;
+
+        select.parentElement.appendChild(
+            customInput
+        );
+
+    }
+
+
+    itemsBody.appendChild(row);
 
 }
 
@@ -1958,6 +2557,11 @@ function closeSODetails() {
     .getElementById('cancelSOButton')
     .disabled = true;
 
+    document
+    .getElementById('selectedSOInfo')
+    .innerHTML =
+        'No Sales Order selected.';
+
 }
 
 
@@ -1966,6 +2570,9 @@ function closeSODetails() {
 ===================================================== */
 
 function openCreateSO() {
+
+    clearCreateSOForm();
+
 
     document
     .querySelectorAll('.page')
@@ -2010,12 +2617,20 @@ function generateSONumber() {
 
         const match =
             String(so.soNumber || '')
-            .match(/SO-\d{4}-(\d+)/);
+            .match(/^SO-(\d{4})-(\d+)$/);
 
-        if (match) {
+
+        if (
+            match &&
+            match[1] === String(year)
+        ) {
 
             const number =
-                parseInt(match[1], 10);
+                parseInt(
+                    match[2],
+                    10
+                );
+
 
             if (number > highestNumber) {
                 highestNumber = number;
@@ -2070,26 +2685,31 @@ function addSOItem() {
         <td>
             <input
                 type="text"
+                class="item-name"
                 placeholder="Item name">
         </td>
 
         <td>
             <input
                 type="text"
+                class="item-description"
                 placeholder="Description">
         </td>
 
         <td>
             <input
                 type="number"
+                class="item-qty"
                 min="0"
                 step="any"
-                placeholder="0">
+                placeholder="0"
+                oninput="calculateSOItemTotal(this)">
         </td>
 
         <td>
 
             <select
+                class="item-unit"
                 onchange="handleUnitChange(this)">
 
                 <option value="">
@@ -2114,6 +2734,24 @@ function addSOItem() {
         </td>
 
         <td>
+            <input
+                type="number"
+                class="item-amount"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                oninput="calculateSOItemTotal(this)">
+        </td>
+
+        <td
+            class="item-total total-cell"
+            data-total="0">
+
+            ₱0.00
+
+        </td>
+
+        <td>
 
             <button
                 class="delete-item"
@@ -2130,6 +2768,130 @@ function addSOItem() {
 
     tbody.appendChild(row);
 
+    calculateSOTotals();
+
+}
+
+
+/* =====================================================
+   CALCULATE ITEM TOTAL
+===================================================== */
+
+function calculateSOItemTotal(input) {
+
+    const row =
+        input.closest('tr');
+
+
+    const qtyInput =
+        row.querySelector('.item-qty');
+
+
+    const amountInput =
+        row.querySelector('.item-amount');
+
+
+    const totalCell =
+        row.querySelector('.item-total');
+
+
+    const qty =
+        Number(qtyInput.value) || 0;
+
+
+    const amount =
+        Number(amountInput.value) || 0;
+
+
+    const total =
+        qty * amount;
+
+
+    totalCell.dataset.total =
+        total;
+
+
+    totalCell.innerText =
+        formatMoney(total);
+
+
+    calculateSOTotals();
+
+}
+
+
+/* =====================================================
+   CALCULATE SO TOTALS
+===================================================== */
+
+function calculateSOTotals() {
+
+    const rows =
+        document.querySelectorAll(
+            '#soItemsBody tr'
+        );
+
+
+    const items = [];
+
+
+    rows.forEach(function(row) {
+
+        const qty =
+            Number(
+                row.querySelector('.item-qty')?.value
+            ) || 0;
+
+
+        const amount =
+            Number(
+                row.querySelector('.item-amount')?.value
+            ) || 0;
+
+
+        items.push({
+
+            qty:
+                qty,
+
+            amount:
+                amount
+
+        });
+
+    });
+
+
+    const discount =
+        Number(
+            document.getElementById('soDiscount')?.value
+        ) || 0;
+
+
+    const vatable =
+        document.getElementById('soVatable')?.checked
+        || false;
+
+
+    const totals =
+        calculateSOData(
+            items,
+            discount,
+            vatable
+        );
+
+
+    document.getElementById('soSubtotal').innerText =
+        formatMoney(totals.subtotal);
+
+
+    document.getElementById('soVAT').innerText =
+        formatMoney(totals.vatAmount);
+
+
+    document.getElementById('soGrandTotal').innerText =
+        formatMoney(totals.grandTotal);
+
 }
 
 
@@ -2142,8 +2904,12 @@ function handleUnitChange(select) {
     const parent =
         select.parentElement;
 
+
     const oldCustom =
-        parent.querySelector('.custom-unit-input');
+        parent.querySelector(
+            '.custom-unit-input'
+        );
+
 
     if (oldCustom) {
         oldCustom.remove();
@@ -2155,16 +2921,22 @@ function handleUnitChange(select) {
         const input =
             document.createElement('input');
 
-        input.type = 'text';
+
+        input.type =
+            'text';
+
 
         input.className =
             'custom-unit-input';
 
+
         input.placeholder =
             'Enter unit';
 
+
         input.style.marginTop =
             '5px';
+
 
         parent.appendChild(input);
 
@@ -2185,6 +2957,8 @@ function deleteSOItem(button) {
     row.remove();
 
     renumberSOItems();
+
+    calculateSOTotals();
 
 }
 
@@ -2347,6 +3121,20 @@ function saveSO() {
         .trim();
 
 
+    const discount =
+        Number(
+            document
+            .getElementById('soDiscount')
+            .value
+        ) || 0;
+
+
+    const vatable =
+        document
+        .getElementById('soVatable')
+        .checked;
+
+
     if (!soNumber) {
 
         alert(
@@ -2391,56 +3179,61 @@ function saveSO() {
 
     itemRows.forEach(function(row, index) {
 
-        const inputs =
-            row.querySelectorAll('input');
-
-
         const itemName =
-            inputs[0]
-            ? inputs[0].value.trim()
-            : '';
+            row
+            .querySelector('.item-name')
+            ?.value
+            .trim()
+            || '';
 
 
         const description =
-            inputs[1]
-            ? inputs[1].value.trim()
-            : '';
+            row
+            .querySelector('.item-description')
+            ?.value
+            .trim()
+            || '';
 
 
         const qty =
-            inputs[2]
-            ? inputs[2].value
-            : '';
+            Number(
+                row
+                .querySelector('.item-qty')
+                ?.value
+            ) || 0;
+
+
+        const amount =
+            Number(
+                row
+                .querySelector('.item-amount')
+                ?.value
+            ) || 0;
 
 
         const unitSelect =
-            row.querySelector('select');
+            row.querySelector('.item-unit');
 
 
-        let unit = '';
+        let unit =
+            unitSelect
+            ? unitSelect.value
+            : '';
 
 
-        if (unitSelect) {
+        if (unit === 'custom') {
 
-            unit =
-                unitSelect.value;
-
-
-            if (unit === 'custom') {
-
-                const customInput =
-                    unitSelect.parentElement
-                    .querySelector(
-                        '.custom-unit-input'
-                    );
+            const customInput =
+                unitSelect.parentElement
+                .querySelector(
+                    '.custom-unit-input'
+                );
 
 
-                if (customInput) {
+            if (customInput) {
 
-                    unit =
-                        customInput.value.trim();
-
-                }
+                unit =
+                    customInput.value.trim();
 
             }
 
@@ -2462,11 +3255,25 @@ function saveSO() {
                 qty,
 
             unit:
-                unit
+                unit,
+
+            amount:
+                amount,
+
+            total:
+                qty * amount
 
         });
 
     });
+
+
+    const totals =
+        calculateSOData(
+            items,
+            discount,
+            vatable
+        );
 
 
     const newSO = {
@@ -2508,7 +3315,25 @@ function saveSO() {
             'ACTIVE',
 
         items:
-            items
+            items,
+
+        subtotal:
+            totals.subtotal,
+
+        discount:
+            totals.discount,
+
+        vatable:
+            totals.vatable,
+
+        vatRate:
+            totals.vatRate,
+
+        vatAmount:
+            totals.vatAmount,
+
+        grandTotal:
+            totals.grandTotal
 
     };
 
@@ -2576,7 +3401,9 @@ function saveSO() {
     alert(
         'Sales Order ' +
         soNumber +
-        ' has been successfully saved.'
+        ' has been successfully saved.\n\n' +
+        'Grand Total: ' +
+        formatMoney(totals.grandTotal)
     );
 
 }
@@ -2660,6 +3487,12 @@ function loadSOList() {
                 ${escapeHTML(so.terms || '')}
             </td>
 
+            <td class="total-cell">
+                ${formatMoney(
+                    getSOTotal(so)
+                )}
+            </td>
+
             <td>
                 <span class="${statusClass}">
                     ${escapeHTML(so.status || 'ACTIVE')}
@@ -2697,14 +3530,13 @@ function searchSO() {
 
     rows.forEach(function(row) {
 
-        const soNumber =
-            row.cells[0]
-            .innerText
+        const rowText =
+            row.innerText
             .toUpperCase();
 
 
         row.style.display =
-            soNumber.includes(
+            rowText.includes(
                 searchValue
             )
             ? ''
@@ -2777,8 +3609,33 @@ function clearCreateSOForm() {
 
 
     document
+    .getElementById('soDiscount')
+    .value = '0';
+
+
+    document
+    .getElementById('soVatable')
+    .checked = false;
+
+
+    document
     .getElementById('soItemsBody')
     .innerHTML = '';
+
+
+    document
+    .getElementById('soSubtotal')
+    .innerText = '₱0.00';
+
+
+    document
+    .getElementById('soVAT')
+    .innerText = '₱0.00';
+
+
+    document
+    .getElementById('soGrandTotal')
+    .innerText = '₱0.00';
 
 
     soItemCount = 0;
@@ -3026,6 +3883,162 @@ function setDetailsEditMode(enabled) {
 
     });
 
+
+    document
+    .querySelectorAll(
+        '#soDetailsItemsBody .custom-unit-input'
+    )
+    .forEach(function(input) {
+
+        input.disabled =
+            !enabled;
+
+    });
+
+}
+
+
+/* =====================================================
+   CALCULATE DETAIL ITEM TOTAL
+===================================================== */
+
+function calculateDetailItemTotal(input) {
+
+    const row =
+        input.closest('tr');
+
+
+    const qty =
+        Number(
+            row.querySelector(
+                '.detail-item-qty'
+            )?.value
+        ) || 0;
+
+
+    const amount =
+        Number(
+            row.querySelector(
+                '.detail-item-amount'
+            )?.value
+        ) || 0;
+
+
+    const total =
+        qty * amount;
+
+
+    const totalCell =
+        row.querySelector(
+            '.detail-item-total'
+        );
+
+
+    totalCell.dataset.total =
+        total;
+
+
+    totalCell.innerText =
+        formatMoney(total);
+
+
+    calculateDetailTotals();
+
+}
+
+
+/* =====================================================
+   CALCULATE DETAIL TOTALS
+===================================================== */
+
+function calculateDetailTotals() {
+
+    const rows =
+        document.querySelectorAll(
+            '#soDetailsItemsBody tr'
+        );
+
+
+    const items = [];
+
+
+    rows.forEach(function(row) {
+
+        const qty =
+            Number(
+                row.querySelector(
+                    '.detail-item-qty'
+                )?.value
+            ) || 0;
+
+
+        const amount =
+            Number(
+                row.querySelector(
+                    '.detail-item-amount'
+                )?.value
+            ) || 0;
+
+
+        items.push({
+
+            qty:
+                qty,
+
+            amount:
+                amount
+
+        });
+
+    });
+
+
+    const discount =
+        Number(
+            document.getElementById(
+                'detailDiscount'
+            )?.value
+        ) || 0;
+
+
+    const vatable =
+        document.getElementById(
+            'detailVatable'
+        )?.checked
+        || false;
+
+
+    const totals =
+        calculateSOData(
+            items,
+            discount,
+            vatable
+        );
+
+
+    document.getElementById(
+        'detailSubtotal'
+    ).innerText =
+        formatMoney(
+            totals.subtotal
+        );
+
+
+    document.getElementById(
+        'detailVAT'
+    ).innerText =
+        formatMoney(
+            totals.vatAmount
+        );
+
+
+    document.getElementById(
+        'detailGrandTotal'
+    ).innerText =
+        formatMoney(
+            totals.grandTotal
+        );
+
 }
 
 
@@ -3041,84 +4054,46 @@ function addDetailItem() {
         );
 
 
-    const row =
-        document.createElement('tr');
-
-
     const itemNumber =
-        tbody.querySelectorAll('tr').length + 1;
+        tbody.querySelectorAll('tr').length;
 
 
-    row.innerHTML = `
+    createDetailItemRow(
 
-        <td class="item-number">
-            ${itemNumber}
-        </td>
+        {
+            itemNumber:
+                itemNumber + 1,
 
-        <td>
-            <input
-                type="text"
-                placeholder="Item name">
-        </td>
+            itemName:
+                '',
 
-        <td>
-            <input
-                type="text"
-                placeholder="Description">
-        </td>
+            description:
+                '',
 
-        <td>
-            <input
-                type="number"
-                min="0"
-                step="any"
-                placeholder="0">
-        </td>
+            qty:
+                0,
 
-        <td>
+            unit:
+                '',
 
-            <select
-                onchange="handleDetailUnitChange(this)">
+            amount:
+                0,
 
-                <option value="">
-                    Select Unit
-                </option>
+            total:
+                0
 
-                <option value="pcs">pcs</option>
-                <option value="assy">assy</option>
-                <option value="set">set</option>
-                <option value="length">length</option>
-                <option value="meter">meter</option>
-                <option value="lot">lot</option>
-                <option value="box">box</option>
-                <option value="roll">roll</option>
-                <option value="amount">amount</option>
-                <option value="custom">
-                    Other / Custom
-                </option>
+        },
 
-            </select>
+        itemNumber
 
-        </td>
+    );
 
-        <td>
-
-            <button
-                class="delete-item"
-                onclick="deleteDetailItem(this)">
-
-                DELETE
-
-            </button>
-
-        </td>
-
-    `;
-
-
-    tbody.appendChild(row);
 
     renumberDetailItems();
+
+    setDetailsEditMode(true);
+
+    calculateDetailTotals();
 
 }
 
@@ -3166,11 +4141,18 @@ function handleDetailUnitChange(select) {
             '5px';
 
 
+        input.disabled =
+            false;
+
+
         parent.appendChild(
             input
         );
 
     }
+
+
+    calculateDetailTotals();
 
 }
 
@@ -3187,6 +4169,8 @@ function deleteDetailItem(button) {
 
 
     renumberDetailItems();
+
+    calculateDetailTotals();
 
 }
 
@@ -3337,6 +4321,20 @@ function saveSOUpdate() {
         .trim();
 
 
+    so.discount =
+        Number(
+            document
+            .getElementById('detailDiscount')
+            .value
+        ) || 0;
+
+
+    so.vatable =
+        document
+        .getElementById('detailVatable')
+        .checked;
+
+
     const rows =
         document.querySelectorAll(
             '#soDetailsItemsBody tr'
@@ -3348,32 +4346,42 @@ function saveSOUpdate() {
 
     rows.forEach(function(row, index) {
 
-        const inputs =
-            row.querySelectorAll(
-                'input'
-            );
-
-
         const itemName =
-            inputs[0]
-            ? inputs[0].value.trim()
-            : '';
+            row
+            .querySelector('.detail-item-name')
+            ?.value
+            .trim()
+            || '';
 
 
         const description =
-            inputs[1]
-            ? inputs[1].value.trim()
-            : '';
+            row
+            .querySelector('.detail-item-description')
+            ?.value
+            .trim()
+            || '';
 
 
         const qty =
-            inputs[2]
-            ? inputs[2].value
-            : '';
+            Number(
+                row
+                .querySelector('.detail-item-qty')
+                ?.value
+            ) || 0;
+
+
+        const amount =
+            Number(
+                row
+                .querySelector('.detail-item-amount')
+                ?.value
+            ) || 0;
 
 
         const select =
-            row.querySelector('select');
+            row.querySelector(
+                '.detail-item-unit'
+            );
 
 
         let unit =
@@ -3416,15 +4424,53 @@ function saveSOUpdate() {
                 qty,
 
             unit:
-                unit
+                unit,
+
+            amount:
+                amount,
+
+            total:
+                qty * amount
 
         });
 
     });
 
 
+    const totals =
+        calculateSOData(
+            items,
+            so.discount,
+            so.vatable
+        );
+
+
     so.items =
         items;
+
+
+    so.subtotal =
+        totals.subtotal;
+
+
+    so.discount =
+        totals.discount;
+
+
+    so.vatable =
+        totals.vatable;
+
+
+    so.vatRate =
+        totals.vatRate;
+
+
+    so.vatAmount =
+        totals.vatAmount;
+
+
+    so.grandTotal =
+        totals.grandTotal;
 
 
     localStorage.setItem(
@@ -3465,9 +4511,16 @@ function saveSOUpdate() {
         'none';
 
 
+    calculateDetailTotals();
+
+
     alert(
         selectedSO +
-        ' has been successfully updated.'
+        ' has been successfully updated.\n\n' +
+        'Grand Total: ' +
+        formatMoney(
+            so.grandTotal
+        )
     );
 
 }
@@ -3559,6 +4612,7 @@ function loadDashboard() {
 
 /* =====================================================
    DR PRINTING - LOAD SO
+   UNCHANGED
 ===================================================== */
 
 function loadDRSalesOrders() {
@@ -3636,6 +4690,7 @@ function loadDRSalesOrders() {
 
 /* =====================================================
    DR LOAD ITEMS
+   UNCHANGED
 ===================================================== */
 
 function loadDRItems() {
@@ -3752,6 +4807,7 @@ function loadDRItems() {
 
 /* =====================================================
    DR LOAD ITEM DETAILS
+   UNCHANGED
 ===================================================== */
 
 function loadDRItemDetails() {
@@ -3852,6 +4908,7 @@ function loadDRItemDetails() {
 
 /* =====================================================
    CLEAR DR ITEM
+   UNCHANGED
 ===================================================== */
 
 function clearDRItemFields() {
@@ -3888,6 +4945,7 @@ function clearDRItemFields() {
 
 /* =====================================================
    CLEAR DR FORM
+   UNCHANGED
 ===================================================== */
 
 function clearDRForm() {
@@ -3961,6 +5019,7 @@ function clearDRForm() {
 
 /* =====================================================
    PRINT DR
+   UNCHANGED
 ===================================================== */
 
 function printDR() {
@@ -4071,4 +5130,3 @@ document.addEventListener(
 </body>
 
 </html>
-```
