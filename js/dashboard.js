@@ -2,18 +2,13 @@
    LOGI-TECH DASHBOARD
 ===================================================== */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-        console.log(
-            "LOGI-TECH Dashboard Loaded"
-        );
+    console.log("LOGI-TECH Dashboard Loaded");
 
-        loadDashboard();
+    loadDashboard();
 
-    }
-);
+});
 
 
 /* =====================================================
@@ -22,64 +17,87 @@ document.addEventListener(
 
 function loadDashboard() {
 
-    const savedOrders =
-        localStorage.getItem(
-            "salesOrders"
-        );
+    const savedOrders = localStorage.getItem("salesOrders");
+
+    console.log("Dashboard Sales Orders:", savedOrders);
 
     let salesOrders = [];
 
-    try {
+    if (savedOrders) {
 
-        salesOrders =
-            savedOrders
-            ? JSON.parse(savedOrders)
-            : [];
+        try {
 
-    } catch (error) {
+            salesOrders = JSON.parse(savedOrders);
 
-        console.error(
-            "Sales Order data error:",
-            error
-        );
+        } catch (error) {
 
-        salesOrders = [];
+            console.error(
+                "Error reading Sales Orders:",
+                error
+            );
+
+            salesOrders = [];
+
+        }
 
     }
 
 
-    const activeOrders =
-        salesOrders.filter(function (so) {
+    /* =================================================
+       TOTAL SALES ORDERS
+    ================================================= */
 
-            return so.status !==
-                "CANCELLED";
+    const activeOrders = salesOrders.filter(function (so) {
 
-        });
+        return so.status !== "CANCELLED";
+
+    });
 
 
     const soCount =
-        document.getElementById(
-            "dashboardSOCount"
-        );
+        document.getElementById("dashboardSOCount");
 
     if (soCount) {
 
-        soCount.innerText =
-            activeOrders.length;
+        soCount.textContent = activeOrders.length;
 
     }
 
+
+    /* =================================================
+       RECENT SALES ORDERS
+    ================================================= */
 
     const recentBody =
-        document.getElementById(
-            "recentSOBody"
-        );
+        document.getElementById("recentSOBody");
 
     if (!recentBody) {
+
+        console.error(
+            "recentSOBody not found!"
+        );
+
         return;
+
     }
 
+
     recentBody.innerHTML = "";
+
+
+    if (salesOrders.length === 0) {
+
+        recentBody.innerHTML = `
+            <tr>
+                <td colspan="4">
+                    No Sales Orders found.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
 
 
     salesOrders
@@ -94,8 +112,8 @@ function loadDashboard() {
 
             const statusClass =
                 so.status === "CANCELLED"
-                ? "status status-cancelled"
-                : "status";
+                    ? "status status-cancelled"
+                    : "status";
 
 
             row.innerHTML = `
@@ -121,11 +139,9 @@ function loadDashboard() {
                 <td>
 
                     <span class="${statusClass}">
-
                         ${escapeHTML(
                             so.status || ""
                         )}
-
                     </span>
 
                 </td>
@@ -140,13 +156,22 @@ function loadDashboard() {
 }
 
 
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
+
 function escapeHTML(value) {
 
     return String(value)
+
         .replace(/&/g, "&amp;")
+
         .replace(/</g, "&lt;")
+
         .replace(/>/g, "&gt;")
+
         .replace(/"/g, "&quot;")
+
         .replace(/'/g, "&#039;");
 
 }
