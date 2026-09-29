@@ -2238,6 +2238,93 @@ function saveSO() {
     );
 
 }
+ function loadSOList() {
+
+    const tbody =
+        document.getElementById('soTableBody');
+
+    tbody.innerHTML = '';
+
+    const salesOrders =
+        JSON.parse(
+            localStorage.getItem('salesOrders')
+        ) || [];
+
+
+    salesOrders.forEach(function(so) {
+
+        const row =
+            document.createElement('tr');
+
+        row.className = 'so-row';
+
+        row.setAttribute(
+            'onclick',
+            "selectSO(this, '" + so.soNumber + "')"
+        );
+
+        row.setAttribute(
+            'ondblclick',
+            "openSODetails('" + so.soNumber + "')"
+        );
+
+
+        row.innerHTML = `
+
+            <td>${so.soNumber}</td>
+
+            <td>${so.dateCreation || ''}</td>
+
+            <td>${so.attention || ''}</td>
+
+            <td>${so.project || ''}</td>
+
+            <td>${so.poNumber || ''}</td>
+
+            <td>${so.terms || ''}</td>
+
+            <td>
+                <span class="status">
+                    ${so.status || 'ACTIVE'}
+                </span>
+            </td>
+
+        `;
+
+        tbody.appendChild(row);
+
+    });
+
+}
+ function clearCreateSOForm() {
+
+    document.getElementById('soDate').value = '';
+
+    document.getElementById('billingAddress').value = '';
+
+    document.getElementById('attention').value = '';
+
+    document.getElementById('deliveryAddress').value = '';
+
+    document.getElementById('project').value = '';
+
+    document.getElementById('tin').value = '';
+
+    document.getElementById('poNumber').value = '';
+
+    document.getElementById('terms').value = '';
+
+    document.getElementById('jobOrder').value = '';
+
+    document.getElementById('soItemsBody').innerHTML = '';
+
+    soItemCount = 0;
+
+}
+ document.addEventListener('DOMContentLoaded', function() {
+    loadSOList();
+});
+ 
 </script>
 
 
