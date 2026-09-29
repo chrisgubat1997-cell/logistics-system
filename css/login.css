@@ -1,5 +1,5 @@
 /* =========================================
-   RESET & BODY
+   RESET & BODY WITH BLURRED BACKGROUND
 ========================================= */
 
 * {
@@ -14,14 +14,28 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Background Image mula sa assets folder */
+    position: relative;
+    overflow: hidden;
+}
+
+/* Blurred Background Layer */
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     background: url('assets/background.png') no-repeat center center fixed;
     background-size: cover;
+    filter: blur(8px); /* Dito kinokontrol ang linaw o labo ng background */
+    transform: scale(1.05); /* Iwas sa puting gilid gawa ng blur */
+    z-index: -1;
 }
 
 
 /* =========================================
-   LOGIN CONTAINER & GLASS CARD
+   LOGIN CONTAINER & FROSTED GLASS CARD
 ========================================= */
 
 .login-container {
@@ -37,16 +51,16 @@ body {
 
 .login-card {
     width: 100%;
-    max-width: 400px;
-    /* Glassmorphism Frosted Glass Effect */
+    max-width: 380px;
+    /* Translucent / Frosted Glass card */
     background: rgba(255, 255, 255, 0.45);
-    backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     overflow: hidden;
-    padding: 35px 30px 40px 30px;
+    padding: 30px 25px 35px 25px;
 }
 
 
@@ -57,7 +71,7 @@ body {
 .logo-container {
     width: 100%;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .logo-container img {
@@ -77,7 +91,7 @@ body {
 }
 
 .login-card h1 {
-    font-size: 24px;
+    font-size: 22px;
     color: #311b43;
     margin-bottom: 20px;
     font-weight: 700;
@@ -90,7 +104,7 @@ body {
 
 .input-group {
     position: relative;
-    margin-bottom: 15px;
+    margin-bottom: 14px;
     text-align: left;
 }
 
@@ -107,8 +121,8 @@ body {
 .input-group input {
     width: 100%;
     padding: 12px 18px 12px 45px;
-    /* Soft cyan/teal pill inputs */
-    background-color: rgba(120, 195, 190, 0.75); 
+    /* Soft cyan/teal translucent inputs katulad sa larawan */
+    background-color: rgba(120, 195, 190, 0.8);
     border: none;
     border-radius: 25px;
     font-size: 14px;
@@ -135,8 +149,8 @@ body {
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    margin-top: 8px;
-    margin-bottom: 22px;
+    margin-top: 6px;
+    margin-bottom: 20px;
     font-size: 12px;
 }
 
@@ -173,7 +187,7 @@ body {
 }
 
 .login-links {
-    margin-top: 18px;
+    margin-top: 16px;
 }
 
 .login-links a {
@@ -187,11 +201,12 @@ body {
     text-decoration: underline;
 }
 
+/* Designer Footer Tag */
 .designer-tag {
-    margin-top: 30px;
+    margin-top: 25px;
     color: #ffffff;
     font-size: 16px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 }
 
 #loginMessage {
