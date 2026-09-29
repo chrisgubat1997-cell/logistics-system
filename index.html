@@ -905,176 +905,57 @@ td {
     </div>
 
 
-    <!-- SO LIST -->
+   <!-- SO LIST -->
 
-    <div class="section">
+<div class="section">
 
-        <div class="table-header">
+    <div class="table-header">
 
-            <h2>
-                Sales Order List
-            </h2>
+        <h2>
+            Sales Order List
+        </h2>
 
-            <input
-                type="text"
-                id="soSearch"
-                placeholder="Search SO Number..."
-                onkeyup="searchSO()">
-
-        </div>
-
-
-        <div class="table-container">
-
-            <table id="soTable">
-
-                <thead>
-
-                    <tr>
-
-                        <th>SO Number</th>
-                        <th>Date Creation</th>
-                        <th>Customer</th>
-                        <th>Project</th>
-                        <th>PO Number</th>
-                        <th>Terms</th>
-                        <th>Status</th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody id="soTableBody">
-
-
-                    <tr class="so-row"
-    onclick="selectSO(this, 'SO-2026-00125')"
-    ondblclick="openSODetails('SO-2026-00125')">
-
-                        <td>
-                            SO-2026-00125
-                        </td>
-
-                        <td>
-                            09/29/2026
-                        </td>
-
-                        <td>
-                            ABC Corporation
-                        </td>
-
-                        <td>
-                            Project Alpha
-                        </td>
-
-                        <td>
-                            PO-2026-0055
-                        </td>
-
-                        <td>
-                            COD
-                        </td>
-
-                        <td>
-
-                            <span class="status">
-                                ACTIVE
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr
-                        <tr class="so-row"
-    onclick="selectSO(this, 'SO-2026-00124')"
-    ondblclick="openSODetails('SO-2026-00124')">
-
-                        <td>
-                            SO-2026-00124
-                        </td>
-
-                        <td>
-                            09/28/2026
-                        </td>
-
-                        <td>
-                            XYZ Industries
-                        </td>
-
-                        <td>
-                            Project Beta
-                        </td>
-
-                        <td>
-                            PO-2026-0054
-                        </td>
-
-                        <td>
-                            30 Days
-                        </td>
-
-                        <td>
-
-                            <span class="status">
-                                ACTIVE
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-
-                    <tr
-                        class="so-row"
-                        onclick="selectSO(this, 'SO-2026-00123')">
-
-                        <td>
-                            SO-2026-00123
-                        </td>
-
-                        <td>
-                            09/27/2026
-                        </td>
-
-                        <td>
-                            Sample Client
-                        </td>
-
-                        <td>
-                            Project Gamma
-                        </td>
-
-                        <td>
-                            PO-2026-0053
-                        </td>
-
-                        <td>
-                            COD
-                        </td>
-
-                        <td>
-
-                            <span class="status">
-                                ACTIVE
-                            </span>
-
-                        </td>
-
-                    </tr>
-
-
-                </tbody>
-
-            </table>
-
-        </div>
+        <input
+            type="text"
+            id="soSearch"
+            placeholder="Search SO Number..."
+            onkeyup="searchSO()">
 
     </div>
 
- 
+
+    <div class="table-container">
+
+        <table id="soTable">
+
+            <thead>
+
+                <tr>
+
+                    <th>SO Number</th>
+                    <th>Date Creation</th>
+                    <th>Customer</th>
+                    <th>Project</th>
+                    <th>PO Number</th>
+                    <th>Terms</th>
+                    <th>Status</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody id="soTableBody">
+
+                <!-- SAVED SO WILL APPEAR HERE -->
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 
     <!-- SELECTED SO -->
