@@ -1,11 +1,8 @@
+document.addEventListener("DOMContentLoaded", function () {
 
-/* =========================================
-   LOGI-TECH LOGIN
-========================================= */
+    const loginForm = document.getElementById("loginForm");
 
-document
-    .getElementById("loginForm")
-    .addEventListener("submit", function (event) {
+    loginForm.addEventListener("submit", function (event) {
 
         event.preventDefault();
 
@@ -18,22 +15,15 @@ document
         const message =
             document.getElementById("loginMessage");
 
+        // Get saved account
+        const savedUser =
+            JSON.parse(localStorage.getItem("logitechUser"));
 
-        /* =====================================
-           DEMO LOGIN ACCOUNT
-        ===================================== */
-
-        const demoUsername = "admin";
-        const demoPassword = "admin123";
-
-
-        /* =====================================
-           CHECK LOGIN
-        ===================================== */
-
+        // Check saved account
         if (
-            username === demoUsername &&
-            password === demoPassword
+            savedUser &&
+            username === savedUser.username &&
+            password === savedUser.password
         ) {
 
             message.textContent =
@@ -41,25 +31,40 @@ document
 
             message.style.color = "green";
 
-
-            /* ================================
-               GO TO EXISTING MAIN SYSTEM
-            ================================= */
-
             setTimeout(function () {
 
-                window.location.href =
-                    "index.html";
+                window.location.href = "index.html";
 
             }, 500);
 
-        } else {
-
-            message.textContent =
-                "Invalid username or password.";
-
-            message.style.color = "red";
-
+            return;
         }
 
+        // Demo admin account
+        if (
+            username === "admin" &&
+            password === "admin123"
+        ) {
+
+            message.textContent =
+                "Login successful...";
+
+            message.style.color = "green";
+
+            setTimeout(function () {
+
+                window.location.href = "index.html";
+
+            }, 500);
+
+            return;
+        }
+
+        message.textContent =
+            "Invalid username or password.";
+
+        message.style.color = "red";
+
     });
+
+});
