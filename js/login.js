@@ -2,10 +2,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
 ```
 const loginForm = document.getElementById("loginForm");
-const message = document.getElementById("loginMessage");
+const loginMessage = document.getElementById("loginMessage");
 
 if (!loginForm) {
-    console.error("loginForm not found!");
+    console.error("loginForm not found");
     return;
 }
 
@@ -19,20 +19,24 @@ loginForm.addEventListener("submit", function (event) {
     const password =
         document.getElementById("password").value;
 
+    loginMessage.textContent = "Naglo-login...";
+    loginMessage.style.color = "#2563eb";
+
+
+    /* =========================================
+       GET SAVED ACCOUNT
+    ========================================= */
+
     const savedUser =
         localStorage.getItem("logitechUser");
 
 
-    /* =========================================
-       NO ACCOUNT
-    ========================================= */
-
     if (!savedUser) {
 
-        message.textContent =
+        loginMessage.textContent =
             "No registered account found.";
 
-        message.style.color = "red";
+        loginMessage.style.color = "red";
 
         return;
     }
@@ -50,22 +54,19 @@ loginForm.addEventListener("submit", function (event) {
 
     } catch (error) {
 
-        console.error(
-            "Invalid saved account:",
-            error
-        );
+        loginMessage.textContent =
+            "Account data error.";
 
-        message.textContent =
-            "Invalid account data.";
+        loginMessage.style.color = "red";
 
-        message.style.color = "red";
+        console.error(error);
 
         return;
     }
 
 
     /* =========================================
-       CHECK LOGIN
+       CHECK USERNAME AND PASSWORD
     ========================================= */
 
     if (
@@ -73,14 +74,13 @@ loginForm.addEventListener("submit", function (event) {
         password === user.password
     ) {
 
-        message.textContent =
+        loginMessage.textContent =
             "Login successful!";
 
-        message.style.color =
-            "green";
+        loginMessage.style.color = "green";
 
 
-        /* SAVE LOGIN SESSION */
+        /* SAVE LOGIN STATUS */
 
         localStorage.setItem(
             "logitechLoggedIn",
@@ -89,14 +89,13 @@ loginForm.addEventListener("submit", function (event) {
 
 
         /* =====================================
-           REDIRECT TO MAIN SYSTEM
+           GO TO MAIN SYSTEM
         ===================================== */
 
         setTimeout(function () {
 
-            window.location.replace(
-                "./index.html"
-            );
+            window.location.href =
+                "index.html";
 
         }, 500);
 
@@ -104,11 +103,10 @@ loginForm.addEventListener("submit", function (event) {
 
     else {
 
-        message.textContent =
+        loginMessage.textContent =
             "Invalid username or password.";
 
-        message.style.color =
-            "red";
+        loginMessage.style.color = "red";
 
     }
 
