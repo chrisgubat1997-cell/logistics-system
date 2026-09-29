@@ -323,7 +323,8 @@ td {
 }
 
 .form-group input,
-.form-group select {
+.form-group select,
+.form-group textarea {
     padding: 10px;
     border: 1px solid #d1d5db;
     border-radius: 6px;
@@ -332,7 +333,8 @@ td {
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+.form-group textarea:focus {
     outline: none;
     border-color: #2563eb;
 }
@@ -963,6 +965,8 @@ td {
                     </div>
 
 
+                    <!-- TERMS -->
+
                     <div class="form-group">
 
                         <label>
@@ -993,6 +997,49 @@ td {
 
                             <option value="60 Days">
                                 60 Days
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- SE - UNDER TERMS -->
+
+                    <div class="form-group">
+
+                        <label>
+                            SE
+                        </label>
+
+                        <select id="soSE">
+
+                            <option value="">
+                                Select SE
+                            </option>
+
+                            <option value="JBG">
+                                JBG
+                            </option>
+
+                            <option value="MHT">
+                                MHT
+                            </option>
+
+                            <option value="HHF">
+                                HHF
+                            </option>
+
+                            <option value="IAF">
+                                IAF
+                            </option>
+
+                            <option value="GRF">
+                                GRF
+                            </option>
+
+                            <option value="KBO">
+                                KBO
                             </option>
 
                         </select>
@@ -1048,19 +1095,12 @@ td {
                             <tr>
 
                                 <th>#</th>
-
                                 <th>Item Name</th>
-
                                 <th>Description</th>
-
                                 <th>QTY</th>
-
                                 <th>Unit</th>
-
                                 <th>Amount</th>
-
                                 <th>Total</th>
-
                                 <th>Action</th>
 
                             </tr>
@@ -1074,8 +1114,6 @@ td {
 
                 </div>
 
-
-                <!-- SO TOTALS -->
 
                 <div class="so-totals">
 
@@ -1153,11 +1191,8 @@ td {
                             VAT Rate
                         </span>
 
-                        <span
-                            class="so-total-value">
-
+                        <span class="so-total-value">
                             12%
-
                         </span>
 
                     </div>
@@ -1273,45 +1308,50 @@ td {
                             disabled>
 
                     </div>
-<div class="form-group">
 
-    <label>
-        SE
-    </label>
 
-    <select id="soSE">
+                    <!-- SO DETAILS SE -->
 
-        <option value="">
-            Select SE
-        </option>
+                    <div class="form-group">
 
-        <option value="JBG">
-            JBG
-        </option>
+                        <label>
+                            SE
+                        </label>
 
-        <option value="MHT">
-            MHT
-        </option>
+                        <select id="detailSE" disabled>
 
-        <option value="HHF">
-            HHF
-        </option>
+                            <option value="">
+                                Select SE
+                            </option>
 
-        <option value="IAF">
-            IAF
-        </option>
+                            <option value="JBG">
+                                JBG
+                            </option>
 
-        <option value="GRF">
-            GRF
-        </option>
+                            <option value="MHT">
+                                MHT
+                            </option>
 
-        <option value="KBO">
-            KBO
-        </option>
+                            <option value="HHF">
+                                HHF
+                            </option>
 
-    </select>
+                            <option value="IAF">
+                                IAF
+                            </option>
 
-</div>
+                            <option value="GRF">
+                                GRF
+                            </option>
+
+                            <option value="KBO">
+                                KBO
+                            </option>
+
+                        </select>
+
+                    </div>
+
 
                     <div class="form-group">
 
@@ -1506,8 +1546,6 @@ td {
                 </div>
 
 
-                <!-- DETAIL TOTALS -->
-
                 <div class="detail-summary">
 
                     <div class="so-total-row">
@@ -1613,8 +1651,6 @@ td {
             </div>
 
 
-            <!-- UPDATE BUTTONS -->
-
             <div
                 class="action-bar"
                 style="margin-top:20px;">
@@ -1709,7 +1745,7 @@ td {
         </div>
 
 
-        <!-- DR PRINTING - UNCHANGED -->
+        <!-- DR PRINTING -->
 
         <div
         id="dr"
@@ -1803,45 +1839,50 @@ td {
 
                     </div>
 
-<div class="form-group">
 
-    <label>
-        SE
-    </label>
+                    <!-- DR SE -->
 
-    <select id="detailSE" disabled>
+                    <div class="form-group">
 
-        <option value="">
-            Select SE
-        </option>
+                        <label>
+                            SE
+                        </label>
 
-        <option value="JBG">
-            JBG
-        </option>
+                        <select id="drSE" disabled>
 
-        <option value="MHT">
-            MHT
-        </option>
+                            <option value="">
+                                Select SE
+                            </option>
 
-        <option value="HHF">
-            HHF
-        </option>
+                            <option value="JBG">
+                                JBG
+                            </option>
 
-        <option value="IAF">
-            IAF
-        </option>
+                            <option value="MHT">
+                                MHT
+                            </option>
 
-        <option value="GRF">
-            GRF
-        </option>
+                            <option value="HHF">
+                                HHF
+                            </option>
 
-        <option value="KBO">
-            KBO
-        </option>
+                            <option value="IAF">
+                                IAF
+                            </option>
 
-    </select>
+                            <option value="GRF">
+                                GRF
+                            </option>
 
-</div>
+                            <option value="KBO">
+                                KBO
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
                     <div class="form-group">
 
                         <label>
@@ -2114,7 +2155,6 @@ function calculateSOData(items, discount, vatable) {
 
     let subtotal = 0;
 
-
     items.forEach(function(item) {
 
         const qty =
@@ -2131,13 +2171,11 @@ function calculateSOData(items, discount, vatable) {
 
     });
 
-
     discount =
         Math.max(
             0,
             Number(discount) || 0
         );
-
 
     const taxableAmount =
         Math.max(
@@ -2145,16 +2183,13 @@ function calculateSOData(items, discount, vatable) {
             subtotal - discount
         );
 
-
     const vatAmount =
         vatable
         ? taxableAmount * VAT_RATE
         : 0;
 
-
     const grandTotal =
         taxableAmount + vatAmount;
-
 
     return {
 
@@ -2205,13 +2240,11 @@ function selectSO(row, soNumber) {
             return item.soNumber === soNumber;
         });
 
-
     document.getElementById('updateSOButton').disabled =
         !so || so.status === 'CANCELLED';
 
     document.getElementById('cancelSOButton').disabled =
         !so || so.status === 'CANCELLED';
-
 
     if (so) {
 
@@ -2221,6 +2254,9 @@ function selectSO(row, soNumber) {
             '</strong>' +
             ' &nbsp; | &nbsp; Client: <strong>' +
             escapeHTML(so.clientName || '') +
+            '</strong>' +
+            ' &nbsp; | &nbsp; SE: <strong>' +
+            escapeHTML(so.se || '') +
             '</strong>' +
             ' &nbsp; | &nbsp; PO: <strong>' +
             escapeHTML(so.poNumber || '') +
@@ -2251,7 +2287,6 @@ function getSOTotal(so) {
 
     }
 
-
     const items =
         (so && so.items)
         ? so.items.map(function(item) {
@@ -2269,14 +2304,12 @@ function getSOTotal(so) {
         })
         : [];
 
-
     const result =
         calculateSOData(
             items,
             Number(so && so.discount) || 0,
             Boolean(so && so.vatable)
         );
-
 
     return result.grandTotal;
 
@@ -2299,7 +2332,6 @@ function openSODetails(soNumber) {
             return item.soNumber === soNumber;
         });
 
-
     if (!so) {
 
         alert('Sales Order not found.');
@@ -2307,7 +2339,6 @@ function openSODetails(soNumber) {
         return;
 
     }
-
 
     document
     .querySelectorAll('.page')
@@ -2323,7 +2354,6 @@ function openSODetails(soNumber) {
     .getElementById('pageTitle')
     .innerText = 'Sales Order Details';
 
-
     document.getElementById('detailSODate').value =
         so.dateCreation || '';
 
@@ -2332,8 +2362,9 @@ function openSODetails(soNumber) {
 
     document.getElementById('detailClientName').value =
         so.clientName || '';
+
     document.getElementById('detailSE').value =
-    so.se || '';
+        so.se || '';
 
     document.getElementById('detailBillingAddress').value =
         so.billingAddress || '';
@@ -2359,13 +2390,11 @@ function openSODetails(soNumber) {
     document.getElementById('detailJobOrder').value =
         so.jobOrder || '';
 
-
     document.getElementById('detailDiscount').value =
         Number(so.discount) || 0;
 
     document.getElementById('detailVatable').checked =
         Boolean(so.vatable);
-
 
     detailEditMode = false;
 
@@ -2387,7 +2416,6 @@ function openSODetails(soNumber) {
     document.getElementById('detailAddItemButton').style.display =
         'none';
 
-
     loadDetailItems(so);
 
     calculateDetailTotals();
@@ -2405,7 +2433,6 @@ function loadDetailItems(so) {
         document.getElementById('soDetailsItemsBody');
 
     itemsBody.innerHTML = '';
-
 
     (so.items || []).forEach(function(item, index) {
 
@@ -2430,10 +2457,8 @@ function createDetailItemRow(item, index) {
             'soDetailsItemsBody'
         );
 
-
     const row =
         document.createElement('tr');
-
 
     const amount =
         Number(item.amount) || 0;
@@ -2443,7 +2468,6 @@ function createDetailItemRow(item, index) {
 
     const total =
         qty * amount;
-
 
     row.innerHTML = `
 
@@ -2536,10 +2560,8 @@ function createDetailItemRow(item, index) {
 
     `;
 
-
     const select =
         row.querySelector('.detail-item-unit');
-
 
     const standardUnits = [
         'pcs',
@@ -2553,10 +2575,8 @@ function createDetailItemRow(item, index) {
         'amount'
     ];
 
-
     const unit =
         item.unit || '';
-
 
     if (standardUnits.includes(unit)) {
 
@@ -2569,10 +2589,8 @@ function createDetailItemRow(item, index) {
         select.value =
             'custom';
 
-
         const customInput =
             document.createElement('input');
-
 
         customInput.type =
             'text';
@@ -2597,7 +2615,6 @@ function createDetailItemRow(item, index) {
         );
 
     }
-
 
     itemsBody.appendChild(row);
 
@@ -2652,7 +2669,6 @@ function openCreateSO() {
 
     clearCreateSOForm();
 
-
     document
     .querySelectorAll('.page')
     .forEach(function(page) {
@@ -2691,13 +2707,11 @@ function generateSONumber() {
 
     let highestNumber = 0;
 
-
     salesOrders.forEach(function(so) {
 
         const match =
             String(so.soNumber || '')
             .match(/^SO-(\d{4})-(\d+)$/);
-
 
         if (
             match &&
@@ -2710,7 +2724,6 @@ function generateSONumber() {
                     10
                 );
 
-
             if (number > highestNumber) {
                 highestNumber = number;
             }
@@ -2719,14 +2732,11 @@ function generateSONumber() {
 
     });
 
-
     const nextNumber =
         highestNumber + 1;
 
-
     const formattedNumber =
         String(nextNumber).padStart(5, '0');
-
 
     document
     .getElementById('soNumber')
@@ -2750,10 +2760,8 @@ function addSOItem() {
     const tbody =
         document.getElementById('soItemsBody');
 
-
     const row =
         document.createElement('tr');
-
 
     row.innerHTML = `
 
@@ -2844,7 +2852,6 @@ function addSOItem() {
 
     `;
 
-
     tbody.appendChild(row);
 
     calculateSOTotals();
@@ -2861,38 +2868,29 @@ function calculateSOItemTotal(input) {
     const row =
         input.closest('tr');
 
-
     const qtyInput =
         row.querySelector('.item-qty');
-
 
     const amountInput =
         row.querySelector('.item-amount');
 
-
     const totalCell =
         row.querySelector('.item-total');
-
 
     const qty =
         Number(qtyInput.value) || 0;
 
-
     const amount =
         Number(amountInput.value) || 0;
-
 
     const total =
         qty * amount;
 
-
     totalCell.dataset.total =
         total;
 
-
     totalCell.innerText =
         formatMoney(total);
-
 
     calculateSOTotals();
 
@@ -2910,9 +2908,7 @@ function calculateSOTotals() {
             '#soItemsBody tr'
         );
 
-
     const items = [];
-
 
     rows.forEach(function(row) {
 
@@ -2921,12 +2917,10 @@ function calculateSOTotals() {
                 row.querySelector('.item-qty')?.value
             ) || 0;
 
-
         const amount =
             Number(
                 row.querySelector('.item-amount')?.value
             ) || 0;
-
 
         items.push({
 
@@ -2940,17 +2934,14 @@ function calculateSOTotals() {
 
     });
 
-
     const discount =
         Number(
             document.getElementById('soDiscount')?.value
         ) || 0;
 
-
     const vatable =
         document.getElementById('soVatable')?.checked
         || false;
-
 
     const totals =
         calculateSOData(
@@ -2959,14 +2950,11 @@ function calculateSOTotals() {
             vatable
         );
 
-
     document.getElementById('soSubtotal').innerText =
         formatMoney(totals.subtotal);
 
-
     document.getElementById('soVAT').innerText =
         formatMoney(totals.vatAmount);
-
 
     document.getElementById('soGrandTotal').innerText =
         formatMoney(totals.grandTotal);
@@ -2983,39 +2971,31 @@ function handleUnitChange(select) {
     const parent =
         select.parentElement;
 
-
     const oldCustom =
         parent.querySelector(
             '.custom-unit-input'
         );
 
-
     if (oldCustom) {
         oldCustom.remove();
     }
-
 
     if (select.value === 'custom') {
 
         const input =
             document.createElement('input');
 
-
         input.type =
             'text';
-
 
         input.className =
             'custom-unit-input';
 
-
         input.placeholder =
             'Enter unit';
 
-
         input.style.marginTop =
             '5px';
-
 
         parent.appendChild(input);
 
@@ -3053,7 +3033,6 @@ function renumberSOItems() {
             '#soItemsBody tr'
         );
 
-
     rows.forEach(function(row, index) {
 
         row
@@ -3062,7 +3041,6 @@ function renumberSOItems() {
             index + 1;
 
     });
-
 
     soItemCount =
         rows.length;
@@ -3082,7 +3060,6 @@ function closeCreateSO() {
         document.getElementById('billingAddress').value.trim() ||
         document.querySelectorAll('#soItemsBody tr').length > 0;
 
-
     if (hasData) {
 
         const confirmBack =
@@ -3096,9 +3073,7 @@ function closeCreateSO() {
 
     }
 
-
     clearCreateSOForm();
-
 
     document
     .querySelectorAll('.page')
@@ -3106,11 +3081,9 @@ function closeCreateSO() {
         page.classList.remove('active');
     });
 
-
     document
     .getElementById('sales')
     .classList.add('active');
-
 
     document
     .getElementById('pageTitle')
@@ -3132,23 +3105,23 @@ function saveSO() {
         .value
         .trim();
 
-
     const soDate =
         document
         .getElementById('soDate')
         .value;
-
 
     const clientName =
         document
         .getElementById('clientName')
         .value
         .trim();
-    const se =
-    document
-    .getElementById('soSE')
-    .value;
 
+    /* SE */
+
+    const se =
+        document
+        .getElementById('soSE')
+        .value;
 
     const billingAddress =
         document
@@ -3156,13 +3129,11 @@ function saveSO() {
         .value
         .trim();
 
-
     const attention =
         document
         .getElementById('attention')
         .value
         .trim();
-
 
     const deliveryAddress =
         document
@@ -3170,13 +3141,11 @@ function saveSO() {
         .value
         .trim();
 
-
     const project =
         document
         .getElementById('project')
         .value
         .trim();
-
 
     const tin =
         document
@@ -3184,26 +3153,22 @@ function saveSO() {
         .value
         .trim();
 
-
     const poNumber =
         document
         .getElementById('poNumber')
         .value
         .trim();
 
-
     const terms =
         document
         .getElementById('terms')
         .value;
-
 
     const jobOrder =
         document
         .getElementById('jobOrder')
         .value
         .trim();
-
 
     const discount =
         Number(
@@ -3212,12 +3177,10 @@ function saveSO() {
             .value
         ) || 0;
 
-
     const vatable =
         document
         .getElementById('soVatable')
         .checked;
-
 
     if (!soNumber) {
 
@@ -3229,7 +3192,6 @@ function saveSO() {
 
     }
 
-
     if (!clientName) {
 
         alert(
@@ -3239,22 +3201,21 @@ function saveSO() {
         return;
 
     }
+
     if (!se) {
 
-    alert(
-        'Please select SE.'
-    );
+        alert(
+            'Please select SE.'
+        );
 
-    return;
+        return;
 
-}
-
+    }
 
     const itemRows =
         document.querySelectorAll(
             '#soItemsBody tr'
         );
-
 
     if (itemRows.length === 0) {
 
@@ -3266,9 +3227,7 @@ function saveSO() {
 
     }
 
-
     const items = [];
-
 
     itemRows.forEach(function(row, index) {
 
@@ -3279,14 +3238,12 @@ function saveSO() {
             .trim()
             || '';
 
-
         const description =
             row
             .querySelector('.item-description')
             ?.value
             .trim()
             || '';
-
 
         const qty =
             Number(
@@ -3295,7 +3252,6 @@ function saveSO() {
                 ?.value
             ) || 0;
 
-
         const amount =
             Number(
                 row
@@ -3303,16 +3259,13 @@ function saveSO() {
                 ?.value
             ) || 0;
 
-
         const unitSelect =
             row.querySelector('.item-unit');
-
 
         let unit =
             unitSelect
             ? unitSelect.value
             : '';
-
 
         if (unit === 'custom') {
 
@@ -3322,7 +3275,6 @@ function saveSO() {
                     '.custom-unit-input'
                 );
 
-
             if (customInput) {
 
                 unit =
@@ -3331,7 +3283,6 @@ function saveSO() {
             }
 
         }
-
 
         items.push({
 
@@ -3360,7 +3311,6 @@ function saveSO() {
 
     });
 
-
     const totals =
         calculateSOData(
             items,
@@ -3368,20 +3318,21 @@ function saveSO() {
             vatable
         );
 
-
     const newSO = {
 
-    soNumber:
-        soNumber,
+        soNumber:
+            soNumber,
 
-    dateCreation:
-        soDate,
+        dateCreation:
+            soDate,
 
-    clientName:
-        clientName,
+        clientName:
+            clientName,
 
-    se:
-        se,
+        /* SAVED SE */
+
+        se:
+            se,
 
         billingAddress:
             billingAddress,
@@ -3433,10 +3384,8 @@ function saveSO() {
 
     };
 
-
     let salesOrders =
         getSalesOrders();
-
 
     const existingSO =
         salesOrders.find(function(so) {
@@ -3445,7 +3394,6 @@ function saveSO() {
                 soNumber;
 
         });
-
 
     if (existingSO) {
 
@@ -3458,23 +3406,18 @@ function saveSO() {
 
     }
 
-
     salesOrders.push(newSO);
-
 
     localStorage.setItem(
         'salesOrders',
         JSON.stringify(salesOrders)
     );
 
-
     loadSOList();
 
     loadDashboard();
 
-
     clearCreateSOForm();
-
 
     document
     .querySelectorAll('.page')
@@ -3482,22 +3425,22 @@ function saveSO() {
         page.classList.remove('active');
     });
 
-
     document
     .getElementById('sales')
     .classList.add('active');
-
 
     document
     .getElementById('pageTitle')
     .innerText =
         'Sales Order';
 
-
     alert(
         'Sales Order ' +
         soNumber +
         ' has been successfully saved.\n\n' +
+        'SE: ' +
+        se +
+        '\n' +
         'Grand Total: ' +
         formatMoney(totals.grandTotal)
     );
@@ -3516,23 +3459,18 @@ function loadSOList() {
             'soTableBody'
         );
 
-
     tbody.innerHTML = '';
-
 
     const salesOrders =
         getSalesOrders();
-
 
     salesOrders.forEach(function(so) {
 
         const row =
             document.createElement('tr');
 
-
         row.className =
             'so-row';
-
 
         row.onclick =
             function() {
@@ -3542,7 +3480,6 @@ function loadSOList() {
                 );
             };
 
-
         row.ondblclick =
             function() {
                 openSODetails(
@@ -3550,12 +3487,10 @@ function loadSOList() {
                 );
             };
 
-
         const statusClass =
             so.status === 'CANCELLED'
             ? 'status status-cancelled'
             : 'status';
-
 
         row.innerHTML = `
 
@@ -3572,8 +3507,8 @@ function loadSOList() {
             </td>
 
             <td>
-    ${escapeHTML(so.se || '')}
-</td>
+                ${escapeHTML(so.se || '')}
+            </td>
 
             <td>
                 ${escapeHTML(so.project || '')}
@@ -3601,7 +3536,6 @@ function loadSOList() {
 
         `;
 
-
         tbody.appendChild(row);
 
     });
@@ -3621,19 +3555,16 @@ function searchSO() {
         .value
         .toUpperCase();
 
-
     const rows =
         document.querySelectorAll(
             '.so-row'
         );
-
 
     rows.forEach(function(row) {
 
         const rowText =
             row.innerText
             .toUpperCase();
-
 
         row.style.display =
             rowText.includes(
@@ -3657,86 +3588,73 @@ function clearCreateSOForm() {
     .getElementById('soDate')
     .value = '';
 
-
     document
     .getElementById('soNumber')
     .value = '';
-
 
     document
     .getElementById('clientName')
     .value = '';
 
+    document
+    .getElementById('soSE')
+    .value = '';
 
     document
     .getElementById('billingAddress')
     .value = '';
 
-
     document
     .getElementById('attention')
     .value = '';
-
 
     document
     .getElementById('deliveryAddress')
     .value = '';
 
-
     document
     .getElementById('project')
     .value = '';
-
 
     document
     .getElementById('tinNumber')
     .value = '';
 
-
     document
     .getElementById('poNumber')
     .value = '';
-
 
     document
     .getElementById('terms')
     .value = '';
 
-
     document
     .getElementById('jobOrder')
     .value = '';
-
 
     document
     .getElementById('soDiscount')
     .value = '0';
 
-
     document
     .getElementById('soVatable')
     .checked = false;
-
 
     document
     .getElementById('soItemsBody')
     .innerHTML = '';
 
-
     document
     .getElementById('soSubtotal')
     .innerText = '₱0.00';
-
 
     document
     .getElementById('soVAT')
     .innerText = '₱0.00';
 
-
     document
     .getElementById('soGrandTotal')
     .innerText = '₱0.00';
-
 
     soItemCount = 0;
 
@@ -3759,10 +3677,8 @@ function cancelSelectedSO() {
 
     }
 
-
     const cancelledSONumber =
         selectedSO;
-
 
     const confirmCancel =
         confirm(
@@ -3771,15 +3687,12 @@ function cancelSelectedSO() {
             '?'
         );
 
-
     if (!confirmCancel) {
         return;
     }
 
-
     let salesOrders =
         getSalesOrders();
-
 
     const so =
         salesOrders.find(function(item) {
@@ -3788,7 +3701,6 @@ function cancelSelectedSO() {
                 cancelledSONumber;
 
         });
-
 
     if (!so) {
 
@@ -3800,56 +3712,47 @@ function cancelSelectedSO() {
 
     }
 
-
     so.status =
         'CANCELLED';
-
 
     localStorage.setItem(
         'salesOrders',
         JSON.stringify(salesOrders)
     );
 
-
     loadSOList();
 
     loadDashboard();
 
-
     selectedSO = null;
-
 
     document
     .getElementById('updateSOButton')
     .disabled = true;
 
-
     document
     .getElementById('cancelSOButton')
     .disabled = true;
-
 
     document
     .getElementById('selectedSOInfo')
     .innerHTML =
         'No Sales Order selected.';
 
+    document
+    .querySelectorAll('.page')
+    .forEach(function(page) {
+        page.classList.remove('active');
+    });
 
     document
     .getElementById('sales')
     .classList.add('active');
 
-
-    document
-    .getElementById('soDetails')
-    .classList.remove('active');
-
-
     document
     .getElementById('pageTitle')
     .innerText =
         'Sales Order';
-
 
     alert(
         cancelledSONumber +
@@ -3875,7 +3778,6 @@ function updateSelectedSO() {
 
     }
 
-
     openSODetails(
         selectedSO
     );
@@ -3899,33 +3801,27 @@ function enableSOUpdate() {
 
     }
 
-
     detailEditMode =
         true;
-
 
     setDetailsEditMode(
         true
     );
-
 
     document
     .getElementById('detailEditButton')
     .style.display =
         'none';
 
-
     document
     .getElementById('detailSaveButton')
     .style.display =
         'inline-block';
 
-
     document
     .getElementById('detailAddItemButton')
     .style.display =
         'inline-block';
-
 
     alert(
         'Sales Order ' +
@@ -3957,7 +3853,6 @@ function setDetailsEditMode(enabled) {
 
     });
 
-
     document
     .querySelectorAll(
         '#soDetailsItemsBody input, #soDetailsItemsBody select'
@@ -3968,7 +3863,6 @@ function setDetailsEditMode(enabled) {
             !enabled;
 
     });
-
 
     document
     .querySelectorAll(
@@ -3982,7 +3876,6 @@ function setDetailsEditMode(enabled) {
             : 'none';
 
     });
-
 
     document
     .querySelectorAll(
@@ -4007,14 +3900,12 @@ function calculateDetailItemTotal(input) {
     const row =
         input.closest('tr');
 
-
     const qty =
         Number(
             row.querySelector(
                 '.detail-item-qty'
             )?.value
         ) || 0;
-
 
     const amount =
         Number(
@@ -4023,24 +3914,19 @@ function calculateDetailItemTotal(input) {
             )?.value
         ) || 0;
 
-
     const total =
         qty * amount;
-
 
     const totalCell =
         row.querySelector(
             '.detail-item-total'
         );
 
-
     totalCell.dataset.total =
         total;
 
-
     totalCell.innerText =
         formatMoney(total);
-
 
     calculateDetailTotals();
 
@@ -4058,9 +3944,7 @@ function calculateDetailTotals() {
             '#soDetailsItemsBody tr'
         );
 
-
     const items = [];
-
 
     rows.forEach(function(row) {
 
@@ -4071,14 +3955,12 @@ function calculateDetailTotals() {
                 )?.value
             ) || 0;
 
-
         const amount =
             Number(
                 row.querySelector(
                     '.detail-item-amount'
                 )?.value
             ) || 0;
-
 
         items.push({
 
@@ -4092,7 +3974,6 @@ function calculateDetailTotals() {
 
     });
 
-
     const discount =
         Number(
             document.getElementById(
@@ -4100,13 +3981,11 @@ function calculateDetailTotals() {
             )?.value
         ) || 0;
 
-
     const vatable =
         document.getElementById(
             'detailVatable'
         )?.checked
         || false;
-
 
     const totals =
         calculateSOData(
@@ -4115,7 +3994,6 @@ function calculateDetailTotals() {
             vatable
         );
 
-
     document.getElementById(
         'detailSubtotal'
     ).innerText =
@@ -4123,14 +4001,12 @@ function calculateDetailTotals() {
             totals.subtotal
         );
 
-
     document.getElementById(
         'detailVAT'
     ).innerText =
         formatMoney(
             totals.vatAmount
         );
-
 
     document.getElementById(
         'detailGrandTotal'
@@ -4153,10 +4029,8 @@ function addDetailItem() {
             'soDetailsItemsBody'
         );
 
-
     const itemNumber =
         tbody.querySelectorAll('tr').length;
-
 
     createDetailItemRow(
 
@@ -4188,7 +4062,6 @@ function addDetailItem() {
 
     );
 
-
     renumberDetailItems();
 
     setDetailsEditMode(true);
@@ -4207,50 +4080,40 @@ function handleDetailUnitChange(select) {
     const parent =
         select.parentElement;
 
-
     const oldInput =
         parent.querySelector(
             '.custom-unit-input'
         );
 
-
     if (oldInput) {
         oldInput.remove();
     }
-
 
     if (select.value === 'custom') {
 
         const input =
             document.createElement('input');
 
-
         input.type =
             'text';
-
 
         input.className =
             'custom-unit-input';
 
-
         input.placeholder =
             'Enter unit';
-
 
         input.style.marginTop =
             '5px';
 
-
         input.disabled =
             false;
-
 
         parent.appendChild(
             input
         );
 
     }
-
 
     calculateDetailTotals();
 
@@ -4266,7 +4129,6 @@ function deleteDetailItem(button) {
     button
     .closest('tr')
     .remove();
-
 
     renumberDetailItems();
 
@@ -4285,7 +4147,6 @@ function renumberDetailItems() {
         document.querySelectorAll(
             '#soDetailsItemsBody tr'
         );
-
 
     rows.forEach(function(row, index) {
 
@@ -4315,7 +4176,6 @@ function saveSOUpdate() {
 
     }
 
-
     const confirmUpdate =
         confirm(
             'Save changes to ' +
@@ -4323,15 +4183,12 @@ function saveSOUpdate() {
             '?'
         );
 
-
     if (!confirmUpdate) {
         return;
     }
 
-
     let salesOrders =
         getSalesOrders();
-
 
     const so =
         salesOrders.find(function(item) {
@@ -4340,7 +4197,6 @@ function saveSOUpdate() {
                 selectedSO;
 
         });
-
 
     if (!so) {
 
@@ -4352,12 +4208,10 @@ function saveSOUpdate() {
 
     }
 
-
     so.dateCreation =
         document
         .getElementById('detailSODate')
         .value;
-
 
     so.clientName =
         document
@@ -4365,11 +4219,12 @@ function saveSOUpdate() {
         .value
         .trim();
 
-    so.se =
-    document
-    .getElementById('detailSE')
-    .value;
+    /* SAVE UPDATED SE */
 
+    so.se =
+        document
+        .getElementById('detailSE')
+        .value;
 
     so.billingAddress =
         document
@@ -4377,13 +4232,11 @@ function saveSOUpdate() {
         .value
         .trim();
 
-
     so.attention =
         document
         .getElementById('detailAttention')
         .value
         .trim();
-
 
     so.deliveryAddress =
         document
@@ -4391,13 +4244,11 @@ function saveSOUpdate() {
         .value
         .trim();
 
-
     so.project =
         document
         .getElementById('detailProject')
         .value
         .trim();
-
 
     so.tin =
         document
@@ -4405,26 +4256,22 @@ function saveSOUpdate() {
         .value
         .trim();
 
-
     so.poNumber =
         document
         .getElementById('detailPONumber')
         .value
         .trim();
 
-
     so.terms =
         document
         .getElementById('detailTerms')
         .value;
-
 
     so.jobOrder =
         document
         .getElementById('detailJobOrder')
         .value
         .trim();
-
 
     so.discount =
         Number(
@@ -4433,21 +4280,17 @@ function saveSOUpdate() {
             .value
         ) || 0;
 
-
     so.vatable =
         document
         .getElementById('detailVatable')
         .checked;
-
 
     const rows =
         document.querySelectorAll(
             '#soDetailsItemsBody tr'
         );
 
-
     const items = [];
-
 
     rows.forEach(function(row, index) {
 
@@ -4458,14 +4301,12 @@ function saveSOUpdate() {
             .trim()
             || '';
 
-
         const description =
             row
             .querySelector('.detail-item-description')
             ?.value
             .trim()
             || '';
-
 
         const qty =
             Number(
@@ -4474,7 +4315,6 @@ function saveSOUpdate() {
                 ?.value
             ) || 0;
 
-
         const amount =
             Number(
                 row
@@ -4482,18 +4322,15 @@ function saveSOUpdate() {
                 ?.value
             ) || 0;
 
-
         const select =
             row.querySelector(
                 '.detail-item-unit'
             );
 
-
         let unit =
             select
             ? select.value
             : '';
-
 
         if (unit === 'custom') {
 
@@ -4503,7 +4340,6 @@ function saveSOUpdate() {
                     '.custom-unit-input'
                 );
 
-
             if (customInput) {
 
                 unit =
@@ -4512,7 +4348,6 @@ function saveSOUpdate() {
             }
 
         }
-
 
         items.push({
 
@@ -4541,7 +4376,6 @@ function saveSOUpdate() {
 
     });
 
-
     const totals =
         calculateSOData(
             items,
@@ -4549,79 +4383,66 @@ function saveSOUpdate() {
             so.vatable
         );
 
-
     so.items =
         items;
-
 
     so.subtotal =
         totals.subtotal;
 
-
     so.discount =
         totals.discount;
-
 
     so.vatable =
         totals.vatable;
 
-
     so.vatRate =
         totals.vatRate;
-
 
     so.vatAmount =
         totals.vatAmount;
 
-
     so.grandTotal =
         totals.grandTotal;
-
 
     localStorage.setItem(
         'salesOrders',
         JSON.stringify(salesOrders)
     );
 
-
     loadSOList();
 
     loadDashboard();
 
-
     detailEditMode =
         false;
-
 
     setDetailsEditMode(
         false
     );
-
 
     document
     .getElementById('detailEditButton')
     .style.display =
         'inline-block';
 
-
     document
     .getElementById('detailSaveButton')
     .style.display =
         'none';
-
 
     document
     .getElementById('detailAddItemButton')
     .style.display =
         'none';
 
-
     calculateDetailTotals();
-
 
     alert(
         selectedSO +
         ' has been successfully updated.\n\n' +
+        'SE: ' +
+        so.se +
+        '\n' +
         'Grand Total: ' +
         formatMoney(
             so.grandTotal
@@ -4640,7 +4461,6 @@ function loadDashboard() {
     const salesOrders =
         getSalesOrders();
 
-
     const activeOrders =
         salesOrders.filter(function(so) {
 
@@ -4649,7 +4469,6 @@ function loadDashboard() {
 
         });
 
-
     document
     .getElementById(
         'dashboardSOCount'
@@ -4657,15 +4476,12 @@ function loadDashboard() {
     .innerText =
         activeOrders.length;
 
-
     const recentBody =
         document.getElementById(
             'recentSOBody'
         );
 
-
     recentBody.innerHTML = '';
-
 
     salesOrders
     .slice()
@@ -4676,12 +4492,10 @@ function loadDashboard() {
         const row =
             document.createElement('tr');
 
-
         const statusClass =
             so.status === 'CANCELLED'
             ? 'status status-cancelled'
             : 'status';
-
 
         row.innerHTML = `
 
@@ -4705,7 +4519,6 @@ function loadDashboard() {
 
         `;
 
-
         recentBody.appendChild(
             row
         );
@@ -4717,7 +4530,6 @@ function loadDashboard() {
 
 /* =====================================================
    DR PRINTING - LOAD SO
-   UNCHANGED
 ===================================================== */
 
 function loadDRSalesOrders() {
@@ -4727,10 +4539,8 @@ function loadDRSalesOrders() {
             'drSOSelect'
         );
 
-
     const currentValue =
         select.value;
-
 
     select.innerHTML = `
 
@@ -4740,10 +4550,8 @@ function loadDRSalesOrders() {
 
     `;
 
-
     const salesOrders =
         getSalesOrders();
-
 
     salesOrders
     .filter(function(so) {
@@ -4759,16 +4567,13 @@ function loadDRSalesOrders() {
                 'option'
             );
 
-
         option.value =
             so.soNumber;
-
 
         option.textContent =
             so.soNumber +
             ' - ' +
             (so.clientName || '');
-
 
         select.appendChild(
             option
@@ -4776,12 +4581,13 @@ function loadDRSalesOrders() {
 
     });
 
-
     if (
         currentValue &&
         salesOrders.some(function(so) {
-            return so.soNumber ===
-                currentValue;
+            return (
+                so.soNumber === currentValue &&
+                so.status !== 'CANCELLED'
+            );
         })
     ) {
 
@@ -4795,7 +4601,6 @@ function loadDRSalesOrders() {
 
 /* =====================================================
    DR LOAD ITEMS
-   UNCHANGED
 ===================================================== */
 
 function loadDRItems() {
@@ -4807,12 +4612,10 @@ function loadDRItems() {
         )
         .value;
 
-
     const itemSelect =
         document.getElementById(
             'drItemSelect'
         );
-
 
     itemSelect.innerHTML = `
 
@@ -4822,18 +4625,15 @@ function loadDRItems() {
 
     `;
 
-
     clearDRItemFields();
 
-
     if (!soNumber) {
+        clearDRHeaderFields();
         return;
     }
 
-
     const salesOrders =
         getSalesOrders();
-
 
     const so =
         salesOrders.find(function(item) {
@@ -4843,11 +4643,9 @@ function loadDRItems() {
 
         });
 
-
     if (!so) {
         return;
     }
-
 
     document
     .getElementById(
@@ -4856,6 +4654,14 @@ function loadDRItems() {
     .value =
         so.clientName || '';
 
+    /* LOAD SE TO DR */
+
+    document
+    .getElementById(
+        'drSE'
+    )
+    .value =
+        so.se || '';
 
     document
     .getElementById(
@@ -4864,7 +4670,6 @@ function loadDRItems() {
     .value =
         so.project || '';
 
-
     document
     .getElementById(
         'drDeliveryAddress'
@@ -4872,14 +4677,12 @@ function loadDRItems() {
     .value =
         so.deliveryAddress || '';
 
-
     document
     .getElementById(
         'drAttention'
     )
     .value =
         so.attention || '';
-
 
     (so.items || [])
     .forEach(function(item, index) {
@@ -4889,17 +4692,14 @@ function loadDRItems() {
                 'option'
             );
 
-
         option.value =
             index;
-
 
         option.textContent =
             'Item #' +
             (index + 1) +
             ' - ' +
             (item.itemName || '');
-
 
         itemSelect.appendChild(
             option
@@ -4911,8 +4711,46 @@ function loadDRItems() {
 
 
 /* =====================================================
+   CLEAR DR HEADER
+===================================================== */
+
+function clearDRHeaderFields() {
+
+    document
+    .getElementById(
+        'drClientName'
+    )
+    .value = '';
+
+    document
+    .getElementById(
+        'drSE'
+    )
+    .value = '';
+
+    document
+    .getElementById(
+        'drProject'
+    )
+    .value = '';
+
+    document
+    .getElementById(
+        'drDeliveryAddress'
+    )
+    .value = '';
+
+    document
+    .getElementById(
+        'drAttention'
+    )
+    .value = '';
+
+}
+
+
+/* =====================================================
    DR LOAD ITEM DETAILS
-   UNCHANGED
 ===================================================== */
 
 function loadDRItemDetails() {
@@ -4924,14 +4762,12 @@ function loadDRItemDetails() {
         )
         .value;
 
-
     const itemIndex =
         document
         .getElementById(
             'drItemSelect'
         )
         .value;
-
 
     if (
         !soNumber ||
@@ -4944,10 +4780,8 @@ function loadDRItemDetails() {
 
     }
 
-
     const salesOrders =
         getSalesOrders();
-
 
     const so =
         salesOrders.find(function(item) {
@@ -4957,11 +4791,9 @@ function loadDRItemDetails() {
 
         });
 
-
     if (!so) {
         return;
     }
-
 
     const item =
         so.items[
@@ -4971,11 +4803,9 @@ function loadDRItemDetails() {
             )
         ];
 
-
     if (!item) {
         return;
     }
-
 
     document
     .getElementById(
@@ -4984,7 +4814,6 @@ function loadDRItemDetails() {
     .value =
         item.itemName || '';
 
-
     document
     .getElementById(
         'drQty'
@@ -4992,14 +4821,12 @@ function loadDRItemDetails() {
     .value =
         item.qty || '';
 
-
     document
     .getElementById(
         'drUnit'
     )
     .value =
         item.unit || '';
-
 
     document
     .getElementById(
@@ -5013,7 +4840,6 @@ function loadDRItemDetails() {
 
 /* =====================================================
    CLEAR DR ITEM
-   UNCHANGED
 ===================================================== */
 
 function clearDRItemFields() {
@@ -5024,20 +4850,17 @@ function clearDRItemFields() {
     )
     .value = '';
 
-
     document
     .getElementById(
         'drQty'
     )
     .value = '';
 
-
     document
     .getElementById(
         'drUnit'
     )
     .value = '';
-
 
     document
     .getElementById(
@@ -5050,7 +4873,6 @@ function clearDRItemFields() {
 
 /* =====================================================
    CLEAR DR FORM
-   UNCHANGED
 ===================================================== */
 
 function clearDRForm() {
@@ -5060,7 +4882,6 @@ function clearDRForm() {
         'drSOSelect'
     )
     .value = '';
-
 
     document
     .getElementById(
@@ -5074,13 +4895,11 @@ function clearDRForm() {
 
     `;
 
-
     document
     .getElementById(
         'drNumber'
     )
     .value = '';
-
 
     document
     .getElementById(
@@ -5088,34 +4907,7 @@ function clearDRForm() {
     )
     .value = '';
 
-
-    document
-    .getElementById(
-        'drClientName'
-    )
-    .value = '';
-
-
-    document
-    .getElementById(
-        'drProject'
-    )
-    .value = '';
-
-
-    document
-    .getElementById(
-        'drDeliveryAddress'
-    )
-    .value = '';
-
-
-    document
-    .getElementById(
-        'drAttention'
-    )
-    .value = '';
-
+    clearDRHeaderFields();
 
     clearDRItemFields();
 
@@ -5124,7 +4916,6 @@ function clearDRForm() {
 
 /* =====================================================
    PRINT DR
-   UNCHANGED
 ===================================================== */
 
 function printDR() {
@@ -5136,14 +4927,12 @@ function printDR() {
         )
         .value;
 
-
     const itemNumber =
         document
         .getElementById(
             'drItemSelect'
         )
         .value;
-
 
     const drNumber =
         document
@@ -5152,7 +4941,6 @@ function printDR() {
         )
         .value
         .trim();
-
 
     if (!soNumber) {
 
@@ -5164,7 +4952,6 @@ function printDR() {
 
     }
 
-
     if (itemNumber === '') {
 
         alert(
@@ -5175,7 +4962,6 @@ function printDR() {
 
     }
 
-
     if (!drNumber) {
 
         alert(
@@ -5185,7 +4971,6 @@ function printDR() {
         return;
 
     }
-
 
     window.print();
 
