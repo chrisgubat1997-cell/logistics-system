@@ -1,0 +1,21 @@
+/* =====================================================
+   LOGI-TECH DASHBOARD
+===================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.dashboard-container {
+    padding: 30px;
+}
+
+.dashboard-container h1 {
+    margin-bottom: 10px;
+}
