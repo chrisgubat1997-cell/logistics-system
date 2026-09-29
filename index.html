@@ -948,9 +948,9 @@ td {
                 <tbody id="soTableBody">
 
 
-                    <tr
-                        class="so-row"
-                        onclick="selectSO(this, 'SO-2026-00125')">
+                    <tr class="so-row"
+    onclick="selectSO(this, 'SO-2026-00125')"
+    ondblclick="openSODetails('SO-2026-00125')">
 
                         <td>
                             SO-2026-00125
@@ -988,8 +988,9 @@ td {
 
 
                     <tr
-                        class="so-row"
-                        onclick="selectSO(this, 'SO-2026-00124')">
+                        <tr class="so-row"
+    onclick="selectSO(this, 'SO-2026-00124')"
+    ondblclick="openSODetails('SO-2026-00124')">
 
                         <td>
                             SO-2026-00124
@@ -1072,6 +1073,8 @@ td {
         </div>
 
     </div>
+
+ 
 
 
     <!-- SELECTED SO -->
@@ -1391,7 +1394,104 @@ td {
 
 
 </div>
+<!-- SO DETAILS -->
+<div id="soDetails" class="page">
 
+    <div class="page-header">
+        <div>
+            <h2>Sales Order Details</h2>
+            <div class="subtitle">View Sales Order information</div>
+        </div>
+
+        <div class="action-bar">
+            <button class="btn btn-danger" onclick="cancelSelectedSO()">
+                CANCEL
+            </button>
+
+            <button class="btn btn-primary" onclick="enableSOUpdate()">
+                UPDATE
+            </button>
+        </div>
+    </div>
+
+    <!-- SO DETAILS FORM -->
+    <div class="form-grid">
+
+        <div class="form-group">
+            <label>Date Creation</label>
+            <input type="date" id="detailSODate" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Sales Order Number</label>
+            <input type="text" id="detailSONumber" disabled>
+        </div>
+
+        <div class="form-group full">
+            <label>Billing Address</label>
+            <input type="text" id="detailBillingAddress" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Attention</label>
+            <input type="text" id="detailAttention" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Delivery Address</label>
+            <input type="text" id="detailDeliveryAddress" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Project</label>
+            <input type="text" id="detailProject" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>TIN Number</label>
+            <input type="text" id="detailTIN" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>PO Number</label>
+            <input type="text" id="detailPONumber" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Terms</label>
+            <input type="text" id="detailTerms" disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Job Order</label>
+            <input type="text" id="detailJobOrder" disabled>
+        </div>
+
+    </div>
+
+    <!-- ITEMS -->
+    <div class="table-container" style="margin-top:25px;">
+
+        <h3 style="margin-bottom:15px;">Items</h3>
+
+        <table id="soDetailsItemsTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Item Name</th>
+                    <th>Description</th>
+                    <th>QTY</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+
+            <tbody id="soDetailsItemsBody">
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
 
         <!-- JOB ORDER -->
 
@@ -1562,48 +1662,53 @@ function showPage(pageId, button) {
 }
 let selectedSO = null;
 
-
 function selectSO(row, soNumber) {
 
-    // Remove previous selection
-
-    document
-        .querySelectorAll('.so-row')
-        .forEach(function(item) {
-
-            item.classList.remove('selected');
-
-        });
-
-
-    // Select current row
+    document.querySelectorAll('.so-row').forEach(function(item) {
+        item.classList.remove('selected');
+    });
 
     row.classList.add('selected');
 
+    selectedSO = soNumber;
 
-    // Save selected SO
+    document.getElementById('updateSOButton').disabled = false;
+    document.getElementById('cancelSOButton').disabled = false;
+
+    document.getElementById('selectedSOInfo').innerHTML =
+        'Selected Sales Order: <strong>' + soNumber + '</strong>';
+}
+ function openSODetails(soNumber) {
 
     selectedSO = soNumber;
 
+    document.querySelectorAll('.page').forEach(function(page) {
+        page.classList.remove('active');
+    });
 
-    // Enable buttons
+    document.getElementById('soDetails').classList.add('active');
 
-    document.getElementById('updateSOButton')
-        .disabled = false;
+    document.getElementById('pageTitle').innerText =
+        'Sales Order Details';
 
+    // Hanapin ang SO row
+    const rows = document.querySelectorAll('#soTableBody .so-row');
 
-    document.getElementById('cancelSOButton')
-        .disabled = false;
+    rows.forEach(function(row) {
 
+        const rowSONumber = row.cells[0].innerText.trim();
 
-    // Show selected SO
+        if (rowSONumber === soNumber) {
 
-    document.getElementById('selectedSOInfo')
-        .innerHTML =
-        'Selected Sales Order: <strong>' +
-        soNumber +
-        '</strong>';
+            // Basic SO information
+            document.getElementById('detailSONumber').value =
+                row.cells[0].innerText.trim();
 
+            // NOTE:
+            // Sa ngayon, ito muna ang available sa SO List.
+            // Susunod nating ikokonekta ang buong Create SO data.
+        }
+    });
 }
 
 
@@ -1664,7 +1769,24 @@ function cancelSelectedSO() {
 
 }
 
+function enableSOUpdate() {
 
+    const fields = document.querySelectorAll(
+        '#soDetails input'
+    );
+
+    fields.forEach(function(field) {
+
+        // Huwag i-enable ang SO Number
+        if (field.id !== 'detailSONumber') {
+            field.disabled = false;
+        }
+
+    });
+
+    alert('SO Details are now editable.');
+}
+ 
 function searchSO() {
 
     const searchValue =
