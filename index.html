@@ -3077,10 +3077,10 @@ function renumberSOItems() {
 function closeCreateSO() {
 
     const hasData =
-    document.getElementById('clientName').value.trim() ||
-    document.getElementById('soSE').value.trim() ||
-    document.getElementById('billingAddress').value.trim() ||
-    document.querySelectorAll('#soItemsBody tr').length > 0;
+        document.getElementById('clientName').value.trim() ||
+        document.getElementById('soSE').value.trim() ||
+        document.getElementById('billingAddress').value.trim() ||
+        document.querySelectorAll('#soItemsBody tr').length > 0;
 
 
     if (hasData) {
