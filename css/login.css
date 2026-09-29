@@ -11,23 +11,24 @@
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     min-height: 100vh;
+
     display: flex;
     justify-content: center;
     align-items: center;
-    
-    /* Inayos ang path papuntang assets folder */
+
     background: url('../assets/background.png') no-repeat center center fixed;
     background-size: cover;
 }
 
 
 /* =========================================
-   LOGIN CONTAINER & GLASS CARD
+   LOGIN CONTAINER
 ========================================= */
 
 .login-container {
     width: 100%;
     padding: 20px;
+
     display: flex;
     justify-content: center;
 }
@@ -36,34 +37,48 @@ body {
     text-align: center;
 }
 
+
+/* =========================================
+   GLASS CARD
+========================================= */
+
 .login-card {
     width: 100%;
     max-width: 400px;
-    /* Glassmorphism Frosted Glass Effect */
+
     background: rgba(255, 255, 255, 0.45);
+
     backdrop-filter: blur(15px);
-    -webkit-backdrop-filter: blur(500px);
+    -webkit-backdrop-filter: blur(15px);
+
     border: 1px solid rgba(255, 255, 255, 0.5);
+
     border-radius: 20px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+
+    box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.3);
+
     overflow: hidden;
+
     padding: 35px 30px 40px 30px;
 }
 
 
 /* =========================================
-   LOGO / HEADER BANNER
+   LOGO
 ========================================= */
 
 .logo-container {
     width: 100%;
     text-align: center;
+
     margin-bottom: 25px;
 }
 
 .logo-container img {
     max-width: 220px;
     height: auto;
+
     object-fit: contain;
 }
 
@@ -80,41 +95,57 @@ body {
 .login-card h1 {
     font-size: 24px;
     color: #311b43;
+
     margin-bottom: 20px;
+
     font-weight: 700;
 }
 
 
 /* =========================================
-   INPUT FIELDS (PILL STYLE)
+   INPUT FIELDS
 ========================================= */
 
 .input-group {
     position: relative;
+
     margin-bottom: 15px;
+
     text-align: left;
 }
 
 .input-icon {
     position: absolute;
+
     left: 18px;
     top: 50%;
+
     transform: translateY(-50%);
+
     color: #ffffff;
+
     font-size: 14px;
+
     z-index: 1;
 }
 
 .input-group input {
     width: 100%;
+
     padding: 12px 18px 12px 45px;
-    /* Soft cyan/teal pill inputs */
-    background-color: rgba(120, 195, 190, 0.75); 
+
+    background-color: rgba(120, 195, 190, 0.75);
+
     border: none;
+
     border-radius: 25px;
+
     font-size: 14px;
+
     color: #ffffff;
+
     outline: none;
+
     transition: all 0.3s ease;
 }
 
@@ -124,7 +155,9 @@ body {
 
 .input-group input:focus {
     background-color: rgba(120, 195, 190, 0.95);
-    box-shadow: 0 0 8px rgba(120, 195, 190, 0.6);
+
+    box-shadow:
+        0 0 8px rgba(120, 195, 190, 0.6);
 }
 
 
@@ -134,16 +167,21 @@ body {
 
 .options-row {
     display: flex;
+
     justify-content: flex-end;
     align-items: center;
+
     margin-top: 8px;
     margin-bottom: 22px;
+
     font-size: 12px;
 }
 
 .forgot-pass {
     color: #311b43;
+
     text-decoration: none;
+
     font-weight: 500;
 }
 
@@ -153,19 +191,28 @@ body {
 
 
 /* =========================================
-   LOGIN BUTTON & LINKS
+   BUTTON
 ========================================= */
 
 .login-btn {
     width: 100%;
+
     padding: 12px;
+
     border: none;
+
     border-radius: 6px;
-    background-color: #381a4a; /* Dark purple button */
+
+    background-color: #381a4a;
+
     color: white;
+
     font-size: 14px;
+
     font-weight: 600;
+
     cursor: pointer;
+
     transition: background 0.3s ease;
 }
 
@@ -173,14 +220,22 @@ body {
     background-color: #261133;
 }
 
+
+/* =========================================
+   LINKS
+========================================= */
+
 .login-links {
     margin-top: 18px;
 }
 
 .login-links a {
     color: #311b43;
+
     text-decoration: none;
+
     font-size: 13px;
+
     font-weight: 500;
 }
 
@@ -188,15 +243,185 @@ body {
     text-decoration: underline;
 }
 
+
+/* =========================================
+   DESIGNER
+========================================= */
+
 .designer-tag {
     margin-top: 30px;
+
     color: #ffffff;
+
     font-size: 16px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+
+    text-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.6);
 }
+
+
+/* =========================================
+   LOGIN MESSAGE
+========================================= */
 
 #loginMessage {
     margin-top: 15px;
+
     font-size: 13px;
+
     font-weight: 600;
+}
+
+
+/* =====================================================
+   SIGN UP PAGE - COMPACT VERSION
+===================================================== */
+
+.login-card:has(#signupForm) {
+
+    padding: 22px 30px 22px 30px;
+
+}
+
+
+/* SIGN UP LOGO */
+
+.login-card:has(#signupForm) .logo-container {
+
+    margin-bottom: 10px;
+
+}
+
+.login-card:has(#signupForm) .logo-container img {
+
+    max-width: 175px;
+
+}
+
+
+/* SIGN UP TITLE */
+
+.login-card:has(#signupForm) h1 {
+
+    font-size: 22px;
+
+    margin-bottom: 4px;
+
+}
+
+
+/* SIGN UP SUBTITLE */
+
+.login-card:has(#signupForm) .subtitle {
+
+    margin-bottom: 12px;
+
+    font-size: 12px;
+
+}
+
+
+/* SIGN UP INPUT GROUP */
+
+.login-card:has(#signupForm) .input-group {
+
+    margin-bottom: 8px;
+
+}
+
+
+/* SIGN UP LABEL */
+
+.login-card:has(#signupForm) .input-group label {
+
+    display: block;
+
+    margin-bottom: 3px;
+
+    font-size: 11px;
+
+    font-weight: 600;
+
+    color: #311b43;
+
+}
+
+
+/* SIGN UP INPUT */
+
+.login-card:has(#signupForm) .input-group input {
+
+    height: 38px;
+
+    padding: 8px 16px;
+
+    font-size: 13px;
+
+}
+
+
+/* SIGN UP BUTTON */
+
+.login-card:has(#signupForm) .login-btn {
+
+    margin-top: 3px;
+
+    padding: 10px;
+
+}
+
+
+/* SIGN UP MESSAGE */
+
+.login-card:has(#signupForm) #signupMessage {
+
+    margin-top: 6px;
+
+    font-size: 12px;
+
+}
+
+
+/* SIGN UP BACK LINK */
+
+.login-card:has(#signupForm) .login-links {
+
+    margin-top: 8px;
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-height: 700px) {
+
+    .login-card {
+        padding-top: 20px;
+        padding-bottom: 20px;
+    }
+
+    .logo-container {
+        margin-bottom: 12px;
+    }
+
+    .logo-container img {
+        max-width: 180px;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .login-container {
+        padding: 12px;
+    }
+
+    .login-card {
+        max-width: 100%;
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+
 }
