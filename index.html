@@ -595,19 +595,33 @@ td {
 
 <div class="main">
 
-    <div class="topbar">
+   <div class="topbar">
 
-        <div
-        class="page-title"
-        id="pageTitle">
-            Dashboard
-        </div>
+    <div class="page-title" id="pageTitle">
+        Dashboard
+    </div>
 
-        <div class="user">
-            Logistics Associate
-        </div>
+    <div class="user-area">
+
+        <span id="welcomeUser">
+            WELCOME, USER
+        </span>
+
+        <button
+            class="profile-btn"
+            onclick="openProfile()">
+            👤 PROFILE
+        </button>
+
+        <button
+            class="logout-btn"
+            onclick="logoutUser()">
+            LOGOUT
+        </button>
 
     </div>
+
+</div>
 
     <div class="content">
 
@@ -4994,6 +5008,228 @@ function escapeHTML(value) {
 
 
 /* =====================================================
+   USER ACCOUNT
+===================================================== */
+
+function loadUserAccount() {
+
+    const savedUser =
+        localStorage.getItem('logitechUser');
+
+    const loggedIn =
+        localStorage.getItem('logitechLoggedIn');
+
+    /* CHECK LOGIN SESSION */
+
+    if (!savedUser || loggedIn !== 'true') {
+
+        window.location.href =
+            'login.html';
+
+        return;
+
+    }
+
+    let user;
+
+    try {
+
+        user =
+            JSON.parse(savedUser);
+
+    } catch (error) {
+
+        localStorage.removeItem(
+            'logitechUser'
+        );
+
+        localStorage.removeItem(
+            'logitechLoggedIn'
+        );
+
+        window.location.href =
+            'login.html';
+
+        return;
+
+    }
+
+    const fullname =
+        user.fullname ||
+        user.username ||
+        'USER';
+
+
+    /* =================================================
+       WELCOME NAME
+    ================================================= */
+
+    const welcomeUser =
+        document.getElementById(
+            'welcomeUser'
+        );
+
+    if (welcomeUser) {
+
+        welcomeUser.innerText =
+            'WELCOME, ' + fullname;
+
+    }
+
+
+    /* =================================================
+       PROFILE NAME
+    ================================================= */
+
+    const profileName =
+        document.getElementById(
+            'profileName'
+        );
+
+    if (profileName) {
+
+        profileName.innerText =
+            fullname;
+
+    }
+
+
+    /* =================================================
+       PROFILE FULL NAME
+    ================================================= */
+
+    const profileFullname =
+        document.getElementById(
+            'profileFullname'
+        );
+
+    if (profileFullname) {
+
+        profileFullname.innerText =
+            user.fullname || '-';
+
+    }
+
+
+    /* =================================================
+       PROFILE USERNAME
+    ================================================= */
+
+    const profileUsername =
+        document.getElementById(
+            'profileUsername'
+        );
+
+    if (profileUsername) {
+
+        profileUsername.innerText =
+            user.username || '-';
+
+    }
+
+
+    /* =================================================
+       PROFILE AVATAR
+    ================================================= */
+
+    const profileAvatar =
+        document.getElementById(
+            'profileAvatar'
+        );
+
+    if (profileAvatar) {
+
+        profileAvatar.innerText =
+            fullname
+            .charAt(0)
+            .toUpperCase();
+
+    }
+
+}
+
+
+/* =====================================================
+   OPEN PROFILE
+===================================================== */
+
+function openProfile() {
+
+    document
+    .querySelectorAll('.page')
+    .forEach(function(page) {
+
+        page.classList.remove('active');
+
+    });
+
+
+    const profilePage =
+        document.getElementById(
+            'profile'
+        );
+
+    if (profilePage) {
+
+        profilePage.classList.add(
+            'active'
+        );
+
+    }
+
+
+    const pageTitle =
+        document.getElementById(
+            'pageTitle'
+        );
+
+    if (pageTitle) {
+
+        pageTitle.innerText =
+            'My Profile';
+
+    }
+
+}
+
+
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+function logoutUser() {
+
+    const confirmLogout =
+        confirm(
+            'Are you sure you want to logout?'
+        );
+
+    if (!confirmLogout) {
+
+        return;
+
+    }
+
+
+    /*
+       REMOVE LOGIN SESSION ONLY
+
+       The registered account remains
+       saved in localStorage.
+    */
+
+    localStorage.removeItem(
+        'logitechLoggedIn'
+    );
+
+
+    window.location.href =
+        'login.html';
+
+}
+
+
+/* =====================================================
    PAGE LOAD
 ===================================================== */
 
@@ -5001,16 +5237,35 @@ document.addEventListener(
     'DOMContentLoaded',
     function() {
 
+        /*
+           CHECK ACCOUNT SESSION
+        */
+
+        loadUserAccount();
+
+
+        /*
+           EXISTING SYSTEM LOAD
+        */
+
         loadSOList();
 
         loadDashboard();
 
-        document
-        .getElementById('drDate')
-        .value =
-            new Date()
-            .toISOString()
-            .split('T')[0];
+
+        const drDate =
+            document.getElementById(
+                'drDate'
+            );
+
+        if (drDate) {
+
+            drDate.value =
+                new Date()
+                .toISOString()
+                .split('T')[0];
+
+        }
 
     }
 );
