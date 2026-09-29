@@ -1493,6 +1493,162 @@ td {
 
 </div>
 
+     <!-- SO DETAILS -->
+<div id="soDetails" class="page">
+
+    <div class="page-header">
+
+        <div>
+            <h2>Sales Order Details</h2>
+            <div class="subtitle">View Sales Order</div>
+        </div>
+
+        <div class="action-bar">
+
+            <button class="btn btn-danger"
+                    onclick="cancelSelectedSO()">
+                CANCEL
+            </button>
+
+            <button class="btn btn-primary"
+                    onclick="enableSOUpdate()">
+                UPDATE
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- SO DETAILS FORM -->
+
+    <div class="form-grid">
+
+        <div class="form-group">
+            <label>Date Creation</label>
+            <input type="date"
+                   id="detailSODate"
+                   disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Sales Order Number</label>
+            <input type="text"
+                   id="detailSONumber"
+                   disabled>
+        </div>
+
+
+        <div class="form-group full">
+            <label>Billing Address</label>
+            <input type="text"
+                   id="detailBillingAddress"
+                   disabled>
+        </div>
+
+
+        <div class="form-group">
+            <label>Attention</label>
+            <input type="text"
+                   id="detailAttention"
+                   disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Delivery Address</label>
+            <input type="text"
+                   id="detailDeliveryAddress"
+                   disabled>
+        </div>
+
+
+        <div class="form-group">
+            <label>Project</label>
+            <input type="text"
+                   id="detailProject"
+                   disabled>
+        </div>
+
+        <div class="form-group">
+            <label>TIN Number</label>
+            <input type="text"
+                   id="detailTIN"
+                   disabled>
+        </div>
+
+
+        <div class="form-group">
+            <label>PO Number</label>
+            <input type="text"
+                   id="detailPONumber"
+                   disabled>
+        </div>
+
+        <div class="form-group">
+            <label>Terms</label>
+            <input type="text"
+                   id="detailTerms"
+                   disabled>
+        </div>
+
+
+        <div class="form-group">
+            <label>Job Order</label>
+            <input type="text"
+                   id="detailJobOrder"
+                   disabled>
+        </div>
+
+    </div>
+
+
+    <!-- ITEMS -->
+
+    <div style="margin-top:25px;">
+
+        <h3>Items</h3>
+
+        <div class="table-container">
+
+            <table id="soDetailsItemsTable">
+
+                <thead>
+
+                    <tr>
+                        <th>#</th>
+                        <th>Item Name</th>
+                        <th>Description</th>
+                        <th>QTY</th>
+                        <th>Unit</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="soDetailsItemsBody">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+    <!-- BACK -->
+
+    <div class="action-bar"
+         style="margin-top:25px;">
+
+        <button class="btn btn-secondary"
+                onclick="closeSODetails()">
+            BACK TO SO LIST
+        </button>
+
+    </div>
+
+</div>
+
+     
         <!-- JOB ORDER -->
 
         <div
@@ -1678,39 +1834,69 @@ function selectSO(row, soNumber) {
     document.getElementById('selectedSOInfo').innerHTML =
         'Selected Sales Order: <strong>' + soNumber + '</strong>';
 }
+
  function openSODetails(soNumber) {
 
     selectedSO = soNumber;
+
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(function(page) {
+        page.classList.remove('active');
+    });
+
+    // Show SO Details
+    document.getElementById('soDetails')
+        .classList.add('active');
+
+    // Change page title
+    document.getElementById('pageTitle').innerText =
+        'Sales Order Details';
+
+    // Show selected SO number
+    document.getElementById('detailSONumber').value =
+        soNumber;
+
+    // Disable all fields initially
+    document.querySelectorAll(
+        '#soDetails input, #soDetails select'
+    ).forEach(function(field) {
+
+        field.disabled = true;
+
+    });
+
+    // Clear previous items
+    document.getElementById('soDetailsItemsBody')
+        .innerHTML = '';
+
+}
+function closeSODetails() {
 
     document.querySelectorAll('.page').forEach(function(page) {
         page.classList.remove('active');
     });
 
-    document.getElementById('soDetails').classList.add('active');
+    document.getElementById('sales')
+        .classList.add('active');
 
     document.getElementById('pageTitle').innerText =
-        'Sales Order Details';
+        'Sales Order';
 
-    // Hanapin ang SO row
-    const rows = document.querySelectorAll('#soTableBody .so-row');
-
-    rows.forEach(function(row) {
-
-        const rowSONumber = row.cells[0].innerText.trim();
-
-        if (rowSONumber === soNumber) {
-
-            // Basic SO information
-            document.getElementById('detailSONumber').value =
-                row.cells[0].innerText.trim();
-
-            // NOTE:
-            // Sa ngayon, ito muna ang available sa SO List.
-            // Susunod nating ikokonekta ang buong Create SO data.
-        }
-    });
 }
+ function enableSOUpdate() {
 
+    document.querySelectorAll(
+        '#soDetails input, #soDetails select'
+    ).forEach(function(field) {
+
+        // SO Number cannot be changed
+        if (field.id !== 'detailSONumber') {
+            field.disabled = false;
+        }
+
+    });
+
+}
 
 function openCreateSO() {
     document.getElementById('sales').style.display = 'none';
