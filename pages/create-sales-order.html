@@ -397,6 +397,51 @@
 
         <div class="action-bar">
 
+            <!-- SO FILES -->
+
+<div class="section">
+
+    <div class="table-header">
+
+        <div>
+            <h2>SO Files</h2>
+
+            <p class="subtitle">
+                Upload supporting Sales Order files
+            </p>
+        </div>
+
+        <label
+            for="soFileInput"
+            class="btn btn-primary upload-file-btn"
+        >
+            📎 + UPLOAD FILE
+        </label>
+
+        <input
+            type="file"
+            id="soFileInput"
+            accept=".pdf,application/pdf"
+            multiple
+            hidden
+        >
+
+    </div>
+
+
+    <div
+        id="soFileList"
+        class="so-file-list"
+    >
+
+        <div class="no-files">
+            No files selected.
+        </div>
+
+    </div>
+
+</div>
+            
             <button
                 class="btn btn-secondary"
                 onclick="closeCreateSO()"
