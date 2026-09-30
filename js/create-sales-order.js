@@ -1,204 +1,183 @@
-/* =====================================================
+/* =========================================================
    LOGIS-TECH SYSTEM
    CREATE SALES ORDER
-===================================================== */
+   GOOGLE APPS SCRIPT API
+========================================================= */
 
 
-/* =====================================================
-   CONSTANTS
-===================================================== */
+/* =========================================================
+   API CONFIG
+========================================================= */
+
+const CREATE_SO_API_URL =
+    "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
 
 const VAT_RATE = 0.12;
 
-const SO_FILE_DB_NAME = "LOGISTECH_SO_FILES_DB";
-const SO_FILE_STORE = "soFiles";
-const SO_FILE_DB_VERSION = 1;
-
-
-/* =====================================================
-   PAGE STATE
-===================================================== */
-
 let soItemCount = 0;
-
 let soCreateFiles = [];
 
 
-/* =====================================================
-   PAGE LOAD
-===================================================== */
+/* =========================================================
+   API REQUEST
+========================================================= */
 
-document.addEventListener("DOMContentLoaded", function () {
+async function createSOAPI(action, data = {}) {
 
-    console.log("LOGIS-TECH Create Sales Order Loaded");
+    try {
 
-    initializeCreateSO();
+        const response = await fetch(
+            CREATE_SO_API_URL,
+            {
+                method: "POST",
 
-    setupFileUpload();
+                headers: {
+                    "Content-Type":
+                        "text/plain;charset=utf-8"
+                },
 
-});
+                body: JSON.stringify({
+                    action: action,
+                    ...data
+                })
+            }
+        );
 
 
-/* =====================================================
+        if (!response.ok) {
+
+            throw new Error(
+                "API request failed: " +
+                response.status
+            );
+
+        }
+
+
+        const result =
+            await response.json();
+
+
+        return result;
+
+
+    } catch (error) {
+
+        console.error(
+            "Create SO API Error:",
+            error
+        );
+
+
+        alert(
+            "Hindi makakonekta sa LOGIS-TECH database.\n\n" +
+            "Check ang Google Apps Script Web App URL."
+        );
+
+
+        return {
+            success: false,
+            message: error.message
+        };
+
+    }
+
+}
+
+
+/* =========================================================
+   PAGE INITIALIZATION
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        console.log(
+            "LOGIS-TECH Create Sales Order loaded."
+        );
+
+
+        initializeCreateSO();
+
+    }
+);
+
+
+/* =========================================================
    INITIALIZE CREATE SO
-===================================================== */
+========================================================= */
 
 function initializeCreateSO() {
 
-    setDefaultDate();
+    setCreateSODate();
 
     generateSONumber();
+
+    setupCreateSOFileSection();
 
     calculateSOTotals();
 
 }
 
 
-/* =====================================================
-   DEFAULT DATE
-===================================================== */
+/* =========================================================
+   SET DATE
+========================================================= */
 
-function setDefaultDate() {
+function setCreateSODate() {
 
-    const dateInput =
-        document.getElementById("soDate");
-
-
-    if (!dateInput) {
-
-        return;
-
-    }
-
-
-    if (dateInput.value) {
-
-        return;
-
-    }
-
-
-    const today =
-        new Date();
-
-
-    const year =
-        today.getFullYear();
-
-
-    const month =
-        String(
-            today.getMonth() + 1
-        ).padStart(
-            2,
-            "0"
+    const input =
+        document.getElementById(
+            "soDate"
         );
 
 
-    const day =
-        String(
-            today.getDate()
-        ).padStart(
-            2,
-            "0"
-        );
+    if (!input) {
+        return;
+    }
 
 
-    dateInput.value =
-        `${year}-${month}-${day}`;
+    if (!input.value) {
+
+        const now =
+            new Date();
+
+
+        const year =
+            now.getFullYear();
+
+
+        const month =
+            String(
+                now.getMonth() + 1
+            ).padStart(2, "0");
+
+
+        const day =
+            String(
+                now.getDate()
+            ).padStart(2, "0");
+
+
+        input.value =
+            `${year}-${month}-${day}`;
+
+    }
 
 }
 
 
-/* =====================================================
+/* =========================================================
    GENERATE SO NUMBER
-===================================================== */
+========================================================= */
 
 function generateSONumber() {
-
-    const year =
-        new Date().getFullYear();
-
-
-    let salesOrders = [];
-
-
-    try {
-
-        salesOrders =
-            JSON.parse(
-                localStorage.getItem(
-                    "salesOrders"
-                )
-            ) || [];
-
-    } catch (error) {
-
-        console.error(
-            "Unable to read Sales Orders:",
-            error
-        );
-
-        salesOrders = [];
-
-    }
-
-
-    let highestNumber = 0;
-
-
-    salesOrders.forEach(function (so) {
-
-        const soNumber =
-            String(
-                so?.soNumber || ""
-            );
-
-
-        const pattern =
-            new RegExp(
-                "^SO-" +
-                year +
-                "-(\\d+)$"
-            );
-
-
-        const match =
-            soNumber.match(pattern);
-
-
-        if (!match) {
-
-            return;
-
-        }
-
-
-        const number =
-            Number(match[1]) || 0;
-
-
-        if (
-            number >
-            highestNumber
-        ) {
-
-            highestNumber =
-                number;
-
-        }
-
-    });
-
-
-    const nextNumber =
-        String(
-            highestNumber + 1
-        ).padStart(
-            5,
-            "0"
-        );
-
 
     const input =
         document.getElementById(
@@ -206,36 +185,193 @@ function generateSONumber() {
         );
 
 
-    if (input) {
-
-        input.value =
-            `SO-${year}-${nextNumber}`;
-
+    if (!input) {
+        return;
     }
+
+
+    /*
+     * Temporary automatic SO number.
+     *
+     * Example:
+     * SO-2026-0001
+     *
+     * We check existing Google Sheet data
+     * so the number will continue from the
+     * highest existing SO number.
+     */
+
+    generateNextSONumber();
 
 }
 
 
-/* =====================================================
-   ADD ITEM
-===================================================== */
+/* =========================================================
+   GENERATE NEXT SO NUMBER
+========================================================= */
+
+async function generateNextSONumber() {
+
+    const input =
+        document.getElementById(
+            "soNumber"
+        );
+
+
+    if (!input) {
+        return;
+    }
+
+
+    input.value =
+        "Generating...";
+
+
+    const result =
+        await createSOAPI(
+            "getSalesOrders"
+        );
+
+
+    if (
+        !result.success
+    ) {
+
+        /*
+         * Fallback if API is temporarily
+         * unavailable.
+         */
+
+        input.value =
+            generateFallbackSONumber();
+
+        return;
+
+    }
+
+
+    const orders =
+        Array.isArray(
+            result.salesOrders
+        )
+            ? result.salesOrders
+            : [];
+
+
+    const year =
+        new Date()
+            .getFullYear();
+
+
+    let highestNumber = 0;
+
+
+    orders.forEach(
+        function(so) {
+
+            const number =
+                String(
+                    so.soNumber || ""
+                );
+
+
+            const pattern =
+                new RegExp(
+                    "^SO-" +
+                    year +
+                    "-(\\d+)$"
+                );
+
+
+            const match =
+                number.match(
+                    pattern
+                );
+
+
+            if (match) {
+
+                const value =
+                    Number(
+                        match[1]
+                    );
+
+
+                if (
+                    value >
+                    highestNumber
+                ) {
+
+                    highestNumber =
+                        value;
+
+                }
+
+            }
+
+        }
+    );
+
+
+    const nextNumber =
+        highestNumber + 1;
+
+
+    input.value =
+        "SO-" +
+        year +
+        "-" +
+        String(
+            nextNumber
+        ).padStart(
+            4,
+            "0"
+        );
+
+}
+
+
+/* =========================================================
+   FALLBACK SO NUMBER
+========================================================= */
+
+function generateFallbackSONumber() {
+
+    const year =
+        new Date()
+            .getFullYear();
+
+
+    const timestamp =
+        Date.now()
+            .toString()
+            .slice(-4);
+
+
+    return (
+        "SO-" +
+        year +
+        "-" +
+        timestamp
+    );
+
+}
+
+
+/* =========================================================
+   ADD SO ITEM
+========================================================= */
 
 function addSOItem() {
 
-    const body =
+    const tbody =
         document.getElementById(
             "soItemsBody"
         );
 
 
-    if (!body) {
-
-        console.error(
-            "soItemsBody not found."
-        );
-
+    if (!tbody) {
         return;
-
     }
 
 
@@ -246,208 +382,144 @@ function addSOItem() {
         document.createElement("tr");
 
 
+    row.dataset.itemNumber =
+        soItemCount;
+
+
     row.innerHTML = `
 
         <td class="item-number">
             ${soItemCount}
         </td>
 
-
         <td>
-
             <input
                 type="text"
-                class="item-name"
+                class="so-item-name"
                 placeholder="Item name"
             >
-
         </td>
 
-
         <td>
-
             <input
                 type="text"
-                class="item-description"
+                class="so-item-description"
                 placeholder="Description"
             >
-
         </td>
 
-
         <td>
-
             <input
                 type="number"
-                class="item-qty"
-                min="0"
-                step="0.01"
+                class="so-item-qty"
                 value="1"
+                min="0"
+                step="1"
                 oninput="calculateSOItemTotal(this)"
             >
-
         </td>
 
-
         <td>
-
-            <select
-                class="item-unit"
-                onchange="handleUnitChange(this)"
-            >
-
-                <option value="pcs">
-                    pcs
-                </option>
-
-                <option value="assy">
-                    assy
-                </option>
-
-                <option value="set">
-                    set
-                </option>
-
-                <option value="length">
-                    length
-                </option>
-
-                <option value="meter">
-                    meter
-                </option>
-
-                <option value="lot">
-                    lot
-                </option>
-
-                <option value="box">
-                    box
-                </option>
-
-                <option value="roll">
-                    roll
-                </option>
-
-                <option value="amount">
-                    amount
-                </option>
-
-                <option value="custom">
-                    custom
-                </option>
-
-            </select>
-
-
             <input
                 type="text"
-                class="custom-unit-input"
-                placeholder="Custom unit"
-                style="display:none;"
+                class="so-item-unit"
+                placeholder="Unit"
             >
-
         </td>
 
-
         <td>
-
             <input
                 type="number"
-                class="item-amount"
+                class="so-item-amount"
+                value="0"
                 min="0"
                 step="0.01"
-                value="0"
                 oninput="calculateSOItemTotal(this)"
             >
-
         </td>
 
-
-        <td>
-
-            <input
-                type="text"
-                class="item-total"
-                value="₱0.00"
-                readonly
-            >
-
+        <td class="so-item-total">
+            0.00
         </td>
 
-
         <td>
-
             <button
                 type="button"
-                class="delete-item"
                 onclick="deleteSOItem(this)"
             >
                 DELETE
             </button>
-
         </td>
 
     `;
 
 
-    body.appendChild(row);
-
-
-    calculateSOItemTotal(
-        row.querySelector(
-            ".item-qty"
-        )
+    tbody.appendChild(
+        row
     );
+
+
+    calculateSOTotals();
 
 }
 
 
-/* =====================================================
+/* =========================================================
    CALCULATE ITEM TOTAL
-===================================================== */
+========================================================= */
 
 function calculateSOItemTotal(input) {
 
     const row =
-        input?.closest("tr");
+        input.closest("tr");
 
 
     if (!row) {
-
         return;
-
     }
+
+
+    const qtyInput =
+        row.querySelector(
+            ".so-item-qty"
+        );
+
+
+    const amountInput =
+        row.querySelector(
+            ".so-item-amount"
+        );
+
+
+    const totalCell =
+        row.querySelector(
+            ".so-item-total"
+        );
 
 
     const qty =
         Number(
-            row.querySelector(
-                ".item-qty"
-            )?.value
-        ) || 0;
+            qtyInput
+                ? qtyInput.value
+                : 0
+        );
 
 
     const amount =
         Number(
-            row.querySelector(
-                ".item-amount"
-            )?.value
-        ) || 0;
+            amountInput
+                ? amountInput.value
+                : 0
+        );
 
 
     const total =
         qty * amount;
 
 
-    const totalInput =
-        row.querySelector(
-            ".item-total"
-        );
+    if (totalCell) {
 
-
-    if (totalInput) {
-
-        totalInput.value =
+        totalCell.textContent =
             formatMoney(total);
 
     }
@@ -458,213 +530,32 @@ function calculateSOItemTotal(input) {
 }
 
 
-/* =====================================================
-   CALCULATE TOTALS
-===================================================== */
+/* =========================================================
+   HANDLE UNIT CHANGE
+========================================================= */
 
-function calculateSOTotals() {
+function handleUnitChange() {
 
-    const rows =
-        document.querySelectorAll(
-            "#soItemsBody tr"
-        );
-
-
-    let subtotal = 0;
-
-
-    rows.forEach(function (row) {
-
-        const qty =
-            Number(
-                row.querySelector(
-                    ".item-qty"
-                )?.value
-            ) || 0;
-
-
-        const amount =
-            Number(
-                row.querySelector(
-                    ".item-amount"
-                )?.value
-            ) || 0;
-
-
-        const total =
-            qty * amount;
-
-
-        subtotal += total;
-
-
-        const totalInput =
-            row.querySelector(
-                ".item-total"
-            );
-
-
-        if (totalInput) {
-
-            totalInput.value =
-                formatMoney(total);
-
-        }
-
-    });
-
-
-    const discount =
-        Math.max(
-            0,
-            Number(
-                document.getElementById(
-                    "soDiscount"
-                )?.value
-            ) || 0
-        );
-
-
-    const vatable =
-        Boolean(
-            document.getElementById(
-                "soVatable"
-            )?.checked
-        );
-
-
-    const taxableAmount =
-        Math.max(
-            0,
-            subtotal - discount
-        );
-
-
-    const vatAmount =
-        vatable
-            ? taxableAmount * VAT_RATE
-            : 0;
-
-
-    const grandTotal =
-        taxableAmount +
-        vatAmount;
-
-
-    setText(
-        "soSubtotal",
-        formatMoney(subtotal)
-    );
-
-
-    setText(
-        "soVAT",
-        formatMoney(vatAmount)
-    );
-
-
-    setText(
-        "soGrandTotal",
-        formatMoney(grandTotal)
-    );
-
-
-    return {
-
-        subtotal:
-            subtotal,
-
-        discount:
-            discount,
-
-        vatable:
-            vatable,
-
-        vatRate:
-            VAT_RATE,
-
-        vatAmount:
-            vatAmount,
-
-        grandTotal:
-            grandTotal
-
-    };
+    calculateSOTotals();
 
 }
 
 
-/* =====================================================
-   UNIT CHANGE
-===================================================== */
-
-function handleUnitChange(select) {
-
-    const row =
-        select?.closest("tr");
-
-
-    if (!row) {
-
-        return;
-
-    }
-
-
-    const customInput =
-        row.querySelector(
-            ".custom-unit-input"
-        );
-
-
-    if (!customInput) {
-
-        return;
-
-    }
-
-
-    if (
-        select.value ===
-        "custom"
-    ) {
-
-        customInput.style.display =
-            "block";
-
-        customInput.focus();
-
-    } else {
-
-        customInput.style.display =
-            "none";
-
-        customInput.value =
-            "";
-
-    }
-
-}
-
-
-/* =====================================================
-   DELETE ITEM
-===================================================== */
+/* =========================================================
+   DELETE SO ITEM
+========================================================= */
 
 function deleteSOItem(button) {
 
     const row =
-        button?.closest("tr");
+        button.closest("tr");
 
 
-    if (!row) {
+    if (row) {
 
-        return;
+        row.remove();
 
     }
-
-
-    row.remove();
 
 
     renumberSOItems();
@@ -674,24 +565,31 @@ function deleteSOItem(button) {
 }
 
 
-/* =====================================================
-   RENUMBER ITEMS
-===================================================== */
+/* =========================================================
+   RENUMBER SO ITEMS
+========================================================= */
 
 function renumberSOItems() {
 
-    const rows =
-        document.querySelectorAll(
-            "#soItemsBody tr"
+    const tbody =
+        document.getElementById(
+            "soItemsBody"
         );
 
 
-    soItemCount =
-        rows.length;
+    if (!tbody) {
+        return;
+    }
+
+
+    const rows =
+        tbody.querySelectorAll(
+            "tr"
+        );
 
 
     rows.forEach(
-        function (row, index) {
+        function(row, index) {
 
             const numberCell =
                 row.querySelector(
@@ -706,556 +604,243 @@ function renumberSOItems() {
 
             }
 
+
+            row.dataset.itemNumber =
+                index + 1;
+
         }
     );
+
+
+    soItemCount =
+        rows.length;
 
 }
 
 
-/* =====================================================
-   FILE UPLOAD SETUP
-===================================================== */
+/* =========================================================
+   CALCULATE SO TOTALS
+========================================================= */
 
-function setupFileUpload() {
+function calculateSOTotals() {
 
-    const input =
+    const tbody =
         document.getElementById(
-            "soFileInput"
+            "soItemsBody"
         );
 
 
-    if (!input) {
+    let subtotal = 0;
 
-        console.warn(
-            "SO File input not found."
-        );
 
-        return;
-
-    }
-
-
-    input.addEventListener(
-        "change",
-        function () {
-
-            handleSOFileSelect(
-                this.files
-            );
-
-
-            /*
-                Reset input so the same
-                PDF can be selected again
-                after removing it.
-            */
-
-            this.value = "";
-
-        }
-    );
-
-
-    renderSOFiles();
-
-}
-
-
-/* =====================================================
-   HANDLE FILE SELECTION
-===================================================== */
-
-function handleSOFileSelect(files) {
-
-    if (!files) {
-
-        return;
-
-    }
-
-
-    Array.from(files).forEach(
-        function (file) {
-
-            const isPDF =
-                file.type ===
-                    "application/pdf" ||
-                file.name
-                    .toLowerCase()
-                    .endsWith(".pdf");
-
-
-            if (!isPDF) {
-
-                alert(
-                    `"${file.name}" is not a PDF file.`
-                );
-
-                return;
-
-            }
-
-
-            const duplicate =
-                soCreateFiles.some(
-                    function (existingFile) {
-
-                        return (
-                            existingFile.name ===
-                            file.name &&
-
-                            existingFile.size ===
-                            file.size
-                        );
-
-                    }
-                );
-
-
-            if (duplicate) {
-
-                return;
-
-            }
-
-
-            soCreateFiles.push(file);
-
-        }
-    );
-
-
-    renderSOFiles();
-
-}
-
-
-/* =====================================================
-   RENDER SELECTED FILES
-===================================================== */
-
-function renderSOFiles() {
-
-    const list =
-        document.getElementById(
-            "soFileList"
-        );
-
-
-    if (!list) {
-
-        return;
-
-    }
-
-
-    list.innerHTML = "";
-
-
-    if (
-        soCreateFiles.length ===
-        0
-    ) {
-
-        list.innerHTML = `
-
-            <div class="no-files">
-                No files selected.
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    soCreateFiles.forEach(
-        function (file, index) {
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-            row.className =
-                "so-file-row";
-
-
-            row.innerHTML = `
-
-                <div>
-
-                    <div class="so-file-name">
-                        📄 ${escapeHTML(
-                            file.name
-                        )}
-                    </div>
-
-                    <div class="so-file-size">
-                        ${formatFileSize(
-                            file.size
-                        )}
-                    </div>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    class="remove-file-btn"
-                    onclick="removeSOFile(${index})"
-                >
-                    REMOVE
-                </button>
-
-            `;
-
-
-            list.appendChild(row);
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   REMOVE SELECTED FILE
-===================================================== */
-
-function removeSOFile(index) {
-
-    if (
-        index < 0 ||
-        index >= soCreateFiles.length
-    ) {
-
-        return;
-
-    }
-
-
-    soCreateFiles.splice(
-        index,
-        1
-    );
-
-
-    renderSOFiles();
-
-}
-
-
-/* =====================================================
-   SAVE SALES ORDER
-===================================================== */
-
-async function saveSO() {
-
-    const saveButton =
-        document.querySelector(
-            '.action-bar .btn-primary'
-        );
-
-
-    /*
-        Prevent accidental double-click
-        while saving.
-    */
-
-    if (saveButton) {
-
-        saveButton.disabled = true;
-
-    }
-
-
-    try {
-
-        const soNumber =
-            getValue("soNumber");
-
-
-        const dateCreation =
-            getValue("soDate");
-
-
-        const clientName =
-            getValue("clientName");
-
-
-        const attention =
-            getValue("attention");
-
-
-        const billingAddress =
-            getValue("billingAddress");
-
-
-        const deliveryAddress =
-            getValue("deliveryAddress");
-
-
-        const project =
-            getValue("project");
-
-
-        const tin =
-            getValue("tinNumber");
-
-
-        const poNumber =
-            getValue("poNumber");
-
-
-        const terms =
-            getValue("terms");
-
-
-        const se =
-            getValue("soSE");
-
-
-        const jobOrder =
-            getValue("jobOrder");
-
-
-        const discount =
-            Math.max(
-                0,
-                Number(
-                    document.getElementById(
-                        "soDiscount"
-                    )?.value
-                ) || 0
-            );
-
-
-        const vatable =
-            Boolean(
-                document.getElementById(
-                    "soVatable"
-                )?.checked
-            );
-
-
-        /* =================================================
-           VALIDATION
-        ================================================= */
-
-
-        if (!soNumber) {
-
-            alert(
-                "SO Number is required."
-            );
-
-            return;
-
-        }
-
-
-        if (!dateCreation) {
-
-            alert(
-                "Date Creation is required."
-            );
-
-            return;
-
-        }
-
-
-        if (!clientName) {
-
-            alert(
-                "Client Name is required."
-            );
-
-            document
-                .getElementById(
-                    "clientName"
-                )
-                ?.focus();
-
-            return;
-
-        }
-
-
-        if (!se) {
-
-            alert(
-                "Please select SE."
-            );
-
-            document
-                .getElementById(
-                    "soSE"
-                )
-                ?.focus();
-
-            return;
-
-        }
-
+    if (tbody) {
 
         const rows =
-            document.querySelectorAll(
-                "#soItemsBody tr"
+            tbody.querySelectorAll(
+                "tr"
             );
 
 
-        if (!rows.length) {
+        rows.forEach(
+            function(row) {
 
-            alert(
-                "Please add at least one item."
-            );
-
-            return;
-
-        }
+                const qtyInput =
+                    row.querySelector(
+                        ".so-item-qty"
+                    );
 
 
-        /* =================================================
-           COLLECT ITEMS
-        ================================================= */
+                const amountInput =
+                    row.querySelector(
+                        ".so-item-amount"
+                    );
 
 
-        const items = [];
+                if (
+                    !qtyInput ||
+                    !amountInput
+                ) {
+
+                    return;
+
+                }
 
 
-        for (
-            let index = 0;
-            index < rows.length;
-            index++
-        ) {
-
-            const row =
-                rows[index];
+                const qty =
+                    Number(
+                        qtyInput.value || 0
+                    );
 
 
-            const name =
+                const amount =
+                    Number(
+                        amountInput.value || 0
+                    );
+
+
+                subtotal +=
+                    qty * amount;
+
+            }
+        );
+
+    }
+
+
+    const discountInput =
+        document.getElementById(
+            "soDiscount"
+        );
+
+
+    const discount =
+        Number(
+            discountInput
+                ? discountInput.value
+                : 0
+        );
+
+
+    const vatable =
+        subtotal - discount;
+
+
+    const vatAmount =
+        vatable * VAT_RATE;
+
+
+    const grandTotal =
+        vatable + vatAmount;
+
+
+    setText(
+        "soSubtotal",
+        formatMoney(subtotal)
+    );
+
+
+    setText(
+        "soDiscount",
+        formatMoney(discount)
+    );
+
+
+    setText(
+        "soVatable",
+        formatMoney(vatable)
+    );
+
+
+    setText(
+        "soVAT",
+        formatMoney(vatAmount)
+    );
+
+
+    setText(
+        "soGrandTotal",
+        formatMoney(grandTotal)
+    );
+
+}
+
+
+/* =========================================================
+   COLLECT ITEMS
+========================================================= */
+
+function collectSOItems() {
+
+    const tbody =
+        document.getElementById(
+            "soItemsBody"
+        );
+
+
+    if (!tbody) {
+        return [];
+    }
+
+
+    const rows =
+        tbody.querySelectorAll(
+            "tr"
+        );
+
+
+    const items =
+        [];
+
+
+    rows.forEach(
+        function(row, index) {
+
+            const itemNameInput =
                 row.querySelector(
-                    ".item-name"
-                )?.value.trim() || "";
+                    ".so-item-name"
+                );
+
+
+            const descriptionInput =
+                row.querySelector(
+                    ".so-item-description"
+                );
+
+
+            const qtyInput =
+                row.querySelector(
+                    ".so-item-qty"
+                );
+
+
+            const unitInput =
+                row.querySelector(
+                    ".so-item-unit"
+                );
+
+
+            const amountInput =
+                row.querySelector(
+                    ".so-item-amount"
+                );
+
+
+            const itemName =
+                itemNameInput
+                    ? itemNameInput.value.trim()
+                    : "";
 
 
             const description =
-                row.querySelector(
-                    ".item-description"
-                )?.value.trim() || "";
+                descriptionInput
+                    ? descriptionInput.value.trim()
+                    : "";
 
 
             const qty =
                 Number(
-                    row.querySelector(
-                        ".item-qty"
-                    )?.value
-                ) || 0;
+                    qtyInput
+                        ? qtyInput.value
+                        : 0
+                );
+
+
+            const unit =
+                unitInput
+                    ? unitInput.value.trim()
+                    : "";
 
 
             const amount =
                 Number(
-                    row.querySelector(
-                        ".item-amount"
-                    )?.value
-                ) || 0;
-
-
-            const unitSelect =
-                row.querySelector(
-                    ".item-unit"
+                    amountInput
+                        ? amountInput.value
+                        : 0
                 );
 
 
-            const customUnit =
-                row.querySelector(
-                    ".custom-unit-input"
-                );
-
-
-            let unit =
-                unitSelect?.value || "";
-
-
-            if (
-                unit === "custom"
-            ) {
-
-                unit =
-                    customUnit
-                        ?.value
-                        .trim() || "";
-
-            }
-
-
-            /* ITEM VALIDATION */
-
-
-            if (!name) {
-
-                alert(
-                    `Please enter Item Name for item #${index + 1}.`
-                );
-
-                row.querySelector(
-                    ".item-name"
-                )?.focus();
-
-                return;
-
-            }
-
-
-            if (
-                !unit
-            ) {
-
-                alert(
-                    `Please enter/select Unit for item #${index + 1}.`
-                );
-
-                return;
-
-            }
-
-
-            if (
-                qty <= 0
-            ) {
-
-                alert(
-                    `Quantity must be greater than 0 for item #${index + 1}.`
-                );
-
-                row.querySelector(
-                    ".item-qty"
-                )?.focus();
-
-                return;
-
-            }
-
-
-            if (
-                amount < 0
-            ) {
-
-                alert(
-                    `Amount cannot be negative for item #${index + 1}.`
-                );
-
-                row.querySelector(
-                    ".item-amount"
-                )?.focus();
-
-                return;
-
-            }
+            const total =
+                qty * amount;
 
 
             items.push({
@@ -1263,8 +848,8 @@ async function saveSO() {
                 itemNumber:
                     index + 1,
 
-                name:
-                    name,
+                itemName:
+                    itemName,
 
                 description:
                     description,
@@ -1279,334 +864,38 @@ async function saveSO() {
                     amount,
 
                 total:
-                    qty * amount
+                    total
 
             });
 
         }
+    );
 
 
-        /* =================================================
-           CALCULATE FINAL TOTALS
-        ================================================= */
-
-
-        const subtotal =
-            items.reduce(
-                function (sum, item) {
-
-                    return (
-                        sum +
-                        item.total
-                    );
-
-                },
-                0
-            );
-
-
-        const taxableAmount =
-            Math.max(
-                0,
-                subtotal - discount
-            );
-
-
-        const vatAmount =
-            vatable
-                ? taxableAmount * VAT_RATE
-                : 0;
-
-
-        const grandTotal =
-            taxableAmount +
-            vatAmount;
-
-
-        /* =================================================
-           GET EXISTING SALES ORDERS
-        ================================================= */
-
-
-        let salesOrders = [];
-
-
-        try {
-
-            salesOrders =
-                JSON.parse(
-                    localStorage.getItem(
-                        "salesOrders"
-                    )
-                ) || [];
-
-
-            if (
-                !Array.isArray(
-                    salesOrders
-                )
-            ) {
-
-                salesOrders = [];
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Unable to read Sales Orders:",
-                error
-            );
-
-            salesOrders = [];
-
-        }
-
-
-        /* =================================================
-           DUPLICATE SO CHECK
-        ================================================= */
-
-
-        const duplicate =
-            salesOrders.some(
-                function (so) {
-
-                    return (
-                        String(
-                            so?.soNumber || ""
-                        ) ===
-                        soNumber
-                    );
-
-                }
-            );
-
-
-        if (duplicate) {
-
-            alert(
-                "Sales Order Number already exists."
-            );
-
-            generateSONumber();
-
-            return;
-
-        }
-
-
-        /* =================================================
-           CREATE SALES ORDER OBJECT
-        ================================================= */
-
-
-        const newSO = {
-
-            soNumber:
-                soNumber,
-
-            dateCreation:
-                dateCreation,
-
-            clientName:
-                clientName,
-
-            attention:
-                attention,
-
-            billingAddress:
-                billingAddress,
-
-            deliveryAddress:
-                deliveryAddress,
-
-            project:
-                project,
-
-            tin:
-                tin,
-
-            poNumber:
-                poNumber,
-
-            terms:
-                terms,
-
-            se:
-                se,
-
-            jobOrder:
-                jobOrder,
-
-            status:
-                "ACTIVE",
-
-            items:
-                items,
-
-            subtotal:
-                subtotal,
-
-            discount:
-                discount,
-
-            vatable:
-                vatable,
-
-            vatRate:
-                VAT_RATE,
-
-            vatAmount:
-                vatAmount,
-
-            grandTotal:
-                grandTotal,
-
-            createdAt:
-                new Date().toISOString()
-
-        };
-
-
-        /* =================================================
-           SAVE SO TO LOCAL STORAGE
-        ================================================= */
-
-
-        salesOrders.push(
-            newSO
-        );
-
-
-        localStorage.setItem(
-            "salesOrders",
-            JSON.stringify(
-                salesOrders
-            )
-        );
-
-
-        /* =================================================
-           SAVE PDF FILES TO INDEXED DB
-        ================================================= */
-
-
-        let fileSaveError =
-            false;
-
-
-        for (
-            const file of soCreateFiles
-        ) {
-
-            try {
-
-                await saveSOFileToDB(
-                    soNumber,
-                    file
-                );
-
-            } catch (error) {
-
-                fileSaveError =
-                    true;
-
-                console.error(
-                    "SO file save error:",
-                    error
-                );
-
-            }
-
-        }
-
-
-        /* =================================================
-           SUCCESS MESSAGE
-        ================================================= */
-
-
-        let message =
-            "Sales Order saved successfully!\n\n" +
-            "SO: " +
-            soNumber +
-            "\n" +
-            "Grand Total: " +
-            formatMoney(
-                grandTotal
-            );
-
-
-        if (
-            soCreateFiles.length > 0
-        ) {
-
-            if (fileSaveError) {
-
-                message +=
-                    "\n\nSome PDF files could not be saved.";
-
-            } else {
-
-                message +=
-                    "\n" +
-                    "PDF Files: " +
-                    soCreateFiles.length;
-
-            }
-
-        }
-
-
-        alert(message);
-
-
-        /* =================================================
-           RETURN TO MAIN SYSTEM
-        ================================================= */
-
-
-        window.location.href =
-            "../index.html";
-
-
-    } catch (error) {
-
-        console.error(
-            "Save Sales Order Error:",
-            error
-        );
-
-
-        alert(
-            "An error occurred while saving the Sales Order.\n\n" +
-            "Please check the browser console."
-        );
-
-    } finally {
-
-        if (saveButton) {
-
-            saveButton.disabled =
-                false;
-
-        }
-
-    }
+    return items;
 
 }
 
 
-/* =====================================================
-   CANCEL / BACK
-===================================================== */
+/* =========================================================
+   SAVE SALES ORDER
+========================================================= */
 
-function closeCreateSO() {
+async function saveSO() {
 
-    const rows =
-        document.querySelectorAll(
-            "#soItemsBody tr"
+    /* ==========================================
+       GET FORM VALUES
+    ========================================== */
+
+    const soNumber =
+        getValue(
+            "soNumber"
+        );
+
+
+    const dateCreation =
+        getValue(
+            "soDate"
         );
 
 
@@ -1640,9 +929,27 @@ function closeCreateSO() {
         );
 
 
+    const tin =
+        getValue(
+            "tinNumber"
+        );
+
+
     const poNumber =
         getValue(
             "poNumber"
+        );
+
+
+    const terms =
+        getValue(
+            "terms"
+        );
+
+
+    const se =
+        getValue(
+            "soSE"
         );
 
 
@@ -1652,34 +959,440 @@ function closeCreateSO() {
         );
 
 
-    const hasData =
-        Boolean(
-            clientName ||
-            attention ||
-            billingAddress ||
-            deliveryAddress ||
-            project ||
-            poNumber ||
-            jobOrder ||
-            rows.length > 0 ||
-            soCreateFiles.length > 0
+    /* ==========================================
+       VALIDATION
+    ========================================== */
+
+    if (
+        !soNumber ||
+        soNumber === "Generating..."
+    ) {
+
+        alert(
+            "Hindi pa ready ang SO Number."
         );
 
+        return;
 
-    if (hasData) {
+    }
 
-        const confirmClose =
-            confirm(
-                "Discard unsaved Sales Order data?"
+
+    if (!clientName) {
+
+        alert(
+            "Please enter Client Name."
+        );
+
+        focusElement(
+            "clientName"
+        );
+
+        return;
+
+    }
+
+
+    /* ==========================================
+       ITEMS
+    ========================================== */
+
+    const items =
+        collectSOItems();
+
+
+    if (items.length === 0) {
+
+        alert(
+            "Please add at least one item."
+        );
+
+        return;
+
+    }
+
+
+    for (
+        let i = 0;
+        i < items.length;
+        i++
+    ) {
+
+        if (!items[i].itemName) {
+
+            alert(
+                "Please enter Item Name on item #" +
+                (i + 1)
             );
-
-
-        if (!confirmClose) {
 
             return;
 
         }
 
+
+        if (
+            Number(
+                items[i].qty
+            ) <= 0
+        ) {
+
+            alert(
+                "Quantity must be greater than 0 on item #" +
+                (i + 1)
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    /* ==========================================
+       TOTALS
+    ========================================== */
+
+    let subtotal = 0;
+
+
+    items.forEach(
+        function(item) {
+
+            subtotal +=
+                Number(
+                    item.total || 0
+                );
+
+        }
+    );
+
+
+    const discount =
+        Number(
+            getInputValue(
+                "soDiscount"
+            )
+        );
+
+
+    if (discount > subtotal) {
+
+        alert(
+            "Discount cannot be greater than subtotal."
+        );
+
+        return;
+
+    }
+
+
+    const vatable =
+        subtotal - discount;
+
+
+    const vatAmount =
+        vatable * VAT_RATE;
+
+
+    const grandTotal =
+        vatable + vatAmount;
+
+
+    /* ==========================================
+       BUTTON STATE
+    ========================================== */
+
+    const saveButton =
+        document.querySelector(
+            '[onclick="saveSO()"]'
+        );
+
+
+    if (saveButton) {
+
+        saveButton.disabled =
+            true;
+
+        saveButton.textContent =
+            "SAVING...";
+
+    }
+
+
+    /* ==========================================
+       API DATA
+    ========================================== */
+
+    const data = {
+
+        soNumber:
+            soNumber,
+
+        dateCreation:
+            dateCreation,
+
+        clientName:
+            clientName,
+
+        billingAddress:
+            billingAddress,
+
+        attention:
+            attention,
+
+        deliveryAddress:
+            deliveryAddress,
+
+        project:
+            project,
+
+        tin:
+            tin,
+
+        poNumber:
+            poNumber,
+
+        terms:
+            terms,
+
+        jobOrder:
+            jobOrder,
+
+        se:
+            se,
+
+        subtotal:
+            subtotal,
+
+        discount:
+            discount,
+
+        vatable:
+            vatable,
+
+        vatRate:
+            VAT_RATE,
+
+        vatAmount:
+            vatAmount,
+
+        grandTotal:
+            grandTotal,
+
+        createdBy:
+            getCurrentUser(),
+
+        items:
+            items
+
+    };
+
+
+    /* ==========================================
+       SAVE TO GOOGLE SHEETS
+    ========================================== */
+
+    const result =
+        await createSOAPI(
+            "createSalesOrder",
+            data
+        );
+
+
+    /* ==========================================
+       RESTORE BUTTON
+    ========================================== */
+
+    if (saveButton) {
+
+        saveButton.disabled =
+            false;
+
+        saveButton.textContent =
+            "SAVE";
+
+    }
+
+
+    /* ==========================================
+       API ERROR
+    ========================================== */
+
+    if (!result.success) {
+
+        alert(
+            result.message ||
+            "Failed to save Sales Order."
+        );
+
+        return;
+
+    }
+
+
+    /* ==========================================
+       SUCCESS
+    ========================================== */
+
+    alert(
+        "Sales Order " +
+        soNumber +
+        " saved successfully."
+    );
+
+
+    /*
+     * Clear local create form.
+     */
+
+    clearCreateSOForm();
+
+
+    /*
+     * Go back to Sales Order page.
+     */
+
+    window.location.href =
+        "../index.html";
+
+}
+
+
+/* =========================================================
+   GET CURRENT USER
+========================================================= */
+
+function getCurrentUser() {
+
+    /*
+     * Supports several possible login
+     * localStorage keys.
+     */
+
+    const possibleKeys = [
+
+        "currentUser",
+        "loggedInUser",
+        "userAccount",
+        "account",
+        "LOGISTECH_USER"
+
+    ];
+
+
+    for (
+        let i = 0;
+        i < possibleKeys.length;
+        i++
+    ) {
+
+        const key =
+            possibleKeys[i];
+
+
+        const value =
+            localStorage.getItem(
+                key
+            );
+
+
+        if (!value) {
+            continue;
+        }
+
+
+        try {
+
+            const parsed =
+                JSON.parse(value);
+
+
+            if (
+                typeof parsed ===
+                "object"
+            ) {
+
+                return (
+                    parsed.username ||
+                    parsed.fullName ||
+                    parsed.name ||
+                    ""
+                );
+
+            }
+
+        } catch (error) {
+
+            return value;
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   CLEAR CREATE SO FORM
+========================================================= */
+
+function clearCreateSOForm() {
+
+    const form =
+        document.querySelector(
+            "form"
+        );
+
+
+    if (form) {
+
+        form.reset();
+
+    }
+
+
+    const tbody =
+        document.getElementById(
+            "soItemsBody"
+        );
+
+
+    if (tbody) {
+
+        tbody.innerHTML = "";
+
+    }
+
+
+    soItemCount =
+        0;
+
+
+    soCreateFiles =
+        [];
+
+
+    calculateSOTotals();
+
+}
+
+
+/* =========================================================
+   CLOSE CREATE SO
+========================================================= */
+
+function closeCreateSO() {
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to leave? Unsaved changes will be lost."
+        );
+
+
+    if (!confirmed) {
+        return;
     }
 
 
@@ -1689,79 +1402,190 @@ function closeCreateSO() {
 }
 
 
-/* =====================================================
-   INDEXED DB
-   ===================================================== */
+/* =========================================================
+   FILE SECTION
+========================================================= */
 
-function openSOFileDB() {
+function setupCreateSOFileSection() {
 
-    return new Promise(
-        function (resolve, reject) {
+    const input =
+        document.getElementById(
+            "soFileInput"
+        );
 
-            const request =
-                indexedDB.open(
-                    SO_FILE_DB_NAME,
-                    SO_FILE_DB_VERSION
+
+    if (!input) {
+        return;
+    }
+
+
+    input.addEventListener(
+        "change",
+        function(event) {
+
+            handleCreateSOFiles(
+                event.target.files
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SELECT CREATE SO FILES
+========================================================= */
+
+function selectCreateSOFiles() {
+
+    const input =
+        document.getElementById(
+            "soFileInput"
+        );
+
+
+    if (input) {
+
+        input.click();
+
+    }
+
+}
+
+
+/* =========================================================
+   HANDLE CREATE SO FILES
+========================================================= */
+
+function handleCreateSOFiles(
+    files
+) {
+
+    if (!files) {
+        return;
+    }
+
+
+    Array.from(files)
+        .forEach(
+            function(file) {
+
+                if (
+                    file.type !==
+                    "application/pdf"
+                ) {
+
+                    alert(
+                        file.name +
+                        " is not a PDF file."
+                    );
+
+                    return;
+
+                }
+
+
+                const exists =
+                    soCreateFiles.some(
+                        function(existing) {
+
+                            return (
+                                existing.name ===
+                                file.name &&
+                                existing.size ===
+                                file.size
+                            );
+
+                        }
+                    );
+
+
+                if (!exists) {
+
+                    soCreateFiles.push(
+                        file
+                    );
+
+                }
+
+            }
+        );
+
+
+    renderCreateSOFiles();
+
+}
+
+
+/* =========================================================
+   RENDER CREATE SO FILES
+========================================================= */
+
+function renderCreateSOFiles() {
+
+    const container =
+        document.getElementById(
+            "soFileList"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    if (
+        soCreateFiles.length === 0
+    ) {
+
+        container.innerHTML =
+            `
+            <div class="no-files">
+                No files selected.
+            </div>
+            `;
+
+        return;
+
+    }
+
+
+    soCreateFiles.forEach(
+        function(file, index) {
+
+            const row =
+                document.createElement(
+                    "div"
                 );
 
 
-            request.onupgradeneeded =
-                function (event) {
-
-                    const db =
-                        event.target.result;
+            row.className =
+                "so-file-row";
 
 
-                    if (
-                        !db.objectStoreNames.contains(
-                            SO_FILE_STORE
-                        )
-                    ) {
+            row.innerHTML = `
 
-                        const store =
-                            db.createObjectStore(
-                                SO_FILE_STORE,
-                                {
-                                    keyPath:
-                                        "id",
-                                    autoIncrement:
-                                        true
-                                }
-                            );
+                <span>
+                    ${escapeHTML(file.name)}
+                </span>
+
+                <button
+                    type="button"
+                    onclick="removeCreateSOFile(${index})"
+                >
+                    REMOVE
+                </button>
+
+            `;
 
 
-                        store.createIndex(
-                            "soNumber",
-                            "soNumber",
-                            {
-                                unique:
-                                    false
-                            }
-                        );
-
-                    }
-
-                };
-
-
-            request.onsuccess =
-                function () {
-
-                    resolve(
-                        request.result
-                    );
-
-                };
-
-
-            request.onerror =
-                function () {
-
-                    reject(
-                        request.error
-                    );
-
-                };
+            container.appendChild(
+                row
+            );
 
         }
     );
@@ -1769,111 +1593,59 @@ function openSOFileDB() {
 }
 
 
-/* =====================================================
-   SAVE PDF TO INDEXED DB
-===================================================== */
+/* =========================================================
+   REMOVE CREATE SO FILE
+========================================================= */
 
-function saveSOFileToDB(
-    soNumber,
-    file
-) {
+function removeCreateSOFile(index) {
 
-    return new Promise(
-        async function (resolve, reject) {
+    if (
+        index < 0 ||
+        index >= soCreateFiles.length
+    ) {
 
-            try {
+        return;
 
-                const db =
-                    await openSOFileDB();
+    }
 
 
-                const transaction =
-                    db.transaction(
-                        SO_FILE_STORE,
-                        "readwrite"
-                    );
-
-
-                const store =
-                    transaction.objectStore(
-                        SO_FILE_STORE
-                    );
-
-
-                const fileRecord = {
-
-                    soNumber:
-                        soNumber,
-
-                    fileName:
-                        file.name,
-
-                    fileType:
-                        file.type ||
-                        "application/pdf",
-
-                    fileSize:
-                        file.size,
-
-                    file:
-                        file,
-
-                    uploadedAt:
-                        new Date().toISOString()
-
-                };
-
-
-                const request =
-                    store.add(
-                        fileRecord
-                    );
-
-
-                request.onsuccess =
-                    function () {
-
-                        resolve(
-                            request.result
-                        );
-
-                    };
-
-
-                request.onerror =
-                    function () {
-
-                        reject(
-                            request.error
-                        );
-
-                    };
-
-
-                transaction.onerror =
-                    function () {
-
-                        reject(
-                            transaction.error
-                        );
-
-                    };
-
-            } catch (error) {
-
-                reject(error);
-
-            }
-
-        }
+    soCreateFiles.splice(
+        index,
+        1
     );
+
+
+    renderCreateSOFiles();
 
 }
 
 
-/* =====================================================
-   UTILITY - GET VALUE
-===================================================== */
+/* =========================================================
+   SET TEXT
+========================================================= */
+
+function setText(id, value) {
+
+    const element =
+        document.getElementById(id);
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        value == null
+            ? ""
+            : value;
+
+}
+
+
+/* =========================================================
+   GET VALUE
+========================================================= */
 
 function getValue(id) {
 
@@ -1882,9 +1654,7 @@ function getValue(id) {
 
 
     if (!element) {
-
         return "";
-
     }
 
 
@@ -1895,14 +1665,33 @@ function getValue(id) {
 }
 
 
-/* =====================================================
-   UTILITY - SET TEXT
-===================================================== */
+/* =========================================================
+   GET INPUT VALUE
+========================================================= */
 
-function setText(
-    id,
-    value
-) {
+function getInputValue(id) {
+
+    const element =
+        document.getElementById(id);
+
+
+    if (!element) {
+        return 0;
+    }
+
+
+    return Number(
+        element.value || 0
+    );
+
+}
+
+
+/* =========================================================
+   FOCUS ELEMENT
+========================================================= */
+
+function focusElement(id) {
 
     const element =
         document.getElementById(id);
@@ -1910,125 +1699,64 @@ function setText(
 
     if (element) {
 
-        element.textContent =
-            value;
+        element.focus();
 
     }
 
 }
 
 
-/* =====================================================
-   UTILITY - FORMAT MONEY
-===================================================== */
+/* =========================================================
+   MONEY FORMAT
+========================================================= */
 
 function formatMoney(value) {
 
     const number =
-        Number(value) || 0;
+        Number(value || 0);
 
 
-    return (
-        "₱" +
-        number.toLocaleString(
-            "en-PH",
-            {
-                minimumFractionDigits:
-                    2,
-
-                maximumFractionDigits:
-                    2
-            }
-        )
+    return number.toLocaleString(
+        "en-PH",
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
     );
 
 }
 
 
-/* =====================================================
-   UTILITY - FORMAT FILE SIZE
-===================================================== */
-
-function formatFileSize(bytes) {
-
-    if (
-        !bytes ||
-        bytes <= 0
-    ) {
-
-        return "0 Bytes";
-
-    }
-
-
-    const units = [
-
-        "Bytes",
-        "KB",
-        "MB",
-        "GB"
-
-    ];
-
-
-    const index =
-        Math.min(
-            Math.floor(
-                Math.log(bytes) /
-                Math.log(1024)
-            ),
-            units.length - 1
-        );
-
-
-    return (
-        (
-            bytes /
-            Math.pow(
-                1024,
-                index
-            )
-        ).toFixed(2) +
-        " " +
-        units[index]
-    );
-
-}
-
-
-/* =====================================================
-   UTILITY - ESCAPE HTML
-===================================================== */
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
 
 function escapeHTML(value) {
 
     return String(
-        value ?? ""
+        value == null
+            ? ""
+            : value
     )
-
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-
-        .replace(
-            /</g,
-            "&lt;"
-        )
-
-        .replace(
-            />/g,
-            "&gt;"
-        )
-
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
 
 }
