@@ -1,4 +1,4 @@
-```css
+
 /* =====================================================
    LOGI-TECH DASHBOARD
    PREMIUM COMPACT DESIGN
@@ -90,7 +90,8 @@ body {
 
     padding: 4px;
 
-    margin-right: 10px;
+    margin-left: 0;
+    margin-right: auto;
 
     border: 1px solid #e5e0e8;
     border-radius: 10px;
@@ -100,6 +101,7 @@ body {
 
     flex-shrink: 0;
 }
+
 
 /* =====================================================
    TAB BUTTON
@@ -203,10 +205,10 @@ body {
     letter-spacing: 0.1px;
 }
 
-```css
 /* =====================================================
    PERIOD FILTER - PREMIUM STYLE
 ===================================================== */
+
 
 .period-control {
     display: flex;
@@ -217,6 +219,9 @@ body {
 
     padding: 6px 7px 6px 12px;
 
+    margin-left: 15px;
+    margin-right: 0;
+
     border: 1px solid #ddd7e2;
     border-radius: 10px;
 
@@ -224,7 +229,6 @@ body {
 
     flex-shrink: 0;
 }
-
 /* =====================================================
    PERIOD LABEL
 ===================================================== */
@@ -739,4 +743,4 @@ body {
     }
 
 }
-```
+
