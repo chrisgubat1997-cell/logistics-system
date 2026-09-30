@@ -3,6 +3,8 @@
 
 <head>
 
+    <link rel="stylesheet" href="css/sales-order.css">
+    
 <meta charset="UTF-8">
 
 <meta name="viewport"
@@ -657,1011 +659,10 @@ td {
     ></iframe>
 </div>
 
-        <!-- SALES ORDER -->
+        !-- SALES ORDER MODULE -->
+<div id="salesModule"></div>
 
-        <div id="sales" class="page">
-
-            <div class="page-header">
-
-                <div>
-
-                    <h1>Sales Order</h1>
-
-                    <p class="subtitle">
-                        Manage Sales Orders
-                    </p>
-
-                </div>
-
-                <button
-                    class="btn btn-primary"
-                    onclick="openCreateSO()">
-
-                    + CREATE SO
-
-                </button>
-
-            </div>
-
-
-            <div class="action-bar">
-
-                <button
-                    id="updateSOButton"
-                    class="btn btn-secondary"
-                    onclick="updateSelectedSO()"
-                    disabled>
-
-                    UPDATE
-
-                </button>
-
-                <button
-                    id="cancelSOButton"
-                    class="btn btn-danger"
-                    onclick="cancelSelectedSO()"
-                    disabled>
-
-                    CANCEL
-
-                </button>
-
-            </div>
-
-
-            <div class="section">
-
-                <div class="table-header">
-
-                    <h2>
-                        Sales Order List
-                    </h2>
-
-                    <input
-                        type="text"
-                        id="soSearch"
-                        placeholder="Search SO Number..."
-                        onkeyup="searchSO()">
-
-                </div>
-
-                <div class="table-container">
-
-                    <table id="soTable">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>SO Number</th>
-                                <th>Date Creation</th>
-                                <th>Client Name</th>
-                                <th>SE</th>
-                                <th>Project</th>
-                                <th>PO Number</th>
-                                <th>Terms</th>
-                                <th>Grand Total</th>
-                                <th>Status</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="soTableBody">
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-
-            <div
-                id="selectedSOInfo"
-                class="selected-so">
-
-                No Sales Order selected.
-
-            </div>
-
-        </div>
-
-
-        <!-- CREATE SO -->
-
-        <div
-        id="createSO"
-        class="page">
-
-            <div class="page-header">
-
-                <div>
-
-                    <h1>
-                        Create Sales Order
-                    </h1>
-
-                    <p class="subtitle">
-                        Create a new Sales Order
-                    </p>
-
-                </div>
-
-                <button
-                    class="btn btn-secondary"
-                    onclick="closeCreateSO()">
-
-                    BACK
-
-                </button>
-
-            </div>
-
-
-            <div class="section">
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label>
-                            Date Creation
-                        </label>
-
-                        <input
-                            type="date"
-                            id="soDate">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Sales Order Number
-                        </label>
-
-                        <input
-                            type="text"
-                            id="soNumber"
-                            readonly>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Client Name
-                        </label>
-
-                        <input
-                            type="text"
-                            id="clientName"
-                            placeholder="Enter client name">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Attention
-                        </label>
-
-                        <input
-                            type="text"
-                            id="attention"
-                            placeholder="Enter contact person">
-
-                    </div>
-
-
-                    <div class="form-group full">
-
-                        <label>
-                            Billing Address
-                        </label>
-
-                        <input
-                            type="text"
-                            id="billingAddress"
-                            placeholder="Enter billing address">
-
-                    </div>
-
-
-                    <div class="form-group full">
-
-                        <label>
-                            Delivery Address
-                        </label>
-
-                        <input
-                            type="text"
-                            id="deliveryAddress"
-                            placeholder="Enter delivery address">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Project
-                        </label>
-
-                        <input
-                            type="text"
-                            id="project"
-                            placeholder="Enter project">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            TIN Number
-                        </label>
-
-                        <input
-                            type="text"
-                            id="tinNumber"
-                            placeholder="Enter TIN number">
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            PO Number
-                        </label>
-
-                        <input
-                            type="text"
-                            id="poNumber"
-                            placeholder="Enter PO number">
-
-                    </div>
-
-
-                    <!-- TERMS -->
-
-                    <div class="form-group">
-
-                        <label>
-                            Terms
-                        </label>
-
-                        <select id="terms">
-
-                            <option value="">
-                                Select Terms
-                            </option>
-
-                            <option value="COD">
-                                COD
-                            </option>
-
-                            <option value="15 Days">
-                                15 Days
-                            </option>
-
-                            <option value="30 Days">
-                                30 Days
-                            </option>
-
-                            <option value="45 Days">
-                                45 Days
-                            </option>
-
-                            <option value="60 Days">
-                                60 Days
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- SE - UNDER TERMS -->
-
-                    <div class="form-group">
-
-                        <label>
-                            SE
-                        </label>
-
-                        <select id="soSE">
-
-                            <option value="">
-                                Select SE
-                            </option>
-
-                            <option value="JBG">
-                                JBG
-                            </option>
-
-                            <option value="MHT">
-                                MHT
-                            </option>
-
-                            <option value="HHF">
-                                HHF
-                            </option>
-
-                            <option value="IAF">
-                                IAF
-                            </option>
-
-                            <option value="GRF">
-                                GRF
-                            </option>
-
-                            <option value="KBO">
-                                KBO
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Job Order
-                        </label>
-
-                        <input
-                            type="text"
-                            id="jobOrder"
-                            placeholder="Enter Job Order">
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- ITEMS -->
-
-            <div class="section">
-
-                <div class="table-header">
-
-                    <h2>
-                        Items
-                    </h2>
-
-                    <button
-                        class="btn btn-primary"
-                        onclick="addSOItem()">
-
-                        + ADD ITEM
-
-                    </button>
-
-                </div>
-
-
-                <div class="table-container">
-
-                    <table id="soItemsTable">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>#</th>
-                                <th>Item Name</th>
-                                <th>Description</th>
-                                <th>QTY</th>
-                                <th>Unit</th>
-                                <th>Amount</th>
-                                <th>Total</th>
-                                <th>Action</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="soItemsBody">
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <div class="so-totals">
-
-                    <div class="so-total-row">
-
-                        <span class="so-total-label">
-                            Subtotal
-                        </span>
-
-                        <span
-                            class="so-total-value"
-                            id="soSubtotal">
-
-                            ₱0.00
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="so-total-row">
-
-                        <label
-                            class="so-total-label"
-                            for="soDiscount">
-
-                            Less Discount
-
-                        </label>
-
-                        <input
-                            type="number"
-                            id="soDiscount"
-                            class="so-total-input"
-                            min="0"
-                            step="0.01"
-                            value="0"
-                            placeholder="0.00"
-                            oninput="calculateSOTotals()">
-
-                    </div>
-
-
-                    <div class="so-total-row">
-
-                        <label class="so-total-label">
-
-                            <span class="vatable-check">
-
-                                <input
-                                    type="checkbox"
-                                    id="soVatable"
-                                    onchange="calculateSOTotals()">
-
-                                Vatable
-
-                            </span>
-
-                        </label>
-
-                        <span
-                            class="so-total-value"
-                            id="soVAT">
-
-                            ₱0.00
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="so-total-row">
-
-                        <span class="so-total-label">
-                            VAT Rate
-                        </span>
-
-                        <span class="so-total-value">
-                            12%
-                        </span>
-
-                    </div>
-
-
-                    <div class="so-total-row grand-total-row">
-
-                        <span class="so-total-label">
-                            GRAND TOTAL
-                        </span>
-
-                        <span
-                            class="so-total-value"
-                            id="soGrandTotal">
-
-                            ₱0.00
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="action-bar">
-
-                <button
-                    class="btn btn-secondary"
-                    onclick="closeCreateSO()">
-
-                    CANCEL
-
-                </button>
-
-
-                <button
-                    class="btn btn-primary"
-                    onclick="saveSO()">
-
-                    SAVE SO
-
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- SO DETAILS -->
-
-        <div
-        id="soDetails"
-        class="page">
-
-            <div class="page-header">
-
-                <div>
-
-                    <h2>Sales Order Details</h2>
-
-                    <div class="subtitle">
-                        View and update Sales Order
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="section">
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label>
-                            Date Creation
-                        </label>
-
-                        <input
-                            type="date"
-                            id="detailSODate"
-                            disabled>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Sales Order Number
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailSONumber"
-                            disabled>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Client Name
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailClientName"
-                            disabled>
-
-                    </div>
-
-
-                    <!-- SO DETAILS SE -->
-
-                    <div class="form-group">
-
-                        <label>
-                            SE
-                        </label>
-
-                        <select id="detailSE" disabled>
-
-                            <option value="">
-                                Select SE
-                            </option>
-
-                            <option value="JBG">
-                                JBG
-                            </option>
-
-                            <option value="MHT">
-                                MHT
-                            </option>
-
-                            <option value="HHF">
-                                HHF
-                            </option>
-
-                            <option value="IAF">
-                                IAF
-                            </option>
-
-                            <option value="GRF">
-                                GRF
-                            </option>
-
-                            <option value="KBO">
-                                KBO
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Attention
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailAttention"
-                            disabled>
-
-                    </div>
-
-
-                    <div class="form-group full">
-
-                        <label>
-                            Billing Address
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailBillingAddress"
-                            disabled>
-
-                    </div>
-
-
-                    <div class="form-group full">
-
-                        <label>
-                            Delivery Address
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailDeliveryAddress"
-                            disabled>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Project
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailProject"
-                            disabled>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            TIN Number
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailTIN"
-                            disabled>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            PO Number
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailPONumber"
-                            disabled>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Terms
-                        </label>
-
-                        <select
-                            id="detailTerms"
-                            disabled>
-
-                            <option value="">
-                                Select Terms
-                            </option>
-
-                            <option value="COD">
-                                COD
-                            </option>
-
-                            <option value="15 Days">
-                                15 Days
-                            </option>
-
-                            <option value="30 Days">
-                                30 Days
-                            </option>
-
-                            <option value="45 Days">
-                                45 Days
-                            </option>
-
-                            <option value="60 Days">
-                                60 Days
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label>
-                            Job Order
-                        </label>
-
-                        <input
-                            type="text"
-                            id="detailJobOrder"
-                            disabled>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- DETAILS ITEMS -->
-
-            <div class="section">
-
-                <div class="table-header">
-
-                    <h2>
-                        Items
-                    </h2>
-
-                    <button
-                        id="detailAddItemButton"
-                        class="btn btn-primary"
-                        onclick="addDetailItem()"
-                        style="display:none;">
-
-                        + ADD ITEM
-
-                    </button>
-
-                </div>
-
-
-                <div class="table-container">
-
-                    <table id="soDetailsItemsTable">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>#</th>
-                                <th>Item Name</th>
-                                <th>Description</th>
-                                <th>QTY</th>
-                                <th>Unit</th>
-                                <th>Amount</th>
-                                <th>Total</th>
-                                <th>Action</th>
-
-                            </tr>
-
-                        </thead>
-
-                        <tbody id="soDetailsItemsBody">
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-                <div class="detail-summary">
-
-                    <div class="so-total-row">
-
-                        <span class="so-total-label">
-                            Subtotal
-                        </span>
-
-                        <span
-                            class="so-total-value"
-                            id="detailSubtotal">
-
-                            ₱0.00
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="so-total-row">
-
-                        <label
-                            class="so-total-label"
-                            for="detailDiscount">
-
-                            Less Discount
-
-                        </label>
-
-                        <input
-                            type="number"
-                            id="detailDiscount"
-                            class="so-total-input"
-                            min="0"
-                            step="0.01"
-                            value="0"
-                            disabled
-                            oninput="calculateDetailTotals()">
-
-                    </div>
-
-
-                    <div class="so-total-row">
-
-                        <label class="so-total-label">
-
-                            <span class="vatable-check">
-
-                                <input
-                                    type="checkbox"
-                                    id="detailVatable"
-                                    disabled
-                                    onchange="calculateDetailTotals()">
-
-                                Vatable
-
-                            </span>
-
-                        </label>
-
-                        <span
-                            class="so-total-value"
-                            id="detailVAT">
-
-                            ₱0.00
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="so-total-row">
-
-                        <span class="so-total-label">
-                            VAT Rate
-                        </span>
-
-                        <span class="so-total-value">
-                            12%
-                        </span>
-
-                    </div>
-
-
-                    <div class="so-total-row grand-total-row">
-
-                        <span class="so-total-label">
-                            GRAND TOTAL
-                        </span>
-
-                        <span
-                            class="so-total-value"
-                            id="detailGrandTotal">
-
-                            ₱0.00
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div
-                class="action-bar"
-                style="margin-top:20px;">
-
-                <button
-                    class="btn btn-secondary"
-                    onclick="closeSODetails()">
-
-                    BACK TO SO LIST
-
-                </button>
-
-
-                <button
-                    id="detailCancelButton"
-                    class="btn btn-danger"
-                    onclick="cancelSelectedSO()">
-
-                    CANCEL SO
-
-                </button>
-
-
-                <button
-                    id="detailEditButton"
-                    class="btn btn-secondary"
-                    onclick="enableSOUpdate()">
-
-                    UPDATE
-
-                </button>
-
-
-                <button
-                    id="detailSaveButton"
-                    class="btn btn-success"
-                    onclick="saveSOUpdate()"
-                    style="display:none;">
-
-                    SAVE CHANGES
-
-                </button>
-
-            </div>
-
-        </div>
-
-
+        
         <!-- JOB ORDER -->
 
         <div
@@ -2166,38 +1167,80 @@ td {
 function showPage(pageId, button) {
 
     document
-    .querySelectorAll('.page')
-    .forEach(function(page) {
-        page.classList.remove('active');
-    });
+        .querySelectorAll('.page')
+        .forEach(function(page) {
 
-    document
-    .getElementById(pageId)
-    .classList.add('active');
+            page.classList.remove('active');
 
-    document
-    .querySelectorAll('.menu-btn')
-    .forEach(function(btn) {
-        btn.classList.remove('active');
-    });
+        });
 
-    button.classList.add('active');
-
-    document
-    .getElementById('pageTitle')
-    .innerText = button.innerText.trim();
-
-    if (pageId === 'dr') {
-        loadDRSalesOrders();
-    }
-
-    if (pageId === 'dashboard') {
-        loadDashboard();
-    }
 
     if (pageId === 'sales') {
-        loadSOList();
+
+        const salesPage =
+            document.getElementById('sales');
+
+        if (salesPage) {
+
+            salesPage.classList.add('active');
+
+        }
+
+    } else {
+
+        const page =
+            document.getElementById(pageId);
+
+        if (page) {
+
+            page.classList.add('active');
+
+        }
+
     }
+
+
+    document
+        .querySelectorAll('.menu-btn')
+        .forEach(function(btn) {
+
+            btn.classList.remove('active');
+
+        });
+
+
+    if (button) {
+
+        button.classList.add('active');
+
+        document.getElementById(
+            'pageTitle'
+        ).innerText =
+            button.innerText.trim();
+
+    }
+
+
+    if (pageId === 'dr') {
+
+        loadDRSalesOrders();
+
+    }
+
+
+    if (pageId === 'dashboard') {
+
+        loadDashboard();
+
+    }
+
+
+    if (pageId === 'sales') {
+
+        loadSOList();
+
+    }
+
 }
 
 
@@ -5313,14 +4356,69 @@ function logoutUser() {
 
 }
 
+async function loadSalesOrderModule() {
 
+    const container =
+        document.getElementById('salesModule');
+
+    if (!container) {
+        console.error('salesModule not found.');
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch('pages/sales-order.html');
+
+        if (!response.ok) {
+            throw new Error(
+                'Failed to load Sales Order module.'
+            );
+        }
+
+        const html =
+            await response.text();
+
+        container.innerHTML = html;
+
+        console.log(
+            'Sales Order module loaded successfully.'
+        );
+
+        loadSOList();
+
+    } catch (error) {
+
+        console.error(
+            'Sales Order module error:',
+            error
+        );
+
+        container.innerHTML = `
+            <div style="
+                padding:30px;
+                color:#b00020;
+                background:#fff;
+                border-radius:10px;
+            ">
+                Failed to load Sales Order module.
+            </div>
+        `;
+
+    }
+}
+    
 /* =====================================================
    PAGE LOAD
 ===================================================== */
 
 document.addEventListener(
+    
     'DOMContentLoaded',
     function() {
+
+        loadSalesOrderModule();
 
         /*
            CHECK ACCOUNT SESSION
@@ -5356,7 +4454,7 @@ document.addEventListener(
 );
 
 </script>
-
+<script src="js/sales-order.js"></script>
 </body>
 
 </html>
