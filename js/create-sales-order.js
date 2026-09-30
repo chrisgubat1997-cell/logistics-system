@@ -10,7 +10,7 @@
 ========================================================= */
 
 const CREATE_SO_API_URL =
-    "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+    "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
 
 
 /* =========================================================
