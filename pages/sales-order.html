@@ -27,6 +27,10 @@
 ```
 <div class="sales-order-container">
 
+    <!-- =================================================
+         PAGE HEADER
+    ================================================== -->
+
     <div class="page-header">
 
         <div>
@@ -47,6 +51,11 @@
         </button>
 
     </div>
+
+
+    <!-- =================================================
+         ACTION BAR
+    ================================================== -->
 
     <div class="action-bar">
 
@@ -70,6 +79,11 @@
 
     </div>
 
+
+    <!-- =================================================
+         SALES ORDER LIST
+    ================================================== -->
+
     <div class="section">
 
         <div class="table-header">
@@ -86,6 +100,7 @@
             >
 
         </div>
+
 
         <div class="table-container">
 
@@ -110,6 +125,51 @@
                 </thead>
 
                 <tbody id="soTableBody">
+
+                    <!-- SAMPLE UI ROW -->
+
+                    <tr ondblclick="openSODetails('SO-0001')">
+
+                        <td>
+                            <strong>SO-0001</strong>
+                        </td>
+
+                        <td>
+                            09/30/2026
+                        </td>
+
+                        <td>
+                            Sample Client
+                        </td>
+
+                        <td>
+                            Sample SE
+                        </td>
+
+                        <td>
+                            Sample Project
+                        </td>
+
+                        <td>
+                            PO-0001
+                        </td>
+
+                        <td>
+                            30 Days
+                        </td>
+
+                        <td>
+                            ₱100,000.00
+                        </td>
+
+                        <td>
+                            <span class="status-badge status-open">
+                                OPEN
+                            </span>
+                        </td>
+
+                    </tr>
+
                 </tbody>
 
             </table>
@@ -117,6 +177,11 @@
         </div>
 
     </div>
+
+
+    <!-- =================================================
+         SELECTED SO
+    ================================================== -->
 
     <div
         id="selectedSOInfo"
@@ -127,134 +192,371 @@
 
 
     <!-- =================================================
-         SALES ORDER PDF SECTION
+         SAMPLE SO FILE ACTIONS
+         UI ONLY
     ================================================== -->
 
-    <div
-        id="soFileSection"
-        class="section so-file-section"
-    >
+    <div class="section so-file-section">
 
         <div class="table-header">
 
             <div>
 
                 <h2>
-                    Sales Order File
+                    SO Files
                 </h2>
 
                 <p class="subtitle">
-                    Upload, view, and print the official Sales Order PDF.
+                    Multiple revisions can be uploaded for one Sales Order.
                 </p>
-
-            </div>
-
-            <div class="so-file-actions">
-
-                <input
-                    type="file"
-                    id="soPdfInput"
-                    accept="application/pdf"
-                    hidden
-                    onchange="handleSOPDFUpload(event)"
-                >
-
-                <button
-                    id="uploadSOButton"
-                    class="btn btn-primary"
-                    onclick="document.getElementById('soPdfInput').click()"
-                >
-                    UPLOAD SO PDF
-                </button>
-
-                <button
-                    id="viewSOButton"
-                    class="btn btn-secondary"
-                    onclick="viewSOPDF()"
-                    disabled
-                >
-                    VIEW SO PDF
-                </button>
-
-                <button
-                    id="printSOButton"
-                    class="btn btn-secondary"
-                    onclick="printSOPDF()"
-                    disabled
-                >
-                    PRINT SO
-                </button>
 
             </div>
 
         </div>
 
-        <div
-            id="soFileStatus"
-            class="selected-so"
-        >
-            No SO PDF uploaded.
+
+        <div class="so-file-list">
+
+            <div class="so-file-row">
+
+                <div class="so-file-info">
+
+                    <span class="file-icon">
+                        📄
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            SO-0001 Rev 0.pdf
+                        </strong>
+
+                        <small>
+                            Uploaded by Sales • 09/30/2026
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="so-file-actions">
+
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                    >
+                        VIEW
+                    </button>
+
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                    >
+                        PRINT
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div class="so-file-row">
+
+                <div class="so-file-info">
+
+                    <span class="file-icon">
+                        📄
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            SO-0001 Rev 1.pdf
+                        </strong>
+
+                        <small>
+                            Uploaded by Sales • 09/30/2026
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="so-file-actions">
+
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                    >
+                        VIEW
+                    </button>
+
+                    <button
+                        class="btn btn-secondary"
+                        type="button"
+                    >
+                        PRINT
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- UPLOAD BUTTON -->
+
+        <div class="so-upload-area">
+
+            <button
+                class="btn btn-primary"
+                type="button"
+            >
+                + UPLOAD SO FILE
+            </button>
+
+            <p>
+                PDF files only • Multiple revisions allowed
+            </p>
+
         </div>
 
     </div>
 
 
-</div>
+    <!-- =================================================
+         CREATE SO MODAL
+         UI ONLY
+    ================================================== -->
 
+    <div
+        id="createSOModal"
+        class="so-modal"
+    >
 
-<!-- =====================================================
-     PDF VIEWER MODAL
-====================================================== -->
+        <div class="so-modal-content">
 
-<div
-    id="soPdfModal"
-    class="pdf-modal"
-    aria-hidden="true"
->
+            <div class="so-modal-header">
 
-    <div class="pdf-modal-content">
+                <div>
 
-        <div class="pdf-modal-header">
+                    <h2>
+                        Create Sales Order
+                    </h2>
 
-            <div>
+                    <p>
+                        Enter Sales Order information
+                    </p>
 
-                <h2>
-                    Sales Order PDF
-                </h2>
-
-                <span id="pdfFileName">
-                    No file selected
-                </span>
-
-            </div>
-
-            <div class="pdf-modal-actions">
+                </div>
 
                 <button
-                    class="btn btn-primary"
-                    onclick="printSOPDF()"
-                >
-                    PRINT
-                </button>
-
-                <button
-                    class="pdf-close-btn"
-                    onclick="closeSOPDF()"
-                    title="Close"
+                    class="so-close-btn"
+                    type="button"
                 >
                     ×
                 </button>
 
             </div>
 
-        </div>
 
-        <div class="pdf-viewer-container">
+            <div class="so-modal-body">
 
-            <iframe
-                id="soPdfViewer"
-                title="Sales Order PDF Viewer"
-            ></iframe>
+                <!-- BASIC INFORMATION -->
+
+                <div class="form-section">
+
+                    <h3>
+                        Sales Order Information
+                    </h3>
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+
+                            <label>
+                                SO Number
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="Enter SO Number"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Date Creation
+                            </label>
+
+                            <input
+                                type="date"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Client Name
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="Enter client name"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                SE
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="Enter SE"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                Project
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="Enter project"
+                            >
+
+                        </div>
+
+
+                        <div class="form-group">
+
+                            <label>
+                                PO Number
+                            </label>
+
+                            <input
+                                type="text"
+                                placeholder="Enter PO number"
+                            >
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SO FILES -->
+
+                <div class="form-section">
+
+                    <div class="form-section-header">
+
+                        <div>
+
+                            <h3>
+                                Sales Order Files
+                            </h3>
+
+                            <p>
+                                Upload one or more PDF revisions.
+                            </p>
+
+                        </div>
+
+                        <button
+                            class="btn btn-primary"
+                            type="button"
+                        >
+                            + UPLOAD FILE
+                        </button>
+
+                    </div>
+
+
+                    <div class="selected-files">
+
+                        <div class="selected-file">
+
+                            <span>
+                                📄
+                            </span>
+
+                            <span>
+                                SO-0001 Rev 0.pdf
+                            </span>
+
+                            <button
+                                class="file-remove-btn"
+                                type="button"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+
+                        <div class="selected-file">
+
+                            <span>
+                                📄
+                            </span>
+
+                            <span>
+                                SO-0001 Rev 1.pdf
+                            </span>
+
+                            <button
+                                class="file-remove-btn"
+                                type="button"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- MODAL FOOTER -->
+
+            <div class="so-modal-footer">
+
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                >
+                    CANCEL
+                </button>
+
+                <button
+                    class="btn btn-primary"
+                    type="button"
+                >
+                    SAVE SALES ORDER
+                </button>
+
+            </div>
 
         </div>
 
