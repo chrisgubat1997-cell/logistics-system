@@ -1,20 +1,34 @@
 <!-- =====================================================
+     LOGIS-TECH SYSTEM
      SALES ORDER MODULE
+===================================================== -->
+
+
+<!-- =====================================================
+     SALES ORDER LIST
 ===================================================== -->
 
 <div id="sales" class="page">
 
+    <!-- PAGE HEADER -->
+
     <div class="page-header">
 
         <div>
-            <h1>Sales Order</h1>
+
+            <h1>
+                Sales Order
+            </h1>
 
             <p class="subtitle">
                 Manage Sales Orders
             </p>
+
         </div>
 
+
         <button
+            type="button"
             class="btn btn-primary"
             onclick="openCreateSO()">
 
@@ -25,9 +39,12 @@
     </div>
 
 
+    <!-- ACTION BUTTONS -->
+
     <div class="action-bar">
 
         <button
+            type="button"
             id="updateSOButton"
             class="btn btn-secondary"
             onclick="updateSelectedSO()"
@@ -37,7 +54,9 @@
 
         </button>
 
+
         <button
+            type="button"
             id="cancelSOButton"
             class="btn btn-danger"
             onclick="cancelSelectedSO()"
@@ -58,9 +77,19 @@
 
         <div class="table-header">
 
-            <h2>
-                Sales Order List
-            </h2>
+            <div>
+
+                <h2>
+                    Sales Order List
+                </h2>
+
+                <p class="subtitle">
+                    Select an SO to view its summary.
+                    Double-click to open full details.
+                </p>
+
+            </div>
+
 
             <input
                 type="text"
@@ -79,21 +108,51 @@
 
                     <tr>
 
-                        <th>SO Number</th>
-                        <th>Date Creation</th>
-                        <th>Client Name</th>
-                        <th>SE</th>
-                        <th>Project</th>
-                        <th>PO Number</th>
-                        <th>Terms</th>
-                        <th>Grand Total</th>
-                        <th>Status</th>
+                        <th>
+                            SO Number
+                        </th>
+
+                        <th>
+                            Date Creation
+                        </th>
+
+                        <th>
+                            Client Name
+                        </th>
+
+                        <th>
+                            SE
+                        </th>
+
+                        <th>
+                            Project
+                        </th>
+
+                        <th>
+                            PO Number
+                        </th>
+
+                        <th>
+                            Terms
+                        </th>
+
+                        <th>
+                            Grand Total
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
 
                     </tr>
 
                 </thead>
 
+
                 <tbody id="soTableBody">
+
+                    <!-- SO LIST WILL LOAD HERE -->
+
                 </tbody>
 
             </table>
@@ -102,6 +161,10 @@
 
     </div>
 
+
+    <!-- =================================================
+         SELECTED SO PREVIEW
+    ================================================== -->
 
     <div
         id="selectedSOInfo"
@@ -115,189 +178,6 @@
 
 
 
-
-    <!-- =================================================
-         SALES ORDER ITEMS
-    ================================================== -->
-
-    <div class="section">
-
-        <div class="table-header">
-
-            <h2>
-                Items
-            </h2>
-
-            <button
-                class="btn btn-primary"
-                onclick="addSOItem()">
-
-                + ADD ITEM
-
-            </button>
-
-        </div>
-
-
-        <div class="table-container">
-
-            <table id="soItemsTable">
-
-                <thead>
-
-                    <tr>
-
-                        <th>#</th>
-                        <th>Item Name</th>
-                        <th>Description</th>
-                        <th>QTY</th>
-                        <th>Unit</th>
-                        <th>Amount</th>
-                        <th>Total</th>
-                        <th>Action</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody id="soItemsBody">
-                </tbody>
-
-            </table>
-
-        </div>
-
-
-        <!-- TOTALS -->
-
-        <div class="so-totals">
-
-            <div class="so-total-row">
-
-                <span class="so-total-label">
-                    Subtotal
-                </span>
-
-                <span
-                    class="so-total-value"
-                    id="soSubtotal">
-
-                    ₱0.00
-
-                </span>
-
-            </div>
-
-
-            <div class="so-total-row">
-
-                <label
-                    class="so-total-label"
-                    for="soDiscount">
-
-                    Less Discount
-
-                </label>
-
-                <input
-                    type="number"
-                    id="soDiscount"
-                    class="so-total-input"
-                    min="0"
-                    step="0.01"
-                    value="0"
-                    placeholder="0.00"
-                    oninput="calculateSOTotals()">
-
-            </div>
-
-
-            <div class="so-total-row">
-
-                <label class="so-total-label">
-
-                    <span class="vatable-check">
-
-                        <input
-                            type="checkbox"
-                            id="soVatable"
-                            onchange="calculateSOTotals()">
-
-                        Vatable
-
-                    </span>
-
-                </label>
-
-                <span
-                    class="so-total-value"
-                    id="soVAT">
-
-                    ₱0.00
-
-                </span>
-
-            </div>
-
-
-            <div class="so-total-row">
-
-                <span class="so-total-label">
-                    VAT Rate
-                </span>
-
-                <span class="so-total-value">
-                    12%
-                </span>
-
-            </div>
-
-
-            <div class="so-total-row grand-total-row">
-
-                <span class="so-total-label">
-                    GRAND TOTAL
-                </span>
-
-                <span
-                    class="so-total-value"
-                    id="soGrandTotal">
-
-                    ₱0.00
-
-                </span>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div class="action-bar">
-
-        <button
-            class="btn btn-secondary"
-            onclick="closeCreateSO()">
-
-            CANCEL
-
-        </button>
-
-
-        <button
-            class="btn btn-primary"
-            onclick="saveSO()">
-
-            SAVE SO
-
-        </button>
-
-    </div>
-
-</div>
-
-
 <!-- =====================================================
      SALES ORDER DETAILS
 ===================================================== -->
@@ -306,17 +186,20 @@
     id="soDetails"
     class="page">
 
+
+    <!-- PAGE HEADER -->
+
     <div class="page-header">
 
         <div>
 
-            <h2>
+            <h1>
                 Sales Order Details
-            </h2>
+            </h1>
 
-            <div class="subtitle">
+            <p class="subtitle">
                 View and update Sales Order
-            </div>
+            </p>
 
         </div>
 
@@ -324,12 +207,15 @@
 
 
     <!-- =================================================
-         DETAILS INFORMATION
+         SALES ORDER INFORMATION
     ================================================== -->
 
     <div class="section">
 
         <div class="form-grid">
+
+
+            <!-- DATE -->
 
             <div class="form-group">
 
@@ -345,6 +231,8 @@
             </div>
 
 
+            <!-- SO NUMBER -->
+
             <div class="form-group">
 
                 <label>
@@ -359,6 +247,8 @@
             </div>
 
 
+            <!-- CLIENT -->
+
             <div class="form-group">
 
                 <label>
@@ -372,6 +262,8 @@
 
             </div>
 
+
+            <!-- SE -->
 
             <div class="form-group">
 
@@ -416,6 +308,8 @@
             </div>
 
 
+            <!-- ATTENTION -->
+
             <div class="form-group">
 
                 <label>
@@ -429,6 +323,8 @@
 
             </div>
 
+
+            <!-- BILLING ADDRESS -->
 
             <div class="form-group full">
 
@@ -444,6 +340,8 @@
             </div>
 
 
+            <!-- DELIVERY ADDRESS -->
+
             <div class="form-group full">
 
                 <label>
@@ -457,6 +355,8 @@
 
             </div>
 
+
+            <!-- PROJECT -->
 
             <div class="form-group">
 
@@ -472,6 +372,8 @@
             </div>
 
 
+            <!-- TIN -->
+
             <div class="form-group">
 
                 <label>
@@ -486,6 +388,8 @@
             </div>
 
 
+            <!-- PO NUMBER -->
+
             <div class="form-group">
 
                 <label>
@@ -499,6 +403,8 @@
 
             </div>
 
+
+            <!-- TERMS -->
 
             <div class="form-group">
 
@@ -539,6 +445,8 @@
             </div>
 
 
+            <!-- JOB ORDER -->
+
             <div class="form-group">
 
                 <label>
@@ -557,19 +465,30 @@
     </div>
 
 
+
     <!-- =================================================
-         DETAILS ITEMS
+         SALES ORDER ITEMS
     ================================================== -->
 
     <div class="section">
 
         <div class="table-header">
 
-            <h2>
-                Items
-            </h2>
+            <div>
+
+                <h2>
+                    Items
+                </h2>
+
+                <p class="subtitle">
+                    Sales Order items
+                </p>
+
+            </div>
+
 
             <button
+                type="button"
                 id="detailAddItemButton"
                 class="btn btn-primary"
                 onclick="addDetailItem()"
@@ -590,20 +509,47 @@
 
                     <tr>
 
-                        <th>#</th>
-                        <th>Item Name</th>
-                        <th>Description</th>
-                        <th>QTY</th>
-                        <th>Unit</th>
-                        <th>Amount</th>
-                        <th>Total</th>
-                        <th>Action</th>
+                        <th>
+                            #
+                        </th>
+
+                        <th>
+                            Item Name
+                        </th>
+
+                        <th>
+                            Description
+                        </th>
+
+                        <th>
+                            QTY
+                        </th>
+
+                        <th>
+                            Unit
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                        <th>
+                            Total
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
 
                     </tr>
 
                 </thead>
 
+
                 <tbody id="soDetailsItemsBody">
+
+                    <!-- DETAILS ITEMS WILL LOAD HERE -->
+
                 </tbody>
 
             </table>
@@ -611,15 +557,23 @@
         </div>
 
 
-        <!-- DETAILS TOTALS -->
+        <!-- =================================================
+             DETAILS TOTALS
+        ================================================== -->
 
         <div class="detail-summary">
+
+
+            <!-- SUBTOTAL -->
 
             <div class="so-total-row">
 
                 <span class="so-total-label">
+
                     Subtotal
+
                 </span>
+
 
                 <span
                     class="so-total-value"
@@ -632,6 +586,8 @@
             </div>
 
 
+            <!-- DISCOUNT -->
+
             <div class="so-total-row">
 
                 <label
@@ -641,6 +597,7 @@
                     Less Discount
 
                 </label>
+
 
                 <input
                     type="number"
@@ -655,9 +612,12 @@
             </div>
 
 
+            <!-- VATABLE -->
+
             <div class="so-total-row">
 
-                <label class="so-total-label">
+                <label
+                    class="so-total-label">
 
                     <span class="vatable-check">
 
@@ -673,6 +633,7 @@
 
                 </label>
 
+
                 <span
                     class="so-total-value"
                     id="detailVAT">
@@ -684,24 +645,38 @@
             </div>
 
 
+            <!-- VAT RATE -->
+
             <div class="so-total-row">
 
                 <span class="so-total-label">
+
                     VAT Rate
+
                 </span>
 
+
                 <span class="so-total-value">
+
                     12%
+
                 </span>
 
             </div>
 
 
-            <div class="so-total-row grand-total-row">
+            <!-- GRAND TOTAL -->
+
+            <div
+                class="so-total-row
+                       grand-total-row">
 
                 <span class="so-total-label">
+
                     GRAND TOTAL
+
                 </span>
+
 
                 <span
                     class="so-total-value"
@@ -718,6 +693,7 @@
     </div>
 
 
+
     <!-- =================================================
          DETAILS ACTIONS
     ================================================== -->
@@ -726,7 +702,9 @@
         class="action-bar"
         style="margin-top:20px;">
 
+
         <button
+            type="button"
             class="btn btn-secondary"
             onclick="closeSODetails()">
 
@@ -736,6 +714,7 @@
 
 
         <button
+            type="button"
             id="detailCancelButton"
             class="btn btn-danger"
             onclick="cancelSelectedSO()">
@@ -746,6 +725,7 @@
 
 
         <button
+            type="button"
             id="detailEditButton"
             class="btn btn-secondary"
             onclick="enableSOUpdate()">
@@ -756,6 +736,7 @@
 
 
         <button
+            type="button"
             id="detailSaveButton"
             class="btn btn-success"
             onclick="saveSOUpdate()"
