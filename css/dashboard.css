@@ -1,7 +1,7 @@
 ```css
 /* =====================================================
    LOGI-TECH DASHBOARD
-   COMPACT VERSION
+   COMPACT PROFESSIONAL DESIGN
 ===================================================== */
 
 * {
@@ -30,7 +30,7 @@ body {
 .dashboard-container {
     width: 100%;
     min-height: 100%;
-    padding: 16px 20px;
+    padding: 16px 22px 20px 20px;
 }
 
 /* =====================================================
@@ -38,10 +38,12 @@ body {
 ===================================================== */
 
 .dashboard-header {
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+    padding-right: 18px;
 }
 
 .dashboard-header h1 {
@@ -57,42 +59,67 @@ body {
 }
 
 /* =====================================================
-   TOP TABS
+   SUMMARY / DASHBOARD TABS
 ===================================================== */
 
 .dashboard-tabs {
     display: flex;
+    align-items: center;
     gap: 5px;
+
     background: #ffffff;
     padding: 4px;
+
+    margin-right: 8px;
+
+    border: 1px solid #e8e5eb;
     border-radius: 9px;
+
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+
+    flex-shrink: 0;
 }
 
 .dashboard-tab {
     border: none;
     background: transparent;
-    padding: 8px 16px;
+
+    min-width: 92px;
+
+    padding: 8px 15px;
+
     border-radius: 6px;
+
+    font-family: "Segoe UI", Arial, sans-serif;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
+
     color: #777;
+
     cursor: pointer;
-    transition: all 0.2s ease;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .dashboard-tab:hover {
-    background: #f0ebf4;
+    background: #f1edf4;
     color: #311b43;
 }
 
 .dashboard-tab.active {
     background: #381a4a;
     color: #ffffff;
+
+    box-shadow: 0 2px 5px rgba(56, 26, 74, 0.20);
 }
 
 /* =====================================================
-   SUMMARY AREA
+   SUMMARY SECTION
 ===================================================== */
 
 .summary-section {
@@ -105,15 +132,27 @@ body {
 ===================================================== */
 
 .summary-toolbar {
+    width: 100%;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     margin-bottom: 14px;
+
+    padding-right: 10px;
 }
+
+/* =====================================================
+   SUMMARY TITLE
+===================================================== */
 
 .summary-title h2 {
     font-size: 18px;
+    font-weight: 700;
+
     color: #311b43;
+
     margin-bottom: 3px;
 }
 
@@ -123,36 +162,96 @@ body {
 }
 
 /* =====================================================
-   PERIOD DROPDOWN
+   PERIOD FILTER
 ===================================================== */
 
 .period-control {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
+
+    background: #ffffff;
+
+    padding: 5px 6px 5px 12px;
+
+    border: 1px solid #e3dfe6;
+    border-radius: 9px;
+
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    flex-shrink: 0;
 }
+
+/* =====================================================
+   PERIOD LABEL
+===================================================== */
 
 .period-control label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+
     font-size: 11px;
-    font-weight: 600;
-    color: #666;
+    font-weight: 700;
+
+    color: #381a4a;
+
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    white-space: nowrap;
 }
 
+.period-control label::before {
+    content: "📅";
+    font-size: 13px;
+}
+
+/* =====================================================
+   PERIOD DROPDOWN
+===================================================== */
+
 .period-control select {
-    min-width: 135px;
-    padding: 7px 28px 7px 10px;
-    border: 1px solid #ddd;
+    width: 135px;
+    height: 32px;
+
+    padding: 0 30px 0 11px;
+
+    border: 1px solid #d8d2dc;
     border-radius: 7px;
-    background: #ffffff;
-    color: #444;
+
+    background: #f8f7f9;
+
+    color: #381a4a;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+
     font-size: 12px;
+    font-weight: 600;
+
     outline: none;
+
     cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.period-control select:hover {
+    background: #f1edf4;
+    border-color: #b9adbf;
 }
 
 .period-control select:focus {
+    background: #ffffff;
     border-color: #381a4a;
-    box-shadow: 0 0 0 2px rgba(56, 26, 74, 0.08);
+
+    box-shadow:
+        0 0 0 3px rgba(56, 26, 74, 0.10);
 }
 
 /* =====================================================
@@ -161,9 +260,15 @@ body {
 
 .summary-cards {
     width: 100%;
+
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+
+    grid-template-columns:
+        repeat(5, minmax(0, 1fr));
+
     gap: 12px;
+
+    padding-right: 6px;
 }
 
 /* =====================================================
@@ -172,59 +277,34 @@ body {
 
 .summary-card {
     position: relative;
+
     width: 100%;
     min-width: 0;
+
     min-height: 125px;
+
     background: #ffffff;
-    border-radius: 11px;
-    padding: 16px;
+
     border: 1px solid #eeeeee;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+    border-radius: 11px;
+
+    padding: 16px;
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.06);
+
     overflow: hidden;
-    transition: transform 0.2s ease,
-                box-shadow 0.2s ease;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .summary-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.09);
-}
 
-/* =====================================================
-   CARD TITLE
-===================================================== */
-
-.summary-card-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: #777;
-    text-transform: uppercase;
-    letter-spacing: 0.2px;
-    margin-bottom: 11px;
-    padding-right: 30px;
-}
-
-/* =====================================================
-   CARD NUMBER
-===================================================== */
-
-.summary-card-number {
-    font-size: 27px;
-    font-weight: 700;
-    color: #311b43;
-    line-height: 1;
-    margin-bottom: 7px;
-}
-
-/* =====================================================
-   CARD AMOUNT
-===================================================== */
-
-.summary-card-amount {
-    font-size: 13px;
-    font-weight: 600;
-    color: #555;
-    white-space: nowrap;
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.09);
 }
 
 /* =====================================================
@@ -233,11 +313,15 @@ body {
 
 .summary-card::before {
     content: "";
+
     position: absolute;
+
     left: 0;
     top: 0;
+
     width: 4px;
     height: 100%;
+
     background: #381a4a;
 }
 
@@ -262,21 +346,75 @@ body {
 }
 
 /* =====================================================
+   CARD TITLE
+===================================================== */
+
+.summary-card-title {
+    font-size: 10px;
+    font-weight: 700;
+
+    color: #777;
+
+    text-transform: uppercase;
+
+    letter-spacing: 0.25px;
+
+    margin-bottom: 11px;
+
+    padding-right: 35px;
+}
+
+/* =====================================================
+   CARD NUMBER
+===================================================== */
+
+.summary-card-number {
+    font-size: 27px;
+    font-weight: 700;
+
+    color: #311b43;
+
+    line-height: 1;
+
+    margin-bottom: 7px;
+}
+
+/* =====================================================
+   CARD AMOUNT
+===================================================== */
+
+.summary-card-amount {
+    font-size: 13px;
+    font-weight: 600;
+
+    color: #555;
+
+    white-space: nowrap;
+}
+
+/* =====================================================
    CARD ICON
 ===================================================== */
 
 .summary-card-icon {
     position: absolute;
+
     right: 13px;
     top: 13px;
+
     width: 30px;
     height: 30px;
+
     border-radius: 8px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     background: #f3f0f5;
+
     color: #381a4a;
+
     font-size: 15px;
 }
 
@@ -306,27 +444,39 @@ body {
 
 .empty-message {
     width: 100%;
+
     background: #ffffff;
+
     border-radius: 10px;
+
     padding: 30px;
+
     text-align: center;
+
     color: #888;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* =====================================================
-   RESPONSIVE
+   RESPONSIVE - 1200px
 ===================================================== */
 
 @media (max-width: 1200px) {
 
     .summary-cards {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns:
+            repeat(3, minmax(0, 1fr));
     }
 
 }
 
-@media (max-width: 800px) {
+/* =====================================================
+   RESPONSIVE - 850px
+===================================================== */
+
+@media (max-width: 850px) {
 
     .dashboard-container {
         padding: 14px;
@@ -334,29 +484,42 @@ body {
 
     .dashboard-header {
         flex-direction: column;
+
         align-items: flex-start;
+
         gap: 12px;
+
+        padding-right: 0;
     }
 
     .dashboard-tabs {
-        width: 100%;
-    }
+        width: auto;
 
-    .dashboard-tab {
-        flex: 1;
+        margin-right: 0;
     }
 
     .summary-toolbar {
         flex-direction: column;
+
         align-items: flex-start;
+
         gap: 10px;
+
+        padding-right: 0;
     }
 
     .summary-cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        padding-right: 0;
     }
 
 }
+
+/* =====================================================
+   RESPONSIVE - 500px
+===================================================== */
 
 @media (max-width: 500px) {
 
@@ -368,17 +531,27 @@ body {
         font-size: 21px;
     }
 
+    .dashboard-tabs {
+        width: 100%;
+    }
+
+    .dashboard-tab {
+        flex: 1;
+        min-width: 0;
+    }
+
     .summary-cards {
         grid-template-columns: 1fr;
     }
 
     .period-control {
         width: 100%;
+
         justify-content: space-between;
     }
 
     .period-control select {
-        min-width: 125px;
+        width: 135px;
     }
 
 }
