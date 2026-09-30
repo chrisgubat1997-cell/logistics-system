@@ -203,55 +203,60 @@ body {
     letter-spacing: 0.1px;
 }
 
+```css
 /* =====================================================
-   PERIOD CONTROL CONTAINER
+   PERIOD FILTER - PREMIUM STYLE
 ===================================================== */
 
 .period-control {
-    position: relative;
-
     display: flex;
     align-items: center;
-
     gap: 10px;
-
-    min-height: 46px;
-
-    padding: 6px 7px 6px 13px;
 
     background: #ffffff;
 
-    border: 1px solid #ded8e2;
+    padding: 6px 7px 6px 12px;
 
-    border-radius: 11px;
+    border: 1px solid #ddd7e2;
+    border-radius: 10px;
 
-    box-shadow:
-        0 3px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
 
     flex-shrink: 0;
-
-    transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.period-control:hover {
-    border-color: #c7bbcf;
-
-    box-shadow:
-        0 4px 14px rgba(56, 26, 74, 0.09);
 }
 
 /* =====================================================
    PERIOD LABEL
 ===================================================== */
 
-.period-control label {
+.period-label {
     display: flex;
     align-items: center;
-
     gap: 7px;
 
+    white-space: nowrap;
+}
+
+.period-icon {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #381a4a;
+    color: #ffffff;
+
+    border-radius: 7px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    box-shadow: 0 2px 5px rgba(56, 26, 74, 0.18);
+}
+
+.period-text {
     font-family: "Segoe UI", Arial, sans-serif;
 
     font-size: 12px;
@@ -259,48 +264,33 @@ body {
 
     color: #381a4a;
 
-    letter-spacing: 0.7px;
+    letter-spacing: 0.8px;
 
-    text-transform: uppercase;
-
-    white-space: nowrap;
-}
-
-/* Calendar icon */
-
-.period-control label::before {
-    content: "▣";
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 25px;
-    height: 25px;
-
-    border-radius: 7px;
-
-    background: #f0eaf3;
-
-    color: #381a4a;
-
-    font-size: 13px;
-
-    font-weight: 700;
+    line-height: 1;
 }
 
 /* =====================================================
-   DROPDOWN WRAPPER EFFECT
+   DROPDOWN WRAPPER
 ===================================================== */
 
-.period-control select {
+.period-select-wrapper {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+}
+
+/* =====================================================
+   DROPDOWN
+===================================================== */
+
+.summary-period-select {
     width: 145px;
     height: 34px;
 
-    padding: 0 35px 0 12px;
+    padding: 0 36px 0 13px;
 
-    border: 1px solid #d5cdd9;
-
+    border: 1px solid #d2cad8;
     border-radius: 8px;
 
     background: #f8f6fa;
@@ -310,9 +300,9 @@ body {
     font-family: "Segoe UI", Arial, sans-serif;
 
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 750;
 
-    letter-spacing: 0.2px;
+    letter-spacing: 0.4px;
 
     outline: none;
 
@@ -322,46 +312,94 @@ body {
     -webkit-appearance: none;
     -moz-appearance: none;
 
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        color 0.2s ease;
-}
-
-/* =====================================================
-   CUSTOM DROPDOWN ARROW
-===================================================== */
-
-.period-control::after {
-    content: "⌄";
-
-    position: absolute;
-
-    right: 18px;
-    top: 50%;
-
-    transform: translateY(-55%);
-
-    color: #381a4a;
-
-    font-size: 16px;
-    font-weight: 800;
-
-    pointer-events: none;
+    transition: all 0.2s ease;
 }
 
 /* =====================================================
    DROPDOWN HOVER
 ===================================================== */
 
-.period-control select:hover {
+.summary-period-select:hover {
     background: #f1edf4;
 
-    border-color: #b9adbf;
+    border-color: #b8aabd;
+
+    box-shadow:
+        0 2px 6px rgba(56, 26, 74, 0.08);
+}
+
+/* =====================================================
+   DROPDOWN FOCUS
+===================================================== */
+
+.summary-period-select:focus {
+    background: #ffffff;
+
+    border-color: #381a4a;
+
+    box-shadow:
+        0 0 0 3px rgba(56, 26, 74, 0.10);
+}
+
+/* =====================================================
+   CUSTOM DROPDOWN ARROW
+===================================================== */
+
+.select-arrow {
+    position: absolute;
+
+    right: 12px;
+    top: 50%;
+
+    transform: translateY(-55%);
 
     color: #381a4a;
+
+    font-family: Arial, sans-serif;
+
+    font-size: 17px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    pointer-events: none;
 }
+
+/* =====================================================
+   DROPDOWN OPTIONS
+===================================================== */
+
+.summary-period-select option {
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #311b43;
+
+    background: #ffffff;
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 500px) {
+
+    .period-control {
+        width: 100%;
+    }
+
+    .period-select-wrapper {
+        margin-left: auto;
+    }
+
+    .summary-period-select {
+        width: 140px;
+    }
+
+}
+
 
 /* =====================================================
    DROPDOWN FOCUS
