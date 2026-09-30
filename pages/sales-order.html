@@ -151,7 +151,7 @@
 
                 <tbody id="soTableBody">
 
-                    <!-- SO LIST WILL LOAD HERE -->
+                    <!-- SALES ORDERS WILL LOAD HERE -->
 
                 </tbody>
 
@@ -219,7 +219,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailSODate">
                     Date Creation
                 </label>
 
@@ -235,7 +235,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailSONumber">
                     Sales Order Number
                 </label>
 
@@ -251,7 +251,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailClientName">
                     Client Name
                 </label>
 
@@ -267,7 +267,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailSE">
                     SE
                 </label>
 
@@ -312,7 +312,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailAttention">
                     Attention
                 </label>
 
@@ -328,7 +328,7 @@
 
             <div class="form-group full">
 
-                <label>
+                <label for="detailBillingAddress">
                     Billing Address
                 </label>
 
@@ -344,7 +344,7 @@
 
             <div class="form-group full">
 
-                <label>
+                <label for="detailDeliveryAddress">
                     Delivery Address
                 </label>
 
@@ -360,7 +360,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailProject">
                     Project
                 </label>
 
@@ -376,7 +376,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailTIN">
                     TIN Number
                 </label>
 
@@ -392,7 +392,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailPONumber">
                     PO Number
                 </label>
 
@@ -408,7 +408,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailTerms">
                     Terms
                 </label>
 
@@ -449,7 +449,7 @@
 
             <div class="form-group">
 
-                <label>
+                <label for="detailJobOrder">
                     Job Order
                 </label>
 
@@ -569,11 +569,8 @@
             <div class="so-total-row">
 
                 <span class="so-total-label">
-
                     Subtotal
-
                 </span>
-
 
                 <span
                     class="so-total-value"
@@ -597,7 +594,6 @@
                     Less Discount
 
                 </label>
-
 
                 <input
                     type="number"
@@ -650,16 +646,11 @@
             <div class="so-total-row">
 
                 <span class="so-total-label">
-
                     VAT Rate
-
                 </span>
 
-
                 <span class="so-total-value">
-
                     12%
-
                 </span>
 
             </div>
@@ -668,15 +659,11 @@
             <!-- GRAND TOTAL -->
 
             <div
-                class="so-total-row
-                       grand-total-row">
+                class="so-total-row grand-total-row">
 
                 <span class="so-total-label">
-
                     GRAND TOTAL
-
                 </span>
-
 
                 <span
                     class="so-total-value"
@@ -695,13 +682,74 @@
 
 
     <!-- =================================================
+         SO FILES
+    ================================================== -->
+
+    <div class="section">
+
+        <div class="table-header">
+
+            <div>
+
+                <h2>
+                    SO Files
+                </h2>
+
+                <p class="subtitle">
+                    Attached PDF files for this Sales Order
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <input
+                    type="file"
+                    id="detailSOFileInput"
+                    accept="application/pdf,.pdf"
+                    multiple
+                    hidden
+                    onchange="handleDetailSOFiles(event)">
+
+
+                <button
+                    type="button"
+                    id="detailAddFileButton"
+                    class="btn btn-primary"
+                    onclick="selectDetailSOFiles()"
+                    style="display:none;">
+
+                    + ADD PDF
+
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <div
+            id="detailSOFileList"
+            class="so-file-list">
+
+            <div class="no-files">
+                No PDF files attached.
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
          DETAILS ACTIONS
     ================================================== -->
 
     <div
         class="action-bar"
         style="margin-top:20px;">
-
 
         <button
             type="button"
