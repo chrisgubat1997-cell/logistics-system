@@ -9,7 +9,6 @@
    API CONFIG
 ========================================================= */
 
-// ILAGAY DITO ANG WEB APP URL NG GOOGLE APPS SCRIPT
 const SALES_ORDER_API_URL =
     "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
 
@@ -33,20 +32,44 @@ async function salesOrderAPI(action, data = {}) {
 
     try {
 
+        console.log(
+            "LOGIS-TECH API REQUEST:",
+            action,
+            data
+        );
+
+
         const response = await fetch(
             SALES_ORDER_API_URL,
             {
                 method: "POST",
 
                 headers: {
-                    "Content-Type": "text/plain;charset=utf-8"
+                    "Content-Type":
+                        "text/plain;charset=utf-8"
                 },
 
                 body: JSON.stringify({
                     action: action,
-                    ...data
+                    data: data
                 })
             }
+        );
+
+
+        const responseText =
+            await response.text();
+
+
+        console.log(
+            "LOGIS-TECH API STATUS:",
+            response.status
+        );
+
+
+        console.log(
+            "LOGIS-TECH API RESPONSE:",
+            responseText
         );
 
 
@@ -60,8 +83,29 @@ async function salesOrderAPI(action, data = {}) {
         }
 
 
-        const result =
-            await response.json();
+        let result;
+
+
+        try {
+
+            result =
+                JSON.parse(
+                    responseText
+                );
+
+        } catch (jsonError) {
+
+            console.error(
+                "Invalid JSON response:",
+                responseText
+            );
+
+
+            throw new Error(
+                "Invalid response from LOGIS-TECH API."
+            );
+
+        }
 
 
         return result;
@@ -75,11 +119,10 @@ async function salesOrderAPI(action, data = {}) {
         );
 
 
-        alert(
-            "Hindi makakonekta sa LOGIS-TECH database.\n\n" +
-            "Check ang Google Apps Script Web App URL."
-        );
-
+        /*
+         * Huwag paulit-ulit na mag-popup
+         * habang nagde-debug.
+         */
 
         return {
             success: false,
@@ -107,7 +150,10 @@ async function loadSOList() {
 
         tbody.innerHTML = `
             <tr>
-                <td colspan="100%" style="text-align:center;">
+                <td
+                    colspan="100%"
+                    style="text-align:center;"
+                >
                     Loading Sales Orders...
                 </td>
             </tr>
@@ -118,25 +164,52 @@ async function loadSOList() {
 
     const result =
         await salesOrderAPI(
-            "getSalesOrders"
+            "getSalesOrders",
+            {}
         );
 
 
-    if (!result.success) {
+    console.log(
+        "GET SALES ORDERS RESULT:",
+        result
+    );
+
+
+    if (!result || !result.success) {
 
         if (tbody) {
 
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="100%" style="text-align:center;">
+                    <td
+                        colspan="100%"
+                        style="
+                            text-align:center;
+                            color:red;
+                        "
+                    >
                         Failed to load Sales Orders.
+                        <br>
+                        <small>
+                            ${
+                                escapeHTML(
+                                    result?.message ||
+                                    "Unknown API error."
+                                )
+                            }
+                        </small>
                     </td>
                 </tr>
             `;
 
         }
 
-        console.error(result.message);
+
+        console.error(
+            "Failed to load Sales Orders:",
+            result?.message
+        );
+
 
         return;
 
@@ -171,18 +244,30 @@ function renderSOList(list) {
 
 
     if (!tbody) {
+
+        console.error(
+            "soTableBody element not found."
+        );
+
         return;
+
     }
 
 
     tbody.innerHTML = "";
 
 
-    if (!list || list.length === 0) {
+    if (
+        !Array.isArray(list) ||
+        list.length === 0
+    ) {
 
         tbody.innerHTML = `
             <tr>
-                <td colspan="100%" style="text-align:center;">
+                <td
+                    colspan="100%"
+                    style="text-align:center;"
+                >
                     No Sales Order found.
                 </td>
             </tr>
@@ -193,64 +278,100 @@ function renderSOList(list) {
     }
 
 
-    list.forEach(function(so) {
+    list.forEach(
+        function(so) {
 
-        const row =
-            document.createElement("tr");
-
-
-        row.dataset.soNumber =
-            so.soNumber;
-
-
-        row.innerHTML = `
-            <td>${escapeHTML(so.soNumber)}</td>
-            <td>${escapeHTML(so.dateCreation || "")}</td>
-            <td>${escapeHTML(so.clientName || "")}</td>
-            <td>${escapeHTML(so.project || "")}</td>
-            <td>${escapeHTML(so.poNumber || "")}</td>
-            <td>${escapeHTML(so.status || "")}</td>
-            <td style="text-align:right;">
-                ${formatMoney(so.grandTotal)}
-            </td>
-        `;
-
-
-        /* ==========================================
-           SINGLE CLICK
-        ========================================== */
-
-        row.addEventListener(
-            "click",
-            function() {
-
-                selectSO(
-                    so.soNumber
+            const row =
+                document.createElement(
+                    "tr"
                 );
 
-            }
-        );
+
+            row.dataset.soNumber =
+                so.soNumber;
 
 
-        /* ==========================================
-           DOUBLE CLICK
-        ========================================== */
+            row.innerHTML = `
+                <td>
+                    ${escapeHTML(so.soNumber)}
+                </td>
 
-        row.addEventListener(
-            "dblclick",
-            function() {
+                <td>
+                    ${escapeHTML(
+                        so.dateCreation || ""
+                    )}
+                </td>
 
-                openSODetails(
-                    so.soNumber
-                );
+                <td>
+                    ${escapeHTML(
+                        so.clientName || ""
+                    )}
+                </td>
 
-            }
-        );
+                <td>
+                    ${escapeHTML(
+                        so.project || ""
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        so.poNumber || ""
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        so.status || ""
+                    )}
+                </td>
+
+                <td style="text-align:right;">
+                    ${formatMoney(
+                        so.grandTotal
+                    )}
+                </td>
+            `;
 
 
-        tbody.appendChild(row);
+            /* ==========================================
+               SINGLE CLICK
+            ========================================== */
 
-    });
+            row.addEventListener(
+                "click",
+                function() {
+
+                    selectSO(
+                        so.soNumber
+                    );
+
+                }
+            );
+
+
+            /* ==========================================
+               DOUBLE CLICK
+            ========================================== */
+
+            row.addEventListener(
+                "dblclick",
+                function() {
+
+                    openSODetails(
+                        so.soNumber
+                    );
+
+                }
+            );
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
 
 }
 
@@ -266,8 +387,12 @@ function selectSO(soNumber) {
             function(so) {
 
                 return (
-                    String(so.soNumber)
-                    === String(soNumber)
+                    String(
+                        so.soNumber
+                    ) ===
+                    String(
+                        soNumber
+                    )
                 );
 
             }
@@ -279,24 +404,34 @@ function selectSO(soNumber) {
     }
 
 
-    /* Highlight selected row */
+    /*
+     * Remove previous selection.
+     */
 
     document
         .querySelectorAll(
             "#soTableBody tr"
         )
-        .forEach(function(row) {
+        .forEach(
+            function(row) {
 
-            row.classList.remove(
-                "selected"
-            );
+                row.classList.remove(
+                    "selected"
+                );
 
-        });
+            }
+        );
 
+
+    /*
+     * Highlight selected row.
+     */
 
     const selectedRow =
         document.querySelector(
-            `#soTableBody tr[data-so-number="${cssEscape(soNumber)}"]`
+            `#soTableBody tr[data-so-number="${cssEscape(
+                soNumber
+            )}"]`
         );
 
 
@@ -309,9 +444,9 @@ function selectSO(soNumber) {
     }
 
 
-    /* ==========================================
-       COMPACT PREVIEW
-    ========================================== */
+    /*
+     * Compact preview.
+     */
 
     const preview =
         document.getElementById(
@@ -329,29 +464,39 @@ function selectSO(soNumber) {
         <div class="so-preview">
 
             <strong>
-                ${escapeHTML(selectedSO.soNumber)}
+                ${escapeHTML(
+                    selectedSO.soNumber
+                )}
             </strong>
 
             <br>
 
             Client:
-            ${escapeHTML(selectedSO.clientName || "-")}
+            ${escapeHTML(
+                selectedSO.clientName || "-"
+            )}
 
             <br>
 
             Project:
-            ${escapeHTML(selectedSO.project || "-")}
+            ${escapeHTML(
+                selectedSO.project || "-"
+            )}
 
             <br>
 
             Status:
-            ${escapeHTML(selectedSO.status || "-")}
+            ${escapeHTML(
+                selectedSO.status || "-"
+            )}
 
             <br>
 
             Grand Total:
             <strong>
-                ${formatMoney(selectedSO.grandTotal)}
+                ${formatMoney(
+                    selectedSO.grandTotal
+                )}
             </strong>
 
         </div>
@@ -375,7 +520,9 @@ function searchSO() {
 
     const keyword =
         String(
-            input ? input.value : ""
+            input
+                ? input.value
+                : ""
         )
         .trim()
         .toLowerCase();
@@ -409,7 +556,9 @@ function searchSO() {
                 ]
                 .join(" ")
                 .toLowerCase()
-                .includes(keyword);
+                .includes(
+                    keyword
+                );
 
             }
         );
@@ -438,7 +587,9 @@ function openCreateSO() {
    OPEN SO DETAILS
 ========================================================= */
 
-async function openSODetails(soNumber) {
+async function openSODetails(
+    soNumber
+) {
 
     const result =
         await salesOrderAPI(
@@ -450,10 +601,19 @@ async function openSODetails(soNumber) {
         );
 
 
-    if (!result.success) {
+    console.log(
+        "GET SO DETAILS RESULT:",
+        result
+    );
+
+
+    if (
+        !result ||
+        !result.success
+    ) {
 
         alert(
-            result.message ||
+            result?.message ||
             "Hindi ma-load ang Sales Order."
         );
 
@@ -652,7 +812,9 @@ function renderSODetails(so) {
    RENDER DETAIL ITEMS
 ========================================================= */
 
-function renderSODetailItems(items) {
+function renderSODetailItems(
+    items
+) {
 
     const tbody =
         document.getElementById(
@@ -668,11 +830,17 @@ function renderSODetailItems(items) {
     tbody.innerHTML = "";
 
 
-    if (!items.length) {
+    if (
+        !Array.isArray(items) ||
+        items.length === 0
+    ) {
 
         tbody.innerHTML = `
             <tr>
-                <td colspan="100%" style="text-align:center;">
+                <td
+                    colspan="100%"
+                    style="text-align:center;"
+                >
                     No items.
                 </td>
             </tr>
@@ -687,7 +855,9 @@ function renderSODetailItems(items) {
         function(item, index) {
 
             const row =
-                document.createElement("tr");
+                document.createElement(
+                    "tr"
+                );
 
 
             row.innerHTML = `
@@ -700,7 +870,9 @@ function renderSODetailItems(items) {
                     <input
                         type="text"
                         class="so-detail-item-name"
-                        value="${escapeAttribute(item.itemName || "")}"
+                        value="${escapeAttribute(
+                            item.itemName || ""
+                        )}"
                         disabled
                     >
                 </td>
@@ -709,7 +881,9 @@ function renderSODetailItems(items) {
                     <input
                         type="text"
                         class="so-detail-description"
-                        value="${escapeAttribute(item.description || "")}"
+                        value="${escapeAttribute(
+                            item.description || ""
+                        )}"
                         disabled
                     >
                 </td>
@@ -718,9 +892,13 @@ function renderSODetailItems(items) {
                     <input
                         type="number"
                         class="so-detail-qty"
-                        value="${Number(item.qty || 0)}"
+                        value="${Number(
+                            item.qty || 0
+                        )}"
                         disabled
-                        oninput="calculateDetailTotals()"
+                        oninput="
+                            calculateDetailTotals()
+                        "
                     >
                 </td>
 
@@ -728,7 +906,9 @@ function renderSODetailItems(items) {
                     <input
                         type="text"
                         class="so-detail-unit"
-                        value="${escapeAttribute(item.unit || "")}"
+                        value="${escapeAttribute(
+                            item.unit || ""
+                        )}"
                         disabled
                     >
                 </td>
@@ -737,21 +917,29 @@ function renderSODetailItems(items) {
                     <input
                         type="number"
                         class="so-detail-amount"
-                        value="${Number(item.amount || 0)}"
+                        value="${Number(
+                            item.amount || 0
+                        )}"
                         disabled
-                        oninput="calculateDetailTotals()"
+                        oninput="
+                            calculateDetailTotals()
+                        "
                     >
                 </td>
 
                 <td class="so-detail-total">
-                    ${formatMoney(item.total)}
+                    ${formatMoney(
+                        item.total
+                    )}
                 </td>
 
                 <td>
                     <button
                         type="button"
                         class="detail-delete-item"
-                        onclick="deleteDetailItem(this)"
+                        onclick="
+                            deleteDetailItem(this)
+                        "
                         style="display:none;"
                     >
                         DELETE
@@ -788,10 +976,14 @@ function enableSOUpdate() {
    SET DETAIL EDIT MODE
 ========================================================= */
 
-function setDetailsEditMode(enabled) {
+function setDetailsEditMode(
+    enabled
+) {
 
     soDetailsEditMode =
-        Boolean(enabled);
+        Boolean(
+            enabled
+        );
 
 
     const detailsPage =
@@ -814,7 +1006,9 @@ function setDetailsEditMode(enabled) {
     inputs.forEach(
         function(input) {
 
-            /* SO Number remains readonly */
+            /*
+             * SO Number remains disabled.
+             */
 
             if (
                 input.id ===
@@ -904,7 +1098,9 @@ function addDetailItem() {
 
 
     const row =
-        document.createElement("tr");
+        document.createElement(
+            "tr"
+        );
 
 
     const index =
@@ -941,7 +1137,9 @@ function addDetailItem() {
                 class="so-detail-qty"
                 value="1"
                 min="0"
-                oninput="calculateDetailTotals()"
+                oninput="
+                    calculateDetailTotals()
+                "
             >
         </td>
 
@@ -960,7 +1158,9 @@ function addDetailItem() {
                 value="0"
                 min="0"
                 step="0.01"
-                oninput="calculateDetailTotals()"
+                oninput="
+                    calculateDetailTotals()
+                "
             >
         </td>
 
@@ -972,7 +1172,9 @@ function addDetailItem() {
             <button
                 type="button"
                 class="detail-delete-item"
-                onclick="deleteDetailItem(this)"
+                onclick="
+                    deleteDetailItem(this)
+                "
             >
                 DELETE
             </button>
@@ -998,7 +1200,9 @@ function addDetailItem() {
    DELETE DETAIL ITEM
 ========================================================= */
 
-function deleteDetailItem(button) {
+function deleteDetailItem(
+    button
+) {
 
     if (!soDetailsEditMode) {
         return;
@@ -1006,7 +1210,9 @@ function deleteDetailItem(button) {
 
 
     const row =
-        button.closest("tr");
+        button.closest(
+            "tr"
+        );
 
 
     if (row) {
@@ -1117,7 +1323,9 @@ function calculateDetailTotals() {
                 !qtyInput ||
                 !amountInput
             ) {
+
                 return;
+
             }
 
 
@@ -1137,23 +1345,22 @@ function calculateDetailTotals() {
                 qty * amount;
 
 
-            subtotal += total;
+            subtotal +=
+                total;
 
 
             if (totalCell) {
 
                 totalCell.textContent =
-                    formatMoney(total);
+                    formatMoney(
+                        total
+                    );
 
             }
 
         }
     );
 
-
-    /*
-     * Discount is taken from current SO.
-     */
 
     const discount =
         Number(
@@ -1162,7 +1369,8 @@ function calculateDetailTotals() {
 
 
     const vatable =
-        subtotal - discount;
+        subtotal -
+        discount;
 
 
     const vatRate =
@@ -1170,40 +1378,52 @@ function calculateDetailTotals() {
 
 
     const vatAmount =
-        vatable * vatRate;
+        vatable *
+        vatRate;
 
 
     const grandTotal =
-        vatable + vatAmount;
+        vatable +
+        vatAmount;
 
 
     setText(
         "detailSubtotal",
-        formatMoney(subtotal)
+        formatMoney(
+            subtotal
+        )
     );
 
 
     setText(
         "detailDiscount",
-        formatMoney(discount)
+        formatMoney(
+            discount
+        )
     );
 
 
     setText(
         "detailVatable",
-        formatMoney(vatable)
+        formatMoney(
+            vatable
+        )
     );
 
 
     setText(
         "detailVAT",
-        formatMoney(vatAmount)
+        formatMoney(
+            vatAmount
+        )
     );
 
 
     setText(
         "detailGrandTotal",
-        formatMoney(grandTotal)
+        formatMoney(
+            grandTotal
+        )
     );
 
 }
@@ -1237,7 +1457,9 @@ async function saveSOUpdate() {
         function(item) {
 
             subtotal +=
-                Number(item.total || 0);
+                Number(
+                    item.total || 0
+                );
 
         }
     );
@@ -1250,7 +1472,8 @@ async function saveSOUpdate() {
 
 
     const vatable =
-        subtotal - discount;
+        subtotal -
+        discount;
 
 
     const vatRate =
@@ -1258,11 +1481,13 @@ async function saveSOUpdate() {
 
 
     const vatAmount =
-        vatable * vatRate;
+        vatable *
+        vatRate;
 
 
     const grandTotal =
-        vatable + vatAmount;
+        vatable +
+        vatAmount;
 
 
     const data = {
@@ -1396,10 +1621,13 @@ async function saveSOUpdate() {
     }
 
 
-    if (!result.success) {
+    if (
+        !result ||
+        !result.success
+    ) {
 
         alert(
-            result.message ||
+            result?.message ||
             "Failed to update Sales Order."
         );
 
@@ -1450,8 +1678,7 @@ function collectDetailItems() {
         );
 
 
-    const items =
-        [];
+    const items = [];
 
 
     rows.forEach(
@@ -1525,7 +1752,8 @@ function collectDetailItems() {
 
 
             const total =
-                qty * amount;
+                qty *
+                amount;
 
 
             items.push({
@@ -1585,9 +1813,11 @@ async function cancelSelectedSO() {
 
 
     if (
-        String(so.status)
-            .toUpperCase()
-        === "CANCELLED"
+        String(
+            so.status
+        )
+        .toUpperCase() ===
+        "CANCELLED"
     ) {
 
         alert(
@@ -1622,10 +1852,13 @@ async function cancelSelectedSO() {
         );
 
 
-    if (!result.success) {
+    if (
+        !result ||
+        !result.success
+    ) {
 
         alert(
-            result.message ||
+            result?.message ||
             "Failed to cancel Sales Order."
         );
 
@@ -1740,10 +1973,15 @@ function closeSODetails() {
    UTILITY FUNCTIONS
 ========================================================= */
 
-function setValue(id, value) {
+function setValue(
+    id,
+    value
+) {
 
     const element =
-        document.getElementById(id);
+        document.getElementById(
+            id
+        );
 
 
     if (!element) {
@@ -1762,7 +2000,9 @@ function setValue(id, value) {
 function getValue(id) {
 
     const element =
-        document.getElementById(id);
+        document.getElementById(
+            id
+        );
 
 
     if (!element) {
@@ -1777,10 +2017,15 @@ function getValue(id) {
 }
 
 
-function setText(id, value) {
+function setText(
+    id,
+    value
+) {
 
     const element =
-        document.getElementById(id);
+        document.getElementById(
+            id
+        );
 
 
     if (!element) {
@@ -1803,7 +2048,9 @@ function setText(id, value) {
 function formatMoney(value) {
 
     const number =
-        Number(value || 0);
+        Number(
+            value || 0
+        );
 
 
     return number.toLocaleString(
@@ -1852,7 +2099,9 @@ function escapeHTML(value) {
 }
 
 
-function escapeAttribute(value) {
+function escapeAttribute(
+    value
+) {
 
     return escapeHTML(
         value
@@ -1861,7 +2110,9 @@ function escapeAttribute(value) {
 }
 
 
-function cssEscape(value) {
+function cssEscape(
+    value
+) {
 
     if (
         window.CSS &&
@@ -1892,14 +2143,6 @@ function cssEscape(value) {
 document.addEventListener(
     "DOMContentLoaded",
     function() {
-
-        /*
-         * Huwag automatic mag-load kung
-         * hindi pa naka-display ang Sales Order page.
-         *
-         * Main index.html ang tatawag sa
-         * loadSOList().
-         */
 
         console.log(
             "LOGIS-TECH Sales Order module loaded."
