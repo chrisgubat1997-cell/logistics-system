@@ -3,9 +3,24 @@
    CREATE SALES ORDER
 ===================================================== */
 
+
+/* =====================================================
+   CONSTANTS
+===================================================== */
+
 const VAT_RATE = 0.12;
 
+const SO_FILE_DB_NAME = "LOGISTECH_SO_FILES_DB";
+const SO_FILE_STORE = "soFiles";
+const SO_FILE_DB_VERSION = 1;
+
+
+/* =====================================================
+   PAGE STATE
+===================================================== */
+
 let soItemCount = 0;
+
 let soCreateFiles = [];
 
 
@@ -15,7 +30,7 @@ let soCreateFiles = [];
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    console.log("Create Sales Order Loaded");
+    console.log("LOGIS-TECH Create Sales Order Loaded");
 
     initializeCreateSO();
 
@@ -30,63 +45,67 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function initializeCreateSO() {
 
-    const dateInput =
-        document.getElementById("soDate");
-
-    if (dateInput && !dateInput.value) {
-
-        const today =
-            new Date();
-
-        const year =
-            today.getFullYear();
-
-        const month =
-            String(
-                today.getMonth() + 1
-            ).padStart(2, "0");
-
-        const day =
-            String(
-                today.getDate()
-            ).padStart(2, "0");
-
-        dateInput.value =
-            `${year}-${month}-${day}`;
-
-    }
-
+    setDefaultDate();
 
     generateSONumber();
 
-
-    const discount =
-        document.getElementById("soDiscount");
-
-    if (discount) {
-
-        discount.addEventListener(
-            "input",
-            calculateSOTotals
-        );
-
-    }
-
-
-    const vatable =
-        document.getElementById("soVatable");
-
-    if (vatable) {
-
-        vatable.addEventListener(
-            "change",
-            calculateSOTotals
-        );
-
-    }
-
-
     calculateSOTotals();
+
+}
+
+
+/* =====================================================
+   DEFAULT DATE
+===================================================== */
+
+function setDefaultDate() {
+
+    const dateInput =
+        document.getElementById("soDate");
+
+
+    if (!dateInput) {
+
+        return;
+
+    }
+
+
+    if (dateInput.value) {
+
+        return;
+
+    }
+
+
+    const today =
+        new Date();
+
+
+    const year =
+        today.getFullYear();
+
+
+    const month =
+        String(
+            today.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            today.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    dateInput.value =
+        `${year}-${month}-${day}`;
 
 }
 
@@ -100,7 +119,9 @@ function generateSONumber() {
     const year =
         new Date().getFullYear();
 
+
     let salesOrders = [];
+
 
     try {
 
@@ -113,38 +134,57 @@ function generateSONumber() {
 
     } catch (error) {
 
+        console.error(
+            "Unable to read Sales Orders:",
+            error
+        );
+
         salesOrders = [];
 
     }
 
 
-    let highest = 0;
+    let highestNumber = 0;
 
 
     salesOrders.forEach(function (so) {
 
-        const match =
+        const soNumber =
             String(
-                so.soNumber || ""
-            ).match(
-                new RegExp(
-                    "^SO-" +
-                    year +
-                    "-(\\d+)$"
-                )
+                so?.soNumber || ""
             );
 
 
-        if (match) {
+        const pattern =
+            new RegExp(
+                "^SO-" +
+                year +
+                "-(\\d+)$"
+            );
 
-            const number =
-                Number(match[1]) || 0;
 
-            if (number > highest) {
+        const match =
+            soNumber.match(pattern);
 
-                highest = number;
 
-            }
+        if (!match) {
+
+            return;
+
+        }
+
+
+        const number =
+            Number(match[1]) || 0;
+
+
+        if (
+            number >
+            highestNumber
+        ) {
+
+            highestNumber =
+                number;
 
         }
 
@@ -153,7 +193,7 @@ function generateSONumber() {
 
     const nextNumber =
         String(
-            highest + 1
+            highestNumber + 1
         ).padStart(
             5,
             "0"
@@ -212,35 +252,49 @@ function addSOItem() {
             ${soItemCount}
         </td>
 
+
         <td>
+
             <input
                 type="text"
                 class="item-name"
-                placeholder="Item name">
+                placeholder="Item name"
+            >
+
         </td>
 
+
         <td>
+
             <input
                 type="text"
                 class="item-description"
-                placeholder="Description">
+                placeholder="Description"
+            >
+
         </td>
 
+
         <td>
+
             <input
                 type="number"
                 class="item-qty"
                 min="0"
                 step="0.01"
                 value="1"
-                oninput="calculateSOItemTotal(this)">
+                oninput="calculateSOItemTotal(this)"
+            >
+
         </td>
+
 
         <td>
 
             <select
                 class="item-unit"
-                onchange="handleUnitChange(this)">
+                onchange="handleUnitChange(this)"
+            >
 
                 <option value="pcs">
                     pcs
@@ -284,41 +338,51 @@ function addSOItem() {
 
             </select>
 
+
             <input
                 type="text"
                 class="custom-unit-input"
                 placeholder="Custom unit"
-                style="display:none;">
+                style="display:none;"
+            >
 
         </td>
 
+
         <td>
+
             <input
                 type="number"
                 class="item-amount"
                 min="0"
                 step="0.01"
                 value="0"
-                oninput="calculateSOItemTotal(this)">
+                oninput="calculateSOItemTotal(this)"
+            >
+
         </td>
 
+
         <td>
+
             <input
                 type="text"
                 class="item-total"
                 value="₱0.00"
-                readonly>
+                readonly
+            >
+
         </td>
+
 
         <td>
 
             <button
                 type="button"
                 class="delete-item"
-                onclick="deleteSOItem(this)">
-
+                onclick="deleteSOItem(this)"
+            >
                 DELETE
-
             </button>
 
         </td>
@@ -329,19 +393,23 @@ function addSOItem() {
     body.appendChild(row);
 
 
-    calculateSOTotals();
+    calculateSOItemTotal(
+        row.querySelector(
+            ".item-qty"
+        )
+    );
 
 }
 
 
 /* =====================================================
-   CALCULATE ITEM
+   CALCULATE ITEM TOTAL
 ===================================================== */
 
 function calculateSOItemTotal(input) {
 
     const row =
-        input.closest("tr");
+        input?.closest("tr");
 
 
     if (!row) {
@@ -447,11 +515,14 @@ function calculateSOTotals() {
 
 
     const discount =
-        Number(
-            document.getElementById(
-                "soDiscount"
-            )?.value
-        ) || 0;
+        Math.max(
+            0,
+            Number(
+                document.getElementById(
+                    "soDiscount"
+                )?.value
+            ) || 0
+        );
 
 
     const vatable =
@@ -462,21 +533,22 @@ function calculateSOTotals() {
         );
 
 
-    const taxable =
+    const taxableAmount =
         Math.max(
             0,
             subtotal - discount
         );
 
 
-    const vat =
+    const vatAmount =
         vatable
-            ? taxable * VAT_RATE
+            ? taxableAmount * VAT_RATE
             : 0;
 
 
     const grandTotal =
-        taxable + vat;
+        taxableAmount +
+        vatAmount;
 
 
     setText(
@@ -487,7 +559,7 @@ function calculateSOTotals() {
 
     setText(
         "soVAT",
-        formatMoney(vat)
+        formatMoney(vatAmount)
     );
 
 
@@ -495,6 +567,29 @@ function calculateSOTotals() {
         "soGrandTotal",
         formatMoney(grandTotal)
     );
+
+
+    return {
+
+        subtotal:
+            subtotal,
+
+        discount:
+            discount,
+
+        vatable:
+            vatable,
+
+        vatRate:
+            VAT_RATE,
+
+        vatAmount:
+            vatAmount,
+
+        grandTotal:
+            grandTotal
+
+    };
 
 }
 
@@ -506,7 +601,7 @@ function calculateSOTotals() {
 function handleUnitChange(select) {
 
     const row =
-        select.closest("tr");
+        select?.closest("tr");
 
 
     if (!row) {
@@ -516,13 +611,13 @@ function handleUnitChange(select) {
     }
 
 
-    const custom =
+    const customInput =
         row.querySelector(
             ".custom-unit-input"
         );
 
 
-    if (!custom) {
+    if (!customInput) {
 
         return;
 
@@ -534,15 +629,17 @@ function handleUnitChange(select) {
         "custom"
     ) {
 
-        custom.style.display =
+        customInput.style.display =
             "block";
+
+        customInput.focus();
 
     } else {
 
-        custom.style.display =
+        customInput.style.display =
             "none";
 
-        custom.value =
+        customInput.value =
             "";
 
     }
@@ -557,14 +654,17 @@ function handleUnitChange(select) {
 function deleteSOItem(button) {
 
     const row =
-        button.closest("tr");
+        button?.closest("tr");
 
 
-    if (row) {
+    if (!row) {
 
-        row.remove();
+        return;
 
     }
+
+
+    row.remove();
 
 
     renumberSOItems();
@@ -593,15 +693,15 @@ function renumberSOItems() {
     rows.forEach(
         function (row, index) {
 
-            const number =
+            const numberCell =
                 row.querySelector(
                     ".item-number"
                 );
 
 
-            if (number) {
+            if (numberCell) {
 
-                number.textContent =
+                numberCell.textContent =
                     index + 1;
 
             }
@@ -613,7 +713,7 @@ function renumberSOItems() {
 
 
 /* =====================================================
-   FILE UPLOAD
+   FILE UPLOAD SETUP
 ===================================================== */
 
 function setupFileUpload() {
@@ -626,7 +726,7 @@ function setupFileUpload() {
 
     if (!input) {
 
-        console.log(
+        console.warn(
             "SO File input not found."
         );
 
@@ -643,6 +743,13 @@ function setupFileUpload() {
                 this.files
             );
 
+
+            /*
+                Reset input so the same
+                PDF can be selected again
+                after removing it.
+            */
+
             this.value = "";
 
         }
@@ -655,7 +762,7 @@ function setupFileUpload() {
 
 
 /* =====================================================
-   HANDLE FILE SELECT
+   HANDLE FILE SELECTION
 ===================================================== */
 
 function handleSOFileSelect(files) {
@@ -681,8 +788,7 @@ function handleSOFileSelect(files) {
             if (!isPDF) {
 
                 alert(
-                    file.name +
-                    " is not a PDF file."
+                    `"${file.name}" is not a PDF file.`
                 );
 
                 return;
@@ -692,12 +798,13 @@ function handleSOFileSelect(files) {
 
             const duplicate =
                 soCreateFiles.some(
-                    function (existing) {
+                    function (existingFile) {
 
                         return (
-                            existing.name ===
+                            existingFile.name ===
                             file.name &&
-                            existing.size ===
+
+                            existingFile.size ===
                             file.size
                         );
 
@@ -724,7 +831,7 @@ function handleSOFileSelect(files) {
 
 
 /* =====================================================
-   RENDER FILES
+   RENDER SELECTED FILES
 ===================================================== */
 
 function renderSOFiles() {
@@ -746,7 +853,8 @@ function renderSOFiles() {
 
 
     if (
-        soCreateFiles.length === 0
+        soCreateFiles.length ===
+        0
     ) {
 
         list.innerHTML = `
@@ -797,10 +905,9 @@ function renderSOFiles() {
                 <button
                     type="button"
                     class="remove-file-btn"
-                    onclick="removeSOFile(${index})">
-
+                    onclick="removeSOFile(${index})"
+                >
                     REMOVE
-
                 </button>
 
             `;
@@ -815,10 +922,20 @@ function renderSOFiles() {
 
 
 /* =====================================================
-   REMOVE FILE
+   REMOVE SELECTED FILE
 ===================================================== */
 
 function removeSOFile(index) {
+
+    if (
+        index < 0 ||
+        index >= soCreateFiles.length
+    ) {
+
+        return;
+
+    }
+
 
     soCreateFiles.splice(
         index,
@@ -837,350 +954,547 @@ function removeSOFile(index) {
 
 async function saveSO() {
 
-    const soNumber =
-        getValue("soNumber");
-
-
-    const dateCreation =
-        getValue("soDate");
-
-
-    const clientName =
-        getValue("clientName");
-
-
-    const attention =
-        getValue("attention");
-
-
-    const billingAddress =
-        getValue("billingAddress");
-
-
-    const deliveryAddress =
-        getValue("deliveryAddress");
-
-
-    const project =
-        getValue("project");
-
-
-    const tin =
-        getValue("tinNumber");
-
-
-    const poNumber =
-        getValue("poNumber");
-
-
-    const terms =
-        getValue("terms");
-
-
-    const se =
-        getValue("soSE");
-
-
-    const jobOrder =
-        getValue("jobOrder");
-
-
-    const discount =
-        Number(
-            document.getElementById(
-                "soDiscount"
-            )?.value
-        ) || 0;
-
-
-    const vatable =
-        Boolean(
-            document.getElementById(
-                "soVatable"
-            )?.checked
+    const saveButton =
+        document.querySelector(
+            '.action-bar .btn-primary'
         );
 
 
-    /* VALIDATION */
+    /*
+        Prevent accidental double-click
+        while saving.
+    */
 
-    if (!soNumber) {
+    if (saveButton) {
 
-        alert(
-            "SO Number is required."
-        );
-
-        return;
+        saveButton.disabled = true;
 
     }
 
 
-    if (!clientName) {
+    try {
 
-        alert(
-            "Client Name is required."
-        );
-
-        return;
-
-    }
+        const soNumber =
+            getValue("soNumber");
 
 
-    if (!se) {
-
-        alert(
-            "Please select SE."
-        );
-
-        return;
-
-    }
+        const dateCreation =
+            getValue("soDate");
 
 
-    const rows =
-        document.querySelectorAll(
-            "#soItemsBody tr"
-        );
+        const clientName =
+            getValue("clientName");
 
 
-    if (!rows.length) {
-
-        alert(
-            "Please add at least one item."
-        );
-
-        return;
-
-    }
+        const attention =
+            getValue("attention");
 
 
-    const items = [];
+        const billingAddress =
+            getValue("billingAddress");
 
 
-    rows.forEach(function (row) {
-
-        let unit =
-            row.querySelector(
-                ".item-unit"
-            )?.value || "";
+        const deliveryAddress =
+            getValue("deliveryAddress");
 
 
-        const custom =
-            row.querySelector(
-                ".custom-unit-input"
+        const project =
+            getValue("project");
+
+
+        const tin =
+            getValue("tinNumber");
+
+
+        const poNumber =
+            getValue("poNumber");
+
+
+        const terms =
+            getValue("terms");
+
+
+        const se =
+            getValue("soSE");
+
+
+        const jobOrder =
+            getValue("jobOrder");
+
+
+        const discount =
+            Math.max(
+                0,
+                Number(
+                    document.getElementById(
+                        "soDiscount"
+                    )?.value
+                ) || 0
             );
 
 
-        if (
-            unit === "custom" &&
-            custom
-        ) {
+        const vatable =
+            Boolean(
+                document.getElementById(
+                    "soVatable"
+                )?.checked
+            );
 
-            unit =
-                custom.value.trim();
+
+        /* =================================================
+           VALIDATION
+        ================================================= */
+
+
+        if (!soNumber) {
+
+            alert(
+                "SO Number is required."
+            );
+
+            return;
 
         }
 
 
-        const qty =
-            Number(
-                row.querySelector(
-                    ".item-qty"
-                )?.value
-            ) || 0;
+        if (!dateCreation) {
+
+            alert(
+                "Date Creation is required."
+            );
+
+            return;
+
+        }
 
 
-        const amount =
-            Number(
-                row.querySelector(
-                    ".item-amount"
-                )?.value
-            ) || 0;
+        if (!clientName) {
+
+            alert(
+                "Client Name is required."
+            );
+
+            document
+                .getElementById(
+                    "clientName"
+                )
+                ?.focus();
+
+            return;
+
+        }
 
 
-        items.push({
+        if (!se) {
 
-            name:
+            alert(
+                "Please select SE."
+            );
+
+            document
+                .getElementById(
+                    "soSE"
+                )
+                ?.focus();
+
+            return;
+
+        }
+
+
+        const rows =
+            document.querySelectorAll(
+                "#soItemsBody tr"
+            );
+
+
+        if (!rows.length) {
+
+            alert(
+                "Please add at least one item."
+            );
+
+            return;
+
+        }
+
+
+        /* =================================================
+           COLLECT ITEMS
+        ================================================= */
+
+
+        const items = [];
+
+
+        for (
+            let index = 0;
+            index < rows.length;
+            index++
+        ) {
+
+            const row =
+                rows[index];
+
+
+            const name =
                 row.querySelector(
                     ".item-name"
-                )?.value.trim() || "",
+                )?.value.trim() || "";
 
-            description:
+
+            const description =
                 row.querySelector(
                     ".item-description"
-                )?.value.trim() || "",
-
-            qty: qty,
-
-            unit: unit,
-
-            amount: amount,
-
-            total:
-                qty * amount
-
-        });
-
-    });
+                )?.value.trim() || "";
 
 
-    const subtotal =
-        items.reduce(
-            function (sum, item) {
-
-                return sum +
-                    item.total;
-
-            },
-            0
-        );
+            const qty =
+                Number(
+                    row.querySelector(
+                        ".item-qty"
+                    )?.value
+                ) || 0;
 
 
-    const taxable =
-        Math.max(
-            0,
-            subtotal - discount
-        );
+            const amount =
+                Number(
+                    row.querySelector(
+                        ".item-amount"
+                    )?.value
+                ) || 0;
 
 
-    const vatAmount =
-        vatable
-            ? taxable * VAT_RATE
-            : 0;
-
-
-    const grandTotal =
-        taxable + vatAmount;
-
-
-    /* CHECK DUPLICATE SO */
-
-    let salesOrders = [];
-
-    try {
-
-        salesOrders =
-            JSON.parse(
-                localStorage.getItem(
-                    "salesOrders"
-                )
-            ) || [];
-
-    } catch (error) {
-
-        salesOrders = [];
-
-    }
-
-
-    const duplicate =
-        salesOrders.some(
-            function (so) {
-
-                return (
-                    so.soNumber ===
-                    soNumber
+            const unitSelect =
+                row.querySelector(
+                    ".item-unit"
                 );
 
+
+            const customUnit =
+                row.querySelector(
+                    ".custom-unit-input"
+                );
+
+
+            let unit =
+                unitSelect?.value || "";
+
+
+            if (
+                unit === "custom"
+            ) {
+
+                unit =
+                    customUnit
+                        ?.value
+                        .trim() || "";
+
             }
+
+
+            /* ITEM VALIDATION */
+
+
+            if (!name) {
+
+                alert(
+                    `Please enter Item Name for item #${index + 1}.`
+                );
+
+                row.querySelector(
+                    ".item-name"
+                )?.focus();
+
+                return;
+
+            }
+
+
+            if (
+                !unit
+            ) {
+
+                alert(
+                    `Please enter/select Unit for item #${index + 1}.`
+                );
+
+                return;
+
+            }
+
+
+            if (
+                qty <= 0
+            ) {
+
+                alert(
+                    `Quantity must be greater than 0 for item #${index + 1}.`
+                );
+
+                row.querySelector(
+                    ".item-qty"
+                )?.focus();
+
+                return;
+
+            }
+
+
+            if (
+                amount < 0
+            ) {
+
+                alert(
+                    `Amount cannot be negative for item #${index + 1}.`
+                );
+
+                row.querySelector(
+                    ".item-amount"
+                )?.focus();
+
+                return;
+
+            }
+
+
+            items.push({
+
+                itemNumber:
+                    index + 1,
+
+                name:
+                    name,
+
+                description:
+                    description,
+
+                qty:
+                    qty,
+
+                unit:
+                    unit,
+
+                amount:
+                    amount,
+
+                total:
+                    qty * amount
+
+            });
+
+        }
+
+
+        /* =================================================
+           CALCULATE FINAL TOTALS
+        ================================================= */
+
+
+        const subtotal =
+            items.reduce(
+                function (sum, item) {
+
+                    return (
+                        sum +
+                        item.total
+                    );
+
+                },
+                0
+            );
+
+
+        const taxableAmount =
+            Math.max(
+                0,
+                subtotal - discount
+            );
+
+
+        const vatAmount =
+            vatable
+                ? taxableAmount * VAT_RATE
+                : 0;
+
+
+        const grandTotal =
+            taxableAmount +
+            vatAmount;
+
+
+        /* =================================================
+           GET EXISTING SALES ORDERS
+        ================================================= */
+
+
+        let salesOrders = [];
+
+
+        try {
+
+            salesOrders =
+                JSON.parse(
+                    localStorage.getItem(
+                        "salesOrders"
+                    )
+                ) || [];
+
+
+            if (
+                !Array.isArray(
+                    salesOrders
+                )
+            ) {
+
+                salesOrders = [];
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Unable to read Sales Orders:",
+                error
+            );
+
+            salesOrders = [];
+
+        }
+
+
+        /* =================================================
+           DUPLICATE SO CHECK
+        ================================================= */
+
+
+        const duplicate =
+            salesOrders.some(
+                function (so) {
+
+                    return (
+                        String(
+                            so?.soNumber || ""
+                        ) ===
+                        soNumber
+                    );
+
+                }
+            );
+
+
+        if (duplicate) {
+
+            alert(
+                "Sales Order Number already exists."
+            );
+
+            generateSONumber();
+
+            return;
+
+        }
+
+
+        /* =================================================
+           CREATE SALES ORDER OBJECT
+        ================================================= */
+
+
+        const newSO = {
+
+            soNumber:
+                soNumber,
+
+            dateCreation:
+                dateCreation,
+
+            clientName:
+                clientName,
+
+            attention:
+                attention,
+
+            billingAddress:
+                billingAddress,
+
+            deliveryAddress:
+                deliveryAddress,
+
+            project:
+                project,
+
+            tin:
+                tin,
+
+            poNumber:
+                poNumber,
+
+            terms:
+                terms,
+
+            se:
+                se,
+
+            jobOrder:
+                jobOrder,
+
+            status:
+                "ACTIVE",
+
+            items:
+                items,
+
+            subtotal:
+                subtotal,
+
+            discount:
+                discount,
+
+            vatable:
+                vatable,
+
+            vatRate:
+                VAT_RATE,
+
+            vatAmount:
+                vatAmount,
+
+            grandTotal:
+                grandTotal,
+
+            createdAt:
+                new Date().toISOString()
+
+        };
+
+
+        /* =================================================
+           SAVE SO TO LOCAL STORAGE
+        ================================================= */
+
+
+        salesOrders.push(
+            newSO
         );
 
 
-    if (duplicate) {
-
-        alert(
-            "Sales Order Number already exists."
+        localStorage.setItem(
+            "salesOrders",
+            JSON.stringify(
+                salesOrders
+            )
         );
 
-        return;
 
-    }
-
-
-    /* CREATE SO */
-
-    const newSO = {
-
-        soNumber:
-            soNumber,
-
-        dateCreation:
-            dateCreation,
-
-        clientName:
-            clientName,
-
-        attention:
-            attention,
-
-        billingAddress:
-            billingAddress,
-
-        deliveryAddress:
-            deliveryAddress,
-
-        project:
-            project,
-
-        tin:
-            tin,
-
-        poNumber:
-            poNumber,
-
-        terms:
-            terms,
-
-        se:
-            se,
-
-        jobOrder:
-            jobOrder,
-
-        status:
-            "ACTIVE",
-
-        items:
-            items,
-
-        subtotal:
-            subtotal,
-
-        discount:
-            discount,
-
-        vatable:
-            vatable,
-
-        vatRate:
-            VAT_RATE,
-
-        vatAmount:
-            vatAmount,
-
-        grandTotal:
-            grandTotal
-
-    };
+        /* =================================================
+           SAVE PDF FILES TO INDEXED DB
+        ================================================= */
 
 
-    salesOrders.push(newSO);
+        let fileSaveError =
+            false;
 
-
-    localStorage.setItem(
-        "salesOrders",
-        JSON.stringify(
-            salesOrders
-        )
-    );
-
-
-    /* SAVE FILES */
-
-    if (
-        soCreateFiles.length > 0 &&
-        typeof saveSOFileToDB ===
-            "function"
-    ) {
 
         for (
             const file of soCreateFiles
@@ -1195,8 +1509,11 @@ async function saveSO() {
 
             } catch (error) {
 
+                fileSaveError =
+                    true;
+
                 console.error(
-                    "File save error:",
+                    "SO file save error:",
                     error
                 );
 
@@ -1204,22 +1521,79 @@ async function saveSO() {
 
         }
 
+
+        /* =================================================
+           SUCCESS MESSAGE
+        ================================================= */
+
+
+        let message =
+            "Sales Order saved successfully!\n\n" +
+            "SO: " +
+            soNumber +
+            "\n" +
+            "Grand Total: " +
+            formatMoney(
+                grandTotal
+            );
+
+
+        if (
+            soCreateFiles.length > 0
+        ) {
+
+            if (fileSaveError) {
+
+                message +=
+                    "\n\nSome PDF files could not be saved.";
+
+            } else {
+
+                message +=
+                    "\n" +
+                    "PDF Files: " +
+                    soCreateFiles.length;
+
+            }
+
+        }
+
+
+        alert(message);
+
+
+        /* =================================================
+           RETURN TO MAIN SYSTEM
+        ================================================= */
+
+
+        window.location.href =
+            "../index.html";
+
+
+    } catch (error) {
+
+        console.error(
+            "Save Sales Order Error:",
+            error
+        );
+
+
+        alert(
+            "An error occurred while saving the Sales Order.\n\n" +
+            "Please check the browser console."
+        );
+
+    } finally {
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                false;
+
+        }
+
     }
-
-
-    alert(
-        "Sales Order saved successfully!\n\n" +
-        "SO: " +
-        soNumber +
-        "\nGrand Total: " +
-        formatMoney(
-            grandTotal
-        )
-    );
-
-
-    window.location.href =
-        "../index.html";
 
 }
 
@@ -1236,16 +1610,60 @@ function closeCreateSO() {
         );
 
 
-    const client =
+    const clientName =
         getValue(
             "clientName"
         );
 
 
+    const attention =
+        getValue(
+            "attention"
+        );
+
+
+    const billingAddress =
+        getValue(
+            "billingAddress"
+        );
+
+
+    const deliveryAddress =
+        getValue(
+            "deliveryAddress"
+        );
+
+
+    const project =
+        getValue(
+            "project"
+        );
+
+
+    const poNumber =
+        getValue(
+            "poNumber"
+        );
+
+
+    const jobOrder =
+        getValue(
+            "jobOrder"
+        );
+
+
     const hasData =
-        client ||
-        rows.length > 0 ||
-        soCreateFiles.length > 0;
+        Boolean(
+            clientName ||
+            attention ||
+            billingAddress ||
+            deliveryAddress ||
+            project ||
+            poNumber ||
+            jobOrder ||
+            rows.length > 0 ||
+            soCreateFiles.length > 0
+        );
 
 
     if (hasData) {
@@ -1272,7 +1690,189 @@ function closeCreateSO() {
 
 
 /* =====================================================
-   UTILITIES
+   INDEXED DB
+   ===================================================== */
+
+function openSOFileDB() {
+
+    return new Promise(
+        function (resolve, reject) {
+
+            const request =
+                indexedDB.open(
+                    SO_FILE_DB_NAME,
+                    SO_FILE_DB_VERSION
+                );
+
+
+            request.onupgradeneeded =
+                function (event) {
+
+                    const db =
+                        event.target.result;
+
+
+                    if (
+                        !db.objectStoreNames.contains(
+                            SO_FILE_STORE
+                        )
+                    ) {
+
+                        const store =
+                            db.createObjectStore(
+                                SO_FILE_STORE,
+                                {
+                                    keyPath:
+                                        "id",
+                                    autoIncrement:
+                                        true
+                                }
+                            );
+
+
+                        store.createIndex(
+                            "soNumber",
+                            "soNumber",
+                            {
+                                unique:
+                                    false
+                            }
+                        );
+
+                    }
+
+                };
+
+
+            request.onsuccess =
+                function () {
+
+                    resolve(
+                        request.result
+                    );
+
+                };
+
+
+            request.onerror =
+                function () {
+
+                    reject(
+                        request.error
+                    );
+
+                };
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   SAVE PDF TO INDEXED DB
+===================================================== */
+
+function saveSOFileToDB(
+    soNumber,
+    file
+) {
+
+    return new Promise(
+        async function (resolve, reject) {
+
+            try {
+
+                const db =
+                    await openSOFileDB();
+
+
+                const transaction =
+                    db.transaction(
+                        SO_FILE_STORE,
+                        "readwrite"
+                    );
+
+
+                const store =
+                    transaction.objectStore(
+                        SO_FILE_STORE
+                    );
+
+
+                const fileRecord = {
+
+                    soNumber:
+                        soNumber,
+
+                    fileName:
+                        file.name,
+
+                    fileType:
+                        file.type ||
+                        "application/pdf",
+
+                    fileSize:
+                        file.size,
+
+                    file:
+                        file,
+
+                    uploadedAt:
+                        new Date().toISOString()
+
+                };
+
+
+                const request =
+                    store.add(
+                        fileRecord
+                    );
+
+
+                request.onsuccess =
+                    function () {
+
+                        resolve(
+                            request.result
+                        );
+
+                    };
+
+
+                request.onerror =
+                    function () {
+
+                        reject(
+                            request.error
+                        );
+
+                    };
+
+
+                transaction.onerror =
+                    function () {
+
+                        reject(
+                            transaction.error
+                        );
+
+                    };
+
+            } catch (error) {
+
+                reject(error);
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   UTILITY - GET VALUE
 ===================================================== */
 
 function getValue(id) {
@@ -1295,7 +1895,14 @@ function getValue(id) {
 }
 
 
-function setText(id, value) {
+/* =====================================================
+   UTILITY - SET TEXT
+===================================================== */
+
+function setText(
+    id,
+    value
+) {
 
     const element =
         document.getElementById(id);
@@ -1311,27 +1918,43 @@ function setText(id, value) {
 }
 
 
+/* =====================================================
+   UTILITY - FORMAT MONEY
+===================================================== */
+
 function formatMoney(value) {
 
     const number =
         Number(value) || 0;
 
 
-    return "₱" +
+    return (
+        "₱" +
         number.toLocaleString(
             "en-PH",
             {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
+                minimumFractionDigits:
+                    2,
+
+                maximumFractionDigits:
+                    2
             }
-        );
+        )
+    );
 
 }
 
 
+/* =====================================================
+   UTILITY - FORMAT FILE SIZE
+===================================================== */
+
 function formatFileSize(bytes) {
 
-    if (!bytes) {
+    if (
+        !bytes ||
+        bytes <= 0
+    ) {
 
         return "0 Bytes";
 
@@ -1339,54 +1962,70 @@ function formatFileSize(bytes) {
 
 
     const units = [
+
         "Bytes",
         "KB",
         "MB",
         "GB"
+
     ];
 
 
     const index =
-        Math.floor(
-            Math.log(bytes) /
-            Math.log(1024)
+        Math.min(
+            Math.floor(
+                Math.log(bytes) /
+                Math.log(1024)
+            ),
+            units.length - 1
         );
 
 
     return (
-        bytes /
-        Math.pow(
-            1024,
-            index
-        )
-    ).toFixed(2) +
-    " " +
-    units[index];
+        (
+            bytes /
+            Math.pow(
+                1024,
+                index
+            )
+        ).toFixed(2) +
+        " " +
+        units[index]
+    );
 
 }
 
+
+/* =====================================================
+   UTILITY - ESCAPE HTML
+===================================================== */
 
 function escapeHTML(value) {
 
     return String(
         value ?? ""
     )
+
         .replace(
             /&/g,
             "&amp;"
         )
+
         .replace(
             /</g,
             "&lt;"
         )
+
         .replace(
             />/g,
             "&gt;"
         )
+
         .replace(
             /"/g,
             "&quot;"
         )
+
         .replace(
             /'/g,
             "&#039;"
