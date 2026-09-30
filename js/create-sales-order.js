@@ -1,13 +1,20 @@
 /* =====================================================
-   LOGI-TECH CREATE SALES ORDER
+   LOGIS-TECH CREATE SALES ORDER
 ===================================================== */
 
 let soCreateFiles = [];
+let soItemCount = 0;
+
+
+/* =====================================================
+   PAGE LOAD
+===================================================== */
 
 document.addEventListener("DOMContentLoaded", function () {
 
     console.log("Create Sales Order Loaded");
 
+    // File upload
     const fileInput =
         document.getElementById("soFileInput");
 
@@ -20,7 +27,344 @@ document.addEventListener("DOMContentLoaded", function () {
 
     }
 
+    // Generate SO number if empty
+    const soNumber =
+        document.getElementById("soNumber");
+
+    if (soNumber && !soNumber.value) {
+
+        const now = new Date();
+
+        const year =
+            now.getFullYear();
+
+        const random =
+            Math.floor(
+                1000 + Math.random() * 9000
+            );
+
+        soNumber.value =
+            `SO-${year}-${random}`;
+
+    }
+
 });
+
+
+/* =====================================================
+   ADD ITEM
+===================================================== */
+
+function addSOItem() {
+
+    const tbody =
+        document.getElementById("soItemsBody");
+
+    if (!tbody) {
+
+        console.error(
+            "soItemsBody not found."
+        );
+
+        return;
+    }
+
+    soItemCount++;
+
+    const row =
+        document.createElement("tr");
+
+    row.innerHTML = `
+        <td>${soItemCount}</td>
+
+        <td>
+            <input
+                type="text"
+                class="so-item-name"
+                placeholder="Item name"
+            >
+        </td>
+
+        <td>
+            <input
+                type="text"
+                class="so-item-description"
+                placeholder="Description"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="so-item-qty"
+                value="1"
+                min="0"
+                step="1"
+                onchange="calculateSOTotals()"
+            >
+        </td>
+
+        <td>
+            <input
+                type="text"
+                class="so-item-unit"
+                placeholder="pcs"
+            >
+        </td>
+
+        <td>
+            <input
+                type="number"
+                class="so-item-amount"
+                value="0"
+                min="0"
+                step="0.01"
+                onchange="calculateSOTotals()"
+            >
+        </td>
+
+        <td class="so-item-total">
+            ₱0.00
+        </td>
+
+        <td>
+            <button
+                type="button"
+                class="remove-item-btn"
+                onclick="removeSOItem(this)"
+            >
+                REMOVE
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(row);
+
+    calculateSOTotals();
+
+}
+
+
+/* =====================================================
+   REMOVE ITEM
+===================================================== */
+
+function removeSOItem(button) {
+
+    const row =
+        button.closest("tr");
+
+    if (row) {
+
+        row.remove();
+
+    }
+
+    renumberSOItems();
+
+    calculateSOTotals();
+
+}
+
+
+/* =====================================================
+   RENUMBER ITEMS
+===================================================== */
+
+function renumberSOItems() {
+
+    const rows =
+        document.querySelectorAll(
+            "#soItemsBody tr"
+        );
+
+    rows.forEach(function (row, index) {
+
+        const numberCell =
+            row.querySelector("td:first-child");
+
+        if (numberCell) {
+
+            numberCell.textContent =
+                index + 1;
+
+        }
+
+    });
+
+    soItemCount = rows.length;
+
+}
+
+
+/* =====================================================
+   CALCULATE TOTALS
+===================================================== */
+
+function calculateSOTotals() {
+
+    const rows =
+        document.querySelectorAll(
+            "#soItemsBody tr"
+        );
+
+    let subtotal = 0;
+
+    rows.forEach(function (row) {
+
+        const qtyInput =
+            row.querySelector(
+                ".so-item-qty"
+            );
+
+        const amountInput =
+            row.querySelector(
+                ".so-item-amount"
+            );
+
+        const totalCell =
+            row.querySelector(
+                ".so-item-total"
+            );
+
+        const qty =
+            parseFloat(
+                qtyInput?.value
+            ) || 0;
+
+        const amount =
+            parseFloat(
+                amountInput?.value
+            ) || 0;
+
+        const total =
+            qty * amount;
+
+        subtotal += total;
+
+        if (totalCell) {
+
+            totalCell.textContent =
+                formatCurrency(total);
+
+        }
+
+    });
+
+
+    /* DISCOUNT */
+
+    const discountInput =
+        document.getElementById(
+            "soDiscount"
+        );
+
+    const discount =
+        parseFloat(
+            discountInput?.value
+        ) || 0;
+
+
+    /* VATABLE */
+
+    const vatable =
+        subtotal - discount;
+
+
+    /* VAT */
+
+    const vatRateInput =
+        document.getElementById(
+            "soVATRate"
+        );
+
+    const vatRate =
+        parseFloat(
+            vatRateInput?.value
+        ) || 12;
+
+
+    const vat =
+        vatable * (vatRate / 100);
+
+
+    /* GRAND TOTAL */
+
+    const grandTotal =
+        vatable + vat;
+
+
+    /* DISPLAY */
+
+    const subtotalDisplay =
+        document.getElementById(
+            "soSubtotal"
+        );
+
+    const vatableDisplay =
+        document.getElementById(
+            "soVatable"
+        );
+
+    const vatDisplay =
+        document.getElementById(
+            "soVAT"
+        );
+
+    const grandTotalDisplay =
+        document.getElementById(
+            "soGrandTotal"
+        );
+
+
+    if (subtotalDisplay) {
+
+        subtotalDisplay.textContent =
+            formatCurrency(subtotal);
+
+    }
+
+    if (vatableDisplay) {
+
+        vatableDisplay.textContent =
+            formatCurrency(vatable);
+
+    }
+
+    if (vatDisplay) {
+
+        vatDisplay.textContent =
+            formatCurrency(vat);
+
+    }
+
+    if (grandTotalDisplay) {
+
+        grandTotalDisplay.textContent =
+            formatCurrency(grandTotal);
+
+    }
+
+}
+
+
+/* =====================================================
+   CURRENCY
+===================================================== */
+
+function formatCurrency(amount) {
+
+    return "₱" +
+        Number(amount || 0)
+            .toLocaleString(
+                "en-PH",
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
+
+}
 
 
 /* =====================================================
@@ -30,41 +374,61 @@ document.addEventListener("DOMContentLoaded", function () {
 function handleSOFileSelect(event) {
 
     const files =
-        Array.from(event.target.files);
+        Array.from(
+            event.target.files || []
+        );
 
     files.forEach(function (file) {
 
-        if (
-            file.type !== "application/pdf" &&
-            !file.name.toLowerCase().endsWith(".pdf")
-        ) {
+        /* PDF ONLY */
+
+        const isPDF =
+            file.type === "application/pdf" ||
+            file.name
+                .toLowerCase()
+                .endsWith(".pdf");
+
+        if (!isPDF) {
 
             alert(
-                "Only PDF files are allowed:\n\n" +
-                file.name
+                `"${file.name}" is not a PDF file.`
             );
 
             return;
-
         }
 
-        const alreadyAdded =
-            soCreateFiles.some(function (existingFile) {
 
-                return (
-                    existingFile.name === file.name &&
-                    existingFile.size === file.size
-                );
+        /* DUPLICATE CHECK */
 
-            });
+        const duplicate =
+            soCreateFiles.some(
+                function (existingFile) {
 
-        if (!alreadyAdded) {
+                    return (
+                        existingFile.name ===
+                            file.name &&
+                        existingFile.size ===
+                            file.size
+                    );
 
-            soCreateFiles.push(file);
+                }
+            );
 
+
+        if (duplicate) {
+
+            alert(
+                `"${file.name}" is already selected.`
+            );
+
+            return;
         }
+
+
+        soCreateFiles.push(file);
 
     });
+
 
     renderSOFiles();
 
@@ -74,23 +438,26 @@ function handleSOFileSelect(event) {
 
 
 /* =====================================================
-   DISPLAY SELECTED FILES
+   RENDER FILES
 ===================================================== */
 
 function renderSOFiles() {
 
-    const fileList =
-        document.getElementById("soFileList");
+    const container =
+        document.getElementById(
+            "soFileList"
+        );
 
-    if (!fileList) {
+    if (!container) {
+
         return;
+
     }
 
-    fileList.innerHTML = "";
 
     if (soCreateFiles.length === 0) {
 
-        fileList.innerHTML = `
+        container.innerHTML = `
             <div class="no-files">
                 No files selected.
             </div>
@@ -101,40 +468,46 @@ function renderSOFiles() {
     }
 
 
-    soCreateFiles.forEach(function (file, index) {
+    container.innerHTML = "";
 
-        const row =
-            document.createElement("div");
 
-        row.className = "so-file-row";
+    soCreateFiles.forEach(
+        function (file, index) {
 
-        row.innerHTML = `
+            const row =
+                document.createElement("div");
 
-            <div>
+            row.className =
+                "so-file-row";
 
-                <div class="so-file-name">
-                    📄 ${escapeSOFileName(file.name)}
+            row.innerHTML = `
+
+                <div>
+
+                    <div class="so-file-name">
+                        ${escapeSOFileName(file.name)}
+                    </div>
+
+                    <div class="so-file-size">
+                        ${formatSOFileSize(file.size)}
+                    </div>
+
                 </div>
 
-                <div class="so-file-size">
-                    ${formatSOFileSize(file.size)}
-                </div>
+                <button
+                    type="button"
+                    class="remove-file-btn"
+                    onclick="removeSOFile(${index})"
+                >
+                    REMOVE
+                </button>
 
-            </div>
+            `;
 
-            <button
-                type="button"
-                class="remove-file-btn"
-                onclick="removeSOFile(${index})"
-            >
-                REMOVE
-            </button>
+            container.appendChild(row);
 
-        `;
-
-        fileList.appendChild(row);
-
-    });
+        }
+    );
 
 }
 
@@ -145,16 +518,10 @@ function renderSOFiles() {
 
 function removeSOFile(index) {
 
-    if (
-        index < 0 ||
-        index >= soCreateFiles.length
-    ) {
-
-        return;
-
-    }
-
-    soCreateFiles.splice(index, 1);
+    soCreateFiles.splice(
+        index,
+        1
+    );
 
     renderSOFiles();
 
@@ -168,7 +535,9 @@ function removeSOFile(index) {
 function formatSOFileSize(bytes) {
 
     if (bytes === 0) {
+
         return "0 Bytes";
+
     }
 
     const units = [
@@ -186,8 +555,10 @@ function formatSOFileSize(bytes) {
 
     return (
         parseFloat(
-            (bytes / Math.pow(1024, i))
-            .toFixed(2)
+            (
+                bytes /
+                Math.pow(1024, i)
+            ).toFixed(2)
         ) +
         " " +
         units[i]
@@ -197,7 +568,7 @@ function formatSOFileSize(bytes) {
 
 
 /* =====================================================
-   FILE NAME SAFETY
+   ESCAPE FILE NAME
 ===================================================== */
 
 function escapeSOFileName(name) {
@@ -213,53 +584,31 @@ function escapeSOFileName(name) {
 
 
 /* =====================================================
-   ADD ITEM
-===================================================== */
-
-function addSOItem() {
-
-    console.log("Add Sales Order Item");
-
-}
-
-
-/* =====================================================
-   CALCULATE TOTALS
-===================================================== */
-
-function calculateSOTotals() {
-
-    console.log("Calculate Sales Order Totals");
-
-}
-
-
-/* =====================================================
-   SAVE SALES ORDER
+   SAVE SO
 ===================================================== */
 
 function saveSO() {
 
-    console.log(
-        "Save Sales Order"
-    );
+    calculateSOTotals();
 
     console.log(
-        "Files selected:",
-        soCreateFiles
+        "Sales Order saved."
+    );
+
+    alert(
+        "Sales Order saved successfully."
     );
 
 }
 
 
 /* =====================================================
-   CLOSE CREATE SO
+   CLOSE / CANCEL
 ===================================================== */
 
 function closeCreateSO() {
 
-    console.log(
-        "Close Create Sales Order"
-    );
+    window.location.href =
+        "../index.html";
 
 }
