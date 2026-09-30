@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
         ================================= */
 
         const API_URL =
-            "PASTE_YOUR_WEB_APP_URL_HERE";
+            "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
 
 
         /* ================================
