@@ -1,12 +1,20 @@
 ```css
 /* =====================================================
    LOGI-TECH DASHBOARD
+   COMPACT VERSION
 ===================================================== */
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 body {
@@ -21,8 +29,8 @@ body {
 
 .dashboard-container {
     width: 100%;
-    min-height: 100vh;
-    padding: 28px 32px;
+    min-height: 100%;
+    padding: 16px 20px;
 }
 
 /* =====================================================
@@ -33,18 +41,18 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 16px;
 }
 
 .dashboard-header h1 {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: #311b43;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .dashboard-header p {
-    font-size: 13px;
+    font-size: 12px;
     color: #7b7b7b;
 }
 
@@ -54,23 +62,23 @@ body {
 
 .dashboard-tabs {
     display: flex;
-    gap: 8px;
+    gap: 5px;
     background: #ffffff;
-    padding: 5px;
-    border-radius: 10px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+    padding: 4px;
+    border-radius: 9px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
 }
 
 .dashboard-tab {
     border: none;
     background: transparent;
-    padding: 10px 20px;
-    border-radius: 7px;
-    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 12px;
     font-weight: 600;
     color: #777;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: all 0.2s ease;
 }
 
 .dashboard-tab:hover {
@@ -89,6 +97,7 @@ body {
 
 .summary-section {
     width: 100%;
+    display: block;
 }
 
 /* =====================================================
@@ -99,47 +108,51 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 14px;
 }
 
 .summary-title h2 {
-    font-size: 20px;
+    font-size: 18px;
     color: #311b43;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
 }
 
 .summary-title p {
-    font-size: 12px;
+    font-size: 11px;
     color: #888;
 }
+
+/* =====================================================
+   PERIOD DROPDOWN
+===================================================== */
 
 .period-control {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .period-control label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     color: #666;
 }
 
 .period-control select {
-    min-width: 150px;
-    padding: 9px 35px 9px 13px;
+    min-width: 135px;
+    padding: 7px 28px 7px 10px;
     border: 1px solid #ddd;
-    border-radius: 8px;
-    background: #fff;
+    border-radius: 7px;
+    background: #ffffff;
     color: #444;
-    font-size: 13px;
+    font-size: 12px;
     outline: none;
     cursor: pointer;
 }
 
 .period-control select:focus {
     border-color: #381a4a;
-    box-shadow: 0 0 0 2px rgba(56,26,74,0.08);
+    box-shadow: 0 0 0 2px rgba(56, 26, 74, 0.08);
 }
 
 /* =====================================================
@@ -147,70 +160,75 @@ body {
 ===================================================== */
 
 .summary-cards {
+    width: 100%;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 18px;
+    gap: 12px;
 }
 
 /* =====================================================
-   CARD
+   SUMMARY CARD
 ===================================================== */
 
 .summary-card {
     position: relative;
+    width: 100%;
+    min-width: 0;
+    min-height: 125px;
     background: #ffffff;
-    border-radius: 14px;
-    padding: 22px;
-    min-height: 150px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    border-radius: 11px;
+    padding: 16px;
     border: 1px solid #eeeeee;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
     overflow: hidden;
     transition: transform 0.2s ease,
                 box-shadow 0.2s ease;
 }
 
 .summary-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 22px rgba(0,0,0,0.11);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.09);
 }
 
 /* =====================================================
-   CARD TOP
+   CARD TITLE
 ===================================================== */
 
 .summary-card-title {
-    font-size: 12px;
+    font-size: 10px;
     font-weight: 700;
     color: #777;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-bottom: 15px;
+    letter-spacing: 0.2px;
+    margin-bottom: 11px;
+    padding-right: 30px;
 }
 
 /* =====================================================
-   NUMBER
+   CARD NUMBER
 ===================================================== */
 
 .summary-card-number {
-    font-size: 32px;
+    font-size: 27px;
     font-weight: 700;
     color: #311b43;
     line-height: 1;
-    margin-bottom: 9px;
+    margin-bottom: 7px;
 }
 
 /* =====================================================
-   AMOUNT
+   CARD AMOUNT
 ===================================================== */
 
 .summary-card-amount {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
     color: #555;
+    white-space: nowrap;
 }
 
 /* =====================================================
-   CARD ACCENT
+   CARD LEFT ACCENT
 ===================================================== */
 
 .summary-card::before {
@@ -218,12 +236,10 @@ body {
     position: absolute;
     left: 0;
     top: 0;
-    width: 5px;
+    width: 4px;
     height: 100%;
     background: #381a4a;
 }
-
-/* Different accents */
 
 .summary-card:nth-child(1)::before {
     background: #381a4a;
@@ -251,17 +267,17 @@ body {
 
 .summary-card-icon {
     position: absolute;
-    right: 18px;
-    top: 18px;
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
+    right: 13px;
+    top: 13px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #f3f0f5;
     color: #381a4a;
-    font-size: 18px;
+    font-size: 15px;
 }
 
 /* =====================================================
@@ -277,35 +293,32 @@ body {
 }
 
 /* =====================================================
-   SUMMARY SECTION VISIBILITY
+   HIDDEN SUMMARY
 ===================================================== */
-
-.summary-section {
-    display: block;
-}
 
 .summary-section.hidden {
     display: none;
 }
 
 /* =====================================================
-   EMPTY / LOADING
+   EMPTY MESSAGE
 ===================================================== */
 
 .empty-message {
+    width: 100%;
     background: #ffffff;
-    border-radius: 12px;
-    padding: 40px;
+    border-radius: 10px;
+    padding: 30px;
     text-align: center;
     color: #888;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
 }
 
 /* =====================================================
    RESPONSIVE
 ===================================================== */
 
-@media (max-width: 1250px) {
+@media (max-width: 1200px) {
 
     .summary-cards {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -313,38 +326,16 @@ body {
 
 }
 
-@media (max-width: 850px) {
+@media (max-width: 800px) {
 
     .dashboard-container {
-        padding: 20px;
+        padding: 14px;
     }
 
     .dashboard-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 15px;
-    }
-
-    .summary-toolbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .summary-cards {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-}
-
-@media (max-width: 550px) {
-
-    .dashboard-container {
-        padding: 15px;
-    }
-
-    .dashboard-header h1 {
-        font-size: 23px;
+        gap: 12px;
     }
 
     .dashboard-tabs {
@@ -353,6 +344,28 @@ body {
 
     .dashboard-tab {
         flex: 1;
+    }
+
+    .summary-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .summary-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 500px) {
+
+    .dashboard-container {
+        padding: 12px;
+    }
+
+    .dashboard-header h1 {
+        font-size: 21px;
     }
 
     .summary-cards {
@@ -365,7 +378,7 @@ body {
     }
 
     .period-control select {
-        min-width: 130px;
+        min-width: 125px;
     }
 
 }
