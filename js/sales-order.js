@@ -18,43 +18,122 @@ const SALES_ORDER_API_URL =
 ========================================================= */
 
 let salesOrders = [];
+
 let selectedSO = null;
+
 let currentSO = null;
 
 let soDetailsEditMode = false;
 
 
 /* =========================================================
+   CACHE
+========================================================= */
+
+/*
+ * TRUE kapag successfully na-load na ang SO List.
+ *
+ * Kapag naglipat:
+ *
+ * Dashboard
+ *   ↓
+ * DR
+ *   ↓
+ * Dashboard
+ *   ↓
+ * Sales Order
+ *
+ * Hindi na ulit kukuha sa Google Sheets.
+ */
+
+let salesOrdersLoaded = false;
+
+
+/*
+ * Cache ng individual SO details.
+ *
+ * Key:
+ * SO Number
+ *
+ * Example:
+ *
+ * soDetailsCache["SO-00001"]
+ */
+
+const soDetailsCache = {};
+
+
+/* =========================================================
+   API RETRY SETTINGS
+========================================================= */
+
+const API_MAX_RETRIES = 3;
+
+const API_RETRY_DELAY = 800;
+
+
+/* =========================================================
+   DELAY HELPER
+========================================================= */
+
+function wait(ms) {
+
+    return new Promise(
+        function(resolve) {
+
+            setTimeout(
+                resolve,
+                ms
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
    API REQUEST
 ========================================================= */
 
-async function salesOrderAPI(action, data = {}) {
+async function salesOrderAPI(
+    action,
+    data = {},
+    retryCount = 0
+) {
 
     try {
 
         console.log(
             "LOGIS-TECH API REQUEST:",
             action,
-            data
+            data,
+            "Attempt:",
+            retryCount + 1
         );
 
 
-        const response = await fetch(
-            SALES_ORDER_API_URL,
-            {
-                method: "POST",
+        const response =
+            await fetch(
+                SALES_ORDER_API_URL,
+                {
+                    method: "POST",
 
-                headers: {
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-                },
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
 
-                body: JSON.stringify({
-                    action: action,
-                    data: data
-                })
-            }
-        );
+                    body:
+                        JSON.stringify({
+                            action:
+                                action,
+
+                            data:
+                                data
+                        })
+                }
+            );
 
 
         const responseText =
@@ -73,7 +152,59 @@ async function salesOrderAPI(action, data = {}) {
         );
 
 
-        if (!response.ok) {
+        /*
+         * ================================================
+         * RETRY
+         *
+         * Kapag 404 / 408 / 429 / 500 / 502 / 503 / 504
+         * susubukan ulit.
+         * ================================================
+         */
+
+        if (
+            !response.ok
+        ) {
+
+            const retryable =
+                [
+                    404,
+                    408,
+                    429,
+                    500,
+                    502,
+                    503,
+                    504
+                ].includes(
+                    response.status
+                );
+
+
+            if (
+                retryable &&
+                retryCount <
+                    API_MAX_RETRIES - 1
+            ) {
+
+                console.warn(
+                    "API failed. Retrying...",
+                    response.status
+                );
+
+
+                await wait(
+                    API_RETRY_DELAY *
+                    (retryCount + 1)
+                );
+
+
+                return await salesOrderAPI(
+                    action,
+                    data,
+                    retryCount + 1
+                );
+
+            }
+
 
             throw new Error(
                 "API request failed: " +
@@ -82,6 +213,12 @@ async function salesOrderAPI(action, data = {}) {
 
         }
 
+
+        /*
+         * ================================================
+         * PARSE JSON
+         * ================================================
+         */
 
         let result;
 
@@ -99,6 +236,35 @@ async function salesOrderAPI(action, data = {}) {
                 "Invalid JSON response:",
                 responseText
             );
+
+
+            /*
+             * Retry kapag bad response
+             */
+
+            if (
+                retryCount <
+                API_MAX_RETRIES - 1
+            ) {
+
+                console.warn(
+                    "Invalid API response. Retrying..."
+                );
+
+
+                await wait(
+                    API_RETRY_DELAY *
+                    (retryCount + 1)
+                );
+
+
+                return await salesOrderAPI(
+                    action,
+                    data,
+                    retryCount + 1
+                );
+
+            }
 
 
             throw new Error(
@@ -120,13 +286,42 @@ async function salesOrderAPI(action, data = {}) {
 
 
         /*
-         * Huwag paulit-ulit na mag-popup
-         * habang nagde-debug.
+         * Retry kapag network/fetch error
          */
 
+        if (
+            retryCount <
+            API_MAX_RETRIES - 1
+        ) {
+
+            console.warn(
+                "Network/API error. Retrying..."
+            );
+
+
+            await wait(
+                API_RETRY_DELAY *
+                (retryCount + 1)
+            );
+
+
+            return await salesOrderAPI(
+                action,
+                data,
+                retryCount + 1
+            );
+
+        }
+
+
         return {
-            success: false,
-            message: error.message
+
+            success:
+                false,
+
+            message:
+                error.message
+
         };
 
     }
@@ -138,7 +333,9 @@ async function salesOrderAPI(action, data = {}) {
    LOAD SALES ORDERS
 ========================================================= */
 
-async function loadSOList() {
+async function loadSOList(
+    forceRefresh = false
+) {
 
     const tbody =
         document.getElementById(
@@ -146,21 +343,65 @@ async function loadSOList() {
         );
 
 
+    /*
+     * =====================================================
+     * USE CACHE
+     *
+     * Kung na-load na dati at walang force refresh,
+     * render lang agad.
+     * WALANG API REQUEST.
+     * =====================================================
+     */
+
+    if (
+        salesOrdersLoaded &&
+        !forceRefresh
+    ) {
+
+        console.log(
+            "Using cached Sales Orders."
+        );
+
+
+        renderSOList(
+            salesOrders
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * Loading display
+     */
+
     if (tbody) {
 
         tbody.innerHTML = `
+
             <tr>
+
                 <td
                     colspan="100%"
                     style="text-align:center;"
                 >
+
                     Loading Sales Orders...
+
                 </td>
+
             </tr>
+
         `;
 
     }
 
+
+    /*
+     * API request
+     */
 
     const result =
         await salesOrderAPI(
@@ -175,12 +416,21 @@ async function loadSOList() {
     );
 
 
-    if (!result || !result.success) {
+    /*
+     * API failed
+     */
+
+    if (
+        !result ||
+        !result.success
+    ) {
 
         if (tbody) {
 
             tbody.innerHTML = `
+
                 <tr>
+
                     <td
                         colspan="100%"
                         style="
@@ -188,18 +438,26 @@ async function loadSOList() {
                             color:red;
                         "
                     >
+
                         Failed to load Sales Orders.
+
                         <br>
+
                         <small>
+
                             ${
                                 escapeHTML(
                                     result?.message ||
                                     "Unknown API error."
                                 )
                             }
+
                         </small>
+
                     </td>
+
                 </tr>
+
             `;
 
         }
@@ -216,6 +474,10 @@ async function loadSOList() {
     }
 
 
+    /*
+     * Save list to memory
+     */
+
     salesOrders =
         Array.isArray(
             result.salesOrders
@@ -223,6 +485,45 @@ async function loadSOList() {
             ? result.salesOrders
             : [];
 
+
+    /*
+     * Mark as loaded
+     */
+
+    salesOrdersLoaded =
+        true;
+
+
+    /*
+     * Save each SO to details cache
+     *
+     * Kung may complete data na kasama,
+     * usable na agad.
+     */
+
+    salesOrders.forEach(
+        function(so) {
+
+            if (
+                so &&
+                so.soNumber
+            ) {
+
+                soDetailsCache[
+                    String(
+                        so.soNumber
+                    )
+                ] = so;
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Render
+     */
 
     renderSOList(
         salesOrders
@@ -235,7 +536,9 @@ async function loadSOList() {
    RENDER SALES ORDER LIST
 ========================================================= */
 
-function renderSOList(list) {
+function renderSOList(
+    list
+) {
 
     const tbody =
         document.getElementById(
@@ -263,14 +566,20 @@ function renderSOList(list) {
     ) {
 
         tbody.innerHTML = `
+
             <tr>
+
                 <td
                     colspan="100%"
                     style="text-align:center;"
                 >
+
                     No Sales Order found.
+
                 </td>
+
             </tr>
+
         `;
 
         return;
@@ -292,8 +601,11 @@ function renderSOList(list) {
 
 
             row.innerHTML = `
+
                 <td>
-                    ${escapeHTML(so.soNumber)}
+                    ${escapeHTML(
+                        so.soNumber
+                    )}
                 </td>
 
                 <td>
@@ -331,12 +643,15 @@ function renderSOList(list) {
                         so.grandTotal
                     )}
                 </td>
+
             `;
 
 
-            /* ==========================================
-               SINGLE CLICK
-            ========================================== */
+            /*
+             * =================================================
+             * SINGLE CLICK
+             * =================================================
+             */
 
             row.addEventListener(
                 "click",
@@ -350,9 +665,11 @@ function renderSOList(list) {
             );
 
 
-            /* ==========================================
-               DOUBLE CLICK
-            ========================================== */
+            /*
+             * =================================================
+             * DOUBLE CLICK
+             * =================================================
+             */
 
             row.addEventListener(
                 "dblclick",
@@ -380,7 +697,9 @@ function renderSOList(list) {
    SELECT SALES ORDER
 ========================================================= */
 
-function selectSO(soNumber) {
+function selectSO(
+    soNumber
+) {
 
     selectedSO =
         salesOrders.find(
@@ -400,12 +719,28 @@ function selectSO(soNumber) {
 
 
     if (!selectedSO) {
+
+        /*
+         * Try details cache
+         */
+
+        selectedSO =
+            soDetailsCache[
+                String(
+                    soNumber
+                )
+            ];
+
+    }
+
+
+    if (!selectedSO) {
         return;
     }
 
 
     /*
-     * Remove previous selection.
+     * Remove previous selection
      */
 
     document
@@ -424,7 +759,7 @@ function selectSO(soNumber) {
 
 
     /*
-     * Highlight selected row.
+     * Highlight selected row
      */
 
     const selectedRow =
@@ -445,7 +780,7 @@ function selectSO(soNumber) {
 
 
     /*
-     * Compact preview.
+     * Compact preview
      */
 
     const preview =
@@ -493,10 +828,13 @@ function selectSO(soNumber) {
             <br>
 
             Grand Total:
+
             <strong>
+
                 ${formatMoney(
                     selectedSO.grandTotal
                 )}
+
             </strong>
 
         </div>
@@ -591,6 +929,118 @@ async function openSODetails(
     soNumber
 ) {
 
+    const cacheKey =
+        String(
+            soNumber
+        );
+
+
+    /*
+     * =====================================================
+     * CHECK DETAILS CACHE FIRST
+     *
+     * Ito ang malaking speed improvement.
+     * =====================================================
+     */
+
+    if (
+        soDetailsCache[
+            cacheKey
+        ]
+    ) {
+
+        console.log(
+            "Opening SO from cache:",
+            soNumber
+        );
+
+
+        currentSO =
+            soDetailsCache[
+                cacheKey
+            ];
+
+
+        selectedSO =
+            currentSO;
+
+
+        showSODetailsPage(
+            currentSO
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * =====================================================
+     * TRY DATA FROM SO LIST
+     * =====================================================
+     */
+
+    const listSO =
+        salesOrders.find(
+            function(so) {
+
+                return (
+                    String(
+                        so.soNumber
+                    ) ===
+                    cacheKey
+                );
+
+            }
+        );
+
+
+    /*
+     * Kung complete ang data sa list,
+     * gamitin na agad.
+     */
+
+    if (
+        listSO &&
+        Array.isArray(
+            listSO.items
+        )
+    ) {
+
+        soDetailsCache[
+            cacheKey
+        ] =
+            listSO;
+
+
+        currentSO =
+            listSO;
+
+
+        selectedSO =
+            listSO;
+
+
+        showSODetailsPage(
+            listSO
+        );
+
+
+        return;
+
+    }
+
+
+    /*
+     * =====================================================
+     * ONLY NOW CALL API
+     * =====================================================
+     */
+
+    showSODetailsLoading();
+
+
     const result =
         await salesOrderAPI(
             "getSalesOrder",
@@ -617,6 +1067,7 @@ async function openSODetails(
             "Hindi ma-load ang Sales Order."
         );
 
+
         return;
 
     }
@@ -629,6 +1080,98 @@ async function openSODetails(
     selectedSO =
         currentSO;
 
+
+    /*
+     * Save details to cache
+     */
+
+    soDetailsCache[
+        cacheKey
+    ] =
+        currentSO;
+
+
+    /*
+     * Show details
+     */
+
+    showSODetailsPage(
+        currentSO
+    );
+
+}
+
+
+/* =========================================================
+   SHOW SO DETAILS LOADING
+========================================================= */
+
+function showSODetailsLoading() {
+
+    const salesPage =
+        document.getElementById(
+            "sales"
+        );
+
+
+    const detailsPage =
+        document.getElementById(
+            "soDetails"
+        );
+
+
+    if (salesPage) {
+
+        salesPage.classList.remove(
+            "active"
+        );
+
+        salesPage.style.display =
+            "none";
+
+    }
+
+
+    if (detailsPage) {
+
+        detailsPage.classList.add(
+            "active"
+        );
+
+        detailsPage.style.display =
+            "block";
+
+
+        detailsPage.innerHTML =
+            `
+
+            <div
+                style="
+                    padding:50px;
+                    text-align:center;
+                    font-size:16px;
+                    color:#555;
+                "
+            >
+
+                Loading Sales Order...
+
+            </div>
+
+            `;
+
+    }
+
+}
+
+
+/* =========================================================
+   SHOW SO DETAILS PAGE
+========================================================= */
+
+function showSODetailsPage(
+    so
+) {
 
     const salesPage =
         document.getElementById(
@@ -667,7 +1210,7 @@ async function openSODetails(
 
 
     renderSODetails(
-        currentSO
+        so
     );
 
 
@@ -682,7 +1225,9 @@ async function openSODetails(
    RENDER SO DETAILS
 ========================================================= */
 
-function renderSODetails(so) {
+function renderSODetails(
+    so
+) {
 
     if (!so) {
         return;
@@ -836,14 +1381,20 @@ function renderSODetailItems(
     ) {
 
         tbody.innerHTML = `
+
             <tr>
+
                 <td
                     colspan="100%"
                     style="text-align:center;"
                 >
+
                     No items.
+
                 </td>
+
             </tr>
+
         `;
 
         return;
@@ -867,6 +1418,7 @@ function renderSODetailItems(
                 </td>
 
                 <td>
+
                     <input
                         type="text"
                         class="so-detail-item-name"
@@ -875,9 +1427,11 @@ function renderSODetailItems(
                         )}"
                         disabled
                     >
+
                 </td>
 
                 <td>
+
                     <input
                         type="text"
                         class="so-detail-description"
@@ -886,9 +1440,11 @@ function renderSODetailItems(
                         )}"
                         disabled
                     >
+
                 </td>
 
                 <td>
+
                     <input
                         type="number"
                         class="so-detail-qty"
@@ -900,9 +1456,11 @@ function renderSODetailItems(
                             calculateDetailTotals()
                         "
                     >
+
                 </td>
 
                 <td>
+
                     <input
                         type="text"
                         class="so-detail-unit"
@@ -911,9 +1469,11 @@ function renderSODetailItems(
                         )}"
                         disabled
                     >
+
                 </td>
 
                 <td>
+
                     <input
                         type="number"
                         class="so-detail-amount"
@@ -925,15 +1485,19 @@ function renderSODetailItems(
                             calculateDetailTotals()
                         "
                     >
+
                 </td>
 
                 <td class="so-detail-total">
+
                     ${formatMoney(
                         item.total
                     )}
+
                 </td>
 
                 <td>
+
                     <button
                         type="button"
                         class="detail-delete-item"
@@ -942,8 +1506,11 @@ function renderSODetailItems(
                         "
                         style="display:none;"
                     >
+
                         DELETE
+
                     </button>
+
                 </td>
 
             `;
@@ -1005,10 +1572,6 @@ function setDetailsEditMode(
 
     inputs.forEach(
         function(input) {
-
-            /*
-             * SO Number remains disabled.
-             */
 
             if (
                 input.id ===
@@ -1116,22 +1679,27 @@ function addDetailItem() {
         </td>
 
         <td>
+
             <input
                 type="text"
                 class="so-detail-item-name"
                 value=""
             >
+
         </td>
 
         <td>
+
             <input
                 type="text"
                 class="so-detail-description"
                 value=""
             >
+
         </td>
 
         <td>
+
             <input
                 type="number"
                 class="so-detail-qty"
@@ -1141,17 +1709,21 @@ function addDetailItem() {
                     calculateDetailTotals()
                 "
             >
+
         </td>
 
         <td>
+
             <input
                 type="text"
                 class="so-detail-unit"
                 value=""
             >
+
         </td>
 
         <td>
+
             <input
                 type="number"
                 class="so-detail-amount"
@@ -1162,13 +1734,17 @@ function addDetailItem() {
                     calculateDetailTotals()
                 "
             >
+
         </td>
 
         <td class="so-detail-total">
+
             ${formatMoney(0)}
+
         </td>
 
         <td>
+
             <button
                 type="button"
                 class="detail-delete-item"
@@ -1176,8 +1752,11 @@ function addDetailItem() {
                     deleteDetailItem(this)
                 "
             >
+
                 DELETE
+
             </button>
+
         </td>
 
     `;
@@ -1342,7 +1921,8 @@ function calculateDetailTotals() {
 
 
             const total =
-                qty * amount;
+                qty *
+                amount;
 
 
             subtotal +=
@@ -1645,12 +2225,37 @@ async function saveSOUpdate() {
         false;
 
 
-    await openSODetails(
-        currentSO.soNumber
+    /*
+     * Remove old cached details
+     */
+
+    delete soDetailsCache[
+        String(
+            currentSO.soNumber
+        )
+    ];
+
+
+    /*
+     * Force refresh list
+     */
+
+    salesOrdersLoaded =
+        false;
+
+
+    await loadSOList(
+        true
     );
 
 
-    await loadSOList();
+    /*
+     * Reload updated SO details
+     */
+
+    await openSODetails(
+        currentSO.soNumber
+    );
 
 }
 
@@ -1872,6 +2477,53 @@ async function cancelSelectedSO() {
     );
 
 
+    /*
+     * Update local cache immediately
+     */
+
+    const cacheKey =
+        String(
+            so.soNumber
+        );
+
+
+    if (
+        soDetailsCache[
+            cacheKey
+        ]
+    ) {
+
+        soDetailsCache[
+            cacheKey
+        ].status =
+            "CANCELLED";
+
+    }
+
+
+    const listSO =
+        salesOrders.find(
+            function(item) {
+
+                return (
+                    String(
+                        item.soNumber
+                    ) ===
+                    cacheKey
+                );
+
+            }
+        );
+
+
+    if (listSO) {
+
+        listSO.status =
+            "CANCELLED";
+
+    }
+
+
     selectedSO =
         null;
 
@@ -1880,7 +2532,17 @@ async function cancelSelectedSO() {
         null;
 
 
-    await loadSOList();
+    /*
+     * Force refresh from Google Sheets
+     */
+
+    salesOrdersLoaded =
+        false;
+
+
+    await loadSOList(
+        true
+    );
 
 
     closeSODetails();
@@ -1997,7 +2659,9 @@ function setValue(
 }
 
 
-function getValue(id) {
+function getValue(
+    id
+) {
 
     const element =
         document.getElementById(
@@ -2045,7 +2709,9 @@ function setText(
    MONEY FORMAT
 ========================================================= */
 
-function formatMoney(value) {
+function formatMoney(
+    value
+) {
 
     const number =
         Number(
@@ -2056,8 +2722,11 @@ function formatMoney(value) {
     return number.toLocaleString(
         "en-PH",
         {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits:
+                2,
+
+            maximumFractionDigits:
+                2
         }
     );
 
@@ -2068,7 +2737,9 @@ function formatMoney(value) {
    HTML ESCAPE
 ========================================================= */
 
-function escapeHTML(value) {
+function escapeHTML(
+    value
+) {
 
     return String(
         value == null
