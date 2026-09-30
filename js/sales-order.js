@@ -1268,73 +1268,8 @@ function closeSODetails() {
 
 function openCreateSO() {
 
-    clearCreateSOForm();
-
-
-    document
-        .querySelectorAll('.page')
-        .forEach(function(page) {
-
-            page.classList.remove(
-                'active'
-            );
-
-        });
-
-
-    const create =
-        document.getElementById(
-            'createSO'
-        );
-
-
-    if (create) {
-
-        create.classList.add(
-            'active'
-        );
-
-    }
-
-
-    const pageTitle =
-        document.getElementById(
-            'pageTitle'
-        );
-
-
-    if (pageTitle) {
-
-        pageTitle.innerText =
-            'Create Sales Order';
-
-    }
-
-
-    const today =
-        new Date()
-            .toISOString()
-            .split('T')[0];
-
-
-    const date =
-        document.getElementById(
-            'soDate'
-        );
-
-
-    if (date) {
-
-        date.value =
-            today;
-
-    }
-
-
-    generateSONumber();
-
-
-    setupCreateSOFileSection();
+    window.location.href =
+        'pages/create-sales-order.html';
 
 }
 
