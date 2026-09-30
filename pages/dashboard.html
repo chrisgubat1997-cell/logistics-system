@@ -23,146 +23,343 @@
 
     <div class="dashboard-container">
 
-        <!-- DASHBOARD HEADER -->
+
+        <!-- =================================================
+             DASHBOARD HEADER
+        ================================================== -->
 
         <div class="dashboard-header">
 
             <div>
-                <h1>Dashboard</h1>
+
+                <h1>
+                    Dashboard
+                </h1>
 
                 <p>
                     LOGI-TECH System Overview
                 </p>
-            </div>
-
-        </div>
-
-
-        <!-- DASHBOARD CARDS -->
-
-        <div class="cards">
-
-            <div class="card">
-
-                <div class="card-title">
-                    Total Sales Orders
-                </div>
-
-                <div
-                    class="card-number"
-                    id="dashboardSOCount"
-                >
-                    0
-                </div>
 
             </div>
 
 
-            <div class="card">
+            <!-- DASHBOARD NAVIGATION -->
 
-                <div class="card-title">
-                    Job Orders
-                </div>
+            <div class="dashboard-tabs">
 
-                <div
-                    class="card-number"
-                    id="dashboardJOCount"
+                <button
+                    type="button"
+                    class="dashboard-tab active"
+                    onclick="showDashboardSection('summary', this)"
                 >
-                    0
-                </div>
-
-            </div>
+                    SUMMARY
+                </button>
 
 
-            <div class="card">
-
-                <div class="card-title">
-                    Deliveries
-                </div>
-
-                <div
-                    class="card-number"
-                    id="dashboardDeliveryCount"
+                <button
+                    type="button"
+                    class="dashboard-tab"
+                    onclick="showDashboardSection('dashboard', this)"
                 >
-                    0
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <div class="card-title">
-                    Pending
-                </div>
-
-                <div
-                    class="card-number"
-                    id="dashboardPendingCount"
-                >
-                    0
-                </div>
+                    DASHBOARD
+                </button>
 
             </div>
 
         </div>
 
 
-        <!-- RECENT SALES ORDERS -->
 
-        <div class="section">
+        <!-- =================================================
+             SUMMARY SECTION
+        ================================================== -->
 
-            <div class="section-header">
+        <div
+            id="summarySection"
+            class="dashboard-section active"
+        >
+
+
+            <!-- PERIOD FILTER -->
+
+            <div class="summary-toolbar">
 
                 <div>
 
                     <h2>
-                        Recent Sales Orders
+                        Overall Summary
                     </h2>
 
                     <p>
-                        Latest Sales Order transactions
+                        Sales Order and Delivery Summary
                     </p>
+
+                </div>
+
+
+                <div class="period-filter">
+
+                    <label for="summaryPeriod">
+                        PERIOD
+                    </label>
+
+                    <select id="summaryPeriod">
+
+                        <option value="overall">
+                            OVERALL
+                        </option>
+
+                        <option value="01">
+                            JANUARY
+                        </option>
+
+                        <option value="02">
+                            FEBRUARY
+                        </option>
+
+                        <option value="03">
+                            MARCH
+                        </option>
+
+                        <option value="04">
+                            APRIL
+                        </option>
+
+                        <option value="05">
+                            MAY
+                        </option>
+
+                        <option value="06">
+                            JUNE
+                        </option>
+
+                        <option value="07">
+                            JULY
+                        </option>
+
+                        <option value="08">
+                            AUGUST
+                        </option>
+
+                        <option value="09">
+                            SEPTEMBER
+                        </option>
+
+                        <option value="10">
+                            OCTOBER
+                        </option>
+
+                        <option value="11">
+                            NOVEMBER
+                        </option>
+
+                        <option value="12">
+                            DECEMBER
+                        </option>
+
+                    </select>
 
                 </div>
 
             </div>
 
 
-            <div class="table-container">
 
-                <table>
+            <!-- SUMMARY CARDS -->
 
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                SO Number
-                            </th>
-
-                            <th>
-                                Client
-                            </th>
-
-                            <th>
-                                Project
-                            </th>
-
-                            <th>
-                                Status
-                            </th>
-
-                        </tr>
-
-                    </thead>
+            <div class="summary-cards">
 
 
-                    <tbody id="recentSOBody">
+                <!-- TOTAL SALES ORDER -->
 
-                    </tbody>
+                <div class="summary-card">
 
-                </table>
+                    <div class="summary-card-title">
+                        Total Sales Order
+                    </div>
+
+                    <div
+                        class="summary-card-number"
+                        id="summaryTotalSO"
+                    >
+                        0
+                    </div>
+
+                    <div
+                        class="summary-card-amount"
+                        id="summaryTotalSOAmount"
+                    >
+                        ₱0.00
+                    </div>
+
+                </div>
+
+
+
+                <!-- TOTAL ACTIVE -->
+
+                <div class="summary-card">
+
+                    <div class="summary-card-title">
+                        Total Active
+                    </div>
+
+                    <div
+                        class="summary-card-number"
+                        id="summaryTotalActive"
+                    >
+                        0
+                    </div>
+
+                    <div
+                        class="summary-card-amount"
+                        id="summaryTotalActiveAmount"
+                    >
+                        ₱0.00
+                    </div>
+
+                </div>
+
+
+
+                <!-- TOTAL CANCELLED -->
+
+                <div class="summary-card">
+
+                    <div class="summary-card-title">
+                        Total Cancelled
+                    </div>
+
+                    <div
+                        class="summary-card-number"
+                        id="summaryTotalCancelled"
+                    >
+                        0
+                    </div>
+
+                    <div
+                        class="summary-card-amount"
+                        id="summaryTotalCancelledAmount"
+                    >
+                        ₱0.00
+                    </div>
+
+                </div>
+
+
+
+                <!-- TOTAL DELIVERED -->
+
+                <div class="summary-card">
+
+                    <div class="summary-card-title">
+                        Total Delivered
+                    </div>
+
+                    <div
+                        class="summary-card-number"
+                        id="summaryTotalDelivered"
+                    >
+                        0
+                    </div>
+
+                    <div
+                        class="summary-card-amount"
+                        id="summaryTotalDeliveredAmount"
+                    >
+                        ₱0.00
+                    </div>
+
+                </div>
+
+
+
+                <!-- TOTAL PARTIALLY DELIVERED -->
+
+                <div class="summary-card">
+
+                    <div class="summary-card-title">
+                        Total Partially Delivered
+                    </div>
+
+                    <div
+                        class="summary-card-number"
+                        id="summaryTotalPartial"
+                    >
+                        0
+                    </div>
+
+                    <div
+                        class="summary-card-amount"
+                        id="summaryTotalPartialAmount"
+                    >
+                        ₱0.00
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- SUMMARY NOTE -->
+
+            <div class="summary-note">
+
+                <strong>
+                    Delivery Status:
+                </strong>
+
+                Delivered and Partially Delivered
+                will be calculated using the actual
+                Sales Order quantity versus Delivery Receipt quantity.
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             DASHBOARD SECTION
+        ================================================== -->
+
+        <div
+            id="dashboardSection"
+            class="dashboard-section"
+        >
+
+            <div class="section">
+
+                <div class="section-header">
+
+                    <div>
+
+                        <h2>
+                            Dashboard
+                        </h2>
+
+                        <p>
+                            Account-specific dashboard
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-placeholder">
+
+                    <h3>
+                        Dashboard
+                    </h3>
+
+                    <p>
+                        Sales, Logistics, and Finance dashboards
+                        will be added here.
+                    </p>
+
+                </div>
 
             </div>
 
