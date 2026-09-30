@@ -8,23 +8,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     if (!signupForm) {
-
         console.error("signupForm not found!");
-
         return;
     }
 
 
-    signupForm.addEventListener("submit", function (event) {
+    signupForm.addEventListener("submit", async function (event) {
 
         event.preventDefault();
 
 
-        /* ================================
+        /* =========================================
            GET FORM VALUES
-        ================================= */
+        ========================================= */
 
-        const fullname =
+        const fullName =
             document
                 .getElementById("fullname")
                 .value
@@ -52,15 +50,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 .value;
 
 
-        /* ================================
+        /* =========================================
            VALIDATION
-        ================================= */
+        ========================================= */
 
-        if (
-            !fullname ||
-            !username ||
-            !password
-        ) {
+        if (!fullName || !username || !password) {
 
             message.textContent =
                 "Please complete all fields.";
@@ -93,17 +87,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /* ================================
+        /* =========================================
            API URL
-        ================================= */
+        ========================================= */
 
         const API_URL =
             "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
 
 
-        /* ================================
+        /* =========================================
            LOADING
-        ================================= */
+        ========================================= */
 
         message.textContent =
             "Creating account...";
@@ -112,144 +106,113 @@ document.addEventListener("DOMContentLoaded", function () {
             "#2563eb";
 
 
-        /* ================================
-           CREATE HIDDEN IFRAME
-        ================================= */
+        /* =========================================
+           SEND TO APPS SCRIPT
+        ========================================= */
 
-        let iframe =
-            document.getElementById(
-                "signupApiFrame"
+        try {
+
+            const response =
+                await fetch(API_URL, {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
+
+                    body: JSON.stringify({
+
+                        action:
+                            "createAccount",
+
+                        fullName:
+                            fullName,
+
+                        username:
+                            username,
+
+                        password:
+                            password,
+
+                        accountType:
+                            accountType
+
+                    })
+
+                });
+
+
+            /* =====================================
+               READ API RESPONSE
+            ===================================== */
+
+            const result =
+                await response.json();
+
+
+            console.log(
+                "LOGIS-TECH API:",
+                result
             );
 
 
-        if (!iframe) {
+            /* =====================================
+               SUCCESS
+            ===================================== */
 
-            iframe =
-                document.createElement("iframe");
+            if (result.success === true) {
 
-            iframe.id =
-                "signupApiFrame";
+                message.textContent =
+                    "Account created successfully!";
 
-            iframe.name =
-                "signupApiFrame";
-
-            iframe.style.display =
-                "none";
-
-            document.body.appendChild(
-                iframe
-            );
-
-        }
+                message.style.color =
+                    "green";
 
 
-        /* ================================
-           CREATE FORM
-        ================================= */
-
-        const apiForm =
-            document.createElement("form");
-
-        apiForm.method =
-            "POST";
-
-        apiForm.action =
-            API_URL;
-
-        apiForm.target =
-            "signupApiFrame";
-
-        apiForm.style.display =
-            "none";
+                signupForm.reset();
 
 
-        /* ================================
-           FORM FIELD HELPER
-        ================================= */
+                setTimeout(function () {
 
-        function addField(name, value) {
+                    window.location.href =
+                        "login.html";
 
-            const input =
-                document.createElement("input");
-
-            input.type =
-                "hidden";
-
-            input.name =
-                name;
-
-            input.value =
-                value;
-
-            apiForm.appendChild(
-                input
-            );
-
-        }
+                }, 1200);
 
 
-        /* ================================
-           ADD DATA
-        ================================= */
-
-        addField(
-            "fullName",
-            fullname
-        );
-
-        addField(
-            "username",
-            username
-        );
-
-        addField(
-            "password",
-            password
-        );
-
-        addField(
-            "accountType",
-            accountType
-        );
+                return;
+            }
 
 
-        document.body.appendChild(
-            apiForm
-        );
-
-
-        /* ================================
-           SUBMIT TO APPS SCRIPT
-        ================================= */
-
-        apiForm.submit();
-
-
-        /* ================================
-           SHOW SUCCESS
-        ================================= */
-
-        setTimeout(function () {
+            /* =====================================
+               API ERROR
+            ===================================== */
 
             message.textContent =
-                "Account created successfully!";
+                result.message ||
+                "Account was not created.";
 
             message.style.color =
-                "green";
-
-            signupForm.reset();
+                "red";
 
 
-            setTimeout(function () {
+        } catch (error) {
 
-                window.location.href =
-                    "login.html";
+            console.error(
+                "LOGIS-TECH SIGNUP ERROR:",
+                error
+            );
 
-            }, 1000);
 
+            message.textContent =
+                "Unable to connect to LOGIS-TECH API.";
 
-        }, 1500);
+            message.style.color =
+                "red";
 
+        }
 
     });
 
