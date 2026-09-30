@@ -1168,11 +1168,21 @@
 <script>
 
 /* =====================================================
+   SALES MODULE STATE
+===================================================== */
+
+let salesModuleLoaded = false;
+
+
+/* =====================================================
    PAGE NAVIGATION
 ===================================================== */
 
 function showPage(pageId, button) {
 
+    /*
+     * Hide all pages
+     */
     document
         .querySelectorAll('.page')
         .forEach(function(page) {
@@ -1182,6 +1192,9 @@ function showPage(pageId, button) {
         });
 
 
+    /*
+     * Show selected page
+     */
     const page =
         document.getElementById(pageId);
 
@@ -1193,6 +1206,9 @@ function showPage(pageId, button) {
     }
 
 
+    /*
+     * Update sidebar active button
+     */
     document
         .querySelectorAll('.menu-btn')
         .forEach(function(btn) {
@@ -1206,10 +1222,12 @@ function showPage(pageId, button) {
 
         button.classList.add('active');
 
+
         const pageTitle =
             document.getElementById(
                 'pageTitle'
             );
+
 
         if (pageTitle) {
 
@@ -1221,29 +1239,58 @@ function showPage(pageId, button) {
     }
 
 
-    /* SALES ORDER */
+    /*
+     * =================================================
+     * SALES ORDER
+     *
+     * IMPORTANT:
+     * HINDI NA TATAWAG NG loadSOList()
+     * DITO.
+     *
+     * Sales Order List is loaded only once
+     * when the module is initialized.
+     * =================================================
+     */
 
     if (pageId === 'sales') {
 
-        loadSOList();
+        console.log(
+            'Sales Order page opened. Existing SO list retained.'
+        );
 
     }
 
 
-    /* DR */
+    /*
+     * =================================================
+     * DR
+     * =================================================
+     */
 
     if (pageId === 'dr') {
 
-        loadDRSalesOrders();
+        if (typeof loadDRSalesOrders === 'function') {
+
+            loadDRSalesOrders();
+
+        }
 
     }
 
 
-    /* DASHBOARD */
+    /*
+     * =================================================
+     * DASHBOARD
+     * =================================================
+     */
 
     if (pageId === 'dashboard') {
 
-        loadDashboard();
+        if (typeof loadDashboard === 'function') {
+
+            loadDashboard();
+
+        }
 
     }
 
@@ -1255,6 +1302,21 @@ function showPage(pageId, button) {
 ===================================================== */
 
 async function loadSalesOrderModule() {
+
+    /*
+     * Prevent duplicate loading
+     */
+
+    if (salesModuleLoaded) {
+
+        console.log(
+            'Sales Order module already loaded.'
+        );
+
+        return;
+
+    }
+
 
     const container =
         document.getElementById(
@@ -1275,6 +1337,10 @@ async function loadSalesOrderModule() {
 
     try {
 
+        /*
+         * Load Sales Order HTML
+         */
+
         const response =
             await fetch(
                 'pages/sales-order.html'
@@ -1294,8 +1360,19 @@ async function loadSalesOrderModule() {
             await response.text();
 
 
+        /*
+         * Insert module
+         */
+
         container.innerHTML =
             html;
+
+
+        /*
+         * Mark module as loaded
+         */
+
+        salesModuleLoaded = true;
 
 
         console.log(
@@ -1304,12 +1381,16 @@ async function loadSalesOrderModule() {
 
 
         /*
-         * Make Sales Order visible
-         * only when Sales Order menu
-         * is clicked.
+         * =================================================
+         * LOAD SALES ORDER LIST ONLY ONCE
+         * =================================================
          */
 
-        loadSOList();
+        if (typeof loadSOList === 'function') {
+
+            await loadSOList();
+
+        }
 
 
     } catch (error) {
@@ -1587,7 +1668,9 @@ document.addEventListener(
 
 
         /*
-         * Load Sales Order module
+         * =================================================
+         * LOAD SALES ORDER MODULE ONLY ONCE
+         * =================================================
          */
 
         await loadSalesOrderModule();
