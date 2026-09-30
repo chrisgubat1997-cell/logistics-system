@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
             const API_URL =
-                "ILAGAY ANG ACTUAL WEB APP URL MO";
+                "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
 
             message.textContent =
                 "Resetting password...";
