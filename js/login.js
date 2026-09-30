@@ -1,96 +1,171 @@
 document.addEventListener("DOMContentLoaded", function () {
 
-    const loginForm = document.getElementById("loginForm");
-    const loginMessage = document.getElementById("loginMessage");
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const loginMessage =
+        document.getElementById("loginMessage");
 
     if (!loginForm) {
-        console.error("loginForm not found");
+
+        console.error(
+            "loginForm not found!"
+        );
+
         return;
+
     }
 
-    loginForm.addEventListener("submit", function (event) {
+    loginForm.addEventListener(
+        "submit",
+        async function (event) {
 
-        event.preventDefault();
+            event.preventDefault();
 
-        const username =
-            document.getElementById("username").value.trim();
+            const username =
+                document
+                    .getElementById("username")
+                    .value
+                    .trim();
 
-        const password =
-            document.getElementById("password").value;
+            const password =
+                document
+                    .getElementById("password")
+                    .value;
 
-        loginMessage.textContent = "Naglo-login...";
-        loginMessage.style.color = "#2563eb";
+            if (!username || !password) {
 
-        const savedUser =
-            localStorage.getItem("logitechUser");
+                loginMessage.textContent =
+                    "Please enter username and password.";
 
-        console.log("Saved User:", savedUser);
+                loginMessage.style.color =
+                    "red";
 
-        if (!savedUser) {
+                return;
+
+            }
+
+            const API_URL =
+                "ILAGAY ANG ACTUAL WEB APP URL MO";
 
             loginMessage.textContent =
-                "Walang registered account. Mag-Sign Up muna.";
+                "Logging in...";
 
-            loginMessage.style.color = "red";
+            loginMessage.style.color =
+                "#2563eb";
 
-            return;
+            try {
+
+                const response =
+                    await fetch(API_URL, {
+
+                        method: "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "text/plain;charset=utf-8"
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                action:
+                                    "login",
+
+                                username:
+                                    username,
+
+                                password:
+                                    password
+
+                            })
+
+                    });
+
+                const result =
+                    await response.json();
+
+                console.log(
+                    "LOGIS-TECH LOGIN:",
+                    result
+                );
+
+                if (
+                    result.success === true
+                ) {
+
+                    loginMessage.textContent =
+                        "Login successful!";
+
+                    loginMessage.style.color =
+                        "green";
+
+                    /*
+                     * Save login session
+                     */
+
+                    localStorage.setItem(
+                        "logitechLoggedIn",
+                        "true"
+                    );
+
+                    /*
+                     * Save user information
+                     */
+
+                    localStorage.setItem(
+                        "logitechUser",
+                        JSON.stringify(
+                            result.user
+                        )
+                    );
+
+                    /*
+                     * Go to main system
+                     */
+
+                    setTimeout(
+                        function () {
+
+                            window.location.replace(
+                                "./index.html"
+                            );
+
+                        },
+                        500
+                    );
+
+                    return;
+
+                }
+
+                loginMessage.textContent =
+                    result.message ||
+                    "Invalid username or password.";
+
+                loginMessage.style.color =
+                    "red";
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "LOGIS-TECH LOGIN ERROR:",
+                    error
+                );
+
+                loginMessage.textContent =
+                    "Unable to connect to LOGIS-TECH API.";
+
+                loginMessage.style.color =
+                    "red";
+
+            }
+
         }
-
-        let user;
-
-        try {
-
-            user = JSON.parse(savedUser);
-
-        } catch (error) {
-
-            console.error("JSON ERROR:", error);
-
-            loginMessage.textContent =
-                "May error sa account data.";
-
-            loginMessage.style.color = "red";
-
-            return;
-        }
-
-        console.log("Username entered:", username);
-        console.log("Saved username:", user.username);
-
-        if (
-            username === user.username &&
-            password === user.password
-        ) {
-
-            loginMessage.textContent =
-                "Login successful!";
-
-            loginMessage.style.color = "green";
-
-            localStorage.setItem(
-                "logitechLoggedIn",
-                "true"
-            );
-
-            console.log("LOGIN SUCCESS");
-
-            setTimeout(function () {
-
-                window.location.replace("./index.html");
-
-            }, 500);
-
-        } else {
-
-            loginMessage.textContent =
-                "Invalid username or password.";
-
-            loginMessage.style.color = "red";
-
-            console.log("LOGIN FAILED");
-
-        }
-
-    });
+    );
 
 });
