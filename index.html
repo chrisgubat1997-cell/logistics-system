@@ -530,9 +530,10 @@ td {
 
     .dashboard-frame {
     width: 100%;
-    height: calc(100vh - 80px);
+    height: 900px;
     border: none;
     display: block;
+    overflow: hidden;
 }
     
     /* maraming existing CSS mo dito */
@@ -647,17 +648,13 @@ td {
 
        <!-- DASHBOARD -->
 
-<div
-    id="dashboard"
-    class="page active"
->
-
+<div id="dashboard" class="page active">
     <iframe
         src="pages/dashboard.html"
         class="dashboard-frame"
         title="LOGI-TECH Dashboard"
+        scrolling="no"
     ></iframe>
-
 </div>
 
         <!-- SALES ORDER -->
