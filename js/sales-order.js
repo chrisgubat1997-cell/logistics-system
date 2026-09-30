@@ -1,545 +1,230 @@
-/* =====================================================
+/* =========================================================
    LOGIS-TECH SYSTEM
    SALES ORDER MODULE
-===================================================== */
+   GOOGLE APPS SCRIPT API
+========================================================= */
 
 
-/* =====================================================
-   GLOBAL STATE
-===================================================== */
+/* =========================================================
+   API CONFIG
+========================================================= */
 
+// ILAGAY DITO ANG WEB APP URL NG GOOGLE APPS SCRIPT
+const SALES_ORDER_API_URL =
+    "PASTE_YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let salesOrders = [];
 let selectedSO = null;
-let detailEditMode = false;
+let currentSO = null;
 
-const VAT_RATE = 0.12;
+let soDetailsEditMode = false;
 
 
-/* =====================================================
-   FILE MANAGEMENT
-   INDEXEDDB
-===================================================== */
+/* =========================================================
+   API REQUEST
+========================================================= */
 
-const SO_FILE_DB_NAME = 'LOGISTECH_SO_FILES_DB';
-const SO_FILE_STORE = 'soFiles';
-const SO_FILE_DB_VERSION = 1;
-
-let currentSOFiles = [];
-let currentPDFUrl = null;
-
-
-/* =====================================================
-   OPEN FILE DATABASE
-===================================================== */
-
-function openSOFileDB() {
-
-    return new Promise(function(resolve, reject) {
-
-        const request = indexedDB.open(
-            SO_FILE_DB_NAME,
-            SO_FILE_DB_VERSION
-        );
-
-
-        request.onupgradeneeded = function(event) {
-
-            const db = event.target.result;
-
-
-            if (!db.objectStoreNames.contains(SO_FILE_STORE)) {
-
-                const store = db.createObjectStore(
-                    SO_FILE_STORE,
-                    {
-                        keyPath: 'id',
-                        autoIncrement: true
-                    }
-                );
-
-
-                store.createIndex(
-                    'soNumber',
-                    'soNumber',
-                    {
-                        unique: false
-                    }
-                );
-
-            }
-
-        };
-
-
-        request.onsuccess = function() {
-
-            resolve(request.result);
-
-        };
-
-
-        request.onerror = function() {
-
-            reject(request.error);
-
-        };
-
-    });
-
-}
-
-
-/* =====================================================
-   SAVE FILE TO INDEXEDDB
-===================================================== */
-
-async function saveSOFileToDB(
-    soNumber,
-    file
-) {
-
-    const db =
-        await openSOFileDB();
-
-
-    return new Promise(function(resolve, reject) {
-
-        const transaction =
-            db.transaction(
-                SO_FILE_STORE,
-                'readwrite'
-            );
-
-
-        const store =
-            transaction.objectStore(
-                SO_FILE_STORE
-            );
-
-
-        const record = {
-
-            soNumber: soNumber,
-
-            fileName: file.name,
-
-            fileType:
-                file.type ||
-                'application/pdf',
-
-            fileSize: file.size,
-
-            uploadedDate:
-                new Date().toISOString(),
-
-            file: file
-
-        };
-
-
-        const request =
-            store.add(record);
-
-
-        request.onsuccess =
-            function() {
-
-                resolve(request.result);
-
-            };
-
-
-        request.onerror =
-            function() {
-
-                reject(request.error);
-
-            };
-
-    });
-
-}
-
-
-/* =====================================================
-   GET SO FILES
-===================================================== */
-
-async function getSOFilesFromDB(
-    soNumber
-) {
-
-    const db =
-        await openSOFileDB();
-
-
-    return new Promise(function(resolve, reject) {
-
-        const transaction =
-            db.transaction(
-                SO_FILE_STORE,
-                'readonly'
-            );
-
-
-        const store =
-            transaction.objectStore(
-                SO_FILE_STORE
-            );
-
-
-        const index =
-            store.index('soNumber');
-
-
-        const request =
-            index.getAll(soNumber);
-
-
-        request.onsuccess =
-            function() {
-
-                resolve(
-                    request.result || []
-                );
-
-            };
-
-
-        request.onerror =
-            function() {
-
-                reject(request.error);
-
-            };
-
-    });
-
-}
-
-
-/* =====================================================
-   DELETE SO FILE
-===================================================== */
-
-async function deleteSOFileFromDB(
-    fileId
-) {
-
-    const db =
-        await openSOFileDB();
-
-
-    return new Promise(function(resolve, reject) {
-
-        const transaction =
-            db.transaction(
-                SO_FILE_STORE,
-                'readwrite'
-            );
-
-
-        const store =
-            transaction.objectStore(
-                SO_FILE_STORE
-            );
-
-
-        const request =
-            store.delete(fileId);
-
-
-        request.onsuccess =
-            function() {
-
-                resolve();
-
-            };
-
-
-        request.onerror =
-            function() {
-
-                reject(request.error);
-
-            };
-
-    });
-
-}
-
-
-/* =====================================================
-   GET SALES ORDERS
-===================================================== */
-
-function getSalesOrders() {
+async function salesOrderAPI(action, data = {}) {
 
     try {
 
-        const data =
-            localStorage.getItem(
-                'salesOrders'
+        const response = await fetch(
+            SALES_ORDER_API_URL,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+
+                body: JSON.stringify({
+                    action: action,
+                    ...data
+                })
+            }
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "API request failed: " +
+                response.status
             );
-
-
-        if (!data) {
-
-            return [];
 
         }
 
 
-        const orders =
-            JSON.parse(data);
+        const result =
+            await response.json();
 
 
-        return Array.isArray(orders)
-            ? orders
-            : [];
+        return result;
+
 
     } catch (error) {
 
         console.error(
-            'Unable to read Sales Orders:',
+            "Sales Order API Error:",
             error
         );
 
 
-        return [];
+        alert(
+            "Hindi makakonekta sa LOGIS-TECH database.\n\n" +
+            "Check ang Google Apps Script Web App URL."
+        );
+
+
+        return {
+            success: false,
+            message: error.message
+        };
 
     }
 
 }
 
 
-/* =====================================================
-   SAVE SALES ORDERS
-===================================================== */
+/* =========================================================
+   LOAD SALES ORDERS
+========================================================= */
 
-function saveSalesOrders(
-    salesOrders
-) {
+async function loadSOList() {
 
-    localStorage.setItem(
-        'salesOrders',
-        JSON.stringify(
-            salesOrders
-        )
-    );
-
-}
-
-
-/* =====================================================
-   FORMAT MONEY
-===================================================== */
-
-function formatMoney(
-    value
-) {
-
-    const number =
-        Number(value) || 0;
-
-
-    return '₱' +
-        number.toLocaleString(
-            'en-PH',
-            {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }
-        );
-
-}
-
-
-/* =====================================================
-   SALES ORDER CALCULATION
-===================================================== */
-
-function calculateSOData(
-    items,
-    discount,
-    vatable
-) {
-
-    let subtotal = 0;
-
-
-    (items || []).forEach(function(item) {
-
-        const qty =
-            Number(item.qty) || 0;
-
-
-        const amount =
-            Number(item.amount) || 0;
-
-
-        item.total =
-            qty * amount;
-
-
-        subtotal +=
-            item.total;
-
-    });
-
-
-    discount =
-        Math.max(
-            0,
-            Number(discount) || 0
+    const tbody =
+        document.getElementById(
+            "soTableBody"
         );
 
 
-    const taxableAmount =
-        Math.max(
-            0,
-            subtotal - discount
-        );
+    if (tbody) {
 
-
-    const vatAmount =
-        vatable
-            ? taxableAmount * VAT_RATE
-            : 0;
-
-
-    const grandTotal =
-        taxableAmount +
-        vatAmount;
-
-
-    return {
-
-        subtotal:
-            subtotal,
-
-        discount:
-            discount,
-
-        vatable:
-            Boolean(vatable),
-
-        vatRate:
-            VAT_RATE,
-
-        vatAmount:
-            vatAmount,
-
-        grandTotal:
-            grandTotal
-
-    };
-
-}
-
-
-/* =====================================================
-   GET SO TOTAL
-===================================================== */
-
-function getSOTotal(
-    so
-) {
-
-    if (!so) {
-
-        return 0;
-
-    }
-
-
-    if (
-        so.grandTotal !== undefined &&
-        so.grandTotal !== null
-    ) {
-
-        return Number(
-            so.grandTotal
-        ) || 0;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="100%" style="text-align:center;">
+                    Loading Sales Orders...
+                </td>
+            </tr>
+        `;
 
     }
 
 
     const result =
-        calculateSOData(
-            so.items || [],
-            so.discount || 0,
-            so.vatable || false
+        await salesOrderAPI(
+            "getSalesOrders"
         );
 
 
-    return result.grandTotal;
+    if (!result.success) {
 
-}
+        if (tbody) {
 
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="100%" style="text-align:center;">
+                        Failed to load Sales Orders.
+                    </td>
+                </tr>
+            `;
 
-/* =====================================================
-   OPEN CREATE SO
-   STANDALONE PAGE
-===================================================== */
+        }
 
-function openCreateSO() {
-
-    window.location.href =
-        'pages/create-sales-order.html';
-
-}
-
-
-/* =====================================================
-   LOAD SO LIST
-===================================================== */
-
-function loadSOList() {
-
-    const body =
-        document.getElementById(
-            'soTableBody'
-        );
-
-
-    if (!body) {
+        console.error(result.message);
 
         return;
 
     }
 
 
-    body.innerHTML =
-        '';
+    salesOrders =
+        Array.isArray(
+            result.salesOrders
+        )
+            ? result.salesOrders
+            : [];
 
 
-    const salesOrders =
-        getSalesOrders();
+    renderSOList(
+        salesOrders
+    );
+
+}
 
 
-    salesOrders.forEach(function(so) {
+/* =========================================================
+   RENDER SALES ORDER LIST
+========================================================= */
+
+function renderSOList(list) {
+
+    const tbody =
+        document.getElementById(
+            "soTableBody"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    if (!list || list.length === 0) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="100%" style="text-align:center;">
+                    No Sales Order found.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+
+    list.forEach(function(so) {
 
         const row =
-            document.createElement(
-                'tr'
-            );
+            document.createElement("tr");
 
 
-        row.className =
-            'so-row';
+        row.dataset.soNumber =
+            so.soNumber;
 
 
-        /*
-         * 1 CLICK
-         * Preview only
-         */
+        row.innerHTML = `
+            <td>${escapeHTML(so.soNumber)}</td>
+            <td>${escapeHTML(so.dateCreation || "")}</td>
+            <td>${escapeHTML(so.clientName || "")}</td>
+            <td>${escapeHTML(so.project || "")}</td>
+            <td>${escapeHTML(so.poNumber || "")}</td>
+            <td>${escapeHTML(so.status || "")}</td>
+            <td style="text-align:right;">
+                ${formatMoney(so.grandTotal)}
+            </td>
+        `;
+
+
+        /* ==========================================
+           SINGLE CLICK
+        ========================================== */
 
         row.addEventListener(
-            'click',
+            "click",
             function() {
 
                 selectSO(
-                    row,
                     so.soNumber
                 );
 
@@ -547,13 +232,12 @@ function loadSOList() {
         );
 
 
-        /*
-         * DOUBLE CLICK
-         * Full Details
-         */
+        /* ==========================================
+           DOUBLE CLICK
+        ========================================== */
 
         row.addEventListener(
-            'dblclick',
+            "dblclick",
             function() {
 
                 openSODetails(
@@ -564,336 +248,111 @@ function loadSOList() {
         );
 
 
-        const status =
-            so.status ||
-            'ACTIVE';
-
-
-        const statusClass =
-            status === 'CANCELLED'
-                ? 'status-cancelled'
-                : 'status-active';
-
-
-        row.innerHTML = `
-
-            <td>
-
-                <strong>
-                    ${escapeHTML(
-                        so.soNumber || ''
-                    )}
-                </strong>
-
-            </td>
-
-
-            <td>
-                ${escapeHTML(
-                    so.dateCreation || ''
-                )}
-            </td>
-
-
-            <td>
-                ${escapeHTML(
-                    so.clientName || ''
-                )}
-            </td>
-
-
-            <td>
-                ${escapeHTML(
-                    so.se || ''
-                )}
-            </td>
-
-
-            <td>
-                ${escapeHTML(
-                    so.project || ''
-                )}
-            </td>
-
-
-            <td>
-                ${escapeHTML(
-                    so.poNumber || ''
-                )}
-            </td>
-
-
-            <td>
-                ${escapeHTML(
-                    so.terms || ''
-                )}
-            </td>
-
-
-            <td>
-                ${formatMoney(
-                    getSOTotal(so)
-                )}
-            </td>
-
-
-            <td>
-
-                <span
-                    class="status-badge ${statusClass}">
-
-                    ${escapeHTML(
-                        status
-                    )}
-
-                </span>
-
-            </td>
-
-        `;
-
-
-        body.appendChild(
-            row
-        );
+        tbody.appendChild(row);
 
     });
 
-
-    /*
-     * Re-apply search if search box
-     * already contains text.
-     */
-
-    searchSO();
-
 }
 
 
-/* =====================================================
-   SEARCH SO
-===================================================== */
+/* =========================================================
+   SELECT SALES ORDER
+========================================================= */
 
-function searchSO() {
+function selectSO(soNumber) {
 
-    const input =
-        document.getElementById(
-            'soSearch'
+    selectedSO =
+        salesOrders.find(
+            function(so) {
+
+                return (
+                    String(so.soNumber)
+                    === String(soNumber)
+                );
+
+            }
         );
 
 
-    if (!input) {
-
+    if (!selectedSO) {
         return;
-
     }
 
 
-    const search =
-        input.value
-            .toLowerCase()
-            .trim();
-
+    /* Highlight selected row */
 
     document
         .querySelectorAll(
-            '#soTableBody .so-row'
+            "#soTableBody tr"
         )
         .forEach(function(row) {
 
-            const text =
-                row.innerText
-                    .toLowerCase();
-
-
-            row.style.display =
-                text.includes(search)
-                    ? ''
-                    : 'none';
-
-        });
-
-}
-
-
-/* =====================================================
-   SELECT SO
-   ONE CLICK = PREVIEW
-===================================================== */
-
-function selectSO(
-    row,
-    soNumber
-) {
-
-    document
-        .querySelectorAll(
-            '#soTableBody .so-row'
-        )
-        .forEach(function(item) {
-
-            item.classList.remove(
-                'selected'
+            row.classList.remove(
+                "selected"
             );
 
         });
 
 
-    if (row) {
+    const selectedRow =
+        document.querySelector(
+            `#soTableBody tr[data-so-number="${cssEscape(soNumber)}"]`
+        );
 
-        row.classList.add(
-            'selected'
+
+    if (selectedRow) {
+
+        selectedRow.classList.add(
+            "selected"
         );
 
     }
 
 
-    selectedSO =
-        soNumber;
+    /* ==========================================
+       COMPACT PREVIEW
+    ========================================== */
+
+    const preview =
+        document.getElementById(
+            "selectedSOInfo"
+        );
 
 
-    const salesOrders =
-        getSalesOrders();
-
-
-    const so =
-        salesOrders.find(function(item) {
-
-            return (
-                item.soNumber ===
-                soNumber
-            );
-
-        });
-
-
-    if (!so) {
-
+    if (!preview) {
         return;
-
     }
 
 
-    const isCancelled =
-        so.status ===
-        'CANCELLED';
+    preview.innerHTML = `
 
+        <div class="so-preview">
 
-    const updateButton =
-        document.getElementById(
-            'updateSOButton'
-        );
+            <strong>
+                ${escapeHTML(selectedSO.soNumber)}
+            </strong>
 
+            <br>
 
-    const cancelButton =
-        document.getElementById(
-            'cancelSOButton'
-        );
+            Client:
+            ${escapeHTML(selectedSO.clientName || "-")}
 
+            <br>
 
-    if (updateButton) {
+            Project:
+            ${escapeHTML(selectedSO.project || "-")}
 
-        updateButton.disabled =
-            isCancelled;
+            <br>
 
-    }
+            Status:
+            ${escapeHTML(selectedSO.status || "-")}
 
+            <br>
 
-    if (cancelButton) {
-
-        cancelButton.disabled =
-            isCancelled;
-
-    }
-
-
-    const selectedInfo =
-        document.getElementById(
-            'selectedSOInfo'
-        );
-
-
-    if (!selectedInfo) {
-
-        return;
-
-    }
-
-
-    selectedInfo.innerHTML = `
-
-        <div class="detail-summary">
-
-            <div>
-                <strong>SO Number:</strong>
-                ${escapeHTML(
-                    so.soNumber || '-'
-                )}
-            </div>
-
-
-            <div>
-                <strong>Date:</strong>
-                ${escapeHTML(
-                    so.dateCreation || '-'
-                )}
-            </div>
-
-
-            <div>
-                <strong>Client:</strong>
-                ${escapeHTML(
-                    so.clientName || '-'
-                )}
-            </div>
-
-
-            <div>
-                <strong>SE:</strong>
-                ${escapeHTML(
-                    so.se || '-'
-                )}
-            </div>
-
-
-            <div>
-                <strong>Project:</strong>
-                ${escapeHTML(
-                    so.project || '-'
-                )}
-            </div>
-
-
-            <div>
-                <strong>PO Number:</strong>
-                ${escapeHTML(
-                    so.poNumber || '-'
-                )}
-            </div>
-
-
-            <div>
-                <strong>Terms:</strong>
-                ${escapeHTML(
-                    so.terms || '-'
-                )}
-            </div>
-
-
-            <div>
-                <strong>Grand Total:</strong>
-                ${formatMoney(
-                    getSOTotal(so)
-                )}
-            </div>
-
-
-            <div>
-                <strong>Status:</strong>
-                ${escapeHTML(
-                    so.status || 'ACTIVE'
-                )}
-            </div>
+            Grand Total:
+            <strong>
+                ${formatMoney(selectedSO.grandTotal)}
+            </strong>
 
         </div>
 
@@ -902,38 +361,30 @@ function selectSO(
 }
 
 
-/* =====================================================
-   OPEN FULL SO DETAILS
-   DOUBLE CLICK
-===================================================== */
+/* =========================================================
+   SEARCH SALES ORDER
+========================================================= */
 
-async function openSODetails(
-    soNumber
-) {
+function searchSO() {
 
-    selectedSO =
-        soNumber;
-
-
-    const salesOrders =
-        getSalesOrders();
+    const input =
+        document.getElementById(
+            "soSearch"
+        );
 
 
-    const so =
-        salesOrders.find(function(item) {
-
-            return (
-                item.soNumber ===
-                soNumber
-            );
-
-        });
+    const keyword =
+        String(
+            input ? input.value : ""
+        )
+        .trim()
+        .toLowerCase();
 
 
-    if (!so) {
+    if (!keyword) {
 
-        alert(
-            'Sales Order not found.'
+        renderSOList(
+            salesOrders
         );
 
         return;
@@ -941,1042 +392,433 @@ async function openSODetails(
     }
 
 
-    document
-        .querySelectorAll('.page')
-        .forEach(function(page) {
+    const filtered =
+        salesOrders.filter(
+            function(so) {
 
-            page.classList.remove(
-                'active'
-            );
+                return [
 
-        });
+                    so.soNumber,
+                    so.clientName,
+                    so.project,
+                    so.poNumber,
+                    so.jobOrder,
+                    so.se,
+                    so.status
+
+                ]
+                .join(" ")
+                .toLowerCase()
+                .includes(keyword);
+
+            }
+        );
+
+
+    renderSOList(
+        filtered
+    );
+
+}
+
+
+/* =========================================================
+   OPEN CREATE SO
+========================================================= */
+
+function openCreateSO() {
+
+    window.location.href =
+        "pages/create-sales-order.html";
+
+}
+
+
+/* =========================================================
+   OPEN SO DETAILS
+========================================================= */
+
+async function openSODetails(soNumber) {
+
+    const result =
+        await salesOrderAPI(
+            "getSalesOrder",
+            {
+                soNumber:
+                    soNumber
+            }
+        );
+
+
+    if (!result.success) {
+
+        alert(
+            result.message ||
+            "Hindi ma-load ang Sales Order."
+        );
+
+        return;
+
+    }
+
+
+    currentSO =
+        result.so;
+
+
+    selectedSO =
+        currentSO;
+
+
+    const salesPage =
+        document.getElementById(
+            "sales"
+        );
 
 
     const detailsPage =
         document.getElementById(
-            'soDetails'
+            "soDetails"
         );
 
 
-    if (!detailsPage) {
+    if (salesPage) {
 
-        alert(
-            'Sales Order Details page not found.'
+        salesPage.classList.remove(
+            "active"
         );
 
-        return;
+        salesPage.style.display =
+            "none";
 
     }
 
 
-    detailsPage.classList.add(
-        'active'
-    );
+    if (detailsPage) {
 
-
-    const pageTitle =
-        document.getElementById(
-            'pageTitle'
+        detailsPage.classList.add(
+            "active"
         );
 
-
-    if (pageTitle) {
-
-        pageTitle.innerText =
-            'Sales Order Details';
+        detailsPage.style.display =
+            "block";
 
     }
 
 
-    /*
-     * LOAD INFORMATION
-     */
-
-    setDetailValue(
-        'detailSODate',
-        so.dateCreation
+    renderSODetails(
+        currentSO
     );
-
-
-    setDetailValue(
-        'detailSONumber',
-        so.soNumber
-    );
-
-
-    setDetailValue(
-        'detailClientName',
-        so.clientName
-    );
-
-
-    setDetailValue(
-        'detailSE',
-        so.se
-    );
-
-
-    setDetailValue(
-        'detailAttention',
-        so.attention
-    );
-
-
-    setDetailValue(
-        'detailBillingAddress',
-        so.billingAddress
-    );
-
-
-    setDetailValue(
-        'detailDeliveryAddress',
-        so.deliveryAddress
-    );
-
-
-    setDetailValue(
-        'detailProject',
-        so.project
-    );
-
-
-    setDetailValue(
-        'detailTIN',
-        so.tin
-    );
-
-
-    setDetailValue(
-        'detailPONumber',
-        so.poNumber
-    );
-
-
-    setDetailValue(
-        'detailTerms',
-        so.terms
-    );
-
-
-    setDetailValue(
-        'detailJobOrder',
-        so.jobOrder
-    );
-
-
-    /*
-     * TOTALS
-     */
-
-    setValue(
-        'detailDiscount',
-        so.discount || 0
-    );
-
-
-    const vatable =
-        document.getElementById(
-            'detailVatable'
-        );
-
-
-    if (vatable) {
-
-        vatable.checked =
-            Boolean(
-                so.vatable
-            );
-
-    }
-
-
-    /*
-     * RESET EDIT MODE
-     */
-
-    detailEditMode =
-        false;
 
 
     setDetailsEditMode(
         false
     );
 
-
-    updateDetailButtons(
-        so.status
-    );
-
-
-    /*
-     * LOAD ITEMS
-     */
-
-    loadDetailItems(
-        so
-    );
-
-
-    calculateDetailTotals();
-
-
-    /*
-     * LOAD FILES
-     */
-
-    try {
-
-        await loadSOFiles(
-            so.soNumber
-        );
-
-    } catch (error) {
-
-        console.error(
-            'Unable to load SO files:',
-            error
-        );
-
-    }
-
 }
 
 
-/* =====================================================
-   SET DETAIL VALUE
-===================================================== */
-
-function setDetailValue(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (element) {
-
-        element.value =
-            value ?? '';
-
-    }
-
-}
-
-
-/* =====================================================
-   UPDATE DETAIL BUTTONS
-===================================================== */
-
-function updateDetailButtons(
-    status
-) {
-
-    const cancelled =
-        status ===
-        'CANCELLED';
-
-
-    const editButton =
-        document.getElementById(
-            'detailEditButton'
-        );
-
-
-    const saveButton =
-        document.getElementById(
-            'detailSaveButton'
-        );
-
-
-    const addItemButton =
-        document.getElementById(
-            'detailAddItemButton'
-        );
-
-
-    const cancelButton =
-        document.getElementById(
-            'detailCancelButton'
-        );
-
-
-    if (cancelled) {
-
-        if (editButton) {
-
-            editButton.style.display =
-                'none';
-
-        }
-
-
-        if (saveButton) {
-
-            saveButton.style.display =
-                'none';
-
-        }
-
-
-        if (addItemButton) {
-
-            addItemButton.style.display =
-                'none';
-
-        }
-
-
-        if (cancelButton) {
-
-            cancelButton.style.display =
-                'none';
-
-        }
-
-    } else {
-
-        if (editButton) {
-
-            editButton.style.display =
-                '';
-
-        }
-
-
-        if (saveButton) {
-
-            saveButton.style.display =
-                'none';
-
-        }
-
-
-        if (addItemButton) {
-
-            addItemButton.style.display =
-                'none';
-
-        }
-
-
-        if (cancelButton) {
-
-            cancelButton.style.display =
-                '';
-
-        }
-
-    }
-
-}
-
-
-/* =====================================================
-   LOAD DETAIL ITEMS
-===================================================== */
-
-function loadDetailItems(
-    so
-) {
-
-    const body =
-        document.getElementById(
-            'soDetailsItemsBody'
-        );
-
-
-    if (!body) {
-
-        return;
-
-    }
-
-
-    body.innerHTML =
-        '';
-
-
-    const items =
-        Array.isArray(so.items)
-            ? so.items
-            : [];
-
-
-    items.forEach(function(item, index) {
-
-        createDetailItemRow(
-            item,
-            index
-        );
-
-    });
-
-}
-
-
-/* =====================================================
-   CREATE DETAIL ITEM ROW
-===================================================== */
-
-function createDetailItemRow(
-    item,
-    index
-) {
-
-    const body =
-        document.getElementById(
-            'soDetailsItemsBody'
-        );
-
-
-    if (!body) {
-
-        return;
-
-    }
-
-
-    const row =
-        document.createElement(
-            'tr'
-        );
-
-
-    const units = [
-
-        'pcs',
-        'assy',
-        'set',
-        'length',
-        'meter',
-        'lot',
-        'box',
-        'roll',
-        'amount',
-        'custom'
-
-    ];
-
-
-    let options =
-        '';
-
-
-    units.forEach(function(unit) {
-
-        options += `
-
-            <option
-                value="${escapeHTML(unit)}"
-                ${
-                    item.unit === unit
-                        ? 'selected'
-                        : ''
-                }>
-
-                ${escapeHTML(unit)}
-
-            </option>
-
-        `;
-
-    });
-
-
-    const isCustom =
-        item.unit &&
-        !units.includes(
-            item.unit
-        );
-
-
-    if (isCustom) {
-
-        options += `
-
-            <option
-                value="custom"
-                selected>
-
-                custom
-
-            </option>
-
-        `;
-
-    }
-
-
-    const itemName =
-        escapeHTML(
-            item.name || ''
-        );
-
-
-    const description =
-        escapeHTML(
-            item.description || ''
-        );
-
-
-    const customUnit =
-        escapeHTML(
-            isCustom
-                ? item.unit
-                : ''
-        );
-
-
-    row.innerHTML = `
-
-        <td class="item-number">
-            ${index + 1}
-        </td>
-
-
-        <td>
-
-            <input
-                type="text"
-                class="detail-item-name"
-                value="${itemName}"
-                disabled>
-
-        </td>
-
-
-        <td>
-
-            <input
-                type="text"
-                class="detail-item-description"
-                value="${description}"
-                disabled>
-
-        </td>
-
-
-        <td>
-
-            <input
-                type="number"
-                class="detail-item-qty"
-                value="${Number(
-                    item.qty
-                ) || 0}"
-                min="0"
-                step="0.01"
-                oninput="calculateDetailItemTotal(this)"
-                disabled>
-
-        </td>
-
-
-        <td>
-
-            <select
-                class="detail-item-unit"
-                onchange="handleDetailUnitChange(this)"
-                disabled>
-
-                ${options}
-
-            </select>
-
-
-            <input
-                type="text"
-                class="custom-unit-input"
-                value="${customUnit}"
-                placeholder="Custom unit"
-                style="
-                    display:${
-                        isCustom
-                            ? 'block'
-                            : 'none'
-                    };
-                "
-                disabled>
-
-        </td>
-
-
-        <td>
-
-            <input
-                type="number"
-                class="detail-item-amount"
-                value="${Number(
-                    item.amount
-                ) || 0}"
-                min="0"
-                step="0.01"
-                oninput="calculateDetailItemTotal(this)"
-                disabled>
-
-        </td>
-
-
-        <td>
-
-            <input
-                type="text"
-                class="detail-item-total"
-                value="${formatMoney(
-                    item.total || 0
-                )}"
-                readonly>
-
-        </td>
-
-
-        <td>
-
-            <button
-                type="button"
-                class="delete-item"
-                onclick="deleteDetailItem(this)"
-                style="display:none;">
-
-                DELETE
-
-            </button>
-
-        </td>
-
-    `;
-
-
-    body.appendChild(
-        row
-    );
-
-}
-
-
-/* =====================================================
-   CLOSE DETAILS
-===================================================== */
-
-function closeSODetails() {
-
-    detailEditMode =
-        false;
-
-
-    document
-        .querySelectorAll('.page')
-        .forEach(function(page) {
-
-            page.classList.remove(
-                'active'
-            );
-
-        });
-
-
-    const sales =
-        document.getElementById(
-            'sales'
-        );
-
-
-    if (sales) {
-
-        sales.classList.add(
-            'active'
-        );
-
-    }
-
-
-    const pageTitle =
-        document.getElementById(
-            'pageTitle'
-        );
-
-
-    if (pageTitle) {
-
-        pageTitle.innerText =
-            'Sales Order';
-
-    }
-
-
-    const selectedInfo =
-        document.getElementById(
-            'selectedSOInfo'
-        );
-
-
-    if (selectedInfo) {
-
-        selectedInfo.innerHTML =
-            'No Sales Order selected.';
-
-    }
-
-
-    const updateButton =
-        document.getElementById(
-            'updateSOButton'
-        );
-
-
-    const cancelButton =
-        document.getElementById(
-            'cancelSOButton'
-        );
-
-
-    if (updateButton) {
-
-        updateButton.disabled =
-            true;
-
-    }
-
-
-    if (cancelButton) {
-
-        cancelButton.disabled =
-            true;
-
-    }
-
-
-    selectedSO =
-        null;
-
-
-    detailEditMode =
-        false;
-
-
-    loadSOList();
-
-}
-
-
-/* =====================================================
-   UPDATE SELECTED SO
-===================================================== */
-
-function updateSelectedSO() {
-
-    if (!selectedSO) {
-
-        alert(
-            'Please select a Sales Order.'
-        );
-
-        return;
-
-    }
-
-
-    const salesOrders =
-        getSalesOrders();
-
-
-    const so =
-        salesOrders.find(function(item) {
-
-            return (
-                item.soNumber ===
-                selectedSO
-            );
-
-        });
-
+/* =========================================================
+   RENDER SO DETAILS
+========================================================= */
+
+function renderSODetails(so) {
 
     if (!so) {
-
-        alert(
-            'Sales Order not found.'
-        );
-
         return;
-
     }
 
 
-    if (
-        so.status ===
-        'CANCELLED'
-    ) {
-
-        alert(
-            'Cancelled Sales Orders cannot be updated.'
-        );
-
-        return;
-
-    }
+    setValue(
+        "detailSODate",
+        so.dateCreation
+    );
 
 
-    openSODetails(
-        selectedSO
+    setValue(
+        "detailSONumber",
+        so.soNumber
+    );
+
+
+    setValue(
+        "detailClientName",
+        so.clientName
+    );
+
+
+    setValue(
+        "detailSE",
+        so.se
+    );
+
+
+    setValue(
+        "detailAttention",
+        so.attention
+    );
+
+
+    setValue(
+        "detailBillingAddress",
+        so.billingAddress
+    );
+
+
+    setValue(
+        "detailDeliveryAddress",
+        so.deliveryAddress
+    );
+
+
+    setValue(
+        "detailProject",
+        so.project
+    );
+
+
+    setValue(
+        "detailTIN",
+        so.tin
+    );
+
+
+    setValue(
+        "detailPONumber",
+        so.poNumber
+    );
+
+
+    setValue(
+        "detailTerms",
+        so.terms
+    );
+
+
+    setValue(
+        "detailJobOrder",
+        so.jobOrder
+    );
+
+
+    renderSODetailItems(
+        so.items || []
+    );
+
+
+    setText(
+        "detailSubtotal",
+        formatMoney(
+            so.subtotal
+        )
+    );
+
+
+    setText(
+        "detailDiscount",
+        formatMoney(
+            so.discount
+        )
+    );
+
+
+    setText(
+        "detailVatable",
+        formatMoney(
+            so.vatable
+        )
+    );
+
+
+    setText(
+        "detailVAT",
+        formatMoney(
+            so.vatAmount
+        )
+    );
+
+
+    setText(
+        "detailGrandTotal",
+        formatMoney(
+            so.grandTotal
+        )
     );
 
 }
 
 
-/* =====================================================
-   CANCEL SELECTED SO
-===================================================== */
+/* =========================================================
+   RENDER DETAIL ITEMS
+========================================================= */
 
-function cancelSelectedSO() {
+function renderSODetailItems(items) {
 
-    if (!selectedSO) {
-
-        alert(
-            'Please select a Sales Order.'
+    const tbody =
+        document.getElementById(
+            "soDetailsItemsBody"
         );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    if (!items.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="100%" style="text-align:center;">
+                    No items.
+                </td>
+            </tr>
+        `;
 
         return;
 
     }
 
 
-    const salesOrders =
-        getSalesOrders();
+    items.forEach(
+        function(item, index) {
+
+            const row =
+                document.createElement("tr");
 
 
-    const so =
-        salesOrders.find(function(item) {
+            row.innerHTML = `
 
-            return (
-                item.soNumber ===
-                selectedSO
+                <td>
+                    ${index + 1}
+                </td>
+
+                <td>
+                    <input
+                        type="text"
+                        class="so-detail-item-name"
+                        value="${escapeAttribute(item.itemName || "")}"
+                        disabled
+                    >
+                </td>
+
+                <td>
+                    <input
+                        type="text"
+                        class="so-detail-description"
+                        value="${escapeAttribute(item.description || "")}"
+                        disabled
+                    >
+                </td>
+
+                <td>
+                    <input
+                        type="number"
+                        class="so-detail-qty"
+                        value="${Number(item.qty || 0)}"
+                        disabled
+                        oninput="calculateDetailTotals()"
+                    >
+                </td>
+
+                <td>
+                    <input
+                        type="text"
+                        class="so-detail-unit"
+                        value="${escapeAttribute(item.unit || "")}"
+                        disabled
+                    >
+                </td>
+
+                <td>
+                    <input
+                        type="number"
+                        class="so-detail-amount"
+                        value="${Number(item.amount || 0)}"
+                        disabled
+                        oninput="calculateDetailTotals()"
+                    >
+                </td>
+
+                <td class="so-detail-total">
+                    ${formatMoney(item.total)}
+                </td>
+
+                <td>
+                    <button
+                        type="button"
+                        class="detail-delete-item"
+                        onclick="deleteDetailItem(this)"
+                        style="display:none;"
+                    >
+                        DELETE
+                    </button>
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                row
             );
 
-        });
-
-
-    if (!so) {
-
-        alert(
-            'Sales Order not found.'
-        );
-
-        return;
-
-    }
-
-
-    if (
-        so.status ===
-        'CANCELLED'
-    ) {
-
-        alert(
-            'This Sales Order is already cancelled.'
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            'Are you sure you want to cancel ' +
-            selectedSO +
-            '?'
-        );
-
-
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    so.status =
-        'CANCELLED';
-
-
-    saveSalesOrders(
-        salesOrders
-    );
-
-
-    selectedSO =
-        null;
-
-
-    loadSOList();
-
-
-    const info =
-        document.getElementById(
-            'selectedSOInfo'
-        );
-
-
-    if (info) {
-
-        info.innerHTML =
-            'No Sales Order selected.';
-
-    }
-
-
-    const updateButton =
-        document.getElementById(
-            'updateSOButton'
-        );
-
-
-    const cancelButton =
-        document.getElementById(
-            'cancelSOButton'
-        );
-
-
-    if (updateButton) {
-
-        updateButton.disabled =
-            true;
-
-    }
-
-
-    if (cancelButton) {
-
-        cancelButton.disabled =
-            true;
-
-    }
-
-
-    alert(
-        'Sales Order cancelled successfully.'
+        }
     );
 
 }
 
 
-/* =====================================================
-   ENABLE UPDATE
-===================================================== */
+/* =========================================================
+   DETAIL EDIT MODE
+========================================================= */
 
 function enableSOUpdate() {
-
-    if (!selectedSO) {
-
-        return;
-
-    }
-
-
-    const salesOrders =
-        getSalesOrders();
-
-
-    const so =
-        salesOrders.find(function(item) {
-
-            return (
-                item.soNumber ===
-                selectedSO
-            );
-
-        });
-
-
-    if (
-        !so ||
-        so.status ===
-        'CANCELLED'
-    ) {
-
-        return;
-
-    }
-
-
-    detailEditMode =
-        true;
-
 
     setDetailsEditMode(
         true
     );
 
-
-    const editButton =
-        document.getElementById(
-            'detailEditButton'
-        );
-
-
-    const saveButton =
-        document.getElementById(
-            'detailSaveButton'
-        );
-
-
-    const addButton =
-        document.getElementById(
-            'detailAddItemButton'
-        );
-
-
-    if (editButton) {
-
-        editButton.style.display =
-            'none';
-
-    }
-
-
-    if (saveButton) {
-
-        saveButton.style.display =
-            '';
-
-    }
-
-
-    if (addButton) {
-
-        addButton.style.display =
-            '';
-
-    }
-
 }
 
 
-/* =====================================================
+/* =========================================================
    SET DETAIL EDIT MODE
-===================================================== */
+========================================================= */
 
-function setDetailsEditMode(
-    enabled
-) {
+function setDetailsEditMode(enabled) {
 
-    document
-        .querySelectorAll(
-            '#soDetails input, #soDetails select'
-        )
-        .forEach(function(input) {
+    soDetailsEditMode =
+        Boolean(enabled);
 
-            /*
-             * SO NUMBER is always locked.
-             */
+
+    const detailsPage =
+        document.getElementById(
+            "soDetails"
+        );
+
+
+    if (!detailsPage) {
+        return;
+    }
+
+
+    const inputs =
+        detailsPage.querySelectorAll(
+            "input, textarea, select"
+        );
+
+
+    inputs.forEach(
+        function(input) {
+
+            /* SO Number remains readonly */
 
             if (
                 input.id ===
-                'detailSONumber'
+                "detailSONumber"
             ) {
 
                 input.disabled =
@@ -1987,315 +829,184 @@ function setDetailsEditMode(
             }
 
 
-            /*
-             * File-related hidden inputs
-             * are not affected.
-             */
-
-            if (
-                input.type ===
-                'file'
-            ) {
-
-                return;
-
-            }
-
-
             input.disabled =
                 !enabled;
 
-        });
+        }
+    );
 
 
     document
         .querySelectorAll(
-            '#soDetailsItemsBody .delete-item'
+            ".detail-delete-item"
         )
-        .forEach(function(button) {
+        .forEach(
+            function(button) {
 
-            button.style.display =
-                enabled
-                    ? ''
-                    : 'none';
+                button.style.display =
+                    enabled
+                        ? "inline-block"
+                        : "none";
 
-        });
-
-}
-
-
-/* =====================================================
-   DETAIL ITEM TOTAL
-===================================================== */
-
-function calculateDetailItemTotal(
-    input
-) {
-
-    const row =
-        input.closest('tr');
+            }
+        );
 
 
-    if (!row) {
+    const addButton =
+        document.getElementById(
+            "detailAddItemButton"
+        );
 
-        return;
+
+    if (addButton) {
+
+        addButton.style.display =
+            enabled
+                ? "inline-block"
+                : "none";
 
     }
 
 
-    const qty =
-        Number(
-            row.querySelector(
-                '.detail-item-qty'
-            )?.value
-        ) || 0;
-
-
-    const amount =
-        Number(
-            row.querySelector(
-                '.detail-item-amount'
-            )?.value
-        ) || 0;
-
-
-    const total =
-        qty * amount;
-
-
-    const output =
-        row.querySelector(
-            '.detail-item-total'
+    const saveButton =
+        document.querySelector(
+            '[onclick="saveSOUpdate()"]'
         );
 
 
-    if (output) {
+    if (saveButton) {
 
-        output.value =
-            formatMoney(
-                total
-            );
+        saveButton.style.display =
+            enabled
+                ? "inline-block"
+                : "none";
 
     }
 
-
-    calculateDetailTotals();
-
 }
 
 
-/* =====================================================
-   DETAIL TOTALS
-===================================================== */
-
-function calculateDetailTotals() {
-
-    const rows =
-        document.querySelectorAll(
-            '#soDetailsItemsBody tr'
-        );
-
-
-    const items = [];
-
-
-    rows.forEach(function(row) {
-
-        items.push({
-
-            qty:
-                Number(
-                    row.querySelector(
-                        '.detail-item-qty'
-                    )?.value
-                ) || 0,
-
-            amount:
-                Number(
-                    row.querySelector(
-                        '.detail-item-amount'
-                    )?.value
-                ) || 0
-
-        });
-
-    });
-
-
-    const discount =
-        Number(
-            document.getElementById(
-                'detailDiscount'
-            )?.value
-        ) || 0;
-
-
-    const vatable =
-        Boolean(
-            document.getElementById(
-                'detailVatable'
-            )?.checked
-        );
-
-
-    const result =
-        calculateSOData(
-            items,
-            discount,
-            vatable
-        );
-
-
-    setText(
-        'detailSubtotal',
-        formatMoney(
-            result.subtotal
-        )
-    );
-
-
-    setText(
-        'detailVAT',
-        formatMoney(
-            result.vatAmount
-        )
-    );
-
-
-    setText(
-        'detailGrandTotal',
-        formatMoney(
-            result.grandTotal
-        )
-    );
-
-}
-
-
-/* =====================================================
+/* =========================================================
    ADD DETAIL ITEM
-===================================================== */
+========================================================= */
 
 function addDetailItem() {
 
-    const body =
+    const tbody =
         document.getElementById(
-            'soDetailsItemsBody'
+            "soDetailsItemsBody"
         );
 
 
-    if (!body) {
-
+    if (!tbody) {
         return;
-
     }
 
 
+    const row =
+        document.createElement("tr");
+
+
     const index =
-        body.querySelectorAll(
-            'tr'
-        ).length;
+        tbody.querySelectorAll(
+            "tr"
+        ).length + 1;
 
 
-    createDetailItemRow(
+    row.innerHTML = `
 
-        {
+        <td>
+            ${index}
+        </td>
 
-            name: '',
+        <td>
+            <input
+                type="text"
+                class="so-detail-item-name"
+                value=""
+            >
+        </td>
 
-            description: '',
+        <td>
+            <input
+                type="text"
+                class="so-detail-description"
+                value=""
+            >
+        </td>
 
-            qty: 0,
+        <td>
+            <input
+                type="number"
+                class="so-detail-qty"
+                value="1"
+                min="0"
+                oninput="calculateDetailTotals()"
+            >
+        </td>
 
-            unit: 'pcs',
+        <td>
+            <input
+                type="text"
+                class="so-detail-unit"
+                value=""
+            >
+        </td>
 
-            amount: 0,
+        <td>
+            <input
+                type="number"
+                class="so-detail-amount"
+                value="0"
+                min="0"
+                step="0.01"
+                oninput="calculateDetailTotals()"
+            >
+        </td>
 
-            total: 0
+        <td class="so-detail-total">
+            ${formatMoney(0)}
+        </td>
 
-        },
+        <td>
+            <button
+                type="button"
+                class="detail-delete-item"
+                onclick="deleteDetailItem(this)"
+            >
+                DELETE
+            </button>
+        </td>
 
-        index
+    `;
 
+
+    tbody.appendChild(
+        row
     );
 
 
     renumberDetailItems();
 
 
-    setDetailsEditMode(
-        true
-    );
-
-
     calculateDetailTotals();
 
 }
 
 
-/* =====================================================
-   DETAIL UNIT CHANGE
-===================================================== */
-
-function handleDetailUnitChange(
-    select
-) {
-
-    const row =
-        select.closest('tr');
-
-
-    if (!row) {
-
-        return;
-
-    }
-
-
-    const custom =
-        row.querySelector(
-            '.custom-unit-input'
-        );
-
-
-    if (!custom) {
-
-        return;
-
-    }
-
-
-    if (
-        select.value ===
-        'custom'
-    ) {
-
-        custom.style.display =
-            'block';
-
-    } else {
-
-        custom.style.display =
-            'none';
-
-        custom.value =
-            '';
-
-    }
-
-}
-
-
-/* =====================================================
+/* =========================================================
    DELETE DETAIL ITEM
-===================================================== */
+========================================================= */
 
-function deleteDetailItem(
-    button
-) {
+function deleteDetailItem(button) {
+
+    if (!soDetailsEditMode) {
+        return;
+    }
+
 
     const row =
-        button.closest('tr');
+        button.closest("tr");
 
 
     if (row) {
@@ -2307,51 +1018,207 @@ function deleteDetailItem(
 
     renumberDetailItems();
 
+
     calculateDetailTotals();
 
 }
 
 
-/* =====================================================
+/* =========================================================
    RENUMBER DETAIL ITEMS
-===================================================== */
+========================================================= */
 
 function renumberDetailItems() {
 
-    document
-        .querySelectorAll(
-            '#soDetailsItemsBody tr'
-        )
-        .forEach(function(row, index) {
-
-            const number =
-                row.querySelector(
-                    '.item-number'
-                );
+    const tbody =
+        document.getElementById(
+            "soDetailsItemsBody"
+        );
 
 
-            if (number) {
+    if (!tbody) {
+        return;
+    }
 
-                number.textContent =
+
+    const rows =
+        tbody.querySelectorAll(
+            "tr"
+        );
+
+
+    rows.forEach(
+        function(row, index) {
+
+            if (
+                row.children[0]
+            ) {
+
+                row.children[0]
+                    .textContent =
                     index + 1;
 
             }
 
-        });
+        }
+    );
 
 }
 
 
-/* =====================================================
+/* =========================================================
+   CALCULATE DETAIL TOTALS
+========================================================= */
+
+function calculateDetailTotals() {
+
+    const tbody =
+        document.getElementById(
+            "soDetailsItemsBody"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    let subtotal = 0;
+
+
+    const rows =
+        tbody.querySelectorAll(
+            "tr"
+        );
+
+
+    rows.forEach(
+        function(row) {
+
+            const qtyInput =
+                row.querySelector(
+                    ".so-detail-qty"
+                );
+
+
+            const amountInput =
+                row.querySelector(
+                    ".so-detail-amount"
+                );
+
+
+            const totalCell =
+                row.querySelector(
+                    ".so-detail-total"
+                );
+
+
+            if (
+                !qtyInput ||
+                !amountInput
+            ) {
+                return;
+            }
+
+
+            const qty =
+                Number(
+                    qtyInput.value || 0
+                );
+
+
+            const amount =
+                Number(
+                    amountInput.value || 0
+                );
+
+
+            const total =
+                qty * amount;
+
+
+            subtotal += total;
+
+
+            if (totalCell) {
+
+                totalCell.textContent =
+                    formatMoney(total);
+
+            }
+
+        }
+    );
+
+
+    /*
+     * Discount is taken from current SO.
+     */
+
+    const discount =
+        Number(
+            currentSO?.discount || 0
+        );
+
+
+    const vatable =
+        subtotal - discount;
+
+
+    const vatRate =
+        0.12;
+
+
+    const vatAmount =
+        vatable * vatRate;
+
+
+    const grandTotal =
+        vatable + vatAmount;
+
+
+    setText(
+        "detailSubtotal",
+        formatMoney(subtotal)
+    );
+
+
+    setText(
+        "detailDiscount",
+        formatMoney(discount)
+    );
+
+
+    setText(
+        "detailVatable",
+        formatMoney(vatable)
+    );
+
+
+    setText(
+        "detailVAT",
+        formatMoney(vatAmount)
+    );
+
+
+    setText(
+        "detailGrandTotal",
+        formatMoney(grandTotal)
+    );
+
+}
+
+
+/* =========================================================
    SAVE SO UPDATE
-===================================================== */
+========================================================= */
 
 async function saveSOUpdate() {
 
-    if (!selectedSO) {
+    if (!currentSO) {
 
         alert(
-            'No Sales Order selected.'
+            "Walang selected Sales Order."
         );
 
         return;
@@ -2359,25 +1226,357 @@ async function saveSOUpdate() {
     }
 
 
-    const salesOrders =
-        getSalesOrders();
+    const items =
+        collectDetailItems();
 
+
+    let subtotal = 0;
+
+
+    items.forEach(
+        function(item) {
+
+            subtotal +=
+                Number(item.total || 0);
+
+        }
+    );
+
+
+    const discount =
+        Number(
+            currentSO.discount || 0
+        );
+
+
+    const vatable =
+        subtotal - discount;
+
+
+    const vatRate =
+        0.12;
+
+
+    const vatAmount =
+        vatable * vatRate;
+
+
+    const grandTotal =
+        vatable + vatAmount;
+
+
+    const data = {
+
+        soNumber:
+            currentSO.soNumber,
+
+        dateCreation:
+            getValue(
+                "detailSODate"
+            ),
+
+        clientName:
+            getValue(
+                "detailClientName"
+            ),
+
+        se:
+            getValue(
+                "detailSE"
+            ),
+
+        attention:
+            getValue(
+                "detailAttention"
+            ),
+
+        billingAddress:
+            getValue(
+                "detailBillingAddress"
+            ),
+
+        deliveryAddress:
+            getValue(
+                "detailDeliveryAddress"
+            ),
+
+        project:
+            getValue(
+                "detailProject"
+            ),
+
+        tin:
+            getValue(
+                "detailTIN"
+            ),
+
+        poNumber:
+            getValue(
+                "detailPONumber"
+            ),
+
+        terms:
+            getValue(
+                "detailTerms"
+            ),
+
+        jobOrder:
+            getValue(
+                "detailJobOrder"
+            ),
+
+        status:
+            currentSO.status ||
+            "ACTIVE",
+
+        subtotal:
+            subtotal,
+
+        discount:
+            discount,
+
+        vatable:
+            vatable,
+
+        vatRate:
+            vatRate,
+
+        vatAmount:
+            vatAmount,
+
+        grandTotal:
+            grandTotal,
+
+        createdBy:
+            currentSO.createdBy ||
+            "",
+
+        createdDate:
+            currentSO.createdDate ||
+            "",
+
+        items:
+            items
+
+    };
+
+
+    const saveButton =
+        document.querySelector(
+            '[onclick="saveSOUpdate()"]'
+        );
+
+
+    if (saveButton) {
+
+        saveButton.disabled =
+            true;
+
+        saveButton.textContent =
+            "SAVING...";
+
+    }
+
+
+    const result =
+        await salesOrderAPI(
+            "updateSalesOrder",
+            data
+        );
+
+
+    if (saveButton) {
+
+        saveButton.disabled =
+            false;
+
+        saveButton.textContent =
+            "SAVE";
+
+    }
+
+
+    if (!result.success) {
+
+        alert(
+            result.message ||
+            "Failed to update Sales Order."
+        );
+
+        return;
+
+    }
+
+
+    alert(
+        "Sales Order updated successfully."
+    );
+
+
+    soDetailsEditMode =
+        false;
+
+
+    await openSODetails(
+        currentSO.soNumber
+    );
+
+
+    await loadSOList();
+
+}
+
+
+/* =========================================================
+   COLLECT DETAIL ITEMS
+========================================================= */
+
+function collectDetailItems() {
+
+    const tbody =
+        document.getElementById(
+            "soDetailsItemsBody"
+        );
+
+
+    if (!tbody) {
+        return [];
+    }
+
+
+    const rows =
+        tbody.querySelectorAll(
+            "tr"
+        );
+
+
+    const items =
+        [];
+
+
+    rows.forEach(
+        function(row, index) {
+
+            const itemNameInput =
+                row.querySelector(
+                    ".so-detail-item-name"
+                );
+
+
+            const descriptionInput =
+                row.querySelector(
+                    ".so-detail-description"
+                );
+
+
+            const qtyInput =
+                row.querySelector(
+                    ".so-detail-qty"
+                );
+
+
+            const unitInput =
+                row.querySelector(
+                    ".so-detail-unit"
+                );
+
+
+            const amountInput =
+                row.querySelector(
+                    ".so-detail-amount"
+                );
+
+
+            if (!itemNameInput) {
+                return;
+            }
+
+
+            const itemName =
+                itemNameInput.value.trim();
+
+
+            const description =
+                descriptionInput
+                    ? descriptionInput.value.trim()
+                    : "";
+
+
+            const qty =
+                Number(
+                    qtyInput
+                        ? qtyInput.value
+                        : 0
+                );
+
+
+            const unit =
+                unitInput
+                    ? unitInput.value.trim()
+                    : "";
+
+
+            const amount =
+                Number(
+                    amountInput
+                        ? amountInput.value
+                        : 0
+                );
+
+
+            const total =
+                qty * amount;
+
+
+            items.push({
+
+                itemNumber:
+                    index + 1,
+
+                itemName:
+                    itemName,
+
+                description:
+                    description,
+
+                qty:
+                    qty,
+
+                unit:
+                    unit,
+
+                amount:
+                    amount,
+
+                total:
+                    total
+
+            });
+
+        }
+    );
+
+
+    return items;
+
+}
+
+
+/* =========================================================
+   CANCEL SELECTED SO
+========================================================= */
+
+async function cancelSelectedSO() {
 
     const so =
-        salesOrders.find(function(item) {
-
-            return (
-                item.soNumber ===
-                selectedSO
-            );
-
-        });
+        selectedSO ||
+        currentSO;
 
 
     if (!so) {
 
         alert(
-            'Sales Order not found.'
+            "Pumili muna ng Sales Order."
         );
 
         return;
@@ -2386,12 +1585,13 @@ async function saveSOUpdate() {
 
 
     if (
-        so.status ===
-        'CANCELLED'
+        String(so.status)
+            .toUpperCase()
+        === "CANCELLED"
     ) {
 
         alert(
-            'Cancelled Sales Orders cannot be updated.'
+            "Cancelled na ang Sales Order na ito."
         );
 
         return;
@@ -2401,1283 +1601,309 @@ async function saveSOUpdate() {
 
     const confirmed =
         confirm(
-            'Save changes to ' +
-            selectedSO +
-            '?'
+            "Are you sure you want to cancel SO " +
+            so.soNumber +
+            "?"
         );
 
 
     if (!confirmed) {
-
         return;
-
     }
 
 
-    /*
-     * READ BASIC INFORMATION
-     */
-
-    so.dateCreation =
-        getValue(
-            'detailSODate'
+    const result =
+        await salesOrderAPI(
+            "cancelSalesOrder",
+            {
+                soNumber:
+                    so.soNumber
+            }
         );
 
 
-    so.clientName =
-        getValue(
-            'detailClientName'
-        );
-
-
-    so.se =
-        getValue(
-            'detailSE'
-        );
-
-
-    so.attention =
-        getValue(
-            'detailAttention'
-        );
-
-
-    so.billingAddress =
-        getValue(
-            'detailBillingAddress'
-        );
-
-
-    so.deliveryAddress =
-        getValue(
-            'detailDeliveryAddress'
-        );
-
-
-    so.project =
-        getValue(
-            'detailProject'
-        );
-
-
-    so.tin =
-        getValue(
-            'detailTIN'
-        );
-
-
-    so.poNumber =
-        getValue(
-            'detailPONumber'
-        );
-
-
-    so.terms =
-        getValue(
-            'detailTerms'
-        );
-
-
-    so.jobOrder =
-        getValue(
-            'detailJobOrder'
-        );
-
-
-    so.discount =
-        Number(
-            getValue(
-                'detailDiscount'
-            )
-        ) || 0;
-
-
-    so.vatable =
-        Boolean(
-            document.getElementById(
-                'detailVatable'
-            )?.checked
-        );
-
-
-    /*
-     * VALIDATION
-     */
-
-    if (!so.clientName) {
+    if (!result.success) {
 
         alert(
-            'Client Name is required.'
+            result.message ||
+            "Failed to cancel Sales Order."
         );
 
         return;
 
     }
-
-
-    if (!so.se) {
-
-        alert(
-            'Please select SE.'
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * READ ITEMS
-     */
-
-    const rows =
-        document.querySelectorAll(
-            '#soDetailsItemsBody tr'
-        );
-
-
-    if (!rows.length) {
-
-        alert(
-            'Please add at least one item.'
-        );
-
-        return;
-
-    }
-
-
-    const items = [];
-
-
-    rows.forEach(function(row) {
-
-        let unit =
-            row.querySelector(
-                '.detail-item-unit'
-            )?.value || '';
-
-
-        const custom =
-            row.querySelector(
-                '.custom-unit-input'
-            );
-
-
-        if (
-            unit === 'custom' &&
-            custom
-        ) {
-
-            unit =
-                custom.value.trim();
-
-        }
-
-
-        items.push({
-
-            name:
-                row.querySelector(
-                    '.detail-item-name'
-                )?.value.trim() || '',
-
-            description:
-                row.querySelector(
-                    '.detail-item-description'
-                )?.value.trim() || '',
-
-            qty:
-                Number(
-                    row.querySelector(
-                        '.detail-item-qty'
-                    )?.value
-                ) || 0,
-
-            unit:
-                unit,
-
-            amount:
-                Number(
-                    row.querySelector(
-                        '.detail-item-amount'
-                    )?.value
-                ) || 0,
-
-            total:
-                0
-
-        });
-
-    });
-
-
-    /*
-     * CALCULATE
-     */
-
-    const totals =
-        calculateSOData(
-            items,
-            so.discount,
-            so.vatable
-        );
-
-
-    so.items =
-        items;
-
-
-    so.subtotal =
-        totals.subtotal;
-
-
-    so.discount =
-        totals.discount;
-
-
-    so.vatable =
-        totals.vatable;
-
-
-    so.vatRate =
-        totals.vatRate;
-
-
-    so.vatAmount =
-        totals.vatAmount;
-
-
-    so.grandTotal =
-        totals.grandTotal;
-
-
-    /*
-     * SAVE
-     */
-
-    saveSalesOrders(
-        salesOrders
-    );
-
-
-    /*
-     * RESET EDIT MODE
-     */
-
-    detailEditMode =
-        false;
-
-
-    setDetailsEditMode(
-        false
-    );
-
-
-    updateDetailButtons(
-        so.status
-    );
-
-
-    calculateDetailTotals();
-
-
-    /*
-     * REFRESH LIST
-     */
-
-    loadSOList();
-
-
-    /*
-     * KEEP DETAILS OPEN
-     */
-
-    await loadSOFiles(
-        so.soNumber
-    );
 
 
     alert(
+        "Sales Order cancelled successfully."
+    );
 
-        'Sales Order updated successfully!\n\n' +
 
-        'SO: ' +
-        so.soNumber +
+    selectedSO =
+        null;
 
-        '\nGrand Total: ' +
-        formatMoney(
-            so.grandTotal
-        )
 
+    currentSO =
+        null;
+
+
+    await loadSOList();
+
+
+    closeSODetails();
+
+}
+
+
+/* =========================================================
+   UPDATE SELECTED SO
+========================================================= */
+
+function updateSelectedSO() {
+
+    const so =
+        selectedSO ||
+        currentSO;
+
+
+    if (!so) {
+
+        alert(
+            "Pumili muna ng Sales Order."
+        );
+
+        return;
+
+    }
+
+
+    openSODetails(
+        so.soNumber
     );
 
 }
 
 
-/* =====================================================
-   DETAIL SO FILE SECTION
-===================================================== */
+/* =========================================================
+   CLOSE SO DETAILS
+========================================================= */
 
-function ensureDetailSOFileSection() {
+function closeSODetails() {
+
+    const salesPage =
+        document.getElementById(
+            "sales"
+        );
+
 
     const detailsPage =
         document.getElementById(
-            'soDetails'
+            "soDetails"
         );
 
 
-    if (!detailsPage) {
+    if (detailsPage) {
 
-        return null;
+        detailsPage.classList.remove(
+            "active"
+        );
+
+        detailsPage.style.display =
+            "none";
 
     }
 
 
-    let section =
-        document.getElementById(
-            'detailSOFilesSection'
+    if (salesPage) {
+
+        salesPage.classList.add(
+            "active"
         );
 
-
-    if (!section) {
-
-        section =
-            document.createElement(
-                'div'
-            );
-
-
-        section.id =
-            'detailSOFilesSection';
-
-
-        section.className =
-            'section';
-
-
-        section.innerHTML = `
-
-            <div class="table-header">
-
-                <div>
-
-                    <h2>
-                        SO Files
-                    </h2>
-
-                    <p class="subtitle">
-                        Uploaded Sales Order PDF files
-                    </p>
-
-                </div>
-
-
-                <label
-                    for="detailSOFileInput"
-                    class="btn btn-primary"
-                    style="cursor:pointer;">
-
-                    📎 + UPLOAD FILE
-
-                </label>
-
-
-                <input
-                    type="file"
-                    id="detailSOFileInput"
-                    accept=".pdf,application/pdf"
-                    multiple
-                    hidden
-                    onchange="handleDetailSOFiles(this.files)">
-
-            </div>
-
-
-            <div
-                id="detailSOFilesList"
-                class="so-file-list">
-
-                <div class="so-file-status">
-                    No SO files uploaded yet.
-                </div>
-
-            </div>
-
-        `;
-
-
-        const actionBars =
-            detailsPage.querySelectorAll(
-                '.action-bar'
-            );
-
-
-        const lastActionBar =
-            actionBars[
-                actionBars.length - 1
-            ];
-
-
-        if (lastActionBar) {
-
-            detailsPage.insertBefore(
-                section,
-                lastActionBar
-            );
-
-        } else {
-
-            detailsPage.appendChild(
-                section
-            );
-
-        }
+        salesPage.style.display =
+            "block";
 
     }
 
 
-    return section;
+    soDetailsEditMode =
+        false;
+
+
+    currentSO =
+        null;
 
 }
 
 
-/* =====================================================
-   LOAD SO FILES
-===================================================== */
-
-async function loadSOFiles(
-    soNumber
-) {
-
-    const section =
-        ensureDetailSOFileSection();
-
-
-    if (!section) {
-
-        return;
-
-    }
-
-
-    const files =
-        await getSOFilesFromDB(
-            soNumber
-        );
-
-
-    currentSOFiles =
-        files;
-
-
-    renderSOFiles(
-        files
-    );
-
-}
-
-
-/* =====================================================
-   HANDLE DETAIL FILES
-===================================================== */
-
-async function handleDetailSOFiles(
-    files
-) {
-
-    if (
-        !files ||
-        !selectedSO
-    ) {
-
-        return;
-
-    }
-
-
-    const fileArray =
-        Array.from(files);
-
-
-    for (
-        const file of fileArray
-    ) {
-
-        if (
-            file.type !==
-            'application/pdf'
-        ) {
-
-            alert(
-                file.name +
-                ' is not a PDF file.'
-            );
-
-            continue;
-
-        }
-
-
-        try {
-
-            await saveSOFileToDB(
-                selectedSO,
-                file
-            );
-
-        } catch (error) {
-
-            console.error(
-                'File upload error:',
-                error
-            );
-
-
-            alert(
-                'Failed to upload ' +
-                file.name
-            );
-
-        }
-
-    }
-
-
-    await loadSOFiles(
-        selectedSO
-    );
-
-
-    const input =
-        document.getElementById(
-            'detailSOFileInput'
-        );
-
-
-    if (input) {
-
-        input.value =
-            '';
-
-    }
-
-}
-
-
-/* =====================================================
-   RENDER SO FILES
-===================================================== */
-
-function renderSOFiles(
-    files
-) {
-
-    const list =
-        document.getElementById(
-            'detailSOFilesList'
-        );
-
-
-    if (!list) {
-
-        return;
-
-    }
-
-
-    list.innerHTML =
-        '';
-
-
-    if (
-        !files ||
-        files.length === 0
-    ) {
-
-        list.innerHTML = `
-
-            <div class="so-file-status">
-
-                No SO files uploaded yet.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    files.forEach(function(record) {
-
-        const row =
-            document.createElement(
-                'div'
-            );
-
-
-        row.className =
-            'so-file-row';
-
-
-        const date =
-            record.uploadedDate
-                ? new Date(
-                    record.uploadedDate
-                ).toLocaleString(
-                    'en-PH'
-                )
-                : '-';
-
-
-        row.innerHTML = `
-
-            <div class="so-file-info">
-
-                <span class="file-icon">
-                    📄
-                </span>
-
-
-                <div>
-
-                    <strong>
-                        ${escapeHTML(
-                            record.fileName
-                        )}
-                    </strong>
-
-
-                    <small>
-
-                        Uploaded:
-                        ${escapeHTML(
-                            date
-                        )}
-
-                        •
-                        ${formatFileSize(
-                            record.fileSize
-                        )}
-
-                    </small>
-
-                </div>
-
-            </div>
-
-
-            <div class="so-file-actions">
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    onclick="viewSOFile(${record.id})">
-
-                    VIEW FILE
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    onclick="printSOFile(${record.id})">
-
-                    PRINT
-
-                </button>
-
-            </div>
-
-        `;
-
-
-        list.appendChild(
-            row
-        );
-
-    });
-
-}
-
-
-/* =====================================================
-   GET SINGLE FILE
-===================================================== */
-
-async function getSOFileById(
-    fileId
-) {
-
-    const db =
-        await openSOFileDB();
-
-
-    return new Promise(function(resolve, reject) {
-
-        const transaction =
-            db.transaction(
-                SO_FILE_STORE,
-                'readonly'
-            );
-
-
-        const store =
-            transaction.objectStore(
-                SO_FILE_STORE
-            );
-
-
-        const request =
-            store.get(
-                fileId
-            );
-
-
-        request.onsuccess =
-            function() {
-
-                resolve(
-                    request.result
-                );
-
-            };
-
-
-        request.onerror =
-            function() {
-
-                reject(
-                    request.error
-                );
-
-            };
-
-    });
-
-}
-
-
-/* =====================================================
-   VIEW SO FILE
-===================================================== */
-
-async function viewSOFile(
-    fileId
-) {
-
-    try {
-
-        const record =
-            await getSOFileById(
-                fileId
-            );
-
-
-        if (
-            !record ||
-            !record.file
-        ) {
-
-            alert(
-                'Unable to open file.'
-            );
-
-            return;
-
-        }
-
-
-        if (currentPDFUrl) {
-
-            URL.revokeObjectURL(
-                currentPDFUrl
-            );
-
-        }
-
-
-        currentPDFUrl =
-            URL.createObjectURL(
-                record.file
-            );
-
-
-        openPDFViewer(
-            currentPDFUrl,
-            record.fileName
-        );
-
-    } catch (error) {
-
-        console.error(
-            'View file error:',
-            error
-        );
-
-
-        alert(
-            'Unable to open file.'
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   PRINT SO FILE
-===================================================== */
-
-async function printSOFile(
-    fileId
-) {
-
-    try {
-
-        const record =
-            await getSOFileById(
-                fileId
-            );
-
-
-        if (
-            !record ||
-            !record.file
-        ) {
-
-            alert(
-                'Unable to print file.'
-            );
-
-            return;
-
-        }
-
-
-        const url =
-            URL.createObjectURL(
-                record.file
-            );
-
-
-        const printWindow =
-            window.open(
-                url,
-                '_blank'
-            );
-
-
-        if (!printWindow) {
-
-            URL.revokeObjectURL(
-                url
-            );
-
-
-            alert(
-                'Please allow pop-ups to print the PDF.'
-            );
-
-            return;
-
-        }
-
-
-        printWindow.onload =
-            function() {
-
-                printWindow.focus();
-
-                printWindow.print();
-
-            };
-
-
-        setTimeout(function() {
-
-            URL.revokeObjectURL(
-                url
-            );
-
-        }, 60000);
-
-    } catch (error) {
-
-        console.error(
-            'Print file error:',
-            error
-        );
-
-
-        alert(
-            'Unable to print file.'
-        );
-
-    }
-
-}
-
-
-/* =====================================================
-   PDF VIEWER
-===================================================== */
-
-function openPDFViewer(
-    url,
-    fileName
-) {
-
-    let modal =
-        document.getElementById(
-            'soPDFViewerModal'
-        );
-
-
-    if (!modal) {
-
-        modal =
-            document.createElement(
-                'div'
-            );
-
-
-        modal.id =
-            'soPDFViewerModal';
-
-
-        modal.className =
-            'pdf-modal';
-
-
-        modal.innerHTML = `
-
-            <div class="pdf-modal-content">
-
-                <div class="pdf-modal-header">
-
-                    <h2
-                        id="soPDFViewerTitle">
-                    </h2>
-
-
-                    <button
-                        type="button"
-                        class="pdf-close-btn"
-                        onclick="closeSOFileViewer()">
-
-                        ×
-
-                    </button>
-
-                </div>
-
-
-                <div class="pdf-viewer-container">
-
-                    <iframe
-                        id="soPDFViewer"
-                        title="SO PDF Viewer">
-                    </iframe>
-
-                </div>
-
-            </div>
-
-        `;
-
-
-        document.body.appendChild(
-            modal
-        );
-
-    }
-
-
-    const title =
-        document.getElementById(
-            'soPDFViewerTitle'
-        );
-
-
-    const viewer =
-        document.getElementById(
-            'soPDFViewer'
-        );
-
-
-    if (title) {
-
-        title.textContent =
-            fileName || 'PDF File';
-
-    }
-
-
-    if (viewer) {
-
-        viewer.src =
-            url;
-
-    }
-
-
-    modal.classList.add(
-        'show'
-    );
-
-
-    modal.setAttribute(
-        'aria-hidden',
-        'false'
-    );
-
-}
-
-
-/* =====================================================
-   CLOSE PDF VIEWER
-===================================================== */
-
-function closeSOFileViewer() {
-
-    const modal =
-        document.getElementById(
-            'soPDFViewerModal'
-        );
-
-
-    if (!modal) {
-
-        return;
-
-    }
-
-
-    modal.classList.remove(
-        'show'
-    );
-
-
-    modal.setAttribute(
-        'aria-hidden',
-        'true'
-    );
-
-
-    const viewer =
-        document.getElementById(
-            'soPDFViewer'
-        );
-
-
-    if (viewer) {
-
-        viewer.src =
-            'about:blank';
-
-    }
-
-}
-
-
-/* =====================================================
-   FILE SIZE
-===================================================== */
-
-function formatFileSize(
-    bytes
-) {
-
-    if (
-        !bytes ||
-        bytes <= 0
-    ) {
-
-        return '0 Bytes';
-
-    }
-
-
-    const units = [
-
-        'Bytes',
-        'KB',
-        'MB',
-        'GB'
-
-    ];
-
-
-    const index =
-        Math.min(
-
-            Math.floor(
-                Math.log(bytes) /
-                Math.log(1024)
-            ),
-
-            units.length - 1
-
-        );
-
-
-    return (
-
-        bytes /
-        Math.pow(
-            1024,
-            index
-        )
-
-    ).toFixed(
-        index === 0
-            ? 0
-            : 2
-    ) +
-    ' ' +
-    units[index];
-
-}
-
-
-/* =====================================================
-   UTILITY
-===================================================== */
-
-function getValue(
-    id
-) {
+/* =========================================================
+   UTILITY FUNCTIONS
+========================================================= */
+
+function setValue(id, value) {
 
     const element =
-        document.getElementById(
-            id
-        );
+        document.getElementById(id);
 
 
-    return (
-        element?.value ||
-        ''
+    if (!element) {
+        return;
+    }
+
+
+    element.value =
+        value == null
+            ? ""
+            : value;
+
+}
+
+
+function getValue(id) {
+
+    const element =
+        document.getElementById(id);
+
+
+    if (!element) {
+        return "";
+    }
+
+
+    return String(
+        element.value || ""
     ).trim();
 
 }
 
 
-/* =====================================================
-   SET VALUE
-===================================================== */
-
-function setValue(
-    id,
-    value
-) {
+function setText(id, value) {
 
     const element =
-        document.getElementById(
-            id
-        );
+        document.getElementById(id);
 
 
-    if (element) {
-
-        element.value =
-            value ?? '';
-
+    if (!element) {
+        return;
     }
+
+
+    element.textContent =
+        value == null
+            ? ""
+            : value;
 
 }
 
 
-/* =====================================================
-   SET TEXT
-===================================================== */
+/* =========================================================
+   MONEY FORMAT
+========================================================= */
 
-function setText(
-    id,
-    value
-) {
+function formatMoney(value) {
 
-    const element =
-        document.getElementById(
-            id
-        );
+    const number =
+        Number(value || 0);
 
 
-    if (element) {
-
-        element.textContent =
-            value ?? '';
-
-    }
+    return number.toLocaleString(
+        "en-PH",
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
+    );
 
 }
 
 
-/* =====================================================
-   ESCAPE HTML
-===================================================== */
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
 
-function escapeHTML(
-    value
-) {
+function escapeHTML(value) {
 
     return String(
-        value ?? ''
+        value == null
+            ? ""
+            : value
     )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+function escapeAttribute(value) {
+
+    return escapeHTML(
+        value
+    );
+
+}
+
+
+function cssEscape(value) {
+
+    if (
+        window.CSS &&
+        typeof window.CSS.escape ===
+            "function"
+    ) {
+
+        return window.CSS.escape(
+            String(value)
+        );
+
+    }
+
+
+    return String(value)
         .replace(
-            /&/g,
-            '&amp;'
-        )
-        .replace(
-            /</g,
-            '&lt;'
-        )
-        .replace(
-            />/g,
-            '&gt;'
-        )
-        .replace(
-            /"/g,
-            '&quot;'
-        )
-        .replace(
-            /'/g,
-            '&#039;'
+            /([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
+            "\\$1"
         );
 
 }
 
 
-/* =====================================================
-   MODULE READY
-===================================================== */
+/* =========================================================
+   INITIALIZE SALES ORDER MODULE
+========================================================= */
 
-console.log(
-    'LOGIS-TECH Sales Order JS loaded.'
-);
-
-
-/* =====================================================
-   CLEANUP
-===================================================== */
-
-window.addEventListener(
-    'beforeunload',
+document.addEventListener(
+    "DOMContentLoaded",
     function() {
 
-        if (currentPDFUrl) {
+        /*
+         * Huwag automatic mag-load kung
+         * hindi pa naka-display ang Sales Order page.
+         *
+         * Main index.html ang tatawag sa
+         * loadSOList().
+         */
 
-            URL.revokeObjectURL(
-                currentPDFUrl
-            );
-
-            currentPDFUrl =
-                null;
-
-        }
+        console.log(
+            "LOGIS-TECH Sales Order module loaded."
+        );
 
     }
 );
