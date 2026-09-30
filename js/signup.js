@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
-    signupForm.addEventListener("submit", async function (event) {
+    signupForm.addEventListener("submit", function (event) {
 
         event.preventDefault();
 
@@ -25,26 +25,42 @@ document.addEventListener("DOMContentLoaded", function () {
         ================================= */
 
         const fullname =
-            document.getElementById("fullname").value.trim();
+            document
+                .getElementById("fullname")
+                .value
+                .trim();
 
         const username =
-            document.getElementById("signupUsername").value.trim();
+            document
+                .getElementById("signupUsername")
+                .value
+                .trim();
 
         const password =
-            document.getElementById("signupPassword").value;
+            document
+                .getElementById("signupPassword")
+                .value;
 
         const confirmPassword =
-            document.getElementById("confirmPassword").value;
+            document
+                .getElementById("confirmPassword")
+                .value;
 
         const accountType =
-            document.getElementById("accountType").value;
+            document
+                .getElementById("accountType")
+                .value;
 
 
         /* ================================
            VALIDATION
         ================================= */
 
-        if (!fullname || !username || !password) {
+        if (
+            !fullname ||
+            !username ||
+            !password
+        ) {
 
             message.textContent =
                 "Please complete all fields.";
@@ -78,6 +94,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* ================================
+           API URL
+        ================================= */
+
+        const API_URL =
+            "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
+
+
+        /* ================================
            LOADING
         ================================= */
 
@@ -89,57 +113,129 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /* ================================
-           LOGIS-TECH API
+           CREATE HIDDEN IFRAME
         ================================= */
 
-        const API_URL =
-            "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
+        let iframe =
+            document.getElementById(
+                "signupApiFrame"
+            );
+
+
+        if (!iframe) {
+
+            iframe =
+                document.createElement("iframe");
+
+            iframe.id =
+                "signupApiFrame";
+
+            iframe.name =
+                "signupApiFrame";
+
+            iframe.style.display =
+                "none";
+
+            document.body.appendChild(
+                iframe
+            );
+
+        }
 
 
         /* ================================
-           SEND TO GOOGLE APPS SCRIPT
+           CREATE FORM
         ================================= */
 
-        try {
+        const apiForm =
+            document.createElement("form");
 
-            await fetch(API_URL, {
+        apiForm.method =
+            "POST";
 
-                method: "POST",
+        apiForm.action =
+            API_URL;
 
-                mode: "no-cors",
+        apiForm.target =
+            "signupApiFrame";
 
-                headers: {
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-                },
-
-                body: JSON.stringify({
-
-                    action: "createAccount",
-
-                    fullName: fullname,
-
-                    username: username,
-
-                    password: password,
-
-                    accountType: accountType
-
-                })
-
-            });
+        apiForm.style.display =
+            "none";
 
 
-            /* ================================
-               SUCCESS
-            ================================= */
+        /* ================================
+           FORM FIELD HELPER
+        ================================= */
+
+        function addField(name, value) {
+
+            const input =
+                document.createElement("input");
+
+            input.type =
+                "hidden";
+
+            input.name =
+                name;
+
+            input.value =
+                value;
+
+            apiForm.appendChild(
+                input
+            );
+
+        }
+
+
+        /* ================================
+           ADD DATA
+        ================================= */
+
+        addField(
+            "fullName",
+            fullname
+        );
+
+        addField(
+            "username",
+            username
+        );
+
+        addField(
+            "password",
+            password
+        );
+
+        addField(
+            "accountType",
+            accountType
+        );
+
+
+        document.body.appendChild(
+            apiForm
+        );
+
+
+        /* ================================
+           SUBMIT TO APPS SCRIPT
+        ================================= */
+
+        apiForm.submit();
+
+
+        /* ================================
+           SHOW SUCCESS
+        ================================= */
+
+        setTimeout(function () {
 
             message.textContent =
                 "Account created successfully!";
 
             message.style.color =
                 "green";
-
 
             signupForm.reset();
 
@@ -149,23 +245,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.location.href =
                     "login.html";
 
-            }, 1500);
+            }, 1000);
 
 
-        } catch (error) {
+        }, 1500);
 
-            console.error(
-                "SIGNUP ERROR:",
-                error
-            );
-
-            message.textContent =
-                "Unable to connect to LOGIS-TECH API.";
-
-            message.style.color =
-                "red";
-
-        }
 
     });
 
