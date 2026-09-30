@@ -1,177 +1,167 @@
+
 /* =====================================================
    LOGI-TECH DASHBOARD
+   TAB NAVIGATION
 ===================================================== */
 
 document.addEventListener("DOMContentLoaded", function () {
 
     console.log("LOGI-TECH Dashboard Loaded");
 
-    loadDashboard();
+    showDashboardSection("summary");
 
 });
 
 
 /* =====================================================
-   LOAD DASHBOARD
+   DASHBOARD SECTION NAVIGATION
 ===================================================== */
 
-function loadDashboard() {
+function showDashboardSection(section, button) {
 
-    const savedOrders = localStorage.getItem("salesOrders");
+    /* -------------------------------------------------
+       GET ALL SECTIONS
+    ------------------------------------------------- */
 
-    console.log("Dashboard Sales Orders:", savedOrders);
+    const sections = [
+        "summarySection",
+        "salesOrderSection",
+        "logisticsSection",
+        "financeSection"
+    ];
 
-    let salesOrders = [];
+    /* -------------------------------------------------
+       HIDE ALL SECTIONS
+    ------------------------------------------------- */
 
-    if (savedOrders) {
+    sections.forEach(function (sectionId) {
 
-        try {
+        const element = document.getElementById(sectionId);
 
-            salesOrders = JSON.parse(savedOrders);
-
-        } catch (error) {
-
-            console.error(
-                "Error reading Sales Orders:",
-                error
-            );
-
-            salesOrders = [];
-
+        if (element) {
+            element.style.display = "none";
         }
-
-    }
-
-
-    /* =================================================
-       TOTAL SALES ORDERS
-    ================================================= */
-
-    const activeOrders = salesOrders.filter(function (so) {
-
-        return so.status !== "CANCELLED";
 
     });
 
 
-    const soCount =
-        document.getElementById("dashboardSOCount");
+    /* -------------------------------------------------
+       SHOW SELECTED SECTION
+    ------------------------------------------------- */
 
-    if (soCount) {
+    let selectedSection = null;
 
-        soCount.textContent = activeOrders.length;
+    switch (section) {
 
-    }
+        case "summary":
+            selectedSection = document.getElementById("summarySection");
+            break;
 
+        case "sales-order":
+            selectedSection = document.getElementById("salesOrderSection");
+            break;
 
-    /* =================================================
-       RECENT SALES ORDERS
-    ================================================= */
+        case "logistics":
+            selectedSection = document.getElementById("logisticsSection");
+            break;
 
-    const recentBody =
-        document.getElementById("recentSOBody");
-
-    if (!recentBody) {
-
-        console.error(
-            "recentSOBody not found!"
-        );
-
-        return;
-
-    }
-
-
-    recentBody.innerHTML = "";
-
-
-    if (salesOrders.length === 0) {
-
-        recentBody.innerHTML = `
-            <tr>
-                <td colspan="4">
-                    No Sales Orders found.
-                </td>
-            </tr>
-        `;
-
-        return;
+        case "finance":
+            selectedSection = document.getElementById("financeSection");
+            break;
 
     }
 
-
-    salesOrders
-        .slice()
-        .reverse()
-        .slice(0, 5)
-        .forEach(function (so) {
-
-            const row =
-                document.createElement("tr");
+    if (selectedSection) {
+        selectedSection.style.display = "block";
+    }
 
 
-            const statusClass =
-                so.status === "CANCELLED"
-                    ? "status status-cancelled"
-                    : "status";
+    /* -------------------------------------------------
+       ACTIVE BUTTON
+    ------------------------------------------------- */
 
+    document
+        .querySelectorAll(".dashboard-tab")
+        .forEach(function (tab) {
 
-            row.innerHTML = `
-
-                <td>
-                    ${escapeHTML(
-                        so.soNumber || ""
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        so.clientName || ""
-                    )}
-                </td>
-
-                <td>
-                    ${escapeHTML(
-                        so.project || ""
-                    )}
-                </td>
-
-                <td>
-
-                    <span class="${statusClass}">
-                        ${escapeHTML(
-                            so.status || ""
-                        )}
-                    </span>
-
-                </td>
-
-            `;
-
-
-            recentBody.appendChild(row);
+            tab.classList.remove("active");
 
         });
+
+
+    if (button) {
+        button.classList.add("active");
+    }
+
+
+    /* -------------------------------------------------
+       LOAD SECTION DATA
+    ------------------------------------------------- */
+
+    if (section === "summary") {
+        loadSummary();
+    }
+
+    if (section === "sales-order") {
+        loadSalesOrderDashboard();
+    }
+
+    if (section === "logistics") {
+        loadLogisticsDashboard();
+    }
+
+    if (section === "finance") {
+        loadFinanceDashboard();
+    }
 
 }
 
 
 /* =====================================================
-   ESCAPE HTML
+   SUMMARY
 ===================================================== */
 
-function escapeHTML(value) {
+function loadSummary() {
 
-    return String(value)
+    console.log("Loading Summary...");
 
-        .replace(/&/g, "&amp;")
+    /*
+       Summary formula will be added here.
+       We will connect this to the actual
+       Sales Order + Delivery data.
+    */
 
-        .replace(/</g, "&lt;")
+}
 
-        .replace(/>/g, "&gt;")
 
-        .replace(/"/g, "&quot;")
+/* =====================================================
+   SALES ORDER DASHBOARD
+===================================================== */
 
-        .replace(/'/g, "&#039;");
+function loadSalesOrderDashboard() {
+
+    console.log("Loading Sales Order Dashboard...");
+
+}
+
+
+/* =====================================================
+   LOGISTICS DASHBOARD
+===================================================== */
+
+function loadLogisticsDashboard() {
+
+    console.log("Loading Logistics Dashboard...");
+
+}
+
+
+/* =====================================================
+   FINANCE DASHBOARD
+===================================================== */
+
+function loadFinanceDashboard() {
+
+    console.log("Loading Finance Dashboard...");
 
 }
