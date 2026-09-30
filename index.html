@@ -1159,7 +1159,59 @@ td {
 
 
 <script>
+async function loadSalesOrderModule() {
 
+    const container =
+        document.getElementById('salesModule');
+
+    if (!container) {
+        console.error('salesModule not found.');
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch('pages/sales-order.html');
+
+        if (!response.ok) {
+            throw new Error(
+                'Failed to load Sales Order module.'
+            );
+        }
+
+        const html =
+            await response.text();
+
+        container.innerHTML = html;
+
+        console.log(
+            'Sales Order module loaded successfully.'
+        );
+
+        loadSOList();
+
+    } catch (error) {
+
+        console.error(
+            'Sales Order module error:',
+            error
+        );
+
+        container.innerHTML = `
+            <div style="
+                padding:30px;
+                color:#b00020;
+                background:#fff;
+                border-radius:10px;
+            ">
+                Failed to load Sales Order module.
+            </div>
+        `;
+
+    }
+}
+    
 /* =====================================================
    GENERAL PAGE NAVIGATION
 ===================================================== */
@@ -1175,27 +1227,12 @@ function showPage(pageId, button) {
         });
 
 
-    if (pageId === 'sales') {
+    const page =
+        document.getElementById(pageId);
 
-        const salesPage =
-            document.getElementById('sales');
+    if (page) {
 
-        if (salesPage) {
-
-            salesPage.classList.add('active');
-
-        }
-
-    } else {
-
-        const page =
-            document.getElementById(pageId);
-
-        if (page) {
-
-            page.classList.add('active');
-
-        }
+        page.classList.add('active');
 
     }
 
