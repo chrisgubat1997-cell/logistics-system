@@ -1,7 +1,7 @@
 ```css
 /* =====================================================
    LOGI-TECH DASHBOARD
-   COMPACT PROFESSIONAL DESIGN
+   PREMIUM COMPACT DESIGN
 ===================================================== */
 
 * {
@@ -30,7 +30,7 @@ body {
 .dashboard-container {
     width: 100%;
     min-height: 100%;
-    padding: 16px 22px 20px 20px;
+    padding: 18px 24px 22px 20px;
 }
 
 /* =====================================================
@@ -39,60 +39,88 @@ body {
 
 .dashboard-header {
     width: 100%;
+
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 18px;
+
+    margin-bottom: 20px;
     padding-right: 18px;
 }
 
+/* =====================================================
+   HEADER TITLE
+===================================================== */
+
 .dashboard-header h1 {
-    font-size: 24px;
-    font-weight: 700;
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    font-size: 25px;
+    font-weight: 750;
+
     color: #311b43;
-    margin-bottom: 3px;
+
+    letter-spacing: -0.3px;
+
+    margin-bottom: 4px;
 }
 
 .dashboard-header p {
+    font-family: "Segoe UI", Arial, sans-serif;
+
     font-size: 12px;
-    color: #7b7b7b;
+    font-weight: 500;
+
+    color: #858585;
+
+    letter-spacing: 0.2px;
 }
 
 /* =====================================================
-   SUMMARY / DASHBOARD TABS
+   SUMMARY / DASHBOARD BUTTON AREA
 ===================================================== */
 
 .dashboard-tabs {
     display: flex;
     align-items: center;
+
     gap: 5px;
 
     background: #ffffff;
+
     padding: 4px;
 
-    margin-right: 8px;
+    margin-right: 10px;
 
-    border: 1px solid #e8e5eb;
-    border-radius: 9px;
+    border: 1px solid #e5e0e8;
+    border-radius: 10px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    box-shadow:
+        0 3px 10px rgba(0, 0, 0, 0.07);
 
     flex-shrink: 0;
 }
 
+/* =====================================================
+   TAB BUTTON
+===================================================== */
+
 .dashboard-tab {
+    min-width: 96px;
+
+    padding: 9px 17px;
+
     border: none;
+    border-radius: 7px;
+
     background: transparent;
 
-    min-width: 92px;
-
-    padding: 8px 15px;
-
-    border-radius: 6px;
-
     font-family: "Segoe UI", Arial, sans-serif;
+
     font-size: 12px;
     font-weight: 700;
+
+    letter-spacing: 0.3px;
 
     color: #777;
 
@@ -101,21 +129,25 @@ body {
     white-space: nowrap;
 
     transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        box-shadow 0.2s ease;
+        all 0.2s ease;
 }
 
+/* Hover */
+
 .dashboard-tab:hover {
-    background: #f1edf4;
-    color: #311b43;
+    background: #f2edf5;
+    color: #381a4a;
 }
+
+/* Active */
 
 .dashboard-tab.active {
     background: #381a4a;
+
     color: #ffffff;
 
-    box-shadow: 0 2px 5px rgba(56, 26, 74, 0.20);
+    box-shadow:
+        0 3px 7px rgba(56, 26, 74, 0.22);
 }
 
 /* =====================================================
@@ -138,7 +170,7 @@ body {
     justify-content: space-between;
     align-items: center;
 
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 
     padding-right: 10px;
 }
@@ -148,38 +180,66 @@ body {
 ===================================================== */
 
 .summary-title h2 {
-    font-size: 18px;
-    font-weight: 700;
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    font-size: 19px;
+    font-weight: 750;
 
     color: #311b43;
+
+    letter-spacing: -0.2px;
 
     margin-bottom: 3px;
 }
 
 .summary-title p {
+    font-family: "Segoe UI", Arial, sans-serif;
+
     font-size: 11px;
-    color: #888;
+    font-weight: 500;
+
+    color: #8a8a8a;
+
+    letter-spacing: 0.1px;
 }
 
 /* =====================================================
-   PERIOD FILTER
+   PERIOD CONTROL CONTAINER
 ===================================================== */
 
 .period-control {
+    position: relative;
+
     display: flex;
     align-items: center;
-    gap: 9px;
+
+    gap: 10px;
+
+    min-height: 46px;
+
+    padding: 6px 7px 6px 13px;
 
     background: #ffffff;
 
-    padding: 5px 6px 5px 12px;
+    border: 1px solid #ded8e2;
 
-    border: 1px solid #e3dfe6;
-    border-radius: 9px;
+    border-radius: 11px;
 
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow:
+        0 3px 12px rgba(0, 0, 0, 0.06);
 
     flex-shrink: 0;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.period-control:hover {
+    border-color: #c7bbcf;
+
+    box-shadow:
+        0 4px 14px rgba(56, 26, 74, 0.09);
 }
 
 /* =====================================================
@@ -189,66 +249,130 @@ body {
 .period-control label {
     display: flex;
     align-items: center;
-    gap: 6px;
 
-    font-family: "Segoe UI", Arial, sans-serif;
-
-    font-size: 11px;
-    font-weight: 700;
-
-    color: #381a4a;
-
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-
-    white-space: nowrap;
-}
-
-.period-control label::before {
-    content: "📅";
-    font-size: 13px;
-}
-
-/* =====================================================
-   PERIOD DROPDOWN
-===================================================== */
-
-.period-control select {
-    width: 135px;
-    height: 32px;
-
-    padding: 0 30px 0 11px;
-
-    border: 1px solid #d8d2dc;
-    border-radius: 7px;
-
-    background: #f8f7f9;
-
-    color: #381a4a;
+    gap: 7px;
 
     font-family: "Segoe UI", Arial, sans-serif;
 
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 800;
+
+    color: #381a4a;
+
+    letter-spacing: 0.7px;
+
+    text-transform: uppercase;
+
+    white-space: nowrap;
+}
+
+/* Calendar icon */
+
+.period-control label::before {
+    content: "▣";
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 25px;
+    height: 25px;
+
+    border-radius: 7px;
+
+    background: #f0eaf3;
+
+    color: #381a4a;
+
+    font-size: 13px;
+
+    font-weight: 700;
+}
+
+/* =====================================================
+   DROPDOWN WRAPPER EFFECT
+===================================================== */
+
+.period-control select {
+    width: 145px;
+    height: 34px;
+
+    padding: 0 35px 0 12px;
+
+    border: 1px solid #d5cdd9;
+
+    border-radius: 8px;
+
+    background: #f8f6fa;
+
+    color: #311b43;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    letter-spacing: 0.2px;
 
     outline: none;
 
     cursor: pointer;
 
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
-        box-shadow 0.2s ease;
+        box-shadow 0.2s ease,
+        color 0.2s ease;
 }
+
+/* =====================================================
+   CUSTOM DROPDOWN ARROW
+===================================================== */
+
+.period-control::after {
+    content: "⌄";
+
+    position: absolute;
+
+    right: 18px;
+    top: 50%;
+
+    transform: translateY(-55%);
+
+    color: #381a4a;
+
+    font-size: 16px;
+    font-weight: 800;
+
+    pointer-events: none;
+}
+
+/* =====================================================
+   DROPDOWN HOVER
+===================================================== */
 
 .period-control select:hover {
     background: #f1edf4;
+
     border-color: #b9adbf;
+
+    color: #381a4a;
 }
+
+/* =====================================================
+   DROPDOWN FOCUS
+===================================================== */
 
 .period-control select:focus {
     background: #ffffff;
+
     border-color: #381a4a;
+
+    color: #311b43;
 
     box-shadow:
         0 0 0 3px rgba(56, 26, 74, 0.10);
@@ -266,7 +390,7 @@ body {
     grid-template-columns:
         repeat(5, minmax(0, 1fr));
 
-    gap: 12px;
+    gap: 13px;
 
     padding-right: 6px;
 }
@@ -281,17 +405,18 @@ body {
     width: 100%;
     min-width: 0;
 
-    min-height: 125px;
+    min-height: 128px;
+
+    padding: 17px 16px 15px 18px;
 
     background: #ffffff;
 
-    border: 1px solid #eeeeee;
-    border-radius: 11px;
+    border: 1px solid #eceaec;
 
-    padding: 16px;
+    border-radius: 12px;
 
     box-shadow:
-        0 3px 10px rgba(0, 0, 0, 0.06);
+        0 3px 11px rgba(0, 0, 0, 0.055);
 
     overflow: hidden;
 
@@ -304,7 +429,7 @@ body {
     transform: translateY(-2px);
 
     box-shadow:
-        0 6px 16px rgba(0, 0, 0, 0.09);
+        0 7px 18px rgba(0, 0, 0, 0.09);
 }
 
 /* =====================================================
@@ -350,18 +475,20 @@ body {
 ===================================================== */
 
 .summary-card-title {
+    font-family: "Segoe UI", Arial, sans-serif;
+
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 800;
 
     color: #777;
 
     text-transform: uppercase;
 
-    letter-spacing: 0.25px;
+    letter-spacing: 0.35px;
 
-    margin-bottom: 11px;
+    margin-bottom: 12px;
 
-    padding-right: 35px;
+    padding-right: 38px;
 }
 
 /* =====================================================
@@ -369,14 +496,16 @@ body {
 ===================================================== */
 
 .summary-card-number {
-    font-size: 27px;
-    font-weight: 700;
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    font-size: 28px;
+    font-weight: 750;
 
     color: #311b43;
 
     line-height: 1;
 
-    margin-bottom: 7px;
+    margin-bottom: 8px;
 }
 
 /* =====================================================
@@ -384,8 +513,10 @@ body {
 ===================================================== */
 
 .summary-card-amount {
+    font-family: "Segoe UI", Arial, sans-serif;
+
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 650;
 
     color: #555;
 
@@ -402,20 +533,23 @@ body {
     right: 13px;
     top: 13px;
 
-    width: 30px;
-    height: 30px;
-
-    border-radius: 8px;
+    width: 31px;
+    height: 31px;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
-    background: #f3f0f5;
+    border-radius: 8px;
+
+    background: #f3eff5;
 
     color: #381a4a;
 
     font-size: 15px;
+
+    box-shadow:
+        inset 0 0 0 1px rgba(56, 26, 74, 0.04);
 }
 
 /* =====================================================
@@ -447,7 +581,7 @@ body {
 
     background: #ffffff;
 
-    border-radius: 10px;
+    border-radius: 11px;
 
     padding: 30px;
 
@@ -473,13 +607,34 @@ body {
 }
 
 /* =====================================================
-   RESPONSIVE - 850px
+   RESPONSIVE - 900px
 ===================================================== */
 
-@media (max-width: 850px) {
+@media (max-width: 900px) {
+
+    .dashboard-header {
+        padding-right: 0;
+    }
+
+    .dashboard-tabs {
+        margin-right: 0;
+    }
+
+    .summary-cards {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+/* =====================================================
+   RESPONSIVE - 750px
+===================================================== */
+
+@media (max-width: 750px) {
 
     .dashboard-container {
-        padding: 14px;
+        padding: 15px;
     }
 
     .dashboard-header {
@@ -488,14 +643,10 @@ body {
         align-items: flex-start;
 
         gap: 12px;
-
-        padding-right: 0;
     }
 
     .dashboard-tabs {
         width: auto;
-
-        margin-right: 0;
     }
 
     .summary-toolbar {
@@ -504,13 +655,6 @@ body {
         align-items: flex-start;
 
         gap: 10px;
-
-        padding-right: 0;
-    }
-
-    .summary-cards {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
 
         padding-right: 0;
     }
@@ -542,6 +686,8 @@ body {
 
     .summary-cards {
         grid-template-columns: 1fr;
+
+        padding-right: 0;
     }
 
     .period-control {
@@ -551,7 +697,7 @@ body {
     }
 
     .period-control select {
-        width: 135px;
+        width: 145px;
     }
 
 }
