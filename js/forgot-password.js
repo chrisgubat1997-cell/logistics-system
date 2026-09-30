@@ -1,5 +1,9 @@
 document.addEventListener("DOMContentLoaded", function () {
 
+    /* =========================================
+       ELEMENTS
+    ========================================= */
+
     const forgotForm =
         document.getElementById("forgotPasswordForm");
 
@@ -51,7 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             /* =====================================
-               GET FORM VALUES
+               INPUT ELEMENTS
             ===================================== */
 
             const usernameInput =
@@ -64,16 +68,20 @@ document.addEventListener("DOMContentLoaded", function () {
                     "newPassword"
                 );
 
-            const confirmNewPasswordInput =
+            const confirmPasswordInput =
                 document.getElementById(
                     "confirmNewPassword"
                 );
 
 
+            /* =====================================
+               CHECK INPUTS
+            ===================================== */
+
             if (
                 !usernameInput ||
                 !newPasswordInput ||
-                !confirmNewPasswordInput
+                !confirmPasswordInput
             ) {
 
                 console.error(
@@ -91,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             /* =====================================
-               VALUES
+               GET VALUES
             ===================================== */
 
             const username =
@@ -100,16 +108,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const newPassword =
                 newPasswordInput.value;
 
-            const confirmNewPassword =
-                confirmNewPasswordInput.value;
-
-
-            console.log(
-                "PASSWORD RESET VALUES:",
-                {
-                    username: username
-                }
-            );
+            const confirmPassword =
+                confirmPasswordInput.value;
 
 
             /* =====================================
@@ -144,7 +144,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
 
-            if (!confirmNewPassword) {
+            if (!confirmPassword) {
 
                 message.textContent =
                     "Please confirm your new password.";
@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 message.style.color =
                     "#dc2626";
 
-                confirmNewPasswordInput.focus();
+                confirmPasswordInput.focus();
 
                 return;
             }
@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (
                 newPassword !==
-                confirmNewPassword
+                confirmPassword
             ) {
 
                 message.textContent =
@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 message.style.color =
                     "#dc2626";
 
-                confirmNewPasswordInput.focus();
+                confirmPasswordInput.focus();
 
                 return;
             }
@@ -220,34 +220,42 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
             /* =====================================
+               REQUEST BODY
+               
+               IMPORTANT:
+               USERNAME ONLY
+               NO EMAIL
+            ===================================== */
+
+            const requestBody = {
+
+                action:
+                    "resetPassword",
+
+                data: {
+
+                    username:
+                        username,
+
+                    newPassword:
+                        newPassword
+
+                }
+
+            };
+
+
+            console.log(
+                "LOGIS-TECH RESET REQUEST:",
+                requestBody
+            );
+
+
+            /* =====================================
                API REQUEST
             ===================================== */
 
             try {
-
-                const requestBody = {
-
-                    action:
-                        "resetPassword",
-
-                    data: {
-
-                        username:
-                            username,
-
-                        newPassword:
-                            newPassword
-
-                    }
-
-                };
-
-
-                console.log(
-                    "LOGIS-TECH RESET REQUEST:",
-                    requestBody
-                );
-
 
                 const response =
                     await fetch(
@@ -273,6 +281,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     );
 
 
+                /* =================================
+                   GET RESPONSE AS TEXT FIRST
+                ================================= */
+
                 const responseText =
                     await response.text();
 
@@ -282,11 +294,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     response.status
                 );
 
+
                 console.log(
                     "RESET API RESPONSE:",
                     responseText
                 );
 
+
+                /* =================================
+                   HTTP ERROR
+                ================================= */
 
                 if (!response.ok) {
 
@@ -297,6 +314,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
 
+                /* =================================
+                   EMPTY RESPONSE
+                ================================= */
+
                 if (!responseText) {
 
                     throw new Error(
@@ -304,6 +325,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     );
                 }
 
+
+                /* =================================
+                   PARSE JSON
+                ================================= */
 
                 let result;
 
@@ -317,7 +342,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 } catch (jsonError) {
 
                     console.error(
-                        "INVALID JSON RESPONSE:",
+                        "LOGIS-TECH INVALID JSON:",
                         responseText
                     );
 
@@ -328,7 +353,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                 console.log(
-                    "LOGIS-TECH PASSWORD RESET RESULT:",
+                    "LOGIS-TECH RESET RESULT:",
                     result
                 );
 
@@ -354,13 +379,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     if (submitButton) {
 
-                        submitButton.disabled =
-                            true;
-
                         submitButton.textContent =
                             "PASSWORD RESET";
+
                     }
 
+
+                    /* ===============================
+                       REDIRECT TO LOGIN
+                    =============================== */
 
                     setTimeout(
                         function () {
@@ -405,6 +432,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
             } catch (error) {
 
+                /* =================================
+                   ERROR
+                ================================= */
+
                 console.error(
                     "===================================="
                 );
@@ -413,7 +444,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     "LOGIS-TECH PASSWORD RESET ERROR"
                 );
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
                 console.error(
                     "API URL:",
