@@ -8,174 +8,169 @@
      SALES ORDER LIST
 ===================================================== -->
 
-<div id="sales" class="page">
+<div class="page-header">
 
-    <!-- PAGE HEADER -->
+    <div>
 
-    <div class="page-header">
+        <h1>
+            Sales Order
+        </h1>
+
+        <p class="subtitle">
+            Manage Sales Orders
+        </p>
+
+    </div>
+
+
+    <button
+        type="button"
+        class="btn btn-primary"
+        onclick="openCreateSO()">
+
+        + CREATE SO
+
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     ACTION BUTTONS
+===================================================== -->
+
+<div class="action-bar">
+
+    <button
+        type="button"
+        id="updateSOButton"
+        class="btn btn-secondary"
+        onclick="updateSelectedSO()"
+        disabled>
+
+        UPDATE
+
+    </button>
+
+
+    <button
+        type="button"
+        id="cancelSOButton"
+        class="btn btn-danger"
+        onclick="cancelSelectedSO()"
+        disabled>
+
+        CANCEL
+
+    </button>
+
+</div>
+
+
+<!-- =====================================================
+     SALES ORDER LIST
+===================================================== -->
+
+<div class="section">
+
+    <div class="table-header">
 
         <div>
 
-            <h1>
-                Sales Order
-            </h1>
+            <h2>
+                Sales Order List
+            </h2>
 
             <p class="subtitle">
-                Manage Sales Orders
+                Select an SO to view its summary.
+                Double-click to open full details.
             </p>
 
         </div>
 
 
-        <button
-            type="button"
-            class="btn btn-primary"
-            onclick="openCreateSO()">
-
-            + CREATE SO
-
-        </button>
+        <input
+            type="text"
+            id="soSearch"
+            placeholder="Search SO Number..."
+            onkeyup="searchSO()">
 
     </div>
 
 
-    <!-- ACTION BUTTONS -->
+    <div class="table-container">
 
-    <div class="action-bar">
+        <table id="soTable">
 
-        <button
-            type="button"
-            id="updateSOButton"
-            class="btn btn-secondary"
-            onclick="updateSelectedSO()"
-            disabled>
+            <thead>
 
-            UPDATE
+                <tr>
 
-        </button>
+                    <th>
+                        SO Number
+                    </th>
 
+                    <th>
+                        Date Creation
+                    </th>
 
-        <button
-            type="button"
-            id="cancelSOButton"
-            class="btn btn-danger"
-            onclick="cancelSelectedSO()"
-            disabled>
+                    <th>
+                        Client Name
+                    </th>
 
-            CANCEL
+                    <th>
+                        SE
+                    </th>
 
-        </button>
+                    <th>
+                        Project
+                    </th>
 
-    </div>
+                    <th>
+                        PO Number
+                    </th>
 
+                    <th>
+                        Terms
+                    </th>
 
-    <!-- =================================================
-         SALES ORDER LIST
-    ================================================== -->
+                    <th>
+                        Grand Total
+                    </th>
 
-    <div class="section">
+                    <th>
+                        Status
+                    </th>
 
-        <div class="table-header">
+                </tr>
 
-            <div>
-
-                <h2>
-                    Sales Order List
-                </h2>
-
-                <p class="subtitle">
-                    Select an SO to view its summary.
-                    Double-click to open full details.
-                </p>
-
-            </div>
+            </thead>
 
 
-            <input
-                type="text"
-                id="soSearch"
-                placeholder="Search SO Number..."
-                onkeyup="searchSO()">
+            <tbody id="soTableBody">
 
-        </div>
+                <!-- SALES ORDERS WILL LOAD HERE -->
 
+            </tbody>
 
-        <div class="table-container">
-
-            <table id="soTable">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            SO Number
-                        </th>
-
-                        <th>
-                            Date Creation
-                        </th>
-
-                        <th>
-                            Client Name
-                        </th>
-
-                        <th>
-                            SE
-                        </th>
-
-                        <th>
-                            Project
-                        </th>
-
-                        <th>
-                            PO Number
-                        </th>
-
-                        <th>
-                            Terms
-                        </th>
-
-                        <th>
-                            Grand Total
-                        </th>
-
-                        <th>
-                            Status
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody id="soTableBody">
-
-                    <!-- SALES ORDERS WILL LOAD HERE -->
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-
-    <!-- =================================================
-         SELECTED SO PREVIEW
-    ================================================== -->
-
-    <div
-        id="selectedSOInfo"
-        class="selected-so">
-
-        No Sales Order selected.
+        </table>
 
     </div>
 
 </div>
 
+
+<!-- =====================================================
+     SELECTED SO PREVIEW
+===================================================== -->
+
+<div
+    id="selectedSOInfo"
+    class="selected-so">
+
+    No Sales Order selected.
+
+</div>
 
 
 <!-- =====================================================
@@ -465,7 +460,6 @@
     </div>
 
 
-
     <!-- =================================================
          SALES ORDER ITEMS
     ================================================== -->
@@ -680,7 +674,6 @@
     </div>
 
 
-
     <!-- =================================================
          SO FILES
     ================================================== -->
@@ -740,7 +733,6 @@
         </div>
 
     </div>
-
 
 
     <!-- =================================================
