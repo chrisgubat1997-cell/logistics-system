@@ -338,10 +338,16 @@
      SALES ORDER SECTION
 ================================================== -->
 
+<!-- =================================================
+     SALES ORDER SECTION
+================================================== -->
+
 <div
     id="salesOrderSection"
     class="dashboard-section"
 >
+
+    <!-- SALES ORDER HEADER -->
 
     <div class="section">
 
@@ -354,11 +360,280 @@
                 </h2>
 
                 <p>
-                    Sales Order Dashboard
+                    Sales Order transaction overview
                 </p>
 
             </div>
 
+
+            <!-- PERIOD -->
+
+            <div class="period-control">
+
+                <div class="period-label">
+
+                    <span class="period-text">
+                        PERIOD
+                    </span>
+
+                </div>
+
+                <div class="period-select-wrapper">
+
+                    <select
+                        id="salesOrderPeriod"
+                        class="summary-period-select"
+                    >
+
+                        <option value="overall">
+                            OVERALL
+                        </option>
+
+                        <option value="01">JANUARY</option>
+                        <option value="02">FEBRUARY</option>
+                        <option value="03">MARCH</option>
+                        <option value="04">APRIL</option>
+                        <option value="05">MAY</option>
+                        <option value="06">JUNE</option>
+                        <option value="07">JULY</option>
+                        <option value="08">AUGUST</option>
+                        <option value="09">SEPTEMBER</option>
+                        <option value="10">OCTOBER</option>
+                        <option value="11">NOVEMBER</option>
+                        <option value="12">DECEMBER</option>
+
+                    </select>
+
+                    <span class="select-arrow">
+                        ⌄
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SALES ORDER CARDS -->
+
+        <div class="summary-cards">
+
+
+            <!-- TOTAL SALES ORDER -->
+
+            <div
+                class="summary-card sales-order-clickable"
+                onclick="openSalesOrderPopup('all')"
+            >
+
+                <div class="summary-card-title">
+                    Total Sales Order
+                </div>
+
+                <div
+                    class="summary-card-number"
+                    id="salesDashboardTotal"
+                >
+                    0
+                </div>
+
+                <div
+                    class="summary-card-amount"
+                    id="salesDashboardTotalAmount"
+                >
+                    ₱0.00
+                </div>
+
+            </div>
+
+
+            <!-- ACTIVE -->
+
+            <div
+                class="summary-card sales-order-clickable"
+                onclick="openSalesOrderPopup('active')"
+            >
+
+                <div class="summary-card-title">
+                    Total Active
+                </div>
+
+                <div
+                    class="summary-card-number"
+                    id="salesDashboardActive"
+                >
+                    0
+                </div>
+
+                <div
+                    class="summary-card-amount"
+                    id="salesDashboardActiveAmount"
+                >
+                    ₱0.00
+                </div>
+
+            </div>
+
+
+            <!-- CANCELLED -->
+
+            <div
+                class="summary-card sales-order-clickable"
+                onclick="openSalesOrderPopup('cancelled')"
+            >
+
+                <div class="summary-card-title">
+                    Total Cancelled
+                </div>
+
+                <div
+                    class="summary-card-number"
+                    id="salesDashboardCancelled"
+                >
+                    0
+                </div>
+
+                <div
+                    class="summary-card-amount"
+                    id="salesDashboardCancelledAmount"
+                >
+                    ₱0.00
+                </div>
+
+            </div>
+
+
+            <!-- DELIVERED -->
+
+            <div
+                class="summary-card sales-order-clickable"
+                onclick="openSalesOrderPopup('delivered')"
+            >
+
+                <div class="summary-card-title">
+                    Total Delivered
+                </div>
+
+                <div
+                    class="summary-card-number"
+                    id="salesDashboardDelivered"
+                >
+                    0
+                </div>
+
+                <div
+                    class="summary-card-amount"
+                    id="salesDashboardDeliveredAmount"
+                >
+                    ₱0.00
+                </div>
+
+            </div>
+
+
+            <!-- PARTIALLY DELIVERED -->
+
+            <div
+                class="summary-card sales-order-clickable"
+                onclick="openSalesOrderPopup('partial')"
+            >
+
+                <div class="summary-card-title">
+                    Total Partially Delivered
+                </div>
+
+                <div
+                    class="summary-card-number"
+                    id="salesDashboardPartial"
+                >
+                    0
+                </div>
+
+                <div
+                    class="summary-card-amount"
+                    id="salesDashboardPartialAmount"
+                >
+                    ₱0.00
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- INFORMATION -->
+
+        <div class="summary-note">
+
+            <strong>
+                Sales Order:
+            </strong>
+
+            Click any summary card to view the
+            corresponding Sales Order numbers and clients.
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =================================================
+     SALES ORDER POPUP
+================================================== -->
+
+<div
+    id="salesOrderPopup"
+    class="sales-order-popup"
+    style="display:none;"
+>
+
+    <div class="sales-order-popup-overlay"
+         onclick="closeSalesOrderPopup()">
+    </div>
+
+
+    <div class="sales-order-popup-box">
+
+        <div class="sales-order-popup-header">
+
+            <h2 id="salesOrderPopupTitle">
+                SALES ORDERS
+            </h2>
+
+            <button
+                type="button"
+                onclick="closeSalesOrderPopup()"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="salesOrderPopupList"
+            class="sales-order-popup-list"
+        >
+        </div>
+
+
+        <div class="sales-order-popup-footer">
+
+            <button
+                type="button"
+                onclick="closeSalesOrderPopup()"
+            >
+                CLOSE
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
         </div>
 
 
