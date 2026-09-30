@@ -23,6 +23,10 @@
 
     <div class="create-so-container">
 
+        <!-- =====================================================
+             PAGE HEADER
+        ====================================================== -->
+
         <div class="page-header">
 
             <div>
@@ -36,6 +40,7 @@
             </div>
 
             <button
+                type="button"
                 class="btn btn-secondary"
                 onclick="closeCreateSO()"
             >
@@ -45,15 +50,21 @@
         </div>
 
 
-        <!-- SO INFORMATION -->
+        <!-- =====================================================
+             SO INFORMATION
+        ====================================================== -->
 
         <div class="section">
 
             <div class="form-grid">
 
+                <!-- DATE -->
+
                 <div class="form-group">
 
-                    <label>Date Creation</label>
+                    <label for="soDate">
+                        Date Creation
+                    </label>
 
                     <input
                         type="date"
@@ -63,9 +74,13 @@
                 </div>
 
 
+                <!-- SO NUMBER -->
+
                 <div class="form-group">
 
-                    <label>Sales Order Number</label>
+                    <label for="soNumber">
+                        Sales Order Number
+                    </label>
 
                     <input
                         type="text"
@@ -76,9 +91,13 @@
                 </div>
 
 
+                <!-- CLIENT -->
+
                 <div class="form-group">
 
-                    <label>Client Name</label>
+                    <label for="clientName">
+                        Client Name
+                    </label>
 
                     <input
                         type="text"
@@ -89,9 +108,13 @@
                 </div>
 
 
+                <!-- ATTENTION -->
+
                 <div class="form-group">
 
-                    <label>Attention</label>
+                    <label for="attention">
+                        Attention
+                    </label>
 
                     <input
                         type="text"
@@ -102,9 +125,13 @@
                 </div>
 
 
+                <!-- BILLING ADDRESS -->
+
                 <div class="form-group full">
 
-                    <label>Billing Address</label>
+                    <label for="billingAddress">
+                        Billing Address
+                    </label>
 
                     <input
                         type="text"
@@ -115,9 +142,13 @@
                 </div>
 
 
+                <!-- DELIVERY ADDRESS -->
+
                 <div class="form-group full">
 
-                    <label>Delivery Address</label>
+                    <label for="deliveryAddress">
+                        Delivery Address
+                    </label>
 
                     <input
                         type="text"
@@ -128,9 +159,13 @@
                 </div>
 
 
+                <!-- PROJECT -->
+
                 <div class="form-group">
 
-                    <label>Project</label>
+                    <label for="project">
+                        Project
+                    </label>
 
                     <input
                         type="text"
@@ -141,9 +176,13 @@
                 </div>
 
 
+                <!-- TIN -->
+
                 <div class="form-group">
 
-                    <label>TIN Number</label>
+                    <label for="tinNumber">
+                        TIN Number
+                    </label>
 
                     <input
                         type="text"
@@ -154,9 +193,13 @@
                 </div>
 
 
+                <!-- PO NUMBER -->
+
                 <div class="form-group">
 
-                    <label>PO Number</label>
+                    <label for="poNumber">
+                        PO Number
+                    </label>
 
                     <input
                         type="text"
@@ -167,9 +210,13 @@
                 </div>
 
 
+                <!-- TERMS -->
+
                 <div class="form-group">
 
-                    <label>Terms</label>
+                    <label for="terms">
+                        Terms
+                    </label>
 
                     <select id="terms">
 
@@ -202,9 +249,13 @@
                 </div>
 
 
+                <!-- SE -->
+
                 <div class="form-group">
 
-                    <label>SE</label>
+                    <label for="soSE">
+                        SE
+                    </label>
 
                     <select id="soSE">
 
@@ -212,21 +263,42 @@
                             Select SE
                         </option>
 
-                        <option value="JBG">JBG</option>
-                        <option value="MHT">MHT</option>
-                        <option value="HHF">HHF</option>
-                        <option value="IAF">IAF</option>
-                        <option value="GRF">GRF</option>
-                        <option value="KBO">KBO</option>
+                        <option value="JBG">
+                            JBG
+                        </option>
+
+                        <option value="MHT">
+                            MHT
+                        </option>
+
+                        <option value="HHF">
+                            HHF
+                        </option>
+
+                        <option value="IAF">
+                            IAF
+                        </option>
+
+                        <option value="GRF">
+                            GRF
+                        </option>
+
+                        <option value="KBO">
+                            KBO
+                        </option>
 
                     </select>
 
                 </div>
 
 
+                <!-- JOB ORDER -->
+
                 <div class="form-group">
 
-                    <label>Job Order</label>
+                    <label for="jobOrder">
+                        Job Order
+                    </label>
 
                     <input
                         type="text"
@@ -241,15 +313,28 @@
         </div>
 
 
-        <!-- ITEMS -->
+        <!-- =====================================================
+             ITEMS
+        ====================================================== -->
 
         <div class="section">
 
             <div class="table-header">
 
-                <h2>Items</h2>
+                <div>
+
+                    <h2>
+                        Items
+                    </h2>
+
+                    <p class="subtitle">
+                        Add Sales Order items
+                    </p>
+
+                </div>
 
                 <button
+                    type="button"
                     class="btn btn-primary"
                     onclick="addSOItem()"
                 >
@@ -268,17 +353,39 @@
                         <tr>
 
                             <th>#</th>
-                            <th>Item Name</th>
-                            <th>Description</th>
-                            <th>QTY</th>
-                            <th>Unit</th>
-                            <th>Amount</th>
-                            <th>Total</th>
-                            <th>Action</th>
+
+                            <th>
+                                Item Name
+                            </th>
+
+                            <th>
+                                Description
+                            </th>
+
+                            <th>
+                                QTY
+                            </th>
+
+                            <th>
+                                Unit
+                            </th>
+
+                            <th>
+                                Amount
+                            </th>
+
+                            <th>
+                                Total
+                            </th>
+
+                            <th>
+                                Action
+                            </th>
 
                         </tr>
 
                     </thead>
+
 
                     <tbody id="soItemsBody">
                     </tbody>
@@ -288,9 +395,13 @@
             </div>
 
 
-            <!-- TOTALS -->
+            <!-- =================================================
+                 TOTALS
+            ================================================== -->
 
             <div class="so-totals">
+
+                <!-- SUBTOTAL -->
 
                 <div class="so-total-row">
 
@@ -307,6 +418,8 @@
 
                 </div>
 
+
+                <!-- DISCOUNT -->
 
                 <div class="so-total-row">
 
@@ -330,6 +443,8 @@
 
                 </div>
 
+
+                <!-- VATABLE -->
 
                 <div class="so-total-row">
 
@@ -360,6 +475,8 @@
                 </div>
 
 
+                <!-- VAT RATE -->
+
                 <div class="so-total-row">
 
                     <span class="so-total-label">
@@ -372,6 +489,8 @@
 
                 </div>
 
+
+                <!-- GRAND TOTAL -->
 
                 <div class="so-total-row grand-total-row">
 
@@ -393,56 +512,68 @@
         </div>
 
 
-        <!-- ACTIONS -->
+        <!-- =====================================================
+             SO FILES
+        ====================================================== -->
+
+        <div class="section">
+
+            <div class="table-header">
+
+                <div>
+
+                    <h2>
+                        SO Files
+                    </h2>
+
+                    <p class="subtitle">
+                        Upload supporting Sales Order PDF files
+                    </p>
+
+                </div>
+
+
+                <label
+                    for="soFileInput"
+                    class="btn btn-primary upload-file-btn"
+                >
+                    📎 + UPLOAD FILE
+                </label>
+
+
+                <input
+                    type="file"
+                    id="soFileInput"
+                    accept=".pdf,application/pdf"
+                    multiple
+                    hidden
+                >
+
+            </div>
+
+
+            <div
+                id="soFileList"
+                class="so-file-list"
+            >
+
+                <div class="no-files">
+                    No files selected.
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =====================================================
+             ACTIONS
+        ====================================================== -->
 
         <div class="action-bar">
 
-            <!-- SO FILES -->
-
-<div class="section">
-
-    <div class="table-header">
-
-        <div>
-            <h2>SO Files</h2>
-
-            <p class="subtitle">
-                Upload supporting Sales Order files
-            </p>
-        </div>
-
-        <label
-            for="soFileInput"
-            class="btn btn-primary upload-file-btn"
-        >
-            📎 + UPLOAD FILE
-        </label>
-
-        <input
-            type="file"
-            id="soFileInput"
-            accept=".pdf,application/pdf"
-            multiple
-            hidden
-        >
-
-    </div>
-
-
-    <div
-        id="soFileList"
-        class="so-file-list"
-    >
-
-        <div class="no-files">
-            No files selected.
-        </div>
-
-    </div>
-
-</div>
-            
             <button
+                type="button"
                 class="btn btn-secondary"
                 onclick="closeCreateSO()"
             >
@@ -451,6 +582,7 @@
 
 
             <button
+                type="button"
                 class="btn btn-primary"
                 onclick="saveSO()"
             >
@@ -461,6 +593,10 @@
 
     </div>
 
+
+    <!-- =========================================================
+         JAVASCRIPT
+    ========================================================== -->
 
     <script src="../js/create-sales-order.js"></script>
 
