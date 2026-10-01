@@ -1278,8 +1278,182 @@ async function saveSO() {
 
 
     /* ==========================================
-       SUCCESS
-    ========================================== */
+   SUCCESS - UPLOAD SO FILES
+========================================== */
+
+console.log("SALES ORDER CREATED:", result);
+
+
+/* ------------------------------------------
+   UPLOAD SELECTED PDF FILES
+------------------------------------------ */
+
+let uploadErrors = [];
+
+if (soCreateFiles.length > 0) {
+
+    console.log(
+        "FILES TO UPLOAD:",
+        soCreateFiles
+    );
+
+    for (
+        let i = 0;
+        i < soCreateFiles.length;
+        i++
+    ) {
+
+        const file =
+            soCreateFiles[i];
+
+        try {
+
+            console.log(
+                "START UPLOAD:",
+                file.name
+            );
+
+
+            /* Convert PDF to Base64 */
+
+            const base64Data =
+                await fileToBase64(file);
+
+
+            console.log(
+                "BASE64 READY:",
+                file.name
+            );
+
+
+            /* Prepare upload data */
+
+            const uploadData = {
+
+                soNumber:
+                    soNumber,
+
+                soId:
+                    result.so &&
+                    result.so.soId
+                        ? result.so.soId
+                        : "",
+
+                fileName:
+                    file.name,
+
+                mimeType:
+                    file.type ||
+                    "application/pdf",
+
+                base64Data:
+                    base64Data,
+
+                uploadedBy:
+                    getCurrentUser(),
+
+                dateCreation:
+                    dateCreation
+
+            };
+
+
+            console.log(
+                "UPLOAD DATA:",
+                {
+                    soNumber:
+                        uploadData.soNumber,
+
+                    soId:
+                        uploadData.soId,
+
+                    fileName:
+                        uploadData.fileName,
+
+                    mimeType:
+                        uploadData.mimeType
+                }
+            );
+
+
+            /* Send file to Google Apps Script */
+
+            const uploadResult =
+                await createSOAPI(
+                    "uploadSOFile",
+                    uploadData
+                );
+
+
+            console.log(
+                "UPLOAD RESULT:",
+                uploadResult
+            );
+
+
+            if (
+                !uploadResult ||
+                !uploadResult.success
+            ) {
+
+                uploadErrors.push(
+                    file.name +
+                    ": " +
+                    (
+                        uploadResult &&
+                        uploadResult.message
+                            ? uploadResult.message
+                            : "Upload failed."
+                    )
+                );
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "FILE UPLOAD ERROR:",
+                file.name,
+                error
+            );
+
+            uploadErrors.push(
+                file.name +
+                ": " +
+                error.message
+            );
+
+        }
+
+    }
+
+}
+
+
+/* ------------------------------------------
+   FINAL MESSAGE
+------------------------------------------ */
+
+if (uploadErrors.length > 0) {
+
+    alert(
+        "Sales Order " +
+        soNumber +
+        " was saved, but some files failed to upload.\n\n" +
+        uploadErrors.join("\n")
+    );
+
+} else if (soCreateFiles.length > 0) {
+
+    alert(
+        "Sales Order " +
+        soNumber +
+        " and " +
+        soCreateFiles.length +
+        " PDF file(s) were saved successfully."
+    );
+
+} else {
 
     alert(
         "Sales Order " +
@@ -1287,20 +1461,22 @@ async function saveSO() {
         " saved successfully."
     );
 
-
-    /*
-     * Clear local create form.
-     */
-
-    clearCreateSOForm();
+}
 
 
-    /*
-     * Go back to Sales Order page.
-     */
+/* ------------------------------------------
+   CLEAR FORM
+------------------------------------------ */
 
-    window.location.href =
-        "../index.html";
+clearCreateSOForm();
+
+
+/* ------------------------------------------
+   RETURN TO SALES ORDER
+------------------------------------------ */
+
+window.location.href =
+    "../index.html";
 
 }
 
