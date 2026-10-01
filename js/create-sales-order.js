@@ -31,21 +31,46 @@ async function createSOAPI(action, data = {}) {
 
     try {
 
-        const response = await fetch(
-            CREATE_SO_API_URL,
-            {
-                method: "POST",
+        console.log(
+            "CREATE SO API REQUEST:",
+            action,
+            data
+        );
 
-                headers: {
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-                },
+        const response =
+            await fetch(
+                CREATE_SO_API_URL,
+                {
+                    method: "POST",
 
-                body: JSON.stringify({
-                    action: action,
-                    ...data
-                })
-            }
+                    headers: {
+                        "Content-Type":
+                            "text/plain;charset=utf-8"
+                    },
+
+                    body: JSON.stringify({
+
+                        action: action,
+
+                        data: data
+
+                    })
+                }
+            );
+
+
+        const responseText =
+            await response.text();
+
+
+        console.log(
+            "CREATE SO API STATUS:",
+            response.status
+        );
+
+        console.log(
+            "CREATE SO API RESPONSE:",
+            responseText
         );
 
 
@@ -59,8 +84,27 @@ async function createSOAPI(action, data = {}) {
         }
 
 
-        const result =
-            await response.json();
+        let result;
+
+        try {
+
+            result =
+                JSON.parse(
+                    responseText
+                );
+
+        } catch (jsonError) {
+
+            console.error(
+                "Invalid JSON response:",
+                responseText
+            );
+
+            throw new Error(
+                "Invalid response from LOGIS-TECH API."
+            );
+
+        }
 
 
         return result;
@@ -81,8 +125,12 @@ async function createSOAPI(action, data = {}) {
 
 
         return {
+
             success: false,
-            message: error.message
+
+            message:
+                error.message
+
         };
 
     }
