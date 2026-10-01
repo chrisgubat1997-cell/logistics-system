@@ -596,115 +596,44 @@
     </div>
 
 
-    <!-- =================================================
-         SO FILES
-    ================================================== -->
+   <!-- =================================================
+     SO FILES
+================================================== -->
 
-    <div class="section">
+<div class="section">
 
-        <div class="table-header">
+<div class="table-header">
 
-            <div>
+    <div>
 
-                <h2>
-                    SO Files
-                </h2>
+        <h2>
+            SO Files
+        </h2>
 
-                <p class="subtitle">
-                    Attached PDF files for this Sales Order
-                </p>
-
-            </div>
-
-
-            <div>
-
-                <input
-                    type="file"
-                    id="detailSOFileInput"
-                    accept="application/pdf,.pdf"
-                    multiple
-                    hidden
-                    onchange="handleDetailSOFiles(event)">
-
-
-                <button
-                    type="button"
-                    id="detailAddFileButton"
-                    class="btn btn-primary"
-                    onclick="selectDetailSOFiles()"
-                    style="display:none;">
-
-                    + ADD PDF
-
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div
-            id="detailSOFileList"
-            class="so-file-list">
-
-            <div class="no-files">
-                No PDF files attached.
-            </div>
-
-        </div>
+        <p class="subtitle">
+            Attached PDF files for this Sales Order
+        </p>
 
     </div>
 
+    <div>
 
-    <!-- =================================================
-         DETAILS ACTIONS
-    ================================================== -->
-
-    <div
-        class="action-bar"
-        style="margin-top:20px;">
-
-        <button
-            type="button"
-            class="btn btn-secondary"
-            onclick="closeSODetails()">
-
-            BACK TO SO LIST
-
-        </button>
-
+        <input
+            type="file"
+            id="detailSOFileInput"
+            accept="application/pdf,.pdf"
+            multiple
+            hidden
+            onchange="handleDetailSOFiles(event)">
 
         <button
             type="button"
-            id="detailCancelButton"
-            class="btn btn-danger"
-            onclick="cancelSelectedSO()">
-
-            CANCEL SO
-
-        </button>
-
-
-        <button
-            type="button"
-            id="detailEditButton"
-            class="btn btn-secondary"
-            onclick="enableSOUpdate()">
-
-            UPDATE
-
-        </button>
-
-
-        <button
-            type="button"
-            id="detailSaveButton"
-            class="btn btn-success"
-            onclick="saveSOUpdate()"
+            id="detailAddFileButton"
+            class="btn btn-primary"
+            onclick="selectDetailSOFiles()"
             style="display:none;">
 
-            SAVE CHANGES
+            + ADD PDF
 
         </button>
 
@@ -712,4 +641,78 @@
 
 </div>
 
+
+<!-- FILE LIST -->
+
+<div
+    id="detailSOFileList"
+    class="so-file-list">
+
+    <div class="no-files">
+        No PDF files attached.
+    </div>
+
 </div>
+
+
+</div>
+
+<!-- =================================================
+     DETAILS ACTIONS
+================================================== -->
+
+<div
+    class="action-bar"
+    style="margin-top:20px;">
+
+
+<button
+    type="button"
+    class="btn btn-secondary"
+    onclick="closeSODetails()">
+
+    BACK TO SO LIST
+
+</button>
+
+
+<button
+    type="button"
+    id="detailCancelButton"
+    class="btn btn-danger"
+    onclick="cancelSelectedSO()">
+
+    CANCEL SO
+
+</button>
+
+
+<button
+    type="button"
+    id="detailEditButton"
+    class="btn btn-secondary"
+    onclick="enableSOUpdate()">
+
+    UPDATE
+
+</button>
+
+
+<button
+    type="button"
+    id="detailSaveButton"
+    class="btn btn-success"
+    onclick="saveSOUpdate()"
+    style="display:none;">
+
+    SAVE CHANGES
+
+</button>
+
+
+</div>
+
+</div>
+
+</div>
+
