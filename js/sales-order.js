@@ -2812,7 +2812,7 @@ SELECT FILE
 
 function selectDetailSOFiles() {
 
-```
+
 if (!currentSO) {
 
     alert(
@@ -2833,7 +2833,7 @@ if (input) {
     input.click();
 
 }
-```
+
 
 }
 
@@ -2843,7 +2843,7 @@ HANDLE SELECTED FILES
 
 async function handleDetailSOFiles(event) {
 
-```
+
 const files =
     event.target.files;
 
@@ -2904,7 +2904,7 @@ event.target.value = "";
 await loadSOFiles(
     currentSO.soNumber
 );
-```
+
 
 }
 
@@ -2916,7 +2916,7 @@ async function uploadDetailSOFile(
 file
 ) {
 
-```
+
 if (!file) {
     return;
 }
@@ -3118,7 +3118,6 @@ try {
     }
 
 }
-```
 
 }
 
@@ -3130,7 +3129,7 @@ function fileToBase64(
 file
 ) {
 
-```
+
 return new Promise(
     function(resolve, reject) {
 
@@ -3166,7 +3165,7 @@ return new Promise(
 
     }
 );
-```
+
 
 }
 
@@ -3178,7 +3177,7 @@ async function loadSOFiles(
 soNumber
 ) {
 
-```
+
 const container =
     document.getElementById(
         "detailSOFileList"
@@ -3279,7 +3278,8 @@ const files =
 renderSOFiles(
     files
 );
-```
+
+
 
 }
 
@@ -3291,7 +3291,7 @@ function renderSOFiles(
 files
 ) {
 
-```
+
 const container =
     document.getElementById(
         "detailSOFileList"
@@ -3472,7 +3472,7 @@ files.forEach(
 
     }
 );
-```
+
 
 }
 
@@ -3484,7 +3484,7 @@ function viewSOFile(
 fileUrl
 ) {
 
-```
+
 if (!fileUrl) {
 
     alert(
@@ -3506,7 +3506,7 @@ window.open(
     "_blank",
     "noopener,noreferrer"
 );
-```
+
 
 }
 
@@ -3519,7 +3519,7 @@ fileId,
 fileName
 ) {
 
-```
+
 if (!fileId) {
 
     alert(
@@ -3590,7 +3590,7 @@ if (currentSO) {
     );
 
 }
-```
+
 
 }
 
@@ -3602,7 +3602,7 @@ function formatFileSize(
 bytes
 ) {
 
-```
+
 const size =
     Number(
         bytes || 0
@@ -3643,7 +3643,7 @@ return (
         .toFixed(2) +
     " MB"
 );
-```
+
 
 }
 
@@ -3655,7 +3655,7 @@ function formatSOFileDate(
 value
 ) {
 
-```
+
 if (!value) {
     return "-";
 }
@@ -3700,7 +3700,7 @@ return date.toLocaleString(
 
     }
 );
-```
+
 
 }
 
