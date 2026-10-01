@@ -932,145 +932,40 @@ function openCreateSO() {
 }
 
 
-/* =========================================================
-   OPEN SO DETAILS
-========================================================= */
+async function openSODetails(soNumber) {
 
-async function openSODetails(
-    soNumber
-) {
+    const cacheKey = String(soNumber);
 
-    const cacheKey =
-        String(
-            soNumber
-        );
-
+    console.log(
+        "Opening Sales Order details:",
+        soNumber
+    );
 
     /*
-     * =====================================================
-     * CHECK DETAILS CACHE FIRST
+     * Always get complete SO data from API.
      *
-     * Ito ang malaking speed improvement.
-     * =====================================================
-     */
-
-    if (
-        soDetailsCache[
-            cacheKey
-        ]
-    ) {
-
-        console.log(
-            "Opening SO from cache:",
-            soNumber
-        );
-
-
-        currentSO =
-            soDetailsCache[
-                cacheKey
-            ];
-
-
-        selectedSO =
-            currentSO;
-
-
-        showSODetailsPage(
-            currentSO
-        );
-
-
-        return;
-
-    }
-
-
-    /*
-     * =====================================================
-     * TRY DATA FROM SO LIST
-     * =====================================================
-     */
-
-    const listSO =
-        salesOrders.find(
-            function(so) {
-
-                return (
-                    String(
-                        so.soNumber
-                    ) ===
-                    cacheKey
-                );
-
-            }
-        );
-
-
-    /*
-     * Kung complete ang data sa list,
-     * gamitin na agad.
-     */
-
-    if (
-        listSO &&
-        Array.isArray(
-            listSO.items
-        )
-    ) {
-
-        soDetailsCache[
-            cacheKey
-        ] =
-            listSO;
-
-
-        currentSO =
-            listSO;
-
-
-        selectedSO =
-            listSO;
-
-
-        showSODetailsPage(
-            listSO
-        );
-
-
-        return;
-
-    }
-
-
-    /*
-     * =====================================================
-     * ONLY NOW CALL API
-     * =====================================================
+     * getSalesOrders() = list/header only
+     * getSalesOrder() = header + SO_ITEMS
      */
 
     showSODetailsLoading();
 
-
-    const result =
-        await salesOrderAPI(
-            "getSalesOrder",
-            {
-                soNumber:
-                    soNumber
-            }
-        );
-
+    const result = await salesOrderAPI(
+        "getSalesOrder",
+        {
+            soNumber: soNumber
+        }
+    );
 
     console.log(
         "GET SO DETAILS RESULT:",
         result
     );
 
-
     if (
         !result ||
-        !result.success
+        !result.success ||
+        !result.so
     ) {
 
         alert(
@@ -1078,36 +973,31 @@ async function openSODetails(
             "Hindi ma-load ang Sales Order."
         );
 
+        closeSODetails();
 
         return;
-
     }
 
-
-    currentSO =
-        result.so;
-
-
-    selectedSO =
-        currentSO;
-
-
     /*
-     * Save details to cache
+     * Complete SO including items
      */
 
-    soDetailsCache[
-        cacheKey
-    ] =
-        currentSO;
+    currentSO = result.so;
 
+    selectedSO = result.so;
 
     /*
-     * Show details
+     * Save complete data to cache
+     */
+
+    soDetailsCache[cacheKey] = result.so;
+
+    /*
+     * Display details
      */
 
     showSODetailsPage(
-        currentSO
+        result.so
     );
 
 }
@@ -1262,129 +1152,124 @@ function showSODetailsPage(
    RENDER SO DETAILS
 ========================================================= */
 
-function renderSODetails(
-    so
-) {
+function renderSODetails(so) {
 
     if (!so) {
         return;
     }
-
 
     setValue(
         "detailSODate",
         so.dateCreation
     );
 
-
     setValue(
         "detailSONumber",
         so.soNumber
     );
-
 
     setValue(
         "detailClientName",
         so.clientName
     );
 
-
     setValue(
         "detailSE",
         so.se
     );
-
 
     setValue(
         "detailAttention",
         so.attention
     );
 
-
     setValue(
         "detailBillingAddress",
         so.billingAddress
     );
-
 
     setValue(
         "detailDeliveryAddress",
         so.deliveryAddress
     );
 
-
     setValue(
         "detailProject",
         so.project
     );
-
 
     setValue(
         "detailTIN",
         so.tin
     );
 
-
     setValue(
         "detailPONumber",
         so.poNumber
     );
-
 
     setValue(
         "detailTerms",
         so.terms
     );
 
-
     setValue(
         "detailJobOrder",
         so.jobOrder
     );
 
+    /*
+     * ITEMS
+     */
 
     renderSODetailItems(
-        so.items || []
+        Array.isArray(so.items)
+            ? so.items
+            : []
     );
 
+    /*
+     * TOTALS
+     */
 
     setText(
         "detailSubtotal",
-        formatMoney(
-            so.subtotal
-        )
+        formatMoney(so.subtotal)
     );
 
+    /*
+     * Discount is an INPUT
+     */
 
-    setText(
+    setValue(
         "detailDiscount",
-        formatMoney(
-            so.discount
-        )
+        so.discount || 0
     );
 
+    /*
+     * Vatable is a CHECKBOX
+     */
 
-    setText(
-        "detailVatable",
-        formatMoney(
-            so.vatable
-        )
-    );
+    const vatableCheckbox =
+        document.getElementById(
+            "detailVatable"
+        );
 
+    if (vatableCheckbox) {
+
+        vatableCheckbox.checked =
+            Boolean(so.vatable);
+
+    }
 
     setText(
         "detailVAT",
-        formatMoney(
-            so.vatAmount
-        )
+        formatMoney(so.vatAmount)
     );
-
 
     setText(
         "detailGrandTotal",
-        formatMoney(
-            so.grandTotal
-        )
+        formatMoney(so.grandTotal)
     );
 
 }
@@ -1899,20 +1784,14 @@ function calculateDetailTotals() {
             "soDetailsItemsBody"
         );
 
-
     if (!tbody) {
         return;
     }
 
-
     let subtotal = 0;
 
-
     const rows =
-        tbody.querySelectorAll(
-            "tr"
-        );
-
+        tbody.querySelectorAll("tr");
 
     rows.forEach(
         function(row) {
@@ -1922,125 +1801,108 @@ function calculateDetailTotals() {
                     ".so-detail-qty"
                 );
 
-
             const amountInput =
                 row.querySelector(
                     ".so-detail-amount"
                 );
-
 
             const totalCell =
                 row.querySelector(
                     ".so-detail-total"
                 );
 
-
             if (
                 !qtyInput ||
                 !amountInput
             ) {
-
                 return;
-
             }
-
 
             const qty =
                 Number(
                     qtyInput.value || 0
                 );
 
-
             const amount =
                 Number(
                     amountInput.value || 0
                 );
 
-
             const total =
-                qty *
-                amount;
+                qty * amount;
 
-
-            subtotal +=
-                total;
-
+            subtotal += total;
 
             if (totalCell) {
 
                 totalCell.textContent =
-                    formatMoney(
-                        total
-                    );
+                    formatMoney(total);
 
             }
 
         }
     );
 
+    /*
+     * Get CURRENT discount from input
+     */
+
+    const discountInput =
+        document.getElementById(
+            "detailDiscount"
+        );
 
     const discount =
         Number(
-            currentSO?.discount || 0
+            discountInput
+                ? discountInput.value || 0
+                : 0
         );
 
+    if (discount > subtotal) {
+
+        alert(
+            "Discount cannot be greater than subtotal."
+        );
+
+        return;
+    }
 
     const vatable =
-        subtotal -
-        discount;
-
+        subtotal - discount;
 
     const vatRate =
         0.12;
 
-
     const vatAmount =
-        vatable *
-        vatRate;
-
+        vatable * vatRate;
 
     const grandTotal =
-        vatable +
-        vatAmount;
-
+        vatable + vatAmount;
 
     setText(
         "detailSubtotal",
-        formatMoney(
-            subtotal
-        )
+        formatMoney(subtotal)
     );
 
+    /*
+     * detailDiscount is INPUT,
+     * so do not use setText()
+     */
 
-    setText(
+    setValue(
         "detailDiscount",
-        formatMoney(
-            discount
-        )
+        discount
     );
-
-
-    setText(
-        "detailVatable",
-        formatMoney(
-            vatable
-        )
-    );
-
 
     setText(
         "detailVAT",
-        formatMoney(
-            vatAmount
-        )
+        formatMoney(vatAmount)
     );
-
 
     setText(
         "detailGrandTotal",
-        formatMoney(
-            grandTotal
-        )
+        formatMoney(grandTotal)
     );
 
 }
@@ -2083,9 +1945,11 @@ async function saveSOUpdate() {
 
 
     const discount =
-        Number(
-            currentSO.discount || 0
-        );
+    Number(
+        document.getElementById(
+            "detailDiscount"
+        )?.value || 0
+    );
 
 
     const vatable =
@@ -2204,9 +2068,9 @@ async function saveSOUpdate() {
 
 
     const saveButton =
-        document.querySelector(
-            '[onclick="saveSOUpdate()"]'
-        );
+    document.getElementById(
+        "detailSaveButton"
+    );
 
 
     if (saveButton) {
