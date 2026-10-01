@@ -1136,6 +1136,13 @@ function showSODetailsPage(
         so
     );
 
+    /*
+     * Load attached SO PDF files
+     */
+    loadSOFiles(
+        so.soNumber
+    );
+
 
     /*
      * Default = VIEW MODE
@@ -1493,26 +1500,48 @@ function setDetailsEditMode(
 
 
     inputs.forEach(
-        function(input) {
+    function(input) {
 
-            if (
-                input.id ===
-                "detailSONumber"
-            ) {
+        /*
+         * SO Number always disabled
+         */
 
-                input.disabled =
-                    true;
-
-                return;
-
-            }
-
+        if (
+            input.id ===
+            "detailSONumber"
+        ) {
 
             input.disabled =
-                !enabled;
+                true;
+
+            return;
 
         }
-    );
+
+
+        /*
+         * File upload input must
+         * remain usable even in VIEW MODE.
+         */
+
+        if (
+            input.id ===
+            "detailSOFileInput"
+        ) {
+
+            input.disabled =
+                false;
+
+            return;
+
+        }
+
+
+        input.disabled =
+            !enabled;
+
+    }
+);
 
 
     document
@@ -1535,6 +1564,24 @@ function setDetailsEditMode(
         document.getElementById(
             "detailAddItemButton"
         );
+
+       /*
+     * SO FILE ADD BUTTON
+     *
+     * Available even in VIEW MODE.
+     */
+
+    const addFileButton =
+        document.getElementById(
+            "detailAddFileButton"
+        );
+
+    if (addFileButton) {
+
+        addFileButton.style.display =
+            "inline-block";
+
+    }
 
 
     if (addButton) {
@@ -2749,6 +2796,911 @@ function cssEscape(
             /([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
             "\\$1"
         );
+
+}
+
+/* =========================================================
+SO FILES
+UPLOAD / VIEW / DELETE
+========================================================= */
+
+const SO_FILE_MAX_SIZE = 10 * 1024 * 1024; // 10 MB
+
+/* =========================================================
+SELECT FILE
+========================================================= */
+
+function selectDetailSOFiles() {
+
+```
+if (!currentSO) {
+
+    alert(
+        "Walang selected Sales Order."
+    );
+
+    return;
+
+}
+
+const input =
+    document.getElementById(
+        "detailSOFileInput"
+    );
+
+if (input) {
+
+    input.click();
+
+}
+```
+
+}
+
+/* =========================================================
+HANDLE SELECTED FILES
+========================================================= */
+
+async function handleDetailSOFiles(event) {
+
+```
+const files =
+    event.target.files;
+
+
+if (
+    !files ||
+    files.length === 0
+) {
+
+    return;
+
+}
+
+
+if (!currentSO) {
+
+    alert(
+        "Walang selected Sales Order."
+    );
+
+    event.target.value = "";
+
+    return;
+
+}
+
+
+/*
+ * Upload each selected PDF
+ */
+
+for (
+    let i = 0;
+    i < files.length;
+    i++
+) {
+
+    await uploadDetailSOFile(
+        files[i]
+    );
+
+}
+
+
+/*
+ * Clear file input
+ * para puwedeng piliin ulit
+ * ang same file.
+ */
+
+event.target.value = "";
+
+
+/*
+ * Reload file list
+ */
+
+await loadSOFiles(
+    currentSO.soNumber
+);
+```
+
+}
+
+/* =========================================================
+UPLOAD ONE SO FILE
+========================================================= */
+
+async function uploadDetailSOFile(
+file
+) {
+
+```
+if (!file) {
+    return;
+}
+
+
+/*
+ * PDF ONLY
+ */
+
+const isPDF =
+    file.type === "application/pdf" ||
+    file.name
+        .toLowerCase()
+        .endsWith(".pdf");
+
+
+if (!isPDF) {
+
+    alert(
+        file.name +
+        "\n\nPDF files only."
+    );
+
+    return;
+
+}
+
+
+/*
+ * FILE SIZE
+ */
+
+if (
+    file.size >
+    SO_FILE_MAX_SIZE
+) {
+
+    alert(
+        file.name +
+        "\n\nFile is too large.\n" +
+        "Maximum file size is 10 MB."
+    );
+
+    return;
+
+}
+
+
+/*
+ * Upload button
+ */
+
+const addButton =
+    document.getElementById(
+        "detailAddFileButton"
+    );
+
+
+if (addButton) {
+
+    addButton.disabled =
+        true;
+
+    addButton.textContent =
+        "UPLOADING...";
+
+}
+
+
+try {
+
+    /*
+     * Convert PDF to Base64
+     */
+
+    const base64Data =
+        await fileToBase64(
+            file
+        );
+
+
+    /*
+     * Remove:
+     *
+     * data:application/pdf;base64,
+     *
+     * because Apps Script will decode
+     * the actual Base64 data only.
+     */
+
+    const cleanBase64 =
+        base64Data.includes(",")
+            ? base64Data.split(",")[1]
+            : base64Data;
+
+
+    /*
+     * Uploaded By
+     *
+     * Use createdBy if available.
+     * Otherwise use LOGIS-TECH USER.
+     */
+
+    const uploadedBy =
+        currentSO.createdBy ||
+        localStorage.getItem(
+            "loggedInUser"
+        ) ||
+        localStorage.getItem(
+            "username"
+        ) ||
+        "LOGIS-TECH USER";
+
+
+    const result =
+        await salesOrderAPI(
+            "uploadSOFile",
+            {
+
+                soNumber:
+                    currentSO.soNumber,
+
+                soId:
+                    currentSO.soId ||
+                    "",
+
+                fileName:
+                    file.name,
+
+                mimeType:
+                    file.type ||
+                    "application/pdf",
+
+                base64Data:
+                    cleanBase64,
+
+                uploadedBy:
+                    uploadedBy,
+
+                dateCreation:
+                    currentSO.dateCreation ||
+                    ""
+
+            }
+        );
+
+
+    if (
+        !result ||
+        !result.success
+    ) {
+
+        alert(
+            result?.message ||
+            "Failed to upload file."
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        "SO FILE UPLOADED:",
+        result
+    );
+
+
+    /*
+     * Don't alert for every file
+     * when multiple files are selected.
+     */
+
+} catch (error) {
+
+    console.error(
+        "SO FILE UPLOAD ERROR:",
+        error
+    );
+
+
+    alert(
+        "Failed to upload " +
+        file.name +
+        ".\n\n" +
+        error.message
+    );
+
+} finally {
+
+    if (addButton) {
+
+        addButton.disabled =
+            false;
+
+        addButton.textContent =
+            "+ ADD PDF";
+
+    }
+
+}
+```
+
+}
+
+/* =========================================================
+FILE TO BASE64
+========================================================= */
+
+function fileToBase64(
+file
+) {
+
+```
+return new Promise(
+    function(resolve, reject) {
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function() {
+
+                resolve(
+                    reader.result
+                );
+
+            };
+
+
+        reader.onerror =
+            function() {
+
+                reject(
+                    new Error(
+                        "Unable to read file."
+                    )
+                );
+
+            };
+
+
+        reader.readAsDataURL(
+            file
+        );
+
+    }
+);
+```
+
+}
+
+/* =========================================================
+LOAD SO FILES
+========================================================= */
+
+async function loadSOFiles(
+soNumber
+) {
+
+```
+const container =
+    document.getElementById(
+        "detailSOFileList"
+    );
+
+
+if (!container) {
+    return;
+}
+
+
+if (!soNumber) {
+
+    container.innerHTML = `
+
+        <div class="no-files">
+
+            No Sales Order selected.
+
+        </div>
+
+    `;
+
+    return;
+
+}
+
+
+container.innerHTML = `
+
+    <div class="no-files">
+
+        Loading files...
+
+    </div>
+
+`;
+
+
+const result =
+    await salesOrderAPI(
+        "getSOFiles",
+        {
+            soNumber:
+                soNumber
+        }
+    );
+
+
+console.log(
+    "GET SO FILES RESULT:",
+    result
+);
+
+
+if (
+    !result ||
+    !result.success
+) {
+
+    container.innerHTML = `
+
+        <div
+            class="no-files"
+            style="color:red;"
+        >
+
+            Failed to load files.
+
+            <br>
+
+            <small>
+
+                ${escapeHTML(
+                    result?.message ||
+                    "Unknown error."
+                )}
+
+            </small>
+
+        </div>
+
+    `;
+
+    return;
+
+}
+
+
+const files =
+    Array.isArray(
+        result.files
+    )
+        ? result.files
+        : [];
+
+
+renderSOFiles(
+    files
+);
+```
+
+}
+
+/* =========================================================
+RENDER SO FILES
+========================================================= */
+
+function renderSOFiles(
+files
+) {
+
+```
+const container =
+    document.getElementById(
+        "detailSOFileList"
+    );
+
+
+if (!container) {
+    return;
+}
+
+
+container.innerHTML = "";
+
+
+if (
+    !Array.isArray(files) ||
+    files.length === 0
+) {
+
+    container.innerHTML = `
+
+        <div class="no-files">
+
+            No PDF files attached.
+
+        </div>
+
+    `;
+
+    return;
+
+}
+
+
+files.forEach(
+    function(file) {
+
+        const row =
+            document.createElement(
+                "div"
+            );
+
+
+        row.className =
+            "so-file-row";
+
+
+        const fileName =
+            file.fileName ||
+            "Unnamed PDF";
+
+
+        const fileType =
+            file.fileType ||
+            "PDF";
+
+
+        const fileSize =
+            formatFileSize(
+                file.fileSize
+            );
+
+
+        const uploadedBy =
+            file.uploadedBy ||
+            "-";
+
+
+        const uploadedDate =
+            formatSOFileDate(
+                file.uploadedDate
+            );
+
+
+        const fileUrl =
+            file.fileUrl ||
+            "";
+
+
+        row.innerHTML = `
+
+            <div
+                class="so-file-info"
+            >
+
+                <div
+                    class="so-file-name"
+                >
+
+                    📄
+
+                    <strong>
+
+                        ${escapeHTML(
+                            fileName
+                        )}
+
+                    </strong>
+
+                </div>
+
+
+                <div
+                    class="so-file-meta"
+                >
+
+                    ${escapeHTML(
+                        fileType
+                    )}
+
+                    •
+
+                    ${escapeHTML(
+                        fileSize
+                    )}
+
+                    •
+
+                    Uploaded by:
+
+                    ${escapeHTML(
+                        uploadedBy
+                    )}
+
+                    •
+
+                    ${escapeHTML(
+                        uploadedDate
+                    )}
+
+                </div>
+
+            </div>
+
+
+            <div
+                class="so-file-actions"
+            >
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick='viewSOFile(${JSON.stringify(
+                        fileUrl
+                    )})'
+                >
+
+                    VIEW
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick='deleteSOFile(
+                        ${JSON.stringify(
+                            file.fileId
+                        )},
+                        ${JSON.stringify(
+                            fileName
+                        )}
+                    )'
+                >
+
+                    DELETE
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        container.appendChild(
+            row
+        );
+
+    }
+);
+```
+
+}
+
+/* =========================================================
+VIEW SO FILE
+========================================================= */
+
+function viewSOFile(
+fileUrl
+) {
+
+```
+if (!fileUrl) {
+
+    alert(
+        "File URL is not available."
+    );
+
+    return;
+
+}
+
+
+/*
+ * Open Google Drive file
+ * in new browser tab.
+ */
+
+window.open(
+    fileUrl,
+    "_blank",
+    "noopener,noreferrer"
+);
+```
+
+}
+
+/* =========================================================
+DELETE SO FILE
+========================================================= */
+
+async function deleteSOFile(
+fileId,
+fileName
+) {
+
+```
+if (!fileId) {
+
+    alert(
+        "Invalid file ID."
+    );
+
+    return;
+
+}
+
+
+const confirmed =
+    confirm(
+        "Delete this file?\n\n" +
+        fileName
+    );
+
+
+if (!confirmed) {
+    return;
+}
+
+
+const result =
+    await salesOrderAPI(
+        "deleteSOFile",
+        {
+            fileId:
+                fileId
+        }
+    );
+
+
+console.log(
+    "DELETE SO FILE RESULT:",
+    result
+);
+
+
+if (
+    !result ||
+    !result.success
+) {
+
+    alert(
+        result?.message ||
+        "Failed to delete file."
+    );
+
+    return;
+
+}
+
+
+alert(
+    "File deleted successfully."
+);
+
+
+/*
+ * Refresh file list
+ */
+
+if (currentSO) {
+
+    await loadSOFiles(
+        currentSO.soNumber
+    );
+
+}
+```
+
+}
+
+/* =========================================================
+FORMAT FILE SIZE
+========================================================= */
+
+function formatFileSize(
+bytes
+) {
+
+```
+const size =
+    Number(
+        bytes || 0
+    );
+
+
+if (size <= 0) {
+    return "0 KB";
+}
+
+
+if (size < 1024) {
+
+    return (
+        size +
+        " B"
+    );
+
+}
+
+
+if (
+    size <
+    1024 * 1024
+) {
+
+    return (
+        (size / 1024)
+            .toFixed(1) +
+        " KB"
+    );
+
+}
+
+
+return (
+    (size / (1024 * 1024))
+        .toFixed(2) +
+    " MB"
+);
+```
+
+}
+
+/* =========================================================
+FORMAT SO FILE DATE
+========================================================= */
+
+function formatSOFileDate(
+value
+) {
+
+```
+if (!value) {
+    return "-";
+}
+
+
+const date =
+    new Date(
+        value
+    );
+
+
+if (
+    Number.isNaN(
+        date.getTime()
+    )
+) {
+
+    return String(
+        value
+    );
+
+}
+
+
+return date.toLocaleString(
+    "en-PH",
+    {
+        year:
+            "numeric",
+
+        month:
+            "short",
+
+        day:
+            "2-digit",
+
+        hour:
+            "2-digit",
+
+        minute:
+            "2-digit"
+
+    }
+);
+```
 
 }
 
