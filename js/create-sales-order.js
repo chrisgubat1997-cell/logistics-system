@@ -1625,6 +1625,96 @@ function closeCreateSO() {
 
 }
 
+/* =========================================================
+   FILE TO BASE64
+========================================================= */
+
+function fileToBase64(file) {
+
+    return new Promise(function(resolve, reject) {
+
+        if (!file) {
+            reject(
+                new Error("No file selected.")
+            );
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+
+            try {
+
+                const result =
+                    event.target.result;
+
+                if (!result) {
+                    reject(
+                        new Error(
+                            "Failed to read file."
+                        )
+                    );
+                    return;
+                }
+
+                /*
+                 * Example:
+                 *
+                 * data:application/pdf;base64,JVBERi0x...
+                 *
+                 * Kunin lamang ang Base64 portion.
+                 */
+
+                const base64Data =
+                    String(result).split(",")[1];
+
+                if (!base64Data) {
+                    reject(
+                        new Error(
+                            "Failed to convert " +
+                            file.name +
+                            " to Base64."
+                        )
+                    );
+                    return;
+                }
+
+                console.log(
+                    "File converted to Base64:",
+                    file.name,
+                    "Size:",
+                    file.size,
+                    "Base64 length:",
+                    base64Data.length
+                );
+
+                resolve(base64Data);
+
+            } catch (error) {
+
+                reject(error);
+
+            }
+
+        };
+
+        reader.onerror = function() {
+
+            reject(
+                new Error(
+                    "Unable to read file: " +
+                    file.name
+                )
+            );
+
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+}
 
 /* =========================================================
    FILE SECTION
