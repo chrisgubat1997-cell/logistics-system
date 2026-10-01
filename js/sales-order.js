@@ -602,50 +602,61 @@ function renderSOList(
 
             row.innerHTML = `
 
-                <td>
-                    ${escapeHTML(
-                        so.soNumber
-                    )}
-                </td>
+    <td>
+        ${escapeHTML(
+            so.soNumber || ""
+        )}
+    </td>
 
-                <td>
-                    ${escapeHTML(
-                        so.dateCreation || ""
-                    )}
-                </td>
+    <td>
+        ${escapeHTML(
+            so.dateCreation || ""
+        )}
+    </td>
 
-                <td>
-                    ${escapeHTML(
-                        so.clientName || ""
-                    )}
-                </td>
+    <td>
+        ${escapeHTML(
+            so.clientName || ""
+        )}
+    </td>
 
-                <td>
-                    ${escapeHTML(
-                        so.project || ""
-                    )}
-                </td>
+    <td>
+        ${escapeHTML(
+            so.se || ""
+        )}
+    </td>
 
-                <td>
-                    ${escapeHTML(
-                        so.poNumber || ""
-                    )}
-                </td>
+    <td>
+        ${escapeHTML(
+            so.project || ""
+        )}
+    </td>
 
-                <td>
-                    ${escapeHTML(
-                        so.status || ""
-                    )}
-                </td>
+    <td>
+        ${escapeHTML(
+            so.poNumber || ""
+        )}
+    </td>
 
-                <td style="text-align:right;">
-                    ${formatMoney(
-                        so.grandTotal
-                    )}
-                </td>
+    <td>
+        ${escapeHTML(
+            so.terms || ""
+        )}
+    </td>
 
-            `;
+    <td style="text-align:right;">
+        ${formatMoney(
+            so.grandTotal
+        )}
+    </td>
 
+    <td>
+        ${escapeHTML(
+            so.status || ""
+        )}
+    </td>
+
+`;
 
             /*
              * =================================================
@@ -1106,13 +1117,16 @@ async function openSODetails(
    SHOW SO DETAILS LOADING
 ========================================================= */
 
+/* =========================================================
+   SHOW SO DETAILS LOADING
+========================================================= */
+
 function showSODetailsLoading() {
 
-    const salesPage =
+    const listView =
         document.getElementById(
-            "sales"
+            "salesOrderListView"
         );
-
 
     const detailsPage =
         document.getElementById(
@@ -1120,13 +1134,16 @@ function showSODetailsLoading() {
         );
 
 
-    if (salesPage) {
+    /*
+     * IMPORTANT:
+     * HUWAG itago ang #sales.
+     *
+     * Ang #soDetails ay nasa loob ng #sales.
+     */
 
-        salesPage.classList.remove(
-            "active"
-        );
+    if (listView) {
 
-        salesPage.style.display =
+        listView.style.display =
             "none";
 
     }
@@ -1134,31 +1151,44 @@ function showSODetailsLoading() {
 
     if (detailsPage) {
 
-        detailsPage.classList.add(
-            "active"
-        );
-
         detailsPage.style.display =
             "block";
 
 
-        detailsPage.innerHTML =
-            `
+        /*
+         * HUWAG gamitin ang innerHTML dito.
+         * Para hindi mabura ang buong SO Details form.
+         */
 
-            <div
-                style="
-                    padding:50px;
-                    text-align:center;
-                    font-size:16px;
-                    color:#555;
-                "
-            >
+        const itemsBody =
+            document.getElementById(
+                "soDetailsItemsBody"
+            );
 
-                Loading Sales Order...
 
-            </div>
+        if (itemsBody) {
+
+            itemsBody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="8"
+                        style="
+                            text-align:center;
+                            padding:30px;
+                        "
+                    >
+
+                        Loading Sales Order...
+
+                    </td>
+
+                </tr>
 
             `;
+
+        }
 
     }
 
@@ -1173,9 +1203,9 @@ function showSODetailsPage(
     so
 ) {
 
-    const salesPage =
+    const listView =
         document.getElementById(
-            "sales"
+            "salesOrderListView"
         );
 
 
@@ -1185,13 +1215,16 @@ function showSODetailsPage(
         );
 
 
-    if (salesPage) {
+    /*
+     * IMPORTANT:
+     *
+     * Hindi natin itatago ang #sales.
+     * Child views lang ang magpapalitan.
+     */
 
-        salesPage.classList.remove(
-            "active"
-        );
+    if (listView) {
 
-        salesPage.style.display =
+        listView.style.display =
             "none";
 
     }
@@ -1199,20 +1232,24 @@ function showSODetailsPage(
 
     if (detailsPage) {
 
-        detailsPage.classList.add(
-            "active"
-        );
-
         detailsPage.style.display =
             "block";
 
     }
 
 
+    /*
+     * Render complete SO details
+     */
+
     renderSODetails(
         so
     );
 
+
+    /*
+     * Default = VIEW MODE
+     */
 
     setDetailsEditMode(
         false
@@ -2583,11 +2620,15 @@ function updateSelectedSO() {
    CLOSE SO DETAILS
 ========================================================= */
 
+/* =========================================================
+   CLOSE SO DETAILS
+========================================================= */
+
 function closeSODetails() {
 
-    const salesPage =
+    const listView =
         document.getElementById(
-            "sales"
+            "salesOrderListView"
         );
 
 
@@ -2597,11 +2638,11 @@ function closeSODetails() {
         );
 
 
-    if (detailsPage) {
+    /*
+     * Hide details
+     */
 
-        detailsPage.classList.remove(
-            "active"
-        );
+    if (detailsPage) {
 
         detailsPage.style.display =
             "none";
@@ -2609,24 +2650,65 @@ function closeSODetails() {
     }
 
 
-    if (salesPage) {
+    /*
+     * Show SO list
+     */
 
-        salesPage.classList.add(
-            "active"
-        );
+    if (listView) {
 
-        salesPage.style.display =
+        listView.style.display =
             "block";
 
     }
 
 
+    /*
+     * Reset edit mode
+     */
+
     soDetailsEditMode =
         false;
 
 
+    /*
+     * Huwag burahin ang selectedSO.
+     * Para available pa rin ang selected row.
+     */
+
     currentSO =
         null;
+
+
+    /*
+     * Restore buttons
+     */
+
+    const updateButton =
+        document.getElementById(
+            "updateSOButton"
+        );
+
+
+    const cancelButton =
+        document.getElementById(
+            "cancelSOButton"
+        );
+
+
+    if (updateButton) {
+
+        updateButton.disabled =
+            !selectedSO;
+
+    }
+
+
+    if (cancelButton) {
+
+        cancelButton.disabled =
+            !selectedSO;
+
+    }
 
 }
 
