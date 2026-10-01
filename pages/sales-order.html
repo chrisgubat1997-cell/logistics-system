@@ -3,186 +3,175 @@
      SALES ORDER MODULE
 ===================================================== -->
 
+<div id="salesOrderPage" class="sales-order-module">
 
-<!-- =====================================================
+```
+<!-- =================================================
      SALES ORDER LIST
-===================================================== -->
+================================================== -->
 
-<div class="page-header">
+<div id="salesOrderListView">
 
-    <div>
+    <div class="page-header">
 
-        <h1>
-            Sales Order
-        </h1>
+        <div>
+            <h1>Sales Order</h1>
 
-        <p class="subtitle">
-            Manage Sales Orders
-        </p>
+            <p class="subtitle">
+                Manage Sales Orders
+            </p>
+        </div>
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            onclick="openCreateSO()">
+
+            + CREATE SO
+
+        </button>
 
     </div>
 
 
-    <button
-        type="button"
-        class="btn btn-primary"
-        onclick="openCreateSO()">
+    <!-- =================================================
+         ACTION BUTTONS
+    ================================================== -->
 
-        + CREATE SO
+    <div class="action-bar">
 
-    </button>
+        <button
+            type="button"
+            id="updateSOButton"
+            class="btn btn-secondary"
+            onclick="updateSelectedSO()"
+            disabled>
 
-</div>
+            UPDATE
 
-
-<!-- =====================================================
-     ACTION BUTTONS
-===================================================== -->
-
-<div class="action-bar">
-
-    <button
-        type="button"
-        id="updateSOButton"
-        class="btn btn-secondary"
-        onclick="updateSelectedSO()"
-        disabled>
-
-        UPDATE
-
-    </button>
+        </button>
 
 
-    <button
-        type="button"
-        id="cancelSOButton"
-        class="btn btn-danger"
-        onclick="cancelSelectedSO()"
-        disabled>
+        <button
+            type="button"
+            id="cancelSOButton"
+            class="btn btn-danger"
+            onclick="cancelSelectedSO()"
+            disabled>
 
-        CANCEL
+            CANCEL
 
-    </button>
+        </button>
 
-</div>
+    </div>
 
 
-<!-- =====================================================
-     SALES ORDER LIST
-===================================================== -->
+    <!-- =================================================
+         SALES ORDER LIST
+    ================================================== -->
 
-<div class="section">
+    <div class="section">
 
-    <div class="table-header">
+        <div class="table-header">
 
-        <div>
+            <div>
 
-            <h2>
-                Sales Order List
-            </h2>
+                <h2>
+                    Sales Order List
+                </h2>
 
-            <p class="subtitle">
-                Select an SO to view its summary.
-                Double-click to open full details.
-            </p>
+                <p class="subtitle">
+                    Select an SO to view its summary.
+                    Double-click to open full details.
+                </p>
+
+            </div>
+
+
+            <input
+                type="text"
+                id="soSearch"
+                placeholder="Search SO Number..."
+                onkeyup="searchSO()">
 
         </div>
 
 
-        <input
-            type="text"
-            id="soSearch"
-            placeholder="Search SO Number..."
-            onkeyup="searchSO()">
+        <div class="table-container">
+
+            <table id="soTable">
+
+                <thead>
+
+                    <tr>
+
+                        <th>SO Number</th>
+
+                        <th>Date Creation</th>
+
+                        <th>Client Name</th>
+
+                        <th>SE</th>
+
+                        <th>Project</th>
+
+                        <th>PO Number</th>
+
+                        <th>Terms</th>
+
+                        <th>Grand Total</th>
+
+                        <th>Status</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="soTableBody">
+
+                    <!-- SALES ORDERS WILL LOAD HERE -->
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
 
 
-    <div class="table-container">
+    <!-- =================================================
+         SELECTED SO PREVIEW
+    ================================================== -->
 
-        <table id="soTable">
+    <div
+        id="selectedSOInfo"
+        class="selected-so">
 
-            <thead>
-
-                <tr>
-
-                    <th>
-                        SO Number
-                    </th>
-
-                    <th>
-                        Date Creation
-                    </th>
-
-                    <th>
-                        Client Name
-                    </th>
-
-                    <th>
-                        SE
-                    </th>
-
-                    <th>
-                        Project
-                    </th>
-
-                    <th>
-                        PO Number
-                    </th>
-
-                    <th>
-                        Terms
-                    </th>
-
-                    <th>
-                        Grand Total
-                    </th>
-
-                    <th>
-                        Status
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody id="soTableBody">
-
-                <!-- SALES ORDERS WILL LOAD HERE -->
-
-            </tbody>
-
-        </table>
+        No Sales Order selected.
 
     </div>
 
 </div>
 
 
-<!-- =====================================================
-     SELECTED SO PREVIEW
-===================================================== -->
-
-<div
-    id="selectedSOInfo"
-    class="selected-so">
-
-    No Sales Order selected.
-
-</div>
-
-
-<!-- =====================================================
-     SALES ORDER DETAILS
-===================================================== -->
+<!-- =================================================
+     SALES ORDER DETAILS VIEW
+     
+     IMPORTANT:
+     This is NOT a .page.
+     It is a separate internal view.
+================================================== -->
 
 <div
     id="soDetails"
-    class="page">
+    style="display:none;">
 
 
-    <!-- PAGE HEADER -->
+    <!-- =================================================
+         PAGE HEADER
+    ================================================== -->
 
     <div class="page-header">
 
@@ -274,29 +263,12 @@
                         Select SE
                     </option>
 
-                    <option value="JBG">
-                        JBG
-                    </option>
-
-                    <option value="MHT">
-                        MHT
-                    </option>
-
-                    <option value="HHF">
-                        HHF
-                    </option>
-
-                    <option value="IAF">
-                        IAF
-                    </option>
-
-                    <option value="GRF">
-                        GRF
-                    </option>
-
-                    <option value="KBO">
-                        KBO
-                    </option>
+                    <option value="JBG">JBG</option>
+                    <option value="MHT">MHT</option>
+                    <option value="HHF">HHF</option>
+                    <option value="IAF">IAF</option>
+                    <option value="GRF">GRF</option>
+                    <option value="KBO">KBO</option>
 
                 </select>
 
@@ -415,25 +387,11 @@
                         Select Terms
                     </option>
 
-                    <option value="COD">
-                        COD
-                    </option>
-
-                    <option value="15 Days">
-                        15 Days
-                    </option>
-
-                    <option value="30 Days">
-                        30 Days
-                    </option>
-
-                    <option value="45 Days">
-                        45 Days
-                    </option>
-
-                    <option value="60 Days">
-                        60 Days
-                    </option>
+                    <option value="COD">COD</option>
+                    <option value="15 Days">15 Days</option>
+                    <option value="30 Days">30 Days</option>
+                    <option value="45 Days">45 Days</option>
+                    <option value="60 Days">60 Days</option>
 
                 </select>
 
@@ -503,37 +461,14 @@
 
                     <tr>
 
-                        <th>
-                            #
-                        </th>
-
-                        <th>
-                            Item Name
-                        </th>
-
-                        <th>
-                            Description
-                        </th>
-
-                        <th>
-                            QTY
-                        </th>
-
-                        <th>
-                            Unit
-                        </th>
-
-                        <th>
-                            Amount
-                        </th>
-
-                        <th>
-                            Total
-                        </th>
-
-                        <th>
-                            Action
-                        </th>
+                        <th>#</th>
+                        <th>Item Name</th>
+                        <th>Description</th>
+                        <th>QTY</th>
+                        <th>Unit</th>
+                        <th>Amount</th>
+                        <th>Total</th>
+                        <th>Action</th>
 
                     </tr>
 
@@ -557,9 +492,6 @@
 
         <div class="detail-summary">
 
-
-            <!-- SUBTOTAL -->
-
             <div class="so-total-row">
 
                 <span class="so-total-label">
@@ -576,8 +508,6 @@
 
             </div>
 
-
-            <!-- DISCOUNT -->
 
             <div class="so-total-row">
 
@@ -602,12 +532,9 @@
             </div>
 
 
-            <!-- VATABLE -->
-
             <div class="so-total-row">
 
-                <label
-                    class="so-total-label">
+                <label class="so-total-label">
 
                     <span class="vatable-check">
 
@@ -635,8 +562,6 @@
             </div>
 
 
-            <!-- VAT RATE -->
-
             <div class="so-total-row">
 
                 <span class="so-total-label">
@@ -649,8 +574,6 @@
 
             </div>
 
-
-            <!-- GRAND TOTAL -->
 
             <div
                 class="so-total-row grand-total-row">
@@ -787,5 +710,8 @@
         </button>
 
     </div>
+
+</div>
+```
 
 </div>
