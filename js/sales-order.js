@@ -3706,22 +3706,14 @@ return date.toLocaleString(
 
 /* =========================================================
    EMAIL SALES ORDER
+   CREATE GMAIL DRAFT
 ========================================================= */
 
-function emailSelectedSO() {
-
-    /*
-     * Get currently opened Sales Order
-     */
+async function emailSelectedSO() {
 
     const so =
         currentSO ||
         selectedSO;
-
-
-    /*
-     * No SO selected
-     */
 
     if (!so) {
 
@@ -3730,13 +3722,7 @@ function emailSelectedSO() {
         );
 
         return;
-
     }
-
-
-    /*
-     * Get SO information
-     */
 
     const soNumber =
         String(
@@ -3744,24 +3730,17 @@ function emailSelectedSO() {
             ""
         ).trim();
 
-
     const clientName =
         String(
             so.clientName ||
             ""
         ).trim();
 
-
     const project =
         String(
             so.project ||
             ""
         ).trim();
-
-
-    /*
-     * Validate SO Number
-     */
 
     if (!soNumber) {
 
@@ -3770,67 +3749,128 @@ function emailSelectedSO() {
         );
 
         return;
-
     }
 
 
-    /*
-     * =====================================================
-     * EMAIL SUBJECT
-     *
-     * Format:
-     *
-     * SOF SO-2026-5501 CLIENT NAME PROJECT
-     * =====================================================
-     */
+    /* ========================================
+       RECIPIENT EMAIL
+    ======================================== */
 
-    const subject =
-        `SOF ${soNumber} ${clientName} ${project}`
-            .replace(
-                /\s+/g,
-                " "
-            )
-            .trim();
+    const recipient =
+        prompt(
+            "Enter recipient email address:"
+        );
 
+    if (recipient === null) {
+        return;
+    }
 
-    /*
-     * =====================================================
-     * EMAIL BODY
-     * =====================================================
-     */
+    const email =
+        recipient.trim();
 
-    const body =
-`Dear Sir/Ma'am,
+    if (!email) {
 
-Please see attached Sales Order ${soNumber} for your reference.
+        alert(
+            "Kailangan ng recipient email address."
+        );
 
-Client Name: ${clientName}
-Project: ${project}
-
-Thank you.
-
-Best regards,
-LOGIS-TECH
-`;
+        return;
+    }
 
 
-    /*
-     * TEMPORARY TEST
-     *
-     * Ipakita muna natin ang actual
-     * subject at body na gagamitin.
-     */
+    /* ========================================
+       CREATE GMAIL DRAFT
+    ======================================== */
 
-    alert(
-        "EMAIL SO TEST\n\n" +
-        "Subject:\n" +
-        subject +
-        "\n\n" +
-        "Body:\n" +
-        body
-    );
+    try {
+
+        alert(
+            "Creating Gmail draft...\n\n" +
+            "Please wait."
+        );
+
+
+        const result =
+            await salesOrderAPI(
+                "emailSalesOrder",
+                {
+                    soNumber:
+                        soNumber,
+
+                    clientName:
+                        clientName,
+
+                    project:
+                        project,
+
+                    recipient:
+                        email
+                }
+            );
+
+
+        if (
+            !result ||
+            !result.success
+        ) {
+
+            alert(
+                "Hindi nagawa ang Gmail draft.\n\n" +
+                (
+                    result &&
+                    result.message
+                        ? result.message
+                        : "Unknown error."
+                )
+            );
+
+            return;
+        }
+
+
+        /* ========================================
+           SUCCESS
+        ======================================== */
+
+        alert(
+            "GMAIL DRAFT CREATED SUCCESSFULLY!\n\n" +
+
+            "Recipient:\n" +
+            email +
+
+            "\n\nSubject:\n" +
+            result.subject +
+
+            "\n\nPDF Attached:\n" +
+            result.fileName +
+
+            "\n\nBuksan ang Gmail → Drafts " +
+            "para i-check, i-edit at SEND."
+        );
+
+
+        console.log(
+            "EMAIL SO SUCCESS:",
+            result
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "EMAIL SO ERROR:",
+            error
+        );
+
+        alert(
+            "Nagkaroon ng error habang gumagawa ng Gmail draft.\n\n" +
+            error.message
+        );
+
+    }
 
 }
+
 
 /* =========================================================
    INITIALIZE SALES ORDER MODULE
