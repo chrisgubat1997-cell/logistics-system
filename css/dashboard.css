@@ -902,3 +902,166 @@ body {
         text-align: left;
     }
 }
+
+/* =========================================================
+   SALES ORDER POPUP - CARD TO CENTER ANIMATION
+========================================================= */
+
+.sales-order-popup {
+    opacity: 0;
+    visibility: hidden;
+
+    transition:
+        opacity 0.25s ease,
+        visibility 0.25s ease;
+}
+
+.sales-order-popup[style*="display: block"] {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sales-order-popup-overlay {
+    opacity: 0;
+
+    transition:
+        opacity 0.35s ease;
+}
+
+.sales-order-popup[style*="display: block"]
+.sales-order-popup-overlay {
+    opacity: 1;
+}
+
+
+/* Popup starts small */
+.sales-order-popup-box {
+    transform:
+        translate(-50%, -50%)
+        scale(0.15);
+
+    transform-origin: center center;
+
+    opacity: 0;
+
+    transition:
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.25s ease;
+
+    /* important */
+    will-change: transform, opacity;
+}
+
+
+/* Popup reaches center */
+.sales-order-popup[style*="display: block"]
+.sales-order-popup-box {
+    transform:
+        translate(-50%, -50%)
+        scale(1);
+
+    opacity: 1;
+}
+
+
+/* =========================================================
+   CARD-LIKE OPENING EFFECT
+========================================================= */
+
+.summary-card {
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.summary-card:active {
+    transform: scale(0.97);
+}
+
+
+/* =========================================================
+   POPUP CONTENT DELAY
+========================================================= */
+
+.sales-order-popup[style*="display: block"]
+.sales-order-popup-header {
+    animation:
+        popupHeader 0.35s ease 0.18s both;
+}
+
+.sales-order-popup[style*="display: block"]
+.sales-order-popup-list {
+    animation:
+        popupList 0.4s ease 0.25s both;
+}
+
+.sales-order-popup[style*="display: block"]
+.sales-order-popup-footer {
+    animation:
+        popupFooter 0.35s ease 0.32s both;
+}
+
+
+@keyframes popupHeader {
+
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+@keyframes popupList {
+
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+@keyframes popupFooter {
+
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================================================
+   REDUCE MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .sales-order-popup,
+    .sales-order-popup-box,
+    .sales-order-popup-overlay,
+    .sales-order-popup-header,
+    .sales-order-popup-list,
+    .sales-order-popup-footer {
+        animation: none !important;
+        transition: none !important;
+    }
+
+}
