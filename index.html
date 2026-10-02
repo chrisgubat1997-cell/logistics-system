@@ -20,6 +20,13 @@
         href="css/sales-order.css"
     >
 
+    <!-- DELIVERY CSS -->
+
+<link 
+    rel="stylesheet" 
+    href="css/delivery.css"
+>
+
 
     <style>
 
@@ -591,13 +598,6 @@
 
         <button
             class="menu-btn"
-            onclick="showPage('job', this)">
-            📋 Job Order
-        </button>
-
-
-        <button
-            class="menu-btn"
             onclick="showPage('delivery', this)">
             🚚 Delivery
         </button>
@@ -714,54 +714,20 @@
 
 
         <!-- =================================================
-             JOB ORDER
-        ================================================= -->
-
-        <div
-            id="job"
-            class="page">
-
-            <h1>Job Order</h1>
-
-            <div class="section">
-
-                <h2>
-                    Job Order Management
-                </h2>
-
-                <p>
-                    Manage Job Orders and Production.
-                </p>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
              DELIVERY
         ================================================= -->
 
-        <div
-            id="delivery"
-            class="page">
+        <!-- ================================================= 
+     DELIVERY MODULE
+================================================= -->
 
-            <h1>Delivery</h1>
+<div 
+    id="delivery" 
+    class="page">
 
-            <div class="section">
+    <div id="deliveryModule"></div>
 
-                <h2>
-                    Delivery Management
-                </h2>
-
-                <p>
-                    Manage deliveries, trucks and drivers.
-                </p>
-
-            </div>
-
-        </div>
-
+</div>
 
         <!-- =================================================
              DR PRINTING
@@ -1233,6 +1199,7 @@
 ===================================================== */
 
 let salesModuleLoaded = false;
+let deliveryModuleLoaded = false;
 
 
 /* =====================================================
@@ -1321,6 +1288,165 @@ function showPage(pageId, button) {
         loadSalesOrderModule();
 
     }
+
+    /* 
+ * ================================================= 
+ * DELIVERY
+ * ================================================= 
+ */
+
+if (pageId === 'delivery') {
+
+    loadDeliveryModule();
+
+}
+    /* ===================================================== 
+   LOAD DELIVERY MODULE
+===================================================== */
+
+async function loadDeliveryModule() {
+
+    /*
+     * Prevent duplicate loading
+     */
+
+    if (deliveryModuleLoaded) {
+
+        console.log(
+            'Delivery module already loaded.'
+        );
+
+        return;
+
+    }
+
+
+    const container =
+        document.getElementById(
+            'deliveryModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'deliveryModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        /*
+         * =================================================
+         * LOAD DELIVERY HTML
+         * =================================================
+         */
+
+        const response =
+            await fetch(
+                'pages/delivery.html'
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                'Failed to load Delivery module.'
+            );
+
+        }
+
+
+        const html =
+            await response.text();
+
+
+        /*
+         * =================================================
+         * INSERT DELIVERY MODULE
+         * =================================================
+         */
+
+        container.innerHTML =
+            html;
+
+
+        /*
+         * =================================================
+         * MARK AS LOADED
+         * =================================================
+         */
+
+        deliveryModuleLoaded = true;
+
+
+        console.log(
+            'Delivery module loaded successfully.'
+        );
+
+
+        /*
+         * =================================================
+         * LOAD DELIVERY JAVASCRIPT
+         * =================================================
+         */
+
+        if (
+            !document.querySelector(
+                'script[data-delivery-js]'
+            )
+        ) {
+
+            const script =
+                document.createElement(
+                    'script'
+                );
+
+            script.src =
+                'js/delivery.js';
+
+            script.setAttribute(
+                'data-delivery-js',
+                'true'
+            );
+
+            document.body.appendChild(
+                script
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            'Delivery module error:',
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div style="
+                padding:30px;
+                color:#b00020;
+                background:#fff;
+                border-radius:10px;
+            ">
+
+                Failed to load Delivery module.
+
+            </div>
+
+        `;
+
+    }
+
+}
 
 
     /*
