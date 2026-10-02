@@ -3704,6 +3704,133 @@ return date.toLocaleString(
 
 }
 
+/* =========================================================
+   EMAIL SALES ORDER
+========================================================= */
+
+function emailSelectedSO() {
+
+    /*
+     * Get currently opened Sales Order
+     */
+
+    const so =
+        currentSO ||
+        selectedSO;
+
+
+    /*
+     * No SO selected
+     */
+
+    if (!so) {
+
+        alert(
+            "Walang selected Sales Order."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Get SO information
+     */
+
+    const soNumber =
+        String(
+            so.soNumber ||
+            ""
+        ).trim();
+
+
+    const clientName =
+        String(
+            so.clientName ||
+            ""
+        ).trim();
+
+
+    const project =
+        String(
+            so.project ||
+            ""
+        ).trim();
+
+
+    /*
+     * Validate SO Number
+     */
+
+    if (!soNumber) {
+
+        alert(
+            "Walang SO Number ang selected Sales Order."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * =====================================================
+     * EMAIL SUBJECT
+     *
+     * Format:
+     *
+     * SOF SO-2026-5501 CLIENT NAME PROJECT
+     * =====================================================
+     */
+
+    const subject =
+        `SOF ${soNumber} ${clientName} ${project}`
+            .replace(
+                /\s+/g,
+                " "
+            )
+            .trim();
+
+
+    /*
+     * =====================================================
+     * EMAIL BODY
+     * =====================================================
+     */
+
+    const body =
+`Dear Sir/Ma'am,
+
+Please see attached Sales Order ${soNumber} for your reference.
+
+Client Name: ${clientName}
+Project: ${project}
+
+Thank you.
+
+Best regards,
+LOGIS-TECH
+`;
+
+
+    /*
+     * TEMPORARY TEST
+     *
+     * Ipakita muna natin ang actual
+     * subject at body na gagamitin.
+     */
+
+    alert(
+        "EMAIL SO TEST\n\n" +
+        "Subject:\n" +
+        subject +
+        "\n\n" +
+        "Body:\n" +
+        body
+    );
+
+}
 
 /* =========================================================
    INITIALIZE SALES ORDER MODULE
