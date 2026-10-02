@@ -575,6 +575,20 @@ tbody tr:hover {
     background: #f4f7fb;
 }
 
+#dashboard {
+    width: 100%;
+    min-height: calc(100vh - 80px);
+    padding: 0;
+    background: #f4f7fb;
+}
+
+#dashboard.active {
+    display: block;
+}
+
+
+
+
 
 /* =========================================================
    PROFILE
