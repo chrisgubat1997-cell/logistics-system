@@ -536,12 +536,252 @@ body {
    SALES ORDER POPUP
 ========================================================= */
 
+/* =========================================================
+   SALES ORDER POPUP
+========================================================= */
+
 .sales-order-popup {
     position: fixed;
-
     inset: 0;
 
     z-index: 99999;
+
+    /* HUWAG display:none dito */
+}
+
+.sales-order-popup-overlay {
+    position: absolute;
+    inset: 0;
+
+    background: rgba(15, 23, 42, 0.58);
+
+    backdrop-filter: blur(3px);
+
+    opacity: 0;
+
+    transition: opacity 0.3s ease;
+}
+
+.sales-order-popup-box {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: min(720px, calc(100% - 40px));
+
+    max-height: 80vh;
+
+    transform:
+        translate(-50%, -50%)
+        scale(0.85);
+
+    opacity: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #ffffff;
+
+    border-radius: 14px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 25px 70px rgba(15, 23, 42, 0.30);
+
+    transition:
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.25s ease;
+}
+
+
+/* =========================================================
+   WHEN POPUP IS DISPLAYED
+========================================================= */
+
+.sales-order-popup[style*="display: block"]
+.sales-order-popup-overlay {
+    opacity: 1;
+}
+
+.sales-order-popup[style*="display: block"]
+.sales-order-popup-box {
+    transform:
+        translate(-50%, -50%)
+        scale(1);
+
+    opacity: 1;
+}
+
+
+/* =========================================================
+   POPUP HEADER
+========================================================= */
+
+.sales-order-popup-header {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 17px 20px;
+
+    background: #0f172a;
+
+    color: #ffffff;
+}
+
+.sales-order-popup-header h2 {
+    font-size: 15px;
+
+    font-weight: 800;
+}
+
+.sales-order-popup-header button {
+    width: 32px;
+    height: 32px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: rgba(255,255,255,0.10);
+
+    color: #ffffff;
+
+    font-size: 21px;
+
+    cursor: pointer;
+}
+
+.sales-order-popup-header button:hover {
+    background: rgba(255,255,255,0.20);
+}
+
+
+/* =========================================================
+   POPUP LIST
+========================================================= */
+
+.sales-order-popup-list {
+    flex: 1;
+
+    padding: 12px;
+
+    overflow-y: auto;
+
+    background: #f8fafc;
+}
+
+.sales-order-popup-list::-webkit-scrollbar {
+    width: 7px;
+}
+
+.sales-order-popup-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+
+    border-radius: 10px;
+}
+
+
+/* =========================================================
+   POPUP ITEM
+========================================================= */
+
+.sales-order-popup-item {
+    display: grid;
+
+    grid-template-columns:
+        130px 1fr 120px;
+
+    align-items: center;
+
+    gap: 15px;
+
+    padding: 14px 15px;
+
+    margin-bottom: 8px;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e8f0;
+
+    border-radius: 9px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
+}
+
+.sales-order-popup-item:hover {
+    background: #eff6ff;
+
+    border-color: #bfdbfe;
+
+    transform: translateX(3px);
+}
+
+.sales-order-popup-item strong {
+    color: #1d4ed8;
+
+    font-size: 12px;
+}
+
+.sales-order-popup-item span {
+    color: #475569;
+
+    font-size: 11px;
+}
+
+.sales-order-popup-item small {
+    color: #94a3b8;
+
+    font-size: 10px;
+
+    text-align: right;
+}
+
+
+/* =========================================================
+   POPUP FOOTER
+========================================================= */
+
+.sales-order-popup-footer {
+    display: flex;
+
+    justify-content: flex-end;
+
+    padding: 13px 18px;
+
+    border-top: 1px solid #e2e8f0;
+
+    background: #ffffff;
+}
+
+.sales-order-popup-footer button {
+    padding: 9px 18px;
+
+    border: none;
+
+    border-radius: 7px;
+
+    background: #2563eb;
+
+    color: #ffffff;
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+}
+
+.sales-order-popup-footer button:hover {
+    background: #1d4ed8;
 }
 
 .sales-order-popup-overlay {
