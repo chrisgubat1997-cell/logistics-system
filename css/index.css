@@ -567,17 +567,12 @@ tbody tr:hover {
 ========================================================= */
 
 .dashboard-frame {
-    width: 100%;
-
-    height: 900px;
-
-    border: none;
-
     display: block;
-
-    overflow: hidden;
-
-    background: transparent;
+    width: 100%;
+    height: calc(100vh - 80px);
+    min-height: 700px;
+    border: none;
+    background: #f4f7fb;
 }
 
 
