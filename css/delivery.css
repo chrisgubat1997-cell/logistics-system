@@ -1,0 +1,459 @@
+/* =========================================================
+   LOGIS-TECH SYSTEM
+   DELIVERY / DR MODULE
+========================================================= */
+
+.delivery-module {
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.delivery-module .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.delivery-module .page-header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.delivery-module .page-header p {
+    margin: 5px 0 0;
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   SECTION CARD
+========================================================= */
+
+.section-card {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.section-title p {
+    margin: 5px 0 0;
+    color: #6b7280;
+    font-size: 14px;
+}
+
+
+/* =========================================================
+   SUBSECTION
+========================================================= */
+
+.subsection {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.subsection-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.section-note {
+    color: #6b7280;
+    font-size: 13px;
+    margin-bottom: 15px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+.prepare-section {
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.search-input {
+    width: 100%;
+    height: 44px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    padding: 0 14px;
+    font-size: 14px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #2563eb;
+}
+
+
+/* =========================================================
+   SEARCH SUGGESTIONS
+========================================================= */
+
+.search-suggestions {
+    margin-top: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.suggestion-title {
+    padding: 10px 14px;
+    background: #f3f4f6;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+.suggestion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.suggestion-item div {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.suggestion-item strong {
+    font-size: 14px;
+}
+
+.suggestion-item span {
+    font-size: 14px;
+}
+
+.suggestion-item small {
+    color: #6b7280;
+}
+
+
+/* =========================================================
+   FORM GRID
+========================================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: span 2;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    background: #ffffff;
+}
+
+.form-group input[readonly],
+.form-group textarea[readonly] {
+    background: #f3f4f6;
+    color: #4b5563;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.editable-label {
+    display: inline-block;
+    margin-left: 5px;
+    font-size: 10px;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.delivery-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.delivery-table th {
+    background: #f3f4f6;
+    padding: 12px;
+    border-bottom: 1px solid #d1d5db;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.delivery-table td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.delivery-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+
+/* =========================================================
+   ITEMS TABLE
+========================================================= */
+
+.items-table {
+    min-width: 1100px;
+}
+
+.items-table th,
+.items-table td {
+    white-space: nowrap;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.qty-input {
+    width: 80px;
+    height: 36px;
+    border: 1px solid #d1d5db;
+    border-radius: 5px;
+    padding: 0 8px;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.qty-input:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.amount {
+    text-align: right !important;
+    font-weight: 600;
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.status.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status.prepared {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.btn {
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: #1d4ed8;
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: #ffffff;
+}
+
+.btn-secondary:hover {
+    background: #4b5563;
+}
+
+.btn-outline {
+    background: #ffffff;
+    color: #2563eb;
+    border: 1px solid #2563eb;
+}
+
+.btn-outline:hover {
+    background: #eff6ff;
+}
+
+.btn-danger {
+    background: #dc2626;
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    background: #b91c1c;
+}
+
+.btn-small {
+    padding: 7px 11px;
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   ACTION GROUP
+========================================================= */
+
+.action-group {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+
+/* =========================================================
+   DR TOTAL
+========================================================= */
+
+.dr-total {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 30px;
+    margin-top: 20px;
+    padding: 18px 20px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.dr-total span {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.dr-total strong {
+    font-size: 22px;
+}
+
+
+/* =========================================================
+   BOTTOM ACTION BUTTONS
+========================================================= */
+
+.dr-action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 900px) {
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+
+    .delivery-module {
+        padding: 12px;
+    }
+
+    .delivery-module .page-header {
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .suggestion-item div {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+    }
+
+}
