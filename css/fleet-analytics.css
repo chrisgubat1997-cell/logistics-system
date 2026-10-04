@@ -1,1 +1,713 @@
+/* =====================================================
+   FLEET & DELIVERY ANALYTICS
+===================================================== */
 
+.fleet-analytics-page {
+
+    width: 100%;
+
+    padding: 22px;
+
+    color: #1f2937;
+
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.fleet-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    gap: 20px;
+
+    margin-bottom: 22px;
+
+}
+
+
+.fleet-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 14px;
+
+}
+
+
+.fleet-title-icon {
+
+    width: 48px;
+
+    height: 48px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #eef2ff;
+
+    border-radius: 12px;
+
+    font-size: 23px;
+
+}
+
+
+.fleet-title h1 {
+
+    margin: 0;
+
+    font-size: 25px;
+
+    font-weight: 700;
+
+}
+
+
+.fleet-title p {
+
+    margin: 4px 0 0;
+
+    color: #6b7280;
+
+    font-size: 13px;
+
+}
+
+
+/* =====================================================
+   FILTERS
+===================================================== */
+
+.fleet-filters {
+
+    display: flex;
+
+    gap: 8px;
+
+}
+
+
+.fleet-filters select {
+
+    height: 38px;
+
+    min-width: 135px;
+
+    padding: 0 12px;
+
+    border: 1px solid #d8dee8;
+
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    color: #374151;
+
+    font-size: 12px;
+
+    font-weight: 600;
+
+    outline: none;
+
+    cursor: pointer;
+
+}
+
+
+.fleet-filters select:focus {
+
+    border-color: #4f46e5;
+
+}
+
+
+/* =====================================================
+   KPI GRID
+===================================================== */
+
+.kpi-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(6, 1fr);
+
+    gap: 12px;
+
+    margin-bottom: 25px;
+
+}
+
+
+.kpi-card {
+
+    min-height: 105px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    background: #ffffff;
+
+    border: 1px solid #e7eaf0;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.04);
+
+}
+
+
+.kpi-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background: #f1f5f9;
+
+    border-radius: 10px;
+
+    font-size: 19px;
+
+}
+
+
+.kpi-content span {
+
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: #64748b;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    letter-spacing: .4px;
+
+}
+
+
+.kpi-content strong {
+
+    font-size: 21px;
+
+    font-weight: 700;
+
+}
+
+
+.kpi-content small {
+
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+
+    margin-top: 2px;
+
+}
+
+
+/* =====================================================
+   SECTION HEADING
+===================================================== */
+
+.section-heading {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin: 25px 0 12px;
+
+}
+
+
+.section-heading h2 {
+
+    margin: 0;
+
+    font-size: 17px;
+
+}
+
+
+.section-heading p {
+
+    margin: 3px 0 0;
+
+    color: #94a3b8;
+
+    font-size: 11px;
+
+}
+
+
+.section-tag {
+
+    padding: 6px 10px;
+
+    background: #eef2ff;
+
+    color: #4f46e5;
+
+    border-radius: 20px;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: .4px;
+
+}
+
+
+.delivery-tag {
+
+    background: #ecfdf5;
+
+    color: #047857;
+
+}
+
+
+.dr-tag {
+
+    background: #fff7ed;
+
+    color: #c2410c;
+
+}
+
+
+/* =====================================================
+   ANALYTICS GRID
+===================================================== */
+
+.analytics-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 14px;
+
+}
+
+
+/* =====================================================
+   ANALYTICS CARD
+===================================================== */
+
+.analytics-card {
+
+    min-width: 0;
+
+    background: #ffffff;
+
+    border: 1px solid #e7eaf0;
+
+    border-radius: 13px;
+
+    padding: 17px;
+
+    box-shadow:
+        0 2px 8px rgba(15, 23, 42, 0.04);
+
+}
+
+
+.card-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-bottom: 12px;
+
+}
+
+
+.card-header h3 {
+
+    margin: 0;
+
+    font-size: 14px;
+
+}
+
+
+.card-header p {
+
+    margin: 4px 0 0;
+
+    color: #94a3b8;
+
+    font-size: 10px;
+
+}
+
+
+.details-btn {
+
+    border: none;
+
+    background: transparent;
+
+    color: #4f46e5;
+
+    font-size: 10px;
+
+    font-weight: 600;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+}
+
+
+.details-btn:hover {
+
+    text-decoration: underline;
+
+}
+
+
+/* =====================================================
+   CHART
+===================================================== */
+
+.chart-box {
+
+    position: relative;
+
+    width: 100%;
+
+    height: 230px;
+
+}
+
+
+.large-chart .chart-box {
+
+    height: 245px;
+
+}
+
+
+/* =====================================================
+   MAINTENANCE
+===================================================== */
+
+.maintenance-summary {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    margin-top: 18px;
+
+}
+
+
+.maintenance-row {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 12px 13px;
+
+    background: #f8fafc;
+
+    border-radius: 8px;
+
+}
+
+
+.maintenance-row span {
+
+    color: #64748b;
+
+    font-size: 11px;
+
+}
+
+
+.maintenance-row strong {
+
+    font-size: 13px;
+
+}
+
+
+/* =====================================================
+   DELIVERY LEAD TIME
+===================================================== */
+
+.delivery-mini-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-bottom: 12px;
+
+}
+
+
+.delivery-mini-stats > div {
+
+    padding: 9px;
+
+    background: #f8fafc;
+
+    border-radius: 8px;
+
+}
+
+
+.delivery-mini-stats span {
+
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+}
+
+
+.delivery-mini-stats strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+}
+
+
+/* =====================================================
+   ACCURACY
+===================================================== */
+
+.accuracy-summary {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 10px;
+
+}
+
+
+.accuracy-main {
+
+    padding: 10px 15px;
+
+    background: #f8fafc;
+
+    border-radius: 9px;
+
+}
+
+
+.accuracy-main span {
+
+    display: block;
+
+    color: #64748b;
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+}
+
+
+.accuracy-main strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 23px;
+
+}
+
+
+.accuracy-stats {
+
+    display: flex;
+
+    gap: 18px;
+
+}
+
+
+.accuracy-stats span {
+
+    display: block;
+
+    color: #94a3b8;
+
+    font-size: 8px;
+
+    font-weight: 700;
+
+}
+
+
+.accuracy-stats strong {
+
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 13px;
+
+}
+
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 1350px) {
+
+    .kpi-grid {
+
+        grid-template-columns:
+            repeat(3, 1fr);
+
+    }
+
+}
+
+
+@media (max-width: 1000px) {
+
+    .fleet-header {
+
+        flex-direction: column;
+
+        align-items: flex-start;
+
+    }
+
+
+    .fleet-filters {
+
+        width: 100%;
+
+    }
+
+
+    .fleet-filters select {
+
+        flex: 1;
+
+    }
+
+
+    .analytics-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+}
+
+
+@media (max-width: 650px) {
+
+    .fleet-analytics-page {
+
+        padding: 14px;
+
+    }
+
+
+    .kpi-grid {
+
+        grid-template-columns: 1fr 1fr;
+
+    }
+
+
+    .fleet-filters {
+
+        flex-wrap: wrap;
+
+    }
+
+
+    .fleet-filters select {
+
+        min-width: 120px;
+
+    }
+
+
+    .accuracy-summary {
+
+        flex-direction: column;
+
+        align-items: stretch;
+
+    }
+
+}
