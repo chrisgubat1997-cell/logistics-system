@@ -36,6 +36,12 @@
         href="css/delivery.css"
     >
 
+    <!-- FLEET & DELIVERY ANALYTICS CSS -->
+<link
+    rel="stylesheet"
+    href="css/fleet-analytics.css"
+>
+
 </head>
 
 
@@ -70,6 +76,11 @@
         onclick="showPage('delivery', this)">
         🚚 Delivery
     </button>
+
+        <button class="menu-btn"
+    onclick="showPage('fleetAnalytics', this)">
+    📊 Fleet & Delivery Analytics
+</button>
 
     <button class="menu-btn"
         onclick="showPage('invoice', this)">
@@ -193,6 +204,18 @@
     class="page">
 
     <div id="deliveryModule"></div>
+
+</div>
+
+        <!-- =================================================
+     FLEET & DELIVERY ANALYTICS
+================================================= -->
+
+<div
+    id="fleetAnalytics"
+    class="page">
+
+    <div id="fleetAnalyticsModule"></div>
 
 </div>
 
@@ -667,6 +690,7 @@
 
 let salesModuleLoaded = false;
 let deliveryModuleLoaded = false;
+let fleetAnalyticsModuleLoaded = false;
 
 
 /* =====================================================
@@ -755,6 +779,16 @@ function showPage(pageId, button) {
         loadSalesOrderModule();
 
     }
+
+    /* =================================================
+   FLEET & DELIVERY ANALYTICS
+================================================= */
+
+if (pageId === 'fleetAnalytics') {
+
+    loadFleetAnalyticsModule();
+
+}
 
     /* 
  * ================================================= 
@@ -954,7 +988,155 @@ async function loadDeliveryModule() {
     }
 
 }
+/* =====================================================
+   LOAD FLEET & DELIVERY ANALYTICS MODULE
+===================================================== */
 
+async function loadFleetAnalyticsModule() {
+
+    /*
+     * Prevent duplicate loading
+     */
+
+    if (fleetAnalyticsModuleLoaded) {
+
+        console.log(
+            'Fleet Analytics module already loaded.'
+        );
+
+        return;
+
+    }
+
+
+    const container =
+        document.getElementById(
+            'fleetAnalyticsModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'fleetAnalyticsModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        /*
+         * =================================================
+         * LOAD FLEET ANALYTICS HTML
+         * =================================================
+         */
+
+        const response =
+            await fetch(
+                'pages/fleet-analytics.html'
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                'Failed to load Fleet Analytics module.'
+            );
+
+        }
+
+
+        const html =
+            await response.text();
+
+
+        /*
+         * =================================================
+         * INSERT MODULE
+         * =================================================
+         */
+
+        container.innerHTML =
+            html;
+
+
+        /*
+         * =================================================
+         * MARK AS LOADED
+         * =================================================
+         */
+
+        fleetAnalyticsModuleLoaded = true;
+
+
+        console.log(
+            'Fleet Analytics module loaded successfully.'
+        );
+
+
+        /*
+         * =================================================
+         * LOAD FLEET ANALYTICS JAVASCRIPT
+         * =================================================
+         */
+
+        if (
+            !document.querySelector(
+                'script[data-fleet-analytics-js]'
+            )
+        ) {
+
+            const script =
+                document.createElement(
+                    'script'
+                );
+
+
+            script.src =
+                'js/fleet-analytics.js';
+
+
+            script.setAttribute(
+                'data-fleet-analytics-js',
+                'true'
+            );
+
+
+            document.body.appendChild(
+                script
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            'Fleet Analytics module error:',
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div style="
+                padding:30px;
+                color:#b00020;
+                background:#fff;
+                border-radius:10px;
+            ">
+
+                Failed to load Fleet & Delivery Analytics module.
+
+            </div>
+
+        `;
+
+    }
+}
 
 /* =====================================================
    LOAD SALES ORDER MODULE
