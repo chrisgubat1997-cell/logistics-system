@@ -1,7 +1,12 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
    FLEET & DELIVERY ANALYTICS
-   DESIGN ONLY
+   MAIN STYLESHEET
+========================================================= */
+
+
+/* =========================================================
+   RESET
 ========================================================= */
 
 * {
@@ -10,38 +15,9 @@
     box-sizing: border-box;
 }
 
-:root {
-    --primary: #2563eb;
-    --primary-dark: #1d4ed8;
-    --primary-soft: #eff6ff;
-
-    --success: #16a34a;
-    --warning: #d97706;
-    --danger: #dc2626;
-
-    --text-main: #172033;
-    --text-secondary: #64748b;
-    --text-light: #94a3b8;
-
-    --border: #e5e7eb;
-    --background: #f5f7fb;
-    --card: #ffffff;
-
-    --shadow-sm:
-        0 2px 8px rgba(15, 23, 42, 0.04);
-
-    --shadow-md:
-        0 8px 24px rgba(15, 23, 42, 0.07);
-
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
+html {
+    scroll-behavior: smooth;
 }
-
-
-/* =========================================================
-   BODY
-========================================================= */
 
 body {
     font-family:
@@ -51,8 +27,9 @@ body {
         Arial,
         sans-serif;
 
-    background: var(--background);
-    color: var(--text-main);
+    background: #f4f6fa;
+
+    color: #172033;
 
     min-height: 100vh;
 
@@ -61,14 +38,66 @@ body {
 
 
 /* =========================================================
-   MAIN PAGE
+   VARIABLES
+========================================================= */
+
+:root {
+
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #eff6ff;
+
+    --success: #16a34a;
+    --success-light: #f0fdf4;
+
+    --warning: #d97706;
+    --warning-light: #fffbeb;
+
+    --danger: #dc2626;
+    --danger-light: #fef2f2;
+
+    --purple: #7c3aed;
+    --purple-light: #f5f3ff;
+
+    --text-main: #172033;
+    --text-secondary: #64748b;
+    --text-muted: #94a3b8;
+
+    --border: #e2e8f0;
+    --border-light: #edf1f6;
+
+    --background: #f4f6fa;
+    --card: #ffffff;
+
+    --shadow-small:
+        0 2px 8px rgba(15, 23, 42, 0.04);
+
+    --shadow-medium:
+        0 8px 24px rgba(15, 23, 42, 0.07);
+
+    --shadow-large:
+        0 14px 35px rgba(15, 23, 42, 0.10);
+
+    --radius-small: 8px;
+    --radius-medium: 12px;
+    --radius-large: 16px;
+}
+
+
+/* =========================================================
+   PAGE
 ========================================================= */
 
 .fleet-analytics-page {
+
     width: 100%;
+
     min-height: 100vh;
 
-    padding: 24px 28px 40px;
+    padding:
+        22px
+        28px
+        40px;
 }
 
 
@@ -77,10 +106,13 @@ body {
 ========================================================= */
 
 .fleet-header {
+
     width: 100%;
 
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
 
     gap: 30px;
@@ -90,24 +122,33 @@ body {
 
 
 /* =========================================================
-   TITLE
+   TITLE AREA
 ========================================================= */
 
 .fleet-title-area {
+
     display: flex;
+
     align-items: center;
 
-    gap: 14px;
+    gap: 13px;
 
     min-width: 300px;
 }
 
+
 .fleet-title-icon {
-    width: 48px;
-    height: 48px;
+
+    width: 46px;
+
+    height: 46px;
+
+    flex-shrink: 0;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 12px;
@@ -121,25 +162,47 @@ body {
 
     color: #ffffff;
 
-    font-size: 22px;
+    font-size: 21px;
 
     box-shadow:
-        0 6px 16px rgba(37, 99, 235, 0.22);
+        0 6px 16px
+        rgba(37, 99, 235, 0.22);
+
+    transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
-.fleet-title-area h1 {
-    font-size: 22px;
-    font-weight: 700;
 
-    color: var(--text-main);
+.fleet-title-icon:hover {
+
+    transform:
+        translateY(-2px)
+        rotate(-2deg);
+
+    box-shadow:
+        0 10px 22px
+        rgba(37, 99, 235, 0.28);
+}
+
+
+.fleet-title-text h1 {
+
+    font-size: 21px;
+
+    font-weight: 750;
 
     line-height: 1.2;
+
+    color: var(--text-main);
 
     margin-bottom: 4px;
 }
 
-.fleet-title-area p {
-    font-size: 12px;
+
+.fleet-title-text p {
+
+    font-size: 11px;
 
     color: var(--text-secondary);
 
@@ -152,12 +215,14 @@ body {
 ========================================================= */
 
 .fleet-header-controls {
+
     display: flex;
+
     flex-direction: column;
 
     align-items: flex-end;
 
-    gap: 10px;
+    gap: 9px;
 
     margin-left: auto;
 }
@@ -168,10 +233,12 @@ body {
 ========================================================= */
 
 .analytics-tabs {
+
     display: flex;
+
     align-items: center;
 
-    gap: 6px;
+    gap: 4px;
 
     padding: 4px;
 
@@ -181,54 +248,67 @@ body {
 
     border-radius: 10px;
 
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-small);
 }
 
+
 .analytics-tab {
+
     position: relative;
 
     border: none;
+
     outline: none;
 
     background: transparent;
 
     color: var(--text-secondary);
 
-    padding: 9px 15px;
+    padding:
+        8px
+        14px;
 
     border-radius: 7px;
 
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+
+    font-weight: 650;
 
     cursor: pointer;
 
     white-space: nowrap;
 
     transition:
-        background 0.2s ease,
         color 0.2s ease,
-        transform 0.2s ease,
+        background 0.2s ease,
+        transform 0.15s ease,
         box-shadow 0.2s ease;
 }
 
-.analytics-tab:hover {
-    color: var(--primary);
 
-    background: var(--primary-soft);
+.analytics-tab:hover {
+
+    background: var(--primary-light);
+
+    color: var(--primary);
 }
 
+
 .analytics-tab:active {
+
     transform: scale(0.97);
 }
 
+
 .analytics-tab.active {
+
     background: var(--primary);
 
     color: #ffffff;
 
     box-shadow:
-        0 3px 8px rgba(37, 99, 235, 0.22);
+        0 3px 8px
+        rgba(37, 99, 235, 0.22);
 }
 
 
@@ -237,7 +317,9 @@ body {
 ========================================================= */
 
 .fleet-filters {
+
     display: flex;
+
     align-items: center;
 
     justify-content: flex-end;
@@ -245,29 +327,44 @@ body {
     gap: 8px;
 }
 
+
 .filter-group {
+
     display: flex;
+
     align-items: center;
 
-    gap: 6px;
+    gap: 5px;
 }
 
+
 .filter-group label {
-    font-size: 11px;
+
+    font-size: 10px;
 
     color: var(--text-secondary);
 
-    font-weight: 600;
+    font-weight: 650;
+
+    white-space: nowrap;
 }
 
+
 .filter-group select {
-    height: 34px;
 
-    min-width: 105px;
+    height: 32px;
 
-    padding: 0 28px 0 10px;
+    min-width: 104px;
 
-    border: 1px solid var(--border);
+    padding:
+        0
+        28px
+        0
+        9px;
+
+    border:
+        1px solid
+        var(--border);
 
     border-radius: 7px;
 
@@ -275,7 +372,7 @@ body {
 
     color: var(--text-main);
 
-    font-size: 11px;
+    font-size: 10px;
 
     font-weight: 600;
 
@@ -285,107 +382,154 @@ body {
 
     transition:
         border-color 0.2s ease,
-        box-shadow 0.2s ease;
+        box-shadow 0.2s ease,
+        background 0.2s ease;
 }
+
 
 .filter-group select:hover {
+
     border-color: #cbd5e1;
+
+    background: #fcfdff;
 }
 
+
 .filter-group select:focus {
+
     border-color: var(--primary);
 
     box-shadow:
-        0 0 0 3px rgba(37, 99, 235, 0.10);
+        0 0 0 3px
+        rgba(37, 99, 235, 0.09);
 }
 
 
 /* =========================================================
-   MAIN CONTENT
+   MAIN
 ========================================================= */
 
 .fleet-main-content {
+
     width: 100%;
 }
 
 
 /* =========================================================
-   ANALYTICS SECTION
+   SECTION
 ========================================================= */
 
 .analytics-section {
+
     display: none;
 
-    animation:
-        sectionFade 0.25s ease;
+    opacity: 0;
+
+    transform: translateY(5px);
 }
+
 
 .analytics-section.active {
+
     display: block;
+
+    animation:
+        analyticsSectionIn
+        0.28s
+        ease
+        forwards;
 }
 
-@keyframes sectionFade {
+
+@keyframes analyticsSectionIn {
+
     from {
+
         opacity: 0;
-        transform: translateY(5px);
+
+        transform:
+            translateY(6px);
     }
 
     to {
+
         opacity: 1;
-        transform: translateY(0);
+
+        transform:
+            translateY(0);
     }
 }
 
 
 /* =========================================================
-   SECTION HEADING
+   SECTION HEADER
 ========================================================= */
 
 .section-heading {
+
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
-    margin-bottom: 16px;
+    gap: 15px;
+
+    margin-bottom: 15px;
 }
 
+
 .section-heading h2 {
+
     font-size: 17px;
 
-    font-weight: 700;
+    line-height: 1.2;
+
+    font-weight: 750;
 
     color: var(--text-main);
 
-    margin-bottom: 3px;
+    margin-bottom: 4px;
 }
+
 
 .section-heading p {
-    font-size: 11px;
+
+    font-size: 10px;
 
     color: var(--text-secondary);
+
+    line-height: 1.4;
 }
 
+
 .section-status {
+
     display: inline-flex;
 
     align-items: center;
+
     justify-content: center;
 
-    height: 27px;
+    height: 26px;
 
-    padding: 0 10px;
+    padding:
+        0
+        10px;
 
     border-radius: 20px;
 
-    background: var(--primary-soft);
+    background: var(--primary-light);
 
     color: var(--primary);
 
-    font-size: 9px;
+    font-size: 8px;
 
-    font-weight: 700;
+    font-weight: 750;
 
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
+
+    white-space: nowrap;
 }
 
 
@@ -394,14 +538,15 @@ body {
 ========================================================= */
 
 .analytics-kpi-grid {
+
     display: grid;
 
     grid-template-columns:
         repeat(4, minmax(0, 1fr));
 
-    gap: 14px;
+    gap: 13px;
 
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 
 
@@ -410,23 +555,28 @@ body {
 ========================================================= */
 
 .kpi-card {
-    min-height: 92px;
+
+    min-height: 90px;
 
     display: flex;
+
     align-items: center;
 
-    gap: 12px;
+    gap: 11px;
 
-    padding: 15px 16px;
+    padding:
+        14px
+        15px;
 
     background: var(--card);
 
     border:
-        1px solid rgba(226, 232, 240, 0.9);
+        1px solid
+        var(--border-light);
 
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-medium);
 
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-small);
 
     transition:
         transform 0.2s ease,
@@ -434,12 +584,17 @@ body {
         border-color 0.2s ease;
 }
 
+
 .kpi-card:hover {
-    transform: translateY(-2px);
 
-    box-shadow: var(--shadow-md);
+    transform:
+        translateY(-2px);
 
-    border-color: #dbeafe;
+    box-shadow:
+        var(--shadow-medium);
+
+    border-color:
+        #d8e5fb;
 }
 
 
@@ -448,20 +603,34 @@ body {
 ========================================================= */
 
 .kpi-icon {
+
     width: 38px;
+
     height: 38px;
 
     flex-shrink: 0;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 10px;
 
-    background: var(--primary-soft);
+    background: var(--primary-light);
 
     font-size: 17px;
+
+    transition:
+        transform 0.2s ease;
+}
+
+
+.kpi-card:hover .kpi-icon {
+
+    transform:
+        scale(1.06);
 }
 
 
@@ -470,25 +639,31 @@ body {
 ========================================================= */
 
 .kpi-content {
-    display: flex;
-    flex-direction: column;
 
     min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
 }
 
+
 .kpi-label {
-    font-size: 10px;
+
+    font-size: 9px;
 
     color: var(--text-secondary);
 
-    font-weight: 600;
+    font-weight: 650;
 
-    margin-bottom: 4px;
+    margin-bottom: 5px;
 
     white-space: nowrap;
 }
 
+
 .kpi-content strong {
+
     font-size: 21px;
 
     line-height: 1;
@@ -496,14 +671,18 @@ body {
     font-weight: 750;
 
     color: var(--text-main);
+
+    letter-spacing: -0.3px;
 }
 
+
 .kpi-content small {
-    font-size: 9px;
 
-    color: var(--text-light);
+    font-size: 8px;
 
-    margin-top: 3px;
+    color: var(--text-muted);
+
+    margin-top: 4px;
 }
 
 
@@ -512,6 +691,7 @@ body {
 ========================================================= */
 
 .analytics-chart-grid {
+
     display: grid;
 
     grid-template-columns:
@@ -526,26 +706,38 @@ body {
 ========================================================= */
 
 .analytics-card {
-    background: var(--card);
-
-    border:
-        1px solid rgba(226, 232, 240, 0.9);
-
-    border-radius: var(--radius-md);
-
-    box-shadow: var(--shadow-sm);
-
-    padding: 17px;
 
     min-width: 0;
 
+    background: var(--card);
+
+    border:
+        1px solid
+        var(--border-light);
+
+    border-radius:
+        var(--radius-medium);
+
+    box-shadow:
+        var(--shadow-small);
+
+    padding:
+        16px;
+
     transition:
         box-shadow 0.2s ease,
-        transform 0.2s ease;
+        transform 0.2s ease,
+        border-color 0.2s ease;
 }
 
+
 .analytics-card:hover {
-    box-shadow: var(--shadow-md);
+
+    box-shadow:
+        var(--shadow-medium);
+
+    border-color:
+        #e0e7f0;
 }
 
 
@@ -554,8 +746,11 @@ body {
 ========================================================= */
 
 .analytics-card-header {
+
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
 
     gap: 12px;
@@ -563,18 +758,24 @@ body {
     margin-bottom: 12px;
 }
 
+
 .analytics-card-header h3 {
-    font-size: 13px;
+
+    font-size: 12px;
 
     font-weight: 700;
 
     color: var(--text-main);
 
+    line-height: 1.3;
+
     margin-bottom: 3px;
 }
 
+
 .analytics-card-header p {
-    font-size: 10px;
+
+    font-size: 9px;
 
     color: var(--text-secondary);
 
@@ -587,7 +788,10 @@ body {
 ========================================================= */
 
 .details-button {
-    border: 1px solid #dbe3ef;
+
+    border:
+        1px solid
+        #dbe3ef;
 
     background: #ffffff;
 
@@ -595,9 +799,11 @@ body {
 
     border-radius: 6px;
 
-    padding: 6px 9px;
+    padding:
+        6px
+        9px;
 
-    font-size: 9px;
+    font-size: 8px;
 
     font-weight: 700;
 
@@ -608,23 +814,39 @@ body {
     transition:
         background 0.2s ease,
         color 0.2s ease,
-        border-color 0.2s ease;
+        border-color 0.2s ease,
+        transform 0.15s ease;
 }
 
-.details-button:hover {
-    background: var(--primary);
 
-    border-color: var(--primary);
+.details-button:hover {
+
+    background:
+        var(--primary);
+
+    border-color:
+        var(--primary);
 
     color: #ffffff;
+
+    transform:
+        translateY(-1px);
+}
+
+
+.details-button:active {
+
+    transform:
+        scale(0.96);
 }
 
 
 /* =========================================================
-   CHART CONTAINER
+   CHART
 ========================================================= */
 
 .chart-container {
+
     position: relative;
 
     width: 100%;
@@ -632,8 +854,11 @@ body {
     height: 230px;
 }
 
+
 .chart-container canvas {
+
     width: 100% !important;
+
     height: 100% !important;
 }
 
@@ -643,6 +868,7 @@ body {
 ========================================================= */
 
 .full-width-card {
+
     width: 100%;
 
     margin-top: 14px;
@@ -650,69 +876,231 @@ body {
 
 
 /* =========================================================
-   DELAY SUMMARY
+   DELAY / STATUS SUMMARY
 ========================================================= */
 
 .delay-summary-grid {
+
     display: grid;
 
     grid-template-columns:
         repeat(5, minmax(0, 1fr));
 
-    gap: 10px;
+    gap: 9px;
 }
+
 
 .delay-item {
+
+    min-height: 68px;
+
     display: flex;
+
     flex-direction: column;
 
-    gap: 6px;
+    justify-content: center;
 
-    padding: 12px;
+    gap: 5px;
 
-    background: #f8fafc;
+    padding:
+        11px;
 
-    border: 1px solid #eef2f7;
+    background:
+        #f8fafc;
 
-    border-radius: 9px;
+    border:
+        1px solid
+        #edf2f7;
+
+    border-radius: 8px;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease;
 }
 
+
+.delay-item:hover {
+
+    background:
+        #ffffff;
+
+    border-color:
+        #dbe5f0;
+
+    transform:
+        translateY(-1px);
+}
+
+
 .delay-item span {
-    font-size: 10px;
+
+    font-size: 9px;
 
     color: var(--text-secondary);
 
     font-weight: 600;
+
+    line-height: 1.3;
 }
 
+
 .delay-item strong {
+
     font-size: 18px;
 
+    line-height: 1;
+
     color: var(--text-main);
+
+    font-weight: 750;
 }
 
 
 /* =========================================================
-   SCROLLBAR
+   STATUS COLORS
+========================================================= */
+
+/*
+   JS can add these classes later:
+   .success
+   .warning
+   .danger
+*/
+
+.delay-item.success {
+
+    background:
+        var(--success-light);
+
+    border-color:
+        #dcfce7;
+}
+
+
+.delay-item.success strong {
+
+    color:
+        var(--success);
+}
+
+
+.delay-item.warning {
+
+    background:
+        var(--warning-light);
+
+    border-color:
+        #fef3c7;
+}
+
+
+.delay-item.warning strong {
+
+    color:
+        var(--warning);
+}
+
+
+.delay-item.danger {
+
+    background:
+        var(--danger-light);
+
+    border-color:
+        #fee2e2;
+}
+
+
+.delay-item.danger strong {
+
+    color:
+        var(--danger);
+}
+
+
+/* =========================================================
+   LOADING STATE
+========================================================= */
+
+.analytics-loading {
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+
+.analytics-loading::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,0.65),
+            transparent
+        );
+
+    transform:
+        translateX(-100%);
+
+    animation:
+        loadingShimmer
+        1.4s
+        infinite;
+}
+
+
+@keyframes loadingShimmer {
+
+    100% {
+
+        transform:
+            translateX(100%);
+    }
+}
+
+
+/* =========================================================
+   CUSTOM SCROLLBAR
 ========================================================= */
 
 ::-webkit-scrollbar {
+
     width: 7px;
+
     height: 7px;
 }
 
+
 ::-webkit-scrollbar-track {
-    background: transparent;
+
+    background:
+        transparent;
 }
+
 
 ::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
 
-    border-radius: 10px;
+    background:
+        #cbd5e1;
+
+    border-radius:
+        10px;
 }
 
+
 ::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+
+    background:
+        #94a3b8;
 }
 
 
@@ -723,124 +1111,236 @@ body {
 @media (max-width: 1200px) {
 
     .fleet-header {
+
         flex-direction: column;
 
         align-items: stretch;
     }
 
+
     .fleet-header-controls {
+
         align-items: stretch;
 
         width: 100%;
     }
 
+
     .analytics-tabs {
+
         width: 100%;
     }
 
+
     .analytics-tab {
+
         flex: 1;
+
+        text-align: center;
     }
 
+
     .fleet-filters {
+
         justify-content: flex-start;
     }
 
+
     .analytics-kpi-grid {
+
         grid-template-columns:
             repeat(2, minmax(0, 1fr));
     }
 
+
     .delay-summary-grid {
+
         grid-template-columns:
             repeat(3, minmax(0, 1fr));
     }
 }
 
 
-@media (max-width: 800px) {
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
 
     .fleet-analytics-page {
-        padding: 18px 16px 30px;
+
+        padding:
+            18px
+            18px
+            30px;
     }
+
 
     .analytics-chart-grid {
-        grid-template-columns: 1fr;
+
+        grid-template-columns:
+            1fr;
     }
+
 
     .section-heading {
-        align-items: flex-start;
 
-        gap: 10px;
-    }
-
-    .section-status {
-        flex-shrink: 0;
-    }
-
-    .delay-summary-grid {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+        align-items:
+            flex-start;
     }
 }
 
 
+/* =========================================================
+   MOBILE
+========================================================= */
+
 @media (max-width: 600px) {
 
+    .fleet-analytics-page {
+
+        padding:
+            15px
+            12px
+            25px;
+    }
+
+
     .fleet-title-area {
+
         min-width: 0;
     }
 
-    .fleet-title-area h1 {
+
+    .fleet-title-icon {
+
+        width: 40px;
+
+        height: 40px;
+
         font-size: 18px;
     }
 
-    .fleet-title-area p {
-        font-size: 10px;
+
+    .fleet-title-text h1 {
+
+        font-size: 17px;
     }
+
+
+    .fleet-title-text p {
+
+        font-size: 9px;
+    }
+
 
     .analytics-tabs {
-        overflow-x: auto;
 
-        justify-content: flex-start;
+        overflow-x:
+            auto;
+
+        justify-content:
+            flex-start;
     }
+
 
     .analytics-tab {
-        flex: 0 0 auto;
+
+        flex:
+            0 0 auto;
+
+        padding:
+            8px
+            11px;
     }
 
+
     .fleet-filters {
+
         display: grid;
 
         grid-template-columns:
-            repeat(3, 1fr);
+            repeat(3, minmax(0, 1fr));
+
+        gap: 7px;
 
         width: 100%;
     }
 
-    .filter-group {
-        flex-direction: column;
 
-        align-items: stretch;
+    .filter-group {
+
+        flex-direction:
+            column;
+
+        align-items:
+            stretch;
 
         gap: 4px;
     }
 
+
+    .filter-group label {
+
+        font-size: 9px;
+    }
+
+
     .filter-group select {
+
         width: 100%;
 
         min-width: 0;
     }
 
+
     .analytics-kpi-grid {
-        grid-template-columns: 1fr;
+
+        grid-template-columns:
+            1fr;
     }
+
+
+    .section-heading {
+
+        flex-direction:
+            column;
+
+        align-items:
+            flex-start;
+    }
+
 
     .delay-summary-grid {
-        grid-template-columns: 1fr;
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
 
+
     .chart-container {
+
         height: 210px;
+    }
+}
+
+
+/* =========================================================
+   VERY SMALL SCREEN
+========================================================= */
+
+@media (max-width: 380px) {
+
+    .fleet-filters {
+
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .delay-summary-grid {
+
+        grid-template-columns:
+            1fr;
     }
 }
