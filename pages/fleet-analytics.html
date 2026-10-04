@@ -6,7 +6,6 @@
 
     <title>Fleet & Delivery Analytics | LOGIS-TECH SYSTEM</title>
 
-    <!-- Main Fleet Analytics CSS -->
     <link rel="stylesheet" href="../css/fleet-analytics.css">
 
     <!-- Chart.js -->
@@ -22,14 +21,14 @@
     ====================================================== -->
     <header class="fleet-header">
 
-        <!-- LEFT : TITLE -->
+        <!-- TITLE -->
         <div class="fleet-title-area">
 
             <div class="fleet-title-icon">
                 🚚
             </div>
 
-            <div>
+            <div class="fleet-title-text">
                 <h1>Fleet & Delivery Analytics</h1>
                 <p>Fleet, delivery and DR performance monitoring</p>
             </div>
@@ -37,34 +36,42 @@
         </div>
 
 
-        <!-- RIGHT : ANALYTICS BUTTONS + FILTERS -->
+        <!-- RIGHT SIDE CONTROLS -->
         <div class="fleet-header-controls">
 
-            <!-- ANALYTICS SELECTION -->
+            <!-- ANALYTICS NAVIGATION -->
             <div class="analytics-tabs">
 
                 <button
                     type="button"
                     class="analytics-tab active"
                     data-section="fleet"
-                    onclick="switchAnalytics('fleet')">
+                    id="fleetTab">
+
                     Fleet Performance
+
                 </button>
+
 
                 <button
                     type="button"
                     class="analytics-tab"
                     data-section="delivery"
-                    onclick="switchAnalytics('delivery')">
+                    id="deliveryTab">
+
                     Delivery Performance
+
                 </button>
+
 
                 <button
                     type="button"
                     class="analytics-tab"
                     data-section="dr"
-                    onclick="switchAnalytics('dr')">
+                    id="drTab">
+
                     DR Monitoring
+
                 </button>
 
             </div>
@@ -81,7 +88,10 @@
                     </label>
 
                     <select id="vehicleFilter">
-                        <option value="ALL">All Vehicle</option>
+
+                        <option value="ALL">
+                            All Vehicle
+                        </option>
 
                         <option value="TBO710">TBO710</option>
                         <option value="TBO711">TBO711</option>
@@ -143,53 +153,18 @@
                             All Month
                         </option>
 
-                        <option value="01">
-                            January
-                        </option>
-
-                        <option value="02">
-                            February
-                        </option>
-
-                        <option value="03">
-                            March
-                        </option>
-
-                        <option value="04">
-                            April
-                        </option>
-
-                        <option value="05">
-                            May
-                        </option>
-
-                        <option value="06">
-                            June
-                        </option>
-
-                        <option value="07">
-                            July
-                        </option>
-
-                        <option value="08">
-                            August
-                        </option>
-
-                        <option value="09">
-                            September
-                        </option>
-
-                        <option value="10" selected>
-                            October
-                        </option>
-
-                        <option value="11">
-                            November
-                        </option>
-
-                        <option value="12">
-                            December
-                        </option>
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10" selected>October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
 
                     </select>
 
@@ -206,17 +181,18 @@
     <!-- =====================================================
          MAIN CONTENT
     ====================================================== -->
+
     <main class="fleet-main-content">
 
 
         <!-- =================================================
              FLEET PERFORMANCE
         ================================================== -->
+
         <section
             id="fleetPerformanceSection"
             class="analytics-section active">
 
-            <!-- SECTION HEADER -->
             <div class="section-heading">
 
                 <div>
@@ -229,16 +205,16 @@
                 </div>
 
                 <span class="section-status">
-                    LIVE ANALYTICS
+                    FLEET ANALYTICS
                 </span>
 
             </div>
 
 
             <!-- KPI CARDS -->
+
             <div class="analytics-kpi-grid">
 
-                <!-- TOTAL VEHICLES -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -251,17 +227,19 @@
                             Total Vehicles
                         </span>
 
-                        <strong
-                            id="totalVehicles">
+                        <strong id="totalVehicles">
                             15
                         </strong>
+
+                        <small>
+                            Active Fleet
+                        </small>
 
                     </div>
 
                 </div>
 
 
-                <!-- TOTAL KM -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -274,8 +252,7 @@
                             Total Kilometer
                         </span>
 
-                        <strong
-                            id="totalKm">
+                        <strong id="totalKm">
                             125,450
                         </strong>
 
@@ -288,7 +265,6 @@
                 </div>
 
 
-                <!-- TOTAL FUEL -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -301,8 +277,7 @@
                             Total Fuel
                         </span>
 
-                        <strong
-                            id="totalFuel">
+                        <strong id="totalFuel">
                             12,500
                         </strong>
 
@@ -315,7 +290,6 @@
                 </div>
 
 
-                <!-- AVERAGE KM/L -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -328,13 +302,12 @@
                             Average KM/L
                         </span>
 
-                        <strong
-                            id="averageKmL">
+                        <strong id="averageKmL">
                             10.04
                         </strong>
 
                         <small>
-                            KM/L
+                            KM per Liter
                         </small>
 
                     </div>
@@ -344,20 +317,21 @@
             </div>
 
 
+            <!-- FLEET CHARTS -->
 
-            <!-- =================================================
-                 FLEET CHARTS
-            ================================================== -->
             <div class="analytics-chart-grid">
 
 
                 <!-- ACTUAL KM -->
+
                 <div class="analytics-card">
 
                     <div class="analytics-card-header">
 
                         <div>
-                            <h3>Actual Kilometer / Truck</h3>
+                            <h3>
+                                Actual Kilometer / Truck
+                            </h3>
 
                             <p>
                                 Total distance travelled per vehicle
@@ -367,8 +341,10 @@
                         <button
                             type="button"
                             class="details-button"
-                            onclick="openFleetDetails('km')">
-                            View Details
+                            id="fleetKmDetails">
+
+                            Details
+
                         </button>
 
                     </div>
@@ -380,24 +356,30 @@
                 </div>
 
 
+
                 <!-- FUEL -->
+
                 <div class="analytics-card">
 
                     <div class="analytics-card-header">
 
                         <div>
-                            <h3>Fuel Consumption / Truck</h3>
+                            <h3>
+                                Fuel Consumption / Truck
+                            </h3>
 
                             <p>
-                                Fuel usage by vehicle
+                                Total fuel consumption per vehicle
                             </p>
                         </div>
 
                         <button
                             type="button"
                             class="details-button"
-                            onclick="openFleetDetails('fuel')">
-                            View Details
+                            id="fleetFuelDetails">
+
+                            Details
+
                         </button>
 
                     </div>
@@ -409,24 +391,30 @@
                 </div>
 
 
+
                 <!-- KM/L -->
+
                 <div class="analytics-card">
 
                     <div class="analytics-card-header">
 
                         <div>
-                            <h3>Fuel Efficiency (KM/L)</h3>
+                            <h3>
+                                Fuel Efficiency
+                            </h3>
 
                             <p>
-                                Higher KM/L means better efficiency
+                                Kilometer per liter performance
                             </p>
                         </div>
 
                         <button
                             type="button"
                             class="details-button"
-                            onclick="openFleetDetails('kml')">
-                            View Details
+                            id="fleetKmlDetails">
+
+                            Details
+
                         </button>
 
                     </div>
@@ -438,13 +426,17 @@
                 </div>
 
 
+
                 <!-- MAINTENANCE -->
+
                 <div class="analytics-card">
 
                     <div class="analytics-card-header">
 
                         <div>
-                            <h3>Maintenance Breakdown</h3>
+                            <h3>
+                                Maintenance Breakdown
+                            </h3>
 
                             <p>
                                 Repair cost and vehicle downtime
@@ -454,8 +446,10 @@
                         <button
                             type="button"
                             class="details-button"
-                            onclick="openFleetDetails('maintenance')">
-                            View Details
+                            id="fleetMaintenanceDetails">
+
+                            Details
+
                         </button>
 
                     </div>
@@ -475,19 +469,21 @@
         <!-- =================================================
              DELIVERY PERFORMANCE
         ================================================== -->
+
         <section
             id="deliveryPerformanceSection"
             class="analytics-section">
 
-            <!-- SECTION HEADER -->
             <div class="section-heading">
 
                 <div>
-                    <h2>Delivery Performance</h2>
+                    <h2>
+                        Delivery Performance
+                    </h2>
 
                     <p>
-                        Monitor delivery lead time, accuracy and
-                        delayed deliveries.
+                        Monitor delivery lead time, accuracy
+                        and delayed deliveries.
                     </p>
                 </div>
 
@@ -499,9 +495,10 @@
 
 
             <!-- DELIVERY KPI -->
+
             <div class="analytics-kpi-grid">
 
-                <!-- AVG LEAD TIME -->
+
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -514,8 +511,7 @@
                             Average Lead Time
                         </span>
 
-                        <strong
-                            id="averageLeadTime">
+                        <strong id="averageLeadTime">
                             1.4
                         </strong>
 
@@ -528,7 +524,6 @@
                 </div>
 
 
-                <!-- FASTEST -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -541,8 +536,7 @@
                             Fastest Delivery
                         </span>
 
-                        <strong
-                            id="fastestDelivery">
+                        <strong id="fastestDelivery">
                             0.5
                         </strong>
 
@@ -555,7 +549,6 @@
                 </div>
 
 
-                <!-- LONGEST -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -568,8 +561,7 @@
                             Longest Delivery
                         </span>
 
-                        <strong
-                            id="longestDelivery">
+                        <strong id="longestDelivery">
                             4
                         </strong>
 
@@ -582,7 +574,6 @@
                 </div>
 
 
-                <!-- ACCURACY -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -595,10 +586,13 @@
                             Delivery Accuracy
                         </span>
 
-                        <strong
-                            id="deliveryAccuracy">
+                        <strong id="deliveryAccuracy">
                             92.4%
                         </strong>
+
+                        <small>
+                            On-Time Rate
+                        </small>
 
                     </div>
 
@@ -607,18 +601,19 @@
             </div>
 
 
-
             <!-- DELIVERY CHARTS -->
+
             <div class="analytics-chart-grid">
 
 
-                <!-- LEAD TIME -->
                 <div class="analytics-card">
 
                     <div class="analytics-card-header">
 
                         <div>
-                            <h3>Delivery Lead Time</h3>
+                            <h3>
+                                Delivery Lead Time
+                            </h3>
 
                             <p>
                                 Date Transfer → Date Delivered
@@ -628,8 +623,10 @@
                         <button
                             type="button"
                             class="details-button"
-                            onclick="openDeliveryDetails('leadtime')">
-                            View Details
+                            id="deliveryLeadDetails">
+
+                            Details
+
                         </button>
 
                     </div>
@@ -641,13 +638,15 @@
                 </div>
 
 
-                <!-- DELIVERY ACCURACY -->
+
                 <div class="analytics-card">
 
                     <div class="analytics-card-header">
 
                         <div>
-                            <h3>Delivery Accuracy</h3>
+                            <h3>
+                                Delivery Accuracy
+                            </h3>
 
                             <p>
                                 Committed Date vs Actual Delivery
@@ -657,8 +656,10 @@
                         <button
                             type="button"
                             class="details-button"
-                            onclick="openDeliveryDetails('accuracy')">
-                            View Details
+                            id="deliveryAccuracyDetails">
+
+                            Details
+
                         </button>
 
                     </div>
@@ -672,14 +673,16 @@
             </div>
 
 
+            <!-- DELAY REASONS -->
 
-            <!-- DELAY REASON -->
             <div class="analytics-card full-width-card">
 
                 <div class="analytics-card-header">
 
                     <div>
-                        <h3>Delivery Delay Reasons</h3>
+                        <h3>
+                            Delivery Delay Reasons
+                        </h3>
 
                         <p>
                             Main causes of delayed deliveries
@@ -688,31 +691,71 @@
 
                 </div>
 
+
                 <div class="delay-summary-grid">
 
                     <div class="delay-item">
-                        <span>Production Delay</span>
-                        <strong id="productionDelayCount">0</strong>
+
+                        <span>
+                            Production Delay
+                        </span>
+
+                        <strong id="productionDelayCount">
+                            0
+                        </strong>
+
                     </div>
 
-                    <div class="delay-item">
-                        <span>Truck Availability</span>
-                        <strong id="truckDelayCount">0</strong>
-                    </div>
 
                     <div class="delay-item">
-                        <span>Client Request</span>
-                        <strong id="clientDelayCount">0</strong>
+
+                        <span>
+                            Truck Availability
+                        </span>
+
+                        <strong id="truckDelayCount">
+                            0
+                        </strong>
+
                     </div>
 
-                    <div class="delay-item">
-                        <span>Traffic / Road</span>
-                        <strong id="trafficDelayCount">0</strong>
-                    </div>
 
                     <div class="delay-item">
-                        <span>Other</span>
-                        <strong id="otherDelayCount">0</strong>
+
+                        <span>
+                            Client Request
+                        </span>
+
+                        <strong id="clientDelayCount">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="delay-item">
+
+                        <span>
+                            Traffic / Road
+                        </span>
+
+                        <strong id="trafficDelayCount">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="delay-item">
+
+                        <span>
+                            Other
+                        </span>
+
+                        <strong id="otherDelayCount">
+                            0
+                        </strong>
+
                     </div>
 
                 </div>
@@ -726,19 +769,23 @@
         <!-- =================================================
              DR MONITORING
         ================================================== -->
+
         <section
             id="drMonitoringSection"
             class="analytics-section">
 
-            <!-- SECTION HEADER -->
             <div class="section-heading">
 
                 <div>
-                    <h2>DR Monitoring</h2>
+
+                    <h2>
+                        DR Monitoring
+                    </h2>
 
                     <p>
-                        Daily and monthly Delivery Receipt monitoring.
+                        Monitor Delivery Receipts by day and month.
                     </p>
+
                 </div>
 
                 <span class="section-status">
@@ -749,9 +796,10 @@
 
 
             <!-- DR KPI -->
+
             <div class="analytics-kpi-grid">
 
-                <!-- TOTAL DR -->
+
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -764,17 +812,19 @@
                             Total DR
                         </span>
 
-                        <strong
-                            id="totalDR">
+                        <strong id="totalDR">
                             1,248
                         </strong>
+
+                        <small>
+                            All Recorded DR
+                        </small>
 
                     </div>
 
                 </div>
 
 
-                <!-- MONTHLY DR -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -787,12 +837,11 @@
                             Monthly DR
                         </span>
 
-                        <strong
-                            id="monthlyDR">
+                        <strong id="monthlyDR">
                             186
                         </strong>
 
-                        <small>
+                        <small id="monthlyDRLabel">
                             October 2026
                         </small>
 
@@ -801,7 +850,6 @@
                 </div>
 
 
-                <!-- PENDING -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -814,17 +862,19 @@
                             Pending DR
                         </span>
 
-                        <strong
-                            id="pendingDR">
+                        <strong id="pendingDR">
                             0
                         </strong>
+
+                        <small>
+                            For Monitoring
+                        </small>
 
                     </div>
 
                 </div>
 
 
-                <!-- OVERDUE -->
                 <div class="kpi-card">
 
                     <div class="kpi-icon">
@@ -837,10 +887,13 @@
                             Overdue DR
                         </span>
 
-                        <strong
-                            id="overdueDR">
+                        <strong id="overdueDR">
                             0
                         </strong>
+
+                        <small>
+                            Requires Action
+                        </small>
 
                     </div>
 
@@ -849,29 +902,36 @@
             </div>
 
 
-
             <!-- DR CHARTS -->
+
             <div class="analytics-chart-grid">
 
 
                 <!-- DAILY DR -->
+
                 <div class="analytics-card">
 
                     <div class="analytics-card-header">
 
                         <div>
-                            <h3>DR Per Day</h3>
+
+                            <h3>
+                                DR Per Day
+                            </h3>
 
                             <p>
                                 Daily Delivery Receipt activity
                             </p>
+
                         </div>
 
                         <button
                             type="button"
                             class="details-button"
-                            onclick="openDRDetails('daily')">
-                            View Details
+                            id="drDailyDetails">
+
+                            Details
+
                         </button>
 
                     </div>
@@ -883,30 +943,130 @@
                 </div>
 
 
+
                 <!-- MONTHLY DR -->
+
                 <div class="analytics-card">
 
                     <div class="analytics-card-header">
 
                         <div>
-                            <h3>DR Per Month</h3>
+
+                            <h3>
+                                DR Per Month
+                            </h3>
 
                             <p>
                                 Monthly Delivery Receipt trend
                             </p>
+
                         </div>
 
                         <button
                             type="button"
                             class="details-button"
-                            onclick="openDRDetails('monthly')">
-                            View Details
+                            id="drMonthlyDetails">
+
+                            Details
+
                         </button>
 
                     </div>
 
                     <div class="chart-container">
                         <canvas id="drMonthChart"></canvas>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- DR STATUS -->
+
+            <div class="analytics-card full-width-card">
+
+                <div class="analytics-card-header">
+
+                    <div>
+
+                        <h3>
+                            DR Status Monitoring
+                        </h3>
+
+                        <p>
+                            Current status of Delivery Receipts
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="delay-summary-grid">
+
+                    <div class="delay-item">
+
+                        <span>
+                            Prepared
+                        </span>
+
+                        <strong id="preparedDR">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="delay-item">
+
+                        <span>
+                            Released
+                        </span>
+
+                        <strong id="releasedDR">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="delay-item">
+
+                        <span>
+                            Delivered
+                        </span>
+
+                        <strong id="deliveredDR">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="delay-item">
+
+                        <span>
+                            Pending
+                        </span>
+
+                        <strong id="statusPendingDR">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="delay-item">
+
+                        <span>
+                            Overdue
+                        </span>
+
+                        <strong id="statusOverdueDR">
+                            0
+                        </strong>
+
                     </div>
 
                 </div>
@@ -922,21 +1082,13 @@
 
 
 <!-- =========================================================
-     JAVASCRIPT MODULES
-========================================================== -->
+     JAVASCRIPT
+========================================================= -->
 
-<!-- Main Controller -->
 <script src="../js/fleet-analytics.js"></script>
-
-<!-- Fleet Performance -->
 <script src="../js/fleet-performance.js"></script>
-
-<!-- Delivery Performance -->
 <script src="../js/delivery-performance.js"></script>
-
-<!-- DR Monitoring -->
 <script src="../js/dr-monitoring.js"></script>
-
 
 </body>
 </html>
