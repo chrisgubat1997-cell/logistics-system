@@ -1,752 +1,218 @@
-/* =====================================================
+/* =========================================================
+   LOGIS-TECH SYSTEM
    FLEET & DELIVERY ANALYTICS
-===================================================== */
+   MAIN CONTROLLER
+========================================================= */
 
 
-/* =====================================================
-   SAMPLE DATA
-===================================================== */
+/* =========================================================
+   GLOBAL ANALYTICS STATE
+========================================================= */
 
-const fleetAnalyticsData = {
+window.FleetAnalytics = {
 
-    vehicles: [
-        "TBO710",
-        "TBO711",
-        "TBO712",
-        "TBO713",
-        "TBO714"
-    ],
+    currentSection: "fleet",
 
-    actualKM: [
-        5000,
-        4800,
-        5500,
-        5100,
-        4900
-    ],
+    filters: {
 
-    fuelLiters: [
-        500,
-        490,
-        500,
-        500,
-        495
-    ],
+        vehicle: "ALL",
 
-    kmPerLiter: [
-        10.0,
-        9.8,
-        11.0,
-        10.2,
-        9.9
-    ],
+        year: "2026",
 
-    leadTime: [
-        1.2,
-        1.5,
-        1.1,
-        1.8,
-        1.3
-    ],
+        month: "10"
 
-    accuracy: [
-        92,
-        89,
-        96,
-        91,
-        94
-    ],
-
-    drPerDay: [
-        5,
-        8,
-        6,
-        11,
-        9,
-        7,
-        12,
-        10,
-        8,
-        11,
-        13,
-        9,
-        7,
-        10,
-        12
-    ],
-
-    drPerMonth: [
-        125,
-        108,
-        143,
-        97,
-        156,
-        132,
-        149,
-        138,
-        114,
-        186,
-        0,
-        0
-    ]
+    }
 
 };
 
 
-/* =====================================================
-   CHART VARIABLES
-===================================================== */
+/* =========================================================
+   DOM READY
+========================================================= */
 
-let kmChart = null;
+document.addEventListener("DOMContentLoaded", function () {
 
-let fuelChart = null;
+    initializeFleetAnalytics();
 
-let kmLChart = null;
-
-let leadTimeChart = null;
-
-let accuracyChart = null;
-
-let drDayChart = null;
-
-let drMonthChart = null;
+});
 
 
-/* =====================================================
+/* =========================================================
    INITIALIZE
-===================================================== */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        initializeFleetAnalytics();
-
-    }
-);
-
-
-/* =====================================================
-   INITIALIZE ANALYTICS
-===================================================== */
+========================================================= */
 
 function initializeFleetAnalytics() {
 
-    createKMChart();
+    setupAnalyticsTabs();
 
-    createFuelChart();
+    setupFilters();
 
-    createKmLChart();
+    activateSection("fleet");
 
-    createLeadTimeChart();
-
-    createAccuracyChart();
-
-    createDRDayChart();
-
-    createDRMonthChart();
-
-    setupFleetFilters();
+    refreshCurrentAnalytics();
 
 }
 
 
-/* =====================================================
-   ACTUAL KM / TRUCK
-===================================================== */
+/* =========================================================
+   TAB SETUP
+========================================================= */
 
-function createKMChart() {
+function setupAnalyticsTabs() {
 
-    const canvas =
-        document.getElementById(
-            "kmChart"
+    const tabs =
+        document.querySelectorAll(".analytics-tab");
+
+
+    tabs.forEach(function (tab) {
+
+        tab.addEventListener("click", function () {
+
+            const section =
+                this.dataset.section;
+
+            if (!section) {
+                return;
+            }
+
+            switchAnalytics(section);
+
+        });
+
+    });
+
+}
+
+
+/* =========================================================
+   SWITCH ANALYTICS
+========================================================= */
+
+function switchAnalytics(section) {
+
+    const validSections = [
+        "fleet",
+        "delivery",
+        "dr"
+    ];
+
+
+    if (!validSections.includes(section)) {
+
+        console.warn(
+            "Invalid analytics section:",
+            section
         );
 
-    if (!canvas) return;
+        return;
+
+    }
 
 
-    kmChart = new Chart(
-        canvas,
-        {
+    window.FleetAnalytics.currentSection =
+        section;
 
-            type: "bar",
 
-            data: {
+    activateSection(section);
 
-                labels:
-                    fleetAnalyticsData.vehicles,
+    refreshCurrentAnalytics();
 
-                datasets: [
+}
 
-                    {
 
-                        label: "Actual KM",
+/* =========================================================
+   ACTIVATE SECTION
+========================================================= */
 
-                        data:
-                            fleetAnalyticsData.actualKM,
+function activateSection(section) {
 
-                        borderRadius: 6
+    const sections = {
 
-                    }
+        fleet:
+            document.getElementById(
+                "fleetPerformanceSection"
+            ),
 
-                ]
+        delivery:
+            document.getElementById(
+                "deliveryPerformanceSection"
+            ),
 
-            },
+        dr:
+            document.getElementById(
+                "drMonitoringSection"
+            )
 
-            options: {
+    };
 
-                responsive: true,
 
-                maintainAspectRatio: false,
+    /* Hide all sections */
 
-                plugins: {
+    Object.values(sections).forEach(
+        function (element) {
 
-                    legend: {
-
-                        display: false
-
-                    }
-
-                },
-
-                scales: {
-
-                    y: {
-
-                        beginAtZero: true
-
-                    }
-
-                }
-
+            if (!element) {
+                return;
             }
+
+            element.classList.remove("active");
 
         }
     );
 
-}
+
+    /* Activate selected section */
+
+    const selected =
+        sections[section];
 
 
-/* =====================================================
-   FUEL CONSUMPTION
-===================================================== */
+    if (selected) {
 
-function createFuelChart() {
+        selected.classList.add("active");
 
-    const canvas =
-        document.getElementById(
-            "fuelChart"
+    }
+
+
+    /* Update buttons */
+
+    const tabs =
+        document.querySelectorAll(
+            ".analytics-tab"
         );
 
-    if (!canvas) return;
+
+    tabs.forEach(function (tab) {
+
+        const isActive =
+            tab.dataset.section === section;
 
 
-    fuelChart = new Chart(
-        canvas,
-        {
-
-            type: "line",
-
-            data: {
-
-                labels:
-                    fleetAnalyticsData.vehicles,
-
-                datasets: [
-
-                    {
-
-                        label: "Liters",
-
-                        data:
-                            fleetAnalyticsData.fuelLiters,
-
-                        tension: 0.35,
-
-                        fill: false
-
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                    legend: {
-
-                        display: false
-
-                    }
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   KM / L
-===================================================== */
-
-function createKmLChart() {
-
-    const canvas =
-        document.getElementById(
-            "kmlChart"
+        tab.classList.toggle(
+            "active",
+            isActive
         );
 
-    if (!canvas) return;
-
-
-    kmLChart = new Chart(
-        canvas,
-        {
-
-            type: "line",
-
-            data: {
-
-                labels:
-                    fleetAnalyticsData.vehicles,
-
-                datasets: [
-
-                    {
-
-                        label: "KM/L",
-
-                        data:
-                            fleetAnalyticsData.kmPerLiter,
-
-                        tension: 0.35,
-
-                        fill: false
-
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                    legend: {
-
-                        display: false
-
-                    }
-
-                }
-
-            }
-
-        }
-    );
+    });
 
 }
 
 
-/* =====================================================
-   DELIVERY LEAD TIME
-===================================================== */
-
-function createLeadTimeChart() {
-
-    const canvas =
-        document.getElementById(
-            "leadTimeChart"
-        );
-
-    if (!canvas) return;
-
-
-    leadTimeChart = new Chart(
-        canvas,
-        {
-
-            type: "line",
-
-            data: {
-
-                labels: [
-                    "Week 1",
-                    "Week 2",
-                    "Week 3",
-                    "Week 4"
-                ],
-
-                datasets: [
-
-                    {
-
-                        label:
-                            "Average Lead Time",
-
-                        data: [
-                            1.5,
-                            1.3,
-                            1.7,
-                            1.2
-                        ],
-
-                        tension: 0.35,
-
-                        fill: false
-
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                    legend: {
-
-                        display: false
-
-                    }
-
-                },
-
-                scales: {
-
-                    y: {
-
-                        beginAtZero: true
-
-                    }
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   DELIVERY ACCURACY
-===================================================== */
-
-function createAccuracyChart() {
-
-    const canvas =
-        document.getElementById(
-            "accuracyChart"
-        );
-
-    if (!canvas) return;
-
-
-    accuracyChart = new Chart(
-        canvas,
-        {
-
-            type: "line",
-
-            data: {
-
-                labels: [
-                    "Week 1",
-                    "Week 2",
-                    "Week 3",
-                    "Week 4"
-                ],
-
-                datasets: [
-
-                    {
-
-                        label:
-                            "Accuracy %",
-
-                        data: [
-                            91,
-                            94,
-                            89,
-                            96
-                        ],
-
-                        tension: 0.35,
-
-                        fill: false
-
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                    legend: {
-
-                        display: false
-
-                    }
-
-                },
-
-                scales: {
-
-                    y: {
-
-                        min: 0,
-
-                        max: 100
-
-                    }
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   DR PER DAY
-===================================================== */
-
-function createDRDayChart() {
-
-    const canvas =
-        document.getElementById(
-            "drDayChart"
-        );
-
-    if (!canvas) return;
-
-
-    drDayChart = new Chart(
-        canvas,
-        {
-
-            type: "bar",
-
-            data: {
-
-                labels: [
-                    "Oct 1",
-                    "Oct 2",
-                    "Oct 3",
-                    "Oct 4",
-                    "Oct 5",
-                    "Oct 6",
-                    "Oct 7",
-                    "Oct 8",
-                    "Oct 9",
-                    "Oct 10",
-                    "Oct 11",
-                    "Oct 12",
-                    "Oct 13",
-                    "Oct 14",
-                    "Oct 15"
-                ],
-
-                datasets: [
-
-                    {
-
-                        label: "DR",
-
-                        data:
-                            fleetAnalyticsData.drPerDay,
-
-                        borderRadius: 5
-
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                    legend: {
-
-                        display: false
-
-                    }
-
-                },
-
-                scales: {
-
-                    y: {
-
-                        beginAtZero: true,
-
-                        ticks: {
-
-                            precision: 0
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   DR PER MONTH
-===================================================== */
-
-function createDRMonthChart() {
-
-    const canvas =
-        document.getElementById(
-            "drMonthChart"
-        );
-
-    if (!canvas) return;
-
-
-    drMonthChart = new Chart(
-        canvas,
-        {
-
-            type: "bar",
-
-            data: {
-
-                labels: [
-                    "Jan",
-                    "Feb",
-                    "Mar",
-                    "Apr",
-                    "May",
-                    "Jun",
-                    "Jul",
-                    "Aug",
-                    "Sep",
-                    "Oct",
-                    "Nov",
-                    "Dec"
-                ],
-
-                datasets: [
-
-                    {
-
-                        label: "DR",
-
-                        data:
-                            fleetAnalyticsData.drPerMonth,
-
-                        borderRadius: 5
-
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-
-                maintainAspectRatio: false,
-
-                plugins: {
-
-                    legend: {
-
-                        display: false
-
-                    }
-
-                },
-
-                scales: {
-
-                    y: {
-
-                        beginAtZero: true,
-
-                        ticks: {
-
-                            precision: 0
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =====================================================
-   FILTERS
-===================================================== */
-
-function setupFleetFilters() {
+/* =========================================================
+   FILTER SETUP
+========================================================= */
+
+function setupFilters() {
 
     const vehicleFilter =
         document.getElementById(
             "vehicleFilter"
         );
 
-
     const yearFilter =
         document.getElementById(
             "yearFilter"
         );
-
 
     const monthFilter =
         document.getElementById(
@@ -758,7 +224,14 @@ function setupFleetFilters() {
 
         vehicleFilter.addEventListener(
             "change",
-            applyFleetFilters
+            function () {
+
+                window.FleetAnalytics.filters.vehicle =
+                    this.value;
+
+                handleFilterChange();
+
+            }
         );
 
     }
@@ -768,7 +241,14 @@ function setupFleetFilters() {
 
         yearFilter.addEventListener(
             "change",
-            applyFleetFilters
+            function () {
+
+                window.FleetAnalytics.filters.year =
+                    this.value;
+
+                handleFilterChange();
+
+            }
         );
 
     }
@@ -778,64 +258,429 @@ function setupFleetFilters() {
 
         monthFilter.addEventListener(
             "change",
-            applyFleetFilters
+            function () {
+
+                window.FleetAnalytics.filters.month =
+                    this.value;
+
+                handleFilterChange();
+
+            }
         );
+
+    }
+
+
+    /* Get initial values from HTML */
+
+    if (vehicleFilter) {
+
+        window.FleetAnalytics.filters.vehicle =
+            vehicleFilter.value;
+
+    }
+
+
+    if (yearFilter) {
+
+        window.FleetAnalytics.filters.year =
+            yearFilter.value;
+
+    }
+
+
+    if (monthFilter) {
+
+        window.FleetAnalytics.filters.month =
+            monthFilter.value;
 
     }
 
 }
 
 
-/* =====================================================
-   APPLY FILTERS
-===================================================== */
+/* =========================================================
+   FILTER CHANGE
+========================================================= */
 
-function applyFleetFilters() {
+function handleFilterChange() {
 
-    const vehicle =
-        document.getElementById(
-            "vehicleFilter"
-        ).value;
-
-
-    const year =
-        document.getElementById(
-            "yearFilter"
-        ).value;
-
-
-    const month =
-        document.getElementById(
-            "monthFilter"
-        ).value;
+    const filters =
+        window.FleetAnalytics.filters;
 
 
     console.log(
-        "Fleet Analytics Filter:",
-        {
-            vehicle,
-            year,
-            month
-        }
+        "Analytics filters:",
+        filters
     );
+
+
+    refreshCurrentAnalytics();
+
+}
+
+
+/* =========================================================
+   REFRESH CURRENT ANALYTICS
+========================================================= */
+
+function refreshCurrentAnalytics() {
+
+    const section =
+        window.FleetAnalytics.currentSection;
 
 
     /*
-     * DATABASE FILTER WILL BE CONNECTED LATER.
-     */
+       We don't hard-code the analytics
+       calculation here.
+
+       Each module owns its own data:
+       
+       Fleet:
+       fleet-performance.js
+
+       Delivery:
+       delivery-performance.js
+
+       DR:
+       dr-monitoring.js
+    */
+
+
+    switch (section) {
+
+        case "fleet":
+
+            if (
+                typeof window.refreshFleetPerformance ===
+                "function"
+            ) {
+
+                window.refreshFleetPerformance();
+
+            }
+
+            break;
+
+
+        case "delivery":
+
+            if (
+                typeof window.refreshDeliveryPerformance ===
+                "function"
+            ) {
+
+                window.refreshDeliveryPerformance();
+
+            }
+
+            break;
+
+
+        case "dr":
+
+            if (
+                typeof window.refreshDRMonitoring ===
+                "function"
+            ) {
+
+                window.refreshDRMonitoring();
+
+            }
+
+            break;
+
+    }
 
 }
 
 
-/* =====================================================
-   DETAILS
-===================================================== */
+/* =========================================================
+   GET CURRENT FILTERS
+========================================================= */
 
-function openDetails(type) {
+function getAnalyticsFilters() {
 
-    console.log(
-        "Open analytics details:",
-        type
+    return {
+
+        vehicle:
+            window.FleetAnalytics.filters.vehicle,
+
+        year:
+            window.FleetAnalytics.filters.year,
+
+        month:
+            window.FleetAnalytics.filters.month
+
+    };
+
+}
+
+
+/* =========================================================
+   GET ACTIVE SECTION
+========================================================= */
+
+function getCurrentAnalyticsSection() {
+
+    return window.FleetAnalytics.currentSection;
+
+}
+
+
+/* =========================================================
+   FORMAT NUMBER
+========================================================= */
+
+function formatNumber(
+    value,
+    decimals = 0
+) {
+
+    const number =
+        Number(value);
+
+
+    if (!Number.isFinite(number)) {
+
+        return "0";
+
+    }
+
+
+    return number.toLocaleString(
+        "en-US",
+        {
+            minimumFractionDigits:
+                decimals,
+
+            maximumFractionDigits:
+                decimals
+        }
     );
 
 }
+
+
+/* =========================================================
+   FORMAT KM
+========================================================= */
+
+function formatKilometer(value) {
+
+    return formatNumber(
+        value,
+        0
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT LITERS
+========================================================= */
+
+function formatLiters(value) {
+
+    return formatNumber(
+        value,
+        0
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT KM/L
+========================================================= */
+
+function formatKmPerLiter(value) {
+
+    return formatNumber(
+        value,
+        2
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT CURRENCY
+========================================================= */
+
+function formatCurrency(value) {
+
+    const number =
+        Number(value);
+
+
+    if (!Number.isFinite(number)) {
+
+        return "₱0.00";
+
+    }
+
+
+    return number.toLocaleString(
+        "en-PH",
+        {
+            style: "currency",
+            currency: "PHP",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT DAYS
+========================================================= */
+
+function formatDays(value) {
+
+    return formatNumber(
+        value,
+        1
+    );
+
+}
+
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+function showAnalyticsEmptyState(
+    containerId,
+    message = "No data available"
+) {
+
+    const container =
+        document.getElementById(
+            containerId
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = `
+
+        <div class="analytics-empty-state">
+
+            <div class="empty-icon">
+                📊
+            </div>
+
+            <strong>
+                ${message}
+            </strong>
+
+            <span>
+                Try changing the selected filters.
+            </span>
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   SAFE ELEMENT UPDATE
+========================================================= */
+
+function setElementText(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        value;
+
+}
+
+
+/* =========================================================
+   ADD LOADING STATE
+========================================================= */
+
+function setAnalyticsLoading(
+    elementId,
+    loading = true
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.classList.toggle(
+        "analytics-loading",
+        loading
+    );
+
+}
+
+
+/* =========================================================
+   WINDOW EVENTS
+========================================================= */
+
+window.switchAnalytics =
+    switchAnalytics;
+
+window.getAnalyticsFilters =
+    getAnalyticsFilters;
+
+window.getCurrentAnalyticsSection =
+    getCurrentAnalyticsSection;
+
+window.formatNumber =
+    formatNumber;
+
+window.formatKilometer =
+    formatKilometer;
+
+window.formatLiters =
+    formatLiters;
+
+window.formatKmPerLiter =
+    formatKmPerLiter;
+
+window.formatCurrency =
+    formatCurrency;
+
+window.formatDays =
+    formatDays;
+
+window.setElementText =
+    setElementText;
+
+window.setAnalyticsLoading =
+    setAnalyticsLoading;
+
+window.showAnalyticsEmptyState =
+    showAnalyticsEmptyState;
