@@ -510,9 +510,11 @@ async function loadSOList(
         );
 
 
-        renderSOList(
-            salesOrders
-        );
+        updateSOSummary();
+
+renderSOList(
+    salesOrders
+);
 
 
         return;
