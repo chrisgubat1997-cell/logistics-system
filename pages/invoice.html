@@ -1,806 +1,1394 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- =========================================================
+     LOGIS-TECH SYSTEM
+     INVOICING MODULE
+     
+     IMPORTANT:
+     This file is loaded dynamically inside index.html.
+     Do NOT add <html>, <head>, <body>, <link>, or <script>
+     tags here.
+========================================================= -->
 
-    <title>Invoicing | LOGIS-TECH SYSTEM</title>
 
-    <!-- INVOICING CSS -->
-    <link rel="stylesheet" href="../css/invoicing.css">
-</head>
+<div class="invoicing-container">
 
-<body>
 
-    <div class="invoicing-container">
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
 
-        <!-- =====================================================
-             PAGE HEADER
-        ====================================================== -->
-        <div class="invoicing-header">
+    <div class="invoicing-header">
 
-            <div class="header-title">
-                <h1>INVOICING</h1>
-                <p>Invoice management and monitoring</p>
-            </div>
+        <div class="header-title">
 
-            <!-- TOP RIGHT CONTROLS -->
-            <div class="header-actions">
+            <h1>
+                INVOICING
+            </h1>
 
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    id="prepareInvoiceBtn">
-                    + PREPARE INVOICE
-                </button>
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    id="refreshInvoiceBtn">
-                    ↻ REFRESH
-                </button>
-
-                <button
-                    type="button"
-                    class="btn btn-filter"
-                    id="invoiceFilterBtn">
-                    FILTER
-                </button>
-
-            </div>
+            <p>
+                Invoice management and monitoring
+            </p>
 
         </div>
 
 
-        <!-- =====================================================
-             SUMMARY CARDS
-        ====================================================== -->
-        <section class="invoice-summary">
+        <!-- TOP RIGHT CONTROLS -->
 
-            <!-- TOTAL INVOICE -->
-            <div class="summary-card total-invoice-card">
-                <div class="summary-card-icon">
-                    INV
-                </div>
-
-                <div class="summary-card-content">
-                    <span class="summary-label">
-                        TOTAL INVOICE
-                    </span>
-
-                    <strong
-                        class="summary-value"
-                        id="totalInvoice">
-                        0
-                    </strong>
-
-                    <small>
-                        All invoices
-                    </small>
-                </div>
-            </div>
-
-
-            <!-- TODAY'S INVOICED -->
-            <div class="summary-card todays-invoice-card">
-                <div class="summary-card-icon">
-                    TODAY
-                </div>
-
-                <div class="summary-card-content">
-                    <span class="summary-label">
-                        TODAY'S INVOICED
-                    </span>
-
-                    <strong
-                        class="summary-value"
-                        id="todaysInvoiced">
-                        0
-                    </strong>
-
-                    <small>
-                        Invoices today
-                    </small>
-                </div>
-            </div>
-
-
-            <!-- ONGOING -->
-            <div class="summary-card ongoing-invoice-card">
-                <div class="summary-card-icon">
-                    ...
-                </div>
-
-                <div class="summary-card-content">
-                    <span class="summary-label">
-                        ONGOING INVOICE
-                    </span>
-
-                    <strong
-                        class="summary-value"
-                        id="ongoingInvoice">
-                        0
-                    </strong>
-
-                    <small>
-                        Draft / ongoing
-                    </small>
-                </div>
-            </div>
-
-
-            <!-- CANCELLED -->
-            <div class="summary-card cancelled-invoice-card">
-                <div class="summary-card-icon">
-                    ×
-                </div>
-
-                <div class="summary-card-content">
-                    <span class="summary-label">
-                        CANCELLED INVOICE
-                    </span>
-
-                    <strong
-                        class="summary-value"
-                        id="cancelledInvoice">
-                        0
-                    </strong>
-
-                    <small>
-                        Cancelled invoices
-                    </small>
-                </div>
-            </div>
-
-        </section>
-
-
-        <!-- =====================================================
-             RECENT INVOICE
-        ====================================================== -->
-        <section class="invoice-section">
-
-            <div class="section-header">
-
-                <div class="section-title">
-                    <h2>RECENT INVOICE</h2>
-                    <span>
-                        Latest invoice transactions
-                    </span>
-                </div>
-
-                <!-- SECTION SEARCH -->
-                <div class="section-actions">
-
-                    <button
-                        type="button"
-                        class="section-search-btn"
-                        id="invoiceSearchBtn">
-                        🔍 SEARCH
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- INVOICE SEARCH AREA -->
-            <div
-                class="section-search-box"
-                id="invoiceSearchBox"
-                hidden>
-
-                <input
-                    type="text"
-                    id="invoiceSearchInput"
-                    placeholder="Search Invoice No., SO No., Client, Project, DR No., PO No.">
-
-                <button
-                    type="button"
-                    id="invoiceSearchClearBtn">
-                    CLEAR
-                </button>
-
-            </div>
-
-
-            <!-- RECENT INVOICE TABLE -->
-            <div class="table-wrapper">
-
-                <table class="invoice-table">
-
-                    <thead>
-                        <tr>
-                            <th>INVOICE NO.</th>
-                            <th>SO NO.</th>
-                            <th>CLIENT</th>
-                            <th>PROJECT</th>
-                            <th>DATE</th>
-                            <th>AMOUNT</th>
-                            <th>STATUS</th>
-                            <th>ACTIONS</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="recentInvoiceTableBody">
-
-                        <!-- JS WILL LOAD INVOICES HERE -->
-
-                        <tr class="empty-row">
-                            <td colspan="8">
-                                No invoice records found.
-                            </td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </section>
-
-
-        <!-- =====================================================
-             RECENT SALES ORDER
-        ====================================================== -->
-        <section class="invoice-section sales-order-section">
-
-            <div class="section-header">
-
-                <div class="section-title">
-                    <h2>RECENT SALES ORDER</h2>
-                    <span>
-                        Sales orders available for invoicing
-                    </span>
-                </div>
-
-                <!-- SECTION SEARCH -->
-                <div class="section-actions">
-
-                    <button
-                        type="button"
-                        class="section-search-btn"
-                        id="salesOrderSearchBtn">
-                        🔍 SEARCH
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <!-- SALES ORDER SEARCH AREA -->
-            <div
-                class="section-search-box"
-                id="salesOrderSearchBox"
-                hidden>
-
-                <input
-                    type="text"
-                    id="salesOrderSearchInput"
-                    placeholder="Search SO No., Client, Project, PO No.">
-
-                <button
-                    type="button"
-                    id="salesOrderSearchClearBtn">
-                    CLEAR
-                </button>
-
-            </div>
-
-
-            <!-- RECENT SALES ORDER TABLE -->
-            <div class="table-wrapper">
-
-                <table class="sales-order-table">
-
-                    <thead>
-                        <tr>
-                            <th>SO NO.</th>
-                            <th>CLIENT</th>
-                            <th>PROJECT</th>
-                            <th>DATE</th>
-                            <th>STATUS</th>
-                            <th>BALANCE</th>
-                            <th>ACTION</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="recentSalesOrderTableBody">
-
-                        <!-- JS WILL LOAD SALES ORDERS HERE -->
-
-                        <tr class="empty-row">
-                            <td colspan="7">
-                                No sales order records found.
-                            </td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </section>
-
-
-    </div>
-
-
-    <!-- =====================================================
-         PREPARE INVOICE MODAL
-    ====================================================== -->
-    <div
-        class="modal-overlay"
-        id="prepareInvoiceModal"
-        hidden>
-
-        <div class="modal">
-
-            <div class="modal-header">
-
-                <div>
-                    <h2>PREPARE INVOICE</h2>
-                    <p>Create a new invoice</p>
-                </div>
-
-                <button
-                    type="button"
-                    class="modal-close"
-                    id="closePrepareInvoiceModal">
-                    ×
-                </button>
-
-            </div>
-
-
-            <div class="modal-body">
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-                        <label>Invoice No.</label>
-                        <input
-                            type="text"
-                            id="invoiceNo"
-                            placeholder="Auto generated"
-                            readonly>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Invoice Date</label>
-                        <input
-                            type="date"
-                            id="invoiceDate">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Sales Order No.</label>
-                        <input
-                            type="text"
-                            id="invoiceSONo"
-                            placeholder="Select Sales Order">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Delivery Receipt No.</label>
-                        <input
-                            type="text"
-                            id="invoiceDRNo"
-                            placeholder="Select Delivery Receipt">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Client</label>
-                        <input
-                            type="text"
-                            id="invoiceClient"
-                            placeholder="Client name">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Project</label>
-                        <input
-                            type="text"
-                            id="invoiceProject"
-                            placeholder="Project name">
-                    </div>
-
-                    <div class="form-group">
-                        <label>P.O. No.</label>
-                        <input
-                            type="text"
-                            id="invoicePONo"
-                            placeholder="PO Number">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Terms</label>
-                        <select id="invoiceTerms">
-                            <option value="">Select Terms</option>
-                            <option value="COD">COD</option>
-                            <option value="15">15 DAYS</option>
-                            <option value="30">30 DAYS</option>
-                            <option value="45">45 DAYS</option>
-                            <option value="60">60 DAYS</option>
-                        </select>
-                    </div>
-
-                </div>
-
-
-                <!-- ITEMS -->
-                <div class="invoice-items-section">
-
-                    <div class="items-header">
-                        <h3>INVOICE ITEMS</h3>
-
-                        <button
-                            type="button"
-                            class="btn btn-secondary"
-                            id="addInvoiceItemBtn">
-                            + ADD ITEM
-                        </button>
-                    </div>
-
-
-                    <div class="table-wrapper">
-
-                        <table class="invoice-items-table">
-
-                            <thead>
-                                <tr>
-                                    <th>ITEM</th>
-                                    <th>DESCRIPTION</th>
-                                    <th>QTY</th>
-                                    <th>UNIT</th>
-                                    <th>UNIT PRICE</th>
-                                    <th>AMOUNT</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="invoiceItemsTableBody">
-
-                                <!-- JS WILL ADD ITEMS -->
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
-
-                <!-- INVOICE SUMMARY -->
-                <div class="invoice-total-section">
-
-                    <div class="total-row">
-                        <span>SUBTOTAL</span>
-                        <strong id="invoiceSubtotal">
-                            ₱0.00
-                        </strong>
-                    </div>
-
-                    <div class="total-row">
-                        <span>VAT 12%</span>
-                        <strong id="invoiceVAT">
-                            ₱0.00
-                        </strong>
-                    </div>
-
-                    <div class="total-row grand-total">
-                        <span>TOTAL AMOUNT</span>
-                        <strong id="invoiceTotalAmount">
-                            ₱0.00
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="modal-footer">
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    id="cancelPrepareInvoiceBtn">
-                    CANCEL
-                </button>
-
-                <button
-                    type="button"
-                    class="btn btn-preview"
-                    id="previewInvoiceBtn">
-                    PREVIEW
-                </button>
-
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    id="saveInvoiceBtn">
-                    SAVE / POST
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         INVOICE PREVIEW MODAL
-    ====================================================== -->
-    <div
-        class="modal-overlay"
-        id="invoicePreviewModal"
-        hidden>
-
-        <div class="preview-modal">
-
-            <div class="preview-header">
-
-                <div>
-                    <h2>INVOICE PREVIEW</h2>
-                    <p>Review invoice before posting</p>
-                </div>
-
-                <button
-                    type="button"
-                    class="modal-close"
-                    id="closeInvoicePreviewModal">
-                    ×
-                </button>
-
-            </div>
-
-
-            <div
-                class="invoice-preview-paper"
-                id="invoicePreviewPaper">
-
-                <!-- =================================================
-                     FUTURE INVOICE TEMPLATE
-                     Actual invoice design will be added later.
-                ================================================== -->
-
-                <div class="preview-company">
-                    <h2>GREENMETAL ELECTRIC</h2>
-                    <p>Electric Manufacturing Corporation</p>
-                </div>
-
-                <div class="preview-title">
-                    INVOICE
-                </div>
-
-                <div class="preview-details">
-
-                    <div>
-                        <strong>Invoice No.</strong>
-                        <span id="previewInvoiceNo">—</span>
-                    </div>
-
-                    <div>
-                        <strong>Date</strong>
-                        <span id="previewInvoiceDate">—</span>
-                    </div>
-
-                    <div>
-                        <strong>SO No.</strong>
-                        <span id="previewSONo">—</span>
-                    </div>
-
-                    <div>
-                        <strong>DR No.</strong>
-                        <span id="previewDRNo">—</span>
-                    </div>
-
-                    <div>
-                        <strong>Client</strong>
-                        <span id="previewClient">—</span>
-                    </div>
-
-                    <div>
-                        <strong>Project</strong>
-                        <span id="previewProject">—</span>
-                    </div>
-
-                </div>
-
-
-                <table class="preview-items-table">
-
-                    <thead>
-                        <tr>
-                            <th>ITEM</th>
-                            <th>DESCRIPTION</th>
-                            <th>QTY</th>
-                            <th>UNIT</th>
-                            <th>AMOUNT</th>
-                        </tr>
-                    </thead>
-
-                    <tbody id="previewInvoiceItems">
-
-                        <!-- JS -->
-
-                    </tbody>
-
-                </table>
-
-
-                <div class="preview-total">
-
-                    <div>
-                        <span>SUBTOTAL</span>
-                        <strong id="previewSubtotal">
-                            ₱0.00
-                        </strong>
-                    </div>
-
-                    <div>
-                        <span>VAT 12%</span>
-                        <strong id="previewVAT">
-                            ₱0.00
-                        </strong>
-                    </div>
-
-                    <div class="preview-grand-total">
-                        <span>TOTAL</span>
-                        <strong id="previewTotal">
-                            ₱0.00
-                        </strong>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="preview-footer">
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    id="backToInvoiceBtn">
-                    ← BACK
-                </button>
-
-                <button
-                    type="button"
-                    class="btn btn-print"
-                    id="printInvoiceBtn">
-                    🖨 PRINT
-                </button>
-
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    id="postInvoiceBtn">
-                    POST INVOICE
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         FILTER PANEL
-    ====================================================== -->
-    <div
-        class="filter-panel"
-        id="invoiceFilterPanel"
-        hidden>
-
-        <div class="filter-header">
-
-            <h3>FILTER INVOICE</h3>
+        <div class="header-actions">
 
             <button
                 type="button"
-                id="closeInvoiceFilter">
+                class="btn btn-primary"
+                id="prepareInvoiceBtn"
+            >
+                + PREPARE INVOICE
+            </button>
+
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="refreshInvoiceBtn"
+            >
+                ↻ REFRESH
+            </button>
+
+
+            <button
+                type="button"
+                class="btn btn-filter"
+                id="invoiceFilterBtn"
+            >
+                FILTER
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         SUMMARY CARDS
+    ====================================================== -->
+
+    <section class="invoice-summary">
+
+
+        <!-- TOTAL INVOICE -->
+
+        <div class="summary-card total-invoice-card">
+
+            <div class="summary-card-icon">
+                INV
+            </div>
+
+
+            <div class="summary-card-content">
+
+                <span class="summary-label">
+                    TOTAL INVOICE
+                </span>
+
+
+                <strong
+                    class="summary-value"
+                    id="totalInvoice"
+                >
+                    0
+                </strong>
+
+
+                <small>
+                    All invoices
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- TODAY'S INVOICED -->
+
+        <div class="summary-card todays-invoice-card">
+
+            <div class="summary-card-icon">
+                TODAY
+            </div>
+
+
+            <div class="summary-card-content">
+
+                <span class="summary-label">
+                    TODAY'S INVOICED
+                </span>
+
+
+                <strong
+                    class="summary-value"
+                    id="todaysInvoiced"
+                >
+                    0
+                </strong>
+
+
+                <small>
+                    Invoices today
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ONGOING -->
+
+        <div class="summary-card ongoing-invoice-card">
+
+            <div class="summary-card-icon">
+                ...
+            </div>
+
+
+            <div class="summary-card-content">
+
+                <span class="summary-label">
+                    ONGOING INVOICE
+                </span>
+
+
+                <strong
+                    class="summary-value"
+                    id="ongoingInvoice"
+                >
+                    0
+                </strong>
+
+
+                <small>
+                    Draft / ongoing
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CANCELLED -->
+
+        <div class="summary-card cancelled-invoice-card">
+
+            <div class="summary-card-icon">
+                ×
+            </div>
+
+
+            <div class="summary-card-content">
+
+                <span class="summary-label">
+                    CANCELLED INVOICE
+                </span>
+
+
+                <strong
+                    class="summary-value"
+                    id="cancelledInvoice"
+                >
+                    0
+                </strong>
+
+
+                <small>
+                    Cancelled invoices
+                </small>
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RECENT INVOICE
+    ====================================================== -->
+
+    <section class="invoice-section">
+
+
+        <div class="section-header">
+
+
+            <div class="section-title">
+
+                <h2>
+                    RECENT INVOICE
+                </h2>
+
+                <span>
+                    Latest invoice transactions
+                </span>
+
+            </div>
+
+
+            <!-- SECTION SEARCH -->
+
+            <div class="section-actions">
+
+                <button
+                    type="button"
+                    class="section-search-btn"
+                    id="invoiceSearchBtn"
+                >
+                    🔍 SEARCH
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- INVOICE SEARCH AREA -->
+
+        <div
+            class="section-search-box"
+            id="invoiceSearchBox"
+            hidden
+        >
+
+            <input
+                type="text"
+                id="invoiceSearchInput"
+                placeholder="Search Invoice No., SO No., Client, Project, DR No., PO No."
+            >
+
+
+            <button
+                type="button"
+                id="invoiceSearchClearBtn"
+            >
+                CLEAR
+            </button>
+
+        </div>
+
+
+
+        <!-- RECENT INVOICE TABLE -->
+
+        <div class="table-wrapper">
+
+            <table class="invoice-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            INVOICE NO.
+                        </th>
+
+                        <th>
+                            SO NO.
+                        </th>
+
+                        <th>
+                            CLIENT
+                        </th>
+
+                        <th>
+                            PROJECT
+                        </th>
+
+                        <th>
+                            DATE
+                        </th>
+
+                        <th>
+                            AMOUNT
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            ACTIONS
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="recentInvoiceTableBody">
+
+                    <tr class="empty-row">
+
+                        <td colspan="8">
+
+                            No invoice records found.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RECENT SALES ORDER
+    ====================================================== -->
+
+    <section class="invoice-section sales-order-section">
+
+
+        <div class="section-header">
+
+
+            <div class="section-title">
+
+                <h2>
+                    RECENT SALES ORDER
+                </h2>
+
+                <span>
+                    Sales orders available for invoicing
+                </span>
+
+            </div>
+
+
+            <!-- SECTION SEARCH -->
+
+            <div class="section-actions">
+
+                <button
+                    type="button"
+                    class="section-search-btn"
+                    id="salesOrderSearchBtn"
+                >
+                    🔍 SEARCH
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- SALES ORDER SEARCH AREA -->
+
+        <div
+            class="section-search-box"
+            id="salesOrderSearchBox"
+            hidden
+        >
+
+            <input
+                type="text"
+                id="salesOrderSearchInput"
+                placeholder="Search SO No., Client, Project, PO No."
+            >
+
+
+            <button
+                type="button"
+                id="salesOrderSearchClearBtn"
+            >
+                CLEAR
+            </button>
+
+        </div>
+
+
+
+        <!-- RECENT SALES ORDER TABLE -->
+
+        <div class="table-wrapper">
+
+            <table class="sales-order-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            SO NO.
+                        </th>
+
+                        <th>
+                            CLIENT
+                        </th>
+
+                        <th>
+                            PROJECT
+                        </th>
+
+                        <th>
+                            DATE
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            BALANCE
+                        </th>
+
+                        <th>
+                            ACTION
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="recentSalesOrderTableBody">
+
+                    <tr class="empty-row">
+
+                        <td colspan="7">
+
+                            No sales order records found.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+
+<!-- =========================================================
+     PREPARE INVOICE MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="prepareInvoiceModal"
+    hidden
+>
+
+
+    <div class="modal">
+
+
+        <!-- MODAL HEADER -->
+
+        <div class="modal-header">
+
+            <div>
+
+                <h2>
+                    PREPARE INVOICE
+                </h2>
+
+                <p>
+                    Create a new invoice
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closePrepareInvoiceModal"
+            >
                 ×
             </button>
 
         </div>
 
 
-        <div class="filter-body">
 
-            <div class="form-group">
-                <label>Invoice Status</label>
+        <!-- MODAL BODY -->
 
-                <select id="filterInvoiceStatus">
-                    <option value="">All Status</option>
-                    <option value="ONGOING">Ongoing</option>
-                    <option value="POSTED">Posted</option>
-                    <option value="CANCELLED">Cancelled</option>
-                </select>
-            </div>
+        <div class="modal-body">
 
 
-            <div class="form-group">
-                <label>Payment Status</label>
+            <!-- BASIC INFORMATION -->
 
-                <select id="filterPaymentStatus">
-                    <option value="">All Payment Status</option>
-                    <option value="UNPAID">Unpaid</option>
-                    <option value="PARTIALLY PAID">Partially Paid</option>
-                    <option value="PAID">Paid</option>
-                    <option value="OVERDUE">Overdue</option>
-                </select>
-            </div>
+            <div class="form-grid">
 
 
-            <div class="form-group">
-                <label>Date Range</label>
-
-                <select id="filterDateRange">
-                    <option value="">All Dates</option>
-                    <option value="TODAY">Today</option>
-                    <option value="WEEK">This Week</option>
-                    <option value="MONTH">This Month</option>
-                    <option value="CUSTOM">Custom</option>
-                </select>
-            </div>
-
-
-            <div class="custom-date-filter">
+                <!-- INVOICE NO -->
 
                 <div class="form-group">
-                    <label>From</label>
+
+                    <label>
+                        Invoice No.
+                    </label>
+
                     <input
-                        type="date"
-                        id="filterDateFrom">
+                        type="text"
+                        id="invoiceNo"
+                        placeholder="Auto generated"
+                        readonly
+                    >
+
                 </div>
 
+
+
+                <!-- INVOICE DATE -->
+
                 <div class="form-group">
-                    <label>To</label>
+
+                    <label>
+                        Invoice Date
+                    </label>
+
                     <input
                         type="date"
-                        id="filterDateTo">
+                        id="invoiceDate"
+                    >
+
+                </div>
+
+
+
+                <!-- SALES ORDER -->
+
+                <div class="form-group">
+
+                    <label>
+                        Sales Order No.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceSONo"
+                        placeholder="Select Sales Order"
+                    >
+
+                </div>
+
+
+
+                <!-- DELIVERY RECEIPT -->
+
+                <div class="form-group">
+
+                    <label>
+                        Delivery Receipt No.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceDRNo"
+                        placeholder="Select Delivery Receipt"
+                    >
+
+                </div>
+
+
+
+                <!-- CLIENT -->
+
+                <div class="form-group">
+
+                    <label>
+                        Client
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceClient"
+                        placeholder="Client name"
+                    >
+
+                </div>
+
+
+
+                <!-- PROJECT -->
+
+                <div class="form-group">
+
+                    <label>
+                        Project
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceProject"
+                        placeholder="Project name"
+                    >
+
+                </div>
+
+
+
+                <!-- PO NUMBER -->
+
+                <div class="form-group">
+
+                    <label>
+                        P.O. No.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoicePONo"
+                        placeholder="PO Number"
+                    >
+
+                </div>
+
+
+
+                <!-- TERMS -->
+
+                <div class="form-group">
+
+                    <label>
+                        Terms
+                    </label>
+
+                    <select id="invoiceTerms">
+
+                        <option value="">
+                            Select Terms
+                        </option>
+
+                        <option value="COD">
+                            COD
+                        </option>
+
+                        <option value="15">
+                            15 DAYS
+                        </option>
+
+                        <option value="30">
+                            30 DAYS
+                        </option>
+
+                        <option value="45">
+                            45 DAYS
+                        </option>
+
+                        <option value="60">
+                            60 DAYS
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- =================================================
+                 INVOICE ITEMS
+            ================================================== -->
+
+            <div class="invoice-items-section">
+
+
+                <div class="items-header">
+
+                    <h3>
+                        INVOICE ITEMS
+                    </h3>
+
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="addInvoiceItemBtn"
+                    >
+                        + ADD ITEM
+                    </button>
+
+                </div>
+
+
+
+                <div class="table-wrapper">
+
+                    <table class="invoice-items-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    ITEM
+                                </th>
+
+                                <th>
+                                    DESCRIPTION
+                                </th>
+
+                                <th>
+                                    QTY
+                                </th>
+
+                                <th>
+                                    UNIT
+                                </th>
+
+                                <th>
+                                    UNIT PRICE
+                                </th>
+
+                                <th>
+                                    AMOUNT
+                                </th>
+
+                                <th>
+                                    
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="invoiceItemsTableBody"
+                        >
+                        </tbody>
+
+                    </table>
+
                 </div>
 
             </div>
+
+
+
+            <!-- =================================================
+                 INVOICE TOTAL
+            ================================================== -->
+
+            <div class="invoice-total-section">
+
+
+                <div class="total-row">
+
+                    <span>
+                        SUBTOTAL
+                    </span>
+
+                    <strong id="invoiceSubtotal">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+
+                <div class="total-row">
+
+                    <span>
+                        VAT 12%
+                    </span>
+
+                    <strong id="invoiceVAT">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+
+                <div class="total-row grand-total">
+
+                    <span>
+                        TOTAL AMOUNT
+                    </span>
+
+                    <strong id="invoiceTotalAmount">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+            </div>
+
 
         </div>
 
 
-        <div class="filter-footer">
+
+        <!-- MODAL FOOTER -->
+
+        <div class="modal-footer">
+
 
             <button
                 type="button"
                 class="btn btn-secondary"
-                id="clearInvoiceFilter">
-                CLEAR
+                id="cancelPrepareInvoiceBtn"
+            >
+                CANCEL
             </button>
+
+
+            <button
+                type="button"
+                class="btn btn-preview"
+                id="previewInvoiceBtn"
+            >
+                PREVIEW
+            </button>
+
 
             <button
                 type="button"
                 class="btn btn-primary"
-                id="applyInvoiceFilter">
-                APPLY FILTER
+                id="saveInvoiceBtn"
+            >
+                SAVE / POST
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     INVOICE PREVIEW MODAL
+========================================================= -->
+
+<div
+    class="modal-overlay"
+    id="invoicePreviewModal"
+    hidden
+>
+
+
+    <div class="preview-modal">
+
+
+        <!-- PREVIEW HEADER -->
+
+        <div class="preview-header">
+
+            <div>
+
+                <h2>
+                    INVOICE PREVIEW
+                </h2>
+
+                <p>
+                    Review invoice before posting
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="modal-close"
+                id="closeInvoicePreviewModal"
+            >
+                ×
             </button>
 
         </div>
 
+
+
+        <!-- =================================================
+             INVOICE PAPER
+        ================================================== -->
+
+        <div
+            class="invoice-preview-paper"
+            id="invoicePreviewPaper"
+        >
+
+
+            <!-- COMPANY -->
+
+            <div class="preview-company">
+
+                <h2>
+                    GREENMETAL ELECTRIC
+                </h2>
+
+                <p>
+                    Electric Manufacturing Corporation
+                </p>
+
+            </div>
+
+
+
+            <!-- TITLE -->
+
+            <div class="preview-title">
+
+                INVOICE
+
+            </div>
+
+
+
+            <!-- DETAILS -->
+
+            <div class="preview-details">
+
+
+                <div>
+
+                    <strong>
+                        Invoice No.
+                    </strong>
+
+                    <span id="previewInvoiceNo">
+                        —
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Date
+                    </strong>
+
+                    <span id="previewInvoiceDate">
+                        —
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        SO No.
+                    </strong>
+
+                    <span id="previewSONo">
+                        —
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        DR No.
+                    </strong>
+
+                    <span id="previewDRNo">
+                        —
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Client
+                    </strong>
+
+                    <span id="previewClient">
+                        —
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        Project
+                    </strong>
+
+                    <span id="previewProject">
+                        —
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- PREVIEW ITEMS -->
+
+            <table class="preview-items-table">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            ITEM
+                        </th>
+
+                        <th>
+                            DESCRIPTION
+                        </th>
+
+                        <th>
+                            QTY
+                        </th>
+
+                        <th>
+                            UNIT
+                        </th>
+
+                        <th>
+                            AMOUNT
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="previewInvoiceItems">
+                </tbody>
+
+
+            </table>
+
+
+
+            <!-- PREVIEW TOTAL -->
+
+            <div class="preview-total">
+
+
+                <div>
+
+                    <span>
+                        SUBTOTAL
+                    </span>
+
+                    <strong id="previewSubtotal">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        VAT 12%
+                    </span>
+
+                    <strong id="previewVAT">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="preview-grand-total">
+
+                    <span>
+                        TOTAL
+                    </span>
+
+                    <strong id="previewTotal">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- PREVIEW FOOTER -->
+
+        <div class="preview-footer">
+
+
+            <button
+                type="button"
+                class="btn btn-secondary"
+                id="backToInvoiceBtn"
+            >
+                ← BACK
+            </button>
+
+
+            <button
+                type="button"
+                class="btn btn-print"
+                id="printInvoiceBtn"
+            >
+                🖨 PRINT
+            </button>
+
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="postInvoiceBtn"
+            >
+                POST INVOICE
+            </button>
+
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     FILTER PANEL
+========================================================= -->
+
+<div
+    class="filter-panel"
+    id="invoiceFilterPanel"
+    hidden
+>
+
+
+    <!-- FILTER HEADER -->
+
+    <div class="filter-header">
+
+        <h3>
+            FILTER INVOICE
+        </h3>
+
+
+        <button
+            type="button"
+            id="closeInvoiceFilter"
+        >
+            ×
+        </button>
+
     </div>
 
 
-    <!-- =====================================================
-         JAVASCRIPT
-    ====================================================== -->
-    <script src="../js/invoicing.js"></script>
 
-</body>
-</html>
+    <!-- FILTER BODY -->
+
+    <div class="filter-body">
+
+
+        <!-- INVOICE STATUS -->
+
+        <div class="form-group">
+
+            <label>
+                Invoice Status
+            </label>
+
+
+            <select id="filterInvoiceStatus">
+
+                <option value="">
+                    All Status
+                </option>
+
+                <option value="ONGOING">
+                    Ongoing
+                </option>
+
+                <option value="POSTED">
+                    Posted
+                </option>
+
+                <option value="CANCELLED">
+                    Cancelled
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <!-- PAYMENT STATUS -->
+
+        <div class="form-group">
+
+            <label>
+                Payment Status
+            </label>
+
+
+            <select id="filterPaymentStatus">
+
+                <option value="">
+                    All Payment Status
+                </option>
+
+                <option value="UNPAID">
+                    Unpaid
+                </option>
+
+                <option value="PARTIALLY PAID">
+                    Partially Paid
+                </option>
+
+                <option value="PAID">
+                    Paid
+                </option>
+
+                <option value="OVERDUE">
+                    Overdue
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <!-- DATE RANGE -->
+
+        <div class="form-group">
+
+            <label>
+                Date Range
+            </label>
+
+
+            <select id="filterDateRange">
+
+                <option value="">
+                    All Dates
+                </option>
+
+                <option value="TODAY">
+                    Today
+                </option>
+
+                <option value="WEEK">
+                    This Week
+                </option>
+
+                <option value="MONTH">
+                    This Month
+                </option>
+
+                <option value="CUSTOM">
+                    Custom
+                </option>
+
+            </select>
+
+        </div>
+
+
+
+        <!-- CUSTOM DATE -->
+
+        <div class="custom-date-filter">
+
+
+            <div class="form-group">
+
+                <label>
+                    From
+                </label>
+
+                <input
+                    type="date"
+                    id="filterDateFrom"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    To
+                </label>
+
+                <input
+                    type="date"
+                    id="filterDateTo"
+                >
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- FILTER FOOTER -->
+
+    <div class="filter-footer">
+
+
+        <button
+            type="button"
+            class="btn btn-secondary"
+            id="clearInvoiceFilter"
+        >
+            CLEAR
+        </button>
+
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            id="applyInvoiceFilter"
+        >
+            APPLY FILTER
+        </button>
+
+
+    </div>
+
+
+</div>
