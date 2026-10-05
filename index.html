@@ -1767,6 +1767,10 @@ async function loadFleetAnalyticsModule() {
 async function loadInvoicingModule() {
 
     console.log(
+        '========================================'
+    );
+
+    console.log(
         'Loading Invoicing module...'
     );
 
@@ -1777,10 +1781,14 @@ async function loadInvoicingModule() {
         );
 
 
+    /* =====================================================
+       CHECK CONTAINER
+    ===================================================== */
+
     if (!container) {
 
         console.error(
-            'invoicingModule not found.'
+            'ERROR: #invoicingModule not found.'
         );
 
         return;
@@ -1788,37 +1796,104 @@ async function loadInvoicingModule() {
     }
 
 
-
     /* =====================================================
-       LOAD INVOICE HTML
+       LOAD HTML ONLY ONCE
     ===================================================== */
 
-    if (
-        !invoicingModuleLoaded
-    ) {
-
+    if (!invoicingModuleLoaded) {
 
         try {
 
+            /*
+             * Build the URL from the current GitHub Pages
+             * location instead of relying on a relative path.
+             */
+
+            const invoiceHTMLUrl =
+                new URL(
+                    'pages/invoicing.html',
+                    window.location.href
+                ).href;
+
+
+            console.log(
+                'Invoice HTML URL:',
+                invoiceHTMLUrl
+            );
+
+
+            /* =================================================
+               FETCH HTML
+            ================================================= */
 
             const response =
                 await fetch(
-                    'pages/invoicing.html'
+                    invoiceHTMLUrl +
+                    '?v=' +
+                    Date.now(),
+                    {
+                        method: 'GET',
+                        cache: 'no-store'
+                    }
                 );
 
+
+            console.log(
+                'Invoice HTML response:',
+                response.status,
+                response.statusText
+            );
+
+
+            /* =================================================
+               HTTP ERROR
+            ================================================= */
 
             if (!response.ok) {
 
                 throw new Error(
-                    'Failed to load Invoicing HTML.'
+                    'HTTP ' +
+                    response.status +
+                    ' - ' +
+                    response.statusText
                 );
 
             }
 
 
+            /* =================================================
+               READ HTML
+            ================================================= */
+
             const html =
                 await response.text();
 
+
+            console.log(
+                'Invoice HTML length:',
+                html.length
+            );
+
+
+            /* =================================================
+               EMPTY HTML
+            ================================================= */
+
+            if (
+                !html ||
+                !html.trim()
+            ) {
+
+                throw new Error(
+                    'invoicing.html is empty.'
+                );
+
+            }
+
+
+            /* =================================================
+               INSERT HTML
+            ================================================= */
 
             container.innerHTML =
                 html;
@@ -1829,50 +1904,82 @@ async function loadInvoicingModule() {
 
 
             console.log(
-                'Invoicing HTML loaded.'
+                'Invoicing HTML loaded successfully.'
             );
 
 
+            /* =================================================
+               IMPORTANT:
+               We intentionally stop here if JS does not
+               exist yet.
+
+               The HTML should still display.
+            ================================================= */
+
         } catch (error) {
 
+            console.error(
+                '========================================'
+            );
 
             console.error(
-                'Invoicing HTML error:',
+                'INVOICING HTML LOAD ERROR'
+            );
+
+            console.error(
                 error
+            );
+
+            console.error(
+                '========================================'
             );
 
 
             container.innerHTML = `
 
                 <div style="
-                    padding:30px;
-                    color:#b00020;
-                    background:#fff;
-                    border-radius:10px;
                     margin:20px;
+                    padding:25px;
+                    background:#ffffff;
+                    border:1px solid #f0c9c5;
+                    border-radius:12px;
+                    color:#7f1d1d;
+                    font-family:Segoe UI, Arial, sans-serif;
                 ">
 
-                    <strong>
+                    <div style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:10px;
+                    ">
                         Failed to load Invoicing module.
-                    </strong>
+                    </div>
 
-                    <br><br>
 
-                    Please check:
+                    <div style="
+                        font-size:12px;
+                        line-height:1.7;
+                    ">
 
-                    <ul>
-                        <li>
-                            pages/invoicing.html
-                        </li>
+                        ${error.message}
 
-                        <li>
-                            css/invoicing.css
-                        </li>
+                    </div>
 
-                        <li>
-                            js/invoicing.js
-                        </li>
-                    </ul>
+
+                    <div style="
+                        margin-top:15px;
+                        padding:12px;
+                        background:#fff7f6;
+                        border-radius:8px;
+                        font-size:11px;
+                        line-height:1.7;
+                    ">
+
+                        <strong>Expected file:</strong><br>
+
+                        pages/invoicing.html
+
+                    </div>
 
                 </div>
 
@@ -1886,62 +1993,51 @@ async function loadInvoicingModule() {
     }
 
 
-
     /* =====================================================
-       LOAD INVOICE JAVASCRIPT
+       INVOICE JAVASCRIPT
+       
+       JS file does not exist yet.
+       
+       DO NOT show an HTML load error because of this.
     ===================================================== */
 
-    try {
-
-
-        await loadScriptOnce(
-            'js/invoicing.js',
-            'data-invoicing-js'
+    const invoiceScript =
+        document.querySelector(
+            'script[data-invoicing-js]'
         );
 
 
-        /* =================================================
-           INITIALIZE INVOICE MODULE
-        ================================================= */
+    if (invoiceScript) {
 
-        if (
-            typeof window.initializeInvoicing ===
-            'function'
-        ) {
-
-
-            window.initializeInvoicing();
-
-
-            console.log(
-                'Invoicing initialized successfully.'
-            );
-
-
-        } else {
-
-
-            console.warn(
-                'initializeInvoicing() not found.'
-            );
-
-
-        }
-
-
-    } catch (error) {
-
-
-        console.error(
-            'Invoicing JavaScript error:',
-            error
+        console.log(
+            'Invoicing JavaScript already exists.'
         );
 
+        return;
 
     }
 
-}
 
+    /*
+     * TEMPORARY:
+     * We are intentionally NOT loading js/invoicing.js
+     * until we build the Supabase version.
+     */
+
+    console.log(
+        'Invoicing HTML ready.'
+    );
+
+    console.log(
+        'Invoicing JavaScript will be connected after Supabase setup.'
+    );
+
+
+    console.log(
+        '========================================'
+    );
+
+}
 
 
 /* =========================================================
