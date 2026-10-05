@@ -784,9 +784,11 @@ function showPage(pageId, button) {
    FLEET & DELIVERY ANALYTICS
 ================================================= */
 
-if (pageId === 'fleetAnalytics') {
+if (pageId === 'delivery') {
 
-    loadFleetAnalyticsModule();
+    loadDeliveryModule();
+
+}
 
 }
 
@@ -989,25 +991,124 @@ async function loadDeliveryModule() {
 
 }
 /* =====================================================
+   LOAD SCRIPT ONCE
+===================================================== */
+
+function loadScriptOnce(src, attributeName) {
+
+    return new Promise(function(resolve, reject) {
+
+        const existing =
+            document.querySelector(
+                `script[${attributeName}]`
+            );
+
+        if (existing) {
+
+            /*
+             * If already loaded
+             */
+            if (existing.dataset.loaded === 'true') {
+
+                resolve();
+
+                return;
+
+            }
+
+            /*
+             * If currently loading,
+             * wait for it.
+             */
+            existing.addEventListener(
+                'load',
+                function() {
+
+                    resolve();
+
+                },
+                { once: true }
+            );
+
+            existing.addEventListener(
+                'error',
+                function() {
+
+                    reject(
+                        new Error(
+                            'Failed to load ' + src
+                        )
+                    );
+
+                },
+                { once: true }
+            );
+
+            return;
+
+        }
+
+
+        const script =
+            document.createElement('script');
+
+
+        script.src = src;
+
+
+        script.setAttribute(
+            attributeName,
+            'true'
+        );
+
+
+        script.onload =
+            function() {
+
+                script.dataset.loaded =
+                    'true';
+
+                console.log(
+                    'Script loaded:',
+                    src
+                );
+
+                resolve();
+
+            };
+
+
+        script.onerror =
+            function() {
+
+                console.error(
+                    'Failed to load:',
+                    src
+                );
+
+                reject(
+                    new Error(
+                        'Failed to load ' + src
+                    )
+                );
+
+            };
+
+
+        document.body.appendChild(
+            script
+        );
+
+    });
+
+}
+
+
+/* =====================================================
    LOAD FLEET & DELIVERY ANALYTICS MODULE
 ===================================================== */
 
 async function loadFleetAnalyticsModule() {
-
-    /*
-     * Prevent duplicate loading
-     */
-
-    if (fleetAnalyticsModuleLoaded) {
-
-        console.log(
-            'Fleet Analytics module already loaded.'
-        );
-
-        return;
-
-    }
-
 
     const container =
         document.getElementById(
@@ -1026,87 +1127,162 @@ async function loadFleetAnalyticsModule() {
     }
 
 
-    try {
+    /*
+     * =================================================
+     * LOAD HTML ONLY ONCE
+     * =================================================
+     */
 
-        /*
-         * =================================================
-         * LOAD FLEET ANALYTICS HTML
-         * =================================================
-         */
+    if (!fleetAnalyticsModuleLoaded) {
 
-        const response =
-            await fetch(
-                'pages/fleet-analytics.html'
+        try {
+
+            const response =
+                await fetch(
+                    'pages/fleet-analytics.html'
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'Failed to load Fleet Analytics HTML.'
+                );
+
+            }
+
+
+            const html =
+                await response.text();
+
+
+            container.innerHTML =
+                html;
+
+
+            fleetAnalyticsModuleLoaded =
+                true;
+
+
+            console.log(
+                'Fleet Analytics HTML loaded.'
             );
 
 
-        if (!response.ok) {
+        } catch (error) {
 
-            throw new Error(
-                'Failed to load Fleet Analytics module.'
+            console.error(
+                'Fleet Analytics HTML error:',
+                error
             );
+
+
+            container.innerHTML = `
+
+                <div style="
+                    padding:30px;
+                    color:#b00020;
+                    background:#fff;
+                    border-radius:10px;
+                ">
+
+                    Failed to load Fleet & Delivery Analytics module.
+
+                </div>
+
+            `;
+
+            return;
 
         }
 
-
-        const html =
-            await response.text();
+    }
 
 
-        /*
-         * =================================================
-         * INSERT MODULE
-         * =================================================
-         */
+    /*
+     * =================================================
+     * LOAD CHART.JS
+     * =================================================
+     */
 
-        container.innerHTML =
-            html;
+    try {
 
-
-        /*
-         * =================================================
-         * MARK AS LOADED
-         * =================================================
-         */
-
-        fleetAnalyticsModuleLoaded = true;
-
-
-        console.log(
-            'Fleet Analytics module loaded successfully.'
+        await loadScriptOnce(
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            'data-chartjs'
         );
 
 
         /*
          * =================================================
-         * LOAD FLEET ANALYTICS JAVASCRIPT
+         * MAIN FLEET ANALYTICS CONTROLLER
+         * =================================================
+         */
+
+        await loadScriptOnce(
+            'js/fleet-analytics.js',
+            'data-fleet-analytics-js'
+        );
+
+
+        /*
+         * =================================================
+         * FLEET PERFORMANCE
+         * =================================================
+         */
+
+        await loadScriptOnce(
+            'js/fleet-performance.js',
+            'data-fleet-performance-js'
+        );
+
+
+        /*
+         * =================================================
+         * DELIVERY PERFORMANCE
+         * =================================================
+         */
+
+        await loadScriptOnce(
+            'js/delivery-performance.js',
+            'data-delivery-performance-js'
+        );
+
+
+        /*
+         * =================================================
+         * DR MONITORING
+         * =================================================
+         */
+
+        await loadScriptOnce(
+            'js/dr-monitoring.js',
+            'data-dr-monitoring-js'
+        );
+
+
+        /*
+         * =================================================
+         * INITIALIZE ANALYTICS
          * =================================================
          */
 
         if (
-            !document.querySelector(
-                'script[data-fleet-analytics-js]'
-            )
+            typeof window.initializeFleetAnalytics ===
+            'function'
         ) {
 
-            const script =
-                document.createElement(
-                    'script'
-                );
+            window.initializeFleetAnalytics();
 
 
-            script.src =
-                'js/fleet-analytics.js';
-
-
-            script.setAttribute(
-                'data-fleet-analytics-js',
-                'true'
+            console.log(
+                'Fleet Analytics initialized successfully.'
             );
 
+        } else {
 
-            document.body.appendChild(
-                script
+            console.error(
+                'initializeFleetAnalytics() not found.'
             );
 
         }
@@ -1115,27 +1291,12 @@ async function loadFleetAnalyticsModule() {
     } catch (error) {
 
         console.error(
-            'Fleet Analytics module error:',
+            'Fleet Analytics JavaScript error:',
             error
         );
 
-
-        container.innerHTML = `
-
-            <div style="
-                padding:30px;
-                color:#b00020;
-                background:#fff;
-                border-radius:10px;
-            ">
-
-                Failed to load Fleet & Delivery Analytics module.
-
-            </div>
-
-        `;
-
     }
+
 }
 
 /* =====================================================
