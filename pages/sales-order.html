@@ -1,3 +1,4 @@
+```html
 <!-- =====================================================
      LOGIS-TECH SYSTEM
      SALES ORDER MODULE
@@ -42,6 +43,7 @@
                 </div>
 
             </div>
+
 
             <button
                 type="button"
@@ -237,8 +239,12 @@
                         All Status
                     </option>
 
-                    <option value="ACTIVE">
-                        Active
+                    <option value="UNPOSTED">
+                        Unposted
+                    </option>
+
+                    <option value="POSTED">
+                        Posted
                     </option>
 
                     <option value="PARTIAL">
@@ -282,14 +288,21 @@
 
                 <span class="so-status-dot"></span>
 
-                <span id="soSelectionText">
-                    No Sales Order selected
-                </span>
+                <div
+                    id="soSelectionText"
+                    class="so-selection-content"
+                >
+                    <span class="so-selection-empty">
+                        No Sales Order selected
+                    </span>
+                </div>
 
             </div>
 
 
             <div class="so-action-buttons">
+
+                <!-- UPDATE -->
 
                 <button
                     type="button"
@@ -304,6 +317,8 @@
 
                 </button>
 
+
+                <!-- CANCEL -->
 
                 <button
                     type="button"
@@ -322,28 +337,7 @@
 
         </div>
 
-<!-- =================================================
-     SELECTED SALES ORDER PREVIEW
-================================================== -->
 
-<div
-    id="selectedSOInfo"
-    class="selected-so"
->
-    <div class="selected-so-placeholder">
-
-        <span>👆</span>
-
-        <div>
-            <strong>No Sales Order selected</strong>
-
-            <small>
-                Select a Sales Order from the table.
-            </small>
-        </div>
-
-    </div>
-</div>
         <!-- =================================================
              SALES ORDER TABLE
         ================================================== -->
@@ -361,7 +355,8 @@
                     </h2>
 
                     <p>
-                        Double-click a Sales Order to view complete details.
+                        Click to select. Double-click a Sales Order
+                        to view complete details.
                     </p>
 
                 </div>
@@ -433,7 +428,9 @@
             </div>
 
 
-            <!-- EMPTY STATE -->
+            <!-- =================================================
+                 EMPTY STATE
+            ================================================== -->
 
             <div
                 id="soEmptyState"
@@ -519,11 +516,82 @@
             </div>
 
 
+            <!-- CURRENT SO STATUS -->
+
             <div
                 id="detailStatusBadge"
                 class="so-detail-status"
             >
-                ACTIVE
+                UNPOSTED
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             POSTING STATUS PANEL
+        ================================================== -->
+
+        <div
+            id="soPostingStatusPanel"
+            class="so-posting-status-panel"
+        >
+
+            <div class="so-posting-status-icon">
+                🟡
+            </div>
+
+
+            <div class="so-posting-status-content">
+
+                <div class="so-posting-status-title">
+                    SALES ORDER STATUS
+                </div>
+
+                <strong id="soPostingStatusText">
+                    UNPOSTED
+                </strong>
+
+                <p id="soPostingStatusDescription">
+                    This Sales Order has not yet been posted.
+                    It is not available for Delivery / DR preparation.
+                </p>
+
+            </div>
+
+
+            <!-- POSTING INFORMATION -->
+
+            <div
+                id="soPostingMeta"
+                class="so-posting-meta"
+            >
+
+                <div class="so-posting-meta-item">
+
+                    <span>
+                        POSTED BY
+                    </span>
+
+                    <strong id="soPostedBy">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="so-posting-meta-item">
+
+                    <span>
+                        POSTED DATE
+                    </span>
+
+                    <strong id="soPostedDate">
+                        —
+                    </strong>
+
+                </div>
+
             </div>
 
         </div>
@@ -1290,6 +1358,21 @@
                 </button>
 
 
+                <!-- POST SO -->
+
+                <button
+                    type="button"
+                    id="detailPostButton"
+                    class="so-btn so-btn-success"
+                    onclick="postSelectedSO()"
+                >
+
+                    🟢
+                    POST SO
+
+                </button>
+
+
                 <!-- SAVE -->
 
                 <button
@@ -1309,6 +1392,82 @@
 
         </div>
 
+
+        <!-- =================================================
+             UPDATE MODE ACTIONS
+        ================================================== -->
+
+        <div
+            id="soUpdateActionBar"
+            class="so-update-action-bar"
+            style="display:none;"
+        >
+
+            <div class="so-update-action-info">
+
+                <span class="so-update-action-icon">
+                    ✏️
+                </span>
+
+                <div>
+
+                    <strong>
+                        UPDATE MODE
+                    </strong>
+
+                    <small>
+                        Review the Sales Order before saving or posting.
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <div class="so-update-action-buttons">
+
+                <button
+                    type="button"
+                    id="soUpdateCancelButton"
+                    class="so-btn so-btn-secondary"
+                    onclick="cancelSOUpdateMode()"
+                >
+
+                    CANCEL EDIT
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="soUpdateSaveButton"
+                    class="so-btn so-btn-success"
+                    onclick="saveSOUpdate()"
+                >
+
+                    ✓
+                    SAVE CHANGES
+
+                </button>
+
+
+                <button
+                    type="button"
+                    id="soUpdatePostButton"
+                    class="so-btn so-btn-success"
+                    onclick="postSelectedSO()"
+                >
+
+                    🟢
+                    POST SO
+
+                </button>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>
+```
