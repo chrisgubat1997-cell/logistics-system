@@ -2875,3 +2875,38 @@
     }
 
 }
+
+/* =========================================================
+   PARTIAL STATUS
+========================================================= */
+
+.so-card-partial {
+    border-left: 4px solid #d99a16;
+}
+
+
+.so-card-partial .so-card-icon {
+    background: #fff5d9;
+    color: #a66b00;
+}
+
+
+.so-card-partial strong {
+    color: #9a6800;
+}
+
+
+/* =========================================================
+   PARTIAL STATUS BADGE
+========================================================= */
+
+.status-partial {
+    background: #fff5d9;
+    color: #966300;
+    border-color: #f1d98d;
+}
+
+
+.status-partial .status-dot {
+    background: #d99a16;
+}
