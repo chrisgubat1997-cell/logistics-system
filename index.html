@@ -969,7 +969,23 @@ let fleetAnalyticsModuleLoaded = false;
 
 let invoicingModuleLoaded = false;
 
-let systemSettingsModuleLoaded = false;
+let systemSettingsModuleLoaded = true;
+
+loadScriptOnce(
+    "js/system-settings.js",
+    "systemSettingsScriptLoaded"
+);
+
+setTimeout(() => {
+
+    if (
+        typeof initializeSystemSettings ===
+        "function"
+    ) {
+        initializeSystemSettings();
+    }
+
+}, 100);
 
 
 
