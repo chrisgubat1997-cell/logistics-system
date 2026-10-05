@@ -2912,20 +2912,20 @@
 }
 
 /* =========================================================
-   SALES ORDER — MODERN REFRESH BUTTON
+   MODERN REFRESH BUTTON — WIDE VERSION
 ========================================================= */
 
 .so-refresh-btn {
-    position: relative;
-
-    width: 40px;
-    height: 40px;
+    height: 39px;
+    min-width: 105px;
 
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    padding: 0;
+    gap: 8px;
+
+    padding: 0 15px;
 
     border: 1px solid #ded7e3;
     border-radius: 9px;
@@ -2933,15 +2933,14 @@
     background: #ffffff;
     color: #381a4a;
 
-    font-size: 15px;
-    font-weight: 600;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 650;
 
     cursor: pointer;
 
     box-shadow:
         0 2px 7px rgba(40, 25, 48, 0.05);
-
-    overflow: hidden;
 
     transition:
         background 0.2s ease,
@@ -2952,7 +2951,52 @@
 }
 
 
-/* Hover */
+/* ICON */
+
+.so-refresh-btn::before {
+    content: "↻";
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 18px;
+    height: 18px;
+
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+
+    transition:
+        transform 0.45s ease;
+}
+
+
+/* TEXT */
+
+.so-refresh-btn::after {
+    content: "Refresh";
+
+    position: static;
+
+    width: auto;
+    height: auto;
+
+    border-radius: 0;
+
+    background: none;
+
+    transform: none;
+
+    opacity: 1;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   HOVER
+========================================================= */
 
 .so-refresh-btn:hover {
     background: #f7f2fa;
@@ -2961,17 +3005,23 @@
 
     color: #381a4a;
 
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 
     box-shadow:
-        0 6px 14px rgba(56, 26, 74, 0.12);
+        0 5px 14px rgba(56, 26, 74, 0.11);
+}
+
+.so-refresh-btn:hover::before {
+    transform: rotate(180deg);
 }
 
 
-/* Click */
+/* =========================================================
+   ACTIVE
+========================================================= */
 
 .so-refresh-btn:active {
-    transform: translateY(0) scale(0.94);
+    transform: translateY(0) scale(0.98);
 
     box-shadow:
         0 2px 5px rgba(56, 26, 74, 0.08);
@@ -2979,26 +3029,7 @@
 
 
 /* =========================================================
-   REFRESH ICON
-========================================================= */
-
-.so-refresh-btn i,
-.so-refresh-btn svg {
-    transition:
-        transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-
-/* Hover rotate */
-
-.so-refresh-btn:hover i,
-.so-refresh-btn:hover svg {
-    transform: rotate(35deg);
-}
-
-
-/* =========================================================
-   REFRESHING STATE
+   REFRESHING
 ========================================================= */
 
 .so-refresh-btn.refreshing {
@@ -3011,13 +3042,9 @@
     color: #381a4a;
 }
 
-
-/* Continuous spinning */
-
-.so-refresh-btn.refreshing i,
-.so-refresh-btn.refreshing svg {
+.so-refresh-btn.refreshing::before {
     animation:
-        soRefreshSpin 0.8s linear infinite;
+        soRefreshSpin 0.75s linear infinite;
 }
 
 
@@ -3035,58 +3062,13 @@
 
 
 /* =========================================================
-   REFRESH RIPPLE
-========================================================= */
-
-.so-refresh-btn::after {
-    content: "";
-
-    position: absolute;
-
-    width: 8px;
-    height: 8px;
-
-    border-radius: 50%;
-
-    background: rgba(56, 26, 74, 0.10);
-
-    transform: scale(0);
-
-    opacity: 0;
-
-    pointer-events: none;
-}
-
-
-.so-refresh-btn:active::after {
-    animation:
-        soRefreshRipple 0.45s ease-out;
-}
-
-
-@keyframes soRefreshRipple {
-
-    0% {
-        transform: scale(1);
-        opacity: 0.35;
-    }
-
-    100% {
-        transform: scale(10);
-        opacity: 0;
-    }
-
-}
-
-
-/* =========================================================
    MOBILE
 ========================================================= */
 
 @media (max-width: 768px) {
 
     .so-refresh-btn {
-        width: 39px;
+        min-width: 100px;
         height: 39px;
     }
 
