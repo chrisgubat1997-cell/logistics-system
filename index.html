@@ -62,6 +62,16 @@
         href="css/fleet-analytics.css"
     >
 
+
+    <!-- =====================================================
+         INVOICING CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="css/invoicing.css"
+    >
+
 </head>
 
 
@@ -88,7 +98,9 @@
     <div class="menu">
 
 
-        <!-- DASHBOARD -->
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
 
         <button
             class="menu-btn active"
@@ -100,7 +112,9 @@
         </button>
 
 
-        <!-- SALES ORDER -->
+        <!-- =================================================
+             SALES ORDER
+        ================================================== -->
 
         <button
             class="menu-btn"
@@ -112,7 +126,9 @@
         </button>
 
 
-        <!-- DELIVERY -->
+        <!-- =================================================
+             DELIVERY
+        ================================================== -->
 
         <button
             class="menu-btn"
@@ -124,7 +140,9 @@
         </button>
 
 
-        <!-- FLEET & DELIVERY ANALYTICS -->
+        <!-- =================================================
+             FLEET & DELIVERY ANALYTICS
+        ================================================== -->
 
         <button
             class="menu-btn"
@@ -136,7 +154,9 @@
         </button>
 
 
-        <!-- INVOICE -->
+        <!-- =================================================
+             INVOICE
+        ================================================== -->
 
         <button
             class="menu-btn"
@@ -148,7 +168,9 @@
         </button>
 
 
-        <!-- PAYMENT -->
+        <!-- =================================================
+             PAYMENT
+        ================================================== -->
 
         <button
             class="menu-btn"
@@ -160,7 +182,9 @@
         </button>
 
 
-        <!-- REPORTS -->
+        <!-- =================================================
+             REPORTS
+        ================================================== -->
 
         <button
             class="menu-btn"
@@ -172,7 +196,9 @@
         </button>
 
 
-        <!-- SETTINGS -->
+        <!-- =================================================
+             SETTINGS
+        ================================================== -->
 
         <button
             class="menu-btn"
@@ -642,60 +668,64 @@
 
         </div>
 
-<!-- =================================================
-     INVOICING MODULE
-================================================== -->
-
-<div
-    id="invoice"
-    class="page"
->
-
-    <div id="invoicingModule"></div>
-
-</div>
 
 
-<!-- =================================================
-     PAYMENT
-================================================== -->
+        <!-- =================================================
+             INVOICING MODULE
+        ================================================== -->
 
-<div
-    id="payment"
-    class="page"
->
+        <div
+            id="invoice"
+            class="page"
+        >
 
-    <div class="page-header">
-
-        <div>
-
-            <h1>
-                Payment
-            </h1>
-
-            <p class="subtitle">
-                Payment Monitoring
-            </p>
+            <div id="invoicingModule"></div>
 
         </div>
 
-    </div>
 
 
-    <div class="section">
+        <!-- =================================================
+             PAYMENT
+        ================================================== -->
 
-        <h2>
-            Payment Monitoring
-        </h2>
+        <div
+            id="payment"
+            class="page"
+        >
 
-        <p>
-            Payment module will be displayed here.
-        </p>
+            <div class="page-header">
 
-    </div>
+                <div>
 
-</div>
-        
+                    <h1>
+                        Payment
+                    </h1>
+
+                    <p class="subtitle">
+                        Payment Monitoring
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="section">
+
+                <h2>
+                    Payment Monitoring
+                </h2>
+
+                <p>
+                    Payment module will be displayed here.
+                </p>
+
+            </div>
+
+        </div>
+
+
 
         <!-- =================================================
              REPORTS
@@ -950,6 +980,8 @@ let deliveryModuleLoaded = false;
 
 let fleetAnalyticsModuleLoaded = false;
 
+let invoicingModuleLoaded = false;
+
 
 
 /* =========================================================
@@ -1079,6 +1111,19 @@ function showPage(pageId, button) {
     ) {
 
         loadFleetAnalyticsModule();
+
+    }
+
+
+    /* =====================================================
+       INVOICE
+    ===================================================== */
+
+    if (
+        pageId === 'invoice'
+    ) {
+
+        loadInvoicingModule();
 
     }
 
@@ -1705,6 +1750,190 @@ async function loadFleetAnalyticsModule() {
 
         console.error(
             'Fleet Analytics JavaScript error:',
+            error
+        );
+
+
+    }
+
+}
+
+
+
+/* =========================================================
+   LOAD INVOICING MODULE
+========================================================= */
+
+async function loadInvoicingModule() {
+
+    console.log(
+        'Loading Invoicing module...'
+    );
+
+
+    const container =
+        document.getElementById(
+            'invoicingModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'invoicingModule not found.'
+        );
+
+        return;
+
+    }
+
+
+
+    /* =====================================================
+       LOAD INVOICE HTML
+    ===================================================== */
+
+    if (
+        !invoicingModuleLoaded
+    ) {
+
+
+        try {
+
+
+            const response =
+                await fetch(
+                    'pages/invoicing.html'
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'Failed to load Invoicing HTML.'
+                );
+
+            }
+
+
+            const html =
+                await response.text();
+
+
+            container.innerHTML =
+                html;
+
+
+            invoicingModuleLoaded =
+                true;
+
+
+            console.log(
+                'Invoicing HTML loaded.'
+            );
+
+
+        } catch (error) {
+
+
+            console.error(
+                'Invoicing HTML error:',
+                error
+            );
+
+
+            container.innerHTML = `
+
+                <div style="
+                    padding:30px;
+                    color:#b00020;
+                    background:#fff;
+                    border-radius:10px;
+                    margin:20px;
+                ">
+
+                    <strong>
+                        Failed to load Invoicing module.
+                    </strong>
+
+                    <br><br>
+
+                    Please check:
+
+                    <ul>
+                        <li>
+                            pages/invoicing.html
+                        </li>
+
+                        <li>
+                            css/invoicing.css
+                        </li>
+
+                        <li>
+                            js/invoicing.js
+                        </li>
+                    </ul>
+
+                </div>
+
+            `;
+
+
+            return;
+
+        }
+
+    }
+
+
+
+    /* =====================================================
+       LOAD INVOICE JAVASCRIPT
+    ===================================================== */
+
+    try {
+
+
+        await loadScriptOnce(
+            'js/invoicing.js',
+            'data-invoicing-js'
+        );
+
+
+        /* =================================================
+           INITIALIZE INVOICE MODULE
+        ================================================= */
+
+        if (
+            typeof window.initializeInvoicing ===
+            'function'
+        ) {
+
+
+            window.initializeInvoicing();
+
+
+            console.log(
+                'Invoicing initialized successfully.'
+            );
+
+
+        } else {
+
+
+            console.warn(
+                'initializeInvoicing() not found.'
+            );
+
+
+        }
+
+
+    } catch (error) {
+
+
+        console.error(
+            'Invoicing JavaScript error:',
             error
         );
 
