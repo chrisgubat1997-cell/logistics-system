@@ -33,105 +33,76 @@
 
     function openCreateDeliveryReceipt(selectedSO = null) {
 
-        console.log(
-            "Opening Create Delivery Receipt..."
+    console.log("Opening Create Delivery Receipt...", selectedSO);
+
+
+    /* -------------------------------------------------
+       SAVE SELECTED SO
+       ------------------------------------------------- */
+
+    if (selectedSO) {
+
+        const deliverySO = {
+
+            soNumber:
+                selectedSO.soNumber || "",
+
+            clientName:
+                selectedSO.clientName || "",
+
+            poNumber:
+                selectedSO.poNumber || "",
+
+            project:
+                selectedSO.project || "",
+
+            source:
+                "delivery",
+
+            timestamp:
+                new Date().toISOString()
+
+        };
+
+
+        localStorage.setItem(
+            SELECTED_SO_STORAGE_KEY,
+            JSON.stringify(deliverySO)
         );
 
 
-        /* -------------------------------------------------
-           SAVE SELECTED SO
-           ------------------------------------------------- */
-
-        if (selectedSO) {
-
-            const deliverySO = {
-
-                soNumber:
-                    selectedSO.soNumber || "",
-
-                clientName:
-                    selectedSO.clientName || "",
-
-                poNumber:
-                    selectedSO.poNumber || "",
-
-                project:
-                    selectedSO.project || "",
-
-                source:
-                    "delivery",
-
-                timestamp:
-                    new Date().toISOString()
-
-            };
-
-
-            localStorage.setItem(
-                SELECTED_SO_STORAGE_KEY,
-                JSON.stringify(deliverySO)
-            );
-
-
-            console.log(
-                "Selected SO saved:",
-                deliverySO
-            );
-
-        }
-
-
-        /* -------------------------------------------------
-           OPEN NEW TAB
-           IMPORTANT:
-           index.html is the base document.
-           create-delivery-receipt.html is inside /pages/
-           ------------------------------------------------- */
-
-        const target =
-            CREATE_DELIVERY_RECEIPT_PAGE;
-
-
         console.log(
-            "Opening:",
-            target
-        );
-
-
-        const newWindow =
-            window.open(
-                target,
-                "_blank"
-            );
-
-
-        /* -------------------------------------------------
-           POPUP BLOCKED
-           ------------------------------------------------- */
-
-        if (!newWindow) {
-
-            console.warn(
-                "Browser blocked the new tab."
-            );
-
-
-            alert(
-                "Hindi ma-open ang Create Delivery Receipt.\n\n" +
-                "Please allow pop-ups for LOGIS-TECH SYSTEM."
-            );
-
-
-            return;
-
-        }
-
-
-        console.log(
-            "Create Delivery Receipt opened successfully."
+            "Selected SO saved:",
+            deliverySO
         );
 
     }
+
+
+    /* -------------------------------------------------
+       CREATE DELIVERY RECEIPT PAGE
+       
+       IMPORTANT:
+       delivery.html is loaded inside index.html.
+       Therefore the browser base is index.html.
+       ------------------------------------------------- */
+
+    const target = "pages/create-delivery-receipt.html";
+
+
+    console.log(
+        "Opening Create Delivery Receipt:",
+        target
+    );
+
+
+    /* -------------------------------------------------
+       OPEN PAGE
+       ------------------------------------------------- */
+
+    window.location.href = target;
+
+}
 
 
     /* =====================================================
