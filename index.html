@@ -72,6 +72,11 @@
         href="css/invoicing.css"
     >
 
+    <link
+    rel="stylesheet"
+    href="css/system-settings.css"
+>
+
 </head>
 
 
@@ -926,35 +931,17 @@
 
 
         <!-- =================================================
-             SETTINGS
-        ================================================== -->
+     SYSTEM SETTINGS MODULE
+================================================== -->
 
-        <div
-            id="settings"
-            class="page"
-        >
+<div
+    id="settings"
+    class="page"
+>
 
-            <h1>
-                Settings
-            </h1>
+    <div id="systemSettingsModule"></div>
 
-
-            <div class="section">
-
-
-                <h2>
-                    System Settings
-                </h2>
-
-
-                <p>
-                    System configuration.
-                </p>
-
-
-            </div>
-
-        </div>
+</div>
 
 
     </div>
@@ -981,6 +968,8 @@ let deliveryModuleLoaded = false;
 let fleetAnalyticsModuleLoaded = false;
 
 let invoicingModuleLoaded = false;
+
+let systemSettingsModuleLoaded = false;
 
 
 
@@ -1147,7 +1136,18 @@ function showPage(pageId, button) {
 
     }
 
+/* =====================================================
+   SYSTEM SETTINGS
+===================================================== */
 
+if (
+    pageId === 'settings'
+) {
+
+    loadSystemSettingsModule();
+
+}
+    
     /* =====================================================
        DASHBOARD
     ===================================================== */
@@ -2039,7 +2039,202 @@ async function loadInvoicingModule() {
 
 }
 
+/* =========================================================
+   LOAD SYSTEM SETTINGS MODULE
+========================================================= */
 
+async function loadSystemSettingsModule() {
+
+    console.log(
+        'Loading System Settings module...'
+    );
+
+
+    const container =
+        document.getElementById(
+            'systemSettingsModule'
+        );
+
+
+    /* =====================================================
+       CHECK CONTAINER
+    ===================================================== */
+
+    if (!container) {
+
+        console.error(
+            'ERROR: #systemSettingsModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD ONLY ONCE
+    ===================================================== */
+
+    if (
+        systemSettingsModuleLoaded
+    ) {
+
+        console.log(
+            'System Settings module already loaded.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD HTML
+    ===================================================== */
+
+    try {
+
+        const settingsHTMLUrl =
+            new URL(
+                'pages/system-settings.html',
+                window.location.href
+            ).href;
+
+
+        console.log(
+            'System Settings HTML URL:',
+            settingsHTMLUrl
+        );
+
+
+        const response =
+            await fetch(
+                settingsHTMLUrl +
+                '?v=' +
+                Date.now(),
+                {
+                    method: 'GET',
+                    cache: 'no-store'
+                }
+            );
+
+
+        console.log(
+            'System Settings response:',
+            response.status,
+            response.statusText
+        );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                'HTTP ' +
+                response.status +
+                ' - ' +
+                response.statusText
+            );
+
+        }
+
+
+        const html =
+            await response.text();
+
+
+        if (
+            !html ||
+            !html.trim()
+        ) {
+
+            throw new Error(
+                'system-settings.html is empty.'
+            );
+
+        }
+
+
+        /* =================================================
+           INSERT HTML
+        ================================================= */
+
+        container.innerHTML =
+            html;
+
+
+        systemSettingsModuleLoaded =
+            true;
+
+
+        console.log(
+            'System Settings HTML loaded successfully.'
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            'SYSTEM SETTINGS LOAD ERROR:',
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div style="
+                margin:20px;
+                padding:25px;
+                background:#ffffff;
+                border:1px solid #f0c9c5;
+                border-radius:12px;
+                color:#7f1d1d;
+                font-family:Segoe UI,Arial,sans-serif;
+            ">
+
+                <div style="
+                    font-size:16px;
+                    font-weight:800;
+                    margin-bottom:10px;
+                ">
+
+                    Failed to load System Settings.
+
+                </div>
+
+
+                <div style="
+                    font-size:12px;
+                    line-height:1.7;
+                ">
+
+                    ${error.message}
+
+                </div>
+
+
+                <div style="
+                    margin-top:15px;
+                    padding:12px;
+                    background:#fff7f6;
+                    border-radius:8px;
+                    font-size:11px;
+                    line-height:1.7;
+                ">
+
+                    <strong>Expected file:</strong><br>
+
+                    pages/system-settings.html
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+}
+    
 /* =========================================================
    USER ACCOUNT
 ========================================================= */
