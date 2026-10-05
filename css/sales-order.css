@@ -18,7 +18,9 @@
     width: 100%;
     min-height: 100%;
     padding: 24px;
+
     font-family: "Segoe UI", Arial, sans-serif;
+
     color: #25232b;
 }
 
@@ -29,10 +31,12 @@
 
 .so-list-view {
     width: 100%;
+
     animation: soPageIn 0.35s ease;
 }
 
 @keyframes soPageIn {
+
     from {
         opacity: 0;
         transform: translateY(8px);
@@ -42,6 +46,7 @@
         opacity: 1;
         transform: translateY(0);
     }
+
 }
 
 
@@ -51,15 +56,20 @@
 
 .so-main-header {
     display: flex;
+
     align-items: center;
     justify-content: space-between;
+
     gap: 20px;
+
     margin-bottom: 22px;
 }
 
 .so-title-area {
     display: flex;
+
     align-items: center;
+
     gap: 14px;
 }
 
@@ -68,16 +78,18 @@
     height: 48px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
     border-radius: 12px;
 
-    background: linear-gradient(
-        135deg,
-        #381a4a,
-        #5d2d76
-    );
+    background:
+        linear-gradient(
+            135deg,
+            #381a4a,
+            #5d2d76
+        );
 
     color: white;
 
@@ -111,8 +123,10 @@
 
 .so-create-btn {
     display: inline-flex;
+
     align-items: center;
     justify-content: center;
+
     gap: 9px;
 
     min-height: 44px;
@@ -120,9 +134,11 @@
     padding: 0 18px;
 
     border: none;
+
     border-radius: 9px;
 
     background: #381a4a;
+
     color: white;
 
     font-size: 13px;
@@ -154,6 +170,7 @@
 
 .so-create-icon {
     font-size: 18px;
+
     line-height: 1;
 }
 
@@ -166,7 +183,7 @@
     display: grid;
 
     grid-template-columns:
-        repeat(4, minmax(0, 1fr));
+        repeat(5, minmax(0, 1fr));
 
     gap: 14px;
 
@@ -182,7 +199,8 @@
 
     background: white;
 
-    border: 1px solid #ece8ef;
+    border:
+        1px solid #ece8ef;
 
     border-radius: 12px;
 
@@ -221,7 +239,10 @@
 
     border-radius: 50%;
 
-    background: rgba(56, 26, 74, 0.035);
+    background:
+        rgba(56, 26, 74, 0.035);
+
+    pointer-events: none;
 }
 
 .so-summary-card h4 {
@@ -258,16 +279,55 @@
     font-size: 11px;
 }
 
+
+/* TOTAL */
+
+.so-card-total {
+    border-left: 4px solid #381a4a;
+}
+
+
+/* ACTIVE */
+
 .so-card-active {
     border-left: 4px solid #22a06b;
 }
+
+.so-card-active strong {
+    color: #16764e;
+}
+
+
+/* PARTIAL */
+
+.so-card-partial {
+    border-left: 4px solid #d99a16;
+}
+
+.so-card-partial strong {
+    color: #9a6800;
+}
+
+
+/* COMPLETED */
 
 .so-card-completed {
     border-left: 4px solid #381a4a;
 }
 
+.so-card-completed strong {
+    color: #5a3470;
+}
+
+
+/* CANCELLED */
+
 .so-card-cancelled {
     border-left: 4px solid #dc3545;
+}
+
+.so-card-cancelled strong {
+    color: #c62828;
 }
 
 
@@ -289,7 +349,8 @@
 
     background: white;
 
-    border: 1px solid #ece8ef;
+    border:
+        1px solid #ece8ef;
 
     border-radius: 10px;
 
@@ -347,6 +408,10 @@
         background 0.2s ease;
 }
 
+.so-search-box input::placeholder {
+    color: #aaa3ae;
+}
+
 .so-search-box input:focus {
     background: white;
 
@@ -356,12 +421,19 @@
         0 0 0 3px rgba(56, 26, 74, 0.08);
 }
 
+
+/* =========================================================
+   FILTER GROUP
+   ========================================================= */
+
 .so-filter-group {
     display: flex;
 
     align-items: center;
 
     gap: 8px;
+
+    flex-shrink: 0;
 }
 
 .so-filter-group select {
@@ -369,7 +441,8 @@
 
     min-width: 130px;
 
-    padding: 0 34px 0 12px;
+    padding:
+        0 34px 0 12px;
 
     border:
         1px solid #ded9e1;
@@ -385,6 +458,17 @@
     font-size: 13px;
 
     cursor: pointer;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.so-filter-group select:hover {
+    background: #fcfbfd;
+
+    border-color: #d2c8d8;
 }
 
 .so-filter-group select:focus {
@@ -395,13 +479,184 @@
 }
 
 
+/* =========================================================
+   REFRESH BUTTON
+   ========================================================= */
+
+.so-refresh-btn {
+    position: relative;
+
+    width: 96px;
+    min-width: 96px;
+
+    height: 39px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 0 13px;
+
+    border:
+        1px solid #ded7e3;
+
+    border-radius: 9px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff,
+            #fbf9fc
+        );
+
+    color: #381a4a;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    box-shadow:
+        0 2px 7px rgba(40, 25, 48, 0.05);
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+/* Refresh icon */
+
+.so-refresh-btn::before {
+    content: "↻";
+
+    width: 19px;
+    height: 19px;
+
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    color: #381a4a;
+
+    font-size: 19px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    transition:
+        transform 0.45s ease;
+}
+
+
+/* Refresh text */
+
+.so-refresh-btn::after {
+    content: "Refresh";
+
+    display: inline;
+
+    margin: 0;
+    padding: 0;
+
+    color: inherit;
+
+    background: none;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    opacity: 1;
+}
+
+
+/* Hover */
 
 .so-refresh-btn:hover {
-    background: #f6f1f8;
+    background:
+        linear-gradient(
+            180deg,
+            #faf6fc,
+            #f4edf7
+        );
 
-    border-color: #cfc3d5;
+    border-color: #cdbdd5;
 
-    transform: rotate(45deg);
+    color: #381a4a;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 6px 15px rgba(56, 26, 74, 0.11);
+}
+
+.so-refresh-btn:hover::before {
+    transform: rotate(180deg);
+}
+
+
+/* Active */
+
+.so-refresh-btn:active {
+    transform:
+        translateY(0)
+        scale(0.97);
+
+    box-shadow:
+        0 2px 5px rgba(56, 26, 74, 0.08);
+}
+
+
+/* Focus */
+
+.so-refresh-btn:focus-visible {
+    outline: none;
+
+    border-color: #381a4a;
+
+    box-shadow:
+        0 0 0 3px rgba(56, 26, 74, 0.10);
+}
+
+
+/* Refreshing */
+
+.so-refresh-btn.refreshing {
+    pointer-events: none;
+
+    background: #f4eef7;
+
+    border-color: #d5c6dc;
+
+    color: #381a4a;
+}
+
+.so-refresh-btn.refreshing::before {
+    animation:
+        soRefreshSpin 0.75s linear infinite;
+}
+
+@keyframes soRefreshSpin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
 }
 
 
@@ -446,6 +701,8 @@
 .so-status-dot {
     width: 7px;
     height: 7px;
+
+    flex: 0 0 7px;
 
     border-radius: 50%;
 
@@ -513,6 +770,7 @@
 
 .so-btn-primary {
     background: #381a4a;
+
     color: white;
 }
 
@@ -734,6 +992,7 @@
     margin: 0 auto 12px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -784,12 +1043,7 @@
     white-space: nowrap;
 }
 
-.status-open {
-    background: #e6f8ef;
-
-    color: #16764e;
-}
-
+.status-open,
 .status-active {
     background: #e6f8ef;
 
@@ -814,6 +1068,15 @@
     color: #956900;
 }
 
+.status-partial {
+    background: #fff5d9;
+
+    color: #966300;
+
+    border:
+        1px solid #f1d98d;
+}
+
 
 /* =========================================================
    DETAILS VIEW
@@ -834,6 +1097,7 @@
 }
 
 @keyframes soDetailsIn {
+
     from {
         opacity: 0;
 
@@ -847,6 +1111,7 @@
         transform:
             translateX(0);
     }
+
 }
 
 
@@ -855,6 +1120,8 @@
    ========================================================= */
 
 .so-details-header {
+    min-height: 58px;
+
     display: flex;
 
     align-items: center;
@@ -871,46 +1138,83 @@
 }
 
 .so-details-header-left {
+    min-width: 0;
+
     display: flex;
 
     align-items: center;
 
-    gap: 13px;
+    gap: 14px;
 }
 
 .so-back-btn {
-    width: 38px;
+    width: auto;
+
+    min-width: 42px;
+
     height: 38px;
 
-    display: flex;
+    display: inline-flex;
+
     align-items: center;
     justify-content: center;
 
-    border:
-        1px solid #ddd6e1;
+    gap: 8px;
 
-    border-radius: 8px;
+    padding: 0 13px;
+
+    border:
+        1px solid #ded7e3;
+
+    border-radius: 9px;
 
     background: white;
 
-    color: #4c4551;
+    color: #514957;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    font-size: 12px;
+
+    font-weight: 650;
 
     cursor: pointer;
 
-    font-size: 17px;
+    box-shadow:
+        0 2px 7px rgba(40, 25, 48, 0.05);
 
     transition:
         background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
         transform 0.2s ease,
-        border-color 0.2s ease;
+        box-shadow 0.2s ease;
 }
 
 .so-back-btn:hover {
-    background: #f6f1f8;
+    background: #f7f2fa;
 
-    border-color: #cfc3d5;
+    border-color: #cdbdd5;
 
-    transform: translateX(-2px);
+    color: #381a4a;
+
+    transform: translateX(-3px);
+
+    box-shadow:
+        0 5px 14px rgba(56, 26, 74, 0.10);
+}
+
+.so-back-btn:active {
+    transform:
+        translateX(-1px)
+        scale(0.98);
+}
+
+.so-back-btn::first-letter {
+    font-size: 17px;
 }
 
 .so-details-title {
@@ -921,6 +1225,8 @@
     font-size: 22px;
 
     font-weight: 750;
+
+    line-height: 1.15;
 }
 
 .so-details-title-icon {
@@ -943,16 +1249,221 @@
     vertical-align: middle;
 }
 
+
+/* =========================================================
+   DETAIL STATUS
+   ========================================================= */
+
 .so-detail-status {
-    margin-top: 5px;
+    flex: 0 0 auto;
 
-    font-size: 12px;
+    display: flex;
 
-    color: #89828d;
+    align-items: center;
+
+    justify-content: flex-end;
+
+    gap: 7px;
+
+    margin-top: 0;
+
+    color: #69616f;
+
+    font-size: 11px;
+
+    font-weight: 600;
 }
 
 .so-detail-status .status-badge {
-    margin-left: 5px;
+    position: relative;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    min-height: 30px;
+
+    padding:
+        0 12px 0 10px;
+
+    margin-left: 0;
+
+    border-radius: 20px;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    letter-spacing: 0.35px;
+
+    box-shadow:
+        0 3px 10px rgba(19, 115, 75, 0.08);
+}
+
+
+/* Default / Active */
+
+.so-detail-status .status-active,
+.so-detail-status .status-open {
+    background: #ecfdf5;
+
+    border:
+        1px solid #bcebd3;
+
+    color: #13734b;
+}
+
+.so-detail-status .status-active::before,
+.so-detail-status .status-open::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+
+    background: #20a464;
+
+    box-shadow:
+        0 0 0 3px rgba(32, 164, 100, 0.12);
+
+    animation:
+        activeStatusPulse 2s ease-in-out infinite;
+}
+
+@keyframes activeStatusPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+
+        box-shadow:
+            0 0 0 3px rgba(32, 164, 100, 0.12);
+    }
+
+    50% {
+        opacity: 0.75;
+
+        box-shadow:
+            0 0 0 5px rgba(32, 164, 100, 0.05);
+    }
+
+}
+
+
+/* Completed */
+
+.so-detail-status .status-completed {
+    background: #f2edf6;
+
+    border:
+        1px solid #d9cbe2;
+
+    color: #603a72;
+}
+
+.so-detail-status .status-completed::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+
+    background: #70418a;
+
+    box-shadow:
+        0 0 0 3px rgba(112, 65, 138, 0.10);
+}
+
+
+/* Cancelled */
+
+.so-detail-status .status-cancelled {
+    background: #fff1f1;
+
+    border:
+        1px solid #f2caca;
+
+    color: #bd3030;
+}
+
+.so-detail-status .status-cancelled::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+
+    background: #dc3545;
+
+    box-shadow:
+        0 0 0 3px rgba(220, 53, 69, 0.10);
+}
+
+
+/* Pending */
+
+.so-detail-status .status-pending {
+    background: #fff8e7;
+
+    border:
+        1px solid #f0ddb0;
+
+    color: #946900;
+}
+
+.so-detail-status .status-pending::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+
+    background: #d99a16;
+
+    box-shadow:
+        0 0 0 3px rgba(217, 154, 22, 0.10);
+}
+
+
+/* Partial */
+
+.so-detail-status .status-partial {
+    background: #fff8e7;
+
+    border:
+        1px solid #f1d98d;
+
+    color: #966300;
+}
+
+.so-detail-status .status-partial::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+
+    background: #d99a16;
+
+    box-shadow:
+        0 0 0 3px rgba(217, 154, 22, 0.10);
 }
 
 
@@ -996,6 +1507,7 @@
     margin-right: 9px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -1106,6 +1618,7 @@
     height: 27px;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -1350,6 +1863,7 @@
     display: flex;
 
     align-items: center;
+
     justify-content: space-between;
 
     gap: 20px;
@@ -1456,6 +1970,7 @@
     display: flex;
 
     align-items: center;
+
     justify-content: space-between;
 
     gap: 15px;
@@ -1501,6 +2016,7 @@
     flex: 0 0 auto;
 
     display: flex;
+
     align-items: center;
     justify-content: center;
 
@@ -1706,6 +2222,7 @@
 }
 
 @keyframes soOverlayIn {
+
     from {
         opacity: 0;
     }
@@ -1713,6 +2230,7 @@
     to {
         opacity: 1;
     }
+
 }
 
 .so-modal-content {
@@ -1745,6 +2263,7 @@
 }
 
 @keyframes soModalIn {
+
     from {
         opacity: 0;
 
@@ -1760,6 +2279,7 @@
             translateY(0)
             scale(1);
     }
+
 }
 
 
@@ -1799,7 +2319,8 @@
 .so-modal-header p {
     margin: 4px 0 0;
 
-    color: rgba(255,255,255,0.72);
+    color:
+        rgba(255,255,255,0.72);
 
     font-size: 11px;
 }
@@ -2068,7 +2589,8 @@
 }
 
 .pdf-modal-header span {
-    color: rgba(255,255,255,0.72);
+    color:
+        rgba(255,255,255,0.72);
 
     font-size: 10px;
 }
@@ -2278,12 +2800,16 @@
    RESPONSIVE — TABLET
    ========================================================= */
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
 
     .so-summary-grid {
         grid-template-columns:
-            repeat(2, minmax(0, 1fr));
+            repeat(3, minmax(0, 1fr));
     }
+
+}
+
+@media (max-width: 1100px) {
 
     .so-detail-info-grid {
         grid-template-columns:
@@ -2303,6 +2829,9 @@
         padding: 15px;
     }
 
+
+    /* Header */
+
     .so-main-header {
         align-items: flex-start;
 
@@ -2313,9 +2842,16 @@
         width: 100%;
     }
 
+
+    /* Summary */
+
     .so-summary-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
     }
+
+
+    /* Toolbar */
 
     .so-toolbar {
         align-items: stretch;
@@ -2335,6 +2871,15 @@
         flex: 1;
     }
 
+    .so-refresh-btn {
+        width: 96px;
+
+        min-width: 96px;
+    }
+
+
+    /* Action bar */
+
     .so-action-bar {
         align-items: stretch;
 
@@ -2351,14 +2896,25 @@
         flex: 1;
     }
 
+
+    /* Details */
+
     .so-details-header {
         align-items: flex-start;
 
         flex-direction: column;
+
+        gap: 12px;
     }
 
     .so-details-header-left {
         width: 100%;
+    }
+
+    .so-detail-status {
+        width: 100%;
+
+        justify-content: flex-start;
     }
 
     .so-detail-info-grid {
@@ -2373,6 +2929,9 @@
         grid-column: auto;
     }
 
+
+    /* Form */
+
     .form-grid {
         grid-template-columns: 1fr;
     }
@@ -2380,6 +2939,9 @@
     .form-grid .full-width {
         grid-column: auto;
     }
+
+
+    /* Detail actions */
 
     .so-details-actions {
         align-items: stretch;
@@ -2397,6 +2959,9 @@
         flex: 1;
     }
 
+
+    /* Totals */
+
     .detail-summary {
         justify-content: stretch;
     }
@@ -2404,6 +2969,9 @@
     .detail-summary-box {
         width: 100%;
     }
+
+
+    /* Modal */
 
     .so-modal {
         padding: 5px;
@@ -2432,6 +3000,9 @@
     .so-modal-footer {
         padding: 11px 13px;
     }
+
+
+    /* PDF */
 
     .pdf-modal {
         padding: 5px;
@@ -2478,9 +3049,40 @@
         font-size: 11px;
     }
 
+
+    /* Summary */
+
+    .so-summary-grid {
+        grid-template-columns: 1fr;
+    }
+
     .so-summary-card strong {
         font-size: 24px;
     }
+
+
+    /* Toolbar */
+
+    .so-filter-group {
+        display: grid;
+
+        grid-template-columns: 1fr 96px;
+
+        width: 100%;
+    }
+
+    .so-filter-group select {
+        width: 100%;
+    }
+
+    .so-refresh-btn {
+        width: 96px;
+
+        min-width: 96px;
+    }
+
+
+    /* Details */
 
     .so-section-header {
         align-items: flex-start;
@@ -2506,6 +3108,21 @@
         font-size: 18px;
     }
 
+    .so-back-btn {
+        height: 36px;
+
+        padding: 0 11px;
+
+        font-size: 11px;
+    }
+
+    .so-detail-status .status-badge {
+        min-height: 28px;
+
+        padding:
+            0 10px;
+    }
+
     .so-details-action-right {
         flex-direction: column;
     }
@@ -2513,6 +3130,9 @@
     .so-details-action-right .so-btn {
         width: 100%;
     }
+
+
+    /* Modal footer */
 
     .so-modal-footer {
         flex-direction: column-reverse;
@@ -2536,521 +3156,12 @@
     *::before,
     *::after {
         animation-duration: 0.01ms !important;
+
         animation-iteration-count: 1 !important;
 
         transition-duration: 0.01ms !important;
+
         scroll-behavior: auto !important;
-    }
-
-}
-
-/* =========================================================
-   SALES ORDER DETAILS — BACK BUTTON
-   ========================================================= */
-
-.so-details-header {
-    position: relative;
-}
-
-.so-details-header-left {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-}
-
-/* Back button */
-.so-back-btn {
-    width: auto;
-    min-width: 42px;
-    height: 38px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    gap: 8px;
-
-    padding: 0 13px;
-
-    border: 1px solid #ded7e3;
-    border-radius: 9px;
-
-    background: #ffffff;
-    color: #514957;
-
-    font-family: "Segoe UI", Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 650;
-
-    cursor: pointer;
-
-    box-shadow: 0 2px 7px rgba(40, 25, 48, 0.05);
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.so-back-btn:hover {
-    background: #f7f2fa;
-
-    border-color: #cdbdd5;
-
-    color: #381a4a;
-
-    transform: translateX(-3px);
-
-    box-shadow:
-        0 5px 14px rgba(56, 26, 74, 0.10);
-}
-
-.so-back-btn:active {
-    transform: translateX(-1px) scale(0.98);
-}
-
-/* Arrow */
-.so-back-btn::first-letter {
-    font-size: 17px;
-}
-
-
-/* =========================================================
-   ACTIVE STATUS — TOP RIGHT
-   ========================================================= */
-
-.so-detail-status {
-    display: flex;
-
-    align-items: center;
-    justify-content: flex-end;
-
-    gap: 7px;
-
-    margin-top: 0;
-
-    color: #69616f;
-
-    font-size: 11px;
-    font-weight: 600;
-}
-
-/*
-   If JS places "ACTIVE" inside .status-badge,
-   this makes it look like a proper status pill.
-*/
-
-.so-detail-status .status-badge {
-    position: relative;
-
-    display: inline-flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    min-height: 30px;
-
-    padding: 0 12px 0 10px;
-
-    margin-left: 0;
-
-    border-radius: 20px;
-
-    background: #ecfdf5;
-
-    border: 1px solid #bcebd3;
-
-    color: #13734b;
-
-    font-size: 11px;
-
-    font-weight: 750;
-
-    letter-spacing: 0.35px;
-
-    box-shadow:
-        0 3px 10px rgba(19, 115, 75, 0.08);
-}
-
-/* Green status dot */
-.so-detail-status .status-badge::before {
-    content: "";
-
-    width: 7px;
-    height: 7px;
-
-    flex: 0 0 7px;
-
-    border-radius: 50%;
-
-    background: #20a464;
-
-    box-shadow:
-        0 0 0 3px rgba(32, 164, 100, 0.12);
-
-    animation: activeStatusPulse 2s ease-in-out infinite;
-}
-
-@keyframes activeStatusPulse {
-    0%,
-    100% {
-        opacity: 1;
-
-        box-shadow:
-            0 0 0 3px rgba(32, 164, 100, 0.12);
-    }
-
-    50% {
-        opacity: 0.75;
-
-        box-shadow:
-            0 0 0 5px rgba(32, 164, 100, 0.05);
-    }
-}
-
-
-/* =========================================================
-   OTHER STATUS COLORS
-   ========================================================= */
-
-/* Completed */
-.so-detail-status .status-completed {
-    background: #f2edf6;
-
-    border-color: #d9cbe2;
-
-    color: #603a72;
-}
-
-.so-detail-status .status-completed::before {
-    background: #70418a;
-
-    box-shadow:
-        0 0 0 3px rgba(112, 65, 138, 0.10);
-
-    animation: none;
-}
-
-
-/* Cancelled */
-.so-detail-status .status-cancelled {
-    background: #fff1f1;
-
-    border-color: #f2caca;
-
-    color: #bd3030;
-}
-
-.so-detail-status .status-cancelled::before {
-    background: #dc3545;
-
-    box-shadow:
-        0 0 0 3px rgba(220, 53, 69, 0.10);
-
-    animation: none;
-}
-
-
-/* Pending */
-.so-detail-status .status-pending {
-    background: #fff8e7;
-
-    border-color: #f0ddb0;
-
-    color: #946900;
-}
-
-.so-detail-status .status-pending::before {
-    background: #d99a16;
-
-    box-shadow:
-        0 0 0 3px rgba(217, 154, 22, 0.10);
-
-    animation: none;
-}
-
-
-/* =========================================================
-   DETAILS HEADER — BETTER ALIGNMENT
-   ========================================================= */
-
-.so-details-header {
-    min-height: 58px;
-
-    display: flex;
-
-    align-items: center;
-    justify-content: space-between;
-
-    gap: 20px;
-
-    padding-bottom: 15px;
-
-    margin-bottom: 18px;
-
-    border-bottom: 1px solid #e8e3eb;
-}
-
-.so-details-header-left {
-    min-width: 0;
-}
-
-.so-details-title {
-    line-height: 1.15;
-}
-
-.so-detail-status {
-    flex: 0 0 auto;
-}
-
-
-/* =========================================================
-   MOBILE
-   ========================================================= */
-
-@media (max-width: 768px) {
-
-    .so-details-header {
-        align-items: flex-start;
-
-        flex-direction: column;
-
-        gap: 12px;
-    }
-
-    .so-details-header-left {
-        width: 100%;
-    }
-
-    .so-detail-status {
-        width: 100%;
-
-        justify-content: flex-start;
-    }
-
-}
-
-@media (max-width: 480px) {
-
-    .so-back-btn {
-        height: 36px;
-
-        padding: 0 11px;
-
-        font-size: 11px;
-    }
-
-    .so-detail-status .status-badge {
-        min-height: 28px;
-
-        padding: 0 10px;
-    }
-
-}
-
-/* =========================================================
-   PARTIAL STATUS
-========================================================= */
-
-.so-card-partial {
-    border-left: 4px solid #d99a16;
-}
-
-
-.so-card-partial .so-card-icon {
-    background: #fff5d9;
-    color: #a66b00;
-}
-
-
-.so-card-partial strong {
-    color: #9a6800;
-}
-
-
-/* =========================================================
-   PARTIAL STATUS BADGE
-========================================================= */
-
-.status-partial {
-    background: #fff5d9;
-    color: #966300;
-    border-color: #f1d98d;
-}
-
-
-.status-partial .status-dot {
-    background: #d99a16;
-}
-
-/* =========================================================
-   MODERN REFRESH BUTTON
-========================================================= */
-
-.so-refresh-btn {
-    height: 39px;
-    min-width: 96px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    gap: 8px;
-
-    padding: 0 14px;
-
-    border: 1px solid #ded7e3;
-    border-radius: 9px;
-
-    background: #ffffff;
-    color: #381a4a;
-
-    font-family: "Segoe UI", Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    white-space: nowrap;
-
-    box-shadow:
-        0 2px 7px rgba(40, 25, 48, 0.05);
-
-    transition:
-        background 0.2s ease,
-        border-color 0.2s ease,
-        color 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-
-/* =========================================================
-   REFRESH ICON
-========================================================= */
-
-.so-refresh-btn::before {
-    content: "↻";
-
-    width: 18px;
-    height: 18px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    font-size: 19px;
-    font-weight: 700;
-    line-height: 1;
-
-    transition: transform 0.45s ease;
-}
-
-
-/* =========================================================
-   REFRESH TEXT
-========================================================= */
-
-.so-refresh-btn::after {
-    content: "Refresh";
-
-    display: inline;
-
-    width: auto;
-    height: auto;
-
-    margin: 0;
-    padding: 0;
-
-    background: none;
-    border: none;
-
-    transform: none;
-    opacity: 1;
-
-    font-size: 12px;
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   HOVER
-========================================================= */
-
-.so-refresh-btn:hover {
-    background: #f7f2fa;
-
-    border-color: #cdbdd5;
-
-    color: #381a4a;
-
-    transform: translateY(-1px);
-
-    box-shadow:
-        0 5px 14px rgba(56, 26, 74, 0.11);
-}
-
-.so-refresh-btn:hover::before {
-    transform: rotate(180deg);
-}
-
-
-/* =========================================================
-   ACTIVE
-========================================================= */
-
-.so-refresh-btn:active {
-    transform: translateY(0) scale(0.98);
-
-    box-shadow:
-        0 2px 5px rgba(56, 26, 74, 0.08);
-}
-
-
-/* =========================================================
-   REFRESHING
-========================================================= */
-
-.so-refresh-btn.refreshing {
-    pointer-events: none;
-
-    background: #f4eef7;
-
-    border-color: #d5c6dc;
-
-    color: #381a4a;
-}
-
-.so-refresh-btn.refreshing::before {
-    animation: soRefreshSpin 0.75s linear infinite;
-}
-
-
-@keyframes soRefreshSpin {
-
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
-    }
-
-}
-
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 768px) {
-
-    .so-refresh-btn {
-        min-width: 96px;
-        height: 39px;
     }
 
 }
