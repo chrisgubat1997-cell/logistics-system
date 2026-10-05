@@ -1,908 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+/* =========================================================
+   LOGIS-TECH SYSTEM
+   CREATE DELIVERY RECEIPT
+   FRONTEND / LOCALSTORAGE VERSION
+   ========================================================= */
 
-    <title>Create Delivery Receipt | LOGIS-TECH SYSTEM</title>
-
-    <!--
-        CACHE BUSTER
-        Increment this number whenever you update the CSS.
-    -->
-    <link rel="stylesheet" href="../css/create-delivery-receipt.css?v=20261005-01">
-</head>
-
-<body>
-
-<div class="create-dr-page">
-
-    <!-- =====================================================
-         PAGE HEADER
-    ====================================================== -->
-
-    <div class="dr-page-header">
-
-        <div class="dr-header-left">
-
-            <button
-                type="button"
-                class="dr-back-btn"
-                id="backButton"
-            >
-                <span>←</span>
-                Back
-            </button>
-
-            <div class="dr-title-icon">
-                🚚
-            </div>
-
-            <div>
-                <div class="dr-page-title">
-                    Create Delivery Receipt
-                </div>
-
-                <div class="dr-page-subtitle">
-                    Prepare a delivery receipt from a posted Sales Order
-                </div>
-            </div>
-
-        </div>
-
-        <div class="dr-header-right">
-
-            <div class="dr-number-box">
-                <span>DR NUMBER</span>
-                <strong id="drNumber">
-                    DR-2026-00001
-                </strong>
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         PROGRESS / WORKFLOW
-    ====================================================== -->
-
-    <div class="dr-workflow">
-
-        <div class="workflow-step active">
-            <span class="workflow-number">1</span>
-
-            <div>
-                <strong>Select SO</strong>
-                <small>Choose posted SO</small>
-            </div>
-        </div>
-
-        <div class="workflow-line"></div>
-
-        <div class="workflow-step">
-            <span class="workflow-number">2</span>
-
-            <div>
-                <strong>Pick Items</strong>
-                <small>Select delivery items</small>
-            </div>
-        </div>
-
-        <div class="workflow-line"></div>
-
-        <div class="workflow-step">
-            <span class="workflow-number">3</span>
-
-            <div>
-                <strong>Prepare DR</strong>
-                <small>Review information</small>
-            </div>
-        </div>
-
-        <div class="workflow-line"></div>
-
-        <div class="workflow-step">
-            <span class="workflow-number">4</span>
-
-            <div>
-                <strong>Post DR</strong>
-                <small>Send to Finance</small>
-            </div>
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         MAIN CONTENT
-    ====================================================== -->
-
-    <main class="dr-main-content">
-
-
-        <!-- =================================================
-             SECTION 01 — SELECT SALES ORDER
-        ================================================== -->
-
-        <section class="dr-section">
-
-            <div class="dr-section-header">
-
-                <div class="dr-section-title-wrap">
-
-                    <div class="dr-section-number">
-                        01
-                    </div>
-
-                    <div>
-                        <h2>Select Sales Order</h2>
-
-                        <p>
-                            Only POSTED Sales Orders with remaining items are available.
-                        </p>
-                    </div>
-
-                </div>
-
-                <div class="posted-only-badge">
-                    POSTED SO ONLY
-                </div>
-
-            </div>
-
-
-            <div class="so-selector-area">
-
-                <label for="salesOrderSelect">
-                    Sales Order <span>*</span>
-                </label>
-
-                <select
-                    id="salesOrderSelect"
-                    class="dr-select"
-                >
-                    <option value="">
-                        -- Select Sales Order --
-                    </option>
-
-                    <!--
-                        MOCK SO DATA WILL BE LOADED HERE
-                    -->
-                </select>
-
-                <small class="field-help">
-                    Only posted Sales Orders with remaining quantities can be selected.
-                </small>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             SECTION 02 — SALES ORDER INFORMATION
-        ================================================== -->
-
-        <section
-            class="dr-section hidden"
-            id="soInformationSection"
-        >
-
-            <div class="dr-section-header">
-
-                <div class="dr-section-title-wrap">
-
-                    <div class="dr-section-number">
-                        02
-                    </div>
-
-                    <div>
-                        <h2>Sales Order Information</h2>
-
-                        <p>
-                            Information below is automatically loaded from the selected SO.
-                        </p>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="so-info-grid">
-
-                <div class="info-card">
-                    <span>SO Number</span>
-                    <strong id="soNumberDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>SO Date</span>
-                    <strong id="soDateDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Client Name</span>
-                    <strong id="clientNameDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Attention</span>
-                    <strong id="attentionDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>PO Number</span>
-                    <strong id="poNumberDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Project</span>
-                    <strong id="projectDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>TIN</span>
-                    <strong id="tinDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Payment Terms</span>
-                    <strong id="termsDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>Sales Engineer</span>
-                    <strong id="salesEngineerDisplay">—</strong>
-                </div>
-
-                <div class="info-card">
-                    <span>SO Status</span>
-                    <strong
-                        id="soStatusDisplay"
-                        class="status-badge status-posted"
-                    >
-                        POSTED
-                    </strong>
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             SECTION 03 — DELIVERY INFORMATION
-        ================================================== -->
-
-        <section
-            class="dr-section hidden"
-            id="deliveryInformationSection"
-        >
-
-            <div class="dr-section-header">
-
-                <div class="dr-section-title-wrap">
-
-                    <div class="dr-section-number">
-                        03
-                    </div>
-
-                    <div>
-                        <h2>Delivery Information</h2>
-
-                        <p>
-                            Delivery address may be changed because actual delivery location may differ from the SO.
-                        </p>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="delivery-form-grid">
-
-                <div class="form-group">
-
-                    <label for="dateOfTransfer">
-                        Date of Transfer <span>*</span>
-                    </label>
-
-                    <input
-                        type="date"
-                        id="dateOfTransfer"
-                        class="dr-input"
-                    >
-
-                    <small class="field-help">
-                        Required before preparing the DR.
-                    </small>
-
-                </div>
-
-
-                <div class="form-group full-width">
-
-                    <label for="deliveryAddress">
-                        Delivery Address <span>*</span>
-                    </label>
-
-                    <textarea
-                        id="deliveryAddress"
-                        class="dr-textarea"
-                        rows="3"
-                        placeholder="Enter actual delivery address..."
-                    ></textarea>
-
-                    <small class="field-help">
-                        This address can be changed from the original SO delivery address.
-                    </small>
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="driverName">
-                        Driver / Contact Person
-                    </label>
-
-                    <input
-                        type="text"
-                        id="driverName"
-                        class="dr-input"
-                        placeholder="Optional"
-                    >
-
-                </div>
-
-
-                <div class="form-group">
-
-                    <label for="vehicleNumber">
-                        Vehicle / Plate Number
-                    </label>
-
-                    <input
-                        type="text"
-                        id="vehicleNumber"
-                        class="dr-input"
-                        placeholder="Optional"
-                    >
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             SECTION 04 — ITEM PICKING
-        ================================================== -->
-
-        <section
-            class="dr-section hidden"
-            id="itemPickingSection"
-        >
-
-            <div class="dr-section-header">
-
-                <div class="dr-section-title-wrap">
-
-                    <div class="dr-section-number">
-                        04
-                    </div>
-
-                    <div>
-                        <h2>Pick Delivery Items</h2>
-
-                        <p>
-                            Select only the items included in the Sales Order.
-                            Quantity cannot exceed the remaining quantity.
-                        </p>
-                    </div>
-
-                </div>
-
-                <div class="remaining-summary">
-                    <span>ITEMS AVAILABLE</span>
-                    <strong id="availableItemCount">0</strong>
-                </div>
-
-            </div>
-
-
-            <!-- PICKING RULE NOTICE -->
-
-            <div class="picking-rule-box">
-
-                <div class="rule-icon">
-                    ✓
-                </div>
-
-                <div>
-
-                    <strong>
-                        Picking Rule
-                    </strong>
-
-                    <p>
-                        You may deliver partially. The system automatically deducts quantities
-                        from previous DRs and prevents over-delivery.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- ITEMS TABLE -->
-
-            <div class="items-table-container">
-
-                <table class="items-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th class="pick-column">
-                                PICK
-                            </th>
-
-                            <th>
-                                SO ITEM
-                            </th>
-
-                            <th>
-                                ORDERED
-                            </th>
-
-                            <th>
-                                PREVIOUSLY DELIVERED
-                            </th>
-
-                            <th>
-                                REMAINING
-                            </th>
-
-                            <th class="description-column">
-                                DR DESCRIPTION
-                            </th>
-
-                            <th class="qty-column">
-                                DR QTY
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="itemsTableBody">
-
-                        <!-- ITEMS WILL BE GENERATED HERE -->
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            <!-- PICKING TOTAL -->
-
-            <div class="picking-footer">
-
-                <div class="picked-summary">
-
-                    <div>
-                        <span>Selected Items</span>
-                        <strong id="selectedItemCount">0</strong>
-                    </div>
-
-                    <div>
-                        <span>Total Picked Qty</span>
-                        <strong id="totalPickedQty">0</strong>
-                    </div>
-
-                </div>
-
-                <div
-                    class="picking-warning"
-                    id="pickingWarning"
-                >
-                    Select at least one item.
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             SECTION 05 — DR SUMMARY
-        ================================================== -->
-
-        <section
-            class="dr-section hidden"
-            id="drSummarySection"
-        >
-
-            <div class="dr-section-header">
-
-                <div class="dr-section-title-wrap">
-
-                    <div class="dr-section-number">
-                        05
-                    </div>
-
-                    <div>
-                        <h2>Delivery Receipt Summary</h2>
-
-                        <p>
-                            Review the information before preparing the DR.
-                        </p>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="dr-summary-grid">
-
-                <div class="summary-box">
-
-                    <span>DR Number</span>
-
-                    <strong id="summaryDrNumber">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-box">
-
-                    <span>SO Number</span>
-
-                    <strong id="summarySoNumber">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-box">
-
-                    <span>Client</span>
-
-                    <strong id="summaryClient">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-box">
-
-                    <span>Date of Transfer</span>
-
-                    <strong id="summaryTransferDate">
-                        —
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="summary-address">
-
-                <span>Delivery Address</span>
-
-                <strong id="summaryAddress">
-                    —
-                </strong>
-
-            </div>
-
-
-            <div class="summary-items">
-
-                <h3>
-                    Selected Delivery Items
-                </h3>
-
-                <div id="summaryItemsList">
-
-                    <!-- SUMMARY ITEMS -->
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        <!-- =================================================
-             SECTION 06 — ACTIONS
-        ================================================== -->
-
-        <section
-            class="dr-actions-section hidden"
-            id="drActionsSection"
-        >
-
-            <div class="action-note">
-
-                <strong>
-                    Before you prepare this DR:
-                </strong>
-
-                <ul>
-
-                    <li>
-                        Make sure the Sales Order is correct.
-                    </li>
-
-                    <li>
-                        Verify Date of Transfer.
-                    </li>
-
-                    <li>
-                        Verify actual Delivery Address.
-                    </li>
-
-                    <li>
-                        Check selected items and quantities.
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-            <div class="dr-action-buttons">
-
-                <button
-                    type="button"
-                    class="dr-btn dr-btn-secondary"
-                    id="cancelButton"
-                >
-                    CANCEL
-                </button>
-
-                <button
-                    type="button"
-                    class="dr-btn dr-btn-outline"
-                    id="previewButton"
-                >
-                    PREVIEW DR
-                </button>
-
-                <button
-                    type="button"
-                    class="dr-btn dr-btn-primary"
-                    id="prepareButton"
-                >
-                    PREPARE DR
-                </button>
-
-                <button
-                    type="button"
-                    class="dr-btn dr-btn-success hidden"
-                    id="postButton"
-                >
-                    POST DR
-                </button>
-
-            </div>
-
-        </section>
-
-
-    </main>
-
-
-    <!-- =====================================================
-         WARNING MODAL
-    ====================================================== -->
-
-    <div
-        class="modal-overlay hidden"
-        id="warningModal"
-    >
-
-        <div class="warning-modal">
-
-            <div class="warning-modal-icon">
-                ⚠
-            </div>
-
-            <h3 id="warningTitle">
-                Warning
-            </h3>
-
-            <p id="warningMessage">
-                Please check the information.
-            </p>
-
-            <button
-                type="button"
-                class="dr-btn dr-btn-primary"
-                id="closeWarningButton"
-            >
-                OK
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         PREVIEW MODAL
-    ====================================================== -->
-
-    <div
-        class="modal-overlay hidden"
-        id="previewModal"
-    >
-
-        <div class="preview-modal">
-
-            <div class="preview-modal-header">
-
-                <div>
-                    <span>DELIVERY RECEIPT PREVIEW</span>
-                    <strong id="previewDrNumber">
-                        DR-2026-00001
-                    </strong>
-                </div>
-
-                <button
-                    type="button"
-                    class="preview-close"
-                    id="closePreviewButton"
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-            <div class="preview-document">
-
-                <div class="preview-company">
-                    <strong>
-                        LOGIS-TECH SYSTEM
-                    </strong>
-
-                    <span>
-                        DELIVERY RECEIPT
-                    </span>
-                </div>
-
-
-                <div class="preview-document-info">
-
-                    <div>
-                        <span>DR Number</span>
-                        <strong id="previewNumber">—</strong>
-                    </div>
-
-                    <div>
-                        <span>Date of Transfer</span>
-                        <strong id="previewDate">—</strong>
-                    </div>
-
-                    <div>
-                        <span>SO Number</span>
-                        <strong id="previewSO">—</strong>
-                    </div>
-
-                    <div>
-                        <span>PO Number</span>
-                        <strong id="previewPO">—</strong>
-                    </div>
-
-                </div>
-
-
-                <div class="preview-client-info">
-
-                    <div>
-                        <span>Client</span>
-                        <strong id="previewClient">—</strong>
-                    </div>
-
-                    <div>
-                        <span>Project</span>
-                        <strong id="previewProject">—</strong>
-                    </div>
-
-                    <div class="full-width">
-                        <span>Delivery Address</span>
-                        <strong id="previewAddress">—</strong>
-                    </div>
-
-                </div>
-
-
-                <table class="preview-items-table">
-
-                    <thead>
-
-                        <tr>
-                            <th>DESCRIPTION</th>
-                            <th>QTY</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="previewItemsBody">
-
-                    </tbody>
-
-                </table>
-
-
-                <div class="preview-signatures">
-
-                    <div>
-                        <span>Prepared By</span>
-                        <div class="signature-line"></div>
-                    </div>
-
-                    <div>
-                        <span>Received By</span>
-                        <div class="signature-line"></div>
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="preview-actions">
-
-                <button
-                    type="button"
-                    class="dr-btn dr-btn-secondary"
-                    id="closePreviewButton2"
-                >
-                    CLOSE
-                </button>
-
-                <button
-                    type="button"
-                    class="dr-btn dr-btn-primary"
-                    id="printButton"
-                >
-                    PRINT DR
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-</div>
-
-
-<!-- =========================================================
-     FRONTEND LOGIC
-     LOCALSTORAGE / MOCK DATA ONLY
-========================================================= -->
-
-<script>
 
 /* =========================================================
    CONFIGURATION
@@ -916,7 +17,7 @@ const STORAGE_KEYS = {
 
 /* =========================================================
    MOCK SALES ORDERS
-   Used ONLY if localStorage has no SO data yet.
+   Used only when localStorage has no SO data.
 ========================================================= */
 
 const MOCK_SALES_ORDERS = [
@@ -961,9 +62,7 @@ const MOCK_SALES_ORDERS = [
             }
 
         ]
-
     },
-
 
     {
         id: "SO-2026-00002",
@@ -998,7 +97,6 @@ const MOCK_SALES_ORDERS = [
             }
 
         ]
-
     }
 
 ];
@@ -1012,48 +110,27 @@ let salesOrders = [];
 let deliveryReceipts = [];
 
 let selectedSO = null;
-
 let pickedItems = [];
-
 let currentDR = null;
 
 
 /* =========================================================
-   ELEMENTS
+   DOM ELEMENTS
 ========================================================= */
 
-const salesOrderSelect =
-    document.getElementById("salesOrderSelect");
+let salesOrderSelect;
+let soInformationSection;
+let deliveryInformationSection;
+let itemPickingSection;
+let drSummarySection;
+let drActionsSection;
 
-const soInformationSection =
-    document.getElementById("soInformationSection");
+let itemsTableBody;
+let dateOfTransfer;
+let deliveryAddress;
 
-const deliveryInformationSection =
-    document.getElementById("deliveryInformationSection");
-
-const itemPickingSection =
-    document.getElementById("itemPickingSection");
-
-const drSummarySection =
-    document.getElementById("drSummarySection");
-
-const drActionsSection =
-    document.getElementById("drActionsSection");
-
-const itemsTableBody =
-    document.getElementById("itemsTableBody");
-
-const dateOfTransfer =
-    document.getElementById("dateOfTransfer");
-
-const deliveryAddress =
-    document.getElementById("deliveryAddress");
-
-const warningModal =
-    document.getElementById("warningModal");
-
-const previewModal =
-    document.getElementById("previewModal");
+let warningModal;
+let previewModal;
 
 
 /* =========================================================
@@ -1068,6 +145,8 @@ document.addEventListener(
 
 function initialize() {
 
+    cacheElements();
+
     loadData();
 
     generateDRNumber();
@@ -1077,6 +156,80 @@ function initialize() {
     setupEvents();
 
     setToday();
+
+    /*
+        IMPORTANT:
+        If delivery.js opened this page using:
+
+        create-delivery-receipt.html?so=SO-2026-5501
+
+        automatically select that SO.
+    */
+    autoSelectSOFromURL();
+
+}
+
+
+/* =========================================================
+   CACHE ELEMENTS
+========================================================= */
+
+function cacheElements() {
+
+    salesOrderSelect =
+        document.getElementById(
+            "salesOrderSelect"
+        );
+
+    soInformationSection =
+        document.getElementById(
+            "soInformationSection"
+        );
+
+    deliveryInformationSection =
+        document.getElementById(
+            "deliveryInformationSection"
+        );
+
+    itemPickingSection =
+        document.getElementById(
+            "itemPickingSection"
+        );
+
+    drSummarySection =
+        document.getElementById(
+            "drSummarySection"
+        );
+
+    drActionsSection =
+        document.getElementById(
+            "drActionsSection"
+        );
+
+    itemsTableBody =
+        document.getElementById(
+            "itemsTableBody"
+        );
+
+    dateOfTransfer =
+        document.getElementById(
+            "dateOfTransfer"
+        );
+
+    deliveryAddress =
+        document.getElementById(
+            "deliveryAddress"
+        );
+
+    warningModal =
+        document.getElementById(
+            "warningModal"
+        );
+
+    previewModal =
+        document.getElementById(
+            "previewModal"
+        );
 
 }
 
@@ -1113,8 +266,8 @@ function loadData() {
 
 
         /*
-            If there is no SO in localStorage,
-            save mock data so it can be tested.
+            Only create mock SO data when
+            there is absolutely no SO data yet.
         */
 
         if (!storedSO) {
@@ -1156,7 +309,6 @@ function saveData() {
         JSON.stringify(salesOrders)
     );
 
-
     localStorage.setItem(
         STORAGE_KEYS.deliveryReceipts,
         JSON.stringify(deliveryReceipts)
@@ -1166,25 +318,30 @@ function saveData() {
 
 
 /* =========================================================
-   POPULATE SO SELECT
+   POPULATE SALES ORDER DROPDOWN
 ========================================================= */
 
 function populateSalesOrders() {
 
-    salesOrderSelect.innerHTML =
-        `<option value="">
+    salesOrderSelect.innerHTML = `
+        <option value="">
             -- Select Sales Order --
-        </option>`;
+        </option>
+    `;
 
 
     const availableSO =
         salesOrders.filter(so => {
 
+            const status =
+                String(
+                    so.status || ""
+                ).toUpperCase();
+
+
             if (
-                String(so.status).toUpperCase()
-                !== "POSTED" &&
-                String(so.status).toUpperCase()
-                !== "PARTIAL"
+                status !== "POSTED" &&
+                status !== "PARTIAL"
             ) {
 
                 return false;
@@ -1200,14 +357,23 @@ function populateSalesOrders() {
     availableSO.forEach(so => {
 
         const option =
-            document.createElement("option");
+            document.createElement(
+                "option"
+            );
 
-        option.value = so.id || so.soNumber;
+
+        option.value =
+            so.id ||
+            so.soNumber;
+
 
         option.textContent =
-            `${so.soNumber} — ${so.client}`;
+            `${so.soNumber} — ${so.client || "No Client"}`;
 
-        salesOrderSelect.appendChild(option);
+
+        salesOrderSelect.appendChild(
+            option
+        );
 
     });
 
@@ -1215,7 +381,144 @@ function populateSalesOrders() {
 
 
 /* =========================================================
-   GET DR DELIVERED QTY FOR SO ITEM
+   AUTO SELECT SO FROM URL
+========================================================= */
+
+function autoSelectSOFromURL() {
+
+    const params =
+        new URLSearchParams(
+            window.location.search
+        );
+
+
+    const requestedSO =
+        params.get("so");
+
+
+    /*
+        No ?so= parameter.
+        Normal Create DR mode.
+    */
+
+    if (!requestedSO) {
+
+        return;
+
+    }
+
+
+    const decodedSO =
+        decodeURIComponent(
+            requestedSO
+        );
+
+
+    const foundSO =
+        salesOrders.find(
+            so =>
+                String(
+                    so.soNumber || ""
+                ).toUpperCase()
+                ===
+                String(
+                    decodedSO
+                ).toUpperCase()
+                ||
+                String(
+                    so.id || ""
+                ).toUpperCase()
+                ===
+                String(
+                    decodedSO
+                ).toUpperCase()
+        );
+
+
+    if (!foundSO) {
+
+        showWarning(
+            "Sales Order Not Found",
+            `The Sales Order "${decodedSO}" could not be found in local storage.`
+        );
+
+        return;
+
+    }
+
+
+    /*
+        Check if SO is still available.
+    */
+
+    const status =
+        String(
+            foundSO.status || ""
+        ).toUpperCase();
+
+
+    if (
+        status !== "POSTED" &&
+        status !== "PARTIAL"
+    ) {
+
+        showWarning(
+            "Sales Order Not Available",
+            `${foundSO.soNumber} is currently ${foundSO.status || "NOT AVAILABLE"}. Only POSTED or PARTIAL SOs can be used for Delivery.`
+        );
+
+        return;
+
+    }
+
+
+    if (
+        getSOItemsRemaining(foundSO) <= 0
+    ) {
+
+        showWarning(
+            "Sales Order Fully Delivered",
+            `${foundSO.soNumber} has no remaining quantity for delivery.`
+        );
+
+        return;
+
+    }
+
+
+    /*
+        Set dropdown.
+    */
+
+    salesOrderSelect.value =
+        foundSO.id ||
+        foundSO.soNumber;
+
+
+    /*
+        Load SO directly.
+    */
+
+    selectedSO =
+        foundSO;
+
+
+    loadSelectedSO();
+
+
+    /*
+        Small visual confirmation.
+    */
+
+    salesOrderSelect.classList.add(
+        "auto-selected"
+    );
+
+}
+
+
+/* =========================================================
+   GET PREVIOUSLY DELIVERED QTY
 ========================================================= */
 
 function getPreviouslyDeliveredQty(
@@ -1226,9 +529,19 @@ function getPreviouslyDeliveredQty(
     return deliveryReceipts.reduce(
         (total, dr) => {
 
+            /*
+                Cancelled DRs do not count.
+            */
+
             if (
-                dr.soNumber !== soNumber ||
-                dr.status === "CANCELLED"
+                String(dr.soNumber || "")
+                !==
+                String(soNumber || "")
+                ||
+                String(dr.status || "")
+                    .toUpperCase()
+                    ===
+                    "CANCELLED"
             ) {
 
                 return total;
@@ -1239,7 +552,13 @@ function getPreviouslyDeliveredQty(
             const matchingItem =
                 (dr.items || []).find(
                     item =>
-                        item.sourceItemId === itemId
+                        String(
+                            item.sourceItemId || ""
+                        )
+                        ===
+                        String(
+                            itemId || ""
+                        )
                 );
 
 
@@ -1251,7 +570,9 @@ function getPreviouslyDeliveredQty(
 
 
             return total +
-                Number(matchingItem.qty || 0);
+                Number(
+                    matchingItem.qty || 0
+                );
 
         },
         0
@@ -1269,15 +590,17 @@ function getRemainingQty(
     item
 ) {
 
+    const ordered =
+        Number(
+            item.orderedQty || 0
+        );
+
+
     const delivered =
         getPreviouslyDeliveredQty(
             so.soNumber,
             item.id
         );
-
-
-    const ordered =
-        Number(item.orderedQty || 0);
 
 
     return Math.max(
@@ -1294,7 +617,9 @@ function getRemainingQty(
 
 function getSOItemsRemaining(so) {
 
-    return (so.items || []).reduce(
+    return (
+        so.items || []
+    ).reduce(
         (total, item) => {
 
             return total +
@@ -1311,50 +636,53 @@ function getSOItemsRemaining(so) {
 
 
 /* =========================================================
-   SELECT SO
+   SALES ORDER CHANGE
 ========================================================= */
 
-salesOrderSelect.addEventListener(
-    "change",
-    function() {
+function handleSOChange() {
 
-        const selectedId =
-            this.value;
+    const selectedId =
+        salesOrderSelect.value;
 
 
-        if (!selectedId) {
+    if (!selectedId) {
 
-            clearSO();
+        clearSO();
 
-            return;
-
-        }
-
-
-        selectedSO =
-            salesOrders.find(
-                so =>
-                    (so.id || so.soNumber)
-                    === selectedId
-            );
-
-
-        if (!selectedSO) {
-
-            showWarning(
-                "Sales Order Not Found",
-                "The selected Sales Order could not be found."
-            );
-
-            return;
-
-        }
-
-
-        loadSelectedSO();
+        return;
 
     }
-);
+
+
+    selectedSO =
+        salesOrders.find(
+            so =>
+                String(
+                    so.id ||
+                    so.soNumber
+                )
+                ===
+                String(
+                    selectedId
+                )
+        );
+
+
+    if (!selectedSO) {
+
+        showWarning(
+            "Sales Order Not Found",
+            "The selected Sales Order could not be found."
+        );
+
+        return;
+
+    }
+
+
+    loadSelectedSO();
+
+}
 
 
 /* =========================================================
@@ -1363,94 +691,210 @@ salesOrderSelect.addEventListener(
 
 function loadSelectedSO() {
 
-    document
-        .getElementById("soNumberDisplay")
-        .textContent =
-        selectedSO.soNumber || "—";
+    if (!selectedSO) {
+
+        return;
+
+    }
 
 
     document
-        .getElementById("soDateDisplay")
+        .getElementById(
+            "soNumberDisplay"
+        )
         .textContent =
-        formatDate(selectedSO.soDate);
+        selectedSO.soNumber ||
+        "—";
 
 
     document
-        .getElementById("clientNameDisplay")
+        .getElementById(
+            "soDateDisplay"
+        )
         .textContent =
-        selectedSO.client || "—";
+        formatDate(
+            selectedSO.soDate
+        );
 
 
     document
-        .getElementById("attentionDisplay")
+        .getElementById(
+            "clientNameDisplay"
+        )
         .textContent =
-        selectedSO.attention || "—";
+        selectedSO.client ||
+        "—";
 
 
     document
-        .getElementById("poNumberDisplay")
+        .getElementById(
+            "attentionDisplay"
+        )
         .textContent =
-        selectedSO.poNumber || "—";
+        selectedSO.attention ||
+        "—";
 
 
     document
-        .getElementById("projectDisplay")
+        .getElementById(
+            "poNumberDisplay"
+        )
         .textContent =
-        selectedSO.project || "—";
+        selectedSO.poNumber ||
+        "—";
 
 
     document
-        .getElementById("tinDisplay")
+        .getElementById(
+            "projectDisplay"
+        )
         .textContent =
-        selectedSO.tin || "—";
+        selectedSO.project ||
+        "—";
 
 
     document
-        .getElementById("termsDisplay")
+        .getElementById(
+            "tinDisplay"
+        )
         .textContent =
-        selectedSO.terms || "—";
+        selectedSO.tin ||
+        "—";
 
 
     document
-        .getElementById("salesEngineerDisplay")
+        .getElementById(
+            "termsDisplay"
+        )
         .textContent =
-        selectedSO.salesEngineer || "—";
+        selectedSO.terms ||
+        "—";
 
 
     document
-        .getElementById("soStatusDisplay")
+        .getElementById(
+            "salesEngineerDisplay"
+        )
         .textContent =
-        selectedSO.status || "POSTED";
+        selectedSO.salesEngineer ||
+        "—";
 
+
+    const status =
+        String(
+            selectedSO.status ||
+            "POSTED"
+        ).toUpperCase();
+
+
+    document
+        .getElementById(
+            "soStatusDisplay"
+        )
+        .textContent =
+        status;
+
+
+    document
+        .getElementById(
+            "soStatusDisplay"
+        )
+        .className =
+        "status-badge status-" +
+        status.toLowerCase();
+
+
+    /*
+        IMPORTANT:
+        Delivery address is automatically
+        copied from SO but remains editable.
+    */
 
     deliveryAddress.value =
-        selectedSO.deliveryAddress || "";
+        selectedSO.deliveryAddress ||
+        "";
+
+
+    /*
+        Reset driver / vehicle for new DR.
+    */
+
+    document
+        .getElementById(
+            "driverName"
+        )
+        .value = "";
+
+
+    document
+        .getElementById(
+            "vehicleNumber"
+        )
+        .value = "";
 
 
     pickedItems = [];
+
+    currentDR = null;
+
+
+    /*
+        Reset action buttons.
+    */
+
+    document
+        .getElementById(
+            "prepareButton"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "postButton"
+        )
+        .classList.add(
+            "hidden"
+        );
 
 
     renderItems();
 
 
+    /*
+        Show all sections.
+    */
+
     soInformationSection
-        .classList.remove("hidden");
+        .classList.remove(
+            "hidden"
+        );
 
 
     deliveryInformationSection
-        .classList.remove("hidden");
+        .classList.remove(
+            "hidden"
+        );
 
 
     itemPickingSection
-        .classList.remove("hidden");
+        .classList.remove(
+            "hidden"
+        );
 
 
     drSummarySection
-        .classList.add("hidden");
+        .classList.add(
+            "hidden"
+        );
 
 
     drActionsSection
-        .classList.remove("hidden");
+        .classList.remove(
+            "hidden"
+        );
 
 
     updateWorkflow(2);
@@ -1469,7 +913,9 @@ function renderItems() {
 
     if (
         !selectedSO ||
-        !Array.isArray(selectedSO.items)
+        !Array.isArray(
+            selectedSO.items
+        )
     ) {
 
         return;
@@ -1511,7 +957,9 @@ function renderItems() {
 
 
             const row =
-                document.createElement("tr");
+                document.createElement(
+                    "tr"
+                );
 
 
             const disabled =
@@ -1533,7 +981,6 @@ function renderItems() {
 
                 </td>
 
-
                 <td>
 
                     <div class="so-item-name">
@@ -1554,16 +1001,13 @@ function renderItems() {
 
                 </td>
 
-
                 <td>
                     ${ordered}
                 </td>
 
-
                 <td>
                     ${delivered}
                 </td>
-
 
                 <td>
 
@@ -1578,7 +1022,6 @@ function renderItems() {
                     </strong>
 
                 </td>
-
 
                 <td>
 
@@ -1611,7 +1054,6 @@ function renderItems() {
 
                 </td>
 
-
                 <td>
 
                     <div class="qty-input-wrap">
@@ -1638,14 +1080,18 @@ function renderItems() {
             `;
 
 
-            itemsTableBody.appendChild(row);
+            itemsTableBody.appendChild(
+                row
+            );
 
         }
     );
 
 
     document
-        .getElementById("availableItemCount")
+        .getElementById(
+            "availableItemCount"
+        )
         .textContent =
         availableCount;
 
@@ -1664,168 +1110,198 @@ function renderItems() {
 function setupItemEvents() {
 
     document
-        .querySelectorAll(".item-check")
-        .forEach(checkbox => {
+        .querySelectorAll(
+            ".item-check"
+        )
+        .forEach(
+            checkbox => {
 
-            checkbox.addEventListener(
-                "change",
-                function() {
+                checkbox.addEventListener(
+                    "change",
+                    function() {
 
-                    const index =
-                        Number(
-                            this.dataset.index
-                        );
-
-
-                    const qtyInput =
-                        document.querySelector(
-                            `.dr-qty[data-index="${index}"]`
-                        );
+                        const index =
+                            Number(
+                                this.dataset.index
+                            );
 
 
-                    const descriptionInput =
-                        document.querySelector(
-                            `.dr-description[data-index="${index}"]`
-                        );
+                        const qtyInput =
+                            document.querySelector(
+                                `.dr-qty[data-index="${index}"]`
+                            );
 
 
-                    const customToggle =
-                        document.querySelector(
-                            `.custom-description[data-index="${index}"]`
-                        );
+                        const descriptionInput =
+                            document.querySelector(
+                                `.dr-description[data-index="${index}"]`
+                            );
 
 
-                    qtyInput.disabled =
-                        !this.checked;
+                        const customToggle =
+                            document.querySelector(
+                                `.custom-description[data-index="${index}"]`
+                            );
 
 
-                    customToggle.disabled =
-                        !this.checked;
+                        qtyInput.disabled =
+                            !this.checked;
 
 
-                    descriptionInput.disabled =
-                        !this.checked ||
-                        !customToggle.checked;
+                        customToggle.disabled =
+                            !this.checked;
 
 
-                    if (!this.checked) {
+                        descriptionInput.disabled =
+                            !this.checked ||
+                            !customToggle.checked;
 
-                        qtyInput.value = 0;
 
-                        customToggle.checked =
-                            false;
+                        if (!this.checked) {
 
-                        descriptionInput.value =
-                            selectedSO.items[index]
-                                .description;
+                            qtyInput.value =
+                                0;
+
+
+                            customToggle.checked =
+                                false;
+
+
+                            descriptionInput.value =
+                                selectedSO
+                                    .items[index]
+                                    .description;
+
+                        }
+
+
+                        updatePickingSummary();
 
                     }
+                );
 
-
-                    updatePickingSummary();
-
-                }
-            );
-
-        });
+            }
+        );
 
 
     document
-        .querySelectorAll(".custom-description")
-        .forEach(toggle => {
+        .querySelectorAll(
+            ".custom-description"
+        )
+        .forEach(
+            toggle => {
 
-            toggle.addEventListener(
-                "change",
-                function() {
+                toggle.addEventListener(
+                    "change",
+                    function() {
 
-                    const index =
-                        Number(
-                            this.dataset.index
-                        );
-
-
-                    const descriptionInput =
-                        document.querySelector(
-                            `.dr-description[data-index="${index}"]`
-                        );
+                        const index =
+                            Number(
+                                this.dataset.index
+                            );
 
 
-                    descriptionInput.disabled =
-                        !this.checked;
+                        const descriptionInput =
+                            document.querySelector(
+                                `.dr-description[data-index="${index}"]`
+                            );
 
 
-                    if (!this.checked) {
+                        descriptionInput.disabled =
+                            !this.checked;
 
-                        descriptionInput.value =
-                            selectedSO.items[index]
-                                .description;
+
+                        if (!this.checked) {
+
+                            descriptionInput.value =
+                                selectedSO
+                                    .items[index]
+                                    .description;
+
+                        }
 
                     }
+                );
 
-                }
-            );
-
-        });
+            }
+        );
 
 
     document
-        .querySelectorAll(".dr-qty")
-        .forEach(input => {
+        .querySelectorAll(
+            ".dr-qty"
+        )
+        .forEach(
+            input => {
 
-            input.addEventListener(
-                "input",
-                function() {
+                input.addEventListener(
+                    "input",
+                    function() {
 
-                    const index =
-                        Number(
-                            this.dataset.index
-                        );
-
-
-                    const item =
-                        selectedSO.items[index];
-
-
-                    const remaining =
-                        getRemainingQty(
-                            selectedSO,
-                            item
-                        );
+                        const index =
+                            Number(
+                                this.dataset.index
+                            );
 
 
-                    let qty =
-                        Number(
-                            this.value
-                        );
+                        const item =
+                            selectedSO
+                                .items[index];
 
 
-                    if (qty < 0) {
+                        const remaining =
+                            getRemainingQty(
+                                selectedSO,
+                                item
+                            );
 
-                        qty = 0;
+
+                        let qty =
+                            Number(
+                                this.value
+                            );
+
+
+                        if (
+                            !Number.isFinite(
+                                qty
+                            ) ||
+                            qty < 0
+                        ) {
+
+                            qty = 0;
+
+                        }
+
+
+                        if (
+                            qty >
+                            remaining
+                        ) {
+
+                            qty =
+                                remaining;
+
+
+                            this.value =
+                                remaining;
+
+
+                            showWarning(
+                                "Quantity Exceeded",
+                                `Maximum remaining quantity for "${item.description}" is ${remaining}.`
+                            );
+
+                        }
+
+
+                        updatePickingSummary();
 
                     }
+                );
 
-
-                    if (qty > remaining) {
-
-                        this.value =
-                            remaining;
-
-
-                        showWarning(
-                            "Quantity Exceeded",
-                            `Maximum remaining quantity for "${item.description}" is ${remaining}.`
-                        );
-
-                    }
-
-
-                    updatePickingSummary();
-
-                }
-            );
-
-        });
+            }
+        );
 
 }
 
@@ -1843,7 +1319,6 @@ function updatePickingSummary() {
 
 
     let selectedCount = 0;
-
     let totalQty = 0;
 
 
@@ -1879,13 +1354,17 @@ function updatePickingSummary() {
 
 
     document
-        .getElementById("selectedItemCount")
+        .getElementById(
+            "selectedItemCount"
+        )
         .textContent =
         selectedCount;
 
 
     document
-        .getElementById("totalPickedQty")
+        .getElementById(
+            "totalPickedQty"
+        )
         .textContent =
         totalQty;
 
@@ -1901,7 +1380,9 @@ function updatePickingSummary() {
         warning.textContent =
             "Select at least one item.";
 
-        warning.classList.add("warning");
+        warning.classList.add(
+            "warning"
+        );
 
     }
 
@@ -1910,7 +1391,9 @@ function updatePickingSummary() {
         warning.textContent =
             "Items and quantities are ready.";
 
-        warning.classList.remove("warning");
+        warning.classList.remove(
+            "warning"
+        );
 
     }
 
@@ -1927,7 +1410,9 @@ function buildPickedItems() {
 
 
     document
-        .querySelectorAll(".item-check:checked")
+        .querySelectorAll(
+            ".item-check:checked"
+        )
         .forEach(check => {
 
             const index =
@@ -1991,9 +1476,11 @@ function buildPickedItems() {
 
                 description:
                     descriptionInput.value.trim()
-                        || sourceItem.description,
+                        ||
+                    sourceItem.description,
 
-                qty: qty,
+                qty:
+                    qty,
 
                 unit:
                     sourceItem.unit || ""
@@ -2011,14 +1498,6 @@ function buildPickedItems() {
 /* =========================================================
    PREPARE DR
 ========================================================= */
-
-document
-    .getElementById("prepareButton")
-    .addEventListener(
-        "click",
-        prepareDR
-    );
-
 
 function prepareDR() {
 
@@ -2112,10 +1591,11 @@ function prepareDR() {
             selectedSO.soNumber,
 
         soId:
-            selectedSO.id,
+            selectedSO.id ||
+            selectedSO.soNumber,
 
         client:
-            selectedSO.client,
+            selectedSO.client || "",
 
         attention:
             selectedSO.attention || "",
@@ -2125,6 +1605,15 @@ function prepareDR() {
 
         project:
             selectedSO.project || "",
+
+        tin:
+            selectedSO.tin || "",
+
+        terms:
+            selectedSO.terms || "",
+
+        salesEngineer:
+            selectedSO.salesEngineer || "",
 
         dateOfTransfer:
             dateOfTransfer.value,
@@ -2142,7 +1631,8 @@ function prepareDR() {
                 "vehicleNumber"
             ).value.trim(),
 
-        items: items,
+        items:
+            items,
 
         status:
             "PREPARED",
@@ -2157,13 +1647,23 @@ function prepareDR() {
 
     updateWorkflow(3);
 
-    document
-        .getElementById("prepareButton")
-        .classList.add("hidden");
 
     document
-        .getElementById("postButton")
-        .classList.remove("hidden");
+        .getElementById(
+            "prepareButton"
+        )
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "postButton"
+        )
+        .classList.remove(
+            "hidden"
+        );
 
 }
 
@@ -2182,25 +1682,33 @@ function renderSummary() {
 
 
     document
-        .getElementById("summaryDrNumber")
+        .getElementById(
+            "summaryDrNumber"
+        )
         .textContent =
         currentDR.drNumber;
 
 
     document
-        .getElementById("summarySoNumber")
+        .getElementById(
+            "summarySoNumber"
+        )
         .textContent =
         currentDR.soNumber;
 
 
     document
-        .getElementById("summaryClient")
+        .getElementById(
+            "summaryClient"
+        )
         .textContent =
         currentDR.client;
 
 
     document
-        .getElementById("summaryTransferDate")
+        .getElementById(
+            "summaryTransferDate"
+        )
         .textContent =
         formatDate(
             currentDR.dateOfTransfer
@@ -2208,7 +1716,9 @@ function renderSummary() {
 
 
     document
-        .getElementById("summaryAddress")
+        .getElementById(
+            "summaryAddress"
+        )
         .textContent =
         currentDR.deliveryAddress;
 
@@ -2222,50 +1732,60 @@ function renderSummary() {
     list.innerHTML = "";
 
 
-    currentDR.items.forEach(item => {
+    currentDR.items.forEach(
+        item => {
 
-        const row =
-            document.createElement("div");
+            const row =
+                document.createElement(
+                    "div"
+                );
 
 
-        row.className =
-            "summary-item-row";
+            row.className =
+                "summary-item-row";
 
 
-        row.innerHTML = `
+            row.innerHTML = `
 
-            <div>
+                <div>
+
+                    <strong>
+                        ${escapeHTML(
+                            item.description
+                        )}
+                    </strong>
+
+                    <small>
+                        Source SO Item:
+                        ${escapeHTML(
+                            item.sourceDescription
+                        )}
+                    </small>
+
+                </div>
 
                 <strong>
+                    ${item.qty}
                     ${escapeHTML(
-                        item.description
+                        item.unit
                     )}
                 </strong>
 
-                <small>
-                    Source SO Item:
-                    ${escapeHTML(
-                        item.sourceDescription
-                    )}
-                </small>
-
-            </div>
-
-            <strong>
-                ${item.qty}
-                ${escapeHTML(item.unit)}
-            </strong>
-
-        `;
+            `;
 
 
-        list.appendChild(row);
+            list.appendChild(
+                row
+            );
 
-    });
+        }
+    );
 
 
     drSummarySection
-        .classList.remove("hidden");
+        .classList.remove(
+            "hidden"
+        );
 
 }
 
@@ -2273,14 +1793,6 @@ function renderSummary() {
 /* =========================================================
    POST DR
 ========================================================= */
-
-document
-    .getElementById("postButton")
-    .addEventListener(
-        "click",
-        postDR
-    );
-
 
 function postDR() {
 
@@ -2296,6 +1808,91 @@ function postDR() {
     }
 
 
+    /*
+        Re-check quantities before posting.
+        This prevents accidental over-delivery.
+    */
+
+    const latestSO =
+        salesOrders.find(
+            so =>
+                String(
+                    so.soNumber
+                )
+                ===
+                String(
+                    currentDR.soNumber
+                )
+        );
+
+
+    if (!latestSO) {
+
+        showWarning(
+            "Sales Order Missing",
+            "The source Sales Order could not be found."
+        );
+
+        return;
+
+    }
+
+
+    for (
+        const item
+        of currentDR.items
+    ) {
+
+        const sourceItem =
+            latestSO.items.find(
+                source =>
+                    String(
+                        source.id
+                    )
+                    ===
+                    String(
+                        item.sourceItemId
+                    )
+            );
+
+
+        if (!sourceItem) {
+
+            showWarning(
+                "Item Missing",
+                `The source item "${item.sourceDescription}" could not be found.`
+            );
+
+            return;
+
+        }
+
+
+        const remaining =
+            getRemainingQty(
+                latestSO,
+                sourceItem
+            );
+
+
+        if (
+            Number(item.qty)
+            >
+            Number(remaining)
+        ) {
+
+            showWarning(
+                "Quantity Exceeded",
+                `The quantity for "${sourceItem.description}" is no longer available. Remaining quantity is ${remaining}.`
+            );
+
+            return;
+
+        }
+
+    }
+
+
     currentDR.status =
         "POSTED";
 
@@ -2304,26 +1901,29 @@ function postDR() {
         new Date().toISOString();
 
 
-    /*
-        Add DR to localStorage.
-    */
-
     deliveryReceipts.push(
         currentDR
     );
 
 
     /*
-        Update SO status based on remaining quantities.
+        Update SO status.
     */
 
     updateSOStatusAfterDR(
-        selectedSO
+        latestSO
     );
 
 
-    saveData();
+    /*
+        Keep selectedSO synchronized.
+    */
 
+    selectedSO =
+        latestSO;
+
+
+    saveData();
 
     updateWorkflow(4);
 
@@ -2334,27 +1934,34 @@ function postDR() {
     );
 
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        window.location.href =
-            "delivery.html";
+            window.location.href =
+                "delivery.html";
 
-    }, 1200);
+        },
+        1200
+    );
 
 }
 
 
 /* =========================================================
-   UPDATE SO STATUS
+   UPDATE SO STATUS AFTER DR
 ========================================================= */
 
 function updateSOStatusAfterDR(so) {
 
     const remaining =
-        getSOItemsRemaining(so);
+        getSOItemsRemaining(
+            so
+        );
 
 
-    if (remaining <= 0) {
+    if (
+        remaining <= 0
+    ) {
 
         so.status =
             "COMPLETED";
@@ -2374,14 +1981,6 @@ function updateSOStatusAfterDR(so) {
 /* =========================================================
    PREVIEW
 ========================================================= */
-
-document
-    .getElementById("previewButton")
-    .addEventListener(
-        "click",
-        previewDR
-    );
-
 
 function previewDR() {
 
@@ -2403,7 +2002,9 @@ function previewDR() {
     try {
 
         items =
-            buildPickedItems();
+            currentDR
+                ? currentDR.items
+                : buildPickedItems();
 
     }
 
@@ -2432,7 +2033,9 @@ function previewDR() {
 
 
     document
-        .getElementById("previewDrNumber")
+        .getElementById(
+            "previewDrNumber"
+        )
         .textContent =
         document.getElementById(
             "drNumber"
@@ -2440,7 +2043,9 @@ function previewDR() {
 
 
     document
-        .getElementById("previewNumber")
+        .getElementById(
+            "previewNumber"
+        )
         .textContent =
         document.getElementById(
             "drNumber"
@@ -2448,42 +2053,63 @@ function previewDR() {
 
 
     document
-        .getElementById("previewDate")
+        .getElementById(
+            "previewDate"
+        )
         .textContent =
         formatDate(
-            dateOfTransfer.value
+            currentDR
+                ? currentDR.dateOfTransfer
+                : dateOfTransfer.value
         );
 
 
     document
-        .getElementById("previewSO")
+        .getElementById(
+            "previewSO"
+        )
         .textContent =
         selectedSO.soNumber;
 
 
     document
-        .getElementById("previewPO")
+        .getElementById(
+            "previewPO"
+        )
         .textContent =
-        selectedSO.poNumber || "—";
-
-
-    document
-        .getElementById("previewClient")
-        .textContent =
-        selectedSO.client;
-
-
-    document
-        .getElementById("previewProject")
-        .textContent =
-        selectedSO.project || "—";
-
-
-    document
-        .getElementById("previewAddress")
-        .textContent =
-        deliveryAddress.value ||
+        selectedSO.poNumber ||
         "—";
+
+
+    document
+        .getElementById(
+            "previewClient"
+        )
+        .textContent =
+        selectedSO.client ||
+        "—";
+
+
+    document
+        .getElementById(
+            "previewProject"
+        )
+        .textContent =
+        selectedSO.project ||
+        "—";
+
+
+    document
+        .getElementById(
+            "previewAddress"
+        )
+        .textContent =
+        currentDR
+            ? currentDR.deliveryAddress
+            : (
+                deliveryAddress.value ||
+                "—"
+            );
 
 
     const body =
@@ -2495,37 +2121,45 @@ function previewDR() {
     body.innerHTML = "";
 
 
-    items.forEach(item => {
+    items.forEach(
+        item => {
 
-        const row =
-            document.createElement("tr");
-
-
-        row.innerHTML = `
-
-            <td>
-                ${escapeHTML(
-                    item.description
-                )}
-            </td>
-
-            <td>
-                ${item.qty}
-                ${escapeHTML(
-                    item.unit
-                )}
-            </td>
-
-        `;
+            const row =
+                document.createElement(
+                    "tr"
+                );
 
 
-        body.appendChild(row);
+            row.innerHTML = `
 
-    });
+                <td>
+                    ${escapeHTML(
+                        item.description
+                    )}
+                </td>
+
+                <td>
+                    ${item.qty}
+                    ${escapeHTML(
+                        item.unit
+                    )}
+                </td>
+
+            `;
+
+
+            body.appendChild(
+                row
+            );
+
+        }
+    );
 
 
     previewModal
-        .classList.remove("hidden");
+        .classList.remove(
+            "hidden"
+        );
 
 }
 
@@ -2539,94 +2173,96 @@ function showWarning(
     message
 ) {
 
-    document
-        .getElementById("warningTitle")
-        .textContent =
-        title;
+    const titleElement =
+        document.getElementById(
+            "warningTitle"
+        );
 
 
-    document
-        .getElementById("warningMessage")
-        .textContent =
-        message;
+    const messageElement =
+        document.getElementById(
+            "warningMessage"
+        );
 
 
-    warningModal
-        .classList.remove("hidden");
+    if (titleElement) {
+
+        titleElement.textContent =
+            title;
+
+    }
+
+
+    if (messageElement) {
+
+        messageElement.textContent =
+            message;
+
+    }
+
+
+    if (warningModal) {
+
+        warningModal
+            .classList.remove(
+                "hidden"
+            );
+
+    }
 
 }
 
 
-document
-    .getElementById("closeWarningButton")
-    .addEventListener(
-        "click",
-        () => {
+/* =========================================================
+   CLOSE WARNING
+========================================================= */
 
-            warningModal
-                .classList.add("hidden");
+function closeWarning() {
 
-        }
-    );
+    if (warningModal) {
+
+        warningModal
+            .classList.add(
+                "hidden"
+            );
+
+    }
+
+}
 
 
 /* =========================================================
    CLOSE PREVIEW
 ========================================================= */
 
-document
-    .getElementById("closePreviewButton")
-    .addEventListener(
-        "click",
-        () => {
+function closePreview() {
 
-            previewModal
-                .classList.add("hidden");
+    if (previewModal) {
 
-        }
-    );
+        previewModal
+            .classList.add(
+                "hidden"
+            );
 
+    }
 
-document
-    .getElementById("closePreviewButton2")
-    .addEventListener(
-        "click",
-        () => {
-
-            previewModal
-                .classList.add("hidden");
-
-        }
-    );
+}
 
 
 /* =========================================================
    PRINT
 ========================================================= */
 
-document
-    .getElementById("printButton")
-    .addEventListener(
-        "click",
-        () => {
+function printDR() {
 
-            window.print();
+    window.print();
 
-        }
-    );
+}
 
 
 /* =========================================================
    CANCEL
 ========================================================= */
-
-document
-    .getElementById("cancelButton")
-    .addEventListener(
-        "click",
-        cancelDR
-    );
-
 
 function cancelDR() {
 
@@ -2653,17 +2289,12 @@ function cancelDR() {
    BACK
 ========================================================= */
 
-document
-    .getElementById("backButton")
-    .addEventListener(
-        "click",
-        () => {
+function goBack() {
 
-            window.location.href =
-                "delivery.html";
+    window.location.href =
+        "delivery.html";
 
-        }
-    );
+}
 
 
 /* =========================================================
@@ -2676,20 +2307,55 @@ function clearSO() {
 
     pickedItems = [];
 
+    currentDR = null;
+
+
     soInformationSection
-        .classList.add("hidden");
+        .classList.add(
+            "hidden"
+        );
+
 
     deliveryInformationSection
-        .classList.add("hidden");
+        .classList.add(
+            "hidden"
+        );
+
 
     itemPickingSection
-        .classList.add("hidden");
+        .classList.add(
+            "hidden"
+        );
+
 
     drSummarySection
-        .classList.add("hidden");
+        .classList.add(
+            "hidden"
+        );
+
 
     drActionsSection
-        .classList.add("hidden");
+        .classList.add(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "prepareButton"
+        )
+        .classList.remove(
+            "hidden"
+        );
+
+
+    document
+        .getElementById(
+            "postButton"
+        )
+        .classList.add(
+            "hidden"
+        );
 
 }
 
@@ -2745,7 +2411,9 @@ function generateDRNumber() {
 
 
     document
-        .getElementById("drNumber")
+        .getElementById(
+            "drNumber"
+        )
         .textContent =
         `DR-${year}-${nextNumber}`;
 
@@ -2753,7 +2421,7 @@ function generateDRNumber() {
 
 
 /* =========================================================
-   TODAY
+   SET TODAY
 ========================================================= */
 
 function setToday() {
@@ -2827,6 +2495,43 @@ function formatDate(value) {
     }
 
 
+    /*
+        Handle YYYY-MM-DD safely
+        without timezone shifting.
+    */
+
+    if (
+        /^\d{4}-\d{2}-\d{2}$/.test(
+            String(value)
+        )
+    ) {
+
+        const [
+            year,
+            month,
+            day
+        ] =
+        String(value)
+            .split("-")
+            .map(Number);
+
+
+        return new Date(
+            year,
+            month - 1,
+            day
+        ).toLocaleDateString(
+            "en-PH",
+            {
+                year: "numeric",
+                month: "short",
+                day: "numeric"
+            }
+        );
+
+    }
+
+
     const date =
         new Date(value);
 
@@ -2889,20 +2594,155 @@ function escapeHTML(value) {
 
 function escapeAttribute(value) {
 
-    return escapeHTML(value);
+    return escapeHTML(
+        value
+    );
 
 }
 
 
 /* =========================================================
-   SETUP EVENTS
+   SETUP ALL EVENTS
 ========================================================= */
 
 function setupEvents() {
 
     /*
-        Prevent accidental form-like submission
-        if this page is embedded later.
+        Sales Order selector
+    */
+
+    salesOrderSelect
+        .addEventListener(
+            "change",
+            handleSOChange
+        );
+
+
+    /*
+        Prepare DR
+    */
+
+    document
+        .getElementById(
+            "prepareButton"
+        )
+        .addEventListener(
+            "click",
+            prepareDR
+        );
+
+
+    /*
+        Post DR
+    */
+
+    document
+        .getElementById(
+            "postButton"
+        )
+        .addEventListener(
+            "click",
+            postDR
+        );
+
+
+    /*
+        Preview DR
+    */
+
+    document
+        .getElementById(
+            "previewButton"
+        )
+        .addEventListener(
+            "click",
+            previewDR
+        );
+
+
+    /*
+        Warning modal
+    */
+
+    document
+        .getElementById(
+            "closeWarningButton"
+        )
+        .addEventListener(
+            "click",
+            closeWarning
+        );
+
+
+    /*
+        Preview close
+    */
+
+    document
+        .getElementById(
+            "closePreviewButton"
+        )
+        .addEventListener(
+            "click",
+            closePreview
+        );
+
+
+    document
+        .getElementById(
+            "closePreviewButton2"
+        )
+        .addEventListener(
+            "click",
+            closePreview
+        );
+
+
+    /*
+        Print
+    */
+
+    document
+        .getElementById(
+            "printButton"
+        )
+        .addEventListener(
+            "click",
+            printDR
+        );
+
+
+    /*
+        Cancel
+    */
+
+    document
+        .getElementById(
+            "cancelButton"
+        )
+        .addEventListener(
+            "click",
+            cancelDR
+        );
+
+
+    /*
+        Back
+    */
+
+    document
+        .getElementById(
+            "backButton"
+        )
+        .addEventListener(
+            "click",
+            goBack
+        );
+
+
+    /*
+        Prevent Enter from accidentally
+        submitting quantity input.
     */
 
     document.addEventListener(
@@ -2923,9 +2763,27 @@ function setupEvents() {
         }
     );
 
+
+    /*
+        ESC closes modals.
+    */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                closeWarning();
+
+                closePreview();
+
+            }
+
+        }
+    );
+
 }
 
-</script>
-
-</body>
-</html>
