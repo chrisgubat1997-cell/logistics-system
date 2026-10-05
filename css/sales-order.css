@@ -2568,3 +2568,310 @@
     }
 
 }
+
+/* =========================================================
+   SALES ORDER DETAILS — BACK BUTTON
+   ========================================================= */
+
+.so-details-header {
+    position: relative;
+}
+
+.so-details-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+/* Back button */
+.so-back-btn {
+    width: auto;
+    min-width: 42px;
+    height: 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    padding: 0 13px;
+
+    border: 1px solid #ded7e3;
+    border-radius: 9px;
+
+    background: #ffffff;
+    color: #514957;
+
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 650;
+
+    cursor: pointer;
+
+    box-shadow: 0 2px 7px rgba(40, 25, 48, 0.05);
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.so-back-btn:hover {
+    background: #f7f2fa;
+
+    border-color: #cdbdd5;
+
+    color: #381a4a;
+
+    transform: translateX(-3px);
+
+    box-shadow:
+        0 5px 14px rgba(56, 26, 74, 0.10);
+}
+
+.so-back-btn:active {
+    transform: translateX(-1px) scale(0.98);
+}
+
+/* Arrow */
+.so-back-btn::first-letter {
+    font-size: 17px;
+}
+
+
+/* =========================================================
+   ACTIVE STATUS — TOP RIGHT
+   ========================================================= */
+
+.so-detail-status {
+    display: flex;
+
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 7px;
+
+    margin-top: 0;
+
+    color: #69616f;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/*
+   If JS places "ACTIVE" inside .status-badge,
+   this makes it look like a proper status pill.
+*/
+
+.so-detail-status .status-badge {
+    position: relative;
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    min-height: 30px;
+
+    padding: 0 12px 0 10px;
+
+    margin-left: 0;
+
+    border-radius: 20px;
+
+    background: #ecfdf5;
+
+    border: 1px solid #bcebd3;
+
+    color: #13734b;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    letter-spacing: 0.35px;
+
+    box-shadow:
+        0 3px 10px rgba(19, 115, 75, 0.08);
+}
+
+/* Green status dot */
+.so-detail-status .status-badge::before {
+    content: "";
+
+    width: 7px;
+    height: 7px;
+
+    flex: 0 0 7px;
+
+    border-radius: 50%;
+
+    background: #20a464;
+
+    box-shadow:
+        0 0 0 3px rgba(32, 164, 100, 0.12);
+
+    animation: activeStatusPulse 2s ease-in-out infinite;
+}
+
+@keyframes activeStatusPulse {
+    0%,
+    100% {
+        opacity: 1;
+
+        box-shadow:
+            0 0 0 3px rgba(32, 164, 100, 0.12);
+    }
+
+    50% {
+        opacity: 0.75;
+
+        box-shadow:
+            0 0 0 5px rgba(32, 164, 100, 0.05);
+    }
+}
+
+
+/* =========================================================
+   OTHER STATUS COLORS
+   ========================================================= */
+
+/* Completed */
+.so-detail-status .status-completed {
+    background: #f2edf6;
+
+    border-color: #d9cbe2;
+
+    color: #603a72;
+}
+
+.so-detail-status .status-completed::before {
+    background: #70418a;
+
+    box-shadow:
+        0 0 0 3px rgba(112, 65, 138, 0.10);
+
+    animation: none;
+}
+
+
+/* Cancelled */
+.so-detail-status .status-cancelled {
+    background: #fff1f1;
+
+    border-color: #f2caca;
+
+    color: #bd3030;
+}
+
+.so-detail-status .status-cancelled::before {
+    background: #dc3545;
+
+    box-shadow:
+        0 0 0 3px rgba(220, 53, 69, 0.10);
+
+    animation: none;
+}
+
+
+/* Pending */
+.so-detail-status .status-pending {
+    background: #fff8e7;
+
+    border-color: #f0ddb0;
+
+    color: #946900;
+}
+
+.so-detail-status .status-pending::before {
+    background: #d99a16;
+
+    box-shadow:
+        0 0 0 3px rgba(217, 154, 22, 0.10);
+
+    animation: none;
+}
+
+
+/* =========================================================
+   DETAILS HEADER — BETTER ALIGNMENT
+   ========================================================= */
+
+.so-details-header {
+    min-height: 58px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 20px;
+
+    padding-bottom: 15px;
+
+    margin-bottom: 18px;
+
+    border-bottom: 1px solid #e8e3eb;
+}
+
+.so-details-header-left {
+    min-width: 0;
+}
+
+.so-details-title {
+    line-height: 1.15;
+}
+
+.so-detail-status {
+    flex: 0 0 auto;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    .so-details-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 12px;
+    }
+
+    .so-details-header-left {
+        width: 100%;
+    }
+
+    .so-detail-status {
+        width: 100%;
+
+        justify-content: flex-start;
+    }
+
+}
+
+@media (max-width: 480px) {
+
+    .so-back-btn {
+        height: 36px;
+
+        padding: 0 11px;
+
+        font-size: 11px;
+    }
+
+    .so-detail-status .status-badge {
+        min-height: 28px;
+
+        padding: 0 10px;
+    }
+
+}
