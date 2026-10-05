@@ -1,4 +1,3 @@
-```javascript
 /* =========================================================
    LOGIS-TECH SYSTEM
    FLEET & DELIVERY ANALYTICS
@@ -27,37 +26,21 @@ window.FleetAnalytics = {
 
 /* =========================================================
    INITIALIZE
-   IMPORTANT:
-   This function is called by index.html AFTER the
-   Fleet Analytics module and required JS files are loaded.
 ========================================================= */
 
 function initializeFleetAnalytics() {
-
-    /* Prevent duplicate initialization */
-
-    if (window.FleetAnalytics.initialized) {
-
-        console.log(
-            "Fleet Analytics already initialized."
-        );
-
-        return;
-
-    }
-
 
     console.log(
         "Initializing Fleet & Delivery Analytics..."
     );
 
 
-    /* Mark initialized */
-
-    window.FleetAnalytics.initialized = true;
-
-
-    /* Setup */
+    /*
+       We allow the initialization function to run
+       again safely, but we DO NOT create duplicate
+       click listeners because event delegation below
+       uses only one listener.
+    */
 
     setupAnalyticsTabs();
 
@@ -70,8 +53,11 @@ function initializeFleetAnalytics() {
     refreshCurrentAnalytics();
 
 
+    window.FleetAnalytics.initialized = true;
+
+
     console.log(
-        "Fleet & Delivery Analytics initialized successfully."
+        "Fleet & Delivery Analytics initialized."
     );
 
 }
@@ -79,69 +65,87 @@ function initializeFleetAnalytics() {
 
 /* =========================================================
    TAB SETUP
+   EVENT DELEGATION
 ========================================================= */
 
 function setupAnalyticsTabs() {
 
-    const tabs =
-        document.querySelectorAll(
-            ".analytics-tab"
-        );
+    /*
+       IMPORTANT:
+
+       Fleet Analytics HTML is dynamically loaded
+       into index.html.
+
+       Therefore we use document-level event
+       delegation instead of attaching listeners
+       directly to the buttons.
+    */
 
 
-    if (!tabs.length) {
-
-        console.warn(
-            "No analytics tabs found."
-        );
+    if (
+        window.FleetAnalytics.tabsListenerAttached
+    ) {
 
         return;
 
     }
 
 
-    tabs.forEach(function (tab) {
+    document.addEventListener(
+        "click",
+        function (event) {
 
-        /* Prevent duplicate event listeners */
-
-        if (
-            tab.dataset.analyticsListener === "true"
-        ) {
-
-            return;
-
-        }
+            const tab =
+                event.target.closest(
+                    ".analytics-tab"
+                );
 
 
-        tab.dataset.analyticsListener = "true";
+            /*
+               Click was not on an analytics tab.
+            */
 
+            if (!tab) {
 
-        tab.addEventListener(
-            "click",
-            function () {
-
-                const section =
-                    this.dataset.section;
-
-
-                if (!section) {
-
-                    return;
-
-                }
-
-
-                switchAnalytics(section);
+                return;
 
             }
-        );
 
-    });
+
+            const section =
+                tab.dataset.section;
+
+
+            if (!section) {
+
+                console.warn(
+                    "Analytics tab has no data-section:",
+                    tab
+                );
+
+                return;
+
+            }
+
+
+            console.log(
+                "Analytics tab clicked:",
+                section
+            );
+
+
+            switchAnalytics(section);
+
+        }
+    );
+
+
+    window.FleetAnalytics.tabsListenerAttached =
+        true;
 
 
     console.log(
-        "Analytics tabs initialized:",
-        tabs.length
+        "Analytics tab event delegation attached."
     );
 
 }
@@ -154,11 +158,9 @@ function setupAnalyticsTabs() {
 function switchAnalytics(section) {
 
     const validSections = [
-
         "fleet",
         "delivery",
         "dr"
-
     ];
 
 
@@ -176,18 +178,30 @@ function switchAnalytics(section) {
     }
 
 
-    /* Save current section */
+    console.log(
+        "Switching analytics to:",
+        section
+    );
+
+
+    /*
+       Save current section
+    */
 
     window.FleetAnalytics.currentSection =
         section;
 
 
-    /* Change visible section */
+    /*
+       Change visible section
+    */
 
     activateSection(section);
 
 
-    /* Refresh data */
+    /*
+       Refresh the selected analytics
+    */
 
     refreshCurrentAnalytics();
 
@@ -220,14 +234,31 @@ function activateSection(section) {
     };
 
 
-    /* =====================================================
-       HIDE ALL ANALYTICS SECTIONS
-    ===================================================== */
+    console.log(
+        "Activating section:",
+        section
+    );
 
-    Object.values(sections).forEach(
-        function (element) {
+
+    /*
+       =====================================================
+       HIDE ALL
+       =====================================================
+    */
+
+    Object.keys(sections).forEach(
+        function (key) {
+
+            const element =
+                sections[key];
+
 
             if (!element) {
+
+                console.warn(
+                    "Section not found:",
+                    key
+                );
 
                 return;
 
@@ -242,26 +273,38 @@ function activateSection(section) {
     );
 
 
-    /* =====================================================
-       SHOW SELECTED SECTION
-    ===================================================== */
+    /*
+       =====================================================
+       SHOW SELECTED
+       =====================================================
+    */
 
     const selected =
         sections[section];
 
 
-    if (selected) {
+    if (!selected) {
 
-        selected.classList.add(
-            "active"
+        console.error(
+            "Selected analytics section not found:",
+            section
         );
+
+        return;
 
     }
 
 
-    /* =====================================================
-       UPDATE ANALYTICS BUTTONS
-    ===================================================== */
+    selected.classList.add(
+        "active"
+    );
+
+
+    /*
+       =====================================================
+       UPDATE BUTTON ACTIVE STATE
+       =====================================================
+    */
 
     const tabs =
         document.querySelectorAll(
@@ -269,18 +312,27 @@ function activateSection(section) {
         );
 
 
-    tabs.forEach(function (tab) {
+    tabs.forEach(
+        function (tab) {
 
-        const isActive =
-            tab.dataset.section === section;
+            const isActive =
+                tab.dataset.section ===
+                section;
 
 
-        tab.classList.toggle(
-            "active",
-            isActive
-        );
+            tab.classList.toggle(
+                "active",
+                isActive
+            );
 
-    });
+        }
+    );
+
+
+    console.log(
+        "Active section:",
+        selected.id
+    );
 
 }
 
@@ -307,20 +359,15 @@ function setupFilters() {
         );
 
 
-    /* =====================================================
-       VEHICLE FILTER
-    ===================================================== */
+    /*
+       VEHICLE
+    */
 
     if (vehicleFilter) {
 
         if (
-            vehicleFilter.dataset.analyticsListener
-            !== "true"
+            !vehicleFilter.dataset.analyticsListener
         ) {
-
-            vehicleFilter.dataset.analyticsListener =
-                "true";
-
 
             vehicleFilter.addEventListener(
                 "change",
@@ -335,6 +382,10 @@ function setupFilters() {
                 }
             );
 
+
+            vehicleFilter.dataset.analyticsListener =
+                "true";
+
         }
 
 
@@ -344,20 +395,15 @@ function setupFilters() {
     }
 
 
-    /* =====================================================
-       YEAR FILTER
-    ===================================================== */
+    /*
+       YEAR
+    */
 
     if (yearFilter) {
 
         if (
-            yearFilter.dataset.analyticsListener
-            !== "true"
+            !yearFilter.dataset.analyticsListener
         ) {
-
-            yearFilter.dataset.analyticsListener =
-                "true";
-
 
             yearFilter.addEventListener(
                 "change",
@@ -372,6 +418,10 @@ function setupFilters() {
                 }
             );
 
+
+            yearFilter.dataset.analyticsListener =
+                "true";
+
         }
 
 
@@ -381,20 +431,15 @@ function setupFilters() {
     }
 
 
-    /* =====================================================
-       MONTH FILTER
-    ===================================================== */
+    /*
+       MONTH
+    */
 
     if (monthFilter) {
 
         if (
-            monthFilter.dataset.analyticsListener
-            !== "true"
+            !monthFilter.dataset.analyticsListener
         ) {
-
-            monthFilter.dataset.analyticsListener =
-                "true";
-
 
             monthFilter.addEventListener(
                 "change",
@@ -408,6 +453,10 @@ function setupFilters() {
 
                 }
             );
+
+
+            monthFilter.dataset.analyticsListener =
+                "true";
 
         }
 
@@ -426,13 +475,9 @@ function setupFilters() {
 
 function handleFilterChange() {
 
-    const filters =
-        window.FleetAnalytics.filters;
-
-
     console.log(
-        "Analytics filters:",
-        filters
+        "Analytics filters changed:",
+        window.FleetAnalytics.filters
     );
 
 
@@ -478,7 +523,7 @@ function refreshCurrentAnalytics() {
             else {
 
                 console.warn(
-                    "refreshFleetPerformance() is not available."
+                    "refreshFleetPerformance() not available."
                 );
 
             }
@@ -504,7 +549,7 @@ function refreshCurrentAnalytics() {
             else {
 
                 console.warn(
-                    "refreshDeliveryPerformance() is not available."
+                    "refreshDeliveryPerformance() not available."
                 );
 
             }
@@ -530,7 +575,7 @@ function refreshCurrentAnalytics() {
             else {
 
                 console.warn(
-                    "refreshDRMonitoring() is not available."
+                    "refreshDRMonitoring() not available."
                 );
 
             }
@@ -784,7 +829,7 @@ function setElementText(
 
 
 /* =========================================================
-   ADD / REMOVE LOADING STATE
+   LOADING STATE
 ========================================================= */
 
 function setAnalyticsLoading(
@@ -820,51 +865,38 @@ function setAnalyticsLoading(
 window.initializeFleetAnalytics =
     initializeFleetAnalytics;
 
-
 window.switchAnalytics =
     switchAnalytics;
-
 
 window.getAnalyticsFilters =
     getAnalyticsFilters;
 
-
 window.getCurrentAnalyticsSection =
     getCurrentAnalyticsSection;
-
 
 window.formatNumber =
     formatNumber;
 
-
 window.formatKilometer =
     formatKilometer;
-
 
 window.formatLiters =
     formatLiters;
 
-
 window.formatKmPerLiter =
     formatKmPerLiter;
-
 
 window.formatCurrency =
     formatCurrency;
 
-
 window.formatDays =
     formatDays;
-
 
 window.setElementText =
     setElementText;
 
-
 window.setAnalyticsLoading =
     setAnalyticsLoading;
 
-
 window.showAnalyticsEmptyState =
     showAnalyticsEmptyState;
-```
