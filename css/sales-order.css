@@ -745,36 +745,35 @@
 }
 
 
-/* =========================================================
-   13. SELECTED SO PREVIEW
-   ========================================================= */
-
 .sales-order-module .selected-so {
     width: 100%;
-    margin-top: 12px;
-    border: 1px solid #e7ebf2;
+    margin-bottom: 12px;
+    border: 1px solid #dbe4f0;
     border-radius: 12px;
     background: #ffffff;
+    box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
 }
 
 .sales-order-module .selected-so-placeholder {
-    min-height: 72px;
-    padding: 13px 16px;
+    min-height: 64px;
+    padding: 12px 15px;
     display: flex;
     align-items: center;
-    gap: 11px;
+    gap: 10px;
     color: #8a94a5;
 }
 
 .sales-order-module .selected-so-placeholder > span {
-    width: 35px;
-    height: 35px;
-    min-width: 35px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 9px;
-    background: #f4f7fb;
+    background: #eff6ff;
+    color: #2563eb;
     font-size: 15px;
 }
 
@@ -782,6 +781,7 @@
     display: block;
     color: #4b5563;
     font-size: 12px;
+    font-weight: 750;
 }
 
 .sales-order-module .selected-so-placeholder small {
