@@ -9,7 +9,7 @@
 
     <link
         rel="stylesheet"
-        href="../css/create-delivery-receipt.css?v=20261005-02"
+        href="../css/create-delivery-receipt.css?v=20261005-03"
     >
 </head>
 
@@ -29,7 +29,7 @@
                 type="button"
                 id="backButton"
                 class="icon-button"
-                title="Back to Delivery"
+                title="Back to Main"
             >
                 ←
             </button>
@@ -187,7 +187,7 @@
 
 
             <!-- =============================================
-                 SALES ORDER SELECTION
+                 01. SALES ORDER SEARCH
                  ============================================= -->
 
             <section class="dr-card">
@@ -207,7 +207,7 @@
                             </h2>
 
                             <p>
-                                Select the Sales Order for this delivery.
+                                Search and select the Sales Order for this delivery.
                             </p>
 
                         </div>
@@ -217,29 +217,98 @@
                 </div>
 
 
-                <div class="form-group">
+                <div class="sales-order-search-wrapper">
 
-                    <label for="salesOrderSelect">
+                    <div class="form-group">
 
-                        SALES ORDER
+                        <label for="salesOrderSearch">
 
-                        <span class="required">
-                            *
-                        </span>
+                            SALES ORDER
 
-                    </label>
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
 
 
-                    <select
-                        id="salesOrderSelect"
-                        class="form-control"
+                        <div class="search-input-wrapper">
+
+                            <span class="search-icon">
+                                ⌕
+                            </span>
+
+                            <input
+                                type="text"
+                                id="salesOrderSearch"
+                                class="form-control search-input"
+                                placeholder="Search SO number, client, project, PO number..."
+                                autocomplete="off"
+                            >
+
+                            <button
+                                type="button"
+                                id="clearSalesOrderSearch"
+                                class="search-clear hidden"
+                                title="Clear"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+
+                        <!-- SEARCH SUGGESTIONS -->
+
+                        <div
+                            id="salesOrderSuggestions"
+                            class="sales-order-suggestions hidden"
+                        >
+
+                            <!-- JS GENERATED -->
+
+                        </div>
+
+
+                        <small class="field-help">
+                            Type the Sales Order number or any related information to search.
+                        </small>
+
+                    </div>
+
+
+                    <!-- SELECTED SO INDICATOR -->
+
+                    <div
+                        id="selectedSOIndicator"
+                        class="selected-so-indicator hidden"
                     >
 
-                        <option value="">
-                            -- Select Sales Order --
-                        </option>
+                        <div class="selected-so-icon">
+                            ✓
+                        </div>
 
-                    </select>
+                        <div class="selected-so-content">
+
+                            <span>
+                                SELECTED SALES ORDER
+                            </span>
+
+                            <strong id="selectedSONumber">
+                                —
+                            </strong>
+
+                        </div>
+
+                        <button
+                            type="button"
+                            id="changeSOButton"
+                            class="btn-link"
+                        >
+                            CHANGE
+                        </button>
+
+                    </div>
 
                 </div>
 
@@ -248,7 +317,8 @@
 
 
             <!-- =============================================
-                 SALES ORDER DETAILS
+                 02. SALES ORDER DETAILS
+                 ALL EDITABLE
                  ============================================= -->
 
             <section
@@ -271,7 +341,7 @@
                             </h2>
 
                             <p>
-                                Information from the selected Sales Order.
+                                Saved information from the Sales Order. You may edit the details before delivery.
                             </p>
 
                         </div>
@@ -289,121 +359,274 @@
                 </div>
 
 
-                <div class="info-grid">
 
-                    <div class="info-item">
+                <!-- =========================================
+                     SALES ORDER DETAIL FORM
+                     ========================================= -->
 
-                        <span class="info-label">
-                            SALES ORDER
-                        </span>
-
-                        <strong id="soNumberDisplay">
-                            —
-                        </strong>
-
-                    </div>
+                <div class="so-edit-grid">
 
 
-                    <div class="info-item">
+                    <!-- DATE CREATION -->
 
-                        <span class="info-label">
-                            SO DATE
-                        </span>
+                    <div class="form-group">
 
-                        <strong id="soDateDisplay">
-                            —
-                        </strong>
+                        <label for="soDateCreation">
 
-                    </div>
+                            DATE CREATION
 
+                            <span class="required">
+                                *
+                            </span>
 
-                    <div class="info-item">
+                        </label>
 
-                        <span class="info-label">
-                            CLIENT
-                        </span>
-
-                        <strong id="clientNameDisplay">
-                            —
-                        </strong>
+                        <input
+                            type="date"
+                            id="soDateCreation"
+                            class="form-control"
+                        >
 
                     </div>
 
 
-                    <div class="info-item">
 
-                        <span class="info-label">
+                    <!-- CLIENT NAME -->
+
+                    <div class="form-group">
+
+                        <label for="clientName">
+
+                            CLIENT NAME
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="clientName"
+                            class="form-control"
+                            placeholder="Client Name"
+                        >
+
+                    </div>
+
+
+
+                    <!-- SALES ENGINEER -->
+
+                    <div class="form-group">
+
+                        <label for="salesEngineer">
+
+                            SE
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="salesEngineer"
+                            class="form-control"
+                            placeholder="Sales Engineer"
+                        >
+
+                    </div>
+
+
+
+                    <!-- ATTENTION -->
+
+                    <div class="form-group">
+
+                        <label for="attention">
+
                             ATTENTION
-                        </span>
 
-                        <strong id="attentionDisplay">
-                            —
-                        </strong>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="attention"
+                            class="form-control"
+                            placeholder="Attention"
+                        >
 
                     </div>
 
 
-                    <div class="info-item">
 
-                        <span class="info-label">
+                    <!-- TIN -->
+
+                    <div class="form-group">
+
+                        <label for="tinNumber">
+
+                            TIN NUMBER
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="tinNumber"
+                            class="form-control"
+                            placeholder="TIN Number"
+                        >
+
+                    </div>
+
+
+
+                    <!-- PO NUMBER -->
+
+                    <div class="form-group">
+
+                        <label for="poNumber">
+
                             PO NUMBER
-                        </span>
 
-                        <strong id="poNumberDisplay">
-                            —
-                        </strong>
+                        </label>
+
+                        <input
+                            type="text"
+                            id="poNumber"
+                            class="form-control"
+                            placeholder="PO Number"
+                        >
 
                     </div>
 
 
-                    <div class="info-item">
 
-                        <span class="info-label">
+                    <!-- PAYMENT TERMS -->
+
+                    <div class="form-group">
+
+                        <label for="paymentTerms">
+
+                            PAYMENT TERMS
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="paymentTerms"
+                            class="form-control"
+                            placeholder="Payment Terms"
+                        >
+
+                    </div>
+
+
+
+                    <!-- JOB ORDER -->
+
+                    <div class="form-group">
+
+                        <label for="jobOrder">
+
+                            JOB ORDER
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="jobOrder"
+                            class="form-control"
+                            placeholder="Job Order"
+                        >
+
+                    </div>
+
+
+
+                    <!-- BILLING ADDRESS -->
+
+                    <div class="form-group form-group-wide">
+
+                        <label for="billingAddress">
+
+                            BILLING ADDRESS
+
+                        </label>
+
+                        <textarea
+                            id="billingAddress"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Billing Address"
+                        ></textarea>
+
+                    </div>
+
+
+
+                    <!-- PROJECT -->
+
+                    <div class="form-group form-group-wide">
+
+                        <label for="project">
+
                             PROJECT
-                        </span>
 
-                        <strong id="projectDisplay">
-                            —
-                        </strong>
+                        </label>
 
-                    </div>
-
-
-                    <div class="info-item">
-
-                        <span class="info-label">
-                            TIN
-                        </span>
-
-                        <strong id="tinDisplay">
-                            —
-                        </strong>
+                        <input
+                            type="text"
+                            id="project"
+                            class="form-control"
+                            placeholder="Project"
+                        >
 
                     </div>
 
 
-                    <div class="info-item">
 
-                        <span class="info-label">
-                            TERMS
-                        </span>
+                    <!-- DELIVERY ADDRESS -->
 
-                        <strong id="termsDisplay">
-                            —
-                        </strong>
+                    <div class="form-group form-group-wide">
+
+                        <label for="deliveryAddress">
+
+                            DELIVERY ADDRESS
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <textarea
+                            id="deliveryAddress"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Delivery Address"
+                        ></textarea>
 
                     </div>
 
+                </div>
 
-                    <div class="info-item">
 
-                        <span class="info-label">
-                            SALES ENGINEER
-                        </span>
+                <!-- EDIT NOTICE -->
 
-                        <strong id="salesEngineerDisplay">
-                            —
+                <div class="editable-notice">
+
+                    <span class="editable-notice-icon">
+                        ✎
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Editable Information
                         </strong>
+
+                        <p>
+                            These values were loaded from the Sales Order. You can modify them if the delivery details are different from the original Sales Order.
+                        </p>
 
                     </div>
 
@@ -414,9 +637,7 @@
 
 
             <!-- =============================================
-                 DELIVERY DETAILS
-                 NO DRIVER
-                 NO VEHICLE
+                 03. DELIVERY DETAILS
                  ============================================= -->
 
             <section
@@ -439,7 +660,7 @@
                             </h2>
 
                             <p>
-                                Enter the transfer date and delivery address.
+                                Enter the date when the items will be transferred.
                             </p>
 
                         </div>
@@ -480,29 +701,6 @@
                     </div>
 
 
-                    <!-- DELIVERY ADDRESS -->
-
-                    <div class="form-group delivery-address-group">
-
-                        <label for="deliveryAddress">
-
-                            DELIVERY ADDRESS
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
-
-                        <textarea
-                            id="deliveryAddress"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Enter delivery address"
-                        ></textarea>
-
-                    </div>
-
                 </div>
 
             </section>
@@ -510,7 +708,7 @@
 
 
             <!-- =============================================
-                 ITEM PICKING
+                 04. ITEM PICKING
                  ============================================= -->
 
             <section
@@ -809,7 +1007,7 @@
                     <div class="review-info-item">
 
                         <span>
-                            SO DATE
+                            DATE CREATION
                         </span>
 
                         <strong id="reviewSODate">
@@ -822,10 +1020,49 @@
                     <div class="review-info-item review-wide">
 
                         <span>
-                            CLIENT
+                            CLIENT NAME
                         </span>
 
                         <strong id="reviewClient">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item">
+
+                        <span>
+                            SE
+                        </span>
+
+                        <strong id="reviewSE">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item">
+
+                        <span>
+                            ATTENTION
+                        </span>
+
+                        <strong id="reviewAttention">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item">
+
+                        <span>
+                            TIN NUMBER
+                        </span>
+
+                        <strong id="reviewTIN">
                             —
                         </strong>
 
@@ -846,6 +1083,45 @@
 
 
                     <div class="review-info-item">
+
+                        <span>
+                            PAYMENT TERMS
+                        </span>
+
+                        <strong id="reviewTerms">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item">
+
+                        <span>
+                            JOB ORDER
+                        </span>
+
+                        <strong id="reviewJO">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item review-wide">
+
+                        <span>
+                            BILLING ADDRESS
+                        </span>
+
+                        <strong id="reviewBillingAddress">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item review-wide">
 
                         <span>
                             PROJECT
@@ -1062,7 +1338,6 @@
             class="dr-view hidden"
         >
 
-
             <section class="dr-card completed-card">
 
                 <div class="completed-icon">
@@ -1218,7 +1493,7 @@
 
 
     <!-- =====================================================
-         WARNING / CONFIRMATION MODAL
+         WARNING MODAL
          ===================================================== -->
 
     <div
@@ -1357,9 +1632,6 @@
 
             <div class="preview-body">
 
-
-                <!-- DR NUMBER -->
-
                 <div class="preview-dr-number">
 
                     <span>
@@ -1374,10 +1646,7 @@
 
 
 
-                <!-- INFO -->
-
                 <div class="preview-info-grid">
-
 
                     <div>
 
@@ -1473,8 +1742,6 @@
 
 
 
-                <!-- ITEMS -->
-
                 <div class="preview-items">
 
                     <h3>
@@ -1563,7 +1830,7 @@
          ===================================================== -->
 
     <script
-        src="../js/create-delivery-receipt.js?v=20261005-02"
+        src="../js/create-delivery-receipt.js?v=20261005-03"
     ></script>
 
 </div>
