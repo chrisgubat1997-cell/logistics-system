@@ -394,32 +394,7 @@
         0 0 0 3px rgba(56, 26, 74, 0.08);
 }
 
-.so-refresh-btn {
-    width: 39px;
-    height: 39px;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border:
-        1px solid #ded9e1;
-
-    border-radius: 8px;
-
-    background: white;
-
-    color: #514957;
-
-    cursor: pointer;
-
-    font-size: 15px;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        border-color 0.2s ease;
-}
 
 .so-refresh-btn:hover {
     background: #f6f1f8;
