@@ -1,1 +1,920 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Create Invoice | LOGIS-TECH SYSTEM
+    </title>
+
+    <!--
+        CSS is loaded by index.html.
+
+        This page is intended to be loaded inside
+        the LOGIS-TECH SYSTEM main application.
+    -->
+
+</head>
+
+
+<body>
+
+<div class="create-invoice-page">
+
+
+    <!-- =====================================================
+         PAGE HEADER
+         ===================================================== -->
+
+    <div class="invoice-page-header">
+
+        <div class="invoice-header-left">
+
+            <div class="invoice-header-icon">
+                🧾
+            </div>
+
+            <div>
+
+                <h1>
+                    Create Invoice
+                </h1>
+
+                <p>
+                    Prepare and review invoice details
+                    before saving.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="invoice-header-status">
+
+            <span class="status-dot"></span>
+
+            <span>
+                Draft
+            </span>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         INVOICE FORM
+         ===================================================== -->
+
+    <div class="invoice-form">
+
+
+        <!-- =================================================
+             INVOICE INFORMATION
+             ================================================= -->
+
+        <section class="invoice-card">
+
+            <div class="invoice-card-header">
+
+                <div>
+
+                    <h2>
+                        Invoice Information
+                    </h2>
+
+                    <p>
+                        Basic invoice details
+                    </p>
+
+                </div>
+
+                <span class="section-number">
+                    01
+                </span>
+
+            </div>
+
+
+            <div class="invoice-grid invoice-grid-4">
+
+                <div class="invoice-field">
+
+                    <label>
+                        Invoice No.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceNumber"
+                        placeholder="INV-2026-0001"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Invoice Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="invoiceDate"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Due Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="invoiceDueDate"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Status
+                    </label>
+
+                    <select id="invoiceStatus">
+
+                        <option value="Draft">
+                            Draft
+                        </option>
+
+                        <option value="Pending">
+                            Pending
+                        </option>
+
+                        <option value="Issued">
+                            Issued
+                        </option>
+
+                        <option value="Paid">
+                            Paid
+                        </option>
+
+                        <option value="Cancelled">
+                            Cancelled
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             CUSTOMER INFORMATION
+             ================================================= -->
+
+        <section class="invoice-card">
+
+            <div class="invoice-card-header">
+
+                <div>
+
+                    <h2>
+                        Customer Information
+                    </h2>
+
+                    <p>
+                        Billing information of the customer
+                    </p>
+
+                </div>
+
+                <span class="section-number">
+                    02
+                </span>
+
+            </div>
+
+
+            <div class="invoice-grid invoice-grid-2">
+
+                <div class="invoice-field">
+
+                    <label>
+                        Client / Customer
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceClient"
+                        placeholder="Enter client name"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Attention
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceAttention"
+                        placeholder="Contact person"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field invoice-field-full">
+
+                    <label>
+                        Billing Address
+                    </label>
+
+                    <textarea
+                        id="invoiceBillingAddress"
+                        rows="2"
+                        placeholder="Enter complete billing address"
+                    ></textarea>
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        TIN
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceTIN"
+                        placeholder="000-000-000-000"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Contact Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceContact"
+                        placeholder="09XX XXX XXXX"
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             REFERENCE INFORMATION
+             ================================================= -->
+
+        <section class="invoice-card">
+
+            <div class="invoice-card-header">
+
+                <div>
+
+                    <h2>
+                        Reference Information
+                    </h2>
+
+                    <p>
+                        Related Sales Order and Delivery Receipt
+                    </p>
+
+                </div>
+
+                <span class="section-number">
+                    03
+                </span>
+
+            </div>
+
+
+            <div class="invoice-grid invoice-grid-4">
+
+                <div class="invoice-field">
+
+                    <label>
+                        Sales Order No.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceSONumber"
+                        placeholder="SO-2026-0001"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        PO No.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoicePONumber"
+                        placeholder="Purchase Order No."
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        DR No.
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceDRNumber"
+                        placeholder="DR-2026-0001"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Payment Terms
+                    </label>
+
+                    <select id="invoiceTerms">
+
+                        <option value="">
+                            Select Terms
+                        </option>
+
+                        <option value="COD">
+                            COD
+                        </option>
+
+                        <option value="15">
+                            15 Days
+                        </option>
+
+                        <option value="30">
+                            30 Days
+                        </option>
+
+                        <option value="45">
+                            45 Days
+                        </option>
+
+                        <option value="60">
+                            60 Days
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="invoice-field invoice-field-full">
+
+                    <label>
+                        Project
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceProject"
+                        placeholder="Project name"
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             INVOICE ITEMS
+             ================================================= -->
+
+        <section class="invoice-card invoice-items-card">
+
+            <div class="invoice-card-header">
+
+                <div>
+
+                    <h2>
+                        Invoice Items
+                    </h2>
+
+                    <p>
+                        Products and services included in this invoice
+                    </p>
+
+                </div>
+
+                <span class="section-number">
+                    04
+                </span>
+
+            </div>
+
+
+            <div class="invoice-table-wrapper">
+
+                <table class="invoice-items-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="col-item">
+                                #
+                            </th>
+
+                            <th class="col-description">
+                                Item Description
+                            </th>
+
+                            <th class="col-qty">
+                                Qty
+                            </th>
+
+                            <th class="col-unit">
+                                Unit
+                            </th>
+
+                            <th class="col-price">
+                                Unit Price
+                            </th>
+
+                            <th class="col-amount">
+                                Amount
+                            </th>
+
+                            <th class="col-action">
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="invoiceItemsBody">
+
+                        <tr class="invoice-item-row">
+
+                            <td class="item-number">
+                                1
+                            </td>
+
+                            <td>
+
+                                <input
+                                    type="text"
+                                    class="item-description"
+                                    placeholder="Item description"
+                                >
+
+                            </td>
+
+                            <td>
+
+                                <input
+                                    type="number"
+                                    class="item-qty"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0"
+                                >
+
+                            </td>
+
+                            <td>
+
+                                <input
+                                    type="text"
+                                    class="item-unit"
+                                    placeholder="pcs"
+                                >
+
+                            </td>
+
+                            <td>
+
+                                <input
+                                    type="number"
+                                    class="item-price"
+                                    min="0"
+                                    step="0.01"
+                                    placeholder="0.00"
+                                >
+
+                            </td>
+
+                            <td>
+
+                                <input
+                                    type="text"
+                                    class="item-amount"
+                                    value="0.00"
+                                    readonly
+                                >
+
+                            </td>
+
+                            <td>
+
+                                <button
+                                    type="button"
+                                    class="remove-item-btn"
+                                    title="Remove item"
+                                >
+                                    ×
+                                </button>
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="invoice-items-footer">
+
+                <button
+                    type="button"
+                    class="add-item-btn"
+                    id="addInvoiceItemBtn"
+                >
+
+                    <span>
+                        +
+                    </span>
+
+                    Add Item
+
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             TOTALS
+             ================================================= -->
+
+        <section class="invoice-card">
+
+            <div class="invoice-card-header">
+
+                <div>
+
+                    <h2>
+                        Invoice Summary
+                    </h2>
+
+                    <p>
+                        Review invoice amount
+                    </p>
+
+                </div>
+
+                <span class="section-number">
+                    05
+                </span>
+
+            </div>
+
+
+            <div class="invoice-summary-layout">
+
+
+                <!-- LEFT NOTES -->
+
+                <div class="invoice-notes">
+
+                    <div class="invoice-field">
+
+                        <label>
+                            Notes
+                        </label>
+
+                        <textarea
+                            id="invoiceNotes"
+                            rows="5"
+                            placeholder="Additional notes or instructions..."
+                        ></textarea>
+
+                    </div>
+
+
+                    <div class="invoice-field">
+
+                        <label>
+                            Remarks
+                        </label>
+
+                        <textarea
+                            id="invoiceRemarks"
+                            rows="3"
+                            placeholder="Internal remarks..."
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- RIGHT TOTAL -->
+
+                <div class="invoice-totals">
+
+                    <div class="total-line">
+
+                        <span>
+                            Subtotal
+                        </span>
+
+                        <strong id="invoiceSubtotal">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="total-line">
+
+                        <span>
+                            Discount
+                        </span>
+
+                        <div class="total-input">
+
+                            <input
+                                type="number"
+                                id="invoiceDiscount"
+                                min="0"
+                                step="0.01"
+                                value="0"
+                            >
+
+                            <span>
+                                ₱
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="total-line">
+
+                        <span>
+                            VAT
+                            <small>
+                                12%
+                            </small>
+                        </span>
+
+                        <strong id="invoiceVAT">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="total-divider">
+                    </div>
+
+
+                    <div class="total-line total-grand">
+
+                        <span>
+                            TOTAL
+                        </span>
+
+                        <strong id="invoiceTotal">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             PAYMENT INFORMATION
+             ================================================= -->
+
+        <section class="invoice-card">
+
+            <div class="invoice-card-header">
+
+                <div>
+
+                    <h2>
+                        Payment Information
+                    </h2>
+
+                    <p>
+                        Record payment status and balance
+                    </p>
+
+                </div>
+
+                <span class="section-number">
+                    06
+                </span>
+
+            </div>
+
+
+            <div class="invoice-grid invoice-grid-4">
+
+                <div class="invoice-field">
+
+                    <label>
+                        Payment Status
+                    </label>
+
+                    <select id="invoicePaymentStatus">
+
+                        <option value="Unpaid">
+                            Unpaid
+                        </option>
+
+                        <option value="Partial">
+                            Partial
+                        </option>
+
+                        <option value="Paid">
+                            Paid
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Amount Paid
+                    </label>
+
+                    <input
+                        type="number"
+                        id="invoiceAmountPaid"
+                        min="0"
+                        step="0.01"
+                        value="0"
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Balance
+                    </label>
+
+                    <input
+                        type="text"
+                        id="invoiceBalance"
+                        value="₱0.00"
+                        readonly
+                    >
+
+                </div>
+
+
+                <div class="invoice-field">
+
+                    <label>
+                        Payment Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="invoicePaymentDate"
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =================================================
+             ACTION BAR
+             ================================================= -->
+
+        <div class="invoice-action-bar">
+
+            <div class="invoice-action-left">
+
+                <button
+                    type="button"
+                    class="invoice-btn btn-cancel"
+                    id="cancelInvoiceBtn"
+                >
+                    Cancel
+                </button>
+
+            </div>
+
+
+            <div class="invoice-action-right">
+
+                <button
+                    type="button"
+                    class="invoice-btn btn-draft"
+                    id="saveInvoiceDraftBtn"
+                >
+                    Save Draft
+                </button>
+
+
+                <button
+                    type="button"
+                    class="invoice-btn btn-preview"
+                    id="previewInvoiceBtn"
+                >
+                    Preview
+                </button>
+
+
+                <button
+                    type="button"
+                    class="invoice-btn btn-create"
+                    id="createInvoiceBtn"
+                >
+                    Create Invoice
+                </button>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+</body>
+
+</html>
+```
