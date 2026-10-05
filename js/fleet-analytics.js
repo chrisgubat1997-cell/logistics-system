@@ -1,3 +1,4 @@
+```javascript
 /* =========================================================
    LOGIS-TECH SYSTEM
    FLEET & DELIVERY ANALYTICS
@@ -14,42 +15,64 @@ window.FleetAnalytics = {
     currentSection: "fleet",
 
     filters: {
-
         vehicle: "ALL",
-
         year: "2026",
-
         month: "10"
+    },
 
-    }
+    initialized: false
 
 };
 
 
 /* =========================================================
-   DOM READY
-========================================================= */
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    initializeFleetAnalytics();
-
-});
-
-
-/* =========================================================
    INITIALIZE
+   IMPORTANT:
+   This function is called by index.html AFTER the
+   Fleet Analytics module and required JS files are loaded.
 ========================================================= */
 
 function initializeFleetAnalytics() {
+
+    /* Prevent duplicate initialization */
+
+    if (window.FleetAnalytics.initialized) {
+
+        console.log(
+            "Fleet Analytics already initialized."
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        "Initializing Fleet & Delivery Analytics..."
+    );
+
+
+    /* Mark initialized */
+
+    window.FleetAnalytics.initialized = true;
+
+
+    /* Setup */
 
     setupAnalyticsTabs();
 
     setupFilters();
 
-    activateSection("fleet");
+    activateSection(
+        window.FleetAnalytics.currentSection
+    );
 
     refreshCurrentAnalytics();
+
+
+    console.log(
+        "Fleet & Delivery Analytics initialized successfully."
+    );
 
 }
 
@@ -61,25 +84,65 @@ function initializeFleetAnalytics() {
 function setupAnalyticsTabs() {
 
     const tabs =
-        document.querySelectorAll(".analytics-tab");
+        document.querySelectorAll(
+            ".analytics-tab"
+        );
+
+
+    if (!tabs.length) {
+
+        console.warn(
+            "No analytics tabs found."
+        );
+
+        return;
+
+    }
 
 
     tabs.forEach(function (tab) {
 
-        tab.addEventListener("click", function () {
+        /* Prevent duplicate event listeners */
 
-            const section =
-                this.dataset.section;
+        if (
+            tab.dataset.analyticsListener === "true"
+        ) {
 
-            if (!section) {
-                return;
+            return;
+
+        }
+
+
+        tab.dataset.analyticsListener = "true";
+
+
+        tab.addEventListener(
+            "click",
+            function () {
+
+                const section =
+                    this.dataset.section;
+
+
+                if (!section) {
+
+                    return;
+
+                }
+
+
+                switchAnalytics(section);
+
             }
-
-            switchAnalytics(section);
-
-        });
+        );
 
     });
+
+
+    console.log(
+        "Analytics tabs initialized:",
+        tabs.length
+    );
 
 }
 
@@ -91,13 +154,17 @@ function setupAnalyticsTabs() {
 function switchAnalytics(section) {
 
     const validSections = [
+
         "fleet",
         "delivery",
         "dr"
+
     ];
 
 
-    if (!validSections.includes(section)) {
+    if (
+        !validSections.includes(section)
+    ) {
 
         console.warn(
             "Invalid analytics section:",
@@ -109,11 +176,18 @@ function switchAnalytics(section) {
     }
 
 
+    /* Save current section */
+
     window.FleetAnalytics.currentSection =
         section;
 
 
+    /* Change visible section */
+
     activateSection(section);
+
+
+    /* Refresh data */
 
     refreshCurrentAnalytics();
 
@@ -146,22 +220,31 @@ function activateSection(section) {
     };
 
 
-    /* Hide all sections */
+    /* =====================================================
+       HIDE ALL ANALYTICS SECTIONS
+    ===================================================== */
 
     Object.values(sections).forEach(
         function (element) {
 
             if (!element) {
+
                 return;
+
             }
 
-            element.classList.remove("active");
+
+            element.classList.remove(
+                "active"
+            );
 
         }
     );
 
 
-    /* Activate selected section */
+    /* =====================================================
+       SHOW SELECTED SECTION
+    ===================================================== */
 
     const selected =
         sections[section];
@@ -169,12 +252,16 @@ function activateSection(section) {
 
     if (selected) {
 
-        selected.classList.add("active");
+        selected.classList.add(
+            "active"
+        );
 
     }
 
 
-    /* Update buttons */
+    /* =====================================================
+       UPDATE ANALYTICS BUTTONS
+    ===================================================== */
 
     const tabs =
         document.querySelectorAll(
@@ -220,79 +307,113 @@ function setupFilters() {
         );
 
 
-    if (vehicleFilter) {
-
-        vehicleFilter.addEventListener(
-            "change",
-            function () {
-
-                window.FleetAnalytics.filters.vehicle =
-                    this.value;
-
-                handleFilterChange();
-
-            }
-        );
-
-    }
-
-
-    if (yearFilter) {
-
-        yearFilter.addEventListener(
-            "change",
-            function () {
-
-                window.FleetAnalytics.filters.year =
-                    this.value;
-
-                handleFilterChange();
-
-            }
-        );
-
-    }
-
-
-    if (monthFilter) {
-
-        monthFilter.addEventListener(
-            "change",
-            function () {
-
-                window.FleetAnalytics.filters.month =
-                    this.value;
-
-                handleFilterChange();
-
-            }
-        );
-
-    }
-
-
-    /* Get initial values from HTML */
+    /* =====================================================
+       VEHICLE FILTER
+    ===================================================== */
 
     if (vehicleFilter) {
+
+        if (
+            vehicleFilter.dataset.analyticsListener
+            !== "true"
+        ) {
+
+            vehicleFilter.dataset.analyticsListener =
+                "true";
+
+
+            vehicleFilter.addEventListener(
+                "change",
+                function () {
+
+                    window.FleetAnalytics.filters.vehicle =
+                        this.value;
+
+
+                    handleFilterChange();
+
+                }
+            );
+
+        }
+
 
         window.FleetAnalytics.filters.vehicle =
-            vehicleFilter.value;
+            vehicleFilter.value || "ALL";
 
     }
 
+
+    /* =====================================================
+       YEAR FILTER
+    ===================================================== */
 
     if (yearFilter) {
 
+        if (
+            yearFilter.dataset.analyticsListener
+            !== "true"
+        ) {
+
+            yearFilter.dataset.analyticsListener =
+                "true";
+
+
+            yearFilter.addEventListener(
+                "change",
+                function () {
+
+                    window.FleetAnalytics.filters.year =
+                        this.value;
+
+
+                    handleFilterChange();
+
+                }
+            );
+
+        }
+
+
         window.FleetAnalytics.filters.year =
-            yearFilter.value;
+            yearFilter.value || "2026";
 
     }
 
 
+    /* =====================================================
+       MONTH FILTER
+    ===================================================== */
+
     if (monthFilter) {
 
+        if (
+            monthFilter.dataset.analyticsListener
+            !== "true"
+        ) {
+
+            monthFilter.dataset.analyticsListener =
+                "true";
+
+
+            monthFilter.addEventListener(
+                "change",
+                function () {
+
+                    window.FleetAnalytics.filters.month =
+                        this.value;
+
+
+                    handleFilterChange();
+
+                }
+            );
+
+        }
+
+
         window.FleetAnalytics.filters.month =
-            monthFilter.value;
+            monthFilter.value || "ALL";
 
     }
 
@@ -330,24 +451,18 @@ function refreshCurrentAnalytics() {
         window.FleetAnalytics.currentSection;
 
 
-    /*
-       We don't hard-code the analytics
-       calculation here.
-
-       Each module owns its own data:
-       
-       Fleet:
-       fleet-performance.js
-
-       Delivery:
-       delivery-performance.js
-
-       DR:
-       dr-monitoring.js
-    */
+    console.log(
+        "Refreshing analytics:",
+        section
+    );
 
 
     switch (section) {
+
+
+        /* =================================================
+           FLEET PERFORMANCE
+        ================================================= */
 
         case "fleet":
 
@@ -360,8 +475,20 @@ function refreshCurrentAnalytics() {
 
             }
 
+            else {
+
+                console.warn(
+                    "refreshFleetPerformance() is not available."
+                );
+
+            }
+
             break;
 
+
+        /* =================================================
+           DELIVERY PERFORMANCE
+        ================================================= */
 
         case "delivery":
 
@@ -374,8 +501,20 @@ function refreshCurrentAnalytics() {
 
             }
 
+            else {
+
+                console.warn(
+                    "refreshDeliveryPerformance() is not available."
+                );
+
+            }
+
             break;
 
+
+        /* =================================================
+           DR MONITORING
+        ================================================= */
 
         case "dr":
 
@@ -385,6 +524,14 @@ function refreshCurrentAnalytics() {
             ) {
 
                 window.refreshDRMonitoring();
+
+            }
+
+            else {
+
+                console.warn(
+                    "refreshDRMonitoring() is not available."
+                );
 
             }
 
@@ -423,7 +570,9 @@ function getAnalyticsFilters() {
 
 function getCurrentAnalyticsSection() {
 
-    return window.FleetAnalytics.currentSection;
+    return (
+        window.FleetAnalytics.currentSection
+    );
 
 }
 
@@ -441,7 +590,9 @@ function formatNumber(
         Number(value);
 
 
-    if (!Number.isFinite(number)) {
+    if (
+        !Number.isFinite(number)
+    ) {
 
         return "0";
 
@@ -451,11 +602,13 @@ function formatNumber(
     return number.toLocaleString(
         "en-US",
         {
+
             minimumFractionDigits:
                 decimals,
 
             maximumFractionDigits:
                 decimals
+
         }
     );
 
@@ -514,7 +667,9 @@ function formatCurrency(value) {
         Number(value);
 
 
-    if (!Number.isFinite(number)) {
+    if (
+        !Number.isFinite(number)
+    ) {
 
         return "₱0.00";
 
@@ -524,10 +679,17 @@ function formatCurrency(value) {
     return number.toLocaleString(
         "en-PH",
         {
+
             style: "currency",
+
             currency: "PHP",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+
+            minimumFractionDigits:
+                2,
+
+            maximumFractionDigits:
+                2
+
         }
     );
 
@@ -564,7 +726,9 @@ function showAnalyticsEmptyState(
 
 
     if (!container) {
+
         return;
+
     }
 
 
@@ -607,7 +771,9 @@ function setElementText(
 
 
     if (!element) {
+
         return;
+
     }
 
 
@@ -618,7 +784,7 @@ function setElementText(
 
 
 /* =========================================================
-   ADD LOADING STATE
+   ADD / REMOVE LOADING STATE
 ========================================================= */
 
 function setAnalyticsLoading(
@@ -633,7 +799,9 @@ function setAnalyticsLoading(
 
 
     if (!element) {
+
         return;
+
     }
 
 
@@ -646,41 +814,57 @@ function setAnalyticsLoading(
 
 
 /* =========================================================
-   WINDOW EVENTS
+   GLOBAL FUNCTIONS
 ========================================================= */
+
+window.initializeFleetAnalytics =
+    initializeFleetAnalytics;
+
 
 window.switchAnalytics =
     switchAnalytics;
 
+
 window.getAnalyticsFilters =
     getAnalyticsFilters;
+
 
 window.getCurrentAnalyticsSection =
     getCurrentAnalyticsSection;
 
+
 window.formatNumber =
     formatNumber;
+
 
 window.formatKilometer =
     formatKilometer;
 
+
 window.formatLiters =
     formatLiters;
+
 
 window.formatKmPerLiter =
     formatKmPerLiter;
 
+
 window.formatCurrency =
     formatCurrency;
+
 
 window.formatDays =
     formatDays;
 
+
 window.setElementText =
     setElementText;
+
 
 window.setAnalyticsLoading =
     setAnalyticsLoading;
 
+
 window.showAnalyticsEmptyState =
     showAnalyticsEmptyState;
+```
