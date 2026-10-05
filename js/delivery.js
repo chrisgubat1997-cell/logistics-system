@@ -1,124 +1,184 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
-   DELIVERY MODULE
+   DELIVERY / DR MODULE
    =========================================================
-   PURPOSE:
-   - Display Posted Sales Orders
-   - Open Create Delivery Receipt
-   - Display Recent DRs
-   - Search / Refresh
-   - Summary Cards
-   - Select DR
-   - Preview / Update / Cancel / Post DR
-   - LOCALSTORAGE VERSION
-   ========================================================= */
+   MATCHED TO:
+   delivery.html
+
+   CURRENT MODE:
+   LOCALSTORAGE ONLY
+
+   STORAGE:
+   - logitechSalesOrders
+   - logitechDeliveryReceipts
+
+   WORKFLOW:
+   POSTED SO
+      ↓
+   PREPARE DR
+      ↓
+   PREPARED
+      ↓
+   POST DR
+      ↓
+   ONGOING
+      ↓
+   COMPLETED / FOR INVOICE
+========================================================= */
 
 "use strict";
 
+
 /* =========================================================
    STORAGE KEYS
-   ========================================================= */
+========================================================= */
 
 const DELIVERY_STORAGE = {
-    SALES_ORDERS: "logitechSalesOrders",
-    DELIVERY_RECEIPTS: "logitechDeliveryReceipts"
+
+    SALES_ORDERS:
+        "logitechSalesOrders",
+
+    DELIVERY_RECEIPTS:
+        "logitechDeliveryReceipts"
+
 };
 
 
 /* =========================================================
-   GLOBAL STATE
-   ========================================================= */
+   GLOBAL VARIABLES
+========================================================= */
 
 let salesOrders = [];
+
 let deliveryReceipts = [];
 
-let filteredSalesOrders = [];
-let filteredDeliveryReceipts = [];
+let selectedDR = null;
 
 let selectedSO = null;
-let selectedDR = null;
 
 
 /* =========================================================
-   INITIALIZATION
-   ========================================================= */
+   DOM READY
+========================================================= */
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-    console.log("LOGIS-TECH DELIVERY MODULE LOADED");
+        console.log(
+            "LOGIS-TECH DELIVERY.JS LOADED"
+        );
 
-    initializeDeliveryModule();
+        initializeDeliveryModule();
 
-});
+    }
+);
 
 
 /* =========================================================
    INITIALIZE
-   ========================================================= */
+========================================================= */
 
 function initializeDeliveryModule() {
 
-    loadLocalStorageData();
+    loadData();
 
-    setupEventListeners();
+    updateSummaryCards();
 
-    renderAll();
+    renderPostedSalesOrders();
+
+    renderRecentDR();
+
+    setupPrepareDRButtons();
+
+    setupSearchAndFilters();
+
+    setupDRSelection();
+
+    setupActionButtons();
+
+    setupViewButtons();
+
+    setupQuantityInputs();
 
 }
 
 
 /* =========================================================
-   LOAD LOCAL STORAGE
-   ========================================================= */
+   LOAD LOCALSTORAGE
+========================================================= */
 
-function loadLocalStorageData() {
+function loadData() {
 
     try {
 
         const storedSO =
-            localStorage.getItem(DELIVERY_STORAGE.SALES_ORDERS);
+            localStorage.getItem(
+                DELIVERY_STORAGE.SALES_ORDERS
+            );
+
 
         const storedDR =
-            localStorage.getItem(DELIVERY_STORAGE.DELIVERY_RECEIPTS);
+            localStorage.getItem(
+                DELIVERY_STORAGE.DELIVERY_RECEIPTS
+            );
 
 
-        salesOrders = storedSO
-            ? JSON.parse(storedSO)
-            : [];
+        salesOrders =
+            storedSO
+                ? JSON.parse(storedSO)
+                : [];
 
 
-        deliveryReceipts = storedDR
-            ? JSON.parse(storedDR)
-            : [];
+        deliveryReceipts =
+            storedDR
+                ? JSON.parse(storedDR)
+                : [];
 
 
-        if (!Array.isArray(salesOrders)) {
+        if (
+            !Array.isArray(
+                salesOrders
+            )
+        ) {
+
             salesOrders = [];
+
         }
 
-        if (!Array.isArray(deliveryReceipts)) {
+
+        if (
+            !Array.isArray(
+                deliveryReceipts
+            )
+        ) {
+
             deliveryReceipts = [];
+
         }
 
 
         console.log(
-            "Sales Orders:",
+            "DELIVERY SO:",
             salesOrders
         );
 
+
         console.log(
-            "Delivery Receipts:",
+            "DELIVERY DR:",
             deliveryReceipts
         );
+
 
     } catch (error) {
 
         console.error(
-            "Error loading Delivery localStorage:",
+            "Failed to load Delivery data:",
             error
         );
 
         salesOrders = [];
+
         deliveryReceipts = [];
 
     }
@@ -127,14 +187,16 @@ function loadLocalStorageData() {
 
 
 /* =========================================================
-   SAVE STORAGE
-   ========================================================= */
+   SAVE DATA
+========================================================= */
 
 function saveSalesOrders() {
 
     localStorage.setItem(
         DELIVERY_STORAGE.SALES_ORDERS,
-        JSON.stringify(salesOrders)
+        JSON.stringify(
+            salesOrders
+        )
     );
 
 }
@@ -144,154 +206,115 @@ function saveDeliveryReceipts() {
 
     localStorage.setItem(
         DELIVERY_STORAGE.DELIVERY_RECEIPTS,
-        JSON.stringify(deliveryReceipts)
+        JSON.stringify(
+            deliveryReceipts
+        )
     );
 
 }
 
 
 /* =========================================================
-   EVENT LISTENERS
-   ========================================================= */
+   PREPARE DR BUTTON
+========================================================= */
 
-function setupEventListeners() {
+function setupPrepareDRButtons() {
 
-    /* -----------------------------------------------------
-       PREPARE DR BUTTONS
-       ----------------------------------------------------- */
-
-    document.querySelectorAll(
-        "[data-action='prepare-dr'], .prepare-dr-btn"
-    ).forEach(function (button) {
-
-        button.addEventListener("click", function () {
-
-            openCreateDeliveryReceipt();
-
-        });
-
-    });
+    const mainButton =
+        document.getElementById(
+            "prepareDRButton"
+        );
 
 
-    /* -----------------------------------------------------
-       SEARCH
-       ----------------------------------------------------- */
+    if (mainButton) {
 
-    const searchInput =
-        document.getElementById("deliverySearch");
-
-
-    if (searchInput) {
-
-        searchInput.addEventListener(
-            "input",
+        mainButton.addEventListener(
+            "click",
             function () {
 
-                filterDeliveryData(
-                    this.value
+                openCreateDR();
+
+            }
+        );
+
+    }
+
+
+    /*
+       Existing buttons inside
+       Posted SO table.
+
+       Since the original HTML has
+       multiple:
+
+       <button class="btn btn-primary btn-small">
+
+       we detect them based on
+       their position inside the
+       Posted SO table.
+    */
+
+    const soTable =
+        document.querySelector(
+            ".posted-so-table"
+        );
+
+
+    if (!soTable) {
+        return;
+    }
+
+
+    const rows =
+        soTable.querySelectorAll(
+            "tbody tr"
+        );
+
+
+    rows.forEach(
+        function (row) {
+
+            const button =
+                row.querySelector(
+                    "button"
                 );
 
+
+            if (!button) {
+                return;
             }
-        );
-
-    }
 
 
-    /* -----------------------------------------------------
-       REFRESH
-       ----------------------------------------------------- */
+            button.addEventListener(
+                "click",
+                function (event) {
 
-    const refreshButton =
-        document.getElementById("deliveryRefreshBtn");
+                    event.preventDefault();
 
-
-    if (refreshButton) {
-
-        refreshButton.addEventListener(
-            "click",
-            function () {
-
-                refreshDeliveryModule();
-
-            }
-        );
-
-    }
+                    event.stopPropagation();
 
 
-    /* -----------------------------------------------------
-       FILTER
-       ----------------------------------------------------- */
-
-    const statusFilter =
-        document.getElementById("deliveryStatusFilter");
+                    const soNumber =
+                        getSONumberFromRow(
+                            row
+                        );
 
 
-    if (statusFilter) {
+                    if (!soNumber) {
 
-        statusFilter.addEventListener(
-            "change",
-            function () {
+                        openCreateDR();
 
-                applyDeliveryFilters();
+                        return;
 
-            }
-        );
-
-    }
+                    }
 
 
-    /* -----------------------------------------------------
-       DATE FILTER
-       ----------------------------------------------------- */
+                    openCreateDR(
+                        soNumber
+                    );
 
-    const dateFilter =
-        document.getElementById("deliveryDateFilter");
-
-
-    if (dateFilter) {
-
-        dateFilter.addEventListener(
-            "change",
-            function () {
-
-                applyDeliveryFilters();
-
-            }
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       CLOSE MODALS
-       ----------------------------------------------------- */
-
-    document.querySelectorAll(
-        "[data-close-modal]"
-    ).forEach(function (button) {
-
-        button.addEventListener(
-            "click",
-            closeModal
-        );
-
-    });
-
-
-    /* -----------------------------------------------------
-       ESC KEY
-       ----------------------------------------------------- */
-
-    document.addEventListener(
-        "keydown",
-        function (event) {
-
-            if (event.key === "Escape") {
-
-                closeModal();
-
-            }
+                }
+            );
 
         }
     );
@@ -300,136 +323,180 @@ function setupEventListeners() {
 
 
 /* =========================================================
-   RENDER EVERYTHING
-   ========================================================= */
+   GET SO NUMBER FROM TABLE ROW
+========================================================= */
 
-function renderAll() {
+function getSONumberFromRow(
+    row
+) {
 
-    updateSummaryCards();
+    if (!row) {
+        return "";
+    }
 
-    renderPostedSalesOrders();
 
-    renderRecentDeliveryReceipts();
+    const firstCell =
+        row.querySelector(
+            "td:first-child"
+        );
 
-    applyDeliveryFilters();
+
+    if (!firstCell) {
+        return "";
+    }
+
+
+    return firstCell
+        .textContent
+        .trim();
 
 }
 
 
 /* =========================================================
-   OPEN CREATE DR PAGE
-   ========================================================= */
+   OPEN CREATE DR
+========================================================= */
 
-function openCreateDeliveryReceipt() {
+function openCreateDR(
+    soNumber = ""
+) {
 
-    /*
-       create-delivery-receipt.html is assumed to be
-       inside the same /pages/ folder as delivery.html.
-    */
+    let url =
+        "create-delivery-receipt.html";
+
+
+    if (soNumber) {
+
+        url +=
+            "?so=" +
+            encodeURIComponent(
+                soNumber
+            );
+
+    }
+
+
+    console.log(
+        "Opening Create DR:",
+        url
+    );
+
 
     window.location.href =
-        "create-delivery-receipt.html";
+        url;
 
 }
 
 
 /* =========================================================
    SUMMARY CARDS
-   ========================================================= */
+========================================================= */
 
 function updateSummaryCards() {
 
     const totalDR =
-        deliveryReceipts.filter(function (dr) {
+        deliveryReceipts.filter(
+            function (dr) {
 
-            return dr.status !== "CANCELLED";
+                return normalizeStatus(
+                    dr.status
+                ) !== "CANCELLED";
 
-        }).length;
+            }
+        ).length;
 
 
     const today =
-        formatDateForCompare(
-            new Date()
-        );
+        getTodayString();
 
 
-    const todaysDR =
-        deliveryReceipts.filter(function (dr) {
+    const todayDR =
+        deliveryReceipts.filter(
+            function (dr) {
 
-            if (dr.status === "CANCELLED") {
-                return false;
+                const status =
+                    normalizeStatus(
+                        dr.status
+                    );
+
+
+                if (
+                    status ===
+                    "CANCELLED"
+                ) {
+
+                    return false;
+
+                }
+
+
+                const date =
+                    getDRDate(
+                        dr
+                    );
+
+
+                return (
+                    normalizeDate(
+                        date
+                    ) ===
+                    today
+                );
+
             }
-
-            const date =
-                dr.dateOfTransfer ||
-                dr.transferDate ||
-                dr.createdAt;
-
-            return formatDateForCompare(date) === today;
-
-        }).length;
+        ).length;
 
 
     const ongoingDR =
-        deliveryReceipts.filter(function (dr) {
+        deliveryReceipts.filter(
+            function (dr) {
 
-            return [
-                "POSTED",
-                "ONGOING",
-                "PREPARED"
-            ].includes(
-                String(dr.status || "").toUpperCase()
-            );
+                return (
+                    normalizeStatus(
+                        dr.status
+                    ) ===
+                    "ONGOING"
+                );
 
-        }).length;
+            }
+        ).length;
 
 
     const cancelledDR =
-        deliveryReceipts.filter(function (dr) {
+        deliveryReceipts.filter(
+            function (dr) {
 
-            return String(
-                dr.status || ""
-            ).toUpperCase() === "CANCELLED";
+                return (
+                    normalizeStatus(
+                        dr.status
+                    ) ===
+                    "CANCELLED"
+                );
 
-        }).length;
+            }
+        ).length;
 
 
-    setElementText(
-        [
-            "totalDeliveryReceipt",
-            "totalDR",
-            "deliveryTotalDR"
-        ],
+    setText(
+        "totalDRCount",
         totalDR
     );
 
 
-    setElementText(
-        [
-            "todayDeliveryReceipt",
-            "todayDR",
-            "deliveryTodayDR"
-        ],
-        todaysDR
+    setText(
+        "todayDRCount",
+        todayDR
     );
 
 
-    setElementText(
-        [
-            "ongoingDelivery",
-            "ongoingDR",
-            "deliveryOngoingDR"
-        ],
+    setText(
+        "ongoingDRCount",
         ongoingDR
     );
 
 
-    setElementText(
-        [
-            "cancelledDelivery",
-            "cancelledDR",
-            "deliveryCancelledDR"
-        ],
+    setText(
+        "cancelledDRCount",
         cancelledDR
     );
 
@@ -437,883 +504,62 @@ function updateSummaryCards() {
 
 
 /* =========================================================
-   SET ELEMENT TEXT
-   ========================================================= */
+   RENDER POSTED SALES ORDERS
+========================================================= */
 
-function setElementText(
-    ids,
-    value
+function renderPostedSalesOrders(
+    search = "",
+    filter = "ALL"
 ) {
 
-    ids.forEach(function (id) {
-
-        const element =
-            document.getElementById(id);
-
-        if (element) {
-
-            element.textContent = value;
-
-        }
-
-    });
-
-}
-
-
-/* =========================================================
-   POSTED SALES ORDERS
-   ========================================================= */
-
-function renderPostedSalesOrders() {
-
-    const container =
-        document.getElementById(
-            "postedSalesOrdersBody"
-        ) ||
+    const table =
         document.querySelector(
-            "#postedSalesOrdersTable tbody"
+            ".posted-so-table"
         );
 
 
-    if (!container) {
-
-        console.warn(
-            "Posted Sales Orders container not found."
-        );
-
+    if (!table) {
         return;
-
     }
 
 
-    filteredSalesOrders =
-        salesOrders.filter(function (so) {
-
-            const status =
-                String(
-                    so.status || ""
-                ).toUpperCase();
-
-
-            /*
-               Only POSTED and PARTIAL SOs
-               are allowed for Delivery.
-            */
-
-            if (
-                status !== "POSTED" &&
-                status !== "PARTIAL"
-            ) {
-
-                return false;
-
-            }
-
-
-            return getSORemainingTotal(so) > 0;
-
-        });
-
-
-    if (
-        filteredSalesOrders.length === 0
-    ) {
-
-        container.innerHTML = `
-            <tr>
-                <td colspan="8" class="empty-state">
-                    <div class="empty-state-content">
-                        <div class="empty-state-icon">📦</div>
-                        <h3>No Posted Sales Orders</h3>
-                        <p>
-                            Posted Sales Orders available
-                            for delivery will appear here.
-                        </p>
-                    </div>
-                </td>
-            </tr>
-        `;
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        filteredSalesOrders
-            .map(function (so) {
-
-                return createSalesOrderRow(so);
-
-            })
-            .join("");
-
-
-    attachSalesOrderRowEvents();
-
-}
-
-
-/* =========================================================
-   CREATE SO ROW
-   ========================================================= */
-
-function createSalesOrderRow(so) {
-
-    const remaining =
-        getSORemainingTotal(so);
-
-
-    const amount =
-        Number(
-            so.totalAmount ||
-            so.amount ||
-            0
+    const tbody =
+        table.querySelector(
+            "tbody"
         );
 
 
-    const status =
+    if (!tbody) {
+        return;
+    }
+
+
+    const searchText =
         String(
-            so.status || "POSTED"
-        ).toUpperCase();
-
-
-    return `
-        <tr
-            class="delivery-so-row"
-            data-so-number="${escapeHTML(
-                so.soNumber || so.number || ""
-            )}"
-        >
-
-            <td>
-                <strong>
-                    ${escapeHTML(
-                        so.soNumber ||
-                        so.number ||
-                        "-"
-                    )}
-                </strong>
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    so.clientName ||
-                    so.client ||
-                    "-"
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    so.poNumber ||
-                    so.po ||
-                    "-"
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    so.project ||
-                    "-"
-                )}
-            </td>
-
-            <td>
-                <div class="delivery-address-cell">
-                    ${escapeHTML(
-                        so.deliveryAddress ||
-                        so.address ||
-                        "-"
-                    )}
-                </div>
-            </td>
-
-            <td>
-                ₱${formatNumber(amount)}
-            </td>
-
-            <td>
-                <span class="dr-status-badge ${getStatusClass(status)}">
-                    ${escapeHTML(status)}
-                </span>
-            </td>
-
-            <td>
-                <button
-                    type="button"
-                    class="dr-btn dr-btn-primary dr-btn-small"
-                    data-so-action="prepare"
-                    data-so-number="${escapeHTML(
-                        so.soNumber ||
-                        so.number ||
-                        ""
-                    )}"
-                >
-                    + PREPARE
-                </button>
-            </td>
-
-        </tr>
-    `;
-
-}
-
-
-/* =========================================================
-   ATTACH SO ROW EVENTS
-   ========================================================= */
-
-function attachSalesOrderRowEvents() {
-
-    document.querySelectorAll(
-        "[data-so-action='prepare']"
-    ).forEach(function (button) {
-
-        button.addEventListener(
-            "click",
-            function (event) {
-
-                event.stopPropagation();
-
-                const soNumber =
-                    this.dataset.soNumber;
-
-                openCreateDeliveryReceiptWithSO(
-                    soNumber
-                );
-
-            }
-        );
-
-    });
-
-
-    document.querySelectorAll(
-        ".delivery-so-row"
-    ).forEach(function (row) {
-
-        row.addEventListener(
-            "click",
-            function () {
-
-                selectSalesOrder(
-                    this.dataset.soNumber
-                );
-
-            }
-        );
-
-    });
-
-}
-
-
-/* =========================================================
-   OPEN CREATE DR WITH SELECTED SO
-   ========================================================= */
-
-function openCreateDeliveryReceiptWithSO(
-    soNumber
-) {
-
-    /*
-       Pass SO number through URL.
-       create-delivery-receipt.html can read:
-
-       new URLSearchParams(
-           window.location.search
-       ).get("so")
-    */
-
-    const url =
-        "create-delivery-receipt.html?so=" +
-        encodeURIComponent(soNumber);
-
-
-    window.location.href = url;
-
-}
-
-
-/* =========================================================
-   SELECT SO
-   ========================================================= */
-
-function selectSalesOrder(
-    soNumber
-) {
-
-    selectedSO =
-        salesOrders.find(function (so) {
-
-            return (
-                (so.soNumber || so.number) ===
-                soNumber
-            );
-
-        });
-
-
-    document
-        .querySelectorAll(".delivery-so-row")
-        .forEach(function (row) {
-
-            row.classList.remove(
-                "selected"
-            );
-
-        });
-
-
-    const selectedRow =
-        document.querySelector(
-            `[data-so-number="${CSS.escape(soNumber)}"]`
-        );
-
-
-    if (selectedRow) {
-
-        selectedRow.classList.add(
-            "selected"
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   RECENT DELIVERY RECEIPTS
-   ========================================================= */
-
-function renderRecentDeliveryReceipts() {
-
-    const container =
-        document.getElementById(
-            "recentDRBody"
-        ) ||
-        document.querySelector(
-            "#recentDRTable tbody"
-        );
-
-
-    if (!container) {
-
-        console.warn(
-            "Recent DR container not found."
-        );
-
-        return;
-
-    }
-
-
-    filteredDeliveryReceipts =
-        [...deliveryReceipts]
-            .sort(function (a, b) {
-
-                return getTimestamp(b) -
-                       getTimestamp(a);
-
-            });
-
-
-    if (
-        filteredDeliveryReceipts.length === 0
-    ) {
-
-        container.innerHTML = `
-            <tr>
-                <td colspan="8" class="empty-state">
-                    <div class="empty-state-content">
-                        <div class="empty-state-icon">📄</div>
-                        <h3>No Delivery Receipts Yet</h3>
-                        <p>
-                            Prepared Delivery Receipts
-                            will appear here.
-                        </p>
-                    </div>
-                </td>
-            </tr>
-        `;
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        filteredDeliveryReceipts
-            .map(function (dr) {
-
-                return createDRRow(dr);
-
-            })
-            .join("");
-
-
-    attachDREvents();
-
-}
-
-
-/* =========================================================
-   CREATE DR ROW
-   ========================================================= */
-
-function createDRRow(dr) {
-
-    const status =
-        String(
-            dr.status ||
-            "PREPARED"
-        ).toUpperCase();
-
-
-    const items =
-        Array.isArray(dr.items)
-            ? dr.items
-            : [];
-
-
-    const totalQty =
-        items.reduce(
-            function (total, item) {
-
-                return total +
-                    Number(
-                        item.quantity ||
-                        item.drQty ||
-                        item.qty ||
-                        0
+            search || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const filtered =
+        salesOrders.filter(
+            function (so) {
+
+                const status =
+                    normalizeStatus(
+                        so.status
                     );
 
-            },
-            0
-        );
 
-
-    return `
-        <tr
-            class="delivery-dr-row"
-            data-dr-number="${escapeHTML(
-                dr.drNumber || ""
-            )}"
-        >
-
-            <td>
-                <strong>
-                    ${escapeHTML(
-                        dr.drNumber || "-"
-                    )}
-                </strong>
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    dr.soNumber || "-"
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    dr.clientName ||
-                    dr.client ||
-                    "-"
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    formatDisplayDate(
-                        dr.dateOfTransfer ||
-                        dr.transferDate
-                    )
-                )}
-            </td>
-
-            <td>
-                ${escapeHTML(
-                    dr.deliveryAddress ||
-                    "-"
-                )}
-            </td>
-
-            <td>
-                ${items.length}
-            </td>
-
-            <td>
-                ${formatNumber(totalQty)}
-            </td>
-
-            <td>
-                <span class="dr-status-badge ${getStatusClass(status)}">
-                    ${escapeHTML(status)}
-                </span>
-            </td>
-
-        </tr>
-    `;
-
-}
-
-
-/* =========================================================
-   DR EVENTS
-   ========================================================= */
-
-function attachDREvents() {
-
-    document.querySelectorAll(
-        ".delivery-dr-row"
-    ).forEach(function (row) {
-
-        row.addEventListener(
-            "click",
-            function () {
-
-                selectDeliveryReceipt(
-                    this.dataset.drNumber
-                );
-
-            }
-        );
-
-    });
-
-
-    /*
-       Optional action buttons if your
-       HTML already has them.
-    */
-
-    document.querySelectorAll(
-        "[data-dr-action='preview']"
-    ).forEach(function (button) {
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                previewDeliveryReceipt(
-                    this.dataset.drNumber
-                );
-
-            }
-        );
-
-    });
-
-
-    document.querySelectorAll(
-        "[data-dr-action='update']"
-    ).forEach(function (button) {
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                updateDeliveryReceipt(
-                    this.dataset.drNumber
-                );
-
-            }
-        );
-
-    });
-
-
-    document.querySelectorAll(
-        "[data-dr-action='cancel']"
-    ).forEach(function (button) {
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                cancelDeliveryReceipt(
-                    this.dataset.drNumber
-                );
-
-            }
-        );
-
-    });
-
-
-    document.querySelectorAll(
-        "[data-dr-action='post']"
-    ).forEach(function (button) {
-
-        button.addEventListener(
-            "click",
-            function () {
-
-                postDeliveryReceipt(
-                    this.dataset.drNumber
-                );
-
-            }
-        );
-
-    });
-
-}
-
-
-/* =========================================================
-   SELECT DELIVERY RECEIPT
-   ========================================================= */
-
-function selectDeliveryReceipt(
-    drNumber
-) {
-
-    selectedDR =
-        deliveryReceipts.find(
-            function (dr) {
-
-                return dr.drNumber ===
-                    drNumber;
-
-            }
-        );
-
-
-    document
-        .querySelectorAll(".delivery-dr-row")
-        .forEach(function (row) {
-
-            row.classList.remove(
-                "selected"
-            );
-
-        });
-
-
-    const selectedRow =
-        document.querySelector(
-            `[data-dr-number="${CSS.escape(drNumber)}"]`
-        );
-
-
-    if (selectedRow) {
-
-        selectedRow.classList.add(
-            "selected"
-        );
-
-    }
-
-
-    updateDRSelectionBar();
-
-}
-
-
-/* =========================================================
-   UPDATE DR SELECTION BAR
-   ========================================================= */
-
-function updateDRSelectionBar() {
-
-    const bar =
-        document.querySelector(
-            ".dr-selection-bar"
-        );
-
-
-    if (!bar) {
-        return;
-    }
-
-
-    if (!selectedDR) {
-
-        bar.classList.remove(
-            "active"
-        );
-
-        bar.style.display =
-            "none";
-
-        return;
-
-    }
-
-
-    bar.style.display =
-        "flex";
-
-
-    bar.classList.add(
-        "active"
-    );
-
-
-    setElementText(
-        [
-            "selectedDRNumber",
-            "selectionDRNumber"
-        ],
-        selectedDR.drNumber || "-"
-    );
-
-
-    setElementText(
-        [
-            "selectedSO",
-            "selectionSONumber"
-        ],
-        selectedDR.soNumber || "-"
-    );
-
-
-}
-
-
-/* =========================================================
-   FILTER
-   ========================================================= */
-
-function filterDeliveryData(
-    searchValue
-) {
-
-    applyDeliveryFilters(
-        searchValue
-    );
-
-}
-
-
-/* =========================================================
-   APPLY FILTERS
-   ========================================================= */
-
-function applyDeliveryFilters(
-    searchValue
-) {
-
-    const searchInput =
-        document.getElementById(
-            "deliverySearch"
-        );
-
-
-    const statusFilter =
-        document.getElementById(
-            "deliveryStatusFilter"
-        );
-
-
-    const dateFilter =
-        document.getElementById(
-            "deliveryDateFilter"
-        );
-
-
-    const search =
-        String(
-            searchValue !== undefined
-                ? searchValue
-                : searchInput
-                    ? searchInput.value
-                    : ""
-        )
-            .trim()
-            .toLowerCase();
-
-
-    const status =
-        statusFilter
-            ? String(
-                statusFilter.value || ""
-            ).toUpperCase()
-            : "";
-
-
-    const date =
-        dateFilter
-            ? dateFilter.value
-            : "";
-
-
-    /* -----------------------------------------------------
-       SO FILTER
-       ----------------------------------------------------- */
-
-    filteredSalesOrders =
-        salesOrders.filter(function (so) {
-
-            const soStatus =
-                String(
-                    so.status || ""
-                ).toUpperCase();
-
-
-            if (
-                soStatus !== "POSTED" &&
-                soStatus !== "PARTIAL"
-            ) {
-
-                return false;
-
-            }
-
-
-            if (
-                getSORemainingTotal(so) <= 0
-            ) {
-
-                return false;
-
-            }
-
-
-            const searchable = [
-
-                so.soNumber,
-                so.number,
-                so.clientName,
-                so.client,
-                so.project,
-                so.poNumber,
-                so.po
-
-            ]
-                .filter(Boolean)
-                .join(" ")
-                .toLowerCase();
-
-
-            return searchable.includes(
-                search
-            );
-
-        });
-
-
-    /* -----------------------------------------------------
-       DR FILTER
-       ----------------------------------------------------- */
-
-    filteredDeliveryReceipts =
-        deliveryReceipts.filter(
-            function (dr) {
-
-                const drStatus =
-                    String(
-                        dr.status || ""
-                    ).toUpperCase();
-
+                /*
+                   Delivery only accepts
+                   POSTED and PARTIAL.
+                */
 
                 if (
-                    status &&
-                    drStatus !== status
+                    status !== "POSTED" &&
+                    status !== "PARTIAL"
                 ) {
 
                     return false;
@@ -1321,42 +567,89 @@ function applyDeliveryFilters(
                 }
 
 
-                const searchable = [
+                /*
+                   Hide fully delivered SO.
+                */
 
-                    dr.drNumber,
-                    dr.soNumber,
-                    dr.clientName,
-                    dr.client,
-                    dr.deliveryAddress
+                if (
+                    getRemainingSOTotal(
+                        so
+                    ) <= 0
+                ) {
 
-                ]
+                    return false;
+
+                }
+
+
+                /*
+                   SO FILTER
+                */
+
+                if (
+                    filter !== "ALL"
+                ) {
+
+                    if (
+                        filter ===
+                        "READY" &&
+                        status !== "POSTED"
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    if (
+                        filter ===
+                        "PARTIAL" &&
+                        status !== "PARTIAL"
+                    ) {
+
+                        return false;
+
+                    }
+
+                }
+
+
+                /*
+                   SEARCH
+                */
+
+                if (
+                    searchText
+                ) {
+
+                    const searchable = [
+
+                        so.soNumber,
+
+                        so.number,
+
+                        so.clientName,
+
+                        so.client,
+
+                        so.poNumber,
+
+                        so.po,
+
+                        so.project,
+
+                        so.deliveryAddress
+
+                    ]
                     .filter(Boolean)
                     .join(" ")
                     .toLowerCase();
 
 
-                if (
-                    search &&
-                    !searchable.includes(search)
-                ) {
-
-                    return false;
-
-                }
-
-
-                if (date) {
-
-                    const drDate =
-                        normalizeDateValue(
-                            dr.dateOfTransfer ||
-                            dr.transferDate ||
-                            dr.createdAt
-                        );
-
-
                     if (
-                        drDate !== date
+                        !searchable.includes(
+                            searchText
+                        )
                     ) {
 
                         return false;
@@ -1372,43 +665,44 @@ function applyDeliveryFilters(
         );
 
 
-    renderFilteredSOList();
+    /*
+       If there are no localStorage SOs,
+       preserve the original HTML rows.
+    */
 
-    renderFilteredDRList();
+    if (
+        salesOrders.length === 0
+    ) {
 
-}
-
-
-/* =========================================================
-   RENDER FILTERED SO LIST
-   ========================================================= */
-
-function renderFilteredSOList() {
-
-    const container =
-        document.getElementById(
-            "postedSalesOrdersBody"
-        ) ||
-        document.querySelector(
-            "#postedSalesOrdersTable tbody"
-        );
-
-
-    if (!container) {
         return;
+
     }
 
 
     if (
-        filteredSalesOrders.length === 0
+        filtered.length === 0
     ) {
 
-        container.innerHTML = `
+        tbody.innerHTML = `
+
             <tr>
-                <td colspan="8" class="empty-state">
-                    No Sales Order found.
+
+                <td
+                    colspan="8"
+                    style="
+                        text-align:center;
+                        padding:40px;
+                        color:#64748b;
+                    "
+                >
+
+                    No Posted Sales Order
+                    available for delivery.
+
                 </td>
+
             </tr>
+
         `;
 
         return;
@@ -1416,189 +710,546 @@ function renderFilteredSOList() {
     }
 
 
-    container.innerHTML =
-        filteredSalesOrders
-            .map(createSalesOrderRow)
+    tbody.innerHTML =
+        filtered
+            .map(
+                createSORow
+            )
             .join("");
-
-
-    attachSalesOrderRowEvents();
-
-}
-
-
-/* =========================================================
-   RENDER FILTERED DR LIST
-   ========================================================= */
-
-function renderFilteredDRList() {
-
-    const container =
-        document.getElementById(
-            "recentDRBody"
-        ) ||
-        document.querySelector(
-            "#recentDRTable tbody"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    if (
-        filteredDeliveryReceipts.length === 0
-    ) {
-
-        container.innerHTML = `
-            <tr>
-                <td colspan="8" class="empty-state">
-                    No Delivery Receipt found.
-                </td>
-            </tr>
-        `;
-
-        return;
-
-    }
-
-
-    container.innerHTML =
-        filteredDeliveryReceipts
-            .map(createDRRow)
-            .join("");
-
-
-    attachDREvents();
-
-}
-
-
-/* =========================================================
-   REFRESH
-   ========================================================= */
-
-function refreshDeliveryModule() {
-
-    const button =
-        document.getElementById(
-            "deliveryRefreshBtn"
-        );
-
-
-    if (button) {
-
-        button.classList.add(
-            "is-refreshing"
-        );
-
-    }
-
-
-    setTimeout(
-        function () {
-
-            loadLocalStorageData();
-
-            selectedSO = null;
-            selectedDR = null;
-
-            renderAll();
-
-
-            if (button) {
-
-                button.classList.remove(
-                    "is-refreshing"
-                );
-
-            }
-
-        },
-        250
-    );
-
-}
-
-
-/* =========================================================
-   PREVIEW DR
-   ========================================================= */
-
-function previewDeliveryReceipt(
-    drNumber
-) {
-
-    const dr =
-        deliveryReceipts.find(
-            function (item) {
-
-                return item.drNumber ===
-                    drNumber;
-
-            }
-        );
-
-
-    if (!dr) {
-
-        showNotification(
-            "Delivery Receipt not found.",
-            "error"
-        );
-
-        return;
-
-    }
-
-
-    selectedDR = dr;
 
 
     /*
-       If create-delivery-receipt.html
-       already has its own preview system,
-       we can simply open the DR details page
-       later.
-
-       For now we use the existing preview modal
-       if available.
+       Reconnect PREPARE buttons
+       after table rendering.
     */
 
-    const modal =
-        document.getElementById(
-            "drPreviewModal"
+    setupPrepareDRButtons();
+
+}
+
+
+/* =========================================================
+   CREATE SO ROW
+========================================================= */
+
+function createSORow(
+    so
+) {
+
+    const soNumber =
+        so.soNumber ||
+        so.number ||
+        "-";
+
+
+    const client =
+        so.clientName ||
+        so.client ||
+        "-";
+
+
+    const po =
+        so.poNumber ||
+        so.po ||
+        "-";
+
+
+    const project =
+        so.project ||
+        "-";
+
+
+    const address =
+        so.deliveryAddress ||
+        so.address ||
+        "-";
+
+
+    const amount =
+        Number(
+            so.totalAmount ||
+            so.amount ||
+            0
         );
 
 
-    if (!modal) {
-
-        showNotification(
-            "Preview window is not available.",
-            "warning"
+    const status =
+        normalizeStatus(
+            so.status
         );
+
+
+    return `
+
+        <tr>
+
+            <td>
+
+                <strong>
+                    ${escapeHTML(
+                        soNumber
+                    )}
+                </strong>
+
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    client
+                )}
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    po
+                )}
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    project
+                )}
+            </td>
+
+
+            <td>
+                ${escapeHTML(
+                    address
+                )}
+            </td>
+
+
+            <td class="amount">
+
+                ₱${formatMoney(
+                    amount
+                )}
+
+            </td>
+
+
+            <td>
+
+                <span
+                    class="status ${
+                        getStatusClass(
+                            status
+                        )
+                    }"
+                >
+
+                    ${escapeHTML(
+                        status
+                    )}
+
+                </span>
+
+            </td>
+
+
+            <td>
+
+                <button
+                    type="button"
+                    class="btn btn-primary btn-small"
+                >
+
+                    + PREPARE DR
+
+                </button>
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+/* =========================================================
+   RENDER RECENT DR
+========================================================= */
+
+function renderRecentDR(
+    search = "",
+    filter = "ALL"
+) {
+
+    const table =
+        document.querySelector(
+            ".recent-dr-table"
+        );
+
+
+    if (!table) {
+        return;
+    }
+
+
+    const tbody =
+        table.querySelector(
+            "tbody"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    /*
+       If no localStorage DR yet,
+       keep sample HTML rows.
+    */
+
+    if (
+        deliveryReceipts.length === 0
+    ) {
+
+        setupDRSelection();
 
         return;
 
     }
 
 
-    populateDRPreview(
-        dr
-    );
+    const searchText =
+        String(
+            search || ""
+        )
+        .trim()
+        .toLowerCase();
 
 
-    modal.style.display =
-        "flex";
+    const filtered =
+        deliveryReceipts
+            .filter(
+                function (dr) {
+
+                    const status =
+                        normalizeStatus(
+                            dr.status
+                        );
 
 
-    requestAnimationFrame(
-        function () {
+                    /*
+                       FILTER
+                    */
 
-            modal.classList.add(
-                "show"
+                    if (
+                        filter !== "ALL"
+                    ) {
+
+                        if (
+                            normalizeFilterStatus(
+                                filter
+                            ) !== status
+                        ) {
+
+                            return false;
+
+                        }
+
+                    }
+
+
+                    /*
+                       SEARCH
+                    */
+
+                    if (
+                        searchText
+                    ) {
+
+                        const searchable = [
+
+                            dr.drNumber,
+
+                            dr.soNumber,
+
+                            dr.clientName,
+
+                            dr.client,
+
+                            dr.project
+
+                        ]
+                        .filter(Boolean)
+                        .join(" ")
+                        .toLowerCase();
+
+
+                        if (
+                            !searchable.includes(
+                                searchText
+                            )
+                        ) {
+
+                            return false;
+
+                        }
+
+                    }
+
+
+                    return true;
+
+                }
+            )
+            .sort(
+                function (a, b) {
+
+                    return (
+                        getTimestamp(b) -
+                        getTimestamp(a)
+                    );
+
+                }
             );
+
+
+    if (
+        filtered.length === 0
+    ) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    style="
+                        text-align:center;
+                        padding:40px;
+                        color:#64748b;
+                    "
+                >
+
+                    No Delivery Receipt found.
+
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    tbody.innerHTML =
+        filtered
+            .map(
+                createDRRow
+            )
+            .join("");
+
+
+    setupDRSelection();
+
+}
+
+
+/* =========================================================
+   CREATE DR ROW
+========================================================= */
+
+function createDRRow(
+    dr
+) {
+
+    const drNumber =
+        dr.drNumber ||
+        "-";
+
+
+    const drDate =
+        getDRDate(
+            dr
+        );
+
+
+    const soNumber =
+        dr.soNumber ||
+        "-";
+
+
+    const client =
+        dr.clientName ||
+        dr.client ||
+        "-";
+
+
+    const project =
+        dr.project ||
+        "-";
+
+
+    const amount =
+        getDRAmount(
+            dr
+        );
+
+
+    const status =
+        normalizeStatus(
+            dr.status ||
+            "PREPARED"
+        );
+
+
+    return `
+
+        <tr
+            data-dr-number="${escapeHTML(
+                drNumber
+            )}"
+            class="dr-row"
+        >
+
+            <td>
+
+                <strong>
+                    ${escapeHTML(
+                        drNumber
+                    )}
+                </strong>
+
+            </td>
+
+
+            <td>
+
+                ${formatDisplayDate(
+                    drDate
+                )}
+
+            </td>
+
+
+            <td>
+
+                ${escapeHTML(
+                    soNumber
+                )}
+
+            </td>
+
+
+            <td>
+
+                ${escapeHTML(
+                    client
+                )}
+
+            </td>
+
+
+            <td>
+
+                ${escapeHTML(
+                    project
+                )}
+
+            </td>
+
+
+            <td class="amount">
+
+                ₱${formatMoney(
+                    amount
+                )}
+
+            </td>
+
+
+            <td>
+
+                <span
+                    class="status ${
+                        getStatusClass(
+                            status
+                        )
+                    }"
+                >
+
+                    ${escapeHTML(
+                        displayStatus(
+                            status
+                        )
+                    )}
+
+                </span>
+
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+
+/* =========================================================
+   DR ROW SELECTION
+========================================================= */
+
+function setupDRSelection() {
+
+    const rows =
+        document.querySelectorAll(
+            ".dr-row"
+        );
+
+
+    rows.forEach(
+        function (row) {
+
+            /*
+               Remove old listeners by
+               cloning the row.
+               Not needed here because
+               table is recreated when
+               data changes.
+            */
+
+            row.onclick =
+                function () {
+
+                    selectDR(
+                        this
+                    );
+
+                };
+
+
+            row.ondblclick =
+                function () {
+
+                    const drNumber =
+                        this.dataset.drNumber;
+
+
+                    const dr =
+                        findDR(
+                            drNumber
+                        );
+
+
+                    if (dr) {
+
+                        openDRDetails(
+                            dr
+                        );
+
+                    }
+
+                };
 
         }
     );
@@ -1607,145 +1258,812 @@ function previewDeliveryReceipt(
 
 
 /* =========================================================
-   POPULATE DR PREVIEW
-   ========================================================= */
+   SELECT DR
+========================================================= */
 
-function populateDRPreview(
-    dr
+function selectDR(
+    row
 ) {
 
-    setElementText(
-        [
-            "previewDRNumber"
-        ],
-        dr.drNumber || "-"
-    );
+    if (!row) {
+        return;
+    }
 
 
-    setElementText(
-        [
-            "previewSONumber"
-        ],
-        dr.soNumber || "-"
-    );
+    const drNumber =
+        row.dataset.drNumber;
 
 
-    setElementText(
-        [
-            "previewClientName"
-        ],
-        dr.clientName ||
-        dr.client ||
-        "-"
-    );
+    selectedDR =
+        findDR(
+            drNumber
+        );
 
 
-    setElementText(
-        [
-            "previewTransferDate"
-        ],
-        formatDisplayDate(
-            dr.dateOfTransfer ||
-            dr.transferDate
+    /*
+       If the row is sample HTML
+       and not yet in localStorage,
+       create temporary selection.
+    */
+
+    if (
+        !selectedDR
+    ) {
+
+        selectedDR = {
+
+            drNumber:
+                drNumber,
+
+            status:
+                getStatusFromRow(
+                    row
+                ),
+
+            soNumber:
+                row.children[2]
+                    ? row.children[2]
+                        .textContent
+                        .trim()
+                    : "",
+
+            clientName:
+                row.children[3]
+                    ? row.children[3]
+                        .textContent
+                        .trim()
+                    : "",
+
+            project:
+                row.children[4]
+                    ? row.children[4]
+                        .textContent
+                        .trim()
+                    : ""
+
+        };
+
+    }
+
+
+    /*
+       Remove selection
+       from all rows.
+    */
+
+    document
+        .querySelectorAll(
+            ".dr-row"
         )
+        .forEach(
+            function (item) {
+
+                item.classList.remove(
+                    "selected"
+                );
+
+            }
+        );
+
+
+    row.classList.add(
+        "selected"
     );
 
 
-    setElementText(
-        [
-            "previewDeliveryAddress"
-        ],
-        dr.deliveryAddress ||
-        "-"
-    );
+    updateSelectionBar();
+
+}
 
 
-    const itemsContainer =
+/* =========================================================
+   UPDATE SELECTION BAR
+========================================================= */
+
+function updateSelectionBar() {
+
+    const text =
         document.getElementById(
-            "previewDRItems"
+            "drSelectionText"
+        );
+
+
+    const previewButton =
+        document.getElementById(
+            "previewDRButton"
+        );
+
+
+    const updateButton =
+        document.getElementById(
+            "updateDRButton"
+        );
+
+
+    const cancelButton =
+        document.getElementById(
+            "cancelDRButton"
+        );
+
+
+    const postButton =
+        document.getElementById(
+            "postDRButton"
         );
 
 
     if (
-        !itemsContainer
+        !selectedDR
     ) {
+
+        if (text) {
+
+            text.innerHTML = `
+
+                <span class="selection-empty">
+
+                    No Delivery Receipt selected
+
+                </span>
+
+            `;
+
+        }
+
+
+        setButtonDisabled(
+            previewButton,
+            true
+        );
+
+
+        setButtonDisabled(
+            updateButton,
+            true
+        );
+
+
+        setButtonDisabled(
+            cancelButton,
+            true
+        );
+
+
+        setButtonDisabled(
+            postButton,
+            true
+        );
+
 
         return;
 
     }
 
 
-    const items =
-        Array.isArray(dr.items)
-            ? dr.items
-            : [];
+    const status =
+        normalizeStatus(
+            selectedDR.status
+        );
 
 
-    itemsContainer.innerHTML =
-        items
-            .map(function (item) {
+    if (text) {
 
-                return `
-                    <tr>
+        text.innerHTML = `
 
-                        <td>
-                            ${escapeHTML(
-                                item.description ||
-                                item.drDescription ||
-                                "-"
-                            )}
-                        </td>
+            <div>
 
-                        <td>
-                            ${escapeHTML(
-                                item.unit ||
-                                ""
-                            )}
-                        </td>
+                <strong>
+                    ${escapeHTML(
+                        selectedDR.drNumber ||
+                        "-"
+                    )}
+                </strong>
 
-                        <td>
-                            ${formatNumber(
-                                item.quantity ||
-                                item.drQty ||
-                                item.qty ||
-                                0
-                            )}
-                        </td>
+                <span>
+                    &nbsp; • &nbsp;
+                    ${escapeHTML(
+                        selectedDR.soNumber ||
+                        "-"
+                    )}
+                </span>
 
-                    </tr>
-                `;
+                <span>
+                    &nbsp; • &nbsp;
+                    ${escapeHTML(
+                        displayStatus(
+                            status
+                        )
+                    )}
+                </span>
 
-            })
-            .join("");
+            </div>
+
+        `;
+
+    }
+
+
+    /*
+       PREVIEW
+       Available for any existing DR.
+    */
+
+    setButtonDisabled(
+        previewButton,
+        false
+    );
+
+
+    /*
+       UPDATE
+       Only PREPARED.
+    */
+
+    setButtonDisabled(
+        updateButton,
+        status !== "PREPARED"
+    );
+
+
+    /*
+       CANCEL
+       Cannot cancel COMPLETED
+       or already CANCELLED.
+    */
+
+    setButtonDisabled(
+        cancelButton,
+
+        status === "CANCELLED" ||
+        status === "COMPLETED"
+    );
+
+
+    /*
+       POST
+       Only PREPARED.
+    */
+
+    setButtonDisabled(
+        postButton,
+        status !== "PREPARED"
+    );
 
 }
 
 
 /* =========================================================
-   UPDATE DR
-   ========================================================= */
+   ACTION BUTTONS
+========================================================= */
 
-function updateDeliveryReceipt(
-    drNumber
+function setupActionButtons() {
+
+    const previewButton =
+        document.getElementById(
+            "previewDRButton"
+        );
+
+
+    const updateButton =
+        document.getElementById(
+            "updateDRButton"
+        );
+
+
+    const cancelButton =
+        document.getElementById(
+            "cancelDRButton"
+        );
+
+
+    const postButton =
+        document.getElementById(
+            "postDRButton"
+        );
+
+
+    if (previewButton) {
+
+        previewButton.onclick =
+            function () {
+
+                if (
+                    selectedDR
+                ) {
+
+                    openDRPreview(
+                        selectedDR
+                    );
+
+                }
+
+            };
+
+    }
+
+
+    if (updateButton) {
+
+        updateButton.onclick =
+            function () {
+
+                if (
+                    selectedDR
+                ) {
+
+                    openDRUpdate(
+                        selectedDR
+                    );
+
+                }
+
+            };
+
+    }
+
+
+    if (cancelButton) {
+
+        cancelButton.onclick =
+            function () {
+
+                if (
+                    selectedDR
+                ) {
+
+                    cancelDR(
+                        selectedDR
+                    );
+
+                }
+
+            };
+
+    }
+
+
+    if (postButton) {
+
+        postButton.onclick =
+            function () {
+
+                if (
+                    selectedDR
+                ) {
+
+                    postDR(
+                        selectedDR
+                    );
+
+                }
+
+            };
+
+    }
+
+}
+
+
+/* =========================================================
+   OPEN DR DETAILS
+========================================================= */
+
+function openDRDetails(
+    dr
 ) {
 
-    const dr =
-        deliveryReceipts.find(
-            function (item) {
+    if (!dr) {
+        return;
+    }
 
-                return item.drNumber ===
-                    drNumber;
+
+    selectedDR = dr;
+
+
+    hideAllViews();
+
+
+    const detailsView =
+        document.getElementById(
+            "drDetailsView"
+        );
+
+
+    if (!detailsView) {
+        return;
+    }
+
+
+    detailsView.style.display =
+        "block";
+
+
+    populateDRDetails(
+        dr
+    );
+
+
+    window.scrollTo(
+        {
+            top: 0,
+            behavior: "smooth"
+        }
+    );
+
+
+    updateDetailsActionButtons();
+
+}
+
+
+/* =========================================================
+   POPULATE DR DETAILS
+========================================================= */
+
+function populateDRDetails(
+    dr
+) {
+
+    /*
+       Existing HTML has many
+       hard-coded sample values.
+
+       We replace them dynamically
+       where possible.
+    */
+
+    const root =
+        document.getElementById(
+            "drDetailsView"
+        );
+
+
+    if (!root) {
+        return;
+    }
+
+
+    /*
+       Header DR number
+    */
+
+    const header =
+        root.querySelector(
+            ".delivery-details-header h1"
+        );
+
+
+    if (header) {
+
+        header.textContent =
+            dr.drNumber ||
+            "-";
+
+    }
+
+
+    /*
+       Status badge
+    */
+
+    const statusBadge =
+        root.querySelector(
+            ".details-header-status .status"
+        );
+
+
+    if (statusBadge) {
+
+        const status =
+            normalizeStatus(
+                dr.status
+            );
+
+
+        statusBadge.textContent =
+            displayStatus(
+                status
+            );
+
+
+        statusBadge.className =
+            "status " +
+            getStatusClass(
+                status
+            );
+
+    }
+
+
+    /*
+       Info cards
+    */
+
+    const infoCards =
+        root.querySelectorAll(
+            ".delivery-info-card"
+        );
+
+
+    if (
+        infoCards.length >= 4
+    ) {
+
+        infoCards[0]
+            .querySelector(
+                "strong"
+            )
+            .textContent =
+                dr.drNumber || "-";
+
+
+        infoCards[1]
+            .querySelector(
+                "strong"
+            )
+            .textContent =
+                dr.soNumber || "-";
+
+
+        infoCards[2]
+            .querySelector(
+                "strong"
+            )
+            .textContent =
+                dr.clientName ||
+                dr.client ||
+                "-";
+
+
+        infoCards[3]
+            .querySelector(
+                "strong"
+            )
+            .textContent =
+                "₱" +
+                formatMoney(
+                    getDRAmount(
+                        dr
+                    )
+                );
+
+    }
+
+
+    /*
+       Status panel
+    */
+
+    const panelStatus =
+        root.querySelector(
+            ".dr-status-panel .dr-status-meta strong"
+        );
+
+
+    if (panelStatus) {
+
+        panelStatus.textContent =
+            displayStatus(
+                dr.status
+            );
+
+    }
+
+
+    /*
+       DR form fields
+    */
+
+    const inputs =
+        root.querySelectorAll(
+            ".form-group input, .form-group textarea"
+        );
+
+
+    /*
+       We use labels to find
+       the correct fields.
+    */
+
+    inputs.forEach(
+        function (input) {
+
+            const group =
+                input.closest(
+                    ".form-group"
+                );
+
+
+            if (!group) {
+                return;
+            }
+
+
+            const label =
+                group.querySelector(
+                    "label"
+                );
+
+
+            if (!label) {
+                return;
+            }
+
+
+            const labelText =
+                label.textContent
+                    .trim()
+                    .toUpperCase();
+
+
+            if (
+                labelText.includes(
+                    "DR NUMBER"
+                )
+            ) {
+
+                input.value =
+                    dr.drNumber || "";
 
             }
+
+
+            else if (
+                labelText.includes(
+                    "DATE OF TRANSFER"
+                )
+            ) {
+
+                input.value =
+                    normalizeDate(
+                        getDRDate(
+                            dr
+                        )
+                    );
+
+            }
+
+
+            else if (
+                labelText ===
+                "SO NUMBER"
+            ) {
+
+                input.value =
+                    dr.soNumber || "";
+
+            }
+
+
+            else if (
+                labelText.includes(
+                    "CLIENT NAME"
+                )
+            ) {
+
+                input.value =
+                    dr.clientName ||
+                    dr.client ||
+                    "";
+
+            }
+
+
+            else if (
+                labelText.includes(
+                    "PO NUMBER"
+                )
+            ) {
+
+                input.value =
+                    dr.poNumber ||
+                    "";
+
+            }
+
+
+            else if (
+                labelText ===
+                "TERMS"
+            ) {
+
+                input.value =
+                    dr.terms ||
+                    "";
+
+            }
+
+
+            else if (
+                labelText ===
+                "PROJECT"
+            ) {
+
+                input.value =
+                    dr.project ||
+                    "";
+
+            }
+
+
+            else if (
+                labelText ===
+                "ATTENTION"
+            ) {
+
+                input.value =
+                    dr.attention ||
+                    "";
+
+            }
+
+
+            else if (
+                labelText.includes(
+                    "DELIVERY ADDRESS"
+                )
+            ) {
+
+                input.value =
+                    dr.deliveryAddress ||
+                    "";
+
+            }
+
+        }
+    );
+
+
+    renderDetailsItems(
+        root,
+        dr
+    );
+
+}
+
+
+/* =========================================================
+   RENDER DR ITEMS IN DETAILS
+========================================================= */
+
+function renderDetailsItems(
+    root,
+    dr
+) {
+
+    const table =
+        root.querySelector(
+            ".items-table"
         );
 
 
-    if (!dr) {
+    if (!table) {
+        return;
+    }
 
-        showNotification(
-            "Delivery Receipt not found.",
-            "error"
+
+    const tbody =
+        table.querySelector(
+            "tbody"
         );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    const items =
+        Array.isArray(
+            dr.items
+        )
+            ? dr.items
+            : [];
+
+
+    if (
+        items.length === 0
+    ) {
 
         return;
 
@@ -1753,47 +2071,773 @@ function updateDeliveryReceipt(
 
 
     /*
-       For now, update returns to
-       create-delivery-receipt.html
-       with the DR number.
-
-       Later we can create a dedicated
-       edit mode.
+       Replace hard-coded rows
+       with actual DR items.
     */
 
-    window.location.href =
+    tbody.innerHTML =
+        items
+            .map(
+                function (
+                    item,
+                    index
+                ) {
+
+                    const qty =
+                        Number(
+                            item.quantity ||
+                            item.drQty ||
+                            item.qty ||
+                            0
+                        );
+
+
+                    const unitAmount =
+                        Number(
+                            item.unitAmount ||
+                            item.unitPrice ||
+                            0
+                        );
+
+
+                    const amount =
+                        qty *
+                        unitAmount;
+
+
+                    return `
+
+                        <tr>
+
+                            <td>
+                                ${index + 1}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    ${escapeHTML(
+                                        item.itemName ||
+                                        item.name ||
+                                        item.description ||
+                                        "-"
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    item.drDescription ||
+                                    item.description ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td class="text-center">
+                                ${formatNumber(
+                                    qty
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    item.unit ||
+                                    ""
+                                )}
+                            </td>
+
+                            <td class="amount">
+                                ₱${formatMoney(
+                                    unitAmount
+                                )}
+                            </td>
+
+                            <td class="amount">
+                                ₱${formatMoney(
+                                    amount
+                                )}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+
+    /*
+       Update DR TOTAL
+    */
+
+    const total =
+        getDRAmount(
+            dr
+        );
+
+
+    root.querySelectorAll(
+        ".dr-total strong"
+    ).forEach(
+        function (element) {
+
+            element.textContent =
+                "₱" +
+                formatMoney(
+                    total
+                );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DETAILS ACTION BUTTONS
+========================================================= */
+
+function updateDetailsActionButtons() {
+
+    const view =
+        document.getElementById(
+            "drDetailsView"
+        );
+
+
+    if (!view) {
+        return;
+    }
+
+
+    const buttons =
+        view.querySelectorAll(
+            ".details-action-bar .btn"
+        );
+
+
+    if (
+        buttons.length < 5
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+       BACK
+    */
+
+    buttons[0].onclick =
+        function () {
+
+            showListView();
+
+        };
+
+
+    /*
+       PREVIEW
+    */
+
+    buttons[1].onclick =
+        function () {
+
+            if (
+                selectedDR
+            ) {
+
+                openDRPreview(
+                    selectedDR
+                );
+
+            }
+
+        };
+
+
+    /*
+       UPDATE
+    */
+
+    buttons[2].onclick =
+        function () {
+
+            if (
+                selectedDR
+            ) {
+
+                openDRUpdate(
+                    selectedDR
+                );
+
+            }
+
+        };
+
+
+    /*
+       CANCEL
+    */
+
+    buttons[3].onclick =
+        function () {
+
+            if (
+                selectedDR
+            ) {
+
+                cancelDR(
+                    selectedDR
+                );
+
+            }
+
+        };
+
+
+    /*
+       POST DR
+    */
+
+    buttons[4].onclick =
+        function () {
+
+            if (
+                selectedDR
+            ) {
+
+                postDR(
+                    selectedDR
+                );
+
+            }
+
+        };
+
+}
+
+
+/* =========================================================
+   OPEN PREVIEW
+========================================================= */
+
+function openDRPreview(
+    dr
+) {
+
+    if (!dr) {
+        return;
+    }
+
+
+    selectedDR = dr;
+
+
+    hideAllViews();
+
+
+    const preview =
+        document.getElementById(
+            "drPreviewView"
+        );
+
+
+    if (!preview) {
+        return;
+    }
+
+
+    preview.style.display =
+        "block";
+
+
+    populatePreview(
+        dr
+    );
+
+
+    window.scrollTo(
+        {
+            top: 0,
+            behavior: "smooth"
+        }
+    );
+
+
+    setupPreviewButtons();
+
+}
+
+
+/* =========================================================
+   POPULATE PREVIEW
+========================================================= */
+
+function populatePreview(
+    dr
+) {
+
+    const root =
+        document.getElementById(
+            "drPreviewView"
+        );
+
+
+    if (!root) {
+        return;
+    }
+
+
+    const header =
+        root.querySelector(
+            ".preview-header h1"
+        );
+
+
+    if (header) {
+
+        header.textContent =
+            dr.drNumber || "-";
+
+    }
+
+
+    const previewNumber =
+        root.querySelector(
+            ".dr-preview-number strong"
+        );
+
+
+    if (previewNumber) {
+
+        previewNumber.textContent =
+            dr.drNumber || "-";
+
+    }
+
+
+    const previewDate =
+        root.querySelector(
+            ".dr-preview-number small"
+        );
+
+
+    if (previewDate) {
+
+        previewDate.textContent =
+            formatDisplayDate(
+                getDRDate(
+                    dr
+                )
+            );
+
+    }
+
+
+    const info =
+        root.querySelectorAll(
+            ".preview-info-grid > div"
+        );
+
+
+    info.forEach(
+        function (block) {
+
+            const label =
+                block.querySelector(
+                    "span"
+                );
+
+
+            const value =
+                block.querySelector(
+                    "strong"
+                );
+
+
+            if (
+                !label ||
+                !value
+            ) {
+
+                return;
+
+            }
+
+
+            const text =
+                label.textContent
+                    .trim()
+                    .toUpperCase();
+
+
+            if (
+                text === "CLIENT"
+            ) {
+
+                value.textContent =
+                    dr.clientName ||
+                    dr.client ||
+                    "-";
+
+            }
+
+
+            else if (
+                text === "SO NUMBER"
+            ) {
+
+                value.textContent =
+                    dr.soNumber ||
+                    "-";
+
+            }
+
+
+            else if (
+                text === "PO NUMBER"
+            ) {
+
+                value.textContent =
+                    dr.poNumber ||
+                    "-";
+
+            }
+
+
+            else if (
+                text === "PROJECT"
+            ) {
+
+                value.textContent =
+                    dr.project ||
+                    "-";
+
+            }
+
+
+            else if (
+                text ===
+                "DELIVERY ADDRESS"
+            ) {
+
+                value.textContent =
+                    dr.deliveryAddress ||
+                    "-";
+
+            }
+
+        }
+    );
+
+
+    /*
+       ITEMS
+    */
+
+    const table =
+        root.querySelector(
+            ".preview-items table"
+        );
+
+
+    if (!table) {
+        return;
+    }
+
+
+    const tbody =
+        table.querySelector(
+            "tbody"
+        );
+
+
+    if (!tbody) {
+        return;
+    }
+
+
+    const items =
+        Array.isArray(
+            dr.items
+        )
+            ? dr.items
+            : [];
+
+
+    if (
+        items.length
+    ) {
+
+        tbody.innerHTML =
+            items
+                .map(
+                    function (
+                        item,
+                        index
+                    ) {
+
+                        const qty =
+                            Number(
+                                item.quantity ||
+                                item.drQty ||
+                                item.qty ||
+                                0
+                            );
+
+
+                        const unitAmount =
+                            Number(
+                                item.unitAmount ||
+                                item.unitPrice ||
+                                0
+                            );
+
+
+                        return `
+
+                            <tr>
+
+                                <td>
+                                    ${index + 1}
+                                </td>
+
+                                <td>
+                                    ${escapeHTML(
+                                        item.itemName ||
+                                        item.name ||
+                                        "-"
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${escapeHTML(
+                                        item.drDescription ||
+                                        item.description ||
+                                        "-"
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${formatNumber(
+                                        qty
+                                    )}
+                                </td>
+
+                                <td>
+                                    ${escapeHTML(
+                                        item.unit ||
+                                        ""
+                                    )}
+                                </td>
+
+                                <td>
+                                    ₱${formatMoney(
+                                        qty *
+                                        unitAmount
+                                    )}
+                                </td>
+
+                            </tr>
+
+                        `;
+
+                    }
+                )
+                .join("");
+
+    }
+
+
+    /*
+       TOTAL
+    */
+
+    const total =
+        root.querySelector(
+            ".preview-total strong"
+        );
+
+
+    if (total) {
+
+        total.textContent =
+            "₱" +
+            formatMoney(
+                getDRAmount(
+                    dr
+                )
+            );
+
+    }
+
+}
+
+
+/* =========================================================
+   PREVIEW BUTTONS
+========================================================= */
+
+function setupPreviewButtons() {
+
+    const view =
+        document.getElementById(
+            "drPreviewView"
+        );
+
+
+    if (!view) {
+        return;
+    }
+
+
+    const buttons =
+        view.querySelectorAll(
+            ".preview-actions .btn"
+        );
+
+
+    if (
+        buttons.length >= 2
+    ) {
+
+        /*
+           CLOSE
+        */
+
+        buttons[0].onclick =
+            function () {
+
+                if (
+                    selectedDR
+                ) {
+
+                    openDRDetails(
+                        selectedDR
+                    );
+
+                } else {
+
+                    showListView();
+
+                }
+
+            };
+
+
+        /*
+           PRINT
+        */
+
+        buttons[1].onclick =
+            function () {
+
+                window.print();
+
+            };
+
+    }
+
+
+    /*
+       BACK ARROW
+    */
+
+    const back =
+        view.querySelector(
+            ".back-button"
+        );
+
+
+    if (back) {
+
+        back.onclick =
+            function () {
+
+                if (
+                    selectedDR
+                ) {
+
+                    openDRDetails(
+                        selectedDR
+                    );
+
+                } else {
+
+                    showListView();
+
+                }
+
+            };
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE DR
+========================================================= */
+
+function openDRUpdate(
+    dr
+) {
+
+    if (!dr) {
+        return;
+    }
+
+
+    /*
+       For now we use the
+       Create DR page with edit
+       parameter.
+
+       Later we can build a
+       dedicated edit mode.
+    */
+
+    let url =
         "create-delivery-receipt.html?edit=" +
         encodeURIComponent(
-            drNumber
+            dr.drNumber
         );
+
+
+    window.location.href =
+        url;
 
 }
 
 
 /* =========================================================
    CANCEL DR
-   ========================================================= */
+========================================================= */
 
-function cancelDeliveryReceipt(
-    drNumber
+function cancelDR(
+    dr
 ) {
 
-    const index =
-        deliveryReceipts.findIndex(
-            function (dr) {
+    if (!dr) {
+        return;
+    }
 
-                return dr.drNumber ===
-                    drNumber;
 
-            }
+    const status =
+        normalizeStatus(
+            dr.status
         );
 
 
-    if (index === -1) {
+    if (
+        status === "CANCELLED"
+    ) {
 
         showNotification(
-            "Delivery Receipt not found.",
-            "error"
+            "This DR is already cancelled.",
+            "warning"
         );
 
         return;
@@ -1801,20 +2845,13 @@ function cancelDeliveryReceipt(
     }
 
 
-    const dr =
-        deliveryReceipts[index];
-
-
     if (
-        String(
-            dr.status || ""
-        ).toUpperCase() ===
-        "CANCELLED"
+        status === "COMPLETED"
     ) {
 
         showNotification(
-            "This DR is already cancelled.",
-            "warning"
+            "Completed DR cannot be cancelled.",
+            "error"
         );
 
         return;
@@ -1835,22 +2872,40 @@ function cancelDeliveryReceipt(
     }
 
 
-    dr.status =
-        "CANCELLED";
+    const index =
+        deliveryReceipts.findIndex(
+            function (item) {
 
+                return (
+                    item.drNumber ===
+                    dr.drNumber
+                );
 
-    dr.cancelledAt =
-        new Date().toISOString();
-
-
-    const user =
-        localStorage.getItem(
-            "logitechUser"
+            }
         );
 
 
-    dr.cancelledBy =
-        user || "Current User";
+    if (
+        index === -1
+    ) {
+
+        showNotification(
+            "This DR is only sample data. " +
+            "It is not yet saved in localStorage.",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    deliveryReceipts[index].status =
+        "CANCELLED";
+
+
+    deliveryReceipts[index].cancelledAt =
+        new Date().toISOString();
 
 
     saveDeliveryReceipts();
@@ -1859,11 +2914,14 @@ function cancelDeliveryReceipt(
     selectedDR = null;
 
 
-    renderAll();
+    refreshDeliveryModule();
+
+
+    showListView();
 
 
     showNotification(
-        "Delivery Receipt cancelled successfully.",
+        "Delivery Receipt cancelled.",
         "success"
     );
 
@@ -1872,48 +2930,25 @@ function cancelDeliveryReceipt(
 
 /* =========================================================
    POST DR
-   ========================================================= */
+========================================================= */
 
-function postDeliveryReceipt(
-    drNumber
+function postDR(
+    dr
 ) {
 
-    const index =
-        deliveryReceipts.findIndex(
-            function (dr) {
-
-                return dr.drNumber ===
-                    drNumber;
-
-            }
-        );
-
-
-    if (index === -1) {
-
-        showNotification(
-            "Delivery Receipt not found.",
-            "error"
-        );
-
+    if (!dr) {
         return;
-
     }
 
 
-    const dr =
-        deliveryReceipts[index];
-
-
-    const currentStatus =
-        String(
-            dr.status || ""
-        ).toUpperCase();
+    const status =
+        normalizeStatus(
+            dr.status
+        );
 
 
     if (
-        currentStatus ===
-        "CANCELLED"
+        status === "CANCELLED"
     ) {
 
         showNotification(
@@ -1927,12 +2962,11 @@ function postDeliveryReceipt(
 
 
     if (
-        currentStatus ===
-        "POSTED"
+        status !== "PREPARED"
     ) {
 
         showNotification(
-            "This DR is already posted.",
+            "Only PREPARED DR can be posted.",
             "warning"
         );
 
@@ -1944,7 +2978,7 @@ function postDeliveryReceipt(
     const confirmed =
         window.confirm(
             "Post " +
-            (dr.drNumber || "this Delivery Receipt") +
+            (dr.drNumber || "this DR") +
             "?"
         );
 
@@ -1954,35 +2988,56 @@ function postDeliveryReceipt(
     }
 
 
-    dr.status =
-        "POSTED";
+    const index =
+        deliveryReceipts.findIndex(
+            function (item) {
 
+                return (
+                    item.drNumber ===
+                    dr.drNumber
+                );
 
-    dr.postedAt =
-        new Date().toISOString();
-
-
-    const user =
-        localStorage.getItem(
-            "logitechUser"
+            }
         );
 
 
-    dr.postedBy =
-        user || "Current User";
+    if (
+        index === -1
+    ) {
+
+        showNotification(
+            "This DR is sample data only.",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    deliveryReceipts[index].status =
+        "ONGOING";
+
+
+    deliveryReceipts[index].postedAt =
+        new Date().toISOString();
 
 
     saveDeliveryReceipts();
 
 
-    selectedDR = dr;
+    selectedDR =
+        deliveryReceipts[index];
 
 
-    renderAll();
+    refreshDeliveryModule();
+
+
+    showListView();
 
 
     showNotification(
-        "Delivery Receipt posted successfully.",
+        "DR posted successfully. Status is now ONGOING DELIVERY.",
         "success"
     );
 
@@ -1990,47 +3045,753 @@ function postDeliveryReceipt(
 
 
 /* =========================================================
-   CLOSE MODAL
-   ========================================================= */
+   VIEW MANAGEMENT
+========================================================= */
 
-function closeModal() {
+function hideAllViews() {
 
-    document
-        .querySelectorAll(
-            ".modal-overlay"
-        )
-        .forEach(function (modal) {
+    const views = [
 
-            modal.classList.remove(
-                "show"
-            );
+        "deliveryListView",
 
-            setTimeout(
-                function () {
+        "prepareDRView",
 
-                    modal.style.display =
-                        "none";
+        "drDetailsView",
 
-                },
-                180
-            );
+        "drPreviewView"
 
-        });
+    ];
+
+
+    views.forEach(
+        function (id) {
+
+            const element =
+                document.getElementById(
+                    id
+                );
+
+
+            if (element) {
+
+                element.style.display =
+                    "none";
+
+            }
+
+        }
+    );
 
 }
 
 
 /* =========================================================
-   SO REMAINING TOTAL
-   ========================================================= */
+   SHOW LIST VIEW
+========================================================= */
 
-function getSORemainingTotal(
-    so
+function showListView() {
+
+    hideAllViews();
+
+
+    const list =
+        document.getElementById(
+            "deliveryListView"
+        );
+
+
+    if (list) {
+
+        list.style.display =
+            "block";
+
+    }
+
+
+    selectedDR = null;
+
+
+    clearDRSelection();
+
+
+    window.scrollTo(
+        {
+            top: 0,
+            behavior: "smooth"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SETUP VIEW BUTTONS
+========================================================= */
+
+function setupViewButtons() {
+
+    /*
+       Prepare DR back button
+    */
+
+    const prepareView =
+        document.getElementById(
+            "prepareDRView"
+        );
+
+
+    if (prepareView) {
+
+        const back =
+            prepareView.querySelector(
+                ".back-button"
+            );
+
+
+        if (back) {
+
+            back.onclick =
+                function () {
+
+                    showListView();
+
+                };
+
+        }
+
+    }
+
+
+    /*
+       Preview back button
+    */
+
+    const previewView =
+        document.getElementById(
+            "drPreviewView"
+        );
+
+
+    if (previewView) {
+
+        const back =
+            previewView.querySelector(
+                ".back-button"
+            );
+
+
+        if (back) {
+
+            back.onclick =
+                function () {
+
+                    if (
+                        selectedDR
+                    ) {
+
+                        openDRDetails(
+                            selectedDR
+                        );
+
+                    } else {
+
+                        showListView();
+
+                    }
+
+                };
+
+        }
+
+    }
+
+
+    /*
+       Prepare DR buttons
+       inside hidden prepare view.
+    */
+
+    setupPrepareViewButtons();
+
+}
+
+
+/* =========================================================
+   PREPARE VIEW BUTTONS
+========================================================= */
+
+function setupPrepareViewButtons() {
+
+    const view =
+        document.getElementById(
+            "prepareDRView"
+        );
+
+
+    if (!view) {
+        return;
+    }
+
+
+    const buttons =
+        view.querySelectorAll(
+            ".details-action-bar .btn"
+        );
+
+
+    if (
+        buttons.length < 3
+    ) {
+
+        return;
+
+    }
+
+
+    /*
+       CANCEL
+    */
+
+    buttons[0].onclick =
+        function () {
+
+            showListView();
+
+        };
+
+
+    /*
+       PREVIEW
+    */
+
+    buttons[1].onclick =
+        function () {
+
+            if (
+                selectedDR
+            ) {
+
+                openDRPreview(
+                    selectedDR
+                );
+
+            } else {
+
+                showNotification(
+                    "No DR selected.",
+                    "warning"
+                );
+
+            }
+
+        };
+
+
+    /*
+       PREPARE DR
+    */
+
+    buttons[2].onclick =
+        function () {
+
+            prepareCurrentDR();
+
+        };
+
+}
+
+
+/* =========================================================
+   PREPARE CURRENT DR
+========================================================= */
+
+function prepareCurrentDR() {
+
+    /*
+       This function is reserved for
+       the future flow when the
+       Prepare DR form is populated
+       dynamically.
+    */
+
+    if (
+        !selectedDR
+    ) {
+
+        showNotification(
+            "Please select a Sales Order first.",
+            "warning"
+        );
+
+        return;
+
+    }
+
+
+    showNotification(
+        "DR preparation is handled by create-delivery-receipt.html.",
+        "info"
+    );
+
+}
+
+
+/* =========================================================
+   SEARCH / FILTER SETUP
+========================================================= */
+
+function setupSearchAndFilters() {
+
+    /*
+       MAIN SEARCH
+    */
+
+    const mainSearch =
+        document.getElementById(
+            "deliveryMainSearch"
+        );
+
+
+    const mainStatus =
+        document.getElementById(
+            "deliveryMainStatusFilter"
+        );
+
+
+    if (mainSearch) {
+
+        mainSearch.addEventListener(
+            "input",
+            function () {
+
+                filterMainDelivery();
+
+            }
+        );
+
+    }
+
+
+    if (mainStatus) {
+
+        mainStatus.addEventListener(
+            "change",
+            function () {
+
+                filterMainDelivery();
+
+            }
+        );
+
+    }
+
+
+    /*
+       SO SEARCH
+    */
+
+    const soSearch =
+        document.getElementById(
+            "deliverySOSearch"
+        );
+
+
+    const soFilter =
+        document.getElementById(
+            "deliverySOFilter"
+        );
+
+
+    if (soSearch) {
+
+        soSearch.addEventListener(
+            "input",
+            function () {
+
+                renderPostedSalesOrders(
+                    this.value,
+                    soFilter
+                        ? soFilter.value
+                        : "ALL"
+                );
+
+            }
+        );
+
+    }
+
+
+    if (soFilter) {
+
+        soFilter.addEventListener(
+            "change",
+            function () {
+
+                renderPostedSalesOrders(
+                    soSearch
+                        ? soSearch.value
+                        : "",
+                    this.value
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+       DR SEARCH
+    */
+
+    const drSearch =
+        document.getElementById(
+            "deliveryDRSearch"
+        );
+
+
+    const drFilter =
+        document.getElementById(
+            "deliveryDRFilter"
+        );
+
+
+    if (drSearch) {
+
+        drSearch.addEventListener(
+            "input",
+            function () {
+
+                renderRecentDR(
+                    this.value,
+                    drFilter
+                        ? drFilter.value
+                        : "ALL"
+                );
+
+            }
+        );
+
+    }
+
+
+    if (drFilter) {
+
+        drFilter.addEventListener(
+            "change",
+            function () {
+
+                renderRecentDR(
+                    drSearch
+                        ? drSearch.value
+                        : "",
+                    this.value
+                );
+
+            }
+        );
+
+    }
+
+
+    /*
+       SEARCH BUTTONS
+    */
+
+    document
+        .querySelectorAll(
+            ".delivery-search-button, .search-button"
+        )
+        .forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        /*
+                           Inputs already filter
+                           live, so button simply
+                           triggers the current
+                           filter again.
+                        */
+
+                        filterMainDelivery();
+
+                    }
+                );
+
+            }
+        );
+
+
+    /*
+       REFRESH
+    */
+
+    const refreshButton =
+        document.querySelector(
+            ".delivery-refresh-button"
+        );
+
+
+    if (refreshButton) {
+
+        refreshButton.onclick =
+            function () {
+
+                refreshDeliveryModule();
+
+            };
+
+    }
+
+}
+
+
+/* =========================================================
+   MAIN DELIVERY FILTER
+========================================================= */
+
+function filterMainDelivery() {
+
+    const searchInput =
+        document.getElementById(
+            "deliveryMainSearch"
+        );
+
+
+    const statusInput =
+        document.getElementById(
+            "deliveryMainStatusFilter"
+        );
+
+
+    const search =
+        searchInput
+            ? searchInput.value
+            : "";
+
+
+    const filter =
+        statusInput
+            ? statusInput.value
+            : "ALL";
+
+
+    /*
+       Main filter applies primarily
+       to DR list.
+    */
+
+    renderRecentDR(
+        search,
+        filter
+    );
+
+}
+
+
+/* =========================================================
+   REFRESH
+========================================================= */
+
+function refreshDeliveryModule() {
+
+    loadData();
+
+    updateSummaryCards();
+
+    const soSearch =
+        document.getElementById(
+            "deliverySOSearch"
+        );
+
+
+    const soFilter =
+        document.getElementById(
+            "deliverySOFilter"
+        );
+
+
+    renderPostedSalesOrders(
+        soSearch
+            ? soSearch.value
+            : "",
+        soFilter
+            ? soFilter.value
+            : "ALL"
+    );
+
+
+    const drSearch =
+        document.getElementById(
+            "deliveryDRSearch"
+        );
+
+
+    const drFilter =
+        document.getElementById(
+            "deliveryDRFilter"
+        );
+
+
+    renderRecentDR(
+        drSearch
+            ? drSearch.value
+            : "",
+        drFilter
+            ? drFilter.value
+            : "ALL"
+    );
+
+
+    showNotification(
+        "Delivery data refreshed.",
+        "success"
+    );
+
+}
+
+
+/* =========================================================
+   QUANTITY INPUTS
+========================================================= */
+
+function setupQuantityInputs() {
+
+    document
+        .querySelectorAll(
+            ".qty-input"
+        )
+        .forEach(
+            function (input) {
+
+                input.addEventListener(
+                    "input",
+                    function () {
+
+                        validateQuantity(
+                            this
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   VALIDATE QUANTITY
+========================================================= */
+
+function validateQuantity(
+    input
+) {
+
+    const value =
+        Number(
+            input.value
+        );
+
+
+    if (
+        value < 0
+    ) {
+
+        input.value = 0;
+
+    }
+
+}
+
+
+/* =========================================================
+   FIND DR
+========================================================= */
+
+function findDR(
+    drNumber
+) {
+
+    return deliveryReceipts.find(
+        function (dr) {
+
+            return (
+                String(
+                    dr.drNumber
+                ) ===
+                String(
+                    drNumber
+                )
+            );
+
+        }
+    ) || null;
+
+}
+
+
+/* =========================================================
+   GET DR DATE
+========================================================= */
+
+function getDRDate(
+    dr
+) {
+
+    return (
+        dr.dateOfTransfer ||
+        dr.transferDate ||
+        dr.drDate ||
+        dr.createdAt ||
+        ""
+    );
+
+}
+
+
+/* =========================================================
+   GET DR AMOUNT
+========================================================= */
+
+function getDRAmount(
+    dr
 ) {
 
     if (
-        !so ||
-        !Array.isArray(so.items)
+        Number(
+            dr.totalAmount
+        ) > 0
+    ) {
+
+        return Number(
+            dr.totalAmount
+        );
+
+    }
+
+
+    if (
+        Number(
+            dr.amount
+        ) > 0
+    ) {
+
+        return Number(
+            dr.amount
+        );
+
+    }
+
+
+    if (
+        !Array.isArray(
+            dr.items
+        )
     ) {
 
         return 0;
@@ -2038,14 +3799,36 @@ function getSORemainingTotal(
     }
 
 
-    return so.items.reduce(
-        function (total, item) {
+    return dr.items.reduce(
+        function (
+            total,
+            item
+        ) {
 
-            return total +
-                getRemainingItemQty(
-                    so,
-                    item
+            const qty =
+                Number(
+                    item.quantity ||
+                    item.drQty ||
+                    item.qty ||
+                    0
                 );
+
+
+            const unitAmount =
+                Number(
+                    item.unitAmount ||
+                    item.unitPrice ||
+                    0
+                );
+
+
+            return (
+                total +
+                (
+                    qty *
+                    unitAmount
+                )
+            );
 
         },
         0
@@ -2055,10 +3838,57 @@ function getSORemainingTotal(
 
 
 /* =========================================================
-   REMAINING ITEM QTY
-   ========================================================= */
+   GET SO REMAINING TOTAL
+========================================================= */
 
-function getRemainingItemQty(
+function getRemainingSOTotal(
+    so
+) {
+
+    if (
+        !so ||
+        !Array.isArray(
+            so.items
+        )
+    ) {
+
+        /*
+           If the SO object does not
+           yet have item details,
+           allow it to display.
+        */
+
+        return 1;
+
+    }
+
+
+    return so.items.reduce(
+        function (
+            total,
+            item
+        ) {
+
+            return (
+                total +
+                getRemainingItem(
+                    so,
+                    item
+                )
+            );
+
+        },
+        0
+    );
+
+}
+
+
+/* =========================================================
+   GET REMAINING ITEM
+========================================================= */
+
+function getRemainingItem(
     so,
     item
 ) {
@@ -2070,6 +3900,15 @@ function getRemainingItemQty(
             item.orderedQty ||
             0
         );
+
+
+    if (
+        ordered <= 0
+    ) {
+
+        return 0;
+
+    }
 
 
     const itemId =
@@ -2085,41 +3924,36 @@ function getRemainingItemQty(
 
     const delivered =
         deliveryReceipts
-            .filter(function (dr) {
+            .filter(
+                function (dr) {
 
-                const status =
-                    String(
-                        dr.status || ""
-                    ).toUpperCase();
+                    const status =
+                        normalizeStatus(
+                            dr.status
+                        );
 
 
-                if (
-                    status ===
-                    "CANCELLED"
-                ) {
+                    if (
+                        status ===
+                        "CANCELLED"
+                    ) {
 
-                    return false;
+                        return false;
+
+                    }
+
+
+                    return (
+                        String(
+                            dr.soNumber
+                        ) ===
+                        String(
+                            soNumber
+                        )
+                    );
 
                 }
-
-
-                const drSO =
-                    dr.soNumber ||
-                    dr.salesOrderNumber;
-
-
-                if (
-                    drSO !== soNumber
-                ) {
-
-                    return false;
-
-                }
-
-
-                return true;
-
-            })
+            )
             .reduce(
                 function (
                     total,
@@ -2134,7 +3968,8 @@ function getRemainingItemQty(
                             : [];
 
 
-                    const itemDelivered =
+                    return (
+                        total +
                         items
                             .filter(
                                 function (
@@ -2142,8 +3977,12 @@ function getRemainingItemQty(
                                 ) {
 
                                     return (
-                                        picked.sourceItemId ===
-                                        itemId
+                                        String(
+                                            picked.sourceItemId
+                                        ) ===
+                                        String(
+                                            itemId
+                                        )
                                     );
 
                                 }
@@ -2154,21 +3993,20 @@ function getRemainingItemQty(
                                     picked
                                 ) {
 
-                                    return sum +
+                                    return (
+                                        sum +
                                         Number(
                                             picked.quantity ||
                                             picked.drQty ||
                                             picked.qty ||
                                             0
-                                        );
+                                        )
+                                    );
 
                                 },
                                 0
-                            );
-
-
-                    return total +
-                        itemDelivered;
+                            )
+                    );
 
                 },
                 0
@@ -2177,24 +4015,99 @@ function getRemainingItemQty(
 
     return Math.max(
         0,
-        ordered - delivered
+        ordered -
+        delivered
     );
 
 }
 
 
 /* =========================================================
-   STATUS CLASS
-   ========================================================= */
+   NORMALIZE STATUS
+========================================================= */
+
+function normalizeStatus(
+    status
+) {
+
+    return String(
+        status ||
+        ""
+    )
+    .trim()
+    .toUpperCase()
+    .replace(
+        /_/g,
+        " "
+    );
+
+}
+
+
+/* =========================================================
+   NORMALIZE FILTER STATUS
+========================================================= */
+
+function normalizeFilterStatus(
+    status
+) {
+
+    return String(
+        status ||
+        ""
+    )
+    .trim()
+    .toUpperCase()
+    .replace(
+        /_/g,
+        " "
+    );
+
+}
+
+
+/* =========================================================
+   DISPLAY STATUS
+========================================================= */
+
+function displayStatus(
+    status
+) {
+
+    const normalized =
+        normalizeStatus(
+            status
+        );
+
+
+    if (
+        normalized ===
+        "ONGOING"
+    ) {
+
+        return "ONGOING";
+
+    }
+
+
+    return normalized ||
+        "PREPARED";
+
+}
+
+
+/* =========================================================
+   STATUS CSS CLASS
+========================================================= */
 
 function getStatusClass(
     status
 ) {
 
     const normalized =
-        String(
-            status || ""
-        ).toUpperCase();
+        normalizeStatus(
+            status
+        );
 
 
     switch (
@@ -2202,31 +4115,28 @@ function getStatusClass(
     ) {
 
         case "POSTED":
-            return "status-posted";
+            return "posted";
 
         case "PREPARED":
-            return "status-prepared";
+            return "prepared";
 
         case "ONGOING":
-            return "status-ongoing";
-
-        case "FOR INVOICE":
-            return "status-invoice";
+            return "ongoing";
 
         case "COMPLETED":
-            return "status-completed";
-
-        case "PARTIAL":
-            return "status-partial";
+            return "completed";
 
         case "CANCELLED":
-            return "status-cancelled";
+            return "cancelled";
 
-        case "UNPOSTED":
-            return "status-unposted";
+        case "FOR INVOICE":
+            return "invoice";
+
+        case "PARTIAL":
+            return "partial";
 
         default:
-            return "status-default";
+            return "prepared";
 
     }
 
@@ -2234,10 +4144,135 @@ function getStatusClass(
 
 
 /* =========================================================
-   DATE HELPERS
-   ========================================================= */
+   GET STATUS FROM SAMPLE ROW
+========================================================= */
 
-function formatDateForCompare(
+function getStatusFromRow(
+    row
+) {
+
+    const status =
+        row.querySelector(
+            ".status"
+        );
+
+
+    return status
+        ? normalizeStatus(
+            status.textContent
+        )
+        : "PREPARED";
+
+}
+
+
+/* =========================================================
+   CLEAR DR SELECTION
+========================================================= */
+
+function clearDRSelection() {
+
+    document
+        .querySelectorAll(
+            ".dr-row"
+        )
+        .forEach(
+            function (row) {
+
+                row.classList.remove(
+                    "selected"
+                );
+
+            }
+        );
+
+
+    selectedDR = null;
+
+
+    updateSelectionBar();
+
+}
+
+
+/* =========================================================
+   BUTTON DISABLED
+========================================================= */
+
+function setButtonDisabled(
+    button,
+    disabled
+) {
+
+    if (!button) {
+        return;
+    }
+
+
+    button.disabled =
+        disabled;
+
+}
+
+
+/* =========================================================
+   SET TEXT
+========================================================= */
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (element) {
+
+        element.textContent =
+            value;
+
+    }
+
+}
+
+
+/* =========================================================
+   DATE
+========================================================= */
+
+function getTodayString() {
+
+    const date =
+        new Date();
+
+
+    return [
+        date.getFullYear(),
+
+        String(
+            date.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        ),
+
+        String(
+            date.getDate()
+        ).padStart(
+            2,
+            "0"
+        )
+
+    ].join("-");
+
+}
+
+
+function normalizeDate(
     value
 ) {
 
@@ -2247,7 +4282,9 @@ function formatDateForCompare(
 
 
     const date =
-        new Date(value);
+        new Date(
+            value
+        );
 
 
     if (
@@ -2256,35 +4293,41 @@ function formatDateForCompare(
         )
     ) {
 
-        return String(value)
-            .substring(0, 10);
+        return String(
+            value
+        ).substring(
+            0,
+            10
+        );
 
     }
 
 
     return [
         date.getFullYear(),
+
         String(
             date.getMonth() + 1
-        ).padStart(2, "0"),
+        ).padStart(
+            2,
+            "0"
+        ),
+
         String(
             date.getDate()
-        ).padStart(2, "0")
+        ).padStart(
+            2,
+            "0"
+        )
+
     ].join("-");
 
 }
 
 
-function normalizeDateValue(
-    value
-) {
-
-    return formatDateForCompare(
-        value
-    );
-
-}
-
+/* =========================================================
+   DISPLAY DATE
+========================================================= */
 
 function formatDisplayDate(
     value
@@ -2296,7 +4339,9 @@ function formatDisplayDate(
 
 
     const date =
-        new Date(value);
+        new Date(
+            value
+        );
 
 
     if (
@@ -2305,7 +4350,9 @@ function formatDisplayDate(
         )
     ) {
 
-        return String(value);
+        return String(
+            value
+        );
 
     }
 
@@ -2313,32 +4360,43 @@ function formatDisplayDate(
     return date.toLocaleDateString(
         "en-PH",
         {
-            year: "numeric",
-            month: "short",
-            day: "2-digit"
+            month:
+                "long",
+
+            day:
+                "numeric",
+
+            year:
+                "numeric"
         }
     );
 
 }
 
 
+/* =========================================================
+   TIMESTAMP
+========================================================= */
+
 function getTimestamp(
     item
 ) {
 
-    const value =
-        item.createdAt ||
-        item.dateOfTransfer ||
-        item.transferDate ||
-        item.updatedAt ||
-        0;
+    const date =
+        getDRDate(
+            item
+        );
 
 
     const timestamp =
-        new Date(value).getTime();
+        new Date(
+            date
+        ).getTime();
 
 
-    return Number.isNaN(timestamp)
+    return Number.isNaN(
+        timestamp
+    )
         ? 0
         : timestamp;
 
@@ -2346,10 +4404,10 @@ function getTimestamp(
 
 
 /* =========================================================
-   NUMBER FORMAT
-   ========================================================= */
+   MONEY
+========================================================= */
 
-function formatNumber(
+function formatMoney(
     value
 ) {
 
@@ -2358,8 +4416,11 @@ function formatNumber(
     ).toLocaleString(
         "en-PH",
         {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2
+            minimumFractionDigits:
+                2,
+
+            maximumFractionDigits:
+                2
         }
     );
 
@@ -2367,8 +4428,25 @@ function formatNumber(
 
 
 /* =========================================================
+   NUMBER
+========================================================= */
+
+function formatNumber(
+    value
+) {
+
+    return Number(
+        value || 0
+    ).toLocaleString(
+        "en-PH"
+    );
+
+}
+
+
+/* =========================================================
    HTML ESCAPE
-   ========================================================= */
+========================================================= */
 
 function escapeHTML(
     value
@@ -2384,34 +4462,36 @@ function escapeHTML(
     }
 
 
-    return String(value)
-        .replace(
-            /&/g,
-            "&amp;"
-        )
-        .replace(
-            /</g,
-            "&lt;"
-        )
-        .replace(
-            />/g,
-            "&gt;"
-        )
-        .replace(
-            /"/g,
-            "&quot;"
-        )
-        .replace(
-            /'/g,
-            "&#039;"
-        );
+    return String(
+        value
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
 
 }
 
 
 /* =========================================================
    NOTIFICATION
-   ========================================================= */
+========================================================= */
 
 function showNotification(
     message,
@@ -2419,51 +4499,21 @@ function showNotification(
 ) {
 
     /*
-       Use existing notification system
-       if your Delivery HTML already has one.
+       Remove existing notification
     */
 
-    const existing =
+    const old =
         document.querySelector(
-            ".delivery-notification"
+            ".delivery-js-notification"
         );
 
 
-    if (existing) {
+    if (old) {
 
-        existing.textContent =
-            message;
-
-        existing.className =
-            "delivery-notification " +
-            "notification-" +
-            type;
-
-        existing.classList.add(
-            "show"
-        );
-
-
-        setTimeout(
-            function () {
-
-                existing.classList.remove(
-                    "show"
-                );
-
-            },
-            3000
-        );
-
-
-        return;
+        old.remove();
 
     }
 
-
-    /*
-       Fallback notification
-    */
 
     const notification =
         document.createElement(
@@ -2472,9 +4522,7 @@ function showNotification(
 
 
     notification.className =
-        "delivery-notification " +
-        "notification-" +
-        type;
+        "delivery-js-notification";
 
 
     notification.textContent =
@@ -2482,24 +4530,102 @@ function showNotification(
 
 
     notification.style.cssText = `
-        position: fixed;
-        right: 24px;
-        bottom: 24px;
-        z-index: 99999;
-        padding: 14px 18px;
-        border-radius: 12px;
-        background: #ffffff;
-        color: #1e293b;
-        box-shadow: 0 12px 35px rgba(15,23,42,.18);
-        border: 1px solid #e2e8f0;
-        font-size: 14px;
-        font-weight: 600;
-        animation: deliveryNotificationIn .25s ease;
+
+        position:fixed;
+
+        right:24px;
+
+        bottom:24px;
+
+        z-index:99999;
+
+        max-width:420px;
+
+        padding:15px 20px;
+
+        border-radius:14px;
+
+        background:#ffffff;
+
+        color:#1e293b;
+
+        border:1px solid #e2e8f0;
+
+        box-shadow:
+            0 15px 40px
+            rgba(15,23,42,.16);
+
+        font-size:14px;
+
+        font-weight:600;
+
+        opacity:0;
+
+        transform:
+            translateY(15px);
+
+        transition:
+            all .25s ease;
+
     `;
+
+
+    if (
+        type ===
+        "success"
+    ) {
+
+        notification.style.borderLeft =
+            "4px solid #16a34a";
+
+    }
+
+
+    else if (
+        type ===
+        "error"
+    ) {
+
+        notification.style.borderLeft =
+            "4px solid #dc2626";
+
+    }
+
+
+    else if (
+        type ===
+        "warning"
+    ) {
+
+        notification.style.borderLeft =
+            "4px solid #f59e0b";
+
+    }
+
+
+    else {
+
+        notification.style.borderLeft =
+            "4px solid #2563eb";
+
+    }
 
 
     document.body.appendChild(
         notification
+    );
+
+
+    requestAnimationFrame(
+        function () {
+
+            notification.style.opacity =
+                "1";
+
+            notification.style.transform =
+                "translateY(0)";
+
+        }
     );
 
 
@@ -2510,10 +4636,7 @@ function showNotification(
                 "0";
 
             notification.style.transform =
-                "translateY(10px)";
-
-            notification.style.transition =
-                "all .2s ease";
+                "translateY(15px)";
 
 
             setTimeout(
@@ -2534,67 +4657,33 @@ function showNotification(
 
 /* =========================================================
    GLOBAL FUNCTIONS
-   =========================================================
-   These are exposed so inline HTML buttons can use them.
-   ========================================================= */
+========================================================= */
 
-window.openCreateDeliveryReceipt =
-    openCreateDeliveryReceipt;
-
-window.openCreateDeliveryReceiptWithSO =
-    openCreateDeliveryReceiptWithSO;
-
-window.previewDeliveryReceipt =
-    previewDeliveryReceipt;
-
-window.updateDeliveryReceipt =
-    updateDeliveryReceipt;
-
-window.cancelDeliveryReceipt =
-    cancelDeliveryReceipt;
-
-window.postDeliveryReceipt =
-    postDeliveryReceipt;
+window.openCreateDR =
+    openCreateDR;
 
 window.refreshDeliveryModule =
     refreshDeliveryModule;
 
-window.filterDeliveryData =
-    filterDeliveryData;
+window.showListView =
+    showListView;
 
-window.closeModal =
-    closeModal;
+window.openDRDetails =
+    openDRDetails;
 
+window.openDRPreview =
+    openDRPreview;
 
-/* =========================================================
-   DEBUG HELPER
-   ========================================================= */
+window.openDRUpdate =
+    openDRUpdate;
 
-window.deliveryDebug = {
+window.cancelDR =
+    cancelDR;
 
-    getSalesOrders: function () {
-        return salesOrders;
-    },
-
-    getDeliveryReceipts: function () {
-        return deliveryReceipts;
-    },
-
-    getSelectedSO: function () {
-        return selectedSO;
-    },
-
-    getSelectedDR: function () {
-        return selectedDR;
-    },
-
-    refresh: function () {
-        refreshDeliveryModule();
-    }
-
-};
+window.postDR =
+    postDR;
 
 
 /* =========================================================
    END DELIVERY.JS
-   ========================================================= */
+========================================================= */
