@@ -4234,3 +4234,32 @@ function filterSOList() {
     );
 
 }
+
+async function refreshSOList() {
+
+    const button = document.getElementById("soRefreshBtn");
+
+    if (button) {
+        button.classList.add("refreshing");
+    }
+
+    try {
+
+        await loadSOList(true);
+
+    } catch (error) {
+
+        console.error("Refresh Sales Order error:", error);
+
+    } finally {
+
+        setTimeout(() => {
+
+            if (button) {
+                button.classList.remove("refreshing");
+            }
+
+        }, 300);
+
+    }
+}
