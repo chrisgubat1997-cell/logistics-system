@@ -1,1 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>System Settings | LOGIS-TECH SYSTEM</title>
+
+    <link rel="stylesheet" href="../css/system-settings.css">
+</head>
+
+<body>
+
+<div class="settings-page">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+    <div class="settings-header">
+
+        <div class="header-left">
+            <div class="header-icon">⚙️</div>
+
+            <div>
+                <h1>System Settings</h1>
+                <p>Manage the behavior and appearance of LOGIS-TECH SYSTEM.</p>
+            </div>
+        </div>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            System Online
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SETTINGS GRID
+    ====================================================== -->
+    <div class="settings-grid">
+
+
+        <!-- =================================================
+             APPEARANCE
+        ================================================== -->
+        <section class="settings-card">
+
+            <div class="card-header">
+                <div class="card-icon appearance-icon">🎨</div>
+
+                <div>
+                    <h2>Appearance</h2>
+                    <p>Customize the look and layout of the system.</p>
+                </div>
+            </div>
+
+            <div class="setting-list">
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Theme</strong>
+                        <span>Choose the system appearance.</span>
+                    </div>
+
+                    <select id="themeSetting">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="system">System Default</option>
+                    </select>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Sidebar</strong>
+                        <span>Default sidebar behavior.</span>
+                    </div>
+
+                    <select id="sidebarSetting">
+                        <option value="expanded">Expanded</option>
+                        <option value="collapsed">Collapsed</option>
+                    </select>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Animations</strong>
+                        <span>Enable smooth system animations.</span>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="animationSetting" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
+        <section class="settings-card">
+
+            <div class="card-header">
+                <div class="card-icon dashboard-icon">📊</div>
+
+                <div>
+                    <h2>Dashboard</h2>
+                    <p>Control how dashboard information is displayed.</p>
+                </div>
+            </div>
+
+            <div class="setting-list">
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Default Page</strong>
+                        <span>Page displayed after login.</span>
+                    </div>
+
+                    <select id="defaultPageSetting">
+                        <option value="dashboard">Dashboard</option>
+                        <option value="sales-order">Sales Order</option>
+                        <option value="delivery">Delivery</option>
+                    </select>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Recent Transactions</strong>
+                        <span>Number of recent records displayed.</span>
+                    </div>
+
+                    <select id="recentTransactionsSetting">
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="30" selected>30</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Auto Refresh</strong>
+                        <span>Automatically refresh dashboard data.</span>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="autoRefreshSetting">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             NOTIFICATIONS
+        ================================================== -->
+        <section class="settings-card">
+
+            <div class="card-header">
+                <div class="card-icon notification-icon">🔔</div>
+
+                <div>
+                    <h2>Notifications</h2>
+                    <p>Manage system alerts and reminders.</p>
+                </div>
+            </div>
+
+            <div class="setting-list">
+
+                <div class="setting-row">
+                    <div>
+                        <strong>System Notifications</strong>
+                        <span>Enable system notifications.</span>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="notificationSetting" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Delivery Alerts</strong>
+                        <span>Notify when delivery status changes.</span>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="deliveryAlertSetting" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Delay Alerts</strong>
+                        <span>Notify when transactions are delayed.</span>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="delayAlertSetting" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Notification Sound</strong>
+                        <span>Play sound for system alerts.</span>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="soundSetting">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DATE & TIME
+        ================================================== -->
+        <section class="settings-card">
+
+            <div class="card-header">
+                <div class="card-icon datetime-icon">📅</div>
+
+                <div>
+                    <h2>Date & Time</h2>
+                    <p>Configure regional date and time settings.</p>
+                </div>
+            </div>
+
+            <div class="setting-list">
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Date Format</strong>
+                        <span>Format used throughout the system.</span>
+                    </div>
+
+                    <select id="dateFormatSetting">
+                        <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                        <option value="DD/MM/YYYY">DD/MM/YYYY</option>
+                        <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                    </select>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Time Format</strong>
+                        <span>Choose the preferred time format.</span>
+                    </div>
+
+                    <select id="timeFormatSetting">
+                        <option value="12">12 Hour</option>
+                        <option value="24">24 Hour</option>
+                    </select>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Timezone</strong>
+                        <span>Timezone used by the system.</span>
+                    </div>
+
+                    <select id="timezoneSetting">
+                        <option value="Asia/Manila" selected>
+                            Asia/Manila (GMT+8)
+                        </option>
+                        <option value="UTC">
+                            UTC
+                        </option>
+                    </select>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SECURITY
+        ================================================== -->
+        <section class="settings-card">
+
+            <div class="card-header">
+                <div class="card-icon security-icon">🔐</div>
+
+                <div>
+                    <h2>Security</h2>
+                    <p>Manage login and session behavior.</p>
+                </div>
+            </div>
+
+            <div class="setting-list">
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Remember Login</strong>
+                        <span>Keep the account signed in.</span>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="rememberLoginSetting" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Auto Logout</strong>
+                        <span>Automatically logout when inactive.</span>
+                    </div>
+
+                    <label class="switch">
+                        <input type="checkbox" id="autoLogoutSetting">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+
+                <div class="setting-row">
+                    <div>
+                        <strong>Session Timeout</strong>
+                        <span>Inactive time before automatic logout.</span>
+                    </div>
+
+                    <select id="sessionTimeoutSetting">
+                        <option value="15">15 Minutes</option>
+                        <option value="30" selected>30 Minutes</option>
+                        <option value="60">60 Minutes</option>
+                        <option value="120">2 Hours</option>
+                    </select>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             DATA & STORAGE
+        ================================================== -->
+        <section class="settings-card">
+
+            <div class="card-header">
+                <div class="card-icon storage-icon">💾</div>
+
+                <div>
+                    <h2>Data & Storage</h2>
+                    <p>Manage locally stored system data.</p>
+                </div>
+            </div>
+
+            <div class="storage-info">
+
+                <div class="storage-box">
+                    <span class="storage-label">Storage Status</span>
+                    <strong>Local System Data</strong>
+                </div>
+
+                <div class="storage-actions">
+
+                    <button type="button" class="action-btn secondary">
+                        ↻ Clear Cache
+                    </button>
+
+                    <button type="button" class="action-btn secondary">
+                        ↓ Export Data
+                    </button>
+
+                    <button type="button" class="action-btn danger">
+                        ⚠ Reset Local Data
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SYSTEM MAINTENANCE
+        ================================================== -->
+        <section class="settings-card">
+
+            <div class="card-header">
+                <div class="card-icon maintenance-icon">🛠️</div>
+
+                <div>
+                    <h2>System Maintenance</h2>
+                    <p>Tools for maintaining the application.</p>
+                </div>
+            </div>
+
+            <div class="maintenance-list">
+
+                <button type="button" class="maintenance-btn">
+                    <span>🔄</span>
+                    <div>
+                        <strong>Refresh Application</strong>
+                        <small>Reload the current system.</small>
+                    </div>
+                </button>
+
+
+                <button type="button" class="maintenance-btn">
+                    <span>🧹</span>
+                    <div>
+                        <strong>Clear Temporary Data</strong>
+                        <small>Remove temporary system information.</small>
+                    </div>
+                </button>
+
+
+                <button type="button" class="maintenance-btn">
+                    <span>⚙️</span>
+                    <div>
+                        <strong>Restore Default Settings</strong>
+                        <small>Return system preferences to default.</small>
+                    </div>
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             ABOUT
+        ================================================== -->
+        <section class="settings-card about-card">
+
+            <div class="card-header">
+                <div class="card-icon about-icon">ℹ️</div>
+
+                <div>
+                    <h2>About</h2>
+                    <p>System information.</p>
+                </div>
+            </div>
+
+            <div class="about-content">
+
+                <div class="system-logo">
+                    <img src="../assets/logo.png" alt="LOGIS-TECH SYSTEM">
+                </div>
+
+                <div class="system-details">
+                    <h3>LOGIS-TECH SYSTEM</h3>
+
+                    <p>
+                        Logistics Management System
+                    </p>
+
+                    <div class="version">
+                        Version <strong>2026.10</strong>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+    </div>
+
+
+    <!-- =====================================================
+         SAVE BAR
+    ====================================================== -->
+    <div class="settings-save-bar">
+
+        <div>
+            <strong>System Preferences</strong>
+            <span>Changes are stored on this device.</span>
+        </div>
+
+        <div class="save-actions">
+            <button type="button" class="cancel-btn">
+                Cancel
+            </button>
+
+            <button type="button" class="save-btn">
+                ✓ Save Changes
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
