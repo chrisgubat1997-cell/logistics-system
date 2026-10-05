@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    SYSTEM SETTINGS MODULE
    =========================================================
-   VERSION: 20261005-01
+   VERSION: 20261005-02
 
    PURPOSE:
    - Save / load system settings
@@ -15,6 +15,7 @@
    - Security preferences
    - Local storage management
    - Restore defaults
+   - Prevent duplicate initialization
    ========================================================= */
 
 
@@ -69,16 +70,65 @@ let currentSystemSettings = {
 
 
 /* =========================================================
+   INITIALIZATION STATE
+   ========================================================= */
+
+let systemSettingsInitialized = false;
+let autoLogoutTimer = null;
+let autoLogoutListenersBound = false;
+let systemThemeListenerBound = false;
+
+
+/* =========================================================
    INITIALIZE
    ========================================================= */
 
 function initializeSystemSettings() {
 
-    console.log("LOGIS-TECH SYSTEM SETTINGS: Initializing...");
+    /*
+       IMPORTANT:
+       This function is called by index.html AFTER
+       pages/system-settings.html has been inserted.
+    */
+
+    if (systemSettingsInitialized) {
+
+        console.log(
+            "LOGIS-TECH SYSTEM SETTINGS: Already initialized."
+        );
+
+        /*
+           Still refresh the form in case the HTML
+           was recreated.
+        */
+
+        loadSavedSystemSettings();
+        populateSystemSettingsForm();
+
+        return;
+    }
+
+
+    console.log(
+        "LOGIS-TECH SYSTEM SETTINGS: Initializing..."
+    );
+
 
     loadSavedSystemSettings();
+
     populateSystemSettingsForm();
+
     bindSystemSettingsEvents();
+
+    applySystemSettings();
+
+    setupSystemThemeListener();
+
+    setupAutoLogout();
+
+
+    systemSettingsInitialized = true;
+
 
     console.log(
         "LOGIS-TECH SYSTEM SETTINGS: Ready",
@@ -96,7 +146,10 @@ function loadSavedSystemSettings() {
     try {
 
         const savedSettings =
-            localStorage.getItem(SYSTEM_SETTINGS_KEY);
+            localStorage.getItem(
+                SYSTEM_SETTINGS_KEY
+            );
+
 
         if (!savedSettings) {
 
@@ -107,20 +160,39 @@ function loadSavedSystemSettings() {
             return;
         }
 
+
         const parsedSettings =
             JSON.parse(savedSettings);
 
+
+        if (
+            !parsedSettings ||
+            typeof parsedSettings !== "object"
+        ) {
+
+            currentSystemSettings = {
+                ...DEFAULT_SYSTEM_SETTINGS
+            };
+
+            return;
+        }
+
+
         currentSystemSettings = {
+
             ...DEFAULT_SYSTEM_SETTINGS,
+
             ...parsedSettings
         };
+
 
     } catch (error) {
 
         console.error(
-            "Failed to load system settings:",
+            "LOGIS-TECH SYSTEM SETTINGS: Failed to load settings:",
             error
         );
+
 
         currentSystemSettings = {
             ...DEFAULT_SYSTEM_SETTINGS
@@ -139,7 +211,9 @@ function saveSystemSettingsToStorage() {
 
         localStorage.setItem(
             SYSTEM_SETTINGS_KEY,
-            JSON.stringify(currentSystemSettings)
+            JSON.stringify(
+                currentSystemSettings
+            )
         );
 
         return true;
@@ -147,7 +221,7 @@ function saveSystemSettingsToStorage() {
     } catch (error) {
 
         console.error(
-            "Failed to save system settings:",
+            "LOGIS-TECH SYSTEM SETTINGS: Failed to save:",
             error
         );
 
@@ -172,155 +246,229 @@ function getSettingElement(id) {
 
 function populateSystemSettingsForm() {
 
-    /* Appearance */
+    /* =====================================================
+       APPEARANCE
+       ===================================================== */
 
     const themeSetting =
-        getSettingElement("themeSetting");
+        getSettingElement(
+            "themeSetting"
+        );
 
     if (themeSetting) {
+
         themeSetting.value =
             currentSystemSettings.theme;
     }
 
 
     const sidebarSetting =
-        getSettingElement("sidebarSetting");
+        getSettingElement(
+            "sidebarSetting"
+        );
 
     if (sidebarSetting) {
+
         sidebarSetting.value =
             currentSystemSettings.sidebar;
     }
 
 
     const animationSetting =
-        getSettingElement("animationSetting");
+        getSettingElement(
+            "animationSetting"
+        );
 
     if (animationSetting) {
+
         animationSetting.checked =
-            currentSystemSettings.animations;
+            Boolean(
+                currentSystemSettings.animations
+            );
     }
 
 
-    /* Dashboard */
+    /* =====================================================
+       DASHBOARD
+       ===================================================== */
 
     const defaultPageSetting =
-        getSettingElement("defaultPageSetting");
+        getSettingElement(
+            "defaultPageSetting"
+        );
 
     if (defaultPageSetting) {
+
         defaultPageSetting.value =
             currentSystemSettings.defaultPage;
     }
 
 
     const recentTransactionsSetting =
-        getSettingElement("recentTransactionsSetting");
+        getSettingElement(
+            "recentTransactionsSetting"
+        );
 
     if (recentTransactionsSetting) {
+
         recentTransactionsSetting.value =
             currentSystemSettings.recentTransactions;
     }
 
 
     const autoRefreshSetting =
-        getSettingElement("autoRefreshSetting");
+        getSettingElement(
+            "autoRefreshSetting"
+        );
 
     if (autoRefreshSetting) {
+
         autoRefreshSetting.checked =
-            currentSystemSettings.autoRefresh;
+            Boolean(
+                currentSystemSettings.autoRefresh
+            );
     }
 
 
-    /* Notifications */
+    /* =====================================================
+       NOTIFICATIONS
+       ===================================================== */
 
     const notificationSetting =
-        getSettingElement("notificationSetting");
+        getSettingElement(
+            "notificationSetting"
+        );
 
     if (notificationSetting) {
+
         notificationSetting.checked =
-            currentSystemSettings.notifications;
+            Boolean(
+                currentSystemSettings.notifications
+            );
     }
 
 
     const deliveryAlertSetting =
-        getSettingElement("deliveryAlertSetting");
+        getSettingElement(
+            "deliveryAlertSetting"
+        );
 
     if (deliveryAlertSetting) {
+
         deliveryAlertSetting.checked =
-            currentSystemSettings.deliveryAlerts;
+            Boolean(
+                currentSystemSettings.deliveryAlerts
+            );
     }
 
 
     const delayAlertSetting =
-        getSettingElement("delayAlertSetting");
+        getSettingElement(
+            "delayAlertSetting"
+        );
 
     if (delayAlertSetting) {
+
         delayAlertSetting.checked =
-            currentSystemSettings.delayAlerts;
+            Boolean(
+                currentSystemSettings.delayAlerts
+            );
     }
 
 
     const soundSetting =
-        getSettingElement("soundSetting");
+        getSettingElement(
+            "soundSetting"
+        );
 
     if (soundSetting) {
+
         soundSetting.checked =
-            currentSystemSettings.sound;
+            Boolean(
+                currentSystemSettings.sound
+            );
     }
 
 
-    /* Date & Time */
+    /* =====================================================
+       DATE & TIME
+       ===================================================== */
 
     const dateFormatSetting =
-        getSettingElement("dateFormatSetting");
+        getSettingElement(
+            "dateFormatSetting"
+        );
 
     if (dateFormatSetting) {
+
         dateFormatSetting.value =
             currentSystemSettings.dateFormat;
     }
 
 
     const timeFormatSetting =
-        getSettingElement("timeFormatSetting");
+        getSettingElement(
+            "timeFormatSetting"
+        );
 
     if (timeFormatSetting) {
+
         timeFormatSetting.value =
             currentSystemSettings.timeFormat;
     }
 
 
     const timezoneSetting =
-        getSettingElement("timezoneSetting");
+        getSettingElement(
+            "timezoneSetting"
+        );
 
     if (timezoneSetting) {
+
         timezoneSetting.value =
             currentSystemSettings.timezone;
     }
 
 
-    /* Security */
+    /* =====================================================
+       SECURITY
+       ===================================================== */
 
     const rememberLoginSetting =
-        getSettingElement("rememberLoginSetting");
+        getSettingElement(
+            "rememberLoginSetting"
+        );
 
     if (rememberLoginSetting) {
+
         rememberLoginSetting.checked =
-            currentSystemSettings.rememberLogin;
+            Boolean(
+                currentSystemSettings.rememberLogin
+            );
     }
 
 
     const autoLogoutSetting =
-        getSettingElement("autoLogoutSetting");
+        getSettingElement(
+            "autoLogoutSetting"
+        );
 
     if (autoLogoutSetting) {
+
         autoLogoutSetting.checked =
-            currentSystemSettings.autoLogout;
+            Boolean(
+                currentSystemSettings.autoLogout
+            );
     }
 
 
     const sessionTimeoutSetting =
-        getSettingElement("sessionTimeoutSetting");
+        getSettingElement(
+            "sessionTimeoutSetting"
+        );
 
     if (sessionTimeoutSetting) {
+
         sessionTimeoutSetting.value =
             currentSystemSettings.sessionTimeout;
     }
@@ -333,88 +481,129 @@ function populateSystemSettingsForm() {
 
 function readSystemSettingsForm() {
 
-    const settings = {
+    return {
 
         /* Appearance */
 
         theme:
-            getSettingElement("themeSetting")?.value
-            || DEFAULT_SYSTEM_SETTINGS.theme,
+            getSettingElement(
+                "themeSetting"
+            )?.value ||
+            DEFAULT_SYSTEM_SETTINGS.theme,
+
 
         sidebar:
-            getSettingElement("sidebarSetting")?.value
-            || DEFAULT_SYSTEM_SETTINGS.sidebar,
+            getSettingElement(
+                "sidebarSetting"
+            )?.value ||
+            DEFAULT_SYSTEM_SETTINGS.sidebar,
+
 
         animations:
-            getSettingElement("animationSetting")?.checked
-            ?? DEFAULT_SYSTEM_SETTINGS.animations,
+            getSettingElement(
+                "animationSetting"
+            )?.checked ??
+            DEFAULT_SYSTEM_SETTINGS.animations,
 
 
         /* Dashboard */
 
         defaultPage:
-            getSettingElement("defaultPageSetting")?.value
-            || DEFAULT_SYSTEM_SETTINGS.defaultPage,
+            getSettingElement(
+                "defaultPageSetting"
+            )?.value ||
+            DEFAULT_SYSTEM_SETTINGS.defaultPage,
+
 
         recentTransactions:
-            getSettingElement("recentTransactionsSetting")?.value
-            || DEFAULT_SYSTEM_SETTINGS.recentTransactions,
+            getSettingElement(
+                "recentTransactionsSetting"
+            )?.value ||
+            DEFAULT_SYSTEM_SETTINGS.recentTransactions,
+
 
         autoRefresh:
-            getSettingElement("autoRefreshSetting")?.checked
-            ?? DEFAULT_SYSTEM_SETTINGS.autoRefresh,
+            getSettingElement(
+                "autoRefreshSetting"
+            )?.checked ??
+            DEFAULT_SYSTEM_SETTINGS.autoRefresh,
 
 
         /* Notifications */
 
         notifications:
-            getSettingElement("notificationSetting")?.checked
-            ?? DEFAULT_SYSTEM_SETTINGS.notifications,
+            getSettingElement(
+                "notificationSetting"
+            )?.checked ??
+            DEFAULT_SYSTEM_SETTINGS.notifications,
+
 
         deliveryAlerts:
-            getSettingElement("deliveryAlertSetting")?.checked
-            ?? DEFAULT_SYSTEM_SETTINGS.deliveryAlerts,
+            getSettingElement(
+                "deliveryAlertSetting"
+            )?.checked ??
+            DEFAULT_SYSTEM_SETTINGS.deliveryAlerts,
+
 
         delayAlerts:
-            getSettingElement("delayAlertSetting")?.checked
-            ?? DEFAULT_SYSTEM_SETTINGS.delayAlerts,
+            getSettingElement(
+                "delayAlertSetting"
+            )?.checked ??
+            DEFAULT_SYSTEM_SETTINGS.delayAlerts,
+
 
         sound:
-            getSettingElement("soundSetting")?.checked
-            ?? DEFAULT_SYSTEM_SETTINGS.sound,
+            getSettingElement(
+                "soundSetting"
+            )?.checked ??
+            DEFAULT_SYSTEM_SETTINGS.sound,
 
 
         /* Date & Time */
 
         dateFormat:
-            getSettingElement("dateFormatSetting")?.value
-            || DEFAULT_SYSTEM_SETTINGS.dateFormat,
+            getSettingElement(
+                "dateFormatSetting"
+            )?.value ||
+            DEFAULT_SYSTEM_SETTINGS.dateFormat,
+
 
         timeFormat:
-            getSettingElement("timeFormatSetting")?.value
-            || DEFAULT_SYSTEM_SETTINGS.timeFormat,
+            getSettingElement(
+                "timeFormatSetting"
+            )?.value ||
+            DEFAULT_SYSTEM_SETTINGS.timeFormat,
+
 
         timezone:
-            getSettingElement("timezoneSetting")?.value
-            || DEFAULT_SYSTEM_SETTINGS.timezone,
+            getSettingElement(
+                "timezoneSetting"
+            )?.value ||
+            DEFAULT_SYSTEM_SETTINGS.timezone,
 
 
         /* Security */
 
         rememberLogin:
-            getSettingElement("rememberLoginSetting")?.checked
-            ?? DEFAULT_SYSTEM_SETTINGS.rememberLogin,
+            getSettingElement(
+                "rememberLoginSetting"
+            )?.checked ??
+            DEFAULT_SYSTEM_SETTINGS.rememberLogin,
+
 
         autoLogout:
-            getSettingElement("autoLogoutSetting")?.checked
-            ?? DEFAULT_SYSTEM_SETTINGS.autoLogout,
+            getSettingElement(
+                "autoLogoutSetting"
+            )?.checked ??
+            DEFAULT_SYSTEM_SETTINGS.autoLogout,
+
 
         sessionTimeout:
-            getSettingElement("sessionTimeoutSetting")?.value
-            || DEFAULT_SYSTEM_SETTINGS.sessionTimeout
+            getSettingElement(
+                "sessionTimeoutSetting"
+            )?.value ||
+            DEFAULT_SYSTEM_SETTINGS.sessionTimeout
     };
-
-    return settings;
 }
 
 
@@ -422,33 +611,103 @@ function readSystemSettingsForm() {
    SAVE CHANGES
    ========================================================= */
 
-function saveSystemSettings() {
+function saveSystemSettings(event) {
+
+    /*
+       IMPORTANT:
+       Prevent form submission / page reload.
+    */
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+    }
+
+
+    console.log(
+        "LOGIS-TECH SYSTEM SETTINGS: Save button clicked."
+    );
+
 
     const newSettings =
         readSystemSettingsForm();
 
+
+    console.log(
+        "LOGIS-TECH SYSTEM SETTINGS: Form values:",
+        newSettings
+    );
+
+
+    /*
+       Build new settings.
+    */
+
+    const previousSettings = {
+        ...currentSystemSettings
+    };
+
+
     currentSystemSettings = {
+
         ...DEFAULT_SYSTEM_SETTINGS,
+
+        ...previousSettings,
+
         ...newSettings
     };
+
+
+    /*
+       Save to localStorage.
+    */
 
     const saved =
         saveSystemSettingsToStorage();
 
+
     if (!saved) {
+
+        /*
+           Restore previous state if localStorage failed.
+        */
+
+        currentSystemSettings = {
+            ...previousSettings
+        };
+
 
         showSettingsMessage(
             "Unable to save settings.",
             "error"
         );
 
-        return;
+
+        return false;
     }
 
 
-    /* Apply settings immediately */
+    /*
+       Apply immediately.
+    */
 
     applySystemSettings();
+
+
+    /*
+       Rebuild auto logout if changed.
+    */
+
+    setupAutoLogout();
+
+
+    /*
+       Make sure form reflects the saved values.
+    */
+
+    populateSystemSettingsForm();
 
 
     showSettingsMessage(
@@ -456,10 +715,14 @@ function saveSystemSettings() {
         "success"
     );
 
+
     console.log(
-        "System settings saved:",
+        "LOGIS-TECH SYSTEM SETTINGS: Settings saved successfully:",
         currentSystemSettings
     );
+
+
+    return false;
 }
 
 
@@ -467,16 +730,36 @@ function saveSystemSettings() {
    CANCEL CHANGES
    ========================================================= */
 
-function cancelSystemSettings() {
+function cancelSystemSettings(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+    }
+
+
+    /*
+       Reload saved values from localStorage.
+    */
+
+    loadSavedSystemSettings();
 
     populateSystemSettingsForm();
 
     applySystemSettings();
 
+    setupAutoLogout();
+
+
     showSettingsMessage(
         "Changes cancelled.",
         "info"
     );
+
+
+    return false;
 }
 
 
@@ -484,31 +767,63 @@ function cancelSystemSettings() {
    RESTORE DEFAULT SETTINGS
    ========================================================= */
 
-function restoreDefaultSystemSettings() {
+function restoreDefaultSystemSettings(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+    }
+
 
     const confirmed =
         confirm(
             "Restore all System Settings to their default values?"
         );
 
+
     if (!confirmed) {
-        return;
+
+        return false;
     }
 
+
     currentSystemSettings = {
+
         ...DEFAULT_SYSTEM_SETTINGS
     };
 
-    saveSystemSettingsToStorage();
+
+    const saved =
+        saveSystemSettingsToStorage();
+
+
+    if (!saved) {
+
+        showSettingsMessage(
+            "Unable to restore default settings.",
+            "error"
+        );
+
+        return false;
+    }
+
 
     populateSystemSettingsForm();
 
     applySystemSettings();
 
+    setupAutoLogout();
+
+
     showSettingsMessage(
         "Default settings restored.",
         "success"
     );
+
+
+    return false;
 }
 
 
@@ -519,7 +834,9 @@ function restoreDefaultSystemSettings() {
 function applySystemSettings() {
 
     applyTheme();
+
     applyAnimations();
+
     applySidebarPreference();
 }
 
@@ -530,21 +847,33 @@ function applySystemSettings() {
 
 function applyTheme() {
 
-    const theme =
-        currentSystemSettings.theme;
-
     const html =
         document.documentElement;
 
+
     if (!html) {
+
         return;
     }
 
 
-    /* Remove previous theme attributes */
+    const theme =
+        currentSystemSettings.theme;
 
-    html.removeAttribute("data-theme");
 
+    html.removeAttribute(
+        "data-theme"
+    );
+
+
+    document.body?.classList.remove(
+        "dark-mode"
+    );
+
+
+    /* =====================================================
+       DARK
+       ===================================================== */
 
     if (theme === "dark") {
 
@@ -553,13 +882,19 @@ function applyTheme() {
             "dark"
         );
 
+
         document.body?.classList.add(
             "dark-mode"
         );
 
+
         return;
     }
 
+
+    /* =====================================================
+       LIGHT
+       ===================================================== */
 
     if (theme === "light") {
 
@@ -568,15 +903,14 @@ function applyTheme() {
             "light"
         );
 
-        document.body?.classList.remove(
-            "dark-mode"
-        );
 
         return;
     }
 
 
-    /* SYSTEM */
+    /* =====================================================
+       SYSTEM
+       ===================================================== */
 
     if (theme === "system") {
 
@@ -586,12 +920,18 @@ function applyTheme() {
                 "(prefers-color-scheme: dark)"
             ).matches;
 
-        html.setAttribute(
-            "data-theme",
+
+        const selectedTheme =
             prefersDark
                 ? "dark"
-                : "light"
+                : "light";
+
+
+        html.setAttribute(
+            "data-theme",
+            selectedTheme
         );
+
 
         document.body?.classList.toggle(
             "dark-mode",
@@ -609,7 +949,9 @@ function applyAnimations() {
 
     document.documentElement.classList.toggle(
         "disable-animations",
-        !currentSystemSettings.animations
+        !Boolean(
+            currentSystemSettings.animations
+        )
     );
 }
 
@@ -621,11 +963,16 @@ function applyAnimations() {
 function applySidebarPreference() {
 
     const sidebar =
-        document.querySelector(".sidebar");
+        document.querySelector(
+            ".sidebar"
+        );
+
 
     if (!sidebar) {
+
         return;
     }
+
 
     if (
         currentSystemSettings.sidebar ===
@@ -649,7 +996,15 @@ function applySidebarPreference() {
    CLEAR CACHE
    ========================================================= */
 
-function clearSystemCache() {
+function clearSystemCache(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+    }
+
 
     const confirmed =
         confirm(
@@ -657,8 +1012,10 @@ function clearSystemCache() {
             "Your saved System Settings and login session will not be removed."
         );
 
+
     if (!confirmed) {
-        return;
+
+        return false;
     }
 
 
@@ -674,17 +1031,23 @@ function clearSystemCache() {
     ];
 
 
-    keysToRemove.forEach(key => {
+    keysToRemove.forEach(
+        key => {
 
-        localStorage.removeItem(key);
-
-    });
+            localStorage.removeItem(
+                key
+            );
+        }
+    );
 
 
     showSettingsMessage(
         "System cache cleared successfully.",
         "success"
     );
+
+
+    return false;
 }
 
 
@@ -692,15 +1055,25 @@ function clearSystemCache() {
    CLEAR TEMPORARY DATA
    ========================================================= */
 
-function clearTemporaryData() {
+function clearTemporaryData(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+    }
+
 
     const confirmed =
         confirm(
             "Clear temporary application data?"
         );
 
+
     if (!confirmed) {
-        return;
+
+        return false;
     }
 
 
@@ -712,26 +1085,37 @@ function clearTemporaryData() {
     ];
 
 
-    Object.keys(localStorage).forEach(key => {
+    Object.keys(
+        localStorage
+    ).forEach(
+        key => {
 
-        const shouldRemove =
-            temporaryPrefixes.some(
-                prefix =>
-                    key.startsWith(prefix)
-            );
+            const shouldRemove =
+                temporaryPrefixes.some(
+                    prefix =>
+                        key.startsWith(
+                            prefix
+                        )
+                );
 
-        if (shouldRemove) {
 
-            localStorage.removeItem(key);
+            if (shouldRemove) {
 
+                localStorage.removeItem(
+                    key
+                );
+            }
         }
-    });
+    );
 
 
     showSettingsMessage(
         "Temporary data cleared.",
         "success"
     );
+
+
+    return false;
 }
 
 
@@ -739,7 +1123,15 @@ function clearTemporaryData() {
    RESET LOCAL DATA
    ========================================================= */
 
-function resetLocalData() {
+function resetLocalData(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+    }
+
 
     const confirmed =
         confirm(
@@ -750,8 +1142,10 @@ function resetLocalData() {
             "Continue?"
         );
 
+
     if (!confirmed) {
-        return;
+
+        return false;
     }
 
 
@@ -761,15 +1155,15 @@ function resetLocalData() {
             "This action cannot be undone."
         );
 
+
     if (!secondConfirm) {
-        return;
+
+        return false;
     }
 
 
     /*
-       IMPORTANT:
-       Do not remove login/session data automatically
-       because doing so would unexpectedly log the user out.
+       Protected login/session/settings.
     */
 
     const protectedKeys = [
@@ -777,18 +1171,28 @@ function resetLocalData() {
         "logitechUser",
         "logitechLoggedIn",
         "logitechLoginTime",
+
         SYSTEM_SETTINGS_KEY
     ];
 
 
-    Object.keys(localStorage).forEach(key => {
+    Object.keys(
+        localStorage
+    ).forEach(
+        key => {
 
-        if (!protectedKeys.includes(key)) {
+            if (
+                !protectedKeys.includes(
+                    key
+                )
+            ) {
 
-            localStorage.removeItem(key);
-
+                localStorage.removeItem(
+                    key
+                );
+            }
         }
-    });
+    );
 
 
     showSettingsMessage(
@@ -797,11 +1201,17 @@ function resetLocalData() {
     );
 
 
-    setTimeout(() => {
+    setTimeout(
+        () => {
 
-        location.reload();
+            location.reload();
 
-    }, 1200);
+        },
+        1200
+    );
+
+
+    return false;
 }
 
 
@@ -809,7 +1219,15 @@ function resetLocalData() {
    EXPORT LOCAL DATA
    ========================================================= */
 
-function exportLocalData() {
+function exportLocalData(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+    }
+
 
     try {
 
@@ -828,35 +1246,52 @@ function exportLocalData() {
         };
 
 
-        Object.keys(localStorage).forEach(key => {
+        Object.keys(
+            localStorage
+        ).forEach(
+            key => {
 
-            /*
-               Do not export login/session credentials.
-            */
+                /*
+                   Never export login/session credentials.
+                */
 
-            if (
-                key === "logitechUser" ||
-                key === "logitechLoggedIn" ||
-                key === "logitechLoginTime"
-            ) {
-                return;
+                if (
+
+                    key ===
+                    "logitechUser" ||
+
+                    key ===
+                    "logitechLoggedIn" ||
+
+                    key ===
+                    "logitechLoginTime"
+
+                ) {
+
+                    return;
+                }
+
+
+                const value =
+                    localStorage.getItem(
+                        key
+                    );
+
+
+                try {
+
+                    exportData.data[key] =
+                        JSON.parse(
+                            value
+                        );
+
+                } catch {
+
+                    exportData.data[key] =
+                        value;
+                }
             }
-
-
-            const value =
-                localStorage.getItem(key);
-
-            try {
-
-                exportData.data[key] =
-                    JSON.parse(value);
-
-            } catch {
-
-                exportData.data[key] =
-                    value;
-            }
-        });
+        );
 
 
         const json =
@@ -878,13 +1313,20 @@ function exportLocalData() {
 
 
         const url =
-            URL.createObjectURL(blob);
+            URL.createObjectURL(
+                blob
+            );
 
 
         const link =
-            document.createElement("a");
+            document.createElement(
+                "a"
+            );
 
-        link.href = url;
+
+        link.href =
+            url;
+
 
         link.download =
             "LOGIS-TECH-LOCAL-DATA-" +
@@ -892,13 +1334,20 @@ function exportLocalData() {
             ".json";
 
 
-        document.body.appendChild(link);
+        document.body.appendChild(
+            link
+        );
+
 
         link.click();
 
+
         link.remove();
 
-        URL.revokeObjectURL(url);
+
+        URL.revokeObjectURL(
+            url
+        );
 
 
         showSettingsMessage(
@@ -906,18 +1355,23 @@ function exportLocalData() {
             "success"
         );
 
+
     } catch (error) {
 
         console.error(
-            "Export failed:",
+            "LOGIS-TECH SYSTEM SETTINGS: Export failed:",
             error
         );
+
 
         showSettingsMessage(
             "Unable to export local data.",
             "error"
         );
     }
+
+
+    return false;
 }
 
 
@@ -925,19 +1379,32 @@ function exportLocalData() {
    REFRESH APPLICATION
    ========================================================= */
 
-function refreshApplication() {
+function refreshApplication(event) {
+
+    if (event) {
+
+        event.preventDefault();
+
+        event.stopPropagation();
+    }
+
 
     const confirmed =
         confirm(
             "Refresh LOGIS-TECH SYSTEM?"
         );
 
+
     if (!confirmed) {
-        return;
+
+        return false;
     }
 
 
     location.reload();
+
+
+    return false;
 }
 
 
@@ -950,33 +1417,54 @@ function getDateForFilename() {
     const now =
         new Date();
 
+
     const year =
         now.getFullYear();
+
 
     const month =
         String(
             now.getMonth() + 1
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
+
 
     const day =
         String(
             now.getDate()
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
+
 
     const hour =
         String(
             now.getHours()
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
+
 
     const minute =
         String(
             now.getMinutes()
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
+
 
     const second =
         String(
             now.getSeconds()
-        ).padStart(2, "0");
+        ).padStart(
+            2,
+            "0"
+        );
 
 
     return (
@@ -992,7 +1480,7 @@ function getDateForFilename() {
 
 
 /* =========================================================
-   MESSAGE
+   MESSAGE / TOAST
    ========================================================= */
 
 function showSettingsMessage(
@@ -1001,7 +1489,7 @@ function showSettingsMessage(
 ) {
 
     /*
-       Try existing notification system first.
+       Use existing system toast if available.
     */
 
     if (
@@ -1019,7 +1507,7 @@ function showSettingsMessage(
 
 
     /*
-       Create simple temporary notification.
+       Otherwise create our own notification.
     */
 
     let notification =
@@ -1035,11 +1523,14 @@ function showSettingsMessage(
                 "div"
             );
 
+
         notification.id =
             "systemSettingsMessage";
 
+
         notification.className =
             "system-settings-message";
+
 
         document.body.appendChild(
             notification
@@ -1050,15 +1541,18 @@ function showSettingsMessage(
     notification.textContent =
         message;
 
+
     notification.classList.remove(
         "success",
         "error",
         "info"
     );
 
+
     notification.classList.add(
         type
     );
+
 
     notification.classList.add(
         "show"
@@ -1071,13 +1565,16 @@ function showSettingsMessage(
 
 
     notification._hideTimer =
-        setTimeout(() => {
+        setTimeout(
+            () => {
 
-            notification.classList.remove(
-                "show"
-            );
+                notification.classList.remove(
+                    "show"
+                );
 
-        }, 3000);
+            },
+            3000
+        );
 }
 
 
@@ -1087,12 +1584,33 @@ function showSettingsMessage(
 
 function bindSystemSettingsEvents() {
 
+    /*
+       IMPORTANT:
+       Remove previously attached handlers first.
+       This prevents duplicate save events.
+    */
+
+
+    /* =====================================================
+       SAVE
+       ===================================================== */
+
     const saveBtn =
         getSettingElement(
             "saveSettingsBtn"
         );
 
+
     if (saveBtn) {
+
+        saveBtn.type = "button";
+
+
+        saveBtn.removeEventListener(
+            "click",
+            saveSystemSettings
+        );
+
 
         saveBtn.addEventListener(
             "click",
@@ -1101,12 +1619,26 @@ function bindSystemSettingsEvents() {
     }
 
 
+    /* =====================================================
+       CANCEL
+       ===================================================== */
+
     const cancelBtn =
         getSettingElement(
             "cancelSettingsBtn"
         );
 
+
     if (cancelBtn) {
+
+        cancelBtn.type = "button";
+
+
+        cancelBtn.removeEventListener(
+            "click",
+            cancelSystemSettings
+        );
+
 
         cancelBtn.addEventListener(
             "click",
@@ -1115,12 +1647,27 @@ function bindSystemSettingsEvents() {
     }
 
 
+    /* =====================================================
+       RESTORE DEFAULTS
+       ===================================================== */
+
     const restoreDefaultsBtn =
         getSettingElement(
             "restoreDefaultsBtn"
         );
 
+
     if (restoreDefaultsBtn) {
+
+        restoreDefaultsBtn.type =
+            "button";
+
+
+        restoreDefaultsBtn.removeEventListener(
+            "click",
+            restoreDefaultSystemSettings
+        );
+
 
         restoreDefaultsBtn.addEventListener(
             "click",
@@ -1129,12 +1676,27 @@ function bindSystemSettingsEvents() {
     }
 
 
+    /* =====================================================
+       CLEAR CACHE
+       ===================================================== */
+
     const clearCacheBtn =
         getSettingElement(
             "clearCacheBtn"
         );
 
+
     if (clearCacheBtn) {
+
+        clearCacheBtn.type =
+            "button";
+
+
+        clearCacheBtn.removeEventListener(
+            "click",
+            clearSystemCache
+        );
+
 
         clearCacheBtn.addEventListener(
             "click",
@@ -1143,12 +1705,27 @@ function bindSystemSettingsEvents() {
     }
 
 
+    /* =====================================================
+       EXPORT DATA
+       ===================================================== */
+
     const exportDataBtn =
         getSettingElement(
             "exportDataBtn"
         );
 
+
     if (exportDataBtn) {
+
+        exportDataBtn.type =
+            "button";
+
+
+        exportDataBtn.removeEventListener(
+            "click",
+            exportLocalData
+        );
+
 
         exportDataBtn.addEventListener(
             "click",
@@ -1157,12 +1734,27 @@ function bindSystemSettingsEvents() {
     }
 
 
+    /* =====================================================
+       RESET LOCAL DATA
+       ===================================================== */
+
     const resetLocalDataBtn =
         getSettingElement(
             "resetLocalDataBtn"
         );
 
+
     if (resetLocalDataBtn) {
+
+        resetLocalDataBtn.type =
+            "button";
+
+
+        resetLocalDataBtn.removeEventListener(
+            "click",
+            resetLocalData
+        );
+
 
         resetLocalDataBtn.addEventListener(
             "click",
@@ -1171,12 +1763,27 @@ function bindSystemSettingsEvents() {
     }
 
 
+    /* =====================================================
+       REFRESH APPLICATION
+       ===================================================== */
+
     const refreshApplicationBtn =
         getSettingElement(
             "refreshApplicationBtn"
         );
 
+
     if (refreshApplicationBtn) {
+
+        refreshApplicationBtn.type =
+            "button";
+
+
+        refreshApplicationBtn.removeEventListener(
+            "click",
+            refreshApplication
+        );
+
 
         refreshApplicationBtn.addEventListener(
             "click",
@@ -1185,12 +1792,27 @@ function bindSystemSettingsEvents() {
     }
 
 
+    /* =====================================================
+       CLEAR TEMPORARY DATA
+       ===================================================== */
+
     const clearTemporaryDataBtn =
         getSettingElement(
             "clearTemporaryDataBtn"
         );
 
+
     if (clearTemporaryDataBtn) {
+
+        clearTemporaryDataBtn.type =
+            "button";
+
+
+        clearTemporaryDataBtn.removeEventListener(
+            "click",
+            clearTemporaryData
+        );
+
 
         clearTemporaryDataBtn.addEventListener(
             "click",
@@ -1199,38 +1821,75 @@ function bindSystemSettingsEvents() {
     }
 
 
-    /* Theme preview */
+    /* =====================================================
+       THEME PREVIEW
+       ===================================================== */
 
     const themeSetting =
         getSettingElement(
             "themeSetting"
         );
 
+
     if (themeSetting) {
+
+        themeSetting.removeEventListener(
+            "change",
+            handleThemePreview
+        );
+
 
         themeSetting.addEventListener(
             "change",
-            function () {
-
-                const selectedTheme =
-                    this.value;
-
-                document.documentElement
-                    .setAttribute(
-                        "data-theme",
-                        selectedTheme === "system"
-                            ? (
-                                window.matchMedia(
-                                    "(prefers-color-scheme: dark)"
-                                ).matches
-                                    ? "dark"
-                                    : "light"
-                            )
-                            : selectedTheme
-                    );
-            }
+            handleThemePreview
         );
     }
+}
+
+
+/* =========================================================
+   THEME PREVIEW HANDLER
+   ========================================================= */
+
+function handleThemePreview() {
+
+    const selectedTheme =
+        this.value;
+
+
+    let appliedTheme =
+        selectedTheme;
+
+
+    if (
+        selectedTheme ===
+        "system"
+    ) {
+
+        const prefersDark =
+            window.matchMedia &&
+            window.matchMedia(
+                "(prefers-color-scheme: dark)"
+            ).matches;
+
+
+        appliedTheme =
+            prefersDark
+                ? "dark"
+                : "light";
+    }
+
+
+    document.documentElement.setAttribute(
+        "data-theme",
+        appliedTheme
+    );
+
+
+    document.body?.classList.toggle(
+        "dark-mode",
+        appliedTheme === "dark"
+    );
 }
 
 
@@ -1238,19 +1897,65 @@ function bindSystemSettingsEvents() {
    AUTO LOGOUT
    ========================================================= */
 
-let autoLogoutTimer = null;
-
-
 function setupAutoLogout() {
 
-    clearTimeout(
-        autoLogoutTimer
-    );
+    /*
+       Clear old interval.
+    */
 
+    if (autoLogoutTimer) {
+
+        clearInterval(
+            autoLogoutTimer
+        );
+
+        autoLogoutTimer = null;
+    }
+
+
+    /*
+       Do not create duplicate activity listeners.
+    */
+
+    if (!autoLogoutListenersBound) {
+
+        const activityEvents = [
+
+            "mousemove",
+            "mousedown",
+            "keydown",
+            "touchstart",
+            "scroll"
+        ];
+
+
+        activityEvents.forEach(
+            eventName => {
+
+                document.addEventListener(
+                    eventName,
+                    updateAutoLogoutActivity,
+                    {
+                        passive: true
+                    }
+                );
+            }
+        );
+
+
+        autoLogoutListenersBound =
+            true;
+    }
+
+
+    /*
+       Auto logout disabled.
+    */
 
     if (
         !currentSystemSettings.autoLogout
     ) {
+
         return;
     }
 
@@ -1267,8 +1972,17 @@ function setupAutoLogout() {
         ) ||
         timeoutMinutes <= 0
     ) {
+
         return;
     }
+
+
+    /*
+       Reset activity timestamp.
+    */
+
+    autoLogoutLastActivity =
+        Date.now();
 
 
     const timeoutMilliseconds =
@@ -1277,80 +1991,74 @@ function setupAutoLogout() {
         1000;
 
 
-    let lastActivity =
-        Date.now();
-
-
-    const activityEvents = [
-
-        "mousemove",
-        "mousedown",
-        "keydown",
-        "touchstart",
-        "scroll"
-    ];
-
-
-    const updateActivity = () => {
-
-        lastActivity =
-            Date.now();
-    };
-
-
-    activityEvents.forEach(eventName => {
-
-        document.addEventListener(
-            eventName,
-            updateActivity,
-            {
-                passive: true
-            }
-        );
-    });
-
+    /*
+       Check every 30 seconds.
+    */
 
     autoLogoutTimer =
-        setInterval(() => {
+        setInterval(
+            () => {
 
-            const inactiveTime =
-                Date.now() -
-                lastActivity;
-
-
-            if (
-                inactiveTime >=
-                timeoutMilliseconds
-            ) {
-
-                clearInterval(
-                    autoLogoutTimer
-                );
+                const inactiveTime =
+                    Date.now() -
+                    autoLogoutLastActivity;
 
 
-                /*
-                   Remove login state only.
-                */
+                if (
+                    inactiveTime >=
+                    timeoutMilliseconds
+                ) {
 
-                localStorage.removeItem(
-                    "logitechLoggedIn"
-                );
-
-                localStorage.removeItem(
-                    "logitechLoginTime"
-                );
+                    clearInterval(
+                        autoLogoutTimer
+                    );
 
 
-                alert(
-                    "Your LOGIS-TECH SYSTEM session has expired due to inactivity."
-                );
+                    autoLogoutTimer =
+                        null;
 
 
-                window.location.href =
-                    "login.html";
-            }
+                    /*
+                       Remove login state only.
+                    */
 
-        }, 30000);
+                    localStorage.removeItem(
+                        "logitechLoggedIn"
+                    );
+
+
+                    localStorage.removeItem(
+                        "logitechLoginTime"
+                    );
+
+
+                    alert(
+                        "Your LOGIS-TECH SYSTEM session has expired due to inactivity."
+                    );
+
+
+                    window.location.href =
+                        "login.html";
+                }
+
+            },
+            30000
+        );
+}
+
+
+/* =========================================================
+   AUTO LOGOUT ACTIVITY
+   ========================================================= */
+
+let autoLogoutLastActivity =
+    Date.now();
+
+
+function updateAutoLogoutActivity() {
+
+    autoLogoutLastActivity =
+        Date.now();
 }
 
 
@@ -1361,8 +2069,17 @@ function setupAutoLogout() {
 function setupSystemThemeListener() {
 
     if (
+        systemThemeListenerBound
+    ) {
+
+        return;
+    }
+
+
+    if (
         !window.matchMedia
     ) {
+
         return;
     }
 
@@ -1402,6 +2119,10 @@ function setupSystemThemeListener() {
             handler
         );
     }
+
+
+    systemThemeListenerBound =
+        true;
 }
 
 
@@ -1418,7 +2139,17 @@ window.LOGISTECH_SYSTEM_SETTINGS = {
         };
     },
 
+
     save: function (settings) {
+
+        if (
+            !settings ||
+            typeof settings !== "object"
+        ) {
+
+            return false;
+        }
+
 
         currentSystemSettings = {
 
@@ -1429,59 +2160,71 @@ window.LOGISTECH_SYSTEM_SETTINGS = {
             ...settings
         };
 
-        saveSystemSettingsToStorage();
+
+        const saved =
+            saveSystemSettingsToStorage();
+
+
+        if (!saved) {
+
+            return false;
+        }
+
 
         applySystemSettings();
+
+        setupAutoLogout();
+
+        populateSystemSettingsForm();
+
+
+        return true;
     },
+
 
     reset: function () {
 
         currentSystemSettings = {
+
             ...DEFAULT_SYSTEM_SETTINGS
         };
 
-        saveSystemSettingsToStorage();
+
+        const saved =
+            saveSystemSettingsToStorage();
+
+
+        if (!saved) {
+
+            return false;
+        }
+
 
         applySystemSettings();
+
+        setupAutoLogout();
+
+        populateSystemSettingsForm();
+
+
+        return true;
     }
 };
 
 
 /* =========================================================
-   INITIAL LOAD
+   IMPORTANT
+   =========================================================
+
+   DO NOT AUTO-BOOT HERE.
+
+   index.html is responsible for:
+
+   1. Loading pages/system-settings.html
+   2. Loading this JS
+   3. Calling initializeSystemSettings()
+
+   This prevents the JS from initializing before the
+   Settings HTML exists and prevents duplicate event
+   listeners.
    ========================================================= */
-
-(function bootSystemSettings() {
-
-    /*
-       When loaded through index.html,
-       the settings HTML may already exist.
-    */
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-
-                initializeSystemSettings();
-                setupSystemThemeListener();
-                setupAutoLogout();
-
-            },
-            {
-                once: true
-            }
-        );
-
-    } else {
-
-        initializeSystemSettings();
-        setupSystemThemeListener();
-        setupAutoLogout();
-    }
-
-})();
