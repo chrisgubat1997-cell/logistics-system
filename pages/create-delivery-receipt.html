@@ -1,1840 +1,4541 @@
-<!DOCTYPE html>
-<html lang="en">
+/* =========================================================
+   LOGIS-TECH SYSTEM
+   CREATE DELIVERY RECEIPT
+   =========================================================
+   VERSION:
+   20261005-04
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   WORKFLOW:
+   01 Prepare Delivery Receipt
+   02 Review / Verify DR
+   03 Completed / DR Saved
 
-    <title>Create Delivery Receipt | LOGIS-TECH SYSTEM</title>
+   DATA SOURCE:
+   LocalStorage muna
 
-    <link
-        rel="stylesheet"
-        href="../css/create-delivery-receipt.css?v=20261005-03"
-    >
-</head>
+   SALES ORDER SEARCH:
+   - SO Number
+   - Client Name
+   - Project
+   - PO Number
 
-<body>
+   ITEM DATA:
+   - Item Number
+   - Item Name
+   - Item Description
+   - Total Order
+   - Total Delivered
+   - Balance
+   - Pick Qty
+   - Remarks
+   ========================================================= */
 
-<div class="create-dr-page">
 
-    <!-- =====================================================
-         HEADER
-         ===================================================== -->
+/* =========================================================
+   STORAGE KEYS
+   ========================================================= */
 
-    <header class="dr-header">
+const SELECTED_SO_KEY = "logitechSelectedDeliverySO";
+const SALES_ORDER_STORAGE_KEY = "logitechSalesOrders";
+const DR_STORAGE_KEY = "logitechDeliveryReceipts";
+const RETURN_MODULE_KEY = "logitechReturnModule";
 
-        <div class="dr-header-left">
 
-            <button
-                type="button"
-                id="backButton"
-                class="icon-button"
-                title="Back to Main"
-            >
-                ←
-            </button>
+/* =========================================================
+   GLOBAL STATE
+   ========================================================= */
 
-            <div class="dr-title-area">
+let selectedSO = null;
 
-                <div class="system-label">
-                    LOGIS-TECH SYSTEM
-                </div>
+let itemState = [];
 
-                <h1>
-                    Create Delivery Receipt
-                </h1>
+let currentDR = null;
 
-                <p>
-                    Prepare and save delivery receipt from Sales Order
-                </p>
+let savedDR = null;
 
+let currentStep = 1;
+
+let warningTimeout = null;
+
+
+/* =========================================================
+   DOM HELPER
+   ========================================================= */
+
+function $(id) {
+    return document.getElementById(id);
+}
+
+
+/* =========================================================
+   INITIALIZATION
+   ========================================================= */
+
+document.addEventListener("DOMContentLoaded", initCreateDeliveryReceipt);
+
+
+function initCreateDeliveryReceipt() {
+
+    console.log(
+        "LOGIS-TECH SYSTEM - Create Delivery Receipt initialized."
+    );
+
+    setupButtons();
+
+    setupSalesOrderSearch();
+
+    setupDate();
+
+    generateAndDisplayDRNumber();
+
+    loadSelectedSalesOrder();
+
+    updateWorkflow(1);
+
+}
+
+
+/* =========================================================
+   BUTTON SETUP
+   ========================================================= */
+
+function setupButtons() {
+
+    /* ---------------------------------------------
+       HEADER BACK
+       --------------------------------------------- */
+
+    const backButton = $("backButton");
+
+    if (backButton) {
+
+        backButton.addEventListener(
+            "click",
+            handleBackRequest
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       CANCEL
+       --------------------------------------------- */
+
+    const cancelButton = $("cancelButton");
+
+    if (cancelButton) {
+
+        cancelButton.addEventListener(
+            "click",
+            handleBackRequest
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       CHANGE SALES ORDER
+       --------------------------------------------- */
+
+    const changeSOButton = $("changeSOButton");
+
+    if (changeSOButton) {
+
+        changeSOButton.addEventListener(
+            "click",
+            changeSalesOrder
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       REVIEW
+       --------------------------------------------- */
+
+    const reviewButton = $("reviewButton");
+
+    if (reviewButton) {
+
+        reviewButton.addEventListener(
+            "click",
+            reviewDeliveryReceipt
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       BACK TO PREPARE
+       --------------------------------------------- */
+
+    const backToPrepareButton =
+        $("backToPrepareButton");
+
+    if (backToPrepareButton) {
+
+        backToPrepareButton.addEventListener(
+            "click",
+            backToPrepare
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       SAVE
+       --------------------------------------------- */
+
+    const saveButton =
+        $("saveDeliveryReceiptButton");
+
+    if (saveButton) {
+
+        saveButton.addEventListener(
+            "click",
+            saveDeliveryReceipt
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       BACK TO DELIVERY
+       --------------------------------------------- */
+
+    const backToDeliveryButton =
+        $("backToDeliveryButton");
+
+    if (backToDeliveryButton) {
+
+        backToDeliveryButton.addEventListener(
+            "click",
+            goBackToMain
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       PRINT COMPLETED
+       --------------------------------------------- */
+
+    const printCompletedButton =
+        $("printCompletedButton");
+
+    if (printCompletedButton) {
+
+        printCompletedButton.addEventListener(
+            "click",
+            openPrintPreview
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       WARNING MODAL
+       --------------------------------------------- */
+
+    const closeWarningButton =
+        $("closeWarningButton");
+
+    if (closeWarningButton) {
+
+        closeWarningButton.addEventListener(
+            "click",
+            closeWarningModal
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       LEAVE MODAL
+       --------------------------------------------- */
+
+    const stayButton = $("stayButton");
+
+    if (stayButton) {
+
+        stayButton.addEventListener(
+            "click",
+            closeLeaveModal
+        );
+
+    }
+
+
+    const confirmLeaveButton =
+        $("confirmLeaveButton");
+
+    if (confirmLeaveButton) {
+
+        confirmLeaveButton.addEventListener(
+            "click",
+            goBackToMain
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       PREVIEW
+       --------------------------------------------- */
+
+    const closePreviewButton =
+        $("closePreviewButton");
+
+    if (closePreviewButton) {
+
+        closePreviewButton.addEventListener(
+            "click",
+            closePreviewModal
+        );
+
+    }
+
+
+    const closePreviewButton2 =
+        $("closePreviewButton2");
+
+    if (closePreviewButton2) {
+
+        closePreviewButton2.addEventListener(
+            "click",
+            closePreviewModal
+        );
+
+    }
+
+
+    const printButton =
+        $("printButton");
+
+    if (printButton) {
+
+        printButton.addEventListener(
+            "click",
+            printDeliveryReceipt
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       ESCAPE KEY
+       --------------------------------------------- */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            closeWarningModal();
+
+            closeLeaveModal();
+
+            closePreviewModal();
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DATE SETUP
+   ========================================================= */
+
+function setupDate() {
+
+    const dateInput = $("dateOfTransfer");
+
+    if (!dateInput) {
+        return;
+    }
+
+    if (!dateInput.value) {
+
+        const today = new Date();
+
+        const year =
+            today.getFullYear();
+
+        const month =
+            String(
+                today.getMonth() + 1
+            ).padStart(2, "0");
+
+        const day =
+            String(
+                today.getDate()
+            ).padStart(2, "0");
+
+        dateInput.value =
+            `${year}-${month}-${day}`;
+
+    }
+
+}
+
+
+/* =========================================================
+   DR NUMBER
+   ========================================================= */
+
+function generateAndDisplayDRNumber() {
+
+    const drNumber =
+        generateDRNumber();
+
+    const element =
+        $("drNumber");
+
+    if (element) {
+
+        element.textContent =
+            drNumber;
+
+    }
+
+}
+
+
+/* =========================================================
+   GENERATE DR NUMBER
+   ========================================================= */
+
+function generateDRNumber() {
+
+    const year =
+        new Date().getFullYear();
+
+    const records =
+        readDeliveryReceipts();
+
+    let highestNumber = 0;
+
+    records.forEach(
+        function(dr) {
+
+            const number =
+                String(
+                    dr.drNumber || ""
+                );
+
+            const pattern =
+                new RegExp(
+                    `^DR-${year}-(\\d+)$`
+                );
+
+            const match =
+                number.match(pattern);
+
+            if (match) {
+
+                highestNumber =
+                    Math.max(
+                        highestNumber,
+                        Number(match[1])
+                    );
+
+            }
+
+        }
+    );
+
+    const nextNumber =
+        highestNumber + 1;
+
+    return (
+        `DR-${year}-` +
+        String(nextNumber).padStart(5, "0")
+    );
+
+}
+
+
+/* =========================================================
+   SALES ORDER SEARCH
+   ========================================================= */
+
+function setupSalesOrderSearch() {
+
+    const searchInput =
+        $("salesOrderSearch");
+
+    const clearButton =
+        $("clearSalesOrderSearch");
+
+    if (!searchInput) {
+        return;
+    }
+
+
+    /* ---------------------------------------------
+       SEARCH INPUT
+       --------------------------------------------- */
+
+    searchInput.addEventListener(
+        "input",
+        function() {
+
+            const query =
+                searchInput.value.trim();
+
+            if (clearButton) {
+
+                clearButton.classList.toggle(
+                    "hidden",
+                    query.length === 0
+                );
+
+            }
+
+            if (!query) {
+
+                hideSalesOrderSuggestions();
+
+                return;
+
+            }
+
+            showSalesOrderSuggestions(query);
+
+        }
+    );
+
+
+    /* ---------------------------------------------
+       FOCUS
+       --------------------------------------------- */
+
+    searchInput.addEventListener(
+        "focus",
+        function() {
+
+            const query =
+                searchInput.value.trim();
+
+            if (query) {
+
+                showSalesOrderSuggestions(query);
+
+            }
+
+        }
+    );
+
+
+    /* ---------------------------------------------
+       CLEAR
+       --------------------------------------------- */
+
+    if (clearButton) {
+
+        clearButton.addEventListener(
+            "click",
+            function() {
+
+                searchInput.value = "";
+
+                clearButton.classList.add(
+                    "hidden"
+                );
+
+                hideSalesOrderSuggestions();
+
+                clearSelectedSalesOrder();
+
+            }
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       CLICK OUTSIDE
+       --------------------------------------------- */
+
+    document.addEventListener(
+        "click",
+        function(event) {
+
+            const wrapper =
+                document.querySelector(
+                    ".sales-order-search-wrapper"
+                );
+
+            if (!wrapper) {
+                return;
+            }
+
+            if (!wrapper.contains(event.target)) {
+
+                hideSalesOrderSuggestions();
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LOAD SALES ORDERS
+   ========================================================= */
+
+function getSalesOrders() {
+
+    let records = [];
+
+    try {
+
+        const stored =
+            localStorage.getItem(
+                SALES_ORDER_STORAGE_KEY
+            );
+
+        if (stored) {
+
+            const parsed =
+                JSON.parse(stored);
+
+            if (Array.isArray(parsed)) {
+
+                records = parsed;
+
+            }
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to read Sales Orders:",
+            error
+        );
+
+    }
+
+
+    /*
+     * SUPPORT OTHER POSSIBLE STORAGE KEYS
+     */
+
+    if (!records.length) {
+
+        const alternativeKeys = [
+            "logitechSOList",
+            "logitechSalesOrderList",
+            "salesOrders",
+            "salesOrderData"
+        ];
+
+        for (
+            const key of alternativeKeys
+        ) {
+
+            try {
+
+                const stored =
+                    localStorage.getItem(key);
+
+                if (!stored) {
+                    continue;
+                }
+
+                const parsed =
+                    JSON.parse(stored);
+
+                if (Array.isArray(parsed)) {
+
+                    records = parsed;
+
+                    break;
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Unable to read:",
+                    key
+                );
+
+            }
+
+        }
+
+    }
+
+
+    return records.map(
+        normalizeSalesOrder
+    );
+
+}
+
+
+/* =========================================================
+   NORMALIZE SALES ORDER
+   ========================================================= */
+
+function normalizeSalesOrder(so) {
+
+    so = so || {};
+
+    const normalized = {
+
+        id:
+            so.id ||
+            so.soId ||
+            so.salesOrderId ||
+            "",
+
+        soNumber:
+            so.soNumber ||
+            so.salesOrderNumber ||
+            so.salesOrder ||
+            so.soNo ||
+            so.SO ||
+            "",
+
+        dateCreation:
+            so.dateCreation ||
+            so.creationDate ||
+            so.dateCreated ||
+            so.soDate ||
+            so.date ||
+            "",
+
+        clientName:
+            so.clientName ||
+            so.client ||
+            so.customerName ||
+            so.customer ||
+            "",
+
+        salesEngineer:
+            so.salesEngineer ||
+            so.SE ||
+            so.se ||
+            "",
+
+        attention:
+            so.attention ||
+            so.contactPerson ||
+            "",
+
+        tinNumber:
+            so.tinNumber ||
+            so.TIN ||
+            so.tin ||
+            "",
+
+        poNumber:
+            so.poNumber ||
+            so.PO ||
+            so.po ||
+            "",
+
+        paymentTerms:
+            so.paymentTerms ||
+            so.terms ||
+            so.payment ||
+            "",
+
+        jobOrder:
+            so.jobOrder ||
+            so.JO ||
+            so.jo ||
+            "",
+
+        billingAddress:
+            so.billingAddress ||
+            so.billAddress ||
+            "",
+
+        project:
+            so.project ||
+            so.projectName ||
+            "",
+
+        deliveryAddress:
+            so.deliveryAddress ||
+            so.address ||
+            so.shipTo ||
+            "",
+
+        status:
+            so.status ||
+            "ACTIVE",
+
+        items:
+            normalizeItems(
+                so.items ||
+                so.orderItems ||
+                so.products ||
+                so.lineItems ||
+                []
+            ),
+
+        original:
+            so
+
+    };
+
+
+    return normalized;
+
+}
+
+
+/* =========================================================
+   NORMALIZE ITEMS
+   ========================================================= */
+
+function normalizeItems(items) {
+
+    if (!Array.isArray(items)) {
+
+        return [];
+
+    }
+
+
+    return items.map(
+        function(item, index) {
+
+            item = item || {};
+
+
+            const itemNumber =
+                item.itemNumber ||
+                item.itemNo ||
+                item.itemCode ||
+                item.code ||
+                item.sku ||
+                item.partNumber ||
+                String(index + 1);
+
+
+            const itemName =
+                item.itemName ||
+                item.name ||
+                item.productName ||
+                item.product ||
+                "";
+
+
+            const itemDescription =
+                item.itemDescription ||
+                item.description ||
+                item.desc ||
+                item.details ||
+                "";
+
+
+            const totalOrder =
+                toNumber(
+                    item.totalOrder ??
+                    item.orderQty ??
+                    item.orderedQty ??
+                    item.quantity ??
+                    item.qty ??
+                    item.soQty ??
+                    item.totalQty ??
+                    0
+                );
+
+
+            const unit =
+                item.unit ||
+                item.uom ||
+                item.UOM ||
+                "";
+
+
+            return {
+
+                id:
+                    item.id ||
+                    item.itemId ||
+                    itemNumber,
+
+                itemNumber:
+                    String(itemNumber),
+
+                itemName:
+                    String(itemName),
+
+                itemDescription:
+                    String(itemDescription),
+
+                totalOrder:
+                    totalOrder,
+
+                unit:
+                    String(unit),
+
+                original:
+                    item
+
+            };
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SEARCH SALES ORDER
+   ========================================================= */
+
+function showSalesOrderSuggestions(query) {
+
+    const container =
+        $("salesOrderSuggestions");
+
+    if (!container) {
+        return;
+    }
+
+
+    const salesOrders =
+        getSalesOrders();
+
+    const search =
+        query.toLowerCase();
+
+
+    const matches =
+        salesOrders.filter(
+            function(so) {
+
+                const searchable = [
+
+                    so.soNumber,
+
+                    so.clientName,
+
+                    so.project,
+
+                    so.poNumber,
+
+                    so.jobOrder,
+
+                    so.attention
+
+                ]
+                    .join(" ")
+                    .toLowerCase();
+
+                return searchable.includes(search);
+
+            }
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (!matches.length) {
+
+        container.innerHTML = `
+            <div class="suggestion-empty">
+                No Sales Order found.
             </div>
+        `;
 
-        </div>
+        container.classList.remove(
+            "hidden"
+        );
 
+        return;
 
-        <div class="dr-header-right">
+    }
 
-            <div class="dr-number-box">
 
-                <span>
-                    DR NUMBER
-                </span>
+    /*
+     * LIMIT RESULTS
+     */
 
-                <strong id="drNumber">
-                    DR-2026-00001
-                </strong>
+    const visibleMatches =
+        matches.slice(0, 10);
 
-            </div>
 
-        </div>
+    visibleMatches.forEach(
+        function(so) {
 
-    </header>
+            const option =
+                document.createElement("button");
 
+            option.type = "button";
 
+            option.className =
+                "sales-order-suggestion";
 
-    <!-- =====================================================
-         3-STEP WORKFLOW
-         ===================================================== -->
 
-    <section class="workflow-container">
+            option.innerHTML = `
 
-        <!-- STEP 01 -->
+                <div class="suggestion-main">
 
-        <div
-            class="workflow-step active"
-            data-step="1"
-            id="workflowStep1"
-        >
-
-            <div class="workflow-number">
-                01
-            </div>
-
-            <div class="workflow-text">
-
-                <strong>
-                    Prepare
-                </strong>
-
-                <span>
-                    Delivery Receipt
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="workflow-line"></div>
-
-
-        <!-- STEP 02 -->
-
-        <div
-            class="workflow-step"
-            data-step="2"
-            id="workflowStep2"
-        >
-
-            <div class="workflow-number">
-                02
-            </div>
-
-            <div class="workflow-text">
-
-                <strong>
-                    Review
-                </strong>
-
-                <span>
-                    Verify DR
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="workflow-line"></div>
-
-
-        <!-- STEP 03 -->
-
-        <div
-            class="workflow-step"
-            data-step="3"
-            id="workflowStep3"
-        >
-
-            <div class="workflow-number">
-                03
-            </div>
-
-            <div class="workflow-text">
-
-                <strong>
-                    Completed
-                </strong>
-
-                <span>
-                    DR Saved
-                </span>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         MAIN CONTENT
-         ===================================================== -->
-
-    <main class="dr-content">
-
-
-        <!-- =================================================
-             PREPARE VIEW
-             ================================================= -->
-
-        <section
-            id="prepareView"
-            class="dr-view"
-        >
-
-
-            <!-- =============================================
-                 01. SALES ORDER SEARCH
-                 ============================================= -->
-
-            <section class="dr-card">
-
-                <div class="card-header">
-
-                    <div class="card-heading-wrapper">
-
-                        <span class="section-number">
-                            01
-                        </span>
-
-                        <div class="section-heading">
-
-                            <h2>
-                                Sales Order
-                            </h2>
-
-                            <p>
-                                Search and select the Sales Order for this delivery.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="sales-order-search-wrapper">
-
-                    <div class="form-group">
-
-                        <label for="salesOrderSearch">
-
-                            SALES ORDER
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
-
-
-                        <div class="search-input-wrapper">
-
-                            <span class="search-icon">
-                                ⌕
-                            </span>
-
-                            <input
-                                type="text"
-                                id="salesOrderSearch"
-                                class="form-control search-input"
-                                placeholder="Search SO number, client, project, PO number..."
-                                autocomplete="off"
-                            >
-
-                            <button
-                                type="button"
-                                id="clearSalesOrderSearch"
-                                class="search-clear hidden"
-                                title="Clear"
-                            >
-                                ×
-                            </button>
-
-                        </div>
-
-
-                        <!-- SEARCH SUGGESTIONS -->
-
-                        <div
-                            id="salesOrderSuggestions"
-                            class="sales-order-suggestions hidden"
-                        >
-
-                            <!-- JS GENERATED -->
-
-                        </div>
-
-
-                        <small class="field-help">
-                            Type the Sales Order number or any related information to search.
-                        </small>
-
-                    </div>
-
-
-                    <!-- SELECTED SO INDICATOR -->
-
-                    <div
-                        id="selectedSOIndicator"
-                        class="selected-so-indicator hidden"
-                    >
-
-                        <div class="selected-so-icon">
-                            ✓
-                        </div>
-
-                        <div class="selected-so-content">
-
-                            <span>
-                                SELECTED SALES ORDER
-                            </span>
-
-                            <strong id="selectedSONumber">
-                                —
-                            </strong>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            id="changeSOButton"
-                            class="btn-link"
-                        >
-                            CHANGE
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =============================================
-                 02. SALES ORDER DETAILS
-                 ALL EDITABLE
-                 ============================================= -->
-
-            <section
-                id="soInformationSection"
-                class="dr-card hidden"
-            >
-
-                <div class="card-header">
-
-                    <div class="card-heading-wrapper">
-
-                        <span class="section-number">
-                            02
-                        </span>
-
-                        <div class="section-heading">
-
-                            <h2>
-                                Sales Order Details
-                            </h2>
-
-                            <p>
-                                Saved information from the Sales Order. You may edit the details before delivery.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <span
-                        id="soStatusDisplay"
-                        class="status-badge status-active"
-                    >
-                        ACTIVE
-                    </span>
-
-                </div>
-
-
-
-                <!-- =========================================
-                     SALES ORDER DETAIL FORM
-                     ========================================= -->
-
-                <div class="so-edit-grid">
-
-
-                    <!-- DATE CREATION -->
-
-                    <div class="form-group">
-
-                        <label for="soDateCreation">
-
-                            DATE CREATION
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
-
-                        <input
-                            type="date"
-                            id="soDateCreation"
-                            class="form-control"
-                        >
-
-                    </div>
-
-
-
-                    <!-- CLIENT NAME -->
-
-                    <div class="form-group">
-
-                        <label for="clientName">
-
-                            CLIENT NAME
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="clientName"
-                            class="form-control"
-                            placeholder="Client Name"
-                        >
-
-                    </div>
-
-
-
-                    <!-- SALES ENGINEER -->
-
-                    <div class="form-group">
-
-                        <label for="salesEngineer">
-
-                            SE
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="salesEngineer"
-                            class="form-control"
-                            placeholder="Sales Engineer"
-                        >
-
-                    </div>
-
-
-
-                    <!-- ATTENTION -->
-
-                    <div class="form-group">
-
-                        <label for="attention">
-
-                            ATTENTION
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="attention"
-                            class="form-control"
-                            placeholder="Attention"
-                        >
-
-                    </div>
-
-
-
-                    <!-- TIN -->
-
-                    <div class="form-group">
-
-                        <label for="tinNumber">
-
-                            TIN NUMBER
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="tinNumber"
-                            class="form-control"
-                            placeholder="TIN Number"
-                        >
-
-                    </div>
-
-
-
-                    <!-- PO NUMBER -->
-
-                    <div class="form-group">
-
-                        <label for="poNumber">
-
-                            PO NUMBER
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="poNumber"
-                            class="form-control"
-                            placeholder="PO Number"
-                        >
-
-                    </div>
-
-
-
-                    <!-- PAYMENT TERMS -->
-
-                    <div class="form-group">
-
-                        <label for="paymentTerms">
-
-                            PAYMENT TERMS
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="paymentTerms"
-                            class="form-control"
-                            placeholder="Payment Terms"
-                        >
-
-                    </div>
-
-
-
-                    <!-- JOB ORDER -->
-
-                    <div class="form-group">
-
-                        <label for="jobOrder">
-
-                            JOB ORDER
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="jobOrder"
-                            class="form-control"
-                            placeholder="Job Order"
-                        >
-
-                    </div>
-
-
-
-                    <!-- BILLING ADDRESS -->
-
-                    <div class="form-group form-group-wide">
-
-                        <label for="billingAddress">
-
-                            BILLING ADDRESS
-
-                        </label>
-
-                        <textarea
-                            id="billingAddress"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Billing Address"
-                        ></textarea>
-
-                    </div>
-
-
-
-                    <!-- PROJECT -->
-
-                    <div class="form-group form-group-wide">
-
-                        <label for="project">
-
-                            PROJECT
-
-                        </label>
-
-                        <input
-                            type="text"
-                            id="project"
-                            class="form-control"
-                            placeholder="Project"
-                        >
-
-                    </div>
-
-
-
-                    <!-- DELIVERY ADDRESS -->
-
-                    <div class="form-group form-group-wide">
-
-                        <label for="deliveryAddress">
-
-                            DELIVERY ADDRESS
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
-
-                        <textarea
-                            id="deliveryAddress"
-                            class="form-control"
-                            rows="3"
-                            placeholder="Delivery Address"
-                        ></textarea>
-
-                    </div>
-
-                </div>
-
-
-                <!-- EDIT NOTICE -->
-
-                <div class="editable-notice">
-
-                    <span class="editable-notice-icon">
-                        ✎
-                    </span>
-
-                    <div>
-
-                        <strong>
-                            Editable Information
-                        </strong>
-
-                        <p>
-                            These values were loaded from the Sales Order. You can modify them if the delivery details are different from the original Sales Order.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =============================================
-                 03. DELIVERY DETAILS
-                 ============================================= -->
-
-            <section
-                id="deliveryDetailsSection"
-                class="dr-card hidden"
-            >
-
-                <div class="card-header">
-
-                    <div class="card-heading-wrapper">
-
-                        <span class="section-number">
-                            03
-                        </span>
-
-                        <div class="section-heading">
-
-                            <h2>
-                                Delivery Details
-                            </h2>
-
-                            <p>
-                                Enter the date when the items will be transferred.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="delivery-details-grid">
-
-
-                    <!-- DATE OF TRANSFER -->
-
-                    <div class="form-group">
-
-                        <label for="dateOfTransfer">
-
-                            DATE OF TRANSFER
-
-                            <span class="required">
-                                *
-                            </span>
-
-                        </label>
-
-                        <input
-                            type="date"
-                            id="dateOfTransfer"
-                            class="form-control"
-                            required
-                        >
-
-                        <small class="field-help">
-                            Required before reviewing the DR.
-                        </small>
-
-                    </div>
-
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =============================================
-                 04. ITEM PICKING
-                 ============================================= -->
-
-            <section
-                id="itemPickingSection"
-                class="dr-card hidden"
-            >
-
-                <div class="card-header">
-
-                    <div class="card-heading-wrapper">
-
-                        <span class="section-number">
-                            04
-                        </span>
-
-                        <div class="section-heading">
-
-                            <h2>
-                                Item Picking
-                            </h2>
-
-                            <p>
-                                Select the items and enter the quantity to be delivered.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="item-counter">
-
-                        <span>
-                            AVAILABLE ITEMS
-                        </span>
-
-                        <strong id="availableItemCount">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-
-                <!-- TABLE -->
-
-                <div class="table-wrapper">
-
-                    <table class="items-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th class="check-column">
-                                    CHECK
-                                </th>
-
-                                <th class="item-no-column">
-                                    ITEM NO.
-                                </th>
-
-                                <th class="description-column">
-                                    DESCRIPTION
-                                </th>
-
-                                <th class="qty-column">
-                                    SO QTY
-                                    <small>
-                                        FROM SALES ORDER
-                                    </small>
-                                </th>
-
-                                <th class="qty-column">
-                                    DELIVERED
-                                    <small>
-                                        FROM RECORD
-                                    </small>
-                                </th>
-
-                                <th class="qty-column">
-                                    BALANCE
-                                    <small>
-                                        SO − DELIVERED
-                                    </small>
-                                </th>
-
-                                <th class="pick-qty-column">
-                                    PICK QTY
-                                    <small>
-                                        ENTRY
-                                    </small>
-                                </th>
-
-                                <th class="remarks-column">
-                                    REMARKS
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="itemsTableBody">
-
-                            <!-- JS GENERATED -->
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-
-
-                <!-- PICKING FOOTER -->
-
-                <div class="picking-footer">
-
-
-                    <div class="picking-stat">
-
-                        <span>
-                            SELECTED ITEMS
-                        </span>
-
-                        <strong id="selectedItemCount">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div class="picking-stat">
-
-                        <span>
-                            TOTAL PICKED QTY
-                        </span>
-
-                        <strong id="totalPickedQty">
-                            0
-                        </strong>
-
-                    </div>
-
-
-                    <div
-                        id="pickingWarning"
-                        class="picking-warning"
-                    >
-                        Select at least one item.
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- =============================================
-                 PREPARE ACTIONS
-                 ============================================= -->
-
-            <section
-                id="prepareActions"
-                class="dr-actions hidden"
-            >
-
-                <button
-                    type="button"
-                    id="cancelButton"
-                    class="btn btn-secondary"
-                >
-                    CANCEL
-                </button>
-
-
-                <div class="action-right">
-
-                    <button
-                        type="button"
-                        id="reviewButton"
-                        class="btn btn-primary btn-review"
-                    >
-                        REVIEW DELIVERY RECEIPT
-                        <span class="btn-arrow">
-                            →
-                        </span>
-                    </button>
-
-                </div>
-
-            </section>
-
-        </section>
-
-
-
-        <!-- =================================================
-             REVIEW VIEW
-             ================================================= -->
-
-        <section
-            id="reviewView"
-            class="dr-view hidden"
-        >
-
-
-            <!-- REVIEW HEADER -->
-
-            <section class="dr-card review-header-card">
-
-                <div class="review-header-content">
-
-                    <div>
-
-                        <div class="review-label">
-                            STEP 02
-                        </div>
-
-                        <h2>
-                            Review & Verify Delivery Receipt
-                        </h2>
-
-                        <p>
-                            Please verify all information and quantities before saving the Delivery Receipt.
-                        </p>
-
-                    </div>
-
-
-                    <div class="review-dr-number">
-
-                        <span>
-                            DR NUMBER
-                        </span>
-
-                        <strong id="reviewDrNumber">
-                            —
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- REVIEW SO INFORMATION -->
-
-            <section class="dr-card">
-
-                <div class="card-header">
-
-                    <div class="card-heading-wrapper">
-
-                        <span class="section-number">
-                            01
-                        </span>
-
-                        <div class="section-heading">
-
-                            <h2>
-                                Sales Order
-                            </h2>
-
-                            <p>
-                                Verify Sales Order information.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="review-info-grid">
-
-                    <div class="review-info-item">
-
-                        <span>
-                            SALES ORDER
-                        </span>
-
-                        <strong id="reviewSO">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item">
-
-                        <span>
-                            DATE CREATION
-                        </span>
-
-                        <strong id="reviewSODate">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item review-wide">
-
-                        <span>
-                            CLIENT NAME
-                        </span>
-
-                        <strong id="reviewClient">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item">
-
-                        <span>
-                            SE
-                        </span>
-
-                        <strong id="reviewSE">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item">
-
-                        <span>
-                            ATTENTION
-                        </span>
-
-                        <strong id="reviewAttention">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item">
-
-                        <span>
-                            TIN NUMBER
-                        </span>
-
-                        <strong id="reviewTIN">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item">
-
-                        <span>
-                            PO NUMBER
-                        </span>
-
-                        <strong id="reviewPO">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item">
-
-                        <span>
-                            PAYMENT TERMS
-                        </span>
-
-                        <strong id="reviewTerms">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item">
-
-                        <span>
-                            JOB ORDER
-                        </span>
-
-                        <strong id="reviewJO">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item review-wide">
-
-                        <span>
-                            BILLING ADDRESS
-                        </span>
-
-                        <strong id="reviewBillingAddress">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item review-wide">
-
-                        <span>
-                            PROJECT
-                        </span>
-
-                        <strong id="reviewProject">
-                            —
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- REVIEW DELIVERY DETAILS -->
-
-            <section class="dr-card">
-
-                <div class="card-header">
-
-                    <div class="card-heading-wrapper">
-
-                        <span class="section-number">
-                            02
-                        </span>
-
-                        <div class="section-heading">
-
-                            <h2>
-                                Delivery Details
-                            </h2>
-
-                            <p>
-                                Verify delivery date and address.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="review-delivery-grid">
-
-                    <div class="review-info-item">
-
-                        <span>
-                            DATE OF TRANSFER
-                        </span>
-
-                        <strong id="reviewTransferDate">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="review-info-item review-address">
-
-                        <span>
-                            DELIVERY ADDRESS
-                        </span>
-
-                        <strong id="reviewAddress">
-                            —
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- REVIEW ITEMS -->
-
-            <section class="dr-card">
-
-                <div class="card-header">
-
-                    <div class="card-heading-wrapper">
-
-                        <span class="section-number">
-                            03
-                        </span>
-
-                        <div class="section-heading">
-
-                            <h2>
-                                Delivery Items
-                            </h2>
-
-                            <p>
-                                Verify quantities and remarks.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="review-total">
-
-                        <span>
-                            TOTAL PICKED
-                        </span>
-
-                        <strong id="reviewTotalQty">
-                            0
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <div class="table-wrapper">
-
-                    <table class="review-items-table">
-
-                        <thead>
-
-                            <tr>
-
-                                <th>
-                                    ITEM NO.
-                                </th>
-
-                                <th>
-                                    DESCRIPTION
-                                </th>
-
-                                <th>
-                                    SO QTY
-                                </th>
-
-                                <th>
-                                    DELIVERED
-                                </th>
-
-                                <th>
-                                    BALANCE
-                                </th>
-
-                                <th>
-                                    PICK QTY
-                                </th>
-
-                                <th>
-                                    REMARKS
-                                </th>
-
-                            </tr>
-
-                        </thead>
-
-
-                        <tbody id="reviewItemsBody">
-
-                            <!-- JS GENERATED -->
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- REVIEW ACTIONS -->
-
-            <section class="dr-actions review-actions">
-
-                <button
-                    type="button"
-                    id="backToPrepareButton"
-                    class="btn btn-secondary"
-                >
-                    ← BACK TO PREPARE
-                </button>
-
-
-                <div class="action-right">
-
-                    <button
-                        type="button"
-                        id="saveDeliveryReceiptButton"
-                        class="btn btn-success btn-save"
-                    >
-                        SAVE DELIVERY RECEIPT
-                    </button>
-
-                </div>
-
-            </section>
-
-        </section>
-
-
-
-        <!-- =================================================
-             COMPLETED VIEW
-             ================================================= -->
-
-        <section
-            id="completedView"
-            class="dr-view hidden"
-        >
-
-            <section class="dr-card completed-card">
-
-                <div class="completed-icon">
-                    ✓
-                </div>
-
-
-                <div class="completed-content">
-
-                    <div class="completed-label">
-                        STEP 03 • COMPLETED
-                    </div>
-
-                    <h2>
-                        Delivery Receipt Saved
-                    </h2>
-
-                    <p>
-                        The Delivery Receipt has been successfully saved.
-                    </p>
-
-
-                    <div class="completed-dr-box">
-
-                        <span>
-                            DR NUMBER
-                        </span>
-
-                        <strong id="completedDrNumber">
-                            —
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-                <div class="completed-actions">
-
-                    <button
-                        type="button"
-                        id="printCompletedButton"
-                        class="btn btn-primary"
-                    >
-                        PRINT DR
-                    </button>
-
-
-                    <button
-                        type="button"
-                        id="backToDeliveryButton"
-                        class="btn btn-secondary"
-                    >
-                        BACK TO DELIVERY
-                    </button>
-
-                </div>
-
-            </section>
-
-
-
-            <!-- SAVED DR DETAILS -->
-
-            <section class="dr-card completed-details-card">
-
-                <div class="card-header">
-
-                    <div class="card-heading-wrapper">
-
-                        <span class="section-number">
-                            ✓
-                        </span>
-
-                        <div class="section-heading">
-
-                            <h2>
-                                Saved Delivery Receipt
-                            </h2>
-
-                            <p>
-                                Summary of the completed transaction.
-                            </p>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="completed-summary-grid">
-
-                    <div>
-
-                        <span>
-                            SALES ORDER
-                        </span>
-
-                        <strong id="completedSO">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            CLIENT
-                        </span>
-
-                        <strong id="completedClient">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            DATE OF TRANSFER
-                        </span>
-
-                        <strong id="completedTransferDate">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="completed-address">
-
-                        <span>
-                            DELIVERY ADDRESS
-                        </span>
-
-                        <strong id="completedAddress">
-                            —
-                        </strong>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-        </section>
-
-    </main>
-
-
-
-    <!-- =====================================================
-         WARNING MODAL
-         ===================================================== -->
-
-    <div
-        id="warningModal"
-        class="modal-overlay hidden"
-    >
-
-        <div class="modal-box warning-modal">
-
-            <div class="modal-icon">
-                !
-            </div>
-
-
-            <div class="modal-content">
-
-                <h3 id="warningTitle">
-                    Warning
-                </h3>
-
-                <p id="warningMessage">
-                    Please check the information.
-                </p>
-
-            </div>
-
-
-            <button
-                type="button"
-                id="closeWarningButton"
-                class="btn btn-primary"
-            >
-                OK
-            </button>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         CONFIRM LEAVE MODAL
-         ===================================================== -->
-
-    <div
-        id="leaveConfirmModal"
-        class="modal-overlay hidden"
-    >
-
-        <div class="modal-box leave-modal">
-
-            <div class="modal-icon leave-icon">
-                !
-            </div>
-
-
-            <div class="modal-content">
-
-                <h3>
-                    Leave Delivery Receipt?
-                </h3>
-
-                <p>
-                    Your current Delivery Receipt preparation will be lost if you leave this page.
-                </p>
-
-            </div>
-
-
-            <div class="modal-actions">
-
-                <button
-                    type="button"
-                    id="stayButton"
-                    class="btn btn-secondary"
-                >
-                    STAY
-                </button>
-
-
-                <button
-                    type="button"
-                    id="confirmLeaveButton"
-                    class="btn btn-danger"
-                >
-                    LEAVE
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-
-    <!-- =====================================================
-         PRINT / PREVIEW MODAL
-         ===================================================== -->
-
-    <div
-        id="previewModal"
-        class="modal-overlay hidden"
-    >
-
-        <div class="preview-modal-box">
-
-            <div class="preview-header">
-
-                <div>
-
-                    <span class="preview-company">
-                        LOGIS-TECH SYSTEM
-                    </span>
-
-                    <h2>
-                        DELIVERY RECEIPT
-                    </h2>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    id="closePreviewButton"
-                    class="modal-close"
-                    title="Close"
-                >
-                    ×
-                </button>
-
-            </div>
-
-
-
-            <div class="preview-body">
-
-                <div class="preview-dr-number">
-
-                    <span>
-                        DR NUMBER
-                    </span>
-
-                    <strong id="previewDrNumber">
-                        —
+                    <strong>
+                        ${escapeHTML(
+                            so.soNumber || "NO SO NUMBER"
+                        )}
                     </strong>
 
-                </div>
-
-
-
-                <div class="preview-info-grid">
-
-                    <div>
-
-                        <span>
-                            DR NUMBER
-                        </span>
-
-                        <strong id="previewNumber">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            DATE OF TRANSFER
-                        </span>
-
-                        <strong id="previewDate">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            SALES ORDER
-                        </span>
-
-                        <strong id="previewSO">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            PO NUMBER
-                        </span>
-
-                        <strong id="previewPO">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            CLIENT
-                        </span>
-
-                        <strong id="previewClient">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            PROJECT
-                        </span>
-
-                        <strong id="previewProject">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="preview-full">
-
-                        <span>
-                            DELIVERY ADDRESS
-                        </span>
-
-                        <strong id="previewAddress">
-                            —
-                        </strong>
-
-                    </div>
+                    <span>
+                        ${escapeHTML(
+                            so.clientName || "No Client"
+                        )}
+                    </span>
 
                 </div>
 
+                <div class="suggestion-meta">
 
+                    ${
+                        so.project
+                        ? `
+                            <span>
+                                PROJECT:
+                                ${escapeHTML(
+                                    so.project
+                                )}
+                            </span>
+                        `
+                        : ""
+                    }
 
-                <div class="preview-items">
-
-                    <h3>
-                        Delivery Items
-                    </h3>
-
-
-                    <div class="table-wrapper">
-
-                        <table class="preview-table">
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        ITEM NO.
-                                    </th>
-
-                                    <th>
-                                        DESCRIPTION
-                                    </th>
-
-                                    <th>
-                                        QTY
-                                    </th>
-
-                                    <th>
-                                        UNIT
-                                    </th>
-
-                                    <th>
-                                        REMARKS
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody id="previewItemsBody">
-
-                                <!-- JS GENERATED -->
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
+                    ${
+                        so.poNumber
+                        ? `
+                            <span>
+                                PO:
+                                ${escapeHTML(
+                                    so.poNumber
+                                )}
+                            </span>
+                        `
+                        : ""
+                    }
 
                 </div>
 
-            </div>
+            `;
 
 
+            option.addEventListener(
+                "click",
+                function() {
 
-            <div class="preview-footer">
+                    selectSalesOrder(
+                        so
+                    );
 
-                <button
-                    type="button"
-                    id="closePreviewButton2"
-                    class="btn btn-secondary"
+                }
+            );
+
+
+            container.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    container.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   SELECT SALES ORDER
+   ========================================================= */
+
+function selectSalesOrder(so) {
+
+    selectedSO =
+        normalizeSalesOrder(so);
+
+
+    /*
+     * SAVE SELECTED SO
+     */
+
+    try {
+
+        localStorage.setItem(
+            SELECTED_SO_KEY,
+            JSON.stringify(selectedSO)
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to save selected SO:",
+            error
+        );
+
+    }
+
+
+    /*
+     * SEARCH BOX
+     */
+
+    const searchInput =
+        $("salesOrderSearch");
+
+    if (searchInput) {
+
+        searchInput.value =
+            selectedSO.soNumber || "";
+
+    }
+
+
+    const clearButton =
+        $("clearSalesOrderSearch");
+
+    if (clearButton) {
+
+        clearButton.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    hideSalesOrderSuggestions();
+
+
+    /*
+     * BUILD ITEM STATE
+     */
+
+    buildItemState();
+
+
+    /*
+     * FILL SO DETAILS
+     */
+
+    fillSalesOrderDetails();
+
+
+    /*
+     * SHOW SECTIONS
+     */
+
+    showElement(
+        "selectedSOIndicator"
+    );
+
+    showElement(
+        "soInformationSection"
+    );
+
+    showElement(
+        "deliveryDetailsSection"
+    );
+
+    showElement(
+        "itemPickingSection"
+    );
+
+    showElement(
+        "prepareActions"
+    );
+
+
+    /*
+     * WORKFLOW
+     */
+
+    currentStep = 1;
+
+    updateWorkflow(1);
+
+
+    /*
+     * SCROLL TO SO DETAILS
+     */
+
+    setTimeout(
+        function() {
+
+            const section =
+                $("soInformationSection");
+
+            if (section) {
+
+                section.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }
+
+        },
+        100
+    );
+
+}
+
+
+/* =========================================================
+   LOAD SELECTED SO FROM PREVIOUS PAGE
+   ========================================================= */
+
+function loadSelectedSalesOrder() {
+
+    try {
+
+        const stored =
+            localStorage.getItem(
+                SELECTED_SO_KEY
+            );
+
+        if (!stored) {
+            return;
+        }
+
+
+        const parsed =
+            JSON.parse(stored);
+
+
+        if (
+            parsed &&
+            typeof parsed === "object"
+        ) {
+
+            selectSalesOrder(
+                parsed
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load selected Sales Order:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   FILL SALES ORDER DETAILS
+   ========================================================= */
+
+function fillSalesOrderDetails() {
+
+    if (!selectedSO) {
+        return;
+    }
+
+
+    setValue(
+        "soDateCreation",
+        selectedSO.dateCreation
+    );
+
+    setValue(
+        "clientName",
+        selectedSO.clientName
+    );
+
+    setValue(
+        "salesEngineer",
+        selectedSO.salesEngineer
+    );
+
+    setValue(
+        "attention",
+        selectedSO.attention
+    );
+
+    setValue(
+        "tinNumber",
+        selectedSO.tinNumber
+    );
+
+    setValue(
+        "poNumber",
+        selectedSO.poNumber
+    );
+
+    setValue(
+        "paymentTerms",
+        selectedSO.paymentTerms
+    );
+
+    setValue(
+        "jobOrder",
+        selectedSO.jobOrder
+    );
+
+    setValue(
+        "billingAddress",
+        selectedSO.billingAddress
+    );
+
+    setValue(
+        "project",
+        selectedSO.project
+    );
+
+    setValue(
+        "deliveryAddress",
+        selectedSO.deliveryAddress
+    );
+
+
+    /*
+     * STATUS
+     */
+
+    const status =
+        $("soStatusDisplay");
+
+    if (status) {
+
+        const value =
+            selectedSO.status ||
+            "ACTIVE";
+
+        status.textContent =
+            String(value).toUpperCase();
+
+        status.classList.remove(
+            "status-active",
+            "status-inactive"
+        );
+
+        if (
+            String(value).toLowerCase() ===
+            "active"
+        ) {
+
+            status.classList.add(
+                "status-active"
+            );
+
+        } else {
+
+            status.classList.add(
+                "status-inactive"
+            );
+
+        }
+
+    }
+
+
+    /*
+     * SELECTED SO INDICATOR
+     */
+
+    setText(
+        "selectedSONumber",
+        selectedSO.soNumber || "—"
+    );
+
+}
+
+
+/* =========================================================
+   GET CURRENT EDITED SALES ORDER DETAILS
+   ========================================================= */
+
+function getEditedSalesOrderDetails() {
+
+    return {
+
+        soNumber:
+            selectedSO?.soNumber || "",
+
+        dateCreation:
+            getValue("soDateCreation"),
+
+        clientName:
+            getValue("clientName"),
+
+        salesEngineer:
+            getValue("salesEngineer"),
+
+        attention:
+            getValue("attention"),
+
+        tinNumber:
+            getValue("tinNumber"),
+
+        poNumber:
+            getValue("poNumber"),
+
+        paymentTerms:
+            getValue("paymentTerms"),
+
+        jobOrder:
+            getValue("jobOrder"),
+
+        billingAddress:
+            getValue("billingAddress"),
+
+        project:
+            getValue("project"),
+
+        deliveryAddress:
+            getValue("deliveryAddress")
+
+    };
+
+}
+
+
+/* =========================================================
+   BUILD ITEM STATE
+   ========================================================= */
+
+function buildItemState() {
+
+    if (!selectedSO) {
+
+        itemState = [];
+
+        return;
+
+    }
+
+
+    const items =
+        selectedSO.items || [];
+
+
+    itemState =
+        items.map(
+            function(item, index) {
+
+                const previousDelivered =
+                    getPreviouslyDeliveredQty(
+                        selectedSO,
+                        item
+                    );
+
+
+                const totalOrder =
+                    toNumber(
+                        item.totalOrder
+                    );
+
+
+                const balance =
+                    Math.max(
+                        totalOrder -
+                        previousDelivered,
+                        0
+                    );
+
+
+                return {
+
+                    index:
+
+                        index,
+
+                    id:
+                        item.id,
+
+                    itemNumber:
+                        item.itemNumber,
+
+                    itemName:
+                        item.itemName,
+
+                    itemDescription:
+                        item.itemDescription,
+
+                    unit:
+                        item.unit,
+
+                    totalOrder:
+                        totalOrder,
+
+                    totalDelivered:
+                        previousDelivered,
+
+                    balance:
+                        balance,
+
+                    pickQty:
+                        0,
+
+                    remarks:
+                        "",
+
+                    checked:
+                        false,
+
+                    error:
+                        ""
+
+                };
+
+            }
+        );
+
+
+    renderItemsTable();
+
+}
+
+
+/* =========================================================
+   PREVIOUS DELIVERED QTY
+   ========================================================= */
+
+function getPreviouslyDeliveredQty(
+    salesOrder,
+    currentItem
+) {
+
+    const records =
+        readDeliveryReceipts();
+
+
+    if (!records.length) {
+        return 0;
+    }
+
+
+    let totalDelivered = 0;
+
+
+    records.forEach(
+        function(dr) {
+
+            if (!dr) {
+                return;
+            }
+
+
+            const drSO =
+                normalizeText(
+                    dr.soNumber
+                );
+
+            const selectedSO =
+                normalizeText(
+                    salesOrder.soNumber
+                );
+
+
+            if (
+                !drSO ||
+                !selectedSO ||
+                drSO !== selectedSO
+            ) {
+
+                return;
+
+            }
+
+
+            const items =
+                Array.isArray(dr.items)
+                ? dr.items
+                : [];
+
+
+            items.forEach(
+                function(item) {
+
+                    if (
+                        sameItem(
+                            item,
+                            currentItem
+                        )
+                    ) {
+
+                        const qty =
+                            toNumber(
+                                item.pickQty ??
+                                item.pickedQty ??
+                                item.deliveredQty ??
+                                item.qty ??
+                                0
+                            );
+
+                        totalDelivered += qty;
+
+                    }
+
+                }
+            );
+
+        }
+    );
+
+
+    return totalDelivered;
+
+}
+
+
+/* =========================================================
+   MATCH ITEM
+   ========================================================= */
+
+function sameItem(
+    savedItem,
+    currentItem
+) {
+
+    if (!savedItem || !currentItem) {
+        return false;
+    }
+
+
+    const currentId =
+        normalizeText(
+            currentItem.id
+        );
+
+    const savedId =
+        normalizeText(
+            savedItem.id ||
+            savedItem.itemId
+        );
+
+
+    if (
+        currentId &&
+        savedId &&
+        currentId === savedId
+    ) {
+
+        return true;
+
+    }
+
+
+    const currentNumber =
+        normalizeText(
+            currentItem.itemNumber
+        );
+
+    const savedNumber =
+        normalizeText(
+            savedItem.itemNumber ||
+            savedItem.itemNo ||
+            savedItem.itemCode
+        );
+
+
+    if (
+        currentNumber &&
+        savedNumber &&
+        currentNumber === savedNumber
+    ) {
+
+        return true;
+
+    }
+
+
+    const currentName =
+        normalizeText(
+            currentItem.itemName
+        );
+
+    const savedName =
+        normalizeText(
+            savedItem.itemName ||
+            savedItem.name
+        );
+
+
+    if (
+        currentName &&
+        savedName &&
+        currentName === savedName
+    ) {
+
+        return true;
+
+    }
+
+
+    const currentDescription =
+        normalizeText(
+            currentItem.itemDescription
+        );
+
+    const savedDescription =
+        normalizeText(
+            savedItem.itemDescription ||
+            savedItem.description
+        );
+
+
+    if (
+        currentDescription &&
+        savedDescription &&
+        currentDescription === savedDescription
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   RENDER ITEMS TABLE
+   ========================================================= */
+
+function renderItemsTable() {
+
+    const tbody =
+        $("itemsTableBody");
+
+    if (!tbody) {
+        return;
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    if (!itemState.length) {
+
+        tbody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="8"
+                    class="empty-items"
                 >
-                    CLOSE
-                </button>
+                    No items found in this Sales Order.
+                </td>
+
+            </tr>
+
+        `;
+
+        updatePickingStats();
+
+        return;
+
+    }
 
 
-                <button
-                    type="button"
-                    id="printButton"
-                    class="btn btn-primary"
-                >
-                    PRINT DR
-                </button>
+    itemState.forEach(
+        function(item, index) {
 
-            </div>
+            const row =
+                document.createElement("tr");
 
-        </div>
-
-    </div>
+            row.dataset.index =
+                String(index);
 
 
+            if (item.balance <= 0) {
 
-    <!-- =====================================================
-         JAVASCRIPT
-         ===================================================== -->
+                row.classList.add(
+                    "fully-delivered"
+                );
 
-    <script
-        src="../js/create-delivery-receipt.js?v=20261005-03"
-    ></script>
+            }
 
-</div>
 
-</body>
+            row.innerHTML = `
 
-</html>
+                <td class="check-column">
+
+                    <input
+                        type="checkbox"
+                        class="item-checkbox"
+                        data-index="${index}"
+                        ${
+                            item.balance <= 0
+                            ? "disabled"
+                            : ""
+                        }
+                    >
+
+                </td>
+
+
+                <td class="item-no-column">
+
+                    <strong>
+                        ${escapeHTML(
+                            item.itemNumber || "—"
+                        )}
+                    </strong>
+
+                </td>
+
+
+                <td class="description-column">
+
+                    <div class="item-name">
+
+                        ${escapeHTML(
+                            item.itemName || "—"
+                        )}
+
+                    </div>
+
+                    ${
+                        item.itemDescription
+                        ? `
+                            <div class="item-description">
+
+                                ${escapeHTML(
+                                    item.itemDescription
+                                )}
+
+                            </div>
+                        `
+                        : ""
+                    }
+
+                </td>
+
+
+                <td class="qty-column">
+
+                    <strong>
+                        ${formatNumber(
+                            item.totalOrder
+                        )}
+                    </strong>
+
+                    ${
+                        item.unit
+                        ? `
+                            <small>
+                                ${escapeHTML(
+                                    item.unit
+                                )}
+                            </small>
+                        `
+                        : ""
+                    }
+
+                </td>
+
+
+                <td class="qty-column">
+
+                    ${formatNumber(
+                        item.totalDelivered
+                    )}
+
+                </td>
+
+
+                <td class="qty-column">
+
+                    <strong
+                        class="${
+                            item.balance <= 0
+                            ? "balance-zero"
+                            : ""
+                        }"
+                    >
+
+                        ${formatNumber(
+                            item.balance
+                        )}
+
+                    </strong>
+
+                </td>
+
+
+                <td class="pick-qty-column">
+
+                    <input
+                        type="number"
+                        class="pick-qty-input"
+                        data-index="${index}"
+                        min="0"
+                        step="any"
+                        value="0"
+                        placeholder="0"
+                        ${
+                            item.balance <= 0
+                            ? "disabled"
+                            : "disabled"
+                        }
+                    >
+
+                    <div
+                        class="qty-error"
+                        data-error-index="${index}"
+                    ></div>
+
+                </td>
+
+
+                <td class="remarks-column">
+
+                    <input
+                        type="text"
+                        class="remarks-input"
+                        data-index="${index}"
+                        placeholder="Remarks"
+                        disabled
+                    >
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(row);
+
+        }
+    );
+
+
+    setupItemEvents();
+
+    updatePickingStats();
+
+}
+
+
+/* =========================================================
+   ITEM EVENTS
+   ========================================================= */
+
+function setupItemEvents() {
+
+    const checkboxes =
+        document.querySelectorAll(
+            ".item-checkbox"
+        );
+
+
+    checkboxes.forEach(
+        function(checkbox) {
+
+            checkbox.addEventListener(
+                "change",
+                function() {
+
+                    const index =
+                        Number(
+                            checkbox.dataset.index
+                        );
+
+                    const item =
+                        itemState[index];
+
+                    if (!item) {
+                        return;
+                    }
+
+
+                    item.checked =
+                        checkbox.checked;
+
+
+                    const row =
+                        checkbox.closest("tr");
+
+
+                    const pickInput =
+                        row?.querySelector(
+                            ".pick-qty-input"
+                        );
+
+
+                    const remarksInput =
+                        row?.querySelector(
+                            ".remarks-input"
+                        );
+
+
+                    if (checkbox.checked) {
+
+                        if (pickInput) {
+
+                            pickInput.disabled =
+                                false;
+
+                            pickInput.focus();
+
+                        }
+
+                        if (remarksInput) {
+
+                            remarksInput.disabled =
+                                false;
+
+                        }
+
+                        row?.classList.add(
+                            "item-selected"
+                        );
+
+                    } else {
+
+                        item.pickQty = 0;
+
+                        item.remarks = "";
+
+                        item.error = "";
+
+                        if (pickInput) {
+
+                            pickInput.value =
+                                "0";
+
+                            pickInput.disabled =
+                                true;
+
+                        }
+
+                        if (remarksInput) {
+
+                            remarksInput.value =
+                                "";
+
+                            remarksInput.disabled =
+                                true;
+
+                        }
+
+                        row?.classList.remove(
+                            "item-selected"
+                        );
+
+                        clearItemError(
+                            index
+                        );
+
+                    }
+
+
+                    updatePickingStats();
+
+                }
+            );
+
+        }
+    );
+
+
+    const pickInputs =
+        document.querySelectorAll(
+            ".pick-qty-input"
+        );
+
+
+    pickInputs.forEach(
+        function(input) {
+
+            input.addEventListener(
+                "input",
+                function() {
+
+                    const index =
+                        Number(
+                            input.dataset.index
+                        );
+
+                    const item =
+                        itemState[index];
+
+                    if (!item) {
+                        return;
+                    }
+
+
+                    const value =
+                        input.value;
+
+
+                    const qty =
+                        value === ""
+                        ? 0
+                        : Number(value);
+
+
+                    item.pickQty =
+                        Number.isFinite(qty)
+                        ? qty
+                        : 0;
+
+
+                    validatePickQty(
+                        index,
+                        false
+                    );
+
+
+                    updatePickingStats();
+
+                }
+            );
+
+
+            input.addEventListener(
+                "blur",
+                function() {
+
+                    const index =
+                        Number(
+                            input.dataset.index
+                        );
+
+                    validatePickQty(
+                        index,
+                        false
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    const remarksInputs =
+        document.querySelectorAll(
+            ".remarks-input"
+        );
+
+
+    remarksInputs.forEach(
+        function(input) {
+
+            input.addEventListener(
+                "input",
+                function() {
+
+                    const index =
+                        Number(
+                            input.dataset.index
+                        );
+
+                    const item =
+                        itemState[index];
+
+                    if (!item) {
+                        return;
+                    }
+
+
+                    item.remarks =
+                        input.value;
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   VALIDATE PICK QTY
+   ========================================================= */
+
+function validatePickQty(
+    index,
+    showModal
+) {
+
+    const item =
+        itemState[index];
+
+    if (!item) {
+        return false;
+    }
+
+
+    const qty =
+        toNumber(
+            item.pickQty
+        );
+
+
+    const balance =
+        toNumber(
+            item.balance
+        );
+
+
+    if (qty < 0) {
+
+        item.error =
+            "Pick Qty cannot be negative.";
+
+        setItemError(
+            index,
+            item.error
+        );
+
+        if (showModal) {
+
+            showWarning(
+                "Invalid Pick Quantity",
+                item.error
+            );
+
+        }
+
+        return false;
+
+    }
+
+
+    if (qty > balance) {
+
+        item.error =
+            `Pick Qty (${formatNumber(qty)}) cannot exceed Balance (${formatNumber(balance)}).`;
+
+        setItemError(
+            index,
+            item.error
+        );
+
+        if (showModal) {
+
+            showWarning(
+                "Pick Quantity Exceeded",
+                item.error
+            );
+
+        }
+
+        return false;
+
+    }
+
+
+    item.error = "";
+
+    clearItemError(index);
+
+    return true;
+
+}
+
+
+/* =========================================================
+   ITEM ERROR
+   ========================================================= */
+
+function setItemError(
+    index,
+    message
+) {
+
+    const errorElement =
+        document.querySelector(
+            `[data-error-index="${index}"]`
+        );
+
+
+    if (errorElement) {
+
+        errorElement.textContent =
+            message;
+
+        errorElement.classList.add(
+            "show"
+        );
+
+    }
+
+
+    const input =
+        document.querySelector(
+            `.pick-qty-input[data-index="${index}"]`
+        );
+
+
+    if (input) {
+
+        input.classList.add(
+            "input-error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CLEAR ITEM ERROR
+   ========================================================= */
+
+function clearItemError(index) {
+
+    const errorElement =
+        document.querySelector(
+            `[data-error-index="${index}"]`
+        );
+
+
+    if (errorElement) {
+
+        errorElement.textContent =
+            "";
+
+        errorElement.classList.remove(
+            "show"
+        );
+
+    }
+
+
+    const input =
+        document.querySelector(
+            `.pick-qty-input[data-index="${index}"]`
+        );
+
+
+    if (input) {
+
+        input.classList.remove(
+            "input-error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PICKING STATS
+   ========================================================= */
+
+function updatePickingStats() {
+
+    const selected =
+        itemState.filter(
+            item => item.checked
+        );
+
+
+    const totalPicked =
+        selected.reduce(
+            function(total, item) {
+
+                return (
+                    total +
+                    toNumber(item.pickQty)
+                );
+
+            },
+            0
+        );
+
+
+    const available =
+        itemState.filter(
+            item => item.balance > 0
+        ).length;
+
+
+    setText(
+        "availableItemCount",
+        available
+    );
+
+    setText(
+        "selectedItemCount",
+        selected.length
+    );
+
+    setText(
+        "totalPickedQty",
+        formatNumber(totalPicked)
+    );
+
+
+    const warning =
+        $("pickingWarning");
+
+
+    if (warning) {
+
+        if (!selected.length) {
+
+            warning.textContent =
+                "Select at least one item.";
+
+            warning.classList.add(
+                "show"
+            );
+
+        } else {
+
+            warning.classList.remove(
+                "show"
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   REVIEW DELIVERY RECEIPT
+   ========================================================= */
+
+function reviewDeliveryReceipt() {
+
+    if (!selectedSO) {
+
+        showWarning(
+            "Sales Order Required",
+            "Please search and select a Sales Order first."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * VALIDATE SO DETAILS
+     */
+
+    const client =
+        getValue("clientName").trim();
+
+    const deliveryAddress =
+        getValue("deliveryAddress").trim();
+
+    const dateOfTransfer =
+        getValue("dateOfTransfer").trim();
+
+
+    if (!client) {
+
+        showWarning(
+            "Client Name Required",
+            "Please enter the Client Name."
+        );
+
+        focusElement(
+            "clientName"
+        );
+
+        return;
+
+    }
+
+
+    if (!deliveryAddress) {
+
+        showWarning(
+            "Delivery Address Required",
+            "Please enter the Delivery Address."
+        );
+
+        focusElement(
+            "deliveryAddress"
+        );
+
+        return;
+
+    }
+
+
+    if (!dateOfTransfer) {
+
+        showWarning(
+            "Date of Transfer Required",
+            "Please enter the Date of Transfer before reviewing the Delivery Receipt."
+        );
+
+        focusElement(
+            "dateOfTransfer"
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * VALIDATE ITEMS
+     */
+
+    const selectedItems =
+        itemState.filter(
+            item => item.checked
+        );
+
+
+    if (!selectedItems.length) {
+
+        showWarning(
+            "No Items Selected",
+            "Please select at least one item to deliver."
+        );
+
+        return;
+
+    }
+
+
+    let invalidItem = null;
+
+
+    for (
+        const item of selectedItems
+    ) {
+
+        const valid =
+            validatePickQty(
+                item.index,
+                false
+            );
+
+
+        if (!valid) {
+
+            invalidItem =
+                item;
+
+            break;
+
+        }
+
+
+        if (
+            toNumber(item.pickQty) <= 0
+        ) {
+
+            item.error =
+                "Please enter a Pick Qty greater than 0.";
+
+            setItemError(
+                item.index,
+                item.error
+            );
+
+            invalidItem =
+                item;
+
+            break;
+
+        }
+
+    }
+
+
+    if (invalidItem) {
+
+        showWarning(
+            "Check Pick Quantity",
+            invalidItem.error ||
+            "Please check the Pick Qty."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * BUILD CURRENT DR
+     */
+
+    currentDR =
+        buildCurrentDeliveryReceipt();
+
+
+    /*
+     * RENDER REVIEW
+     */
+
+    renderReview(
+        currentDR
+    );
+
+
+    /*
+     * CHANGE VIEW
+     */
+
+    hideElement(
+        "prepareView"
+    );
+
+    showElement(
+        "reviewView"
+    );
+
+    hideElement(
+        "completedView"
+    );
+
+
+    currentStep = 2;
+
+    updateWorkflow(2);
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =========================================================
+   BUILD CURRENT DR
+   ========================================================= */
+
+function buildCurrentDeliveryReceipt() {
+
+    const edited =
+        getEditedSalesOrderDetails();
+
+
+    const selectedItems =
+        itemState
+            .filter(
+                item => item.checked
+            )
+            .map(
+                function(item) {
+
+                    return {
+
+                        id:
+                            item.id,
+
+                        itemNumber:
+                            item.itemNumber,
+
+                        itemName:
+                            item.itemName,
+
+                        itemDescription:
+                            item.itemDescription,
+
+                        description:
+                            item.itemDescription ||
+                            item.itemName ||
+                            "",
+
+                        unit:
+                            item.unit,
+
+                        totalOrder:
+                            item.totalOrder,
+
+                        soQty:
+                            item.totalOrder,
+
+                        totalDelivered:
+                            item.totalDelivered,
+
+                        deliveredQty:
+                            item.totalDelivered,
+
+                        balance:
+                            item.balance,
+
+                        pickQty:
+                            toNumber(
+                                item.pickQty
+                            ),
+
+                        remarks:
+                            item.remarks || ""
+
+                    };
+
+                }
+            );
+
+
+    return {
+
+        drNumber:
+            getCurrentDRNumber(),
+
+        soNumber:
+            edited.soNumber,
+
+        dateCreation:
+            edited.dateCreation,
+
+        clientName:
+            edited.clientName,
+
+        salesEngineer:
+            edited.salesEngineer,
+
+        attention:
+            edited.attention,
+
+        tinNumber:
+            edited.tinNumber,
+
+        poNumber:
+            edited.poNumber,
+
+        paymentTerms:
+            edited.paymentTerms,
+
+        jobOrder:
+            edited.jobOrder,
+
+        billingAddress:
+            edited.billingAddress,
+
+        project:
+            edited.project,
+
+        deliveryAddress:
+            edited.deliveryAddress,
+
+        dateOfTransfer:
+            getValue("dateOfTransfer"),
+
+        items:
+            selectedItems,
+
+        status:
+            "PREPARED",
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+}
+
+
+/* =========================================================
+   RENDER REVIEW
+   ========================================================= */
+
+function renderReview(dr) {
+
+    if (!dr) {
+        return;
+    }
+
+
+    setText(
+        "reviewDrNumber",
+        dr.drNumber
+    );
+
+
+    setText(
+        "reviewSO",
+        dr.soNumber || "—"
+    );
+
+    setText(
+        "reviewSODate",
+        formatDateDisplay(
+            dr.dateCreation
+        )
+    );
+
+    setText(
+        "reviewClient",
+        dr.clientName || "—"
+    );
+
+    setText(
+        "reviewSE",
+        dr.salesEngineer || "—"
+    );
+
+    setText(
+        "reviewAttention",
+        dr.attention || "—"
+    );
+
+    setText(
+        "reviewTIN",
+        dr.tinNumber || "—"
+    );
+
+    setText(
+        "reviewPO",
+        dr.poNumber || "—"
+    );
+
+    setText(
+        "reviewTerms",
+        dr.paymentTerms || "—"
+    );
+
+    setText(
+        "reviewJO",
+        dr.jobOrder || "—"
+    );
+
+    setText(
+        "reviewBillingAddress",
+        dr.billingAddress || "—"
+    );
+
+    setText(
+        "reviewProject",
+        dr.project || "—"
+    );
+
+    setText(
+        "reviewTransferDate",
+        formatDateDisplay(
+            dr.dateOfTransfer
+        )
+    );
+
+    setText(
+        "reviewAddress",
+        dr.deliveryAddress || "—"
+    );
+
+
+    /*
+     * TOTAL
+     */
+
+    const total =
+        dr.items.reduce(
+            function(sum, item) {
+
+                return (
+                    sum +
+                    toNumber(item.pickQty)
+                );
+
+            },
+            0
+        );
+
+
+    setText(
+        "reviewTotalQty",
+        formatNumber(total)
+    );
+
+
+    /*
+     * ITEMS
+     */
+
+    const tbody =
+        $("reviewItemsBody");
+
+    if (!tbody) {
+        return;
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    dr.items.forEach(
+        function(item) {
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td>
+                    <strong>
+                        ${escapeHTML(
+                            item.itemNumber || "—"
+                        )}
+                    </strong>
+                </td>
+
+
+                <td>
+
+                    <div class="review-item-name">
+
+                        ${escapeHTML(
+                            item.itemName || "—"
+                        )}
+
+                    </div>
+
+                    ${
+                        item.itemDescription
+                        ? `
+                            <div class="review-item-description">
+
+                                ${escapeHTML(
+                                    item.itemDescription
+                                )}
+
+                            </div>
+                        `
+                        : ""
+                    }
+
+                </td>
+
+
+                <td>
+                    ${formatNumber(
+                        item.totalOrder
+                    )}
+                </td>
+
+
+                <td>
+                    ${formatNumber(
+                        item.totalDelivered
+                    )}
+                </td>
+
+
+                <td>
+                    ${formatNumber(
+                        item.balance
+                    )}
+                </td>
+
+
+                <td>
+
+                    <strong class="review-pick-qty">
+
+                        ${formatNumber(
+                            item.pickQty
+                        )}
+
+                    </strong>
+
+                    ${
+                        item.unit
+                        ? `
+                            <small>
+                                ${escapeHTML(
+                                    item.unit
+                                )}
+                            </small>
+                        `
+                        : ""
+                    }
+
+                </td>
+
+
+                <td>
+
+                    ${
+                        item.remarks
+                        ? escapeHTML(
+                            item.remarks
+                        )
+                        : "—"
+                    }
+
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   BACK TO PREPARE
+   ========================================================= */
+
+function backToPrepare() {
+
+    if (!currentDR) {
+
+        showElement(
+            "prepareView"
+        );
+
+        hideElement(
+            "reviewView"
+        );
+
+        currentStep = 1;
+
+        updateWorkflow(1);
+
+        return;
+
+    }
+
+
+    /*
+     * PUT CURRENT REVIEW DATA BACK
+     * INTO ITEM STATE
+     */
+
+    currentDR.items.forEach(
+        function(reviewItem) {
+
+            const stateItem =
+                itemState.find(
+                    item =>
+                        sameItem(
+                            reviewItem,
+                            item
+                        )
+                );
+
+
+            if (!stateItem) {
+                return;
+            }
+
+
+            stateItem.checked =
+                true;
+
+            stateItem.pickQty =
+                toNumber(
+                    reviewItem.pickQty
+                );
+
+            stateItem.remarks =
+                reviewItem.remarks || "";
+
+        }
+    );
+
+
+    /*
+     * RENDER AGAIN
+     */
+
+    renderItemsTable();
+
+
+    /*
+     * RESTORE CHECKED STATES
+     */
+
+    itemState.forEach(
+        function(item) {
+
+            const checkbox =
+                document.querySelector(
+                    `.item-checkbox[data-index="${item.index}"]`
+                );
+
+            const pickInput =
+                document.querySelector(
+                    `.pick-qty-input[data-index="${item.index}"]`
+                );
+
+            const remarksInput =
+                document.querySelector(
+                    `.remarks-input[data-index="${item.index}"]`
+                );
+
+
+            if (checkbox) {
+
+                checkbox.checked =
+                    item.checked;
+
+            }
+
+
+            if (pickInput) {
+
+                pickInput.disabled =
+                    !item.checked;
+
+                pickInput.value =
+                    item.pickQty || 0;
+
+            }
+
+
+            if (remarksInput) {
+
+                remarksInput.disabled =
+                    !item.checked;
+
+                remarksInput.value =
+                    item.remarks || "";
+
+            }
+
+        }
+    );
+
+
+    updatePickingStats();
+
+
+    /*
+     * VIEW
+     */
+
+    hideElement(
+        "reviewView"
+    );
+
+    showElement(
+        "prepareView"
+    );
+
+    hideElement(
+        "completedView"
+    );
+
+
+    currentStep = 1;
+
+    updateWorkflow(1);
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =========================================================
+   SAVE DELIVERY RECEIPT
+   ========================================================= */
+
+function saveDeliveryReceipt() {
+
+    if (!currentDR) {
+
+        showWarning(
+            "Nothing to Save",
+            "There is no prepared Delivery Receipt to save."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * FINAL VALIDATION
+     */
+
+    if (
+        !currentDR.soNumber
+    ) {
+
+        showWarning(
+            "Sales Order Required",
+            "Sales Order information is missing."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !currentDR.dateOfTransfer
+    ) {
+
+        showWarning(
+            "Date of Transfer Required",
+            "Please enter the Date of Transfer."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !currentDR.deliveryAddress
+    ) {
+
+        showWarning(
+            "Delivery Address Required",
+            "Please enter the Delivery Address."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !Array.isArray(
+            currentDR.items
+        ) ||
+        !currentDR.items.length
+    ) {
+
+        showWarning(
+            "No Delivery Items",
+            "Please select at least one item."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * CHECK QUANTITIES AGAIN
+     */
+
+    for (
+        const item of currentDR.items
+    ) {
+
+        if (
+            toNumber(item.pickQty) <= 0
+        ) {
+
+            showWarning(
+                "Invalid Pick Quantity",
+                `Item ${item.itemNumber} must have a Pick Qty greater than 0.`
+            );
+
+            return;
+
+        }
+
+
+        if (
+            toNumber(item.pickQty) >
+            toNumber(item.balance)
+        ) {
+
+            showWarning(
+                "Pick Quantity Exceeded",
+                `Item ${item.itemNumber}: Pick Qty cannot exceed Balance.`
+            );
+
+            return;
+
+        }
+
+    }
+
+
+    /*
+     * GENERATE FINAL DR NUMBER
+     */
+
+    currentDR.drNumber =
+        generateDRNumber();
+
+
+    currentDR.status =
+        "SAVED";
+
+
+    currentDR.savedAt =
+        new Date().toISOString();
+
+
+    /*
+     * READ EXISTING
+     */
+
+    const records =
+        readDeliveryReceipts();
+
+
+    /*
+     * SAVE
+     */
+
+    records.unshift(
+        currentDR
+    );
+
+
+    try {
+
+        localStorage.setItem(
+            DR_STORAGE_KEY,
+            JSON.stringify(records)
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Unable to save Delivery Receipt:",
+            error
+        );
+
+        showWarning(
+            "Save Failed",
+            "The Delivery Receipt could not be saved to local storage."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * SAVED STATE
+     */
+
+    savedDR =
+        currentDR;
+
+
+    /*
+     * CLEAR SELECTED SO
+     */
+
+    try {
+
+        localStorage.removeItem(
+            SELECTED_SO_KEY
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to clear selected SO."
+        );
+
+    }
+
+
+    /*
+     * COMPLETED VIEW
+     */
+
+    renderCompleted(
+        savedDR
+    );
+
+
+    hideElement(
+        "prepareView"
+    );
+
+    hideElement(
+        "reviewView"
+    );
+
+    showElement(
+        "completedView"
+    );
+
+
+    currentStep = 3;
+
+    updateWorkflow(3);
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+
+    console.log(
+        "Delivery Receipt saved:",
+        savedDR
+    );
+
+}
+
+
+/* =========================================================
+   RENDER COMPLETED
+   ========================================================= */
+
+function renderCompleted(dr) {
+
+    if (!dr) {
+        return;
+    }
+
+
+    setText(
+        "completedDrNumber",
+        dr.drNumber || "—"
+    );
+
+    setText(
+        "completedSO",
+        dr.soNumber || "—"
+    );
+
+    setText(
+        "completedClient",
+        dr.clientName || "—"
+    );
+
+    setText(
+        "completedTransferDate",
+        formatDateDisplay(
+            dr.dateOfTransfer
+        )
+    );
+
+    setText(
+        "completedAddress",
+        dr.deliveryAddress || "—"
+    );
+
+
+    /*
+     * UPDATE PREVIEW TOO
+     */
+
+    renderPreview(
+        dr
+    );
+
+}
+
+
+/* =========================================================
+   PREVIEW
+   ========================================================= */
+
+function openPrintPreview() {
+
+    if (!savedDR) {
+
+        showWarning(
+            "No Saved Delivery Receipt",
+            "Please save the Delivery Receipt first."
+        );
+
+        return;
+
+    }
+
+
+    renderPreview(
+        savedDR
+    );
+
+
+    const modal =
+        $("previewModal");
+
+    if (modal) {
+
+        modal.classList.remove(
+            "hidden"
+        );
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   RENDER PREVIEW
+   ========================================================= */
+
+function renderPreview(dr) {
+
+    if (!dr) {
+        return;
+    }
+
+
+    setText(
+        "previewDrNumber",
+        dr.drNumber || "—"
+    );
+
+    setText(
+        "previewNumber",
+        dr.drNumber || "—"
+    );
+
+    setText(
+        "previewDate",
+        formatDateDisplay(
+            dr.dateOfTransfer
+        )
+    );
+
+    setText(
+        "previewSO",
+        dr.soNumber || "—"
+    );
+
+    setText(
+        "previewPO",
+        dr.poNumber || "—"
+    );
+
+    setText(
+        "previewClient",
+        dr.clientName || "—"
+    );
+
+    setText(
+        "previewProject",
+        dr.project || "—"
+    );
+
+    setText(
+        "previewAddress",
+        dr.deliveryAddress || "—"
+    );
+
+
+    const tbody =
+        $("previewItemsBody");
+
+    if (!tbody) {
+        return;
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    const items =
+        Array.isArray(dr.items)
+        ? dr.items
+        : [];
+
+
+    items.forEach(
+        function(item) {
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td>
+                    ${escapeHTML(
+                        item.itemNumber || "—"
+                    )}
+                </td>
+
+                <td>
+
+                    <strong>
+                        ${escapeHTML(
+                            item.itemName || "—"
+                        )}
+                    </strong>
+
+                    ${
+                        item.itemDescription
+                        ? `
+                            <div class="preview-item-description">
+
+                                ${escapeHTML(
+                                    item.itemDescription
+                                )}
+
+                            </div>
+                        `
+                        : ""
+                    }
+
+                </td>
+
+                <td>
+                    ${formatNumber(
+                        item.pickQty
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        item.unit || "—"
+                    )}
+                </td>
+
+                <td>
+                    ${
+                        item.remarks
+                        ? escapeHTML(
+                            item.remarks
+                        )
+                        : "—"
+                    }
+                </td>
+
+            `;
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   PRINT
+   ========================================================= */
+
+function printDeliveryReceipt() {
+
+    /*
+     * Close modal before printing.
+     */
+
+    closePreviewModal();
+
+
+    /*
+     * Browser print.
+     */
+
+    setTimeout(
+        function() {
+
+            window.print();
+
+        },
+        150
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE PREVIEW
+   ========================================================= */
+
+function closePreviewModal() {
+
+    const modal =
+        $("previewModal");
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   CHANGE SALES ORDER
+   ========================================================= */
+
+function changeSalesOrder() {
+
+    /*
+     * Reset only the current SO selection.
+     */
+
+    selectedSO = null;
+
+    itemState = [];
+
+    currentDR = null;
+
+
+    /*
+     * Hide SO dependent sections.
+     */
+
+    hideElement(
+        "selectedSOIndicator"
+    );
+
+    hideElement(
+        "soInformationSection"
+    );
+
+    hideElement(
+        "deliveryDetailsSection"
+    );
+
+    hideElement(
+        "itemPickingSection"
+    );
+
+    hideElement(
+        "prepareActions"
+    );
+
+
+    /*
+     * Clear search.
+     */
+
+    const input =
+        $("salesOrderSearch");
+
+    if (input) {
+
+        input.value = "";
+
+        input.focus();
+
+    }
+
+
+    const clearButton =
+        $("clearSalesOrderSearch");
+
+    if (clearButton) {
+
+        clearButton.classList.add(
+            "hidden"
+        );
+
+    }
+
+
+    /*
+     * Workflow.
+     */
+
+    currentStep = 1;
+
+    updateWorkflow(1);
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =========================================================
+   CLEAR SELECTED SO
+   ========================================================= */
+
+function clearSelectedSalesOrder() {
+
+    selectedSO = null;
+
+    itemState = [];
+
+    currentDR = null;
+
+
+    hideElement(
+        "selectedSOIndicator"
+    );
+
+    hideElement(
+        "soInformationSection"
+    );
+
+    hideElement(
+        "deliveryDetailsSection"
+    );
+
+    hideElement(
+        "itemPickingSection"
+    );
+
+    hideElement(
+        "prepareActions"
+    );
+
+
+    updateWorkflow(1);
+
+}
+
+
+/* =========================================================
+   WORKFLOW
+   ========================================================= */
+
+function updateWorkflow(step) {
+
+    currentStep =
+        step;
+
+
+    for (
+        let i = 1;
+        i <= 3;
+        i++
+    ) {
+
+        const workflow =
+            $(
+                `workflowStep${i}`
+            );
+
+
+        if (!workflow) {
+            continue;
+        }
+
+
+        workflow.classList.remove(
+            "active",
+            "completed"
+        );
+
+
+        if (i === step) {
+
+            workflow.classList.add(
+                "active"
+            );
+
+        } else if (i < step) {
+
+            workflow.classList.add(
+                "completed"
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   BACK / LEAVE
+   ========================================================= */
+
+function handleBackRequest() {
+
+    /*
+     * If already saved,
+     * no warning needed.
+     */
+
+    if (
+        savedDR ||
+        currentStep === 3
+    ) {
+
+        goBackToMain();
+
+        return;
+
+    }
+
+
+    /*
+     * Check if there is actual work.
+     */
+
+    const hasWork =
+        Boolean(selectedSO) ||
+        itemState.some(
+            item =>
+                item.checked ||
+                toNumber(item.pickQty) > 0 ||
+                item.remarks
+        ) ||
+        Boolean(
+            getValue("clientName") ||
+            getValue("deliveryAddress")
+        );
+
+
+    if (!hasWork) {
+
+        goBackToMain();
+
+        return;
+
+    }
+
+
+    showLeaveModal();
+
+}
+
+
+/* =========================================================
+   SHOW LEAVE MODAL
+   ========================================================= */
+
+function showLeaveModal() {
+
+    const modal =
+        $("leaveConfirmModal");
+
+    if (!modal) {
+
+        /*
+         * Fallback
+         */
+
+        if (
+            window.confirm(
+                "Your current Delivery Receipt preparation will be lost if you leave this page. Continue?"
+            )
+        ) {
+
+            goBackToMain();
+
+        }
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE LEAVE MODAL
+   ========================================================= */
+
+function closeLeaveModal() {
+
+    const modal =
+        $("leaveConfirmModal");
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   GO BACK TO MAIN
+   ========================================================= */
+
+function goBackToMain() {
+
+    closeLeaveModal();
+
+    closeWarningModal();
+
+    closePreviewModal();
+
+
+    /*
+     * Tell main system that we came from
+     * Create Delivery Receipt.
+     *
+     * The important part:
+     *
+     * DO NOT USE:
+     *
+     * delivery.html
+     *
+     * because delivery.html is a module/page
+     * and not the main shell.
+     */
+
+    try {
+
+        localStorage.setItem(
+            RETURN_MODULE_KEY,
+            "delivery"
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to set return module."
+        );
+
+    }
+
+
+    /*
+     * Correct path:
+     *
+     * create-delivery-receipt.html
+     * is inside /pages/
+     *
+     * ../index.html
+     * goes back to the main system.
+     */
+
+    window.location.href =
+        "../index.html";
+
+}
+
+
+/* =========================================================
+   WARNING MODAL
+   ========================================================= */
+
+function showWarning(
+    title,
+    message
+) {
+
+    const modal =
+        $("warningModal");
+
+
+    setText(
+        "warningTitle",
+        title || "Warning"
+    );
+
+    setText(
+        "warningMessage",
+        message ||
+        "Please check the information."
+    );
+
+
+    if (!modal) {
+
+        alert(
+            `${title}\n\n${message}`
+        );
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+
+    if (warningTimeout) {
+
+        clearTimeout(
+            warningTimeout
+        );
+
+    }
+
+}
+
+
+function closeWarningModal() {
+
+    const modal =
+        $("warningModal");
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   SALES ORDER SUGGESTION HIDE
+   ========================================================= */
+
+function hideSalesOrderSuggestions() {
+
+    const container =
+        $("salesOrderSuggestions");
+
+    if (container) {
+
+        container.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   STORAGE - DELIVERY RECEIPTS
+   ========================================================= */
+
+function readDeliveryReceipts() {
+
+    try {
+
+        const stored =
+            localStorage.getItem(
+                DR_STORAGE_KEY
+            );
+
+        if (!stored) {
+
+            return [];
+
+        }
+
+
+        const parsed =
+            JSON.parse(stored);
+
+
+        if (
+            Array.isArray(parsed)
+        ) {
+
+            return parsed;
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to read Delivery Receipts:",
+            error
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+/* =========================================================
+   CURRENT DR NUMBER
+   ========================================================= */
+
+function getCurrentDRNumber() {
+
+    const element =
+        $("drNumber");
+
+    if (
+        element &&
+        element.textContent.trim()
+    ) {
+
+        return element.textContent.trim();
+
+    }
+
+
+    return generateDRNumber();
+
+}
+
+
+/* =========================================================
+   ELEMENT HELPERS
+   ========================================================= */
+
+function showElement(id) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+function hideElement(id) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.classList.add(
+        "hidden"
+    );
+
+}
+
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.textContent =
+        value ??
+        "—";
+
+}
+
+
+function setValue(
+    id,
+    value
+) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.value =
+        value ??
+        "";
+
+}
+
+
+function getValue(id) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return "";
+    }
+
+    return element.value || "";
+
+}
+
+
+function focusElement(id) {
+
+    const element =
+        $(id);
+
+    if (element) {
+
+        element.focus();
+
+        element.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+    }
+
+}
+
+
+/* =========================================================
+   FORMAT NUMBER
+   ========================================================= */
+
+function formatNumber(value) {
+
+    const number =
+        toNumber(value);
+
+
+    if (
+        Number.isInteger(number)
+    ) {
+
+        return number.toLocaleString(
+            "en-US"
+        );
+
+    }
+
+
+    return number.toLocaleString(
+        "en-US",
+        {
+            maximumFractionDigits: 3
+        }
+    );
+
+}
+
+
+/* =========================================================
+   NUMBER CONVERSION
+   ========================================================= */
+
+function toNumber(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        return 0;
+
+    }
+
+
+    const number =
+        Number(
+            String(value)
+                .replace(/,/g, "")
+                .trim()
+        );
+
+
+    return Number.isFinite(number)
+        ? number
+        : 0;
+
+}
+
+
+/* =========================================================
+   DATE FORMAT
+   ========================================================= */
+
+function formatDateDisplay(value) {
+
+    if (!value) {
+        return "—";
+    }
+
+
+    /*
+     * Avoid timezone problems with
+     * YYYY-MM-DD values.
+     */
+
+    const match =
+        String(value).match(
+            /^(\d{4})-(\d{2})-(\d{2})$/
+        );
+
+
+    if (match) {
+
+        return (
+            `${match[2]}/` +
+            `${match[3]}/` +
+            `${match[1]}`
+        );
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return String(value);
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-PH",
+        {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   TEXT NORMALIZATION
+   ========================================================= */
+
+function normalizeText(value) {
+
+    return String(
+        value ?? ""
+    )
+        .trim()
+        .toLowerCase();
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+   ========================================================= */
+
+function escapeHTML(value) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   PAGE BEFORE UNLOAD
+   =========================================================
+   IMPORTANT:
+   We intentionally DO NOT use browser
+   beforeunload confirmation here.
+
+   The custom Leave modal handles navigation
+   so the user gets the LOGIS-TECH design.
+   ========================================================= */
+
+
+/* =========================================================
+   DEBUG HELPER
+   ========================================================= */
+
+window.LOGISTECH_DR_DEBUG = {
+
+    getSelectedSO:
+        function() {
+            return selectedSO;
+        },
+
+    getItems:
+        function() {
+            return itemState;
+        },
+
+    getCurrentDR:
+        function() {
+            return currentDR;
+        },
+
+    getSavedDR:
+        function() {
+            return savedDR;
+        },
+
+    getSalesOrders:
+        function() {
+            return getSalesOrders();
+        },
+
+    getDeliveryReceipts:
+        function() {
+            return readDeliveryReceipts();
+        }
+
+};
+
+
+console.log(
+    "LOGIS-TECH Create DR JS v20261005-04 loaded."
+);
