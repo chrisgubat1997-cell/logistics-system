@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>LOGI-TECH | Create Sales Order</title>
+    <title>LOGIS-TECH | Create Sales Order</title>
 
     <link
         rel="stylesheet"
@@ -27,24 +27,47 @@
              PAGE HEADER
         ====================================================== -->
 
-        <div class="page-header">
+        <div class="create-so-header">
 
-            <div>
+            <div class="header-left">
 
-                <h1>Create Sales Order</h1>
+                <div class="header-icon">
+                    <span>＋</span>
+                </div>
 
-                <p class="subtitle">
-                    Create a new Sales Order
-                </p>
+                <div>
+
+                    <div class="breadcrumb">
+                        SALES ORDER
+                        <span>/</span>
+                        CREATE
+                    </div>
+
+                    <h1>
+                        Create Sales Order
+                    </h1>
+
+                    <p class="subtitle">
+                        Create a new Sales Order and add order details.
+                    </p>
+
+                </div>
 
             </div>
 
+
             <button
                 type="button"
-                class="btn btn-secondary"
+                class="btn btn-back"
                 onclick="closeCreateSO()"
             >
-                BACK
+
+                <span class="btn-icon">←</span>
+
+                <span>
+                    Back to Sales Orders
+                </span>
+
             </button>
 
         </div>
@@ -54,7 +77,36 @@
              SO INFORMATION
         ====================================================== -->
 
-        <div class="section">
+        <div class="section so-information-section">
+
+            <div class="section-header">
+
+                <div class="section-heading">
+
+                    <div class="section-number">
+                        01
+                    </div>
+
+                    <div>
+
+                        <h2>
+                            Sales Order Information
+                        </h2>
+
+                        <p>
+                            Enter the basic information and customer details.
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <div class="section-badge">
+                    REQUIRED INFORMATION
+                </div>
+
+            </div>
+
 
             <div class="form-grid">
 
@@ -64,29 +116,46 @@
 
                     <label for="soDate">
                         Date Creation
+                        <span class="required">*</span>
                     </label>
 
-                    <input
-                        type="date"
-                        id="soDate"
-                    >
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">▣</span>
+
+                        <input
+                            type="date"
+                            id="soDate"
+                        >
+
+                    </div>
 
                 </div>
 
 
                 <!-- SO NUMBER -->
 
-                <div class="form-group">
+                <div class="form-group so-number-group">
 
                     <label for="soNumber">
                         Sales Order Number
                     </label>
 
-                    <input
-                        type="text"
-                        id="soNumber"
-                        readonly
-                    >
+                    <div class="input-wrapper so-number-wrapper">
+
+                        <span class="input-icon">#</span>
+
+                        <input
+                            type="text"
+                            id="soNumber"
+                            readonly
+                        >
+
+                        <span class="auto-badge">
+                            AUTO
+                        </span>
+
+                    </div>
 
                 </div>
 
@@ -97,13 +166,20 @@
 
                     <label for="clientName">
                         Client Name
+                        <span class="required">*</span>
                     </label>
 
-                    <input
-                        type="text"
-                        id="clientName"
-                        placeholder="Enter client name"
-                    >
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">●</span>
+
+                        <input
+                            type="text"
+                            id="clientName"
+                            placeholder="Enter client name"
+                        >
+
+                    </div>
 
                 </div>
 
@@ -116,11 +192,17 @@
                         Attention
                     </label>
 
-                    <input
-                        type="text"
-                        id="attention"
-                        placeholder="Enter contact person"
-                    >
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">♙</span>
+
+                        <input
+                            type="text"
+                            id="attention"
+                            placeholder="Enter contact person"
+                        >
+
+                    </div>
 
                 </div>
 
@@ -133,11 +215,17 @@
                         Billing Address
                     </label>
 
-                    <input
-                        type="text"
-                        id="billingAddress"
-                        placeholder="Enter billing address"
-                    >
+                    <div class="input-wrapper textarea-wrapper">
+
+                        <span class="input-icon textarea-icon">⌂</span>
+
+                        <input
+                            type="text"
+                            id="billingAddress"
+                            placeholder="Enter complete billing address"
+                        >
+
+                    </div>
 
                 </div>
 
@@ -150,11 +238,17 @@
                         Delivery Address
                     </label>
 
-                    <input
-                        type="text"
-                        id="deliveryAddress"
-                        placeholder="Enter delivery address"
-                    >
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">⌖</span>
+
+                        <input
+                            type="text"
+                            id="deliveryAddress"
+                            placeholder="Enter complete delivery address"
+                        >
+
+                    </div>
 
                 </div>
 
@@ -167,11 +261,17 @@
                         Project
                     </label>
 
-                    <input
-                        type="text"
-                        id="project"
-                        placeholder="Enter project"
-                    >
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">▤</span>
+
+                        <input
+                            type="text"
+                            id="project"
+                            placeholder="Enter project name"
+                        >
+
+                    </div>
 
                 </div>
 
@@ -184,11 +284,17 @@
                         TIN Number
                     </label>
 
-                    <input
-                        type="text"
-                        id="tinNumber"
-                        placeholder="Enter TIN number"
-                    >
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">ID</span>
+
+                        <input
+                            type="text"
+                            id="tinNumber"
+                            placeholder="Enter TIN number"
+                        >
+
+                    </div>
 
                 </div>
 
@@ -201,11 +307,17 @@
                         PO Number
                     </label>
 
-                    <input
-                        type="text"
-                        id="poNumber"
-                        placeholder="Enter PO number"
-                    >
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">PO</span>
+
+                        <input
+                            type="text"
+                            id="poNumber"
+                            placeholder="Enter PO number"
+                        >
+
+                    </div>
 
                 </div>
 
@@ -216,35 +328,42 @@
 
                     <label for="terms">
                         Terms
+                        <span class="required">*</span>
                     </label>
 
-                    <select id="terms">
+                    <div class="input-wrapper select-wrapper">
 
-                        <option value="">
-                            Select Terms
-                        </option>
+                        <span class="input-icon">◷</span>
 
-                        <option value="COD">
-                            COD
-                        </option>
+                        <select id="terms">
 
-                        <option value="15 Days">
-                            15 Days
-                        </option>
+                            <option value="">
+                                Select Terms
+                            </option>
 
-                        <option value="30 Days">
-                            30 Days
-                        </option>
+                            <option value="COD">
+                                COD
+                            </option>
 
-                        <option value="45 Days">
-                            45 Days
-                        </option>
+                            <option value="15 Days">
+                                15 Days
+                            </option>
 
-                        <option value="60 Days">
-                            60 Days
-                        </option>
+                            <option value="30 Days">
+                                30 Days
+                            </option>
 
-                    </select>
+                            <option value="45 Days">
+                                45 Days
+                            </option>
+
+                            <option value="60 Days">
+                                60 Days
+                            </option>
+
+                        </select>
+
+                    </div>
 
                 </div>
 
@@ -254,40 +373,47 @@
                 <div class="form-group">
 
                     <label for="soSE">
-                        SE
+                        Sales Engineer
+                        <span class="required">*</span>
                     </label>
 
-                    <select id="soSE">
+                    <div class="input-wrapper select-wrapper">
 
-                        <option value="">
-                            Select SE
-                        </option>
+                        <span class="input-icon">SE</span>
 
-                        <option value="JBG">
-                            JBG
-                        </option>
+                        <select id="soSE">
 
-                        <option value="MHT">
-                            MHT
-                        </option>
+                            <option value="">
+                                Select SE
+                            </option>
 
-                        <option value="HHF">
-                            HHF
-                        </option>
+                            <option value="JBG">
+                                JBG
+                            </option>
 
-                        <option value="IAF">
-                            IAF
-                        </option>
+                            <option value="MHT">
+                                MHT
+                            </option>
 
-                        <option value="GRF">
-                            GRF
-                        </option>
+                            <option value="HHF">
+                                HHF
+                            </option>
 
-                        <option value="KBO">
-                            KBO
-                        </option>
+                            <option value="IAF">
+                                IAF
+                            </option>
 
-                    </select>
+                            <option value="GRF">
+                                GRF
+                            </option>
+
+                            <option value="KBO">
+                                KBO
+                            </option>
+
+                        </select>
+
+                    </div>
 
                 </div>
 
@@ -300,11 +426,17 @@
                         Job Order
                     </label>
 
-                    <input
-                        type="text"
-                        id="jobOrder"
-                        placeholder="Enter Job Order"
-                    >
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">JO</span>
+
+                        <input
+                            type="text"
+                            id="jobOrder"
+                            placeholder="Enter Job Order"
+                        >
+
+                    </div>
 
                 </div>
 
@@ -317,80 +449,122 @@
              ITEMS
         ====================================================== -->
 
-        <div class="section">
+        <div class="section items-section">
 
-            <div class="table-header">
+            <div class="section-header">
 
-                <div>
+                <div class="section-heading">
 
-                    <h2>
-                        Items
-                    </h2>
+                    <div class="section-number">
+                        02
+                    </div>
 
-                    <p class="subtitle">
-                        Add Sales Order items
-                    </p>
+                    <div>
+
+                        <h2>
+                            Sales Order Items
+                        </h2>
+
+                        <p>
+                            Add all products, quantities, units and amounts.
+                        </p>
+
+                    </div>
 
                 </div>
 
+
                 <button
                     type="button"
-                    class="btn btn-primary"
+                    class="btn btn-primary add-item-btn"
                     onclick="addSOItem()"
                 >
-                    + ADD ITEM
+
+                    <span class="plus-icon">
+                        +
+                    </span>
+
+                    ADD ITEM
+
                 </button>
 
             </div>
 
 
-            <div class="table-container">
+            <div class="items-table-card">
 
-                <table id="soItemsTable">
+                <div class="table-topbar">
 
-                    <thead>
+                    <div class="table-title">
 
-                        <tr>
+                        <span class="table-icon">
+                            ▤
+                        </span>
 
-                            <th>#</th>
+                        <span>
+                            Order Items
+                        </span>
 
-                            <th>
-                                Item Name
-                            </th>
+                    </div>
 
-                            <th>
-                                Description
-                            </th>
+                    <div class="table-hint">
+                        Add items using the button above
+                    </div>
 
-                            <th>
-                                QTY
-                            </th>
-
-                            <th>
-                                Unit
-                            </th>
-
-                            <th>
-                                Amount
-                            </th>
-
-                            <th>
-                                Total
-                            </th>
-
-                            <th>
-                                Action
-                            </th>
-
-                        </tr>
-
-                    </thead>
+                </div>
 
 
-                    <tbody id="soItemsBody">
-                    </tbody>
+                <div class="table-container">
 
-                </table>
+                    <table id="soItemsTable">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="col-number">
+                                    #
+                                </th>
+
+                                <th>
+                                    Item Name
+                                </th>
+
+                                <th>
+                                    Description
+                                </th>
+
+                                <th class="col-qty">
+                                    QTY
+                                </th>
+
+                                <th class="col-unit">
+                                    Unit
+                                </th>
+
+                                <th class="col-amount">
+                                    Amount
+                                </th>
+
+                                <th class="col-total">
+                                    Total
+                                </th>
+
+                                <th class="col-action">
+                                    Action
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="soItemsBody">
+                        </tbody>
+
+                    </table>
+
+                </div>
 
             </div>
 
@@ -399,111 +573,146 @@
                  TOTALS
             ================================================== -->
 
-            <div class="so-totals">
+            <div class="totals-layout">
 
-                <!-- SUBTOTAL -->
+                <div class="totals-note">
 
-                <div class="so-total-row">
+                    <div class="note-icon">
+                        ₱
+                    </div>
 
-                    <span class="so-total-label">
-                        Subtotal
-                    </span>
+                    <div>
 
-                    <span
-                        class="so-total-value"
-                        id="soSubtotal"
-                    >
-                        ₱0.00
-                    </span>
+                        <strong>
+                            Order Summary
+                        </strong>
 
-                </div>
+                        <p>
+                            Review the subtotal, discount and VAT before saving the Sales Order.
+                        </p>
 
-
-                <!-- DISCOUNT -->
-
-                <div class="so-total-row">
-
-                    <label
-                        class="so-total-label"
-                        for="soDiscount"
-                    >
-                        Less Discount
-                    </label>
-
-                    <input
-                        type="number"
-                        id="soDiscount"
-                        class="so-total-input"
-                        min="0"
-                        step="0.01"
-                        value="0"
-                        placeholder="0.00"
-                        oninput="calculateSOTotals()"
-                    >
+                    </div>
 
                 </div>
 
 
-                <!-- VATABLE -->
+                <div class="so-totals">
 
-                <div class="so-total-row">
+                    <!-- SUBTOTAL -->
 
-                    <label class="so-total-label">
+                    <div class="so-total-row">
 
-                        <span class="vatable-check">
-
-                            <input
-                                type="checkbox"
-                                id="soVatable"
-                                onchange="calculateSOTotals()"
-                            >
-
-                            Vatable
-
+                        <span class="so-total-label">
+                            Subtotal
                         </span>
 
-                    </label>
+                        <span
+                            class="so-total-value"
+                            id="soSubtotal"
+                        >
+                            ₱0.00
+                        </span>
+
+                    </div>
 
 
-                    <span
-                        class="so-total-value"
-                        id="soVAT"
-                    >
-                        ₱0.00
-                    </span>
+                    <!-- DISCOUNT -->
 
-                </div>
+                    <div class="so-total-row">
+
+                        <label
+                            class="so-total-label"
+                            for="soDiscount"
+                        >
+                            Less Discount
+                        </label>
+
+                        <div class="discount-input-wrapper">
+
+                            <span>
+                                ₱
+                            </span>
+
+                            <input
+                                type="number"
+                                id="soDiscount"
+                                class="so-total-input"
+                                min="0"
+                                step="0.01"
+                                value="0"
+                                placeholder="0.00"
+                                oninput="calculateSOTotals()"
+                            >
+
+                        </div>
+
+                    </div>
 
 
-                <!-- VAT RATE -->
+                    <!-- VATABLE -->
 
-                <div class="so-total-row">
+                    <div class="so-total-row">
 
-                    <span class="so-total-label">
-                        VAT Rate
-                    </span>
+                        <label class="so-total-label">
 
-                    <span class="so-total-value">
-                        12%
-                    </span>
+                            <span class="vatable-check">
 
-                </div>
+                                <input
+                                    type="checkbox"
+                                    id="soVatable"
+                                    onchange="calculateSOTotals()"
+                                >
+
+                                <span>
+                                    Vatable
+                                </span>
+
+                            </span>
+
+                        </label>
 
 
-                <!-- GRAND TOTAL -->
+                        <span
+                            class="so-total-value"
+                            id="soVAT"
+                        >
+                            ₱0.00
+                        </span>
 
-                <div class="so-total-row grand-total-row">
+                    </div>
 
-                    <span class="so-total-label">
-                        GRAND TOTAL
-                    </span>
 
-                    <span
-                        class="so-total-value"
-                        id="soGrandTotal"
-                    >
-                        ₱0.00
-                    </span>
+                    <!-- VAT RATE -->
+
+                    <div class="so-total-row">
+
+                        <span class="so-total-label">
+                            VAT Rate
+                        </span>
+
+                        <span class="so-total-value">
+                            12%
+                        </span>
+
+                    </div>
+
+
+                    <!-- GRAND TOTAL -->
+
+                    <div class="so-total-row grand-total-row">
+
+                        <span class="so-total-label">
+                            GRAND TOTAL
+                        </span>
+
+                        <span
+                            class="so-total-value"
+                            id="soGrandTotal"
+                        >
+                            ₱0.00
+                        </span>
+
+                    </div>
 
                 </div>
 
@@ -516,19 +725,27 @@
              SO FILES
         ====================================================== -->
 
-        <div class="section">
+        <div class="section files-section">
 
-            <div class="table-header">
+            <div class="section-header">
 
-                <div>
+                <div class="section-heading">
 
-                    <h2>
-                        SO Files
-                    </h2>
+                    <div class="section-number">
+                        03
+                    </div>
 
-                    <p class="subtitle">
-                        Upload supporting Sales Order PDF files
-                    </p>
+                    <div>
+
+                        <h2>
+                            Sales Order Files
+                        </h2>
+
+                        <p>
+                            Upload supporting Sales Order PDF documents.
+                        </p>
+
+                    </div>
 
                 </div>
 
@@ -537,7 +754,13 @@
                     for="soFileInput"
                     class="btn btn-primary upload-file-btn"
                 >
-                    📎 + UPLOAD FILE
+
+                    <span>
+                        📎
+                    </span>
+
+                    UPLOAD FILE
+
                 </label>
 
 
@@ -552,13 +775,46 @@
             </div>
 
 
+            <div class="upload-zone">
+
+                <div class="upload-zone-icon">
+                    ↑
+                </div>
+
+                <div class="upload-zone-content">
+
+                    <strong>
+                        Sales Order Documents
+                    </strong>
+
+                    <p>
+                        Upload your PDF files using the button above.
+                    </p>
+
+                    <small>
+                        Accepted format: PDF
+                    </small>
+
+                </div>
+
+            </div>
+
+
             <div
                 id="soFileList"
                 class="so-file-list"
             >
 
                 <div class="no-files">
-                    No files selected.
+
+                    <span class="no-files-icon">
+                        □
+                    </span>
+
+                    <span>
+                        No files selected.
+                    </span>
+
                 </div>
 
             </div>
@@ -572,22 +828,45 @@
 
         <div class="action-bar">
 
-            <button
-                type="button"
-                class="btn btn-secondary"
-                onclick="closeCreateSO()"
-            >
-                CANCEL
-            </button>
+            <div class="action-note">
+
+                <span class="action-note-icon">
+                    ●
+                </span>
+
+                <span>
+                    Review all information before saving.
+                </span>
+
+            </div>
 
 
-            <button
-                type="button"
-                class="btn btn-primary"
-                onclick="saveSO()"
-            >
-                SAVE SO
-            </button>
+            <div class="action-buttons">
+
+                <button
+                    type="button"
+                    class="btn btn-secondary cancel-btn"
+                    onclick="closeCreateSO()"
+                >
+                    CANCEL
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-primary save-so-btn"
+                    onclick="saveSO()"
+                >
+
+                    <span>
+                        ✓
+                    </span>
+
+                    SAVE SALES ORDER
+
+                </button>
+
+            </div>
 
         </div>
 
