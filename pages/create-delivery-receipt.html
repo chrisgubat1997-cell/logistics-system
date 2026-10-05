@@ -2,40 +2,23 @@
 <html lang="en">
 
 <head>
-
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>
-        Create Delivery Receipt | LOGIS-TECH SYSTEM
-    </title>
-
-    <!-- =====================================================
-         CREATE DELIVERY RECEIPT CSS
-         IMPORTANT:
-         HTML is inside /pages/
-         CSS is inside /css/
-         ===================================================== -->
+    <title>Create Delivery Receipt | LOGIS-TECH SYSTEM</title>
 
     <link
         rel="stylesheet"
-        href="../css/create-delivery-receipt.css?v=20261005-01"
+        href="../css/create-delivery-receipt.css?v=20261005-02"
     >
-
 </head>
-
 
 <body>
 
 <div class="create-dr-page">
 
-
     <!-- =====================================================
-         TOP HEADER
+         HEADER
          ===================================================== -->
 
     <header class="dr-header">
@@ -51,7 +34,7 @@
                 ←
             </button>
 
-            <div>
+            <div class="dr-title-area">
 
                 <div class="system-label">
                     LOGIS-TECH SYSTEM
@@ -62,7 +45,7 @@
                 </h1>
 
                 <p>
-                    Prepare and post delivery receipt from Sales Order
+                    Prepare and save delivery receipt from Sales Order
                 </p>
 
             </div>
@@ -91,39 +74,21 @@
 
 
     <!-- =====================================================
-         WORKFLOW
+         3-STEP WORKFLOW
          ===================================================== -->
 
     <section class="workflow-container">
 
-        <div class="workflow-step active">
+        <!-- STEP 01 -->
+
+        <div
+            class="workflow-step active"
+            data-step="1"
+            id="workflowStep1"
+        >
 
             <div class="workflow-number">
                 01
-            </div>
-
-            <div class="workflow-text">
-
-                <strong>
-                    Select SO
-                </strong>
-
-                <span>
-                    Sales Order
-                </span>
-
-            </div>
-
-        </div>
-
-
-        <div class="workflow-line"></div>
-
-
-        <div class="workflow-step">
-
-            <div class="workflow-number">
-                02
             </div>
 
             <div class="workflow-text">
@@ -133,7 +98,7 @@
                 </strong>
 
                 <span>
-                    Pick Items
+                    Delivery Receipt
                 </span>
 
             </div>
@@ -144,10 +109,16 @@
         <div class="workflow-line"></div>
 
 
-        <div class="workflow-step">
+        <!-- STEP 02 -->
+
+        <div
+            class="workflow-step"
+            data-step="2"
+            id="workflowStep2"
+        >
 
             <div class="workflow-number">
-                03
+                02
             </div>
 
             <div class="workflow-text">
@@ -168,20 +139,26 @@
         <div class="workflow-line"></div>
 
 
-        <div class="workflow-step">
+        <!-- STEP 03 -->
+
+        <div
+            class="workflow-step"
+            data-step="3"
+            id="workflowStep3"
+        >
 
             <div class="workflow-number">
-                04
+                03
             </div>
 
             <div class="workflow-text">
 
                 <strong>
-                    Posted
+                    Completed
                 </strong>
 
                 <span>
-                    Complete
+                    DR Saved
                 </span>
 
             </div>
@@ -200,270 +177,51 @@
 
 
         <!-- =================================================
-             SALES ORDER SELECTION
-             ================================================= -->
-
-        <section class="dr-card">
-
-            <div class="card-header">
-
-                <div>
-
-                    <span class="section-number">
-                        01
-                    </span>
-
-                    <div class="section-heading">
-
-                        <h2>
-                            Sales Order
-                        </h2>
-
-                        <p>
-                            Select the posted Sales Order for delivery.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label for="salesOrderSelect">
-                    SALES ORDER
-                    <span class="required">*</span>
-                </label>
-
-                <select
-                    id="salesOrderSelect"
-                    class="form-control"
-                >
-
-                    <option value="">
-                        -- Select Sales Order --
-                    </option>
-
-                </select>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             SALES ORDER INFORMATION
+             PREPARE VIEW
              ================================================= -->
 
         <section
-            id="soInformationSection"
-            class="dr-card hidden"
+            id="prepareView"
+            class="dr-view"
         >
 
-            <div class="card-header">
 
-                <div>
+            <!-- =============================================
+                 SALES ORDER SELECTION
+                 ============================================= -->
 
-                    <span class="section-number">
-                        02
-                    </span>
+            <section class="dr-card">
 
-                    <div class="section-heading">
+                <div class="card-header">
 
-                        <h2>
-                            Sales Order Information
-                        </h2>
+                    <div class="card-heading-wrapper">
 
-                        <p>
-                            Details from the selected Sales Order.
-                        </p>
+                        <span class="section-number">
+                            01
+                        </span>
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Sales Order
+                            </h2>
+
+                            <p>
+                                Select the Sales Order for this delivery.
+                            </p>
+
+                        </div>
 
                     </div>
 
                 </div>
 
-                <span
-                    id="soStatusDisplay"
-                    class="status-badge status-posted"
-                >
-                    POSTED
-                </span>
-
-            </div>
-
-
-            <div class="info-grid">
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        SALES ORDER
-                    </span>
-
-                    <strong id="soNumberDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        SO DATE
-                    </span>
-
-                    <strong id="soDateDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        CLIENT
-                    </span>
-
-                    <strong id="clientNameDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        ATTENTION
-                    </span>
-
-                    <strong id="attentionDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        PO NUMBER
-                    </span>
-
-                    <strong id="poNumberDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        PROJECT
-                    </span>
-
-                    <strong id="projectDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        TIN
-                    </span>
-
-                    <strong id="tinDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        TERMS
-                    </span>
-
-                    <strong id="termsDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="info-item">
-
-                    <span class="info-label">
-                        SALES ENGINEER
-                    </span>
-
-                    <strong id="salesEngineerDisplay">
-                        —
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             DELIVERY INFORMATION
-             ================================================= -->
-
-        <section
-            id="deliveryInformationSection"
-            class="dr-card hidden"
-        >
-
-            <div class="card-header">
-
-                <div>
-
-                    <span class="section-number">
-                        03
-                    </span>
-
-                    <div class="section-heading">
-
-                        <h2>
-                            Delivery Information
-                        </h2>
-
-                        <p>
-                            Enter the actual transfer and delivery details.
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <div class="form-grid">
-
-
-                <!-- DATE OF TRANSFER -->
 
                 <div class="form-group">
 
-                    <label for="dateOfTransfer">
+                    <label for="salesOrderSelect">
 
-                        DATE OF TRANSFER
+                        SALES ORDER
 
                         <span class="required">
                             *
@@ -471,417 +229,996 @@
 
                     </label>
 
-                    <input
-                        type="date"
-                        id="dateOfTransfer"
+
+                    <select
+                        id="salesOrderSelect"
                         class="form-control"
-                        required
                     >
 
-                    <small class="field-help">
-                        Required before preparing the DR.
-                    </small>
+                        <option value="">
+                            -- Select Sales Order --
+                        </option>
+
+                    </select>
 
                 </div>
 
+            </section>
 
-                <!-- DRIVER -->
 
-                <div class="form-group">
 
-                    <label for="driverName">
-                        DRIVER NAME
-                    </label>
+            <!-- =============================================
+                 SALES ORDER DETAILS
+                 ============================================= -->
 
-                    <input
-                        type="text"
-                        id="driverName"
-                        class="form-control"
-                        placeholder="Enter driver name"
-                    >
-
-                </div>
-
-
-                <!-- VEHICLE -->
-
-                <div class="form-group">
-
-                    <label for="vehicleNumber">
-                        VEHICLE NUMBER
-                    </label>
-
-                    <input
-                        type="text"
-                        id="vehicleNumber"
-                        class="form-control"
-                        placeholder="e.g. TBO710"
-                    >
-
-                </div>
-
-
-                <!-- DELIVERY ADDRESS -->
-
-                <div class="form-group full-width">
-
-                    <label for="deliveryAddress">
-
-                        DELIVERY ADDRESS
-
-                        <span class="required">
-                            *
-                        </span>
-
-                    </label>
-
-                    <textarea
-                        id="deliveryAddress"
-                        class="form-control"
-                        rows="3"
-                        placeholder="Enter actual delivery address"
-                    ></textarea>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             ITEM PICKING
-             ================================================= -->
-
-        <section
-            id="itemPickingSection"
-            class="dr-card hidden"
-        >
-
-            <div class="card-header">
-
-                <div>
-
-                    <span class="section-number">
-                        04
-                    </span>
-
-                    <div class="section-heading">
-
-                        <h2>
-                            Item Picking
-                        </h2>
-
-                        <p>
-                            Select the items and quantities to transfer.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="item-counter">
-
-                    <span>
-                        AVAILABLE
-                    </span>
-
-                    <strong id="availableItemCount">
-                        0
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <!-- PICKING TABLE -->
-
-            <div class="table-wrapper">
-
-                <table class="items-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th class="pick-column">
-                                PICK
-                            </th>
-
-                            <th>
-                                ITEM
-                            </th>
-
-                            <th>
-                                SO QTY
-                            </th>
-
-                            <th>
-                                DELIVERED
-                            </th>
-
-                            <th>
-                                BALANCE
-                            </th>
-
-                            <th>
-                                DR DESCRIPTION
-                            </th>
-
-                            <th>
-                                PICK QTY
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody id="itemsTableBody">
-
-                        <!-- Generated by create-delivery-receipt.js -->
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            <!-- PICKING SUMMARY -->
-
-            <div class="picking-footer">
-
-                <div class="picking-stat">
-
-                    <span>
-                        SELECTED ITEMS
-                    </span>
-
-                    <strong id="selectedItemCount">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div class="picking-stat">
-
-                    <span>
-                        TOTAL PICKED QTY
-                    </span>
-
-                    <strong id="totalPickedQty">
-                        0
-                    </strong>
-
-                </div>
-
-
-                <div
-                    id="pickingWarning"
-                    class="picking-warning warning"
-                >
-                    Select at least one item.
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             DR SUMMARY
-             ================================================= -->
-
-        <section
-            id="drSummarySection"
-            class="dr-card summary-card hidden"
-        >
-
-            <div class="card-header">
-
-                <div>
-
-                    <span class="section-number">
-                        05
-                    </span>
-
-                    <div class="section-heading">
-
-                        <h2>
-                            Delivery Receipt Summary
-                        </h2>
-
-                        <p>
-                            Review the prepared DR before posting.
-                        </p>
-
-                    </div>
-
-                </div>
-
-                <span class="status-badge status-prepared">
-                    PREPARED
-                </span>
-
-            </div>
-
-
-            <div class="summary-grid">
-
-
-                <div class="summary-info">
-
-                    <span>
-                        DR NUMBER
-                    </span>
-
-                    <strong id="summaryDrNumber">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-info">
-
-                    <span>
-                        SALES ORDER
-                    </span>
-
-                    <strong id="summarySoNumber">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-info">
-
-                    <span>
-                        CLIENT
-                    </span>
-
-                    <strong id="summaryClient">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-info">
-
-                    <span>
-                        DATE OF TRANSFER
-                    </span>
-
-                    <strong id="summaryTransferDate">
-                        —
-                    </strong>
-
-                </div>
-
-
-                <div class="summary-info full-width">
-
-                    <span>
-                        DELIVERY ADDRESS
-                    </span>
-
-                    <strong id="summaryAddress">
-                        —
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="summary-items">
-
-                <div class="summary-items-header">
-
-                    <strong>
-                        ITEMS FOR DELIVERY
-                    </strong>
-
-                </div>
-
-
-                <div id="summaryItemsList">
-
-                    <!-- Generated by JS -->
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-
-        <!-- =================================================
-             ACTION BAR
-             ================================================= -->
-
-        <section
-            id="drActionsSection"
-            class="dr-actions hidden"
-        >
-
-            <button
-                type="button"
-                id="cancelButton"
-                class="btn btn-secondary"
+            <section
+                id="soInformationSection"
+                class="dr-card hidden"
             >
-                CANCEL
-            </button>
+
+                <div class="card-header">
+
+                    <div class="card-heading-wrapper">
+
+                        <span class="section-number">
+                            02
+                        </span>
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Sales Order Details
+                            </h2>
+
+                            <p>
+                                Information from the selected Sales Order.
+                            </p>
+
+                        </div>
+
+                    </div>
 
 
-            <div class="action-right">
+                    <span
+                        id="soStatusDisplay"
+                        class="status-badge status-active"
+                    >
+                        ACTIVE
+                    </span>
+
+                </div>
+
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            SALES ORDER
+                        </span>
+
+                        <strong id="soNumberDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            SO DATE
+                        </span>
+
+                        <strong id="soDateDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            CLIENT
+                        </span>
+
+                        <strong id="clientNameDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            ATTENTION
+                        </span>
+
+                        <strong id="attentionDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            PO NUMBER
+                        </span>
+
+                        <strong id="poNumberDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            PROJECT
+                        </span>
+
+                        <strong id="projectDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            TIN
+                        </span>
+
+                        <strong id="tinDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            TERMS
+                        </span>
+
+                        <strong id="termsDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="info-item">
+
+                        <span class="info-label">
+                            SALES ENGINEER
+                        </span>
+
+                        <strong id="salesEngineerDisplay">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =============================================
+                 DELIVERY DETAILS
+                 NO DRIVER
+                 NO VEHICLE
+                 ============================================= -->
+
+            <section
+                id="deliveryDetailsSection"
+                class="dr-card hidden"
+            >
+
+                <div class="card-header">
+
+                    <div class="card-heading-wrapper">
+
+                        <span class="section-number">
+                            03
+                        </span>
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Delivery Details
+                            </h2>
+
+                            <p>
+                                Enter the transfer date and delivery address.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="delivery-details-grid">
+
+
+                    <!-- DATE OF TRANSFER -->
+
+                    <div class="form-group">
+
+                        <label for="dateOfTransfer">
+
+                            DATE OF TRANSFER
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <input
+                            type="date"
+                            id="dateOfTransfer"
+                            class="form-control"
+                            required
+                        >
+
+                        <small class="field-help">
+                            Required before reviewing the DR.
+                        </small>
+
+                    </div>
+
+
+                    <!-- DELIVERY ADDRESS -->
+
+                    <div class="form-group delivery-address-group">
+
+                        <label for="deliveryAddress">
+
+                            DELIVERY ADDRESS
+
+                            <span class="required">
+                                *
+                            </span>
+
+                        </label>
+
+                        <textarea
+                            id="deliveryAddress"
+                            class="form-control"
+                            rows="3"
+                            placeholder="Enter delivery address"
+                        ></textarea>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =============================================
+                 ITEM PICKING
+                 ============================================= -->
+
+            <section
+                id="itemPickingSection"
+                class="dr-card hidden"
+            >
+
+                <div class="card-header">
+
+                    <div class="card-heading-wrapper">
+
+                        <span class="section-number">
+                            04
+                        </span>
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Item Picking
+                            </h2>
+
+                            <p>
+                                Select the items and enter the quantity to be delivered.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="item-counter">
+
+                        <span>
+                            AVAILABLE ITEMS
+                        </span>
+
+                        <strong id="availableItemCount">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- TABLE -->
+
+                <div class="table-wrapper">
+
+                    <table class="items-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th class="check-column">
+                                    CHECK
+                                </th>
+
+                                <th class="item-no-column">
+                                    ITEM NO.
+                                </th>
+
+                                <th class="description-column">
+                                    DESCRIPTION
+                                </th>
+
+                                <th class="qty-column">
+                                    SO QTY
+                                    <small>
+                                        FROM SALES ORDER
+                                    </small>
+                                </th>
+
+                                <th class="qty-column">
+                                    DELIVERED
+                                    <small>
+                                        FROM RECORD
+                                    </small>
+                                </th>
+
+                                <th class="qty-column">
+                                    BALANCE
+                                    <small>
+                                        SO − DELIVERED
+                                    </small>
+                                </th>
+
+                                <th class="pick-qty-column">
+                                    PICK QTY
+                                    <small>
+                                        ENTRY
+                                    </small>
+                                </th>
+
+                                <th class="remarks-column">
+                                    REMARKS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="itemsTableBody">
+
+                            <!-- JS GENERATED -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+
+                <!-- PICKING FOOTER -->
+
+                <div class="picking-footer">
+
+
+                    <div class="picking-stat">
+
+                        <span>
+                            SELECTED ITEMS
+                        </span>
+
+                        <strong id="selectedItemCount">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="picking-stat">
+
+                        <span>
+                            TOTAL PICKED QTY
+                        </span>
+
+                        <strong id="totalPickedQty">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div
+                        id="pickingWarning"
+                        class="picking-warning"
+                    >
+                        Select at least one item.
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- =============================================
+                 PREPARE ACTIONS
+                 ============================================= -->
+
+            <section
+                id="prepareActions"
+                class="dr-actions hidden"
+            >
 
                 <button
                     type="button"
-                    id="previewButton"
-                    class="btn btn-outline"
+                    id="cancelButton"
+                    class="btn btn-secondary"
                 >
-                    PREVIEW
+                    CANCEL
                 </button>
 
 
-                <button
-                    type="button"
-                    id="prepareButton"
-                    class="btn btn-primary"
-                >
-                    PREPARE DR
-                </button>
+                <div class="action-right">
 
+                    <button
+                        type="button"
+                        id="reviewButton"
+                        class="btn btn-primary btn-review"
+                    >
+                        REVIEW DELIVERY RECEIPT
+                        <span class="btn-arrow">
+                            →
+                        </span>
+                    </button>
 
-                <button
-                    type="button"
-                    id="postButton"
-                    class="btn btn-success hidden"
-                >
-                    POST DR
-                </button>
+                </div>
 
-            </div>
+            </section>
 
         </section>
 
+
+
+        <!-- =================================================
+             REVIEW VIEW
+             ================================================= -->
+
+        <section
+            id="reviewView"
+            class="dr-view hidden"
+        >
+
+
+            <!-- REVIEW HEADER -->
+
+            <section class="dr-card review-header-card">
+
+                <div class="review-header-content">
+
+                    <div>
+
+                        <div class="review-label">
+                            STEP 02
+                        </div>
+
+                        <h2>
+                            Review & Verify Delivery Receipt
+                        </h2>
+
+                        <p>
+                            Please verify all information and quantities before saving the Delivery Receipt.
+                        </p>
+
+                    </div>
+
+
+                    <div class="review-dr-number">
+
+                        <span>
+                            DR NUMBER
+                        </span>
+
+                        <strong id="reviewDrNumber">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- REVIEW SO INFORMATION -->
+
+            <section class="dr-card">
+
+                <div class="card-header">
+
+                    <div class="card-heading-wrapper">
+
+                        <span class="section-number">
+                            01
+                        </span>
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Sales Order
+                            </h2>
+
+                            <p>
+                                Verify Sales Order information.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="review-info-grid">
+
+                    <div class="review-info-item">
+
+                        <span>
+                            SALES ORDER
+                        </span>
+
+                        <strong id="reviewSO">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item">
+
+                        <span>
+                            SO DATE
+                        </span>
+
+                        <strong id="reviewSODate">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item review-wide">
+
+                        <span>
+                            CLIENT
+                        </span>
+
+                        <strong id="reviewClient">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item">
+
+                        <span>
+                            PO NUMBER
+                        </span>
+
+                        <strong id="reviewPO">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item">
+
+                        <span>
+                            PROJECT
+                        </span>
+
+                        <strong id="reviewProject">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- REVIEW DELIVERY DETAILS -->
+
+            <section class="dr-card">
+
+                <div class="card-header">
+
+                    <div class="card-heading-wrapper">
+
+                        <span class="section-number">
+                            02
+                        </span>
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Delivery Details
+                            </h2>
+
+                            <p>
+                                Verify delivery date and address.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="review-delivery-grid">
+
+                    <div class="review-info-item">
+
+                        <span>
+                            DATE OF TRANSFER
+                        </span>
+
+                        <strong id="reviewTransferDate">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="review-info-item review-address">
+
+                        <span>
+                            DELIVERY ADDRESS
+                        </span>
+
+                        <strong id="reviewAddress">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- REVIEW ITEMS -->
+
+            <section class="dr-card">
+
+                <div class="card-header">
+
+                    <div class="card-heading-wrapper">
+
+                        <span class="section-number">
+                            03
+                        </span>
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Delivery Items
+                            </h2>
+
+                            <p>
+                                Verify quantities and remarks.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="review-total">
+
+                        <span>
+                            TOTAL PICKED
+                        </span>
+
+                        <strong id="reviewTotalQty">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="table-wrapper">
+
+                    <table class="review-items-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    ITEM NO.
+                                </th>
+
+                                <th>
+                                    DESCRIPTION
+                                </th>
+
+                                <th>
+                                    SO QTY
+                                </th>
+
+                                <th>
+                                    DELIVERED
+                                </th>
+
+                                <th>
+                                    BALANCE
+                                </th>
+
+                                <th>
+                                    PICK QTY
+                                </th>
+
+                                <th>
+                                    REMARKS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="reviewItemsBody">
+
+                            <!-- JS GENERATED -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- REVIEW ACTIONS -->
+
+            <section class="dr-actions review-actions">
+
+                <button
+                    type="button"
+                    id="backToPrepareButton"
+                    class="btn btn-secondary"
+                >
+                    ← BACK TO PREPARE
+                </button>
+
+
+                <div class="action-right">
+
+                    <button
+                        type="button"
+                        id="saveDeliveryReceiptButton"
+                        class="btn btn-success btn-save"
+                    >
+                        SAVE DELIVERY RECEIPT
+                    </button>
+
+                </div>
+
+            </section>
+
+        </section>
+
+
+
+        <!-- =================================================
+             COMPLETED VIEW
+             ================================================= -->
+
+        <section
+            id="completedView"
+            class="dr-view hidden"
+        >
+
+
+            <section class="dr-card completed-card">
+
+                <div class="completed-icon">
+                    ✓
+                </div>
+
+
+                <div class="completed-content">
+
+                    <div class="completed-label">
+                        STEP 03 • COMPLETED
+                    </div>
+
+                    <h2>
+                        Delivery Receipt Saved
+                    </h2>
+
+                    <p>
+                        The Delivery Receipt has been successfully saved.
+                    </p>
+
+
+                    <div class="completed-dr-box">
+
+                        <span>
+                            DR NUMBER
+                        </span>
+
+                        <strong id="completedDrNumber">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="completed-actions">
+
+                    <button
+                        type="button"
+                        id="printCompletedButton"
+                        class="btn btn-primary"
+                    >
+                        PRINT DR
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="backToDeliveryButton"
+                        class="btn btn-secondary"
+                    >
+                        BACK TO DELIVERY
+                    </button>
+
+                </div>
+
+            </section>
+
+
+
+            <!-- SAVED DR DETAILS -->
+
+            <section class="dr-card completed-details-card">
+
+                <div class="card-header">
+
+                    <div class="card-heading-wrapper">
+
+                        <span class="section-number">
+                            ✓
+                        </span>
+
+                        <div class="section-heading">
+
+                            <h2>
+                                Saved Delivery Receipt
+                            </h2>
+
+                            <p>
+                                Summary of the completed transaction.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="completed-summary-grid">
+
+                    <div>
+
+                        <span>
+                            SALES ORDER
+                        </span>
+
+                        <strong id="completedSO">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            CLIENT
+                        </span>
+
+                        <strong id="completedClient">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            DATE OF TRANSFER
+                        </span>
+
+                        <strong id="completedTransferDate">
+                            —
+                        </strong>
+
+                    </div>
+
+
+                    <div class="completed-address">
+
+                        <span>
+                            DELIVERY ADDRESS
+                        </span>
+
+                        <strong id="completedAddress">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </section>
 
     </main>
 
 
 
     <!-- =====================================================
-         WARNING MODAL
+         WARNING / CONFIRMATION MODAL
          ===================================================== -->
 
     <div
@@ -894,6 +1231,7 @@
             <div class="modal-icon">
                 !
             </div>
+
 
             <div class="modal-content">
 
@@ -923,7 +1261,63 @@
 
 
     <!-- =====================================================
-         PREVIEW MODAL
+         CONFIRM LEAVE MODAL
+         ===================================================== -->
+
+    <div
+        id="leaveConfirmModal"
+        class="modal-overlay hidden"
+    >
+
+        <div class="modal-box leave-modal">
+
+            <div class="modal-icon leave-icon">
+                !
+            </div>
+
+
+            <div class="modal-content">
+
+                <h3>
+                    Leave Delivery Receipt?
+                </h3>
+
+                <p>
+                    Your current Delivery Receipt preparation will be lost if you leave this page.
+                </p>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    id="stayButton"
+                    class="btn btn-secondary"
+                >
+                    STAY
+                </button>
+
+
+                <button
+                    type="button"
+                    id="confirmLeaveButton"
+                    class="btn btn-danger"
+                >
+                    LEAVE
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         PRINT / PREVIEW MODAL
          ===================================================== -->
 
     <div
@@ -952,6 +1346,7 @@
                     type="button"
                     id="closePreviewButton"
                     class="modal-close"
+                    title="Close"
                 >
                     ×
                 </button>
@@ -959,8 +1354,11 @@
             </div>
 
 
+
             <div class="preview-body">
 
+
+                <!-- DR NUMBER -->
 
                 <div class="preview-dr-number">
 
@@ -975,7 +1373,11 @@
                 </div>
 
 
+
+                <!-- INFO -->
+
                 <div class="preview-info-grid">
+
 
                     <div>
 
@@ -993,7 +1395,7 @@
                     <div>
 
                         <span>
-                            DATE
+                            DATE OF TRANSFER
                         </span>
 
                         <strong id="previewDate">
@@ -1070,10 +1472,13 @@
                 </div>
 
 
+
+                <!-- ITEMS -->
+
                 <div class="preview-items">
 
                     <h3>
-                        Items
+                        Delivery Items
                     </h3>
 
 
@@ -1086,11 +1491,23 @@
                                 <tr>
 
                                     <th>
+                                        ITEM NO.
+                                    </th>
+
+                                    <th>
                                         DESCRIPTION
                                     </th>
 
                                     <th>
                                         QTY
+                                    </th>
+
+                                    <th>
+                                        UNIT
+                                    </th>
+
+                                    <th>
+                                        REMARKS
                                     </th>
 
                                 </tr>
@@ -1099,6 +1516,8 @@
 
 
                             <tbody id="previewItemsBody">
+
+                                <!-- JS GENERATED -->
 
                             </tbody>
 
@@ -1109,6 +1528,7 @@
                 </div>
 
             </div>
+
 
 
             <div class="preview-footer">
@@ -1140,19 +1560,14 @@
 
     <!-- =====================================================
          JAVASCRIPT
-         IMPORTANT:
-         HTML is inside /pages/
-         JS is inside /js/
          ===================================================== -->
 
     <script
-        src="../js/create-delivery-receipt.js?v=20261005-01"
+        src="../js/create-delivery-receipt.js?v=20261005-02"
     ></script>
 
-
 </div>
-<script src="../js/create-delivery-receipt.js"></script>
-    <link rel="stylesheet" href="../css/create-delivery-receipt.css">
+
 </body>
 
 </html>
