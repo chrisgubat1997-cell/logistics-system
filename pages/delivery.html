@@ -1,62 +1,457 @@
 <!-- =========================================================
      LOGIS-TECH SYSTEM
      DELIVERY / DR MODULE
-     DISPLAY ONLY - NO FUNCTION YET
+     
+     DISPLAY / UI ONLY
+     NO JAVASCRIPT / NO APPS SCRIPT YET
+     
+     WORKFLOW:
+     POSTED SO
+        ↓
+     PREPARE DR
+        ↓
+     PREPARED
+        ↓
+     POST DR
+        ↓
+     ONGOING DELIVERY
+        ↓
+     COMPLETED / FOR INVOICE
 ========================================================= -->
 
 <div class="delivery-module">
 
-    <!-- =====================================================
+```
+<!-- =====================================================
+     MAIN DELIVERY LIST VIEW
+====================================================== -->
+<div id="deliveryListView" class="delivery-list-view">
+
+
+    <!-- =================================================
          PAGE HEADER
-    ====================================================== -->
+    ================================================== -->
     <div class="page-header">
-        <div>
-            <h1>Delivery</h1>
-            <p>Delivery Receipt Management</p>
+
+        <div class="page-header-left">
+
+            <div class="page-header-icon">
+                🚚
+            </div>
+
+            <div>
+
+                <h1>
+                    Delivery
+                </h1>
+
+                <p>
+                    Delivery Receipt Management
+                </p>
+
+            </div>
+
         </div>
 
-        <button type="button" class="btn btn-primary">
-            + PREPARE DR
-        </button>
+
+        <div class="page-header-actions">
+
+            <button
+                type="button"
+                class="btn btn-primary"
+                id="prepareDRButton">
+
+                + PREPARE DR
+
+            </button>
+
+        </div>
+
     </div>
 
 
-    <!-- =====================================================
-         ACTIVE SALES ORDERS FOR DELIVERY
-    ====================================================== -->
-    <div class="section-card">
 
-        <div class="section-title">
-            <div>
-                <h2>Active Sales Orders</h2>
-                <p>Sales Orders available for Delivery Receipt preparation</p>
+    <!-- =================================================
+         DELIVERY SUMMARY CARDS
+    ================================================== -->
+    <div class="delivery-summary-grid">
+
+
+        <!-- =============================================
+             TOTAL DELIVERY RECEIPT
+        ============================================== -->
+        <div
+            class="delivery-summary-card summary-total-dr"
+            id="totalDRCard">
+
+            <div class="summary-card-icon">
+                📋
             </div>
+
+
+            <div class="summary-card-content">
+
+                <span class="summary-label">
+                    TOTAL DELIVERY RECEIPT
+                </span>
+
+                <strong id="totalDRCount">
+                    128
+                </strong>
+
+                <small>
+                    All Delivery Receipts
+                </small>
+
+            </div>
+
         </div>
 
+
+
+        <!-- =============================================
+             TODAY'S DELIVERY RECEIPT
+        ============================================== -->
+        <div
+            class="delivery-summary-card summary-today-dr"
+            id="todayDRCard">
+
+            <div class="summary-card-icon">
+                📅
+            </div>
+
+
+            <div class="summary-card-content">
+
+                <span class="summary-label">
+                    TODAY'S DELIVERY RECEIPT
+                </span>
+
+                <strong id="todayDRCount">
+                    6
+                </strong>
+
+                <small>
+                    October 5, 2026
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =============================================
+             ONGOING DELIVERY
+        ============================================== -->
+        <div
+            class="delivery-summary-card summary-ongoing-dr"
+            id="ongoingDRCard">
+
+            <div class="summary-card-icon">
+                🚚
+            </div>
+
+
+            <div class="summary-card-content">
+
+                <span class="summary-label">
+                    ONGOING DELIVERY
+                </span>
+
+                <strong id="ongoingDRCount">
+                    9
+                </strong>
+
+                <small>
+                    Currently in delivery
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =============================================
+             CANCELLED DR
+        ============================================== -->
+        <div
+            class="delivery-summary-card summary-cancelled-dr"
+            id="cancelledDRCard">
+
+            <div class="summary-card-icon">
+                ❌
+            </div>
+
+
+            <div class="summary-card-content">
+
+                <span class="summary-label">
+                    CANCELLED DR
+                </span>
+
+                <strong id="cancelledDRCount">
+                    3
+                </strong>
+
+                <small>
+                    Cancelled Delivery Receipts
+                </small>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         MAIN SEARCH BAR
+    ================================================== -->
+    <div class="delivery-main-search">
+
+
+        <div class="delivery-search-wrapper">
+
+
+            <span class="delivery-search-icon">
+                🔎
+            </span>
+
+
+            <input
+                type="text"
+                id="deliveryMainSearch"
+                class="delivery-main-search-input"
+                placeholder="Search Delivery Receipt, SO Number, Client Name, PO Number or Project..."
+            >
+
+
+            <button
+                type="button"
+                class="delivery-search-button">
+
+                SEARCH
+
+            </button>
+
+
+        </div>
+
+
+        <select
+            id="deliveryMainStatusFilter"
+            class="delivery-main-filter">
+
+            <option value="ALL">
+                All Delivery
+            </option>
+
+            <option value="PREPARED">
+                PREPARED
+            </option>
+
+            <option value="ONGOING">
+                ONGOING DELIVERY
+            </option>
+
+            <option value="COMPLETED">
+                COMPLETED
+            </option>
+
+            <option value="CANCELLED">
+                CANCELLED
+            </option>
+
+            <option value="FOR_INVOICE">
+                FOR INVOICE
+            </option>
+
+        </select>
+
+
+        <button
+            type="button"
+            class="delivery-refresh-button">
+
+            ↻ REFRESH
+
+        </button>
+
+
+    </div>
+
+
+
+    <!-- =================================================
+         SECTION 01
+         POSTED SALES ORDERS
+    ================================================== -->
+    <div class="section-card">
+
+
+        <!-- SECTION HEADER -->
+        <div class="section-title">
+
+            <div>
+
+                <div class="section-heading-row">
+
+                    <span class="section-number">
+                        01
+                    </span>
+
+                    <div>
+
+                        <h2>
+                            Posted Sales Orders
+                        </h2>
+
+                        <p>
+                            Posted Sales Orders available for
+                            Delivery Receipt preparation
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="section-badge posted">
+                POSTED SO
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             POSTED SO SEARCH
+        ================================================== -->
+        <div class="delivery-toolbar">
+
+
+            <div class="delivery-search-box">
+
+                <span class="search-icon">
+                    🔎
+                </span>
+
+
+                <input
+                    type="text"
+                    id="deliverySOSearch"
+                    placeholder="Search SO Number / Client / PO Number / Project..."
+                >
+
+
+                <button
+                    type="button"
+                    class="search-button">
+
+                    SEARCH
+
+                </button>
+
+            </div>
+
+
+            <select
+                class="delivery-filter"
+                id="deliverySOFilter">
+
+                <option value="ALL">
+                    All Posted SO
+                </option>
+
+                <option value="READY">
+                    Ready for Delivery
+                </option>
+
+                <option value="PARTIAL">
+                    Partial Delivery
+                </option>
+
+            </select>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             POSTED SO TABLE
+        ================================================== -->
         <div class="table-wrapper">
 
-            <table class="delivery-table">
+            <table class="delivery-table posted-so-table">
+
 
                 <thead>
+
                     <tr>
-                        <th>SO Number</th>
-                        <th>Client Name</th>
-                        <th>PO Number</th>
-                        <th>Project</th>
-                        <th>Delivery Address</th>
-                        <th>Status</th>
-                        <th>Action</th>
+
+                        <th>
+                            SO Number
+                        </th>
+
+                        <th>
+                            Client Name
+                        </th>
+
+                        <th>
+                            PO Number
+                        </th>
+
+                        <th>
+                            Project
+                        </th>
+
+                        <th>
+                            Delivery Address
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
+
                     </tr>
+
                 </thead>
+
 
                 <tbody>
 
+
+                    <!-- SO 1 -->
                     <tr>
-                        <td>SO-2026-5501</td>
 
-                        <td>ABC COMPANY</td>
+                        <td>
+                            <strong>
+                                SO-2026-5501
+                            </strong>
+                        </td>
 
-                        <td>PO-12345</td>
+                        <td>
+                            ABC COMPANY
+                        </td>
+
+                        <td>
+                            PO-12345
+                        </td>
 
                         <td>
                             NORTH PROJECT
@@ -66,28 +461,50 @@
                             Brgy. San Jose, Bulacan
                         </td>
 
-                        <td>
-                            <span class="status active">
-                                ACTIVE
-                            </span>
+                        <td class="amount">
+                            ₱150,000.00
                         </td>
 
                         <td>
+
+                            <span class="status posted">
+                                POSTED
+                            </span>
+
+                        </td>
+
+                        <td>
+
                             <button
                                 type="button"
                                 class="btn btn-primary btn-small">
-                                PREPARE DR
+
+                                + PREPARE DR
+
                             </button>
+
                         </td>
+
                     </tr>
 
 
+
+                    <!-- SO 2 -->
                     <tr>
-                        <td>SO-2026-5508</td>
 
-                        <td>XYZ INDUSTRIAL CORP.</td>
+                        <td>
+                            <strong>
+                                SO-2026-5508
+                            </strong>
+                        </td>
 
-                        <td>PO-12678</td>
+                        <td>
+                            XYZ INDUSTRIAL CORP.
+                        </td>
+
+                        <td>
+                            PO-12678
+                        </td>
 
                         <td>
                             SOUTH PROJECT
@@ -97,20 +514,85 @@
                             Meycauayan, Bulacan
                         </td>
 
-                        <td>
-                            <span class="status active">
-                                ACTIVE
-                            </span>
+                        <td class="amount">
+                            ₱285,500.00
                         </td>
 
                         <td>
+
+                            <span class="status posted">
+                                POSTED
+                            </span>
+
+                        </td>
+
+                        <td>
+
                             <button
                                 type="button"
                                 class="btn btn-primary btn-small">
-                                PREPARE DR
+
+                                + PREPARE DR
+
                             </button>
+
                         </td>
+
                     </tr>
+
+
+
+                    <!-- SO 3 -->
+                    <tr>
+
+                        <td>
+                            <strong>
+                                SO-2026-5512
+                            </strong>
+                        </td>
+
+                        <td>
+                            SAMPLE CONSTRUCTION INC.
+                        </td>
+
+                        <td>
+                            PO-12891
+                        </td>
+
+                        <td>
+                            EAST PROJECT
+                        </td>
+
+                        <td>
+                            Quezon City
+                        </td>
+
+                        <td class="amount">
+                            ₱98,750.00
+                        </td>
+
+                        <td>
+
+                            <span class="status posted">
+                                POSTED
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <button
+                                type="button"
+                                class="btn btn-primary btn-small">
+
+                                + PREPARE DR
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
 
                 </tbody>
 
@@ -118,503 +600,238 @@
 
         </div>
 
-    </div>
-
-
-
-    <!-- =====================================================
-         PREPARE DELIVERY RECEIPT
-    ====================================================== -->
-    <div class="section-card">
-
-        <div class="section-title">
-            <div>
-                <h2>Prepare Delivery Receipt</h2>
-                <p>Select Sales Order and pick the items for delivery</p>
-            </div>
-        </div>
-
-
-        <!-- =================================================
-             SEARCH SALES ORDER
-        ================================================== -->
-        <div class="prepare-section">
-
-            <label class="form-label">
-                Search Sales Order
-            </label>
-
-            <input
-                type="text"
-                class="search-input"
-                placeholder="Search SO Number / Client / PO Number"
-                value="SO-2026-5501"
-            >
-
-
-            <!-- =============================================
-                 SAMPLE SEARCH SUGGESTIONS
-            ============================================== -->
-            <div class="search-suggestions">
-
-                <div class="suggestion-title">
-                    Matching Sales Orders
-                </div>
-
-                <div class="suggestion-item">
-
-                    <div>
-                        <strong>SO-2026-5501</strong>
-
-                        <span>
-                            ABC COMPANY
-                        </span>
-
-                        <small>
-                            PO-12345
-                        </small>
-                    </div>
-
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-small">
-                        SELECT
-                    </button>
-
-                </div>
-
-
-                <div class="suggestion-item">
-
-                    <div>
-                        <strong>SO-2026-5508</strong>
-
-                        <span>
-                            ABC COMPANY
-                        </span>
-
-                        <small>
-                            PO-12678
-                        </small>
-                    </div>
-
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-small">
-                        SELECT
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =================================================
-             DR INFORMATION
-        ================================================== -->
-        <div class="subsection">
-
-            <div class="subsection-title">
-                DR Information
-            </div>
-
-
-            <div class="form-grid">
-
-                <!-- SO NUMBER -->
-                <div class="form-group">
-
-                    <label>SO Number</label>
-
-                    <input
-                        type="text"
-                        value="SO-2026-5501"
-                        readonly
-                    >
-
-                </div>
-
-
-                <!-- CLIENT -->
-                <div class="form-group">
-
-                    <label>Client Name</label>
-
-                    <input
-                        type="text"
-                        value="ABC COMPANY"
-                        readonly
-                    >
-
-                </div>
-
-
-                <!-- TIN -->
-                <div class="form-group">
-
-                    <label>TIN</label>
-
-                    <input
-                        type="text"
-                        value="123-456-789"
-                        readonly
-                    >
-
-                </div>
-
-
-                <!-- PO -->
-                <div class="form-group">
-
-                    <label>PO Number</label>
-
-                    <input
-                        type="text"
-                        value="PO-12345"
-                        readonly
-                    >
-
-                </div>
-
-
-                <!-- BILLING ADDRESS -->
-                <div class="form-group full-width">
-
-                    <label>Billing Address</label>
-
-                    <textarea
-                        rows="2"
-                        readonly>ABC COMPANY, 123 Main Street, Quezon City</textarea>
-
-                </div>
-
-
-                <!-- DELIVERY ADDRESS -->
-                <div class="form-group full-width">
-
-                    <label>
-                        Delivery Address
-                        <span class="editable-label">
-                            Editable
-                        </span>
-                    </label>
-
-                    <textarea
-                        rows="3"
-                        placeholder="Enter actual delivery address"></textarea>
-
-                </div>
-
-
-                <!-- PROJECT -->
-                <div class="form-group">
-
-                    <label>Project</label>
-
-                    <input
-                        type="text"
-                        value="NORTH PROJECT"
-                        readonly
-                    >
-
-                </div>
-
-
-                <!-- ATTENTION -->
-                <div class="form-group">
-
-                    <label>Attention</label>
-
-                    <input
-                        type="text"
-                        value="JUAN DELA CRUZ"
-                        readonly
-                    >
-
-                </div>
-
-
-                <!-- SE -->
-                <div class="form-group">
-
-                    <label>SE</label>
-
-                    <input
-                        type="text"
-                        value="JBG"
-                        readonly
-                    >
-
-                </div>
-
-
-                <!-- TERMS -->
-                <div class="form-group">
-
-                    <label>Terms</label>
-
-                    <input
-                        type="text"
-                        value="COD"
-                        readonly
-                    >
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =================================================
-             ITEMS FOR DELIVERY
-        ================================================== -->
-        <div class="subsection">
-
-            <div class="subsection-title">
-                Pick Items for Delivery
-            </div>
-
-            <p class="section-note">
-                Enter the quantity to be delivered. DR Amount is
-                based only on the picked quantity.
-            </p>
-
-
-            <div class="table-wrapper">
-
-                <table class="delivery-table items-table">
-
-                    <thead>
-
-                        <tr>
-                            <th>Item No.</th>
-                            <th>Item Name</th>
-                            <th>Description</th>
-                            <th>SO Qty</th>
-                            <th>Pick Qty</th>
-                            <th>Unit</th>
-                            <th>Unit Amount</th>
-                            <th>DR Amount</th>
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        <!-- ITEM 1 -->
-                        <tr>
-
-                            <td>1</td>
-
-                            <td>
-                                Cable Tray
-                            </td>
-
-                            <td>
-                                Cable Tray Assembly
-                            </td>
-
-                            <td class="text-center">
-                                100
-                            </td>
-
-                            <td>
-
-                                <input
-                                    type="number"
-                                    class="qty-input"
-                                    value="10"
-                                    min="0"
-                                >
-
-                            </td>
-
-                            <td>
-                                ASSY
-                            </td>
-
-                            <td class="amount">
-                                ₱1,500.00
-                            </td>
-
-                            <td class="amount">
-                                ₱15,000.00
-                            </td>
-
-                        </tr>
-
-
-                        <!-- ITEM 2 -->
-                        <tr>
-
-                            <td>2</td>
-
-                            <td>
-                                Cable Ladder
-                            </td>
-
-                            <td>
-                                Cable Ladder Assembly
-                            </td>
-
-                            <td class="text-center">
-                                50
-                            </td>
-
-                            <td>
-
-                                <input
-                                    type="number"
-                                    class="qty-input"
-                                    value="6"
-                                    min="0"
-                                >
-
-                            </td>
-
-                            <td>
-                                ASSY
-                            </td>
-
-                            <td class="amount">
-                                ₱1,500.00
-                            </td>
-
-                            <td class="amount">
-                                ₱9,000.00
-                            </td>
-
-                        </tr>
-
-
-                        <!-- ITEM 3 -->
-                        <tr>
-
-                            <td>3</td>
-
-                            <td>
-                                Support Bracket
-                            </td>
-
-                            <td>
-                                Heavy Duty Bracket
-                            </td>
-
-                            <td class="text-center">
-                                100
-                            </td>
-
-                            <td>
-
-                                <input
-                                    type="number"
-                                    class="qty-input"
-                                    value="0"
-                                    min="0"
-                                >
-
-                            </td>
-
-                            <td>
-                                PCS
-                            </td>
-
-                            <td class="amount">
-                                ₱500.00
-                            </td>
-
-                            <td class="amount">
-                                ₱0.00
-                            </td>
-
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =================================================
-             DR TOTAL
-        ================================================== -->
-        <div class="dr-total">
-
-            <div>
-                <span>DR TOTAL</span>
-            </div>
-
-            <strong>
-                ₱24,000.00
-            </strong>
-
-        </div>
-
-
-
-        <!-- =================================================
-             BOTTOM ACTION BUTTONS
-        ================================================== -->
-        <div class="dr-action-buttons">
-
-            <button
-                type="button"
-                class="btn btn-secondary">
-                CANCEL
-            </button>
-
-            <button
-                type="button"
-                class="btn btn-primary">
-                🖨️ PRINT DR
-            </button>
-
-        </div>
 
     </div>
 
 
 
-    <!-- =====================================================
-         DELIVERY RECEIPT LIST
-    ====================================================== -->
+    <!-- =================================================
+         SECTION 02
+         RECENT DR PREPARED
+    ================================================== -->
     <div class="section-card">
+
 
         <div class="section-title">
 
             <div>
-                <h2>Delivery Receipt List</h2>
-                <p>Prepared Delivery Receipts</p>
+
+                <div class="section-heading-row">
+
+                    <span class="section-number">
+                        02
+                    </span>
+
+                    <div>
+
+                        <h2>
+                            Recent DR Prepared
+                        </h2>
+
+                        <p>
+                            Click once to select a DR.
+                            Double-click to open DR Details.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="section-badge prepared">
+                DR LIST
             </div>
 
         </div>
 
 
+
+        <!-- =================================================
+             DR SEARCH
+        ================================================== -->
+        <div class="delivery-toolbar">
+
+
+            <div class="delivery-search-box">
+
+                <span class="search-icon">
+                    🔎
+                </span>
+
+
+                <input
+                    type="text"
+                    id="deliveryDRSearch"
+                    placeholder="Search DR Number / SO Number / Client / Project..."
+                >
+
+
+                <button
+                    type="button"
+                    class="search-button">
+
+                    SEARCH
+
+                </button>
+
+            </div>
+
+
+            <select
+                class="delivery-filter"
+                id="deliveryDRFilter">
+
+                <option value="ALL">
+                    All DR
+                </option>
+
+                <option value="PREPARED">
+                    PREPARED
+                </option>
+
+                <option value="ONGOING">
+                    ONGOING DELIVERY
+                </option>
+
+                <option value="COMPLETED">
+                    COMPLETED
+                </option>
+
+                <option value="CANCELLED">
+                    CANCELLED
+                </option>
+
+                <option value="FOR_INVOICE">
+                    FOR INVOICE
+                </option>
+
+            </select>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             SELECTED DR ACTION BAR
+        ================================================== -->
+        <div class="dr-selection-bar">
+
+
+            <div class="dr-selection-status">
+
+                <span class="selection-dot"></span>
+
+
+                <div
+                    id="drSelectionText"
+                    class="dr-selection-content">
+
+                    <span class="selection-empty">
+                        No Delivery Receipt selected
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="dr-selection-actions">
+
+
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    id="previewDRButton"
+                    disabled>
+
+                    👁 PREVIEW
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    id="updateDRButton"
+                    disabled>
+
+                    ✏️ UPDATE
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    id="cancelDRButton"
+                    disabled>
+
+                    CANCEL
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-success"
+                    id="postDRButton"
+                    disabled>
+
+                    🟢 POST DR
+
+                </button>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             RECENT DR TABLE
+        ================================================== -->
         <div class="table-wrapper">
 
-            <table class="delivery-table">
+            <table class="delivery-table recent-dr-table">
+
 
                 <thead>
 
                     <tr>
-                        <th>DR Number</th>
-                        <th>DR Date</th>
-                        <th>SO Number</th>
-                        <th>Client Name</th>
-                        <th>Project</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Action</th>
+
+                        <th>
+                            DR Number
+                        </th>
+
+                        <th>
+                            DR Date
+                        </th>
+
+                        <th>
+                            SO Number
+                        </th>
+
+                        <th>
+                            Client Name
+                        </th>
+
+                        <th>
+                            Project
+                        </th>
+
+                        <th>
+                            Amount
+                        </th>
+
+                        <th>
+                            Status
+                        </th>
+
                     </tr>
 
                 </thead>
@@ -622,14 +839,24 @@
 
                 <tbody>
 
-                    <tr>
+
+                    <!-- =================================================
+                         PREPARED
+                    ================================================== -->
+                    <tr
+                        data-dr-number="DR-2026-0009"
+                        class="dr-row">
 
                         <td>
-                            DR-2026-0001
+
+                            <strong>
+                                DR-2026-0009
+                            </strong>
+
                         </td>
 
                         <td>
-                            October 2, 2026
+                            October 5, 2026
                         </td>
 
                         <td>
@@ -649,35 +876,1218 @@
                         </td>
 
                         <td>
+
                             <span class="status prepared">
                                 PREPARED
                             </span>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- =================================================
+                         ONGOING
+                    ================================================== -->
+                    <tr
+                        data-dr-number="DR-2026-0008"
+                        class="dr-row">
+
+                        <td>
+
+                            <strong>
+                                DR-2026-0008
+                            </strong>
+
+                        </td>
+
+                        <td>
+                            October 5, 2026
+                        </td>
+
+                        <td>
+                            SO-2026-5508
+                        </td>
+
+                        <td>
+                            XYZ INDUSTRIAL CORP.
+                        </td>
+
+                        <td>
+                            SOUTH PROJECT
+                        </td>
+
+                        <td class="amount">
+                            ₱48,500.00
                         </td>
 
                         <td>
 
-                            <div class="action-group">
+                            <span class="status ongoing">
+                                ONGOING
+                            </span>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-outline btn-small">
-                                    VIEW
-                                </button>
+                        </td>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-secondary btn-small">
-                                    UPDATE
-                                </button>
+                    </tr>
 
-                                <button
-                                    type="button"
-                                    class="btn btn-danger btn-small">
-                                    CANCEL
-                                </button>
 
-                            </div>
 
+                    <!-- =================================================
+                         FOR INVOICE
+                    ================================================== -->
+                    <tr
+                        data-dr-number="DR-2026-0007"
+                        class="dr-row">
+
+                        <td>
+
+                            <strong>
+                                DR-2026-0007
+                            </strong>
+
+                        </td>
+
+                        <td>
+                            October 3, 2026
+                        </td>
+
+                        <td>
+                            SO-2026-5512
+                        </td>
+
+                        <td>
+                            SAMPLE CONSTRUCTION INC.
+                        </td>
+
+                        <td>
+                            EAST PROJECT
+                        </td>
+
+                        <td class="amount">
+                            ₱18,750.00
+                        </td>
+
+                        <td>
+
+                            <span class="status invoice">
+                                FOR INVOICE
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+
+
+                    <!-- =================================================
+                         CANCELLED
+                    ================================================== -->
+                    <tr
+                        data-dr-number="DR-2026-0006"
+                        class="dr-row cancelled-row">
+
+                        <td>
+
+                            <strong>
+                                DR-2026-0006
+                            </strong>
+
+                        </td>
+
+                        <td>
+                            October 2, 2026
+                        </td>
+
+                        <td>
+                            SO-2026-5498
+                        </td>
+
+                        <td>
+                            OLD CLIENT CORPORATION
+                        </td>
+
+                        <td>
+                            WEST PROJECT
+                        </td>
+
+                        <td class="amount">
+                            ₱12,500.00
+                        </td>
+
+                        <td>
+
+                            <span class="status cancelled">
+                                CANCELLED
+                            </span>
+
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     PREPARE DR VIEW
+     HIDDEN UNTIL JS IS CONNECTED
+====================================================== -->
+<div
+    id="prepareDRView"
+    class="delivery-details-view"
+    style="display:none;">
+
+
+    <!-- HEADER -->
+    <div class="delivery-details-header">
+
+
+        <div class="details-header-left">
+
+
+            <button
+                type="button"
+                class="back-button">
+
+                ←
+
+            </button>
+
+
+            <div>
+
+                <span class="details-label">
+                    PREPARE DELIVERY RECEIPT
+                </span>
+
+                <h1>
+                    DR-2026-0009
+                </h1>
+
+            </div>
+
+        </div>
+
+
+        <div class="details-header-status">
+
+            <span class="status prepared">
+                PREPARING
+            </span>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- STATUS PANEL -->
+    <div class="dr-status-panel preparing">
+
+
+        <div class="dr-status-icon">
+            📋
+        </div>
+
+
+        <div class="dr-status-content">
+
+            <strong>
+                Delivery Receipt Preparation
+            </strong>
+
+            <p>
+                Complete the delivery information and select
+                the items to be included in this DR.
+            </p>
+
+        </div>
+
+
+        <div class="dr-status-meta">
+
+            <span>
+                DATE OF TRANSFER
+            </span>
+
+            <strong>
+                REQUIRED
+            </strong>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- DR INFORMATION -->
+    <div class="section-card">
+
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>
+                    DR Information
+                </h2>
+
+                <p>
+                    Information pulled from the selected
+                    Sales Order
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+
+            <div class="form-group">
+
+                <label>
+                    DR Number
+                </label>
+
+                <input
+                    type="text"
+                    value="DR-2026-0009"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group required-field">
+
+                <label>
+                    Date of Transfer
+                    <span class="required">
+                        *
+                    </span>
+                </label>
+
+                <input
+                    type="date"
+                    value="2026-10-05">
+
+                <small class="field-note">
+                    Required before preparing the DR
+                </small>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    SO Number
+                </label>
+
+                <input
+                    type="text"
+                    value="SO-2026-5501"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    SO Date
+                </label>
+
+                <input
+                    type="text"
+                    value="October 1, 2026"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Client Name
+                </label>
+
+                <input
+                    type="text"
+                    value="ABC COMPANY"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Attention
+                </label>
+
+                <input
+                    type="text"
+                    value="JUAN DELA CRUZ"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    TIN
+                </label>
+
+                <input
+                    type="text"
+                    value="123-456-789"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    SE
+                </label>
+
+                <input
+                    type="text"
+                    value="JBG"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    PO Number
+                </label>
+
+                <input
+                    type="text"
+                    value="PO-12345"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Terms
+                </label>
+
+                <input
+                    type="text"
+                    value="COD"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Project
+                </label>
+
+                <input
+                    type="text"
+                    value="NORTH PROJECT"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group full-width">
+
+                <label>
+                    Delivery Address
+                    <span class="editable-label">
+                        Editable
+                    </span>
+                </label>
+
+                <textarea
+                    rows="3">Brgy. San Jose, Bulacan</textarea>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ITEMS -->
+    <div class="section-card">
+
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>
+                    Items for Delivery
+                </h2>
+
+                <p>
+                    Enter the quantity to be included in this DR
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="delivery-table items-table">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Item No.
+                        </th>
+
+                        <th>
+                            Item Name
+                        </th>
+
+                        <th>
+                            Description
+                        </th>
+
+                        <th>
+                            SO Qty
+                        </th>
+
+                        <th>
+                            Previously Delivered
+                        </th>
+
+                        <th>
+                            Balance
+                        </th>
+
+                        <th>
+                            Pick Qty
+                        </th>
+
+                        <th>
+                            Unit
+                        </th>
+
+                        <th>
+                            Unit Amount
+                        </th>
+
+                        <th>
+                            DR Amount
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+
+                    <tr>
+
+                        <td>
+                            1
+                        </td>
+
+                        <td>
+                            <strong>
+                                Cable Tray
+                            </strong>
+                        </td>
+
+                        <td>
+                            Cable Tray Assembly
+                        </td>
+
+                        <td class="text-center">
+                            100
+                        </td>
+
+                        <td class="text-center">
+                            20
+                        </td>
+
+                        <td class="text-center">
+                            <strong>
+                                80
+                            </strong>
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="number"
+                                class="qty-input"
+                                value="10"
+                                min="0">
+
+                        </td>
+
+                        <td>
+                            ASSY
+                        </td>
+
+                        <td class="amount">
+                            ₱1,500.00
+                        </td>
+
+                        <td class="amount">
+                            ₱15,000.00
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            2
+                        </td>
+
+                        <td>
+                            <strong>
+                                Cable Ladder
+                            </strong>
+                        </td>
+
+                        <td>
+                            Cable Ladder Assembly
+                        </td>
+
+                        <td class="text-center">
+                            50
+                        </td>
+
+                        <td class="text-center">
+                            10
+                        </td>
+
+                        <td class="text-center">
+                            <strong>
+                                40
+                            </strong>
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="number"
+                                class="qty-input"
+                                value="6"
+                                min="0">
+
+                        </td>
+
+                        <td>
+                            ASSY
+                        </td>
+
+                        <td class="amount">
+                            ₱1,500.00
+                        </td>
+
+                        <td class="amount">
+                            ₱9,000.00
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            3
+                        </td>
+
+                        <td>
+                            <strong>
+                                Support Bracket
+                            </strong>
+                        </td>
+
+                        <td>
+                            Heavy Duty Bracket
+                        </td>
+
+                        <td class="text-center">
+                            100
+                        </td>
+
+                        <td class="text-center">
+                            0
+                        </td>
+
+                        <td class="text-center">
+                            <strong>
+                                100
+                            </strong>
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="number"
+                                class="qty-input"
+                                value="0"
+                                min="0">
+
+                        </td>
+
+                        <td>
+                            PCS
+                        </td>
+
+                        <td class="amount">
+                            ₱500.00
+                        </td>
+
+                        <td class="amount">
+                            ₱0.00
+                        </td>
+
+                    </tr>
+
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+
+        <div class="dr-total">
+
+            <div>
+
+                <span>
+                    DR TOTAL
+                </span>
+
+                <small>
+                    Based on selected delivery quantities
+                </small>
+
+            </div>
+
+            <strong>
+                ₱24,000.00
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- PREPARE ACTIONS -->
+    <div class="details-action-bar">
+
+
+        <button
+            type="button"
+            class="btn btn-secondary">
+
+            CANCEL
+
+        </button>
+
+
+        <button
+            type="button"
+            class="btn btn-outline">
+
+            👁 PREVIEW
+
+        </button>
+
+
+        <button
+            type="button"
+            class="btn btn-primary">
+
+            💾 PREPARE DR
+
+        </button>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     DR DETAILS VIEW
+     HIDDEN UNTIL JS IS CONNECTED
+====================================================== -->
+<div
+    id="drDetailsView"
+    class="delivery-details-view"
+    style="display:none;">
+
+
+    <!-- HEADER -->
+    <div class="delivery-details-header">
+
+
+        <div class="details-header-left">
+
+
+            <button
+                type="button"
+                class="back-button">
+
+                ←
+
+            </button>
+
+
+            <div>
+
+                <span class="details-label">
+                    DELIVERY RECEIPT DETAILS
+                </span>
+
+                <h1>
+                    DR-2026-0009
+                </h1>
+
+            </div>
+
+        </div>
+
+
+        <div class="details-header-status">
+
+            <span class="status prepared">
+                PREPARED
+            </span>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- STATUS PANEL -->
+    <div class="dr-status-panel prepared">
+
+
+        <div class="dr-status-icon">
+            📋
+        </div>
+
+
+        <div class="dr-status-content">
+
+            <strong>
+                Delivery Receipt is Prepared
+            </strong>
+
+            <p>
+                Review the Delivery Receipt before posting it
+                to Finance.
+            </p>
+
+        </div>
+
+
+        <div class="dr-status-meta">
+
+            <span>
+                CURRENT STATUS
+            </span>
+
+            <strong>
+                PREPARED
+            </strong>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- INFO CARDS -->
+    <div class="delivery-info-cards">
+
+
+        <div class="delivery-info-card">
+
+            <span>
+                DR NUMBER
+            </span>
+
+            <strong>
+                DR-2026-0009
+            </strong>
+
+        </div>
+
+
+        <div class="delivery-info-card">
+
+            <span>
+                SO NUMBER
+            </span>
+
+            <strong>
+                SO-2026-5501
+            </strong>
+
+        </div>
+
+
+        <div class="delivery-info-card">
+
+            <span>
+                CLIENT
+            </span>
+
+            <strong>
+                ABC COMPANY
+            </strong>
+
+        </div>
+
+
+        <div class="delivery-info-card">
+
+            <span>
+                DR TOTAL
+            </span>
+
+            <strong>
+                ₱24,000.00
+            </strong>
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- DR INFORMATION -->
+    <div class="section-card">
+
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>
+                    DR Information
+                </h2>
+
+                <p>
+                    Delivery Receipt details
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-grid">
+
+
+            <div class="form-group">
+
+                <label>
+                    DR Number
+                </label>
+
+                <input
+                    type="text"
+                    value="DR-2026-0009"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Date of Transfer
+                </label>
+
+                <input
+                    type="date"
+                    value="2026-10-05"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    SO Number
+                </label>
+
+                <input
+                    type="text"
+                    value="SO-2026-5501"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Client Name
+                </label>
+
+                <input
+                    type="text"
+                    value="ABC COMPANY"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    PO Number
+                </label>
+
+                <input
+                    type="text"
+                    value="PO-12345"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Terms
+                </label>
+
+                <input
+                    type="text"
+                    value="COD"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Project
+                </label>
+
+                <input
+                    type="text"
+                    value="NORTH PROJECT"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>
+                    Attention
+                </label>
+
+                <input
+                    type="text"
+                    value="JUAN DELA CRUZ"
+                    readonly>
+
+            </div>
+
+
+            <div class="form-group full-width">
+
+                <label>
+                    Delivery Address
+                </label>
+
+                <textarea
+                    rows="3"
+                    readonly>Brgy. San Jose, Bulacan</textarea>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- ITEMS -->
+    <div class="section-card">
+
+
+        <div class="section-title">
+
+            <div>
+
+                <h2>
+                    Delivered Items
+                </h2>
+
+                <p>
+                    Items included in this Delivery Receipt
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table class="delivery-table items-table">
+
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Item No.
+                        </th>
+
+                        <th>
+                            Item Name
+                        </th>
+
+                        <th>
+                            Description
+                        </th>
+
+                        <th>
+                            Quantity
+                        </th>
+
+                        <th>
+                            Unit
+                        </th>
+
+                        <th>
+                            Unit Amount
+                        </th>
+
+                        <th>
+                            DR Amount
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            1
+                        </td>
+
+                        <td>
+                            Cable Tray
+                        </td>
+
+                        <td>
+                            Cable Tray Assembly
+                        </td>
+
+                        <td class="text-center">
+                            10
+                        </td>
+
+                        <td>
+                            ASSY
+                        </td>
+
+                        <td class="amount">
+                            ₱1,500.00
+                        </td>
+
+                        <td class="amount">
+                            ₱15,000.00
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            2
+                        </td>
+
+                        <td>
+                            Cable Ladder
+                        </td>
+
+                        <td>
+                            Cable Ladder Assembly
+                        </td>
+
+                        <td class="text-center">
+                            6
+                        </td>
+
+                        <td>
+                            ASSY
+                        </td>
+
+                        <td class="amount">
+                            ₱1,500.00
+                        </td>
+
+                        <td class="amount">
+                            ₱9,000.00
                         </td>
 
                     </tr>
@@ -688,6 +2098,421 @@
 
         </div>
 
+
+
+        <div class="dr-total">
+
+            <div>
+
+                <span>
+                    DR TOTAL
+                </span>
+
+            </div>
+
+            <strong>
+                ₱24,000.00
+            </strong>
+
+        </div>
+
+
     </div>
+
+
+
+    <!-- DETAILS ACTIONS -->
+    <div class="details-action-bar">
+
+
+        <button
+            type="button"
+            class="btn btn-secondary">
+
+            ← BACK
+
+        </button>
+
+
+        <button
+            type="button"
+            class="btn btn-outline">
+
+            👁 PREVIEW
+
+        </button>
+
+
+        <button
+            type="button"
+            class="btn btn-secondary">
+
+            ✏️ UPDATE
+
+        </button>
+
+
+        <button
+            type="button"
+            class="btn btn-danger">
+
+            CANCEL
+
+        </button>
+
+
+        <button
+            type="button"
+            class="btn btn-success">
+
+            🟢 POST DR
+
+        </button>
+
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================================
+     DR PREVIEW VIEW
+     HIDDEN UNTIL JS IS CONNECTED
+====================================================== -->
+<div
+    id="drPreviewView"
+    class="delivery-preview-view"
+    style="display:none;">
+
+
+    <!-- PREVIEW HEADER -->
+    <div class="preview-header">
+
+
+        <button
+            type="button"
+            class="back-button">
+
+            ←
+
+        </button>
+
+
+        <div>
+
+            <span>
+                DELIVERY RECEIPT PREVIEW
+            </span>
+
+            <h1>
+                DR-2026-0009
+            </h1>
+
+        </div>
+
+
+        <div class="preview-actions">
+
+            <button
+                type="button"
+                class="btn btn-secondary">
+
+                CLOSE
+
+            </button>
+
+
+            <button
+                type="button"
+                class="btn btn-primary">
+
+                🖨 PRINT DR
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- PREVIEW DOCUMENT -->
+    <div class="dr-preview-document">
+
+
+        <!-- COMPANY HEADER -->
+        <div class="dr-preview-company">
+
+
+            <div>
+
+                <h2>
+                    LOGIS-TECH SYSTEM
+                </h2>
+
+                <p>
+                    DELIVERY RECEIPT
+                </p>
+
+            </div>
+
+
+            <div class="dr-preview-number">
+
+                <span>
+                    DR NUMBER
+                </span>
+
+                <strong>
+                    DR-2026-0009
+                </strong>
+
+                <small>
+                    October 5, 2026
+                </small>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CUSTOMER INFORMATION -->
+        <div class="preview-info-grid">
+
+
+            <div>
+
+                <span>
+                    CLIENT
+                </span>
+
+                <strong>
+                    ABC COMPANY
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    SO NUMBER
+                </span>
+
+                <strong>
+                    SO-2026-5501
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    PO NUMBER
+                </span>
+
+                <strong>
+                    PO-12345
+                </strong>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    PROJECT
+                </span>
+
+                <strong>
+                    NORTH PROJECT
+                </strong>
+
+            </div>
+
+
+            <div class="full-width">
+
+                <span>
+                    DELIVERY ADDRESS
+                </span>
+
+                <strong>
+                    Brgy. San Jose, Bulacan
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- ITEMS -->
+        <div class="preview-items">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            #
+                        </th>
+
+                        <th>
+                            ITEM
+                        </th>
+
+                        <th>
+                            DESCRIPTION
+                        </th>
+
+                        <th>
+                            QTY
+                        </th>
+
+                        <th>
+                            UNIT
+                        </th>
+
+                        <th>
+                            AMOUNT
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    <tr>
+
+                        <td>
+                            1
+                        </td>
+
+                        <td>
+                            Cable Tray
+                        </td>
+
+                        <td>
+                            Cable Tray Assembly
+                        </td>
+
+                        <td>
+                            10
+                        </td>
+
+                        <td>
+                            ASSY
+                        </td>
+
+                        <td>
+                            ₱15,000.00
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            2
+                        </td>
+
+                        <td>
+                            Cable Ladder
+                        </td>
+
+                        <td>
+                            Cable Ladder Assembly
+                        </td>
+
+                        <td>
+                            6
+                        </td>
+
+                        <td>
+                            ASSY
+                        </td>
+
+                        <td>
+                            ₱9,000.00
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+
+
+        <!-- TOTAL -->
+        <div class="preview-total">
+
+            <span>
+                DR TOTAL
+            </span>
+
+            <strong>
+                ₱24,000.00
+            </strong>
+
+        </div>
+
+
+
+        <!-- SIGNATURES -->
+        <div class="preview-signatures">
+
+
+            <div>
+
+                <span>
+                    PREPARED BY
+                </span>
+
+                <div class="signature-line"></div>
+
+                <small>
+                    Delivery
+                </small>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    RECEIVED BY
+                </span>
+
+                <div class="signature-line"></div>
+
+                <small>
+                    Client Representative
+                </small>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+```
 
 </div>
