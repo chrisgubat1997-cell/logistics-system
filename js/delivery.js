@@ -18,7 +18,7 @@
        ===================================================== */
 
     const CREATE_DELIVERY_RECEIPT_PAGE =
-        "create-delivery-receipt.html";
+        "pages/create-delivery-receipt.html";
 
     const SELECTED_SO_STORAGE_KEY =
         "logitechSelectedDeliverySO";
@@ -28,7 +28,7 @@
 
 
     /* =====================================================
-       NAVIGATION
+       OPEN CREATE DELIVERY RECEIPT
        ===================================================== */
 
     function openCreateDeliveryReceipt(selectedSO = null) {
@@ -38,9 +38,9 @@
         );
 
 
-        /* ---------------------------------------------
-           SAVE SELECTED SALES ORDER
-           --------------------------------------------- */
+        /* -------------------------------------------------
+           SAVE SELECTED SO
+           ------------------------------------------------- */
 
         if (selectedSO) {
 
@@ -63,6 +63,7 @@
 
                 timestamp:
                     new Date().toISOString()
+
             };
 
 
@@ -76,35 +77,59 @@
                 "Selected SO saved:",
                 deliverySO
             );
+
         }
 
 
-        /* ---------------------------------------------
-           NAVIGATE
-           delivery.html and
-           create-delivery-receipt.html
-           are inside the SAME /pages/ folder.
-           --------------------------------------------- */
+        /* -------------------------------------------------
+           OPEN NEW TAB
+           IMPORTANT:
+           index.html is the base document.
+           create-delivery-receipt.html is inside /pages/
+           ------------------------------------------------- */
+
+        const target =
+            CREATE_DELIVERY_RECEIPT_PAGE;
+
 
         console.log(
-            "Navigating to:",
-            CREATE_DELIVERY_RECEIPT_PAGE
+            "Opening:",
+            target
         );
 
 
-        try {
-
-            window.location.href =
-                CREATE_DELIVERY_RECEIPT_PAGE;
-
-        } catch (error) {
-
-            console.error(
-                "Navigation error:",
-                error
+        const newWindow =
+            window.open(
+                target,
+                "_blank"
             );
 
+
+        /* -------------------------------------------------
+           POPUP BLOCKED
+           ------------------------------------------------- */
+
+        if (!newWindow) {
+
+            console.warn(
+                "Browser blocked the new tab."
+            );
+
+
+            alert(
+                "Hindi ma-open ang Create Delivery Receipt.\n\n" +
+                "Please allow pop-ups for LOGIS-TECH SYSTEM."
+            );
+
+
+            return;
+
         }
+
+
+        console.log(
+            "Create Delivery Receipt opened successfully."
+        );
 
     }
 
@@ -124,15 +149,16 @@
         if (!button) {
 
             console.warn(
-                "prepareDRButton not found."
+                "prepareDRButton NOT FOUND"
             );
 
             return;
+
         }
 
 
         console.log(
-            "prepareDRButton found."
+            "prepareDRButton FOUND"
         );
 
 
@@ -146,15 +172,7 @@
 
 
                 console.log(
-                    "================================="
-                );
-
-                console.log(
-                    "MAIN PREPARE DR CLICKED"
-                );
-
-                console.log(
-                    "================================="
+                    "PREPARE DR BUTTON CLICKED"
                 );
 
 
@@ -167,8 +185,7 @@
 
 
     /* =====================================================
-       POSTED SALES ORDER
-       PREPARE DR BUTTONS
+       POSTED SO - PREPARE DR BUTTONS
        ===================================================== */
 
     function setupPostedSOButtons() {
@@ -180,7 +197,7 @@
 
 
         console.log(
-            "Posted SO Prepare buttons found:",
+            "Posted SO Prepare buttons:",
             buttons.length
         );
 
@@ -204,10 +221,11 @@
                         if (!row) {
 
                             console.error(
-                                "Posted SO row not found."
+                                "SO row not found."
                             );
 
                             return;
+
                         }
 
 
@@ -216,7 +234,7 @@
 
 
                         /* ---------------------------------
-                           READ TABLE DATA
+                           READ SO DATA
                            --------------------------------- */
 
                         const soNumber =
@@ -252,35 +270,8 @@
 
 
                         console.log(
-                            "================================="
-                        );
-
-                        console.log(
-                            "PREPARE DR FROM POSTED SO"
-                        );
-
-                        console.log(
-                            "SO:",
+                            "Preparing DR for:",
                             soNumber
-                        );
-
-                        console.log(
-                            "CLIENT:",
-                            clientName
-                        );
-
-                        console.log(
-                            "PO:",
-                            poNumber
-                        );
-
-                        console.log(
-                            "PROJECT:",
-                            project
-                        );
-
-                        console.log(
-                            "================================="
                         );
 
 
@@ -314,7 +305,7 @@
 
 
     /* =====================================================
-       REFRESH BUTTON
+       REFRESH
        ===================================================== */
 
     function setupRefreshButton() {
@@ -365,7 +356,7 @@
 
 
     /* =====================================================
-       RECENT DR ROW SELECTION
+       DR ROW SELECTION
        ===================================================== */
 
     function setupDRRowSelection() {
@@ -376,19 +367,9 @@
             );
 
 
-        console.log(
-            "Recent DR rows found:",
-            rows.length
-        );
-
-
         rows.forEach(
             function (row) {
 
-
-                /* -----------------------------------------
-                   SINGLE CLICK
-                   ----------------------------------------- */
 
                 row.addEventListener(
                     "click",
@@ -399,10 +380,6 @@
                     }
                 );
 
-
-                /* -----------------------------------------
-                   DOUBLE CLICK
-                   ----------------------------------------- */
 
                 row.addEventListener(
                     "dblclick",
@@ -420,14 +397,10 @@
 
 
     /* =====================================================
-       SELECT DR ROW
+       SELECT DR
        ===================================================== */
 
     function selectDRRow(row) {
-
-        /* ---------------------------------------------
-           REMOVE PREVIOUS SELECTION
-           --------------------------------------------- */
 
         document
             .querySelectorAll(
@@ -444,26 +417,14 @@
             );
 
 
-        /* ---------------------------------------------
-           SELECT CURRENT ROW
-           --------------------------------------------- */
-
         row.classList.add(
             "selected"
         );
 
 
-        /* ---------------------------------------------
-           GET DR NUMBER
-           --------------------------------------------- */
-
         const drNumber =
             row.dataset.drNumber || "";
 
-
-        /* ---------------------------------------------
-           UPDATE SELECTION TEXT
-           --------------------------------------------- */
 
         const selectionText =
             document.getElementById(
@@ -481,10 +442,6 @@
         }
 
 
-        /* ---------------------------------------------
-           SAVE SELECTED DR
-           --------------------------------------------- */
-
         const selectedDR = {
 
             drNumber:
@@ -501,16 +458,6 @@
             JSON.stringify(selectedDR)
         );
 
-
-        console.log(
-            "Selected DR:",
-            selectedDR
-        );
-
-
-        /* ---------------------------------------------
-           ENABLE ACTION BUTTONS
-           --------------------------------------------- */
 
         enableElement(
             "previewDRButton",
@@ -539,7 +486,7 @@
 
 
     /* =====================================================
-       OPEN DR DETAILS
+       DR DETAILS
        ===================================================== */
 
     function openDRDetails(row) {
@@ -557,11 +504,6 @@
 
 
         if (!detailsView) {
-
-            console.warn(
-                "drDetailsView not found."
-            );
-
             return;
         }
 
@@ -595,12 +537,6 @@
 
         }
 
-
-        console.log(
-            "Opened DR details:",
-            drNumber
-        );
-
     }
 
 
@@ -610,26 +546,24 @@
 
     function setupBackButtons() {
 
-        const buttons =
-            document.querySelectorAll(
+        document
+            .querySelectorAll(
                 ".back-button"
+            )
+            .forEach(
+                function (button) {
+
+                    button.addEventListener(
+                        "click",
+                        function () {
+
+                            showDeliveryList();
+
+                        }
+                    );
+
+                }
             );
-
-
-        buttons.forEach(
-            function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        showDeliveryList();
-
-                    }
-                );
-
-            }
-        );
 
     }
 
@@ -643,9 +577,7 @@
         const views = [
 
             "prepareDRView",
-
             "drDetailsView",
-
             "drPreviewView"
 
         ];
@@ -692,19 +624,17 @@
     function setupActionButtons() {
 
 
-        /* ---------------------------------------------
-           PREVIEW DR
-           --------------------------------------------- */
+        /* PREVIEW */
 
-        const previewButton =
+        const preview =
             document.getElementById(
                 "previewDRButton"
             );
 
 
-        if (previewButton) {
+        if (preview) {
 
-            previewButton.addEventListener(
+            preview.addEventListener(
                 "click",
                 function () {
 
@@ -716,19 +646,17 @@
         }
 
 
-        /* ---------------------------------------------
-           UPDATE DR
-           --------------------------------------------- */
+        /* UPDATE */
 
-        const updateButton =
+        const update =
             document.getElementById(
                 "updateDRButton"
             );
 
 
-        if (updateButton) {
+        if (update) {
 
-            updateButton.addEventListener(
+            update.addEventListener(
                 "click",
                 function () {
 
@@ -740,19 +668,17 @@
         }
 
 
-        /* ---------------------------------------------
-           CANCEL DR
-           --------------------------------------------- */
+        /* CANCEL */
 
-        const cancelButton =
+        const cancel =
             document.getElementById(
                 "cancelDRButton"
             );
 
 
-        if (cancelButton) {
+        if (cancel) {
 
-            cancelButton.addEventListener(
+            cancel.addEventListener(
                 "click",
                 function () {
 
@@ -769,16 +695,15 @@
                         );
 
                         return;
+
                     }
 
 
-                    const confirmCancel =
+                    if (
                         confirm(
                             "Are you sure you want to cancel this DR?"
-                        );
-
-
-                    if (confirmCancel) {
+                        )
+                    ) {
 
                         alert(
                             "Cancel DR function is ready for backend connection."
@@ -792,19 +717,17 @@
         }
 
 
-        /* ---------------------------------------------
-           POST DR
-           --------------------------------------------- */
+        /* POST */
 
-        const postButton =
+        const post =
             document.getElementById(
                 "postDRButton"
             );
 
 
-        if (postButton) {
+        if (post) {
 
-            postButton.addEventListener(
+            post.addEventListener(
                 "click",
                 function () {
 
@@ -821,16 +744,15 @@
                         );
 
                         return;
+
                     }
 
 
-                    const confirmPost =
+                    if (
                         confirm(
                             "Post this Delivery Receipt?"
-                        );
-
-
-                    if (confirmPost) {
+                        )
+                    ) {
 
                         alert(
                             "Post DR function is ready for backend connection."
@@ -847,7 +769,7 @@
 
 
     /* =====================================================
-       SHOW DR PREVIEW
+       PREVIEW
        ===================================================== */
 
     function showDRPreview() {
@@ -865,11 +787,6 @@
 
 
         if (!previewView) {
-
-            console.warn(
-                "drPreviewView not found."
-            );
-
             return;
         }
 
@@ -889,7 +806,7 @@
 
 
     /* =====================================================
-       SHOW PREPARE VIEW
+       PREPARE VIEW
        ===================================================== */
 
     function showDRPrepareView() {
@@ -907,11 +824,6 @@
 
 
         if (!prepareView) {
-
-            console.warn(
-                "prepareDRView not found."
-            );
-
             return;
         }
 
@@ -931,7 +843,7 @@
 
 
     /* =====================================================
-       ENABLE / DISABLE ELEMENT
+       ENABLE / DISABLE
        ===================================================== */
 
     function enableElement(
@@ -970,118 +882,7 @@
 
 
     /* =====================================================
-       OPTIONAL:
-       MAIN SEARCH
-       ===================================================== */
-
-    function setupMainSearch() {
-
-        const search =
-            document.getElementById(
-                "deliveryMainSearch"
-            );
-
-
-        if (!search) {
-            return;
-        }
-
-
-        search.addEventListener(
-            "input",
-            function () {
-
-                const keyword =
-                    search.value
-                        .toLowerCase()
-                        .trim();
-
-
-                const rows =
-                    document.querySelectorAll(
-                        ".posted-so-table tbody tr"
-                    );
-
-
-                rows.forEach(
-                    function (row) {
-
-                        const text =
-                            row.textContent
-                                .toLowerCase();
-
-
-                        row.style.display =
-                            text.includes(keyword)
-                                ? ""
-                                : "none";
-
-                    }
-                );
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       DR SEARCH
-       ===================================================== */
-
-    function setupDRSearch() {
-
-        const search =
-            document.getElementById(
-                "deliveryDRSearch"
-            );
-
-
-        if (!search) {
-            return;
-        }
-
-
-        search.addEventListener(
-            "input",
-            function () {
-
-                const keyword =
-                    search.value
-                        .toLowerCase()
-                        .trim();
-
-
-                const rows =
-                    document.querySelectorAll(
-                        ".recent-dr-table tbody tr"
-                    );
-
-
-                rows.forEach(
-                    function (row) {
-
-                        const text =
-                            row.textContent
-                                .toLowerCase();
-
-
-                        row.style.display =
-                            text.includes(keyword)
-                                ? ""
-                                : "none";
-
-                    }
-                );
-
-            }
-        );
-
-    }
-
-
-    /* =====================================================
-       SO SEARCH
+       SEARCH - POSTED SO
        ===================================================== */
 
     function setupSOSearch() {
@@ -1107,27 +908,27 @@
                         .trim();
 
 
-                const rows =
-                    document.querySelectorAll(
+                document
+                    .querySelectorAll(
                         ".posted-so-table tbody tr"
+                    )
+                    .forEach(
+                        function (row) {
+
+                            const text =
+                                row.textContent
+                                    .toLowerCase();
+
+
+                            row.style.display =
+                                text.includes(
+                                    keyword
+                                )
+                                    ? ""
+                                    : "none";
+
+                        }
                     );
-
-
-                rows.forEach(
-                    function (row) {
-
-                        const text =
-                            row.textContent
-                                .toLowerCase();
-
-
-                        row.style.display =
-                            text.includes(keyword)
-                                ? ""
-                                : "none";
-
-                    }
-                );
 
             }
         );
@@ -1136,42 +937,65 @@
 
 
     /* =====================================================
-       STATUS FILTER
+       SEARCH - RECENT DR
        ===================================================== */
 
-    function setupFilters() {
+    function setupDRSearch() {
 
-
-        /* ---------------------------------------------
-           MAIN STATUS FILTER
-           --------------------------------------------- */
-
-        const mainFilter =
+        const search =
             document.getElementById(
-                "deliveryMainStatusFilter"
+                "deliveryDRSearch"
             );
 
 
-        if (mainFilter) {
-
-            mainFilter.addEventListener(
-                "change",
-                function () {
-
-                    filterRows(
-                        ".posted-so-table tbody tr",
-                        mainFilter.value
-                    );
-
-                }
-            );
-
+        if (!search) {
+            return;
         }
 
 
-        /* ---------------------------------------------
-           DR FILTER
-           --------------------------------------------- */
+        search.addEventListener(
+            "input",
+            function () {
+
+                const keyword =
+                    search.value
+                        .toLowerCase()
+                        .trim();
+
+
+                document
+                    .querySelectorAll(
+                        ".recent-dr-table tbody tr"
+                    )
+                    .forEach(
+                        function (row) {
+
+                            const text =
+                                row.textContent
+                                    .toLowerCase();
+
+
+                            row.style.display =
+                                text.includes(
+                                    keyword
+                                )
+                                    ? ""
+                                    : "none";
+
+                        }
+                    );
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       FILTERS
+       ===================================================== */
+
+    function setupFilters() {
 
         const drFilter =
             document.getElementById(
@@ -1195,10 +1019,6 @@
 
         }
 
-
-        /* ---------------------------------------------
-           SO FILTER
-           --------------------------------------------- */
 
         const soFilter =
             document.getElementById(
@@ -1252,34 +1072,36 @@
                         "";
 
                     return;
+
                 }
 
 
-                const statusElement =
+                const status =
                     row.querySelector(
                         ".status-badge"
                     );
 
 
-                if (!statusElement) {
+                if (!status) {
 
                     row.style.display =
                         "";
 
                     return;
+
                 }
 
 
-                const status =
-                    statusElement
-                        .textContent
+                const currentStatus =
+                    status.textContent
                         .trim()
                         .toUpperCase();
 
 
                 row.style.display =
-                    status ===
-                    filterValue.toUpperCase()
+                    currentStatus ===
+                    filterValue
+                        .toUpperCase()
                         ? ""
                         : "none";
 
@@ -1312,11 +1134,9 @@
 
         setupActionButtons();
 
-        setupMainSearch();
+        setupSOSearch();
 
         setupDRSearch();
-
-        setupSOSearch();
 
         setupFilters();
 
@@ -1325,8 +1145,9 @@
             "Delivery Module READY."
         );
 
+
         console.log(
-            "Create DR page:",
+            "Create DR target:",
             CREATE_DELIVERY_RECEIPT_PAGE
         );
 
@@ -1352,6 +1173,5 @@
         initDelivery();
 
     }
-
 
 })();
