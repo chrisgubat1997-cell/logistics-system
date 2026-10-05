@@ -2,21 +2,32 @@
    LOGIS-TECH SYSTEM
    CREATE DELIVERY RECEIPT
    =========================================================
+   VERSION:
+   20261005-04
 
-   WORKFLOW
+   WORKFLOW:
    01 Prepare Delivery Receipt
    02 Review / Verify DR
    03 Completed / DR Saved
 
-   DATA SOURCE
-   - localStorage
-   - Existing Sales Order records
-   - Existing Delivery Receipt records
+   DATA SOURCE:
+   LocalStorage muna
 
-   IMPORTANT
-   - Pick Qty is manually entered.
-   - Pick Qty cannot exceed Balance.
-   - Sales Order details are editable before review.
+   SALES ORDER SEARCH:
+   - SO Number
+   - Client Name
+   - Project
+   - PO Number
+
+   ITEM DATA:
+   - Item Number
+   - Item Name
+   - Item Description
+   - Total Order
+   - Total Delivered
+   - Balance
+   - Pick Qty
+   - Remarks
    ========================================================= */
 
 
@@ -44,147 +55,105 @@ let savedDR = null;
 
 let currentStep = 1;
 
+let warningTimeout = null;
+
 
 /* =========================================================
    DOM HELPER
    ========================================================= */
 
-function getElement(id) {
+function $(id) {
     return document.getElementById(id);
 }
-
-
-/* =========================================================
-   DOM ELEMENTS
-   ========================================================= */
-
-const salesOrderSelect = getElement("salesOrderSelect");
-
-const soInformationSection = getElement("soInformationSection");
-const deliveryDetailsSection = getElement("deliveryDetailsSection");
-const itemPickingSection = getElement("itemPickingSection");
-const prepareActions = getElement("prepareActions");
-
-const prepareView = getElement("prepareView");
-const reviewView = getElement("reviewView");
-const completedView = getElement("completedView");
-
-const itemsTableBody = getElement("itemsTableBody");
-const reviewItemsBody = getElement("reviewItemsBody");
-
-const dateOfTransfer = getElement("dateOfTransfer");
-const deliveryAddress = getElement("deliveryAddress");
-
-const availableItemCount = getElement("availableItemCount");
-const selectedItemCount = getElement("selectedItemCount");
-const totalPickedQty = getElement("totalPickedQty");
-
-const pickingWarning = getElement("pickingWarning");
-
-const reviewTotalQty = getElement("reviewTotalQty");
-
-const warningModal = getElement("warningModal");
-const warningTitle = getElement("warningTitle");
-const warningMessage = getElement("warningMessage");
-const closeWarningButton = getElement("closeWarningButton");
-
-const leaveConfirmModal = getElement("leaveConfirmModal");
-const stayButton = getElement("stayButton");
-const confirmLeaveButton = getElement("confirmLeaveButton");
-
-const previewModal = getElement("previewModal");
-const closePreviewButton = getElement("closePreviewButton");
-const closePreviewButton2 = getElement("closePreviewButton2");
-const printButton = getElement("printButton");
-
-const backButton = getElement("backButton");
-const cancelButton = getElement("cancelButton");
-
-const reviewButton = getElement("reviewButton");
-const backToPrepareButton = getElement("backToPrepareButton");
-const saveDeliveryReceiptButton = getElement(
-    "saveDeliveryReceiptButton"
-);
-
-const printCompletedButton = getElement(
-    "printCompletedButton"
-);
-
-const backToDeliveryButton = getElement(
-    "backToDeliveryButton"
-);
 
 
 /* =========================================================
    INITIALIZATION
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", initCreateDR);
+document.addEventListener("DOMContentLoaded", initCreateDeliveryReceipt);
 
 
-function initCreateDR() {
+function initCreateDeliveryReceipt() {
 
     console.log(
-        "LOGIS-TECH SYSTEM | Create Delivery Receipt initialized"
+        "LOGIS-TECH SYSTEM - Create Delivery Receipt initialized."
     );
 
-    setDefaultDate();
+    setupButtons();
+
+    setupSalesOrderSearch();
+
+    setupDate();
 
     generateAndDisplayDRNumber();
 
-    loadSalesOrders();
-
-    setupEvents();
+    loadSelectedSalesOrder();
 
     updateWorkflow(1);
+
 }
 
 
 /* =========================================================
-   EVENT SETUP
+   BUTTON SETUP
    ========================================================= */
 
-function setupEvents() {
+function setupButtons() {
 
-    /* SALES ORDER SEARCH */
+    /* ---------------------------------------------
+       HEADER BACK
+       --------------------------------------------- */
 
-    if (salesOrderSelect) {
-
-        salesOrderSelect.addEventListener(
-            "input",
-            handleSalesOrderSearch
-        );
-
-        salesOrderSelect.addEventListener(
-            "change",
-            handleSalesOrderChange
-        );
-    }
-
-
-    /* BACK */
+    const backButton = $("backButton");
 
     if (backButton) {
 
         backButton.addEventListener(
             "click",
-            requestLeave
+            handleBackRequest
         );
+
     }
 
 
-    /* CANCEL */
+    /* ---------------------------------------------
+       CANCEL
+       --------------------------------------------- */
+
+    const cancelButton = $("cancelButton");
 
     if (cancelButton) {
 
         cancelButton.addEventListener(
             "click",
-            requestLeave
+            handleBackRequest
         );
+
     }
 
 
-    /* REVIEW */
+    /* ---------------------------------------------
+       CHANGE SALES ORDER
+       --------------------------------------------- */
+
+    const changeSOButton = $("changeSOButton");
+
+    if (changeSOButton) {
+
+        changeSOButton.addEventListener(
+            "click",
+            changeSalesOrder
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       REVIEW
+       --------------------------------------------- */
+
+    const reviewButton = $("reviewButton");
 
     if (reviewButton) {
 
@@ -192,10 +161,16 @@ function setupEvents() {
             "click",
             reviewDeliveryReceipt
         );
+
     }
 
 
-    /* BACK TO PREPARE */
+    /* ---------------------------------------------
+       BACK TO PREPARE
+       --------------------------------------------- */
+
+    const backToPrepareButton =
+        $("backToPrepareButton");
 
     if (backToPrepareButton) {
 
@@ -203,90 +178,33 @@ function setupEvents() {
             "click",
             backToPrepare
         );
+
     }
 
 
-    /* SAVE */
+    /* ---------------------------------------------
+       SAVE
+       --------------------------------------------- */
 
-    if (saveDeliveryReceiptButton) {
+    const saveButton =
+        $("saveDeliveryReceiptButton");
 
-        saveDeliveryReceiptButton.addEventListener(
+    if (saveButton) {
+
+        saveButton.addEventListener(
             "click",
             saveDeliveryReceipt
         );
+
     }
 
 
-    /* WARNING */
+    /* ---------------------------------------------
+       BACK TO DELIVERY
+       --------------------------------------------- */
 
-    if (closeWarningButton) {
-
-        closeWarningButton.addEventListener(
-            "click",
-            closeWarning
-        );
-    }
-
-
-    /* LEAVE MODAL */
-
-    if (stayButton) {
-
-        stayButton.addEventListener(
-            "click",
-            closeLeaveModal
-        );
-    }
-
-
-    if (confirmLeaveButton) {
-
-        confirmLeaveButton.addEventListener(
-            "click",
-            goBackToMain
-        );
-    }
-
-
-    /* PRINT */
-
-    if (printCompletedButton) {
-
-        printCompletedButton.addEventListener(
-            "click",
-            openPreview
-        );
-    }
-
-
-    if (printButton) {
-
-        printButton.addEventListener(
-            "click",
-            printDeliveryReceipt
-        );
-    }
-
-
-    if (closePreviewButton) {
-
-        closePreviewButton.addEventListener(
-            "click",
-            closePreview
-        );
-    }
-
-
-    if (closePreviewButton2) {
-
-        closePreviewButton2.addEventListener(
-            "click",
-            closePreview
-        );
-    }
-
-
-    /* BACK TO DELIVERY */
+    const backToDeliveryButton =
+        $("backToDeliveryButton");
 
     if (backToDeliveryButton) {
 
@@ -294,197 +212,250 @@ function setupEvents() {
             "click",
             goBackToMain
         );
+
     }
 
 
-    /* ESC KEY */
+    /* ---------------------------------------------
+       PRINT COMPLETED
+       --------------------------------------------- */
+
+    const printCompletedButton =
+        $("printCompletedButton");
+
+    if (printCompletedButton) {
+
+        printCompletedButton.addEventListener(
+            "click",
+            openPrintPreview
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       WARNING MODAL
+       --------------------------------------------- */
+
+    const closeWarningButton =
+        $("closeWarningButton");
+
+    if (closeWarningButton) {
+
+        closeWarningButton.addEventListener(
+            "click",
+            closeWarningModal
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       LEAVE MODAL
+       --------------------------------------------- */
+
+    const stayButton = $("stayButton");
+
+    if (stayButton) {
+
+        stayButton.addEventListener(
+            "click",
+            closeLeaveModal
+        );
+
+    }
+
+
+    const confirmLeaveButton =
+        $("confirmLeaveButton");
+
+    if (confirmLeaveButton) {
+
+        confirmLeaveButton.addEventListener(
+            "click",
+            goBackToMain
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       PREVIEW
+       --------------------------------------------- */
+
+    const closePreviewButton =
+        $("closePreviewButton");
+
+    if (closePreviewButton) {
+
+        closePreviewButton.addEventListener(
+            "click",
+            closePreviewModal
+        );
+
+    }
+
+
+    const closePreviewButton2 =
+        $("closePreviewButton2");
+
+    if (closePreviewButton2) {
+
+        closePreviewButton2.addEventListener(
+            "click",
+            closePreviewModal
+        );
+
+    }
+
+
+    const printButton =
+        $("printButton");
+
+    if (printButton) {
+
+        printButton.addEventListener(
+            "click",
+            printDeliveryReceipt
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       ESCAPE KEY
+       --------------------------------------------- */
 
     document.addEventListener(
         "keydown",
-        function (event) {
+        function(event) {
 
             if (event.key !== "Escape") {
                 return;
             }
 
-            closeWarning();
+            closeWarningModal();
+
             closeLeaveModal();
-            closePreview();
+
+            closePreviewModal();
+
         }
     );
+
 }
 
 
 /* =========================================================
-   DATE
+   DATE SETUP
    ========================================================= */
 
-function setDefaultDate() {
+function setupDate() {
 
-    if (!dateOfTransfer) {
+    const dateInput = $("dateOfTransfer");
+
+    if (!dateInput) {
         return;
     }
 
-    if (!dateOfTransfer.value) {
+    if (!dateInput.value) {
 
         const today = new Date();
 
-        const year = today.getFullYear();
+        const year =
+            today.getFullYear();
 
-        const month = String(
-            today.getMonth() + 1
-        ).padStart(2, "0");
+        const month =
+            String(
+                today.getMonth() + 1
+            ).padStart(2, "0");
 
-        const day = String(
-            today.getDate()
-        ).padStart(2, "0");
+        const day =
+            String(
+                today.getDate()
+            ).padStart(2, "0");
 
-        dateOfTransfer.value =
+        dateInput.value =
             `${year}-${month}-${day}`;
+
     }
+
 }
 
 
 /* =========================================================
-   SALES ORDER STORAGE
+   DR NUMBER
    ========================================================= */
 
-function getSalesOrders() {
+function generateAndDisplayDRNumber() {
 
-    const possibleKeys = [
+    const drNumber =
+        generateDRNumber();
 
-        SALES_ORDER_STORAGE_KEY,
+    const element =
+        $("drNumber");
 
-        "logitechSalesOrder",
+    if (element) {
 
-        "logitechSO",
+        element.textContent =
+            drNumber;
 
-        "salesOrders",
-
-        "salesOrderData"
-    ];
-
-
-    for (const key of possibleKeys) {
-
-        try {
-
-            const raw =
-                localStorage.getItem(key);
-
-            if (!raw) {
-                continue;
-            }
-
-            const parsed =
-                JSON.parse(raw);
-
-            if (Array.isArray(parsed)) {
-
-                return parsed;
-            }
-
-            if (
-                parsed &&
-                Array.isArray(parsed.data)
-            ) {
-
-                return parsed.data;
-            }
-
-            if (
-                parsed &&
-                Array.isArray(parsed.salesOrders)
-            ) {
-
-                return parsed.salesOrders;
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "Unable to read Sales Order storage:",
-                key,
-                error
-            );
-        }
     }
 
-
-    return [];
 }
 
 
 /* =========================================================
-   LOAD SALES ORDERS
+   GENERATE DR NUMBER
    ========================================================= */
 
-function loadSalesOrders() {
+function generateDRNumber() {
 
-    if (!salesOrderSelect) {
-        return;
-    }
+    const year =
+        new Date().getFullYear();
 
+    const records =
+        readDeliveryReceipts();
 
-    const salesOrders =
-        getSalesOrders();
+    let highestNumber = 0;
 
+    records.forEach(
+        function(dr) {
 
-    /*
-       Clear existing options except placeholder.
-    */
-
-    salesOrderSelect.innerHTML = `
-        <option value="">
-            -- Search Sales Order --
-        </option>
-    `;
-
-
-    salesOrders.forEach(
-        function (so, index) {
-
-            const normalized =
-                normalizeSalesOrder(
-                    so,
-                    index
+            const number =
+                String(
+                    dr.drNumber || ""
                 );
 
+            const pattern =
+                new RegExp(
+                    `^DR-${year}-(\\d+)$`
+                );
 
-            if (!normalized.soNumber) {
-                return;
+            const match =
+                number.match(pattern);
+
+            if (match) {
+
+                highestNumber =
+                    Math.max(
+                        highestNumber,
+                        Number(match[1])
+                    );
+
             }
 
-
-            const option =
-                document.createElement("option");
-
-
-            option.value =
-                normalized.soNumber;
-
-
-            option.textContent =
-                `${normalized.soNumber} — ${normalized.clientName || "No Client"}`;
-
-
-            option.dataset.index =
-                index;
-
-
-            salesOrderSelect.appendChild(
-                option
-            );
         }
     );
 
+    const nextNumber =
+        highestNumber + 1;
 
-    /*
-       If Delivery page previously selected
-       an SO, automatically load it.
-    */
+    return (
+        `DR-${year}-` +
+        String(nextNumber).padStart(5, "0")
+    );
 
-    loadPreviouslySelectedSO();
 }
 
 
@@ -492,288 +463,222 @@ function loadSalesOrders() {
    SALES ORDER SEARCH
    ========================================================= */
 
-function handleSalesOrderSearch() {
+function setupSalesOrderSearch() {
 
-    const search =
-        String(
-            salesOrderSelect.value || ""
-        )
-        .trim()
-        .toLowerCase();
+    const searchInput =
+        $("salesOrderSearch");
 
+    const clearButton =
+        $("clearSalesOrderSearch");
 
-    if (!search) {
+    if (!searchInput) {
         return;
     }
 
 
-    const salesOrders =
-        getSalesOrders();
+    /* ---------------------------------------------
+       SEARCH INPUT
+       --------------------------------------------- */
 
+    searchInput.addEventListener(
+        "input",
+        function() {
 
-    const matched =
-        salesOrders.find(
-            function (so, index) {
+            const query =
+                searchInput.value.trim();
 
-                const normalized =
-                    normalizeSalesOrder(
-                        so,
-                        index
-                    );
+            if (clearButton) {
 
-
-                const soNumber =
-                    normalized.soNumber
-                        .toLowerCase();
-
-
-                const client =
-                    normalized.clientName
-                        .toLowerCase();
-
-
-                return (
-                    soNumber.includes(search) ||
-                    client.includes(search)
-                );
-            }
-        );
-
-
-    /*
-       Do not automatically select while
-       the user is still typing.
-
-       The browser datalist-like behavior
-       is handled through select options.
-    */
-
-    if (matched) {
-
-        /*
-           Nothing here intentionally.
-           Selection happens on change.
-        */
-    }
-}
-
-
-/* =========================================================
-   SALES ORDER CHANGE
-   ========================================================= */
-
-function handleSalesOrderChange(event) {
-
-    const value =
-        String(
-            event.target.value || ""
-        ).trim();
-
-
-    if (!value) {
-
-        clearSalesOrder();
-
-        return;
-    }
-
-
-    const salesOrders =
-        getSalesOrders();
-
-
-    let foundSO = null;
-
-
-    for (
-        let index = 0;
-        index < salesOrders.length;
-        index++
-    ) {
-
-        const normalized =
-            normalizeSalesOrder(
-                salesOrders[index],
-                index
-            );
-
-
-        if (
-            normalized.soNumber === value
-        ) {
-
-            foundSO =
-                normalized;
-
-            break;
-        }
-    }
-
-
-    /*
-       Check previously selected SO
-       if it isn't in the main list.
-    */
-
-    if (!foundSO) {
-
-        try {
-
-            const raw =
-                localStorage.getItem(
-                    SELECTED_SO_KEY
+                clearButton.classList.toggle(
+                    "hidden",
+                    query.length === 0
                 );
 
-
-            if (raw) {
-
-                const saved =
-                    JSON.parse(raw);
-
-
-                const normalized =
-                    normalizeSalesOrder(
-                        saved,
-                        0
-                    );
-
-
-                if (
-                    normalized.soNumber === value
-                ) {
-
-                    foundSO =
-                        normalized;
-                }
             }
 
-        } catch (error) {
+            if (!query) {
 
-            console.warn(
-                "Unable to load selected SO.",
-                error
-            );
+                hideSalesOrderSuggestions();
+
+                return;
+
+            }
+
+            showSalesOrderSuggestions(query);
+
         }
-    }
-
-
-    if (!foundSO) {
-
-        showWarning(
-            "Sales Order Not Found",
-            "The selected Sales Order could not be found."
-        );
-
-        return;
-    }
-
-
-    selectSalesOrder(
-        foundSO
     );
+
+
+    /* ---------------------------------------------
+       FOCUS
+       --------------------------------------------- */
+
+    searchInput.addEventListener(
+        "focus",
+        function() {
+
+            const query =
+                searchInput.value.trim();
+
+            if (query) {
+
+                showSalesOrderSuggestions(query);
+
+            }
+
+        }
+    );
+
+
+    /* ---------------------------------------------
+       CLEAR
+       --------------------------------------------- */
+
+    if (clearButton) {
+
+        clearButton.addEventListener(
+            "click",
+            function() {
+
+                searchInput.value = "";
+
+                clearButton.classList.add(
+                    "hidden"
+                );
+
+                hideSalesOrderSuggestions();
+
+                clearSelectedSalesOrder();
+
+            }
+        );
+
+    }
+
+
+    /* ---------------------------------------------
+       CLICK OUTSIDE
+       --------------------------------------------- */
+
+    document.addEventListener(
+        "click",
+        function(event) {
+
+            const wrapper =
+                document.querySelector(
+                    ".sales-order-search-wrapper"
+                );
+
+            if (!wrapper) {
+                return;
+            }
+
+            if (!wrapper.contains(event.target)) {
+
+                hideSalesOrderSuggestions();
+
+            }
+
+        }
+    );
+
 }
 
 
 /* =========================================================
-   PREVIOUSLY SELECTED SO
+   LOAD SALES ORDERS
    ========================================================= */
 
-function loadPreviouslySelectedSO() {
+function getSalesOrders() {
+
+    let records = [];
 
     try {
 
-        const raw =
+        const stored =
             localStorage.getItem(
-                SELECTED_SO_KEY
+                SALES_ORDER_STORAGE_KEY
             );
 
+        if (stored) {
 
-        if (!raw) {
-            return;
-        }
+            const parsed =
+                JSON.parse(stored);
 
+            if (Array.isArray(parsed)) {
 
-        const saved =
-            JSON.parse(raw);
+                records = parsed;
 
-
-        if (!saved) {
-            return;
-        }
-
-
-        const normalized =
-            normalizeSalesOrder(
-                saved,
-                0
-            );
-
-
-        if (!normalized.soNumber) {
-            return;
-        }
-
-
-        /*
-           Add selected SO if it does not
-           exist in the current options.
-        */
-
-        let optionExists = false;
-
-
-        Array.from(
-            salesOrderSelect.options
-        ).forEach(
-            function (option) {
-
-                if (
-                    option.value ===
-                    normalized.soNumber
-                ) {
-
-                    optionExists = true;
-                }
             }
-        );
 
-
-        if (!optionExists) {
-
-            const option =
-                document.createElement("option");
-
-
-            option.value =
-                normalized.soNumber;
-
-
-            option.textContent =
-                `${normalized.soNumber} — ${normalized.clientName || "No Client"}`;
-
-
-            salesOrderSelect.appendChild(
-                option
-            );
         }
-
-
-        salesOrderSelect.value =
-            normalized.soNumber;
-
-
-        selectSalesOrder(
-            normalized
-        );
-
 
     } catch (error) {
 
-        console.warn(
-            "No previous Sales Order could be loaded.",
+        console.error(
+            "Unable to read Sales Orders:",
             error
         );
+
     }
+
+
+    /*
+     * SUPPORT OTHER POSSIBLE STORAGE KEYS
+     */
+
+    if (!records.length) {
+
+        const alternativeKeys = [
+            "logitechSOList",
+            "logitechSalesOrderList",
+            "salesOrders",
+            "salesOrderData"
+        ];
+
+        for (
+            const key of alternativeKeys
+        ) {
+
+            try {
+
+                const stored =
+                    localStorage.getItem(key);
+
+                if (!stored) {
+                    continue;
+                }
+
+                const parsed =
+                    JSON.parse(stored);
+
+                if (Array.isArray(parsed)) {
+
+                    records = parsed;
+
+                    break;
+
+                }
+
+            } catch (error) {
+
+                console.warn(
+                    "Unable to read:",
+                    key
+                );
+
+            }
+
+        }
+
+    }
+
+
+    return records.map(
+        normalizeSalesOrder
+    );
+
 }
 
 
@@ -781,279 +686,378 @@ function loadPreviouslySelectedSO() {
    NORMALIZE SALES ORDER
    ========================================================= */
 
-function normalizeSalesOrder(
-    so,
-    index = 0
-) {
+function normalizeSalesOrder(so) {
 
-    if (!so) {
-
-        return {
-            soNumber: "",
-            dateCreation: "",
-            clientName: "",
-            salesEngineer: "",
-            attention: "",
-            tinNumber: "",
-            poNumber: "",
-            paymentTerms: "",
-            jobOrder: "",
-            billingAddress: "",
-            project: "",
-            deliveryAddress: "",
-            items: []
-        };
-    }
-
+    so = so || {};
 
     const normalized = {
 
-        soNumber:
-            getFirstValue(
-                so,
-                [
-                    "soNumber",
-                    "salesOrder",
-                    "salesOrderNumber",
-                    "soNo",
-                    "so",
-                    "id",
-                    "number"
-                ]
-            ),
+        id:
+            so.id ||
+            so.soId ||
+            so.salesOrderId ||
+            "",
 
+        soNumber:
+            so.soNumber ||
+            so.salesOrderNumber ||
+            so.salesOrder ||
+            so.soNo ||
+            so.SO ||
+            "",
 
         dateCreation:
-            getFirstValue(
-                so,
-                [
-                    "dateCreation",
-                    "dateCreated",
-                    "creationDate",
-                    "date",
-                    "soDate"
-                ]
-            ),
-
+            so.dateCreation ||
+            so.creationDate ||
+            so.dateCreated ||
+            so.soDate ||
+            so.date ||
+            "",
 
         clientName:
-            getFirstValue(
-                so,
-                [
-                    "clientName",
-                    "client",
-                    "customer",
-                    "customerName"
-                ]
-            ),
-
+            so.clientName ||
+            so.client ||
+            so.customerName ||
+            so.customer ||
+            "",
 
         salesEngineer:
-            getFirstValue(
-                so,
-                [
-                    "salesEngineer",
-                    "se",
-                    "SE",
-                    "salesEngineerName"
-                ]
-            ),
-
+            so.salesEngineer ||
+            so.SE ||
+            so.se ||
+            "",
 
         attention:
-            getFirstValue(
-                so,
-                [
-                    "attention",
-                    "attn",
-                    "contactPerson",
-                    "contact"
-                ]
-            ),
-
+            so.attention ||
+            so.contactPerson ||
+            "",
 
         tinNumber:
-            getFirstValue(
-                so,
-                [
-                    "tinNumber",
-                    "tin",
-                    "TIN",
-                    "tinNo"
-                ]
-            ),
-
+            so.tinNumber ||
+            so.TIN ||
+            so.tin ||
+            "",
 
         poNumber:
-            getFirstValue(
-                so,
-                [
-                    "poNumber",
-                    "po",
-                    "PO",
-                    "purchaseOrder"
-                ]
-            ),
-
+            so.poNumber ||
+            so.PO ||
+            so.po ||
+            "",
 
         paymentTerms:
-            getFirstValue(
-                so,
-                [
-                    "paymentTerms",
-                    "terms",
-                    "paymentTerm"
-                ]
-            ),
-
+            so.paymentTerms ||
+            so.terms ||
+            so.payment ||
+            "",
 
         jobOrder:
-            getFirstValue(
-                so,
-                [
-                    "jobOrder",
-                    "jo",
-                    "JO",
-                    "jobOrderNumber"
-                ]
-            ),
-
+            so.jobOrder ||
+            so.JO ||
+            so.jo ||
+            "",
 
         billingAddress:
-            getFirstValue(
-                so,
-                [
-                    "billingAddress",
-                    "billing",
-                    "billAddress"
-                ]
-            ),
-
+            so.billingAddress ||
+            so.billAddress ||
+            "",
 
         project:
-            getFirstValue(
-                so,
-                [
-                    "project",
-                    "projectName"
-                ]
-            ),
-
+            so.project ||
+            so.projectName ||
+            "",
 
         deliveryAddress:
-            getFirstValue(
-                so,
-                [
-                    "deliveryAddress",
-                    "delivery",
-                    "shipTo",
-                    "shippingAddress"
-                ]
-            ),
+            so.deliveryAddress ||
+            so.address ||
+            so.shipTo ||
+            "",
 
+        status:
+            so.status ||
+            "ACTIVE",
 
         items:
-            getSOItems(so)
+            normalizeItems(
+                so.items ||
+                so.orderItems ||
+                so.products ||
+                so.lineItems ||
+                []
+            ),
+
+        original:
+            so
+
     };
 
 
-    /*
-       Keep original SO object.
-
-       This is useful when the actual Sales Order
-       contains additional fields.
-    */
-
-    normalized.originalData =
-        so;
-
-
-    normalized.index =
-        index;
-
-
     return normalized;
+
 }
 
 
 /* =========================================================
-   GET FIRST VALUE
+   NORMALIZE ITEMS
    ========================================================= */
 
-function getFirstValue(
-    object,
-    keys
-) {
+function normalizeItems(items) {
 
-    for (const key of keys) {
+    if (!Array.isArray(items)) {
 
-        if (
-            object[key] !== undefined &&
-            object[key] !== null &&
-            String(object[key]).trim() !== ""
-        ) {
+        return [];
 
-            return String(
-                object[key]
-            ).trim();
-        }
     }
 
 
-    return "";
+    return items.map(
+        function(item, index) {
+
+            item = item || {};
+
+
+            const itemNumber =
+                item.itemNumber ||
+                item.itemNo ||
+                item.itemCode ||
+                item.code ||
+                item.sku ||
+                item.partNumber ||
+                String(index + 1);
+
+
+            const itemName =
+                item.itemName ||
+                item.name ||
+                item.productName ||
+                item.product ||
+                "";
+
+
+            const itemDescription =
+                item.itemDescription ||
+                item.description ||
+                item.desc ||
+                item.details ||
+                "";
+
+
+            const totalOrder =
+                toNumber(
+                    item.totalOrder ??
+                    item.orderQty ??
+                    item.orderedQty ??
+                    item.quantity ??
+                    item.qty ??
+                    item.soQty ??
+                    item.totalQty ??
+                    0
+                );
+
+
+            const unit =
+                item.unit ||
+                item.uom ||
+                item.UOM ||
+                "";
+
+
+            return {
+
+                id:
+                    item.id ||
+                    item.itemId ||
+                    itemNumber,
+
+                itemNumber:
+                    String(itemNumber),
+
+                itemName:
+                    String(itemName),
+
+                itemDescription:
+                    String(itemDescription),
+
+                totalOrder:
+                    totalOrder,
+
+                unit:
+                    String(unit),
+
+                original:
+                    item
+
+            };
+
+        }
+    );
+
 }
 
 
 /* =========================================================
-   GET SALES ORDER ITEMS
+   SEARCH SALES ORDER
    ========================================================= */
 
-function getSOItems(so) {
+function showSalesOrderSuggestions(query) {
 
-    const possibleItems = [
+    const container =
+        $("salesOrderSuggestions");
 
-        so.items,
-
-        so.lineItems,
-
-        so.orderItems,
-
-        so.products,
-
-        so.itemList,
-
-        so.details
-    ];
+    if (!container) {
+        return;
+    }
 
 
-    for (
-        const items of possibleItems
-    ) {
+    const salesOrders =
+        getSalesOrders();
 
-        if (
-            Array.isArray(items)
-        ) {
+    const search =
+        query.toLowerCase();
 
-            return items;
-        }
+
+    const matches =
+        salesOrders.filter(
+            function(so) {
+
+                const searchable = [
+
+                    so.soNumber,
+
+                    so.clientName,
+
+                    so.project,
+
+                    so.poNumber,
+
+                    so.jobOrder,
+
+                    so.attention
+
+                ]
+                    .join(" ")
+                    .toLowerCase();
+
+                return searchable.includes(search);
+
+            }
+        );
+
+
+    container.innerHTML = "";
+
+
+    if (!matches.length) {
+
+        container.innerHTML = `
+            <div class="suggestion-empty">
+                No Sales Order found.
+            </div>
+        `;
+
+        container.classList.remove(
+            "hidden"
+        );
+
+        return;
+
     }
 
 
     /*
-       Some systems may store one item
-       directly inside "data".
-    */
+     * LIMIT RESULTS
+     */
 
-    if (
-        so.data &&
-        Array.isArray(so.data)
-    ) {
-
-        return so.data;
-    }
+    const visibleMatches =
+        matches.slice(0, 10);
 
 
-    return [];
+    visibleMatches.forEach(
+        function(so) {
+
+            const option =
+                document.createElement("button");
+
+            option.type = "button";
+
+            option.className =
+                "sales-order-suggestion";
+
+
+            option.innerHTML = `
+
+                <div class="suggestion-main">
+
+                    <strong>
+                        ${escapeHTML(
+                            so.soNumber || "NO SO NUMBER"
+                        )}
+                    </strong>
+
+                    <span>
+                        ${escapeHTML(
+                            so.clientName || "No Client"
+                        )}
+                    </span>
+
+                </div>
+
+                <div class="suggestion-meta">
+
+                    ${
+                        so.project
+                        ? `
+                            <span>
+                                PROJECT:
+                                ${escapeHTML(
+                                    so.project
+                                )}
+                            </span>
+                        `
+                        : ""
+                    }
+
+                    ${
+                        so.poNumber
+                        ? `
+                            <span>
+                                PO:
+                                ${escapeHTML(
+                                    so.poNumber
+                                )}
+                            </span>
+                        `
+                        : ""
+                    }
+
+                </div>
+
+            `;
+
+
+            option.addEventListener(
+                "click",
+                function() {
+
+                    selectSalesOrder(
+                        so
+                    );
+
+                }
+            );
+
+
+            container.appendChild(
+                option
+            );
+
+        }
+    );
+
+
+    container.classList.remove(
+        "hidden"
+    );
+
 }
 
 
@@ -1064,69 +1068,345 @@ function getSOItems(so) {
 function selectSalesOrder(so) {
 
     selectedSO =
-        normalizeSalesOrder(
-            so,
-            so.index || 0
-        );
+        normalizeSalesOrder(so);
 
 
     /*
-       Save currently selected SO
-       so refresh/reload can recover it.
-    */
+     * SAVE SELECTED SO
+     */
 
     try {
 
         localStorage.setItem(
             SELECTED_SO_KEY,
-            JSON.stringify(selectedSO.originalData || selectedSO)
+            JSON.stringify(selectedSO)
         );
 
     } catch (error) {
 
         console.warn(
-            "Unable to save selected SO.",
+            "Unable to save selected SO:",
             error
         );
-    }
 
-
-    populateSalesOrderDetails();
-
-
-    /*
-       Delivery address comes from SO,
-       but remains editable.
-    */
-
-    if (deliveryAddress) {
-
-        deliveryAddress.value =
-            selectedSO.deliveryAddress || "";
     }
 
 
     /*
-       Recalculate delivered quantity
-       from previously SAVED DRs.
-    */
+     * SEARCH BOX
+     */
 
-    itemState =
-        buildItemState(
-            selectedSO
+    const searchInput =
+        $("salesOrderSearch");
+
+    if (searchInput) {
+
+        searchInput.value =
+            selectedSO.soNumber || "";
+
+    }
+
+
+    const clearButton =
+        $("clearSalesOrderSearch");
+
+    if (clearButton) {
+
+        clearButton.classList.remove(
+            "hidden"
         );
 
-
-    renderItems();
-
-
-    showPrepareSections();
+    }
 
 
-    updateCounters();
+    hideSalesOrderSuggestions();
 
+
+    /*
+     * BUILD ITEM STATE
+     */
+
+    buildItemState();
+
+
+    /*
+     * FILL SO DETAILS
+     */
+
+    fillSalesOrderDetails();
+
+
+    /*
+     * SHOW SECTIONS
+     */
+
+    showElement(
+        "selectedSOIndicator"
+    );
+
+    showElement(
+        "soInformationSection"
+    );
+
+    showElement(
+        "deliveryDetailsSection"
+    );
+
+    showElement(
+        "itemPickingSection"
+    );
+
+    showElement(
+        "prepareActions"
+    );
+
+
+    /*
+     * WORKFLOW
+     */
+
+    currentStep = 1;
 
     updateWorkflow(1);
+
+
+    /*
+     * SCROLL TO SO DETAILS
+     */
+
+    setTimeout(
+        function() {
+
+            const section =
+                $("soInformationSection");
+
+            if (section) {
+
+                section.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start"
+                });
+
+            }
+
+        },
+        100
+    );
+
+}
+
+
+/* =========================================================
+   LOAD SELECTED SO FROM PREVIOUS PAGE
+   ========================================================= */
+
+function loadSelectedSalesOrder() {
+
+    try {
+
+        const stored =
+            localStorage.getItem(
+                SELECTED_SO_KEY
+            );
+
+        if (!stored) {
+            return;
+        }
+
+
+        const parsed =
+            JSON.parse(stored);
+
+
+        if (
+            parsed &&
+            typeof parsed === "object"
+        ) {
+
+            selectSalesOrder(
+                parsed
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load selected Sales Order:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   FILL SALES ORDER DETAILS
+   ========================================================= */
+
+function fillSalesOrderDetails() {
+
+    if (!selectedSO) {
+        return;
+    }
+
+
+    setValue(
+        "soDateCreation",
+        selectedSO.dateCreation
+    );
+
+    setValue(
+        "clientName",
+        selectedSO.clientName
+    );
+
+    setValue(
+        "salesEngineer",
+        selectedSO.salesEngineer
+    );
+
+    setValue(
+        "attention",
+        selectedSO.attention
+    );
+
+    setValue(
+        "tinNumber",
+        selectedSO.tinNumber
+    );
+
+    setValue(
+        "poNumber",
+        selectedSO.poNumber
+    );
+
+    setValue(
+        "paymentTerms",
+        selectedSO.paymentTerms
+    );
+
+    setValue(
+        "jobOrder",
+        selectedSO.jobOrder
+    );
+
+    setValue(
+        "billingAddress",
+        selectedSO.billingAddress
+    );
+
+    setValue(
+        "project",
+        selectedSO.project
+    );
+
+    setValue(
+        "deliveryAddress",
+        selectedSO.deliveryAddress
+    );
+
+
+    /*
+     * STATUS
+     */
+
+    const status =
+        $("soStatusDisplay");
+
+    if (status) {
+
+        const value =
+            selectedSO.status ||
+            "ACTIVE";
+
+        status.textContent =
+            String(value).toUpperCase();
+
+        status.classList.remove(
+            "status-active",
+            "status-inactive"
+        );
+
+        if (
+            String(value).toLowerCase() ===
+            "active"
+        ) {
+
+            status.classList.add(
+                "status-active"
+            );
+
+        } else {
+
+            status.classList.add(
+                "status-inactive"
+            );
+
+        }
+
+    }
+
+
+    /*
+     * SELECTED SO INDICATOR
+     */
+
+    setText(
+        "selectedSONumber",
+        selectedSO.soNumber || "—"
+    );
+
+}
+
+
+/* =========================================================
+   GET CURRENT EDITED SALES ORDER DETAILS
+   ========================================================= */
+
+function getEditedSalesOrderDetails() {
+
+    return {
+
+        soNumber:
+            selectedSO?.soNumber || "",
+
+        dateCreation:
+            getValue("soDateCreation"),
+
+        clientName:
+            getValue("clientName"),
+
+        salesEngineer:
+            getValue("salesEngineer"),
+
+        attention:
+            getValue("attention"),
+
+        tinNumber:
+            getValue("tinNumber"),
+
+        poNumber:
+            getValue("poNumber"),
+
+        paymentTerms:
+            getValue("paymentTerms"),
+
+        jobOrder:
+            getValue("jobOrder"),
+
+        billingAddress:
+            getValue("billingAddress"),
+
+        project:
+            getValue("project"),
+
+        deliveryAddress:
+            getValue("deliveryAddress")
+
+    };
+
 }
 
 
@@ -1134,210 +1414,122 @@ function selectSalesOrder(so) {
    BUILD ITEM STATE
    ========================================================= */
 
-function buildItemState(so) {
+function buildItemState() {
+
+    if (!selectedSO) {
+
+        itemState = [];
+
+        return;
+
+    }
+
 
     const items =
-        so.items || [];
+        selectedSO.items || [];
 
 
-    return items.map(
-        function (item, index) {
+    itemState =
+        items.map(
+            function(item, index) {
 
-            const itemData =
-                normalizeItem(
-                    item,
-                    index
-                );
-
-
-            const deliveredQty =
-                getPreviouslyDeliveredQty(
-                    so.soNumber,
-                    itemData
-                );
+                const previousDelivered =
+                    getPreviouslyDeliveredQty(
+                        selectedSO,
+                        item
+                    );
 
 
-            const balanceQty =
-                Math.max(
-                    itemData.totalOrder -
-                    deliveredQty,
-                    0
-                );
+                const totalOrder =
+                    toNumber(
+                        item.totalOrder
+                    );
 
 
-            return {
+                const balance =
+                    Math.max(
+                        totalOrder -
+                        previousDelivered,
+                        0
+                    );
 
-                index,
 
-                id:
-                    itemData.id,
+                return {
 
-                itemNo:
-                    itemData.itemNo,
+                    index:
 
-                itemName:
-                    itemData.itemName,
+                        index,
 
-                description:
-                    itemData.description,
+                    id:
+                        item.id,
 
-                unit:
-                    itemData.unit,
+                    itemNumber:
+                        item.itemNumber,
 
-                totalOrder:
-                    itemData.totalOrder,
+                    itemName:
+                        item.itemName,
 
-                totalDelivered:
-                    deliveredQty,
+                    itemDescription:
+                        item.itemDescription,
 
-                balance:
-                    balanceQty,
+                    unit:
+                        item.unit,
 
-                pickQty:
-                    0,
+                    totalOrder:
+                        totalOrder,
 
-                remarks:
-                    "",
+                    totalDelivered:
+                        previousDelivered,
 
-                checked:
-                    false,
+                    balance:
+                        balance,
 
-                error:
-                    ""
-            };
-        }
-    );
+                    pickQty:
+                        0,
+
+                    remarks:
+                        "",
+
+                    checked:
+                        false,
+
+                    error:
+                        ""
+
+                };
+
+            }
+        );
+
+
+    renderItemsTable();
+
 }
 
 
 /* =========================================================
-   NORMALIZE ITEM
-   ========================================================= */
-
-function normalizeItem(
-    item,
-    index
-) {
-
-    item =
-        item || {};
-
-
-    const totalOrderRaw =
-        getFirstValue(
-            item,
-            [
-                "totalOrder",
-                "orderQty",
-                "orderedQty",
-                "soQty",
-                "quantity",
-                "qty",
-                "totalQuantity"
-            ]
-        );
-
-
-    const itemNo =
-        getFirstValue(
-            item,
-            [
-                "itemNo",
-                "itemNumber",
-                "itemCode",
-                "code",
-                "sku"
-            ]
-        ) ||
-        String(index + 1);
-
-
-    const itemName =
-        getFirstValue(
-            item,
-            [
-                "itemName",
-                "name",
-                "productName",
-                "product"
-            ]
-        );
-
-
-    const description =
-        getFirstValue(
-            item,
-            [
-                "description",
-                "itemDescription",
-                "details",
-                "specification",
-                "specs"
-            ]
-        );
-
-
-    return {
-
-        id:
-            getFirstValue(
-                item,
-                [
-                    "id",
-                    "itemId",
-                    "itemCode",
-                    "sku"
-                ]
-            ) || itemNo,
-
-
-        itemNo,
-
-        itemName,
-
-        description,
-
-        unit:
-            getFirstValue(
-                item,
-                [
-                    "unit",
-                    "uom",
-                    "unitOfMeasure"
-                ]
-            ),
-
-
-        totalOrder:
-            parseNumber(
-                totalOrderRaw
-            ),
-
-
-        originalData:
-            item
-    };
-}
-
-
-/* =========================================================
-   PREVIOUSLY DELIVERED
+   PREVIOUS DELIVERED QTY
    ========================================================= */
 
 function getPreviouslyDeliveredQty(
-    soNumber,
+    salesOrder,
     currentItem
 ) {
 
-    const drs =
-        getDeliveryReceipts();
+    const records =
+        readDeliveryReceipts();
+
+
+    if (!records.length) {
+        return 0;
+    }
 
 
     let totalDelivered = 0;
 
 
-    drs.forEach(
-        function (dr) {
+    records.forEach(
+        function(dr) {
 
             if (!dr) {
                 return;
@@ -1345,568 +1537,237 @@ function getPreviouslyDeliveredQty(
 
 
             const drSO =
-                getFirstValue(
-                    dr,
-                    [
-                        "soNumber",
-                        "salesOrder",
-                        "salesOrderNumber"
-                    ]
+                normalizeText(
+                    dr.soNumber
+                );
+
+            const selectedSO =
+                normalizeText(
+                    salesOrder.soNumber
                 );
 
 
             if (
-                drSO !== soNumber
+                !drSO ||
+                !selectedSO ||
+                drSO !== selectedSO
             ) {
 
                 return;
+
             }
 
 
             const items =
                 Array.isArray(dr.items)
-                    ? dr.items
-                    : [];
+                ? dr.items
+                : [];
 
 
             items.forEach(
-                function (deliveredItem) {
+                function(item) {
 
                     if (
-                        !isSameItem(
-                            currentItem,
-                            deliveredItem
+                        sameItem(
+                            item,
+                            currentItem
                         )
                     ) {
 
-                        return;
+                        const qty =
+                            toNumber(
+                                item.pickQty ??
+                                item.pickedQty ??
+                                item.deliveredQty ??
+                                item.qty ??
+                                0
+                            );
+
+                        totalDelivered += qty;
+
                     }
 
-
-                    const qty =
-                        getFirstValue(
-                            deliveredItem,
-                            [
-                                "pickQty",
-                                "deliveredQty",
-                                "quantity",
-                                "qty",
-                                "pickedQty"
-                            ]
-                        );
-
-
-                    totalDelivered +=
-                        parseNumber(qty);
                 }
             );
+
         }
     );
 
 
     return totalDelivered;
+
 }
 
 
 /* =========================================================
-   COMPARE ITEMS
+   MATCH ITEM
    ========================================================= */
 
-function isSameItem(
-    itemA,
-    itemB
+function sameItem(
+    savedItem,
+    currentItem
 ) {
 
-    if (!itemA || !itemB) {
+    if (!savedItem || !currentItem) {
         return false;
     }
 
 
-    const idA =
-        getFirstValue(
-            itemA,
-            [
-                "id",
-                "itemId",
-                "itemCode",
-                "sku"
-            ]
+    const currentId =
+        normalizeText(
+            currentItem.id
         );
 
-
-    const idB =
-        getFirstValue(
-            itemB,
-            [
-                "id",
-                "itemId",
-                "itemCode",
-                "sku"
-            ]
+    const savedId =
+        normalizeText(
+            savedItem.id ||
+            savedItem.itemId
         );
 
 
     if (
-        idA &&
-        idB &&
-        idA === idB
+        currentId &&
+        savedId &&
+        currentId === savedId
     ) {
 
         return true;
+
     }
 
 
-    const itemNoA =
-        getFirstValue(
-            itemA,
-            [
-                "itemNo",
-                "itemNumber",
-                "code",
-                "itemCode"
-            ]
+    const currentNumber =
+        normalizeText(
+            currentItem.itemNumber
         );
 
-
-    const itemNoB =
-        getFirstValue(
-            itemB,
-            [
-                "itemNo",
-                "itemNumber",
-                "code",
-                "itemCode"
-            ]
+    const savedNumber =
+        normalizeText(
+            savedItem.itemNumber ||
+            savedItem.itemNo ||
+            savedItem.itemCode
         );
 
 
     if (
-        itemNoA &&
-        itemNoB &&
-        itemNoA === itemNoB
+        currentNumber &&
+        savedNumber &&
+        currentNumber === savedNumber
     ) {
 
         return true;
+
     }
 
 
-    const descA =
-        getFirstValue(
-            itemA,
-            [
-                "description",
-                "itemDescription",
-                "name"
-            ]
-        )
-        .toLowerCase();
-
-
-    const descB =
-        getFirstValue(
-            itemB,
-            [
-                "description",
-                "itemDescription",
-                "name"
-            ]
-        )
-        .toLowerCase();
-
-
-    return (
-        descA &&
-        descB &&
-        descA === descB
-    );
-}
-
-
-/* =========================================================
-   DELIVERY RECEIPT STORAGE
-   ========================================================= */
-
-function getDeliveryReceipts() {
-
-    try {
-
-        const raw =
-            localStorage.getItem(
-                DR_STORAGE_KEY
-            );
-
-
-        if (!raw) {
-            return [];
-        }
-
-
-        const parsed =
-            JSON.parse(raw);
-
-
-        return Array.isArray(parsed)
-            ? parsed
-            : [];
-
-    } catch (error) {
-
-        console.warn(
-            "Unable to read Delivery Receipts.",
-            error
+    const currentName =
+        normalizeText(
+            currentItem.itemName
         );
 
-        return [];
+    const savedName =
+        normalizeText(
+            savedItem.itemName ||
+            savedItem.name
+        );
+
+
+    if (
+        currentName &&
+        savedName &&
+        currentName === savedName
+    ) {
+
+        return true;
+
     }
+
+
+    const currentDescription =
+        normalizeText(
+            currentItem.itemDescription
+        );
+
+    const savedDescription =
+        normalizeText(
+            savedItem.itemDescription ||
+            savedItem.description
+        );
+
+
+    if (
+        currentDescription &&
+        savedDescription &&
+        currentDescription === savedDescription
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
 }
 
 
 /* =========================================================
-   POPULATE SALES ORDER DETAILS
+   RENDER ITEMS TABLE
    ========================================================= */
 
-function populateSalesOrderDetails() {
+function renderItemsTable() {
 
-    if (!selectedSO) {
+    const tbody =
+        $("itemsTableBody");
+
+    if (!tbody) {
         return;
     }
 
 
-    setText(
-        "soNumberDisplay",
-        selectedSO.soNumber
-    );
-
-
-    setText(
-        "soDateDisplay",
-        formatDateDisplay(
-            selectedSO.dateCreation
-        )
-    );
-
-
-    setText(
-        "clientNameDisplay",
-        selectedSO.clientName
-    );
-
-
-    setText(
-        "attentionDisplay",
-        selectedSO.attention
-    );
-
-
-    setText(
-        "poNumberDisplay",
-        selectedSO.poNumber
-    );
-
-
-    setText(
-        "projectDisplay",
-        selectedSO.project
-    );
-
-
-    setText(
-        "tinDisplay",
-        selectedSO.tinNumber
-    );
-
-
-    setText(
-        "termsDisplay",
-        selectedSO.paymentTerms
-    );
-
-
-    setText(
-        "salesEngineerDisplay",
-        selectedSO.salesEngineer
-    );
-
-
-    /*
-       IMPORTANT:
-
-       The HTML currently uses strong elements
-       for SO details.
-
-       We make these fields editable
-       when selected.
-
-       This is done dynamically so the existing
-       HTML does not need to be rebuilt.
-    */
-
-    makeSOFieldEditable(
-        "soDateDisplay",
-        "dateCreation"
-    );
-
-    makeSOFieldEditable(
-        "clientNameDisplay",
-        "clientName"
-    );
-
-    makeSOFieldEditable(
-        "salesEngineerDisplay",
-        "salesEngineer"
-    );
-
-    makeSOFieldEditable(
-        "attentionDisplay",
-        "attention"
-    );
-
-    makeSOFieldEditable(
-        "tinDisplay",
-        "tinNumber"
-    );
-
-    makeSOFieldEditable(
-        "poNumberDisplay",
-        "poNumber"
-    );
-
-    makeSOFieldEditable(
-        "termsDisplay",
-        "paymentTerms"
-    );
-
-    makeSOFieldEditable(
-        "jobOrderDisplay",
-        "jobOrder"
-    );
-
-    makeSOFieldEditable(
-        "billingAddressDisplay",
-        "billingAddress"
-    );
-
-    makeSOFieldEditable(
-        "projectDisplay",
-        "project"
-    );
-
-    makeSOFieldEditable(
-        "deliveryAddressDisplay",
-        "deliveryAddress"
-    );
-}
-
-
-/* =========================================================
-   MAKE SO DETAIL EDITABLE
-   ========================================================= */
-
-function makeSOFieldEditable(
-    elementId,
-    fieldName
-) {
-
-    const element =
-        getElement(elementId);
-
-
-    if (!element) {
-        return;
-    }
-
-
-    /*
-       Do not destroy the existing design.
-
-       Replace the <strong> with an input only
-       if the CSS/HTML does not already provide
-       an editable field.
-    */
-
-    const currentValue =
-        selectedSO[fieldName] || "";
-
-
-    let input =
-        element.querySelector(
-            "input, textarea"
-        );
-
-
-    if (!input) {
-
-        input =
-            document.createElement(
-                fieldName === "billingAddress" ||
-                fieldName === "deliveryAddress"
-                    ? "textarea"
-                    : "input"
-            );
-
-
-        input.className =
-            "so-editable-input";
-
-
-        if (
-            fieldName === "billingAddress" ||
-            fieldName === "deliveryAddress"
-        ) {
-
-            input.rows = 2;
-        }
-
-
-        element.replaceChildren(
-            input
-        );
-    }
-
-
-    input.value =
-        currentValue;
-
-
-    input.dataset.field =
-        fieldName;
-
-
-    input.addEventListener(
-        "input",
-        function () {
-
-            selectedSO[fieldName] =
-                input.value.trim();
-
-
-            /*
-               Delivery address also updates
-               the main Delivery Address field.
-            */
-
-            if (
-                fieldName ===
-                "deliveryAddress"
-            ) {
-
-                if (deliveryAddress) {
-
-                    deliveryAddress.value =
-                        input.value;
-                }
-            }
-        }
-    );
-}
-
-
-/* =========================================================
-   SHOW PREPARE SECTIONS
-   ========================================================= */
-
-function showPrepareSections() {
-
-    removeHidden(
-        soInformationSection
-    );
-
-    removeHidden(
-        deliveryDetailsSection
-    );
-
-    removeHidden(
-        itemPickingSection
-    );
-
-    removeHidden(
-        prepareActions
-    );
-}
-
-
-/* =========================================================
-   CLEAR SALES ORDER
-   ========================================================= */
-
-function clearSalesOrder() {
-
-    selectedSO = null;
-
-    itemState = [];
-
-    addHidden(
-        soInformationSection
-    );
-
-    addHidden(
-        deliveryDetailsSection
-    );
-
-    addHidden(
-        itemPickingSection
-    );
-
-    addHidden(
-        prepareActions
-    );
-
-    if (itemsTableBody) {
-
-        itemsTableBody.innerHTML = "";
-    }
-
-
-    updateCounters();
-}
-
-
-/* =========================================================
-   RENDER ITEM TABLE
-   ========================================================= */
-
-function renderItems() {
-
-    if (!itemsTableBody) {
-        return;
-    }
-
-
-    itemsTableBody.innerHTML = "";
+    tbody.innerHTML = "";
 
 
     if (!itemState.length) {
 
-        itemsTableBody.innerHTML = `
+        tbody.innerHTML = `
+
             <tr>
-                <td colspan="8" class="empty-items">
+
+                <td
+                    colspan="8"
+                    class="empty-items"
+                >
                     No items found in this Sales Order.
                 </td>
+
             </tr>
+
         `;
 
+        updatePickingStats();
+
         return;
+
     }
 
 
     itemState.forEach(
-        function (item, index) {
+        function(item, index) {
 
             const row =
                 document.createElement("tr");
 
-
             row.dataset.index =
-                index;
+                String(index);
 
 
-            if (
-                item.balance <= 0
-            ) {
+            if (item.balance <= 0) {
 
                 row.classList.add(
                     "fully-delivered"
                 );
+
             }
 
 
@@ -1916,9 +1777,13 @@ function renderItems() {
 
                     <input
                         type="checkbox"
-                        class="item-check"
+                        class="item-checkbox"
                         data-index="${index}"
-                        ${item.balance <= 0 ? "disabled" : ""}
+                        ${
+                            item.balance <= 0
+                            ? "disabled"
+                            : ""
+                        }
                     >
 
                 </td>
@@ -1927,7 +1792,9 @@ function renderItems() {
                 <td class="item-no-column">
 
                     <strong>
-                        ${escapeHTML(item.itemNo)}
+                        ${escapeHTML(
+                            item.itemNumber || "—"
+                        )}
                     </strong>
 
                 </td>
@@ -1936,16 +1803,26 @@ function renderItems() {
                 <td class="description-column">
 
                     <div class="item-name">
+
                         ${escapeHTML(
                             item.itemName || "—"
                         )}
+
                     </div>
 
-                    <div class="item-description">
-                        ${escapeHTML(
-                            item.description || "—"
-                        )}
-                    </div>
+                    ${
+                        item.itemDescription
+                        ? `
+                            <div class="item-description">
+
+                                ${escapeHTML(
+                                    item.itemDescription
+                                )}
+
+                            </div>
+                        `
+                        : ""
+                    }
 
                 </td>
 
@@ -1953,13 +1830,21 @@ function renderItems() {
                 <td class="qty-column">
 
                     <strong>
-                        ${formatNumber(item.totalOrder)}
+                        ${formatNumber(
+                            item.totalOrder
+                        )}
                     </strong>
 
                     ${
                         item.unit
-                            ? `<small>${escapeHTML(item.unit)}</small>`
-                            : ""
+                        ? `
+                            <small>
+                                ${escapeHTML(
+                                    item.unit
+                                )}
+                            </small>
+                        `
+                        : ""
                     }
 
                 </td>
@@ -1976,10 +1861,18 @@ function renderItems() {
 
                 <td class="qty-column">
 
-                    <strong>
+                    <strong
+                        class="${
+                            item.balance <= 0
+                            ? "balance-zero"
+                            : ""
+                        }"
+                    >
+
                         ${formatNumber(
                             item.balance
                         )}
+
                     </strong>
 
                 </td>
@@ -1995,7 +1888,11 @@ function renderItems() {
                         step="any"
                         value="0"
                         placeholder="0"
-                        ${item.balance <= 0 ? "disabled" : ""}
+                        ${
+                            item.balance <= 0
+                            ? "disabled"
+                            : "disabled"
+                        }
                     >
 
                     <div
@@ -2012,8 +1909,8 @@ function renderItems() {
                         type="text"
                         class="remarks-input"
                         data-index="${index}"
-                        placeholder="Enter remarks"
-                        ${item.balance <= 0 ? "disabled" : ""}
+                        placeholder="Remarks"
+                        disabled
                     >
 
                 </td>
@@ -2021,16 +1918,16 @@ function renderItems() {
             `;
 
 
-            itemsTableBody.appendChild(
-                row
-            );
+            tbody.appendChild(row);
+
         }
     );
 
 
-    attachItemEvents();
+    setupItemEvents();
 
-    updateCounters();
+    updatePickingStats();
+
 }
 
 
@@ -2038,42 +1935,28 @@ function renderItems() {
    ITEM EVENTS
    ========================================================= */
 
-function attachItemEvents() {
+function setupItemEvents() {
 
     const checkboxes =
-        itemsTableBody.querySelectorAll(
-            ".item-check"
-        );
-
-
-    const pickInputs =
-        itemsTableBody.querySelectorAll(
-            ".pick-qty-input"
-        );
-
-
-    const remarksInputs =
-        itemsTableBody.querySelectorAll(
-            ".remarks-input"
+        document.querySelectorAll(
+            ".item-checkbox"
         );
 
 
     checkboxes.forEach(
-        function (checkbox) {
+        function(checkbox) {
 
             checkbox.addEventListener(
                 "change",
-                function () {
+                function() {
 
                     const index =
                         Number(
                             checkbox.dataset.index
                         );
 
-
                     const item =
                         itemState[index];
-
 
                     if (!item) {
                         return;
@@ -2089,30 +1972,46 @@ function attachItemEvents() {
 
 
                     const pickInput =
-                        row.querySelector(
+                        row?.querySelector(
                             ".pick-qty-input"
                         );
 
 
                     const remarksInput =
-                        row.querySelector(
+                        row?.querySelector(
                             ".remarks-input"
                         );
 
 
-                    if (
-                        !checkbox.checked
-                    ) {
+                    if (checkbox.checked) {
 
-                        item.pickQty =
-                            0;
+                        if (pickInput) {
 
-                        item.remarks =
-                            "";
+                            pickInput.disabled =
+                                false;
 
-                        item.error =
-                            "";
+                            pickInput.focus();
 
+                        }
+
+                        if (remarksInput) {
+
+                            remarksInput.disabled =
+                                false;
+
+                        }
+
+                        row?.classList.add(
+                            "item-selected"
+                        );
+
+                    } else {
+
+                        item.pickQty = 0;
+
+                        item.remarks = "";
+
+                        item.error = "";
 
                         if (pickInput) {
 
@@ -2121,8 +2020,8 @@ function attachItemEvents() {
 
                             pickInput.disabled =
                                 true;
-                        }
 
+                        }
 
                         if (remarksInput) {
 
@@ -2131,55 +2030,49 @@ function attachItemEvents() {
 
                             remarksInput.disabled =
                                 true;
+
                         }
 
+                        row?.classList.remove(
+                            "item-selected"
+                        );
 
                         clearItemError(
                             index
                         );
 
-                    } else {
-
-                        if (pickInput) {
-
-                            pickInput.disabled =
-                                false;
-
-                            pickInput.focus();
-                        }
-
-
-                        if (remarksInput) {
-
-                            remarksInput.disabled =
-                                false;
-                        }
                     }
 
 
-                    updateCounters();
+                    updatePickingStats();
+
                 }
             );
+
         }
     );
 
 
+    const pickInputs =
+        document.querySelectorAll(
+            ".pick-qty-input"
+        );
+
+
     pickInputs.forEach(
-        function (input) {
+        function(input) {
 
             input.addEventListener(
                 "input",
-                function () {
+                function() {
 
                     const index =
                         Number(
                             input.dataset.index
                         );
 
-
                     const item =
                         itemState[index];
-
 
                     if (!item) {
                         return;
@@ -2187,44 +2080,74 @@ function attachItemEvents() {
 
 
                     const value =
-                        parseNumber(
-                            input.value
-                        );
+                        input.value;
+
+
+                    const qty =
+                        value === ""
+                        ? 0
+                        : Number(value);
 
 
                     item.pickQty =
-                        value;
+                        Number.isFinite(qty)
+                        ? qty
+                        : 0;
 
 
                     validatePickQty(
                         index,
-                        input
+                        false
                     );
 
 
-                    updateCounters();
+                    updatePickingStats();
+
                 }
             );
-        }
-    );
 
-
-    remarksInputs.forEach(
-        function (input) {
 
             input.addEventListener(
-                "input",
-                function () {
+                "blur",
+                function() {
 
                     const index =
                         Number(
                             input.dataset.index
                         );
 
+                    validatePickQty(
+                        index,
+                        false
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    const remarksInputs =
+        document.querySelectorAll(
+            ".remarks-input"
+        );
+
+
+    remarksInputs.forEach(
+        function(input) {
+
+            input.addEventListener(
+                "input",
+                function() {
+
+                    const index =
+                        Number(
+                            input.dataset.index
+                        );
 
                     const item =
                         itemState[index];
-
 
                     if (!item) {
                         return;
@@ -2233,10 +2156,13 @@ function attachItemEvents() {
 
                     item.remarks =
                         input.value;
+
                 }
             );
+
         }
     );
+
 }
 
 
@@ -2246,71 +2172,83 @@ function attachItemEvents() {
 
 function validatePickQty(
     index,
-    input
+    showModal
 ) {
 
     const item =
         itemState[index];
-
 
     if (!item) {
         return false;
     }
 
 
-    const value =
-        parseNumber(
-            input.value
+    const qty =
+        toNumber(
+            item.pickQty
         );
 
 
-    if (value < 0) {
+    const balance =
+        toNumber(
+            item.balance
+        );
+
+
+    if (qty < 0) {
 
         item.error =
             "Pick Qty cannot be negative.";
 
-        showItemError(
+        setItemError(
             index,
             item.error
         );
 
+        if (showModal) {
+
+            showWarning(
+                "Invalid Pick Quantity",
+                item.error
+            );
+
+        }
+
         return false;
+
     }
 
 
-    if (
-        value >
-        item.balance
-    ) {
+    if (qty > balance) {
 
         item.error =
-            `Pick Qty cannot exceed the balance of ${formatNumber(item.balance)}.`;
+            `Pick Qty (${formatNumber(qty)}) cannot exceed Balance (${formatNumber(balance)}).`;
 
-
-        showItemError(
+        setItemError(
             index,
             item.error
         );
 
+        if (showModal) {
 
-        showWarning(
-            "Invalid Pick Quantity",
-            `Item ${item.itemNo}: Pick Qty (${formatNumber(value)}) is greater than the available balance (${formatNumber(item.balance)}).`
-        );
+            showWarning(
+                "Pick Quantity Exceeded",
+                item.error
+            );
 
+        }
 
         return false;
+
     }
 
 
     item.error = "";
 
-    clearItemError(
-        index
-    );
-
+    clearItemError(index);
 
     return true;
+
 }
 
 
@@ -2318,36 +2256,43 @@ function validatePickQty(
    ITEM ERROR
    ========================================================= */
 
-function showItemError(
+function setItemError(
     index,
     message
 ) {
 
     const errorElement =
-        itemsTableBody.querySelector(
+        document.querySelector(
             `[data-error-index="${index}"]`
         );
 
 
-    if (!errorElement) {
-        return;
-    }
+    if (errorElement) {
 
+        errorElement.textContent =
+            message;
 
-    errorElement.textContent =
-        message;
-
-
-    const row =
-        errorElement.closest("tr");
-
-
-    if (row) {
-
-        row.classList.add(
-            "has-error"
+        errorElement.classList.add(
+            "show"
         );
+
     }
+
+
+    const input =
+        document.querySelector(
+            `.pick-qty-input[data-index="${index}"]`
+        );
+
+
+    if (input) {
+
+        input.classList.add(
+            "input-error"
+        );
+
+    }
+
 }
 
 
@@ -2355,64 +2300,63 @@ function showItemError(
    CLEAR ITEM ERROR
    ========================================================= */
 
-function clearItemError(
-    index
-) {
+function clearItemError(index) {
 
     const errorElement =
-        itemsTableBody.querySelector(
+        document.querySelector(
             `[data-error-index="${index}"]`
         );
 
 
     if (errorElement) {
 
-        errorElement.textContent = "";
-    }
+        errorElement.textContent =
+            "";
 
-
-    const row =
-        errorElement
-            ? errorElement.closest("tr")
-            : null;
-
-
-    if (row) {
-
-        row.classList.remove(
-            "has-error"
+        errorElement.classList.remove(
+            "show"
         );
+
     }
+
+
+    const input =
+        document.querySelector(
+            `.pick-qty-input[data-index="${index}"]`
+        );
+
+
+    if (input) {
+
+        input.classList.remove(
+            "input-error"
+        );
+
+    }
+
 }
 
 
 /* =========================================================
-   UPDATE COUNTERS
+   PICKING STATS
    ========================================================= */
 
-function updateCounters() {
+function updatePickingStats() {
 
     const selected =
         itemState.filter(
-            item =>
-                item.checked &&
-                item.pickQty > 0
+            item => item.checked
         );
 
 
-    const selectedCount =
-        itemState.filter(
-            item =>
-                item.checked
-        ).length;
-
-
-    const totalQty =
+    const totalPicked =
         selected.reduce(
-            function (total, item) {
+            function(total, item) {
 
-                return total +
-                    item.pickQty;
+                return (
+                    total +
+                    toNumber(item.pickQty)
+                );
 
             },
             0
@@ -2421,74 +2365,51 @@ function updateCounters() {
 
     const available =
         itemState.filter(
-            item =>
-                item.balance > 0
+            item => item.balance > 0
         ).length;
 
 
-    if (availableItemCount) {
+    setText(
+        "availableItemCount",
+        available
+    );
 
-        availableItemCount.textContent =
-            formatNumber(
-                available
-            );
-    }
+    setText(
+        "selectedItemCount",
+        selected.length
+    );
 
-
-    if (selectedItemCount) {
-
-        selectedItemCount.textContent =
-            formatNumber(
-                selectedCount
-            );
-    }
+    setText(
+        "totalPickedQty",
+        formatNumber(totalPicked)
+    );
 
 
-    if (totalPickedQty) {
-
-        totalPickedQty.textContent =
-            formatNumber(
-                totalQty
-            );
-    }
+    const warning =
+        $("pickingWarning");
 
 
-    if (pickingWarning) {
+    if (warning) {
 
-        if (!selectedCount) {
+        if (!selected.length) {
 
-            pickingWarning.textContent =
+            warning.textContent =
                 "Select at least one item.";
 
-            pickingWarning.classList.add(
-                "visible"
-            );
-
-        } else if (
-            selected.some(
-                item =>
-                    item.pickQty >
-                    item.balance
-            )
-        ) {
-
-            pickingWarning.textContent =
-                "One or more Pick Qty values exceed the available balance.";
-
-            pickingWarning.classList.add(
-                "visible"
+            warning.classList.add(
+                "show"
             );
 
         } else {
 
-            pickingWarning.textContent =
-                "Ready for review.";
-
-            pickingWarning.classList.remove(
-                "visible"
+            warning.classList.remove(
+                "show"
             );
+
         }
+
     }
+
 }
 
 
@@ -2502,72 +2423,83 @@ function reviewDeliveryReceipt() {
 
         showWarning(
             "Sales Order Required",
-            "Please select a Sales Order first."
+            "Please search and select a Sales Order first."
         );
 
         return;
+
     }
 
 
     /*
-       Sync editable Sales Order fields.
-    */
+     * VALIDATE SO DETAILS
+     */
 
-    syncEditableSOFields();
+    const client =
+        getValue("clientName").trim();
+
+    const deliveryAddress =
+        getValue("deliveryAddress").trim();
+
+    const dateOfTransfer =
+        getValue("dateOfTransfer").trim();
 
 
-    /*
-       Date
-    */
+    if (!client) {
 
-    if (
-        !dateOfTransfer ||
-        !dateOfTransfer.value
-    ) {
+        showWarning(
+            "Client Name Required",
+            "Please enter the Client Name."
+        );
+
+        focusElement(
+            "clientName"
+        );
+
+        return;
+
+    }
+
+
+    if (!deliveryAddress) {
+
+        showWarning(
+            "Delivery Address Required",
+            "Please enter the Delivery Address."
+        );
+
+        focusElement(
+            "deliveryAddress"
+        );
+
+        return;
+
+    }
+
+
+    if (!dateOfTransfer) {
 
         showWarning(
             "Date of Transfer Required",
             "Please enter the Date of Transfer before reviewing the Delivery Receipt."
         );
 
-        if (dateOfTransfer) {
-            dateOfTransfer.focus();
-        }
-
-        return;
-    }
-
-
-    /*
-       Delivery Address
-    */
-
-    if (
-        !deliveryAddress ||
-        !deliveryAddress.value.trim()
-    ) {
-
-        showWarning(
-            "Delivery Address Required",
-            "Please enter the Delivery Address before reviewing the Delivery Receipt."
+        focusElement(
+            "dateOfTransfer"
         );
 
-        if (deliveryAddress) {
-            deliveryAddress.focus();
-        }
-
         return;
+
     }
 
 
     /*
-       Selected items
-    */
+     * VALIDATE ITEMS
+     */
 
     const selectedItems =
         itemState.filter(
-            item =>
-                item.checked
+            item => item.checked
         );
 
 
@@ -2579,75 +2511,100 @@ function reviewDeliveryReceipt() {
         );
 
         return;
+
     }
 
 
-    /*
-       Validate every selected item.
-    */
+    let invalidItem = null;
+
 
     for (
         const item of selectedItems
     ) {
 
-        if (
-            !item.pickQty ||
-            item.pickQty <= 0
-        ) {
-
-            showWarning(
-                "Pick Quantity Required",
-                `Please enter a Pick Qty for Item ${item.itemNo}.`
+        const valid =
+            validatePickQty(
+                item.index,
+                false
             );
 
-            focusPickInput(
-                item.index
-            );
 
-            return;
+        if (!valid) {
+
+            invalidItem =
+                item;
+
+            break;
+
         }
 
 
         if (
-            item.pickQty >
-            item.balance
+            toNumber(item.pickQty) <= 0
         ) {
 
-            showWarning(
-                "Invalid Pick Quantity",
-                `Item ${item.itemNo}: Pick Qty cannot exceed the balance of ${formatNumber(item.balance)}.`
+            item.error =
+                "Please enter a Pick Qty greater than 0.";
+
+            setItemError(
+                item.index,
+                item.error
             );
 
-            focusPickInput(
-                item.index
-            );
+            invalidItem =
+                item;
 
-            return;
+            break;
+
         }
+
+    }
+
+
+    if (invalidItem) {
+
+        showWarning(
+            "Check Pick Quantity",
+            invalidItem.error ||
+            "Please check the Pick Qty."
+        );
+
+        return;
+
     }
 
 
     /*
-       Build temporary DR.
-       Nothing is saved yet.
-    */
+     * BUILD CURRENT DR
+     */
 
-    currentDR = buildCurrentDR();
-
-
-    renderReview();
+    currentDR =
+        buildCurrentDeliveryReceipt();
 
 
-    addHidden(
-        prepareView
+    /*
+     * RENDER REVIEW
+     */
+
+    renderReview(
+        currentDR
     );
 
-    removeHidden(
-        reviewView
+
+    /*
+     * CHANGE VIEW
+     */
+
+    hideElement(
+        "prepareView"
     );
 
-    addHidden(
-        completedView
+    showElement(
+        "reviewView"
+    );
+
+    hideElement(
+        "completedView"
     );
 
 
@@ -2660,64 +2617,7 @@ function reviewDeliveryReceipt() {
         top: 0,
         behavior: "smooth"
     });
-}
 
-
-/* =========================================================
-   SYNC EDITABLE SO FIELDS
-   ========================================================= */
-
-function syncEditableSOFields() {
-
-    if (!selectedSO) {
-        return;
-    }
-
-
-    const editableFields = [
-
-        "dateCreation",
-        "clientName",
-        "salesEngineer",
-        "attention",
-        "tinNumber",
-        "poNumber",
-        "paymentTerms",
-        "jobOrder",
-        "billingAddress",
-        "project",
-        "deliveryAddress"
-    ];
-
-
-    editableFields.forEach(
-        function (field) {
-
-            const element =
-                document.querySelector(
-                    `[data-field="${field}"]`
-                );
-
-
-            if (element) {
-
-                selectedSO[field] =
-                    element.value.trim();
-            }
-        }
-    );
-
-
-    /*
-       Delivery Address is always taken
-       from the editable delivery field.
-    */
-
-    if (deliveryAddress) {
-
-        selectedSO.deliveryAddress =
-            deliveryAddress.value.trim();
-    }
 }
 
 
@@ -2725,31 +2625,38 @@ function syncEditableSOFields() {
    BUILD CURRENT DR
    ========================================================= */
 
-function buildCurrentDR() {
+function buildCurrentDeliveryReceipt() {
+
+    const edited =
+        getEditedSalesOrderDetails();
+
 
     const selectedItems =
         itemState
             .filter(
-                item =>
-                    item.checked &&
-                    item.pickQty > 0
+                item => item.checked
             )
             .map(
-                function (item) {
+                function(item) {
 
                     return {
 
                         id:
                             item.id,
 
-                        itemNo:
-                            item.itemNo,
+                        itemNumber:
+                            item.itemNumber,
 
                         itemName:
                             item.itemName,
 
+                        itemDescription:
+                            item.itemDescription,
+
                         description:
-                            item.description,
+                            item.itemDescription ||
+                            item.itemName ||
+                            "",
 
                         unit:
                             item.unit,
@@ -2757,18 +2664,28 @@ function buildCurrentDR() {
                         totalOrder:
                             item.totalOrder,
 
+                        soQty:
+                            item.totalOrder,
+
                         totalDelivered:
+                            item.totalDelivered,
+
+                        deliveredQty:
                             item.totalDelivered,
 
                         balance:
                             item.balance,
 
                         pickQty:
-                            item.pickQty,
+                            toNumber(
+                                item.pickQty
+                            ),
 
                         remarks:
-                            item.remarks
+                            item.remarks || ""
+
                     };
+
                 }
             );
 
@@ -2776,89 +2693,58 @@ function buildCurrentDR() {
     return {
 
         drNumber:
-            getElement("drNumber")
-                ?.textContent.trim() || "",
-
+            getCurrentDRNumber(),
 
         soNumber:
-            selectedSO.soNumber,
-
+            edited.soNumber,
 
         dateCreation:
-            selectedSO.dateCreation,
-
+            edited.dateCreation,
 
         clientName:
-            selectedSO.clientName,
-
+            edited.clientName,
 
         salesEngineer:
-            selectedSO.salesEngineer,
-
+            edited.salesEngineer,
 
         attention:
-            selectedSO.attention,
-
+            edited.attention,
 
         tinNumber:
-            selectedSO.tinNumber,
-
+            edited.tinNumber,
 
         poNumber:
-            selectedSO.poNumber,
-
+            edited.poNumber,
 
         paymentTerms:
-            selectedSO.paymentTerms,
-
+            edited.paymentTerms,
 
         jobOrder:
-            selectedSO.jobOrder,
-
+            edited.jobOrder,
 
         billingAddress:
-            selectedSO.billingAddress,
-
+            edited.billingAddress,
 
         project:
-            selectedSO.project,
-
+            edited.project,
 
         deliveryAddress:
-            deliveryAddress
-                ? deliveryAddress.value.trim()
-                : selectedSO.deliveryAddress,
-
+            edited.deliveryAddress,
 
         dateOfTransfer:
-            dateOfTransfer
-                ? dateOfTransfer.value
-                : "",
-
+            getValue("dateOfTransfer"),
 
         items:
             selectedItems,
 
-
-        totalPickedQty:
-            selectedItems.reduce(
-                function (total, item) {
-
-                    return total +
-                        item.pickQty;
-
-                },
-                0
-            ),
-
-
         status:
-            "DRAFT",
-
+            "PREPARED",
 
         createdAt:
             new Date().toISOString()
+
     };
+
 }
 
 
@@ -2866,111 +2752,130 @@ function buildCurrentDR() {
    RENDER REVIEW
    ========================================================= */
 
-function renderReview() {
+function renderReview(dr) {
 
-    if (!currentDR) {
+    if (!dr) {
         return;
     }
 
 
     setText(
         "reviewDrNumber",
-        currentDR.drNumber
+        dr.drNumber
     );
 
 
     setText(
         "reviewSO",
-        currentDR.soNumber
+        dr.soNumber || "—"
     );
-
 
     setText(
         "reviewSODate",
         formatDateDisplay(
-            currentDR.dateCreation
+            dr.dateCreation
         )
     );
 
-
     setText(
         "reviewClient",
-        currentDR.clientName
+        dr.clientName || "—"
     );
 
+    setText(
+        "reviewSE",
+        dr.salesEngineer || "—"
+    );
+
+    setText(
+        "reviewAttention",
+        dr.attention || "—"
+    );
+
+    setText(
+        "reviewTIN",
+        dr.tinNumber || "—"
+    );
 
     setText(
         "reviewPO",
-        currentDR.poNumber
+        dr.poNumber || "—"
     );
 
+    setText(
+        "reviewTerms",
+        dr.paymentTerms || "—"
+    );
+
+    setText(
+        "reviewJO",
+        dr.jobOrder || "—"
+    );
+
+    setText(
+        "reviewBillingAddress",
+        dr.billingAddress || "—"
+    );
 
     setText(
         "reviewProject",
-        currentDR.project
+        dr.project || "—"
     );
-
 
     setText(
         "reviewTransferDate",
         formatDateDisplay(
-            currentDR.dateOfTransfer
+            dr.dateOfTransfer
         )
     );
 
-
     setText(
         "reviewAddress",
-        currentDR.deliveryAddress
+        dr.deliveryAddress || "—"
     );
 
 
-    if (reviewTotalQty) {
+    /*
+     * TOTAL
+     */
 
-        reviewTotalQty.textContent =
-            formatNumber(
-                currentDR.totalPickedQty
-            );
-    }
+    const total =
+        dr.items.reduce(
+            function(sum, item) {
+
+                return (
+                    sum +
+                    toNumber(item.pickQty)
+                );
+
+            },
+            0
+        );
 
 
-    renderReviewItems();
-}
+    setText(
+        "reviewTotalQty",
+        formatNumber(total)
+    );
 
 
-/* =========================================================
-   RENDER REVIEW ITEMS
-   ========================================================= */
+    /*
+     * ITEMS
+     */
 
-function renderReviewItems() {
+    const tbody =
+        $("reviewItemsBody");
 
-    if (!reviewItemsBody) {
+    if (!tbody) {
         return;
     }
 
 
-    reviewItemsBody.innerHTML = "";
+    tbody.innerHTML = "";
 
 
-    if (
-        !currentDR ||
-        !currentDR.items.length
-    ) {
-
-        reviewItemsBody.innerHTML = `
-            <tr>
-                <td colspan="7">
-                    No delivery items.
-                </td>
-            </tr>
-        `;
-
-        return;
-    }
-
-
-    currentDR.items.forEach(
-        function (item) {
+    dr.items.forEach(
+        function(item) {
 
             const row =
                 document.createElement("tr");
@@ -2980,23 +2885,39 @@ function renderReviewItems() {
 
                 <td>
                     <strong>
-                        ${escapeHTML(item.itemNo)}
+                        ${escapeHTML(
+                            item.itemNumber || "—"
+                        )}
                     </strong>
                 </td>
 
+
                 <td>
-                    <div class="item-name">
+
+                    <div class="review-item-name">
+
                         ${escapeHTML(
                             item.itemName || "—"
                         )}
+
                     </div>
 
-                    <div class="item-description">
-                        ${escapeHTML(
-                            item.description || "—"
-                        )}
-                    </div>
+                    ${
+                        item.itemDescription
+                        ? `
+                            <div class="review-item-description">
+
+                                ${escapeHTML(
+                                    item.itemDescription
+                                )}
+
+                            </div>
+                        `
+                        : ""
+                    }
+
                 </td>
+
 
                 <td>
                     ${formatNumber(
@@ -3004,11 +2925,13 @@ function renderReviewItems() {
                     )}
                 </td>
 
+
                 <td>
                     ${formatNumber(
                         item.totalDelivered
                     )}
                 </td>
+
 
                 <td>
                     ${formatNumber(
@@ -3016,28 +2939,54 @@ function renderReviewItems() {
                     )}
                 </td>
 
+
                 <td>
-                    <strong>
+
+                    <strong class="review-pick-qty">
+
                         ${formatNumber(
                             item.pickQty
                         )}
+
                     </strong>
+
+                    ${
+                        item.unit
+                        ? `
+                            <small>
+                                ${escapeHTML(
+                                    item.unit
+                                )}
+                            </small>
+                        `
+                        : ""
+                    }
+
                 </td>
 
+
                 <td>
-                    ${escapeHTML(
-                        item.remarks || "—"
-                    )}
+
+                    ${
+                        item.remarks
+                        ? escapeHTML(
+                            item.remarks
+                        )
+                        : "—"
+                    }
+
                 </td>
 
             `;
 
 
-            reviewItemsBody.appendChild(
+            tbody.appendChild(
                 row
             );
+
         }
     );
+
 }
 
 
@@ -3047,16 +2996,143 @@ function renderReviewItems() {
 
 function backToPrepare() {
 
-    addHidden(
-        reviewView
+    if (!currentDR) {
+
+        showElement(
+            "prepareView"
+        );
+
+        hideElement(
+            "reviewView"
+        );
+
+        currentStep = 1;
+
+        updateWorkflow(1);
+
+        return;
+
+    }
+
+
+    /*
+     * PUT CURRENT REVIEW DATA BACK
+     * INTO ITEM STATE
+     */
+
+    currentDR.items.forEach(
+        function(reviewItem) {
+
+            const stateItem =
+                itemState.find(
+                    item =>
+                        sameItem(
+                            reviewItem,
+                            item
+                        )
+                );
+
+
+            if (!stateItem) {
+                return;
+            }
+
+
+            stateItem.checked =
+                true;
+
+            stateItem.pickQty =
+                toNumber(
+                    reviewItem.pickQty
+                );
+
+            stateItem.remarks =
+                reviewItem.remarks || "";
+
+        }
     );
 
-    removeHidden(
-        prepareView
+
+    /*
+     * RENDER AGAIN
+     */
+
+    renderItemsTable();
+
+
+    /*
+     * RESTORE CHECKED STATES
+     */
+
+    itemState.forEach(
+        function(item) {
+
+            const checkbox =
+                document.querySelector(
+                    `.item-checkbox[data-index="${item.index}"]`
+                );
+
+            const pickInput =
+                document.querySelector(
+                    `.pick-qty-input[data-index="${item.index}"]`
+                );
+
+            const remarksInput =
+                document.querySelector(
+                    `.remarks-input[data-index="${item.index}"]`
+                );
+
+
+            if (checkbox) {
+
+                checkbox.checked =
+                    item.checked;
+
+            }
+
+
+            if (pickInput) {
+
+                pickInput.disabled =
+                    !item.checked;
+
+                pickInput.value =
+                    item.pickQty || 0;
+
+            }
+
+
+            if (remarksInput) {
+
+                remarksInput.disabled =
+                    !item.checked;
+
+                remarksInput.value =
+                    item.remarks || "";
+
+            }
+
+        }
     );
 
-    addHidden(
-        completedView
+
+    updatePickingStats();
+
+
+    /*
+     * VIEW
+     */
+
+    hideElement(
+        "reviewView"
+    );
+
+    showElement(
+        "prepareView"
+    );
+
+    hideElement(
+        "completedView"
     );
 
 
@@ -3069,6 +3145,7 @@ function backToPrepare() {
         top: 0,
         behavior: "smooth"
     });
+
 }
 
 
@@ -3082,45 +3159,122 @@ function saveDeliveryReceipt() {
 
         showWarning(
             "Nothing to Save",
-            "There is no Delivery Receipt ready to save."
+            "There is no prepared Delivery Receipt to save."
         );
 
         return;
+
     }
 
 
     /*
-       Recheck data before final save.
-    */
+     * FINAL VALIDATION
+     */
 
     if (
-        !currentDR.items ||
+        !currentDR.soNumber
+    ) {
+
+        showWarning(
+            "Sales Order Required",
+            "Sales Order information is missing."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !currentDR.dateOfTransfer
+    ) {
+
+        showWarning(
+            "Date of Transfer Required",
+            "Please enter the Date of Transfer."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !currentDR.deliveryAddress
+    ) {
+
+        showWarning(
+            "Delivery Address Required",
+            "Please enter the Delivery Address."
+        );
+
+        return;
+
+    }
+
+
+    if (
+        !Array.isArray(
+            currentDR.items
+        ) ||
         !currentDR.items.length
     ) {
 
         showWarning(
             "No Delivery Items",
-            "Please go back to Prepare and select delivery items."
+            "Please select at least one item."
         );
 
         return;
+
     }
 
 
-    const deliveryReceipts =
-        getDeliveryReceipts();
+    /*
+     * CHECK QUANTITIES AGAIN
+     */
+
+    for (
+        const item of currentDR.items
+    ) {
+
+        if (
+            toNumber(item.pickQty) <= 0
+        ) {
+
+            showWarning(
+                "Invalid Pick Quantity",
+                `Item ${item.itemNumber} must have a Pick Qty greater than 0.`
+            );
+
+            return;
+
+        }
+
+
+        if (
+            toNumber(item.pickQty) >
+            toNumber(item.balance)
+        ) {
+
+            showWarning(
+                "Pick Quantity Exceeded",
+                `Item ${item.itemNumber}: Pick Qty cannot exceed Balance.`
+            );
+
+            return;
+
+        }
+
+    }
 
 
     /*
-       Generate a fresh DR number
-       in case another DR was saved
-       while this page was open.
-    */
+     * GENERATE FINAL DR NUMBER
+     */
 
     currentDR.drNumber =
-        generateDRNumber(
-            deliveryReceipts
-        );
+        generateDRNumber();
 
 
     currentDR.status =
@@ -3132,10 +3286,18 @@ function saveDeliveryReceipt() {
 
 
     /*
-       Add newest DR to beginning.
-    */
+     * READ EXISTING
+     */
 
-    deliveryReceipts.unshift(
+    const records =
+        readDeliveryReceipts();
+
+
+    /*
+     * SAVE
+     */
+
+    records.unshift(
         currentDR
     );
 
@@ -3144,18 +3306,15 @@ function saveDeliveryReceipt() {
 
         localStorage.setItem(
             DR_STORAGE_KEY,
-            JSON.stringify(
-                deliveryReceipts
-            )
+            JSON.stringify(records)
         );
 
     } catch (error) {
 
         console.error(
-            "Unable to save Delivery Receipt.",
+            "Unable to save Delivery Receipt:",
             error
         );
-
 
         showWarning(
             "Save Failed",
@@ -3163,16 +3322,21 @@ function saveDeliveryReceipt() {
         );
 
         return;
+
     }
 
+
+    /*
+     * SAVED STATE
+     */
 
     savedDR =
         currentDR;
 
 
     /*
-       Remove temporary selected SO.
-    */
+     * CLEAR SELECTED SO
+     */
 
     try {
 
@@ -3183,170 +3347,31 @@ function saveDeliveryReceipt() {
     } catch (error) {
 
         console.warn(
-            "Unable to clear selected SO.",
-            error
-        );
-    }
-
-
-    showCompleted();
-
-
-    console.log(
-        "Delivery Receipt saved:",
-        savedDR
-    );
-}
-
-
-/* =========================================================
-   GENERATE DR NUMBER
-   ========================================================= */
-
-function generateDRNumber(
-    existingDRs = []
-) {
-
-    const year =
-        new Date().getFullYear();
-
-
-    let maxNumber = 0;
-
-
-    existingDRs.forEach(
-        function (dr) {
-
-            if (!dr || !dr.drNumber) {
-                return;
-            }
-
-
-            const match =
-                String(
-                    dr.drNumber
-                ).match(
-                    new RegExp(
-                        `^DR-${year}-(\\d+)$`
-                    )
-                );
-
-
-            if (!match) {
-                return;
-            }
-
-
-            const number =
-                Number(
-                    match[1]
-                );
-
-
-            if (
-                number >
-                maxNumber
-            ) {
-
-                maxNumber =
-                    number;
-            }
-        }
-    );
-
-
-    return (
-        `DR-${year}-` +
-        String(
-            maxNumber + 1
-        ).padStart(5, "0")
-    );
-}
-
-
-/* =========================================================
-   DISPLAY GENERATED DR NUMBER
-   ========================================================= */
-
-function generateAndDisplayDRNumber() {
-
-    const existingDRs =
-        getDeliveryReceipts();
-
-
-    const number =
-        generateDRNumber(
-            existingDRs
+            "Unable to clear selected SO."
         );
 
-
-    setText(
-        "drNumber",
-        number
-    );
-}
-
-
-/* =========================================================
-   COMPLETED
-   ========================================================= */
-
-function showCompleted() {
-
-    if (!savedDR) {
-        return;
     }
-
-
-    setText(
-        "completedDrNumber",
-        savedDR.drNumber
-    );
-
-
-    setText(
-        "completedSO",
-        savedDR.soNumber
-    );
-
-
-    setText(
-        "completedClient",
-        savedDR.clientName
-    );
-
-
-    setText(
-        "completedTransferDate",
-        formatDateDisplay(
-            savedDR.dateOfTransfer
-        )
-    );
-
-
-    setText(
-        "completedAddress",
-        savedDR.deliveryAddress
-    );
 
 
     /*
-       Also update preview data.
-    */
+     * COMPLETED VIEW
+     */
 
-    populatePreview();
-
-
-    addHidden(
-        prepareView
+    renderCompleted(
+        savedDR
     );
 
-    addHidden(
-        reviewView
+
+    hideElement(
+        "prepareView"
     );
 
-    removeHidden(
-        completedView
+    hideElement(
+        "reviewView"
+    );
+
+    showElement(
+        "completedView"
     );
 
 
@@ -3359,231 +3384,63 @@ function showCompleted() {
         top: 0,
         behavior: "smooth"
     });
+
+
+    console.log(
+        "Delivery Receipt saved:",
+        savedDR
+    );
+
 }
 
 
 /* =========================================================
-   WORKFLOW
+   RENDER COMPLETED
    ========================================================= */
 
-function updateWorkflow(
-    step
-) {
+function renderCompleted(dr) {
 
-    currentStep =
-        step;
-
-
-    for (
-        let i = 1;
-        i <= 3;
-        i++
-    ) {
-
-        const workflowStep =
-            getElement(
-                `workflowStep${i}`
-            );
-
-
-        if (!workflowStep) {
-            continue;
-        }
-
-
-        workflowStep.classList.remove(
-            "active",
-            "completed"
-        );
-
-
-        if (
-            i === step
-        ) {
-
-            workflowStep.classList.add(
-                "active"
-            );
-        }
-
-
-        if (
-            i < step
-        ) {
-
-            workflowStep.classList.add(
-                "completed"
-            );
-        }
-    }
-}
-
-
-/* =========================================================
-   WARNING MODAL
-   ========================================================= */
-
-function showWarning(
-    title,
-    message
-) {
-
-    if (warningTitle) {
-
-        warningTitle.textContent =
-            title;
-    }
-
-
-    if (warningMessage) {
-
-        warningMessage.textContent =
-            message;
-    }
-
-
-    if (warningModal) {
-
-        removeHidden(
-            warningModal
-        );
-    }
-}
-
-
-/* =========================================================
-   CLOSE WARNING
-   ========================================================= */
-
-function closeWarning() {
-
-    if (warningModal) {
-
-        addHidden(
-            warningModal
-        );
-    }
-}
-
-
-/* =========================================================
-   LEAVE CONFIRMATION
-   ========================================================= */
-
-function requestLeave() {
-
-    /*
-       If DR has already been saved,
-       leaving does not lose anything.
-    */
-
-    if (
-        savedDR ||
-        currentStep === 3
-    ) {
-
-        goBackToMain();
-
+    if (!dr) {
         return;
     }
 
 
-    /*
-       No SO selected and no work:
-       leave immediately.
-    */
+    setText(
+        "completedDrNumber",
+        dr.drNumber || "—"
+    );
 
-    const hasWork =
-        Boolean(selectedSO) ||
-        itemState.some(
-            item =>
-                item.checked ||
-                item.pickQty > 0 ||
-                item.remarks
-        );
+    setText(
+        "completedSO",
+        dr.soNumber || "—"
+    );
 
+    setText(
+        "completedClient",
+        dr.clientName || "—"
+    );
 
-    if (!hasWork) {
+    setText(
+        "completedTransferDate",
+        formatDateDisplay(
+            dr.dateOfTransfer
+        )
+    );
 
-        goBackToMain();
-
-        return;
-    }
-
-
-    if (leaveConfirmModal) {
-
-        removeHidden(
-            leaveConfirmModal
-        );
-    }
-}
-
-
-/* =========================================================
-   CLOSE LEAVE MODAL
-   ========================================================= */
-
-function closeLeaveModal() {
-
-    if (leaveConfirmModal) {
-
-        addHidden(
-            leaveConfirmModal
-        );
-    }
-}
-
-
-/* =========================================================
-   GO BACK TO MAIN
-   ========================================================= */
-
-function goBackToMain() {
-
-    /*
-       Tell index.html that the user came
-       from the Delivery module.
-
-       If index.js supports this key,
-       it can reopen Delivery automatically.
-    */
-
-    try {
-
-        localStorage.setItem(
-            RETURN_MODULE_KEY,
-            "delivery"
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "Unable to set return module.",
-            error
-        );
-    }
+    setText(
+        "completedAddress",
+        dr.deliveryAddress || "—"
+    );
 
 
     /*
-       IMPORTANT:
+     * UPDATE PREVIEW TOO
+     */
 
-       DO NOT use:
+    renderPreview(
+        dr
+    );
 
-           window.location.href = "delivery.html";
-
-       because create-delivery-receipt.html
-       is inside /pages/ while delivery.html
-       is a module/fragment.
-
-       Going directly to delivery.html can
-       destroy the main index layout.
-
-       Always return to the root index.
-    */
-
-    window.location.href =
-        "../index.html";
 }
 
 
@@ -3591,131 +3448,151 @@ function goBackToMain() {
    PREVIEW
    ========================================================= */
 
-function openPreview() {
+function openPrintPreview() {
 
     if (!savedDR) {
-        return;
-    }
 
-
-    populatePreview();
-
-
-    if (previewModal) {
-
-        removeHidden(
-            previewModal
+        showWarning(
+            "No Saved Delivery Receipt",
+            "Please save the Delivery Receipt first."
         );
+
+        return;
+
     }
+
+
+    renderPreview(
+        savedDR
+    );
+
+
+    const modal =
+        $("previewModal");
+
+    if (modal) {
+
+        modal.classList.remove(
+            "hidden"
+        );
+
+        document.body.classList.add(
+            "modal-open"
+        );
+
+    }
+
 }
 
 
 /* =========================================================
-   POPULATE PREVIEW
+   RENDER PREVIEW
    ========================================================= */
 
-function populatePreview() {
+function renderPreview(dr) {
 
-    if (!savedDR) {
+    if (!dr) {
         return;
     }
 
 
     setText(
         "previewDrNumber",
-        savedDR.drNumber
+        dr.drNumber || "—"
     );
-
 
     setText(
         "previewNumber",
-        savedDR.drNumber
+        dr.drNumber || "—"
     );
-
 
     setText(
         "previewDate",
         formatDateDisplay(
-            savedDR.dateOfTransfer
+            dr.dateOfTransfer
         )
     );
 
-
     setText(
         "previewSO",
-        savedDR.soNumber
+        dr.soNumber || "—"
     );
-
 
     setText(
         "previewPO",
-        savedDR.poNumber
+        dr.poNumber || "—"
     );
-
 
     setText(
         "previewClient",
-        savedDR.clientName
+        dr.clientName || "—"
     );
-
 
     setText(
         "previewProject",
-        savedDR.project
+        dr.project || "—"
     );
-
 
     setText(
         "previewAddress",
-        savedDR.deliveryAddress
+        dr.deliveryAddress || "—"
     );
 
 
-    const previewItemsBody =
-        getElement(
-            "previewItemsBody"
-        );
+    const tbody =
+        $("previewItemsBody");
 
-
-    if (!previewItemsBody) {
+    if (!tbody) {
         return;
     }
 
 
-    previewItemsBody.innerHTML = "";
+    tbody.innerHTML = "";
 
 
-    savedDR.items.forEach(
-        function (item) {
+    const items =
+        Array.isArray(dr.items)
+        ? dr.items
+        : [];
+
+
+    items.forEach(
+        function(item) {
 
             const row =
-                document.createElement(
-                    "tr"
-                );
+                document.createElement("tr");
 
 
             row.innerHTML = `
 
                 <td>
                     ${escapeHTML(
-                        item.itemNo
+                        item.itemNumber || "—"
                     )}
                 </td>
 
                 <td>
+
                     <strong>
                         ${escapeHTML(
                             item.itemName || "—"
                         )}
                     </strong>
 
-                    <br>
+                    ${
+                        item.itemDescription
+                        ? `
+                            <div class="preview-item-description">
 
-                    <small>
-                        ${escapeHTML(
-                            item.description || ""
-                        )}
-                    </small>
+                                ${escapeHTML(
+                                    item.itemDescription
+                                )}
+
+                            </div>
+                        `
+                        : ""
+                    }
+
                 </td>
 
                 <td>
@@ -3731,34 +3608,25 @@ function populatePreview() {
                 </td>
 
                 <td>
-                    ${escapeHTML(
-                        item.remarks || "—"
-                    )}
+                    ${
+                        item.remarks
+                        ? escapeHTML(
+                            item.remarks
+                        )
+                        : "—"
+                    }
                 </td>
 
             `;
 
 
-            previewItemsBody.appendChild(
+            tbody.appendChild(
                 row
             );
+
         }
     );
-}
 
-
-/* =========================================================
-   CLOSE PREVIEW
-   ========================================================= */
-
-function closePreview() {
-
-    if (previewModal) {
-
-        addHidden(
-            previewModal
-        );
-    }
 }
 
 
@@ -3768,51 +3636,681 @@ function closePreview() {
 
 function printDeliveryReceipt() {
 
-    if (!savedDR) {
-        return;
-    }
+    /*
+     * Close modal before printing.
+     */
+
+    closePreviewModal();
 
 
-    window.print();
+    /*
+     * Browser print.
+     */
+
+    setTimeout(
+        function() {
+
+            window.print();
+
+        },
+        150
+    );
+
 }
 
 
 /* =========================================================
-   NUMBER PARSER
+   CLOSE PREVIEW
    ========================================================= */
 
-function parseNumber(
-    value
-) {
+function closePreviewModal() {
 
-    if (
-        value === null ||
-        value === undefined ||
-        value === ""
-    ) {
+    const modal =
+        $("previewModal");
 
-        return 0;
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   CHANGE SALES ORDER
+   ========================================================= */
+
+function changeSalesOrder() {
+
+    /*
+     * Reset only the current SO selection.
+     */
+
+    selectedSO = null;
+
+    itemState = [];
+
+    currentDR = null;
+
+
+    /*
+     * Hide SO dependent sections.
+     */
+
+    hideElement(
+        "selectedSOIndicator"
+    );
+
+    hideElement(
+        "soInformationSection"
+    );
+
+    hideElement(
+        "deliveryDetailsSection"
+    );
+
+    hideElement(
+        "itemPickingSection"
+    );
+
+    hideElement(
+        "prepareActions"
+    );
+
+
+    /*
+     * Clear search.
+     */
+
+    const input =
+        $("salesOrderSearch");
+
+    if (input) {
+
+        input.value = "";
+
+        input.focus();
+
     }
 
 
-    const cleaned =
-        String(value)
-            .replace(
-                /,/g,
-                ""
-            )
-            .trim();
+    const clearButton =
+        $("clearSalesOrderSearch");
+
+    if (clearButton) {
+
+        clearButton.classList.add(
+            "hidden"
+        );
+
+    }
 
 
-    const number =
-        Number(
-            cleaned
+    /*
+     * Workflow.
+     */
+
+    currentStep = 1;
+
+    updateWorkflow(1);
+
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =========================================================
+   CLEAR SELECTED SO
+   ========================================================= */
+
+function clearSelectedSalesOrder() {
+
+    selectedSO = null;
+
+    itemState = [];
+
+    currentDR = null;
+
+
+    hideElement(
+        "selectedSOIndicator"
+    );
+
+    hideElement(
+        "soInformationSection"
+    );
+
+    hideElement(
+        "deliveryDetailsSection"
+    );
+
+    hideElement(
+        "itemPickingSection"
+    );
+
+    hideElement(
+        "prepareActions"
+    );
+
+
+    updateWorkflow(1);
+
+}
+
+
+/* =========================================================
+   WORKFLOW
+   ========================================================= */
+
+function updateWorkflow(step) {
+
+    currentStep =
+        step;
+
+
+    for (
+        let i = 1;
+        i <= 3;
+        i++
+    ) {
+
+        const workflow =
+            $(
+                `workflowStep${i}`
+            );
+
+
+        if (!workflow) {
+            continue;
+        }
+
+
+        workflow.classList.remove(
+            "active",
+            "completed"
         );
 
 
-    return Number.isFinite(number)
-        ? number
-        : 0;
+        if (i === step) {
+
+            workflow.classList.add(
+                "active"
+            );
+
+        } else if (i < step) {
+
+            workflow.classList.add(
+                "completed"
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   BACK / LEAVE
+   ========================================================= */
+
+function handleBackRequest() {
+
+    /*
+     * If already saved,
+     * no warning needed.
+     */
+
+    if (
+        savedDR ||
+        currentStep === 3
+    ) {
+
+        goBackToMain();
+
+        return;
+
+    }
+
+
+    /*
+     * Check if there is actual work.
+     */
+
+    const hasWork =
+        Boolean(selectedSO) ||
+        itemState.some(
+            item =>
+                item.checked ||
+                toNumber(item.pickQty) > 0 ||
+                item.remarks
+        ) ||
+        Boolean(
+            getValue("clientName") ||
+            getValue("deliveryAddress")
+        );
+
+
+    if (!hasWork) {
+
+        goBackToMain();
+
+        return;
+
+    }
+
+
+    showLeaveModal();
+
+}
+
+
+/* =========================================================
+   SHOW LEAVE MODAL
+   ========================================================= */
+
+function showLeaveModal() {
+
+    const modal =
+        $("leaveConfirmModal");
+
+    if (!modal) {
+
+        /*
+         * Fallback
+         */
+
+        if (
+            window.confirm(
+                "Your current Delivery Receipt preparation will be lost if you leave this page. Continue?"
+            )
+        ) {
+
+            goBackToMain();
+
+        }
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   CLOSE LEAVE MODAL
+   ========================================================= */
+
+function closeLeaveModal() {
+
+    const modal =
+        $("leaveConfirmModal");
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   GO BACK TO MAIN
+   ========================================================= */
+
+function goBackToMain() {
+
+    closeLeaveModal();
+
+    closeWarningModal();
+
+    closePreviewModal();
+
+
+    /*
+     * Tell main system that we came from
+     * Create Delivery Receipt.
+     *
+     * The important part:
+     *
+     * DO NOT USE:
+     *
+     * delivery.html
+     *
+     * because delivery.html is a module/page
+     * and not the main shell.
+     */
+
+    try {
+
+        localStorage.setItem(
+            RETURN_MODULE_KEY,
+            "delivery"
+        );
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to set return module."
+        );
+
+    }
+
+
+    /*
+     * Correct path:
+     *
+     * create-delivery-receipt.html
+     * is inside /pages/
+     *
+     * ../index.html
+     * goes back to the main system.
+     */
+
+    window.location.href =
+        "../index.html";
+
+}
+
+
+/* =========================================================
+   WARNING MODAL
+   ========================================================= */
+
+function showWarning(
+    title,
+    message
+) {
+
+    const modal =
+        $("warningModal");
+
+
+    setText(
+        "warningTitle",
+        title || "Warning"
+    );
+
+    setText(
+        "warningMessage",
+        message ||
+        "Please check the information."
+    );
+
+
+    if (!modal) {
+
+        alert(
+            `${title}\n\n${message}`
+        );
+
+        return;
+
+    }
+
+
+    modal.classList.remove(
+        "hidden"
+    );
+
+    document.body.classList.add(
+        "modal-open"
+    );
+
+
+    if (warningTimeout) {
+
+        clearTimeout(
+            warningTimeout
+        );
+
+    }
+
+}
+
+
+function closeWarningModal() {
+
+    const modal =
+        $("warningModal");
+
+    if (modal) {
+
+        modal.classList.add(
+            "hidden"
+        );
+
+    }
+
+    document.body.classList.remove(
+        "modal-open"
+    );
+
+}
+
+
+/* =========================================================
+   SALES ORDER SUGGESTION HIDE
+   ========================================================= */
+
+function hideSalesOrderSuggestions() {
+
+    const container =
+        $("salesOrderSuggestions");
+
+    if (container) {
+
+        container.classList.add(
+            "hidden"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   STORAGE - DELIVERY RECEIPTS
+   ========================================================= */
+
+function readDeliveryReceipts() {
+
+    try {
+
+        const stored =
+            localStorage.getItem(
+                DR_STORAGE_KEY
+            );
+
+        if (!stored) {
+
+            return [];
+
+        }
+
+
+        const parsed =
+            JSON.parse(stored);
+
+
+        if (
+            Array.isArray(parsed)
+        ) {
+
+            return parsed;
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to read Delivery Receipts:",
+            error
+        );
+
+    }
+
+
+    return [];
+
+}
+
+
+/* =========================================================
+   CURRENT DR NUMBER
+   ========================================================= */
+
+function getCurrentDRNumber() {
+
+    const element =
+        $("drNumber");
+
+    if (
+        element &&
+        element.textContent.trim()
+    ) {
+
+        return element.textContent.trim();
+
+    }
+
+
+    return generateDRNumber();
+
+}
+
+
+/* =========================================================
+   ELEMENT HELPERS
+   ========================================================= */
+
+function showElement(id) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+function hideElement(id) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.classList.add(
+        "hidden"
+    );
+
+}
+
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.textContent =
+        value ??
+        "—";
+
+}
+
+
+function setValue(
+    id,
+    value
+) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.value =
+        value ??
+        "";
+
+}
+
+
+function getValue(id) {
+
+    const element =
+        $(id);
+
+    if (!element) {
+        return "";
+    }
+
+    return element.value || "";
+
+}
+
+
+function focusElement(id) {
+
+    const element =
+        $(id);
+
+    if (element) {
+
+        element.focus();
+
+        element.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+    }
+
 }
 
 
@@ -3820,14 +4318,10 @@ function parseNumber(
    FORMAT NUMBER
    ========================================================= */
 
-function formatNumber(
-    value
-) {
+function formatNumber(value) {
 
     const number =
-        parseNumber(
-            value
-        );
+        toNumber(value);
 
 
     if (
@@ -3837,15 +4331,49 @@ function formatNumber(
         return number.toLocaleString(
             "en-US"
         );
+
     }
 
 
     return number.toLocaleString(
         "en-US",
         {
-            maximumFractionDigits: 2
+            maximumFractionDigits: 3
         }
     );
+
+}
+
+
+/* =========================================================
+   NUMBER CONVERSION
+   ========================================================= */
+
+function toNumber(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        return 0;
+
+    }
+
+
+    const number =
+        Number(
+            String(value)
+                .replace(/,/g, "")
+                .trim()
+        );
+
+
+    return Number.isFinite(number)
+        ? number
+        : 0;
+
 }
 
 
@@ -3853,9 +4381,7 @@ function formatNumber(
    DATE FORMAT
    ========================================================= */
 
-function formatDateDisplay(
-    value
-) {
+function formatDateDisplay(value) {
 
     if (!value) {
         return "—";
@@ -3863,14 +4389,29 @@ function formatDateDisplay(
 
 
     /*
-       Handle ISO date and normal
-       date strings.
-    */
+     * Avoid timezone problems with
+     * YYYY-MM-DD values.
+     */
+
+    const match =
+        String(value).match(
+            /^(\d{4})-(\d{2})-(\d{2})$/
+        );
+
+
+    if (match) {
+
+        return (
+            `${match[2]}/` +
+            `${match[3]}/` +
+            `${match[1]}`
+        );
+
+    }
+
 
     const date =
-        new Date(
-            value
-        );
+        new Date(value);
 
 
     if (
@@ -3880,103 +4421,34 @@ function formatDateDisplay(
     ) {
 
         return String(value);
+
     }
 
 
     return date.toLocaleDateString(
-        "en-US",
+        "en-PH",
         {
             year: "numeric",
-            month: "short",
+            month: "2-digit",
             day: "2-digit"
         }
     );
+
 }
 
 
 /* =========================================================
-   FOCUS PICK INPUT
+   TEXT NORMALIZATION
    ========================================================= */
 
-function focusPickInput(
-    index
-) {
+function normalizeText(value) {
 
-    if (!itemsTableBody) {
-        return;
-    }
+    return String(
+        value ?? ""
+    )
+        .trim()
+        .toLowerCase();
 
-
-    const input =
-        itemsTableBody.querySelector(
-            `.pick-qty-input[data-index="${index}"]`
-        );
-
-
-    if (input) {
-
-        input.focus();
-
-        input.select();
-    }
-}
-
-
-/* =========================================================
-   SET TEXT
-   ========================================================= */
-
-function setText(
-    id,
-    value
-) {
-
-    const element =
-        getElement(id);
-
-
-    if (!element) {
-        return;
-    }
-
-
-    element.textContent =
-        value ||
-        "—";
-}
-
-
-/* =========================================================
-   HIDDEN HELPERS
-   ========================================================= */
-
-function addHidden(
-    element
-) {
-
-    if (!element) {
-        return;
-    }
-
-
-    element.classList.add(
-        "hidden"
-    );
-}
-
-
-function removeHidden(
-    element
-) {
-
-    if (!element) {
-        return;
-    }
-
-
-    element.classList.remove(
-        "hidden"
-    );
 }
 
 
@@ -3984,20 +4456,11 @@ function removeHidden(
    ESCAPE HTML
    ========================================================= */
 
-function escapeHTML(
-    value
-) {
+function escapeHTML(value) {
 
-    if (
-        value === null ||
-        value === undefined
-    ) {
-
-        return "";
-    }
-
-
-    return String(value)
+    return String(
+        value ?? ""
+    )
         .replace(
             /&/g,
             "&amp;"
@@ -4018,43 +4481,61 @@ function escapeHTML(
             /'/g,
             "&#039;"
         );
+
 }
 
 
 /* =========================================================
-   DEBUG
+   PAGE BEFORE UNLOAD
+   =========================================================
+   IMPORTANT:
+   We intentionally DO NOT use browser
+   beforeunload confirmation here.
+
+   The custom Leave modal handles navigation
+   so the user gets the LOGIS-TECH design.
    ========================================================= */
 
-window.LOGISTECH_DR = {
+
+/* =========================================================
+   DEBUG HELPER
+   ========================================================= */
+
+window.LOGISTECH_DR_DEBUG = {
 
     getSelectedSO:
-        function () {
+        function() {
             return selectedSO;
         },
 
     getItems:
-        function () {
+        function() {
             return itemState;
         },
 
     getCurrentDR:
-        function () {
+        function() {
             return currentDR;
         },
 
     getSavedDR:
-        function () {
+        function() {
             return savedDR;
         },
 
     getSalesOrders:
-        function () {
+        function() {
             return getSalesOrders();
         },
 
     getDeliveryReceipts:
-        function () {
-            return getDeliveryReceipts();
+        function() {
+            return readDeliveryReceipts();
         }
 
 };
+
+
+console.log(
+    "LOGIS-TECH Create DR JS v20261005-04 loaded."
+);
