@@ -1,1 +1,2931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <title>Create Delivery Receipt | LOGIS-TECH SYSTEM</title>
+
+    <!--
+        CACHE BUSTER
+        Increment this number whenever you update the CSS.
+    -->
+    <link rel="stylesheet" href="../css/create-delivery-receipt.css?v=20261005-01">
+</head>
+
+<body>
+
+<div class="create-dr-page">
+
+    <!-- =====================================================
+         PAGE HEADER
+    ====================================================== -->
+
+    <div class="dr-page-header">
+
+        <div class="dr-header-left">
+
+            <button
+                type="button"
+                class="dr-back-btn"
+                id="backButton"
+            >
+                <span>←</span>
+                Back
+            </button>
+
+            <div class="dr-title-icon">
+                🚚
+            </div>
+
+            <div>
+                <div class="dr-page-title">
+                    Create Delivery Receipt
+                </div>
+
+                <div class="dr-page-subtitle">
+                    Prepare a delivery receipt from a posted Sales Order
+                </div>
+            </div>
+
+        </div>
+
+        <div class="dr-header-right">
+
+            <div class="dr-number-box">
+                <span>DR NUMBER</span>
+                <strong id="drNumber">
+                    DR-2026-00001
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PROGRESS / WORKFLOW
+    ====================================================== -->
+
+    <div class="dr-workflow">
+
+        <div class="workflow-step active">
+            <span class="workflow-number">1</span>
+
+            <div>
+                <strong>Select SO</strong>
+                <small>Choose posted SO</small>
+            </div>
+        </div>
+
+        <div class="workflow-line"></div>
+
+        <div class="workflow-step">
+            <span class="workflow-number">2</span>
+
+            <div>
+                <strong>Pick Items</strong>
+                <small>Select delivery items</small>
+            </div>
+        </div>
+
+        <div class="workflow-line"></div>
+
+        <div class="workflow-step">
+            <span class="workflow-number">3</span>
+
+            <div>
+                <strong>Prepare DR</strong>
+                <small>Review information</small>
+            </div>
+        </div>
+
+        <div class="workflow-line"></div>
+
+        <div class="workflow-step">
+            <span class="workflow-number">4</span>
+
+            <div>
+                <strong>Post DR</strong>
+                <small>Send to Finance</small>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MAIN CONTENT
+    ====================================================== -->
+
+    <main class="dr-main-content">
+
+
+        <!-- =================================================
+             SECTION 01 — SELECT SALES ORDER
+        ================================================== -->
+
+        <section class="dr-section">
+
+            <div class="dr-section-header">
+
+                <div class="dr-section-title-wrap">
+
+                    <div class="dr-section-number">
+                        01
+                    </div>
+
+                    <div>
+                        <h2>Select Sales Order</h2>
+
+                        <p>
+                            Only POSTED Sales Orders with remaining items are available.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="posted-only-badge">
+                    POSTED SO ONLY
+                </div>
+
+            </div>
+
+
+            <div class="so-selector-area">
+
+                <label for="salesOrderSelect">
+                    Sales Order <span>*</span>
+                </label>
+
+                <select
+                    id="salesOrderSelect"
+                    class="dr-select"
+                >
+                    <option value="">
+                        -- Select Sales Order --
+                    </option>
+
+                    <!--
+                        MOCK SO DATA WILL BE LOADED HERE
+                    -->
+                </select>
+
+                <small class="field-help">
+                    Only posted Sales Orders with remaining quantities can be selected.
+                </small>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SECTION 02 — SALES ORDER INFORMATION
+        ================================================== -->
+
+        <section
+            class="dr-section hidden"
+            id="soInformationSection"
+        >
+
+            <div class="dr-section-header">
+
+                <div class="dr-section-title-wrap">
+
+                    <div class="dr-section-number">
+                        02
+                    </div>
+
+                    <div>
+                        <h2>Sales Order Information</h2>
+
+                        <p>
+                            Information below is automatically loaded from the selected SO.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="so-info-grid">
+
+                <div class="info-card">
+                    <span>SO Number</span>
+                    <strong id="soNumberDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>SO Date</span>
+                    <strong id="soDateDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Client Name</span>
+                    <strong id="clientNameDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Attention</span>
+                    <strong id="attentionDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>PO Number</span>
+                    <strong id="poNumberDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Project</span>
+                    <strong id="projectDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>TIN</span>
+                    <strong id="tinDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Payment Terms</span>
+                    <strong id="termsDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>Sales Engineer</span>
+                    <strong id="salesEngineerDisplay">—</strong>
+                </div>
+
+                <div class="info-card">
+                    <span>SO Status</span>
+                    <strong
+                        id="soStatusDisplay"
+                        class="status-badge status-posted"
+                    >
+                        POSTED
+                    </strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SECTION 03 — DELIVERY INFORMATION
+        ================================================== -->
+
+        <section
+            class="dr-section hidden"
+            id="deliveryInformationSection"
+        >
+
+            <div class="dr-section-header">
+
+                <div class="dr-section-title-wrap">
+
+                    <div class="dr-section-number">
+                        03
+                    </div>
+
+                    <div>
+                        <h2>Delivery Information</h2>
+
+                        <p>
+                            Delivery address may be changed because actual delivery location may differ from the SO.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="delivery-form-grid">
+
+                <div class="form-group">
+
+                    <label for="dateOfTransfer">
+                        Date of Transfer <span>*</span>
+                    </label>
+
+                    <input
+                        type="date"
+                        id="dateOfTransfer"
+                        class="dr-input"
+                    >
+
+                    <small class="field-help">
+                        Required before preparing the DR.
+                    </small>
+
+                </div>
+
+
+                <div class="form-group full-width">
+
+                    <label for="deliveryAddress">
+                        Delivery Address <span>*</span>
+                    </label>
+
+                    <textarea
+                        id="deliveryAddress"
+                        class="dr-textarea"
+                        rows="3"
+                        placeholder="Enter actual delivery address..."
+                    ></textarea>
+
+                    <small class="field-help">
+                        This address can be changed from the original SO delivery address.
+                    </small>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="driverName">
+                        Driver / Contact Person
+                    </label>
+
+                    <input
+                        type="text"
+                        id="driverName"
+                        class="dr-input"
+                        placeholder="Optional"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="vehicleNumber">
+                        Vehicle / Plate Number
+                    </label>
+
+                    <input
+                        type="text"
+                        id="vehicleNumber"
+                        class="dr-input"
+                        placeholder="Optional"
+                    >
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SECTION 04 — ITEM PICKING
+        ================================================== -->
+
+        <section
+            class="dr-section hidden"
+            id="itemPickingSection"
+        >
+
+            <div class="dr-section-header">
+
+                <div class="dr-section-title-wrap">
+
+                    <div class="dr-section-number">
+                        04
+                    </div>
+
+                    <div>
+                        <h2>Pick Delivery Items</h2>
+
+                        <p>
+                            Select only the items included in the Sales Order.
+                            Quantity cannot exceed the remaining quantity.
+                        </p>
+                    </div>
+
+                </div>
+
+                <div class="remaining-summary">
+                    <span>ITEMS AVAILABLE</span>
+                    <strong id="availableItemCount">0</strong>
+                </div>
+
+            </div>
+
+
+            <!-- PICKING RULE NOTICE -->
+
+            <div class="picking-rule-box">
+
+                <div class="rule-icon">
+                    ✓
+                </div>
+
+                <div>
+
+                    <strong>
+                        Picking Rule
+                    </strong>
+
+                    <p>
+                        You may deliver partially. The system automatically deducts quantities
+                        from previous DRs and prevents over-delivery.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ITEMS TABLE -->
+
+            <div class="items-table-container">
+
+                <table class="items-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="pick-column">
+                                PICK
+                            </th>
+
+                            <th>
+                                SO ITEM
+                            </th>
+
+                            <th>
+                                ORDERED
+                            </th>
+
+                            <th>
+                                PREVIOUSLY DELIVERED
+                            </th>
+
+                            <th>
+                                REMAINING
+                            </th>
+
+                            <th class="description-column">
+                                DR DESCRIPTION
+                            </th>
+
+                            <th class="qty-column">
+                                DR QTY
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="itemsTableBody">
+
+                        <!-- ITEMS WILL BE GENERATED HERE -->
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- PICKING TOTAL -->
+
+            <div class="picking-footer">
+
+                <div class="picked-summary">
+
+                    <div>
+                        <span>Selected Items</span>
+                        <strong id="selectedItemCount">0</strong>
+                    </div>
+
+                    <div>
+                        <span>Total Picked Qty</span>
+                        <strong id="totalPickedQty">0</strong>
+                    </div>
+
+                </div>
+
+                <div
+                    class="picking-warning"
+                    id="pickingWarning"
+                >
+                    Select at least one item.
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SECTION 05 — DR SUMMARY
+        ================================================== -->
+
+        <section
+            class="dr-section hidden"
+            id="drSummarySection"
+        >
+
+            <div class="dr-section-header">
+
+                <div class="dr-section-title-wrap">
+
+                    <div class="dr-section-number">
+                        05
+                    </div>
+
+                    <div>
+                        <h2>Delivery Receipt Summary</h2>
+
+                        <p>
+                            Review the information before preparing the DR.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="dr-summary-grid">
+
+                <div class="summary-box">
+
+                    <span>DR Number</span>
+
+                    <strong id="summaryDrNumber">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-box">
+
+                    <span>SO Number</span>
+
+                    <strong id="summarySoNumber">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-box">
+
+                    <span>Client</span>
+
+                    <strong id="summaryClient">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="summary-box">
+
+                    <span>Date of Transfer</span>
+
+                    <strong id="summaryTransferDate">
+                        —
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="summary-address">
+
+                <span>Delivery Address</span>
+
+                <strong id="summaryAddress">
+                    —
+                </strong>
+
+            </div>
+
+
+            <div class="summary-items">
+
+                <h3>
+                    Selected Delivery Items
+                </h3>
+
+                <div id="summaryItemsList">
+
+                    <!-- SUMMARY ITEMS -->
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             SECTION 06 — ACTIONS
+        ================================================== -->
+
+        <section
+            class="dr-actions-section hidden"
+            id="drActionsSection"
+        >
+
+            <div class="action-note">
+
+                <strong>
+                    Before you prepare this DR:
+                </strong>
+
+                <ul>
+
+                    <li>
+                        Make sure the Sales Order is correct.
+                    </li>
+
+                    <li>
+                        Verify Date of Transfer.
+                    </li>
+
+                    <li>
+                        Verify actual Delivery Address.
+                    </li>
+
+                    <li>
+                        Check selected items and quantities.
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <div class="dr-action-buttons">
+
+                <button
+                    type="button"
+                    class="dr-btn dr-btn-secondary"
+                    id="cancelButton"
+                >
+                    CANCEL
+                </button>
+
+                <button
+                    type="button"
+                    class="dr-btn dr-btn-outline"
+                    id="previewButton"
+                >
+                    PREVIEW DR
+                </button>
+
+                <button
+                    type="button"
+                    class="dr-btn dr-btn-primary"
+                    id="prepareButton"
+                >
+                    PREPARE DR
+                </button>
+
+                <button
+                    type="button"
+                    class="dr-btn dr-btn-success hidden"
+                    id="postButton"
+                >
+                    POST DR
+                </button>
+
+            </div>
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         WARNING MODAL
+    ====================================================== -->
+
+    <div
+        class="modal-overlay hidden"
+        id="warningModal"
+    >
+
+        <div class="warning-modal">
+
+            <div class="warning-modal-icon">
+                ⚠
+            </div>
+
+            <h3 id="warningTitle">
+                Warning
+            </h3>
+
+            <p id="warningMessage">
+                Please check the information.
+            </p>
+
+            <button
+                type="button"
+                class="dr-btn dr-btn-primary"
+                id="closeWarningButton"
+            >
+                OK
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PREVIEW MODAL
+    ====================================================== -->
+
+    <div
+        class="modal-overlay hidden"
+        id="previewModal"
+    >
+
+        <div class="preview-modal">
+
+            <div class="preview-modal-header">
+
+                <div>
+                    <span>DELIVERY RECEIPT PREVIEW</span>
+                    <strong id="previewDrNumber">
+                        DR-2026-00001
+                    </strong>
+                </div>
+
+                <button
+                    type="button"
+                    class="preview-close"
+                    id="closePreviewButton"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="preview-document">
+
+                <div class="preview-company">
+                    <strong>
+                        LOGIS-TECH SYSTEM
+                    </strong>
+
+                    <span>
+                        DELIVERY RECEIPT
+                    </span>
+                </div>
+
+
+                <div class="preview-document-info">
+
+                    <div>
+                        <span>DR Number</span>
+                        <strong id="previewNumber">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Date of Transfer</span>
+                        <strong id="previewDate">—</strong>
+                    </div>
+
+                    <div>
+                        <span>SO Number</span>
+                        <strong id="previewSO">—</strong>
+                    </div>
+
+                    <div>
+                        <span>PO Number</span>
+                        <strong id="previewPO">—</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="preview-client-info">
+
+                    <div>
+                        <span>Client</span>
+                        <strong id="previewClient">—</strong>
+                    </div>
+
+                    <div>
+                        <span>Project</span>
+                        <strong id="previewProject">—</strong>
+                    </div>
+
+                    <div class="full-width">
+                        <span>Delivery Address</span>
+                        <strong id="previewAddress">—</strong>
+                    </div>
+
+                </div>
+
+
+                <table class="preview-items-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>DESCRIPTION</th>
+                            <th>QTY</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="previewItemsBody">
+
+                    </tbody>
+
+                </table>
+
+
+                <div class="preview-signatures">
+
+                    <div>
+                        <span>Prepared By</span>
+                        <div class="signature-line"></div>
+                    </div>
+
+                    <div>
+                        <span>Received By</span>
+                        <div class="signature-line"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="preview-actions">
+
+                <button
+                    type="button"
+                    class="dr-btn dr-btn-secondary"
+                    id="closePreviewButton2"
+                >
+                    CLOSE
+                </button>
+
+                <button
+                    type="button"
+                    class="dr-btn dr-btn-primary"
+                    id="printButton"
+                >
+                    PRINT DR
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     FRONTEND LOGIC
+     LOCALSTORAGE / MOCK DATA ONLY
+========================================================= -->
+
+<script>
+
+/* =========================================================
+   CONFIGURATION
+========================================================= */
+
+const STORAGE_KEYS = {
+    salesOrders: "logitechSalesOrders",
+    deliveryReceipts: "logitechDeliveryReceipts"
+};
+
+
+/* =========================================================
+   MOCK SALES ORDERS
+   Used ONLY if localStorage has no SO data yet.
+========================================================= */
+
+const MOCK_SALES_ORDERS = [
+
+    {
+        id: "SO-2026-00001",
+        soNumber: "SO-2026-00001",
+        soDate: "2026-09-28",
+        client: "ABC Construction Corporation",
+        attention: "Juan Dela Cruz",
+        poNumber: "PO-ABC-001",
+        project: "ABC Tower Project",
+        tin: "123-456-789",
+        terms: "30 DAYS",
+        salesEngineer: "Cris",
+        status: "POSTED",
+
+        deliveryAddress:
+            "ABC Tower Project Site, Quezon City",
+
+        items: [
+
+            {
+                id: "SO-2026-00001-01",
+                description: "Cable Tray 100x50x1.2mm",
+                unit: "pcs",
+                orderedQty: 100
+            },
+
+            {
+                id: "SO-2026-00001-02",
+                description: "Cable Tray 150x50x1.2mm",
+                unit: "pcs",
+                orderedQty: 50
+            },
+
+            {
+                id: "SO-2026-00001-03",
+                description: "Support Bracket Heavy Duty",
+                unit: "pcs",
+                orderedQty: 200
+            }
+
+        ]
+
+    },
+
+
+    {
+        id: "SO-2026-00002",
+        soNumber: "SO-2026-00002",
+        soDate: "2026-09-30",
+        client: "XYZ Engineering",
+        attention: "Maria Santos",
+        poNumber: "PO-XYZ-002",
+        project: "XYZ Warehouse",
+        tin: "987-654-321",
+        terms: "COD",
+        salesEngineer: "Cris",
+        status: "POSTED",
+
+        deliveryAddress:
+            "XYZ Warehouse, Valenzuela City",
+
+        items: [
+
+            {
+                id: "SO-2026-00002-01",
+                description: "GI Cable Tray 300x100",
+                unit: "pcs",
+                orderedQty: 80
+            },
+
+            {
+                id: "SO-2026-00002-02",
+                description: "Cable Tray Cover 300mm",
+                unit: "pcs",
+                orderedQty: 80
+            }
+
+        ]
+
+    }
+
+];
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let salesOrders = [];
+let deliveryReceipts = [];
+
+let selectedSO = null;
+
+let pickedItems = [];
+
+let currentDR = null;
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const salesOrderSelect =
+    document.getElementById("salesOrderSelect");
+
+const soInformationSection =
+    document.getElementById("soInformationSection");
+
+const deliveryInformationSection =
+    document.getElementById("deliveryInformationSection");
+
+const itemPickingSection =
+    document.getElementById("itemPickingSection");
+
+const drSummarySection =
+    document.getElementById("drSummarySection");
+
+const drActionsSection =
+    document.getElementById("drActionsSection");
+
+const itemsTableBody =
+    document.getElementById("itemsTableBody");
+
+const dateOfTransfer =
+    document.getElementById("dateOfTransfer");
+
+const deliveryAddress =
+    document.getElementById("deliveryAddress");
+
+const warningModal =
+    document.getElementById("warningModal");
+
+const previewModal =
+    document.getElementById("previewModal");
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initialize
+);
+
+
+function initialize() {
+
+    loadData();
+
+    generateDRNumber();
+
+    populateSalesOrders();
+
+    setupEvents();
+
+    setToday();
+
+}
+
+
+/* =========================================================
+   LOAD DATA
+========================================================= */
+
+function loadData() {
+
+    try {
+
+        const storedSO =
+            localStorage.getItem(
+                STORAGE_KEYS.salesOrders
+            );
+
+        const storedDR =
+            localStorage.getItem(
+                STORAGE_KEYS.deliveryReceipts
+            );
+
+
+        salesOrders =
+            storedSO
+                ? JSON.parse(storedSO)
+                : [...MOCK_SALES_ORDERS];
+
+
+        deliveryReceipts =
+            storedDR
+                ? JSON.parse(storedDR)
+                : [];
+
+
+        /*
+            If there is no SO in localStorage,
+            save mock data so it can be tested.
+        */
+
+        if (!storedSO) {
+
+            localStorage.setItem(
+                STORAGE_KEYS.salesOrders,
+                JSON.stringify(salesOrders)
+            );
+
+        }
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Unable to load local data:",
+            error
+        );
+
+        salesOrders =
+            [...MOCK_SALES_ORDERS];
+
+        deliveryReceipts = [];
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE DATA
+========================================================= */
+
+function saveData() {
+
+    localStorage.setItem(
+        STORAGE_KEYS.salesOrders,
+        JSON.stringify(salesOrders)
+    );
+
+
+    localStorage.setItem(
+        STORAGE_KEYS.deliveryReceipts,
+        JSON.stringify(deliveryReceipts)
+    );
+
+}
+
+
+/* =========================================================
+   POPULATE SO SELECT
+========================================================= */
+
+function populateSalesOrders() {
+
+    salesOrderSelect.innerHTML =
+        `<option value="">
+            -- Select Sales Order --
+        </option>`;
+
+
+    const availableSO =
+        salesOrders.filter(so => {
+
+            if (
+                String(so.status).toUpperCase()
+                !== "POSTED" &&
+                String(so.status).toUpperCase()
+                !== "PARTIAL"
+            ) {
+
+                return false;
+
+            }
+
+
+            return getSOItemsRemaining(so) > 0;
+
+        });
+
+
+    availableSO.forEach(so => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = so.id || so.soNumber;
+
+        option.textContent =
+            `${so.soNumber} — ${so.client}`;
+
+        salesOrderSelect.appendChild(option);
+
+    });
+
+}
+
+
+/* =========================================================
+   GET DR DELIVERED QTY FOR SO ITEM
+========================================================= */
+
+function getPreviouslyDeliveredQty(
+    soNumber,
+    itemId
+) {
+
+    return deliveryReceipts.reduce(
+        (total, dr) => {
+
+            if (
+                dr.soNumber !== soNumber ||
+                dr.status === "CANCELLED"
+            ) {
+
+                return total;
+
+            }
+
+
+            const matchingItem =
+                (dr.items || []).find(
+                    item =>
+                        item.sourceItemId === itemId
+                );
+
+
+            if (!matchingItem) {
+
+                return total;
+
+            }
+
+
+            return total +
+                Number(matchingItem.qty || 0);
+
+        },
+        0
+    );
+
+}
+
+
+/* =========================================================
+   GET REMAINING QTY
+========================================================= */
+
+function getRemainingQty(
+    so,
+    item
+) {
+
+    const delivered =
+        getPreviouslyDeliveredQty(
+            so.soNumber,
+            item.id
+        );
+
+
+    const ordered =
+        Number(item.orderedQty || 0);
+
+
+    return Math.max(
+        0,
+        ordered - delivered
+    );
+
+}
+
+
+/* =========================================================
+   GET TOTAL SO REMAINING
+========================================================= */
+
+function getSOItemsRemaining(so) {
+
+    return (so.items || []).reduce(
+        (total, item) => {
+
+            return total +
+                getRemainingQty(
+                    so,
+                    item
+                );
+
+        },
+        0
+    );
+
+}
+
+
+/* =========================================================
+   SELECT SO
+========================================================= */
+
+salesOrderSelect.addEventListener(
+    "change",
+    function() {
+
+        const selectedId =
+            this.value;
+
+
+        if (!selectedId) {
+
+            clearSO();
+
+            return;
+
+        }
+
+
+        selectedSO =
+            salesOrders.find(
+                so =>
+                    (so.id || so.soNumber)
+                    === selectedId
+            );
+
+
+        if (!selectedSO) {
+
+            showWarning(
+                "Sales Order Not Found",
+                "The selected Sales Order could not be found."
+            );
+
+            return;
+
+        }
+
+
+        loadSelectedSO();
+
+    }
+);
+
+
+/* =========================================================
+   LOAD SELECTED SO
+========================================================= */
+
+function loadSelectedSO() {
+
+    document
+        .getElementById("soNumberDisplay")
+        .textContent =
+        selectedSO.soNumber || "—";
+
+
+    document
+        .getElementById("soDateDisplay")
+        .textContent =
+        formatDate(selectedSO.soDate);
+
+
+    document
+        .getElementById("clientNameDisplay")
+        .textContent =
+        selectedSO.client || "—";
+
+
+    document
+        .getElementById("attentionDisplay")
+        .textContent =
+        selectedSO.attention || "—";
+
+
+    document
+        .getElementById("poNumberDisplay")
+        .textContent =
+        selectedSO.poNumber || "—";
+
+
+    document
+        .getElementById("projectDisplay")
+        .textContent =
+        selectedSO.project || "—";
+
+
+    document
+        .getElementById("tinDisplay")
+        .textContent =
+        selectedSO.tin || "—";
+
+
+    document
+        .getElementById("termsDisplay")
+        .textContent =
+        selectedSO.terms || "—";
+
+
+    document
+        .getElementById("salesEngineerDisplay")
+        .textContent =
+        selectedSO.salesEngineer || "—";
+
+
+    document
+        .getElementById("soStatusDisplay")
+        .textContent =
+        selectedSO.status || "POSTED";
+
+
+    deliveryAddress.value =
+        selectedSO.deliveryAddress || "";
+
+
+    pickedItems = [];
+
+
+    renderItems();
+
+
+    soInformationSection
+        .classList.remove("hidden");
+
+
+    deliveryInformationSection
+        .classList.remove("hidden");
+
+
+    itemPickingSection
+        .classList.remove("hidden");
+
+
+    drSummarySection
+        .classList.add("hidden");
+
+
+    drActionsSection
+        .classList.remove("hidden");
+
+
+    updateWorkflow(2);
+
+}
+
+
+/* =========================================================
+   RENDER ITEMS
+========================================================= */
+
+function renderItems() {
+
+    itemsTableBody.innerHTML = "";
+
+
+    if (
+        !selectedSO ||
+        !Array.isArray(selectedSO.items)
+    ) {
+
+        return;
+
+    }
+
+
+    let availableCount = 0;
+
+
+    selectedSO.items.forEach(
+        (item, index) => {
+
+            const ordered =
+                Number(
+                    item.orderedQty || 0
+                );
+
+
+            const delivered =
+                getPreviouslyDeliveredQty(
+                    selectedSO.soNumber,
+                    item.id
+                );
+
+
+            const remaining =
+                Math.max(
+                    0,
+                    ordered - delivered
+                );
+
+
+            if (remaining > 0) {
+
+                availableCount++;
+
+            }
+
+
+            const row =
+                document.createElement("tr");
+
+
+            const disabled =
+                remaining <= 0
+                    ? "disabled"
+                    : "";
+
+
+            row.innerHTML = `
+
+                <td class="pick-cell">
+
+                    <input
+                        type="checkbox"
+                        class="item-check"
+                        data-index="${index}"
+                        ${disabled}
+                    >
+
+                </td>
+
+
+                <td>
+
+                    <div class="so-item-name">
+
+                        <strong>
+                            ${escapeHTML(
+                                item.description
+                            )}
+                        </strong>
+
+                        <small>
+                            ${escapeHTML(
+                                item.unit || ""
+                            )}
+                        </small>
+
+                    </div>
+
+                </td>
+
+
+                <td>
+                    ${ordered}
+                </td>
+
+
+                <td>
+                    ${delivered}
+                </td>
+
+
+                <td>
+
+                    <strong
+                        class="${
+                            remaining === 0
+                                ? "zero-remaining"
+                                : "remaining-qty"
+                        }"
+                    >
+                        ${remaining}
+                    </strong>
+
+                </td>
+
+
+                <td>
+
+                    <div class="description-input-wrap">
+
+                        <input
+                            type="text"
+                            class="dr-description"
+                            data-index="${index}"
+                            value="${escapeAttribute(
+                                item.description
+                            )}"
+                            disabled
+                        >
+
+                        <label class="custom-description-toggle">
+
+                            <input
+                                type="checkbox"
+                                class="custom-description"
+                                data-index="${index}"
+                                ${disabled}
+                            >
+
+                            Custom
+
+                        </label>
+
+                    </div>
+
+                </td>
+
+
+                <td>
+
+                    <div class="qty-input-wrap">
+
+                        <input
+                            type="number"
+                            class="dr-qty"
+                            data-index="${index}"
+                            min="0"
+                            max="${remaining}"
+                            step="1"
+                            value="0"
+                            disabled
+                        >
+
+                        <span>
+                            / ${remaining}
+                        </span>
+
+                    </div>
+
+                </td>
+
+            `;
+
+
+            itemsTableBody.appendChild(row);
+
+        }
+    );
+
+
+    document
+        .getElementById("availableItemCount")
+        .textContent =
+        availableCount;
+
+
+    setupItemEvents();
+
+    updatePickingSummary();
+
+}
+
+
+/* =========================================================
+   ITEM EVENTS
+========================================================= */
+
+function setupItemEvents() {
+
+    document
+        .querySelectorAll(".item-check")
+        .forEach(checkbox => {
+
+            checkbox.addEventListener(
+                "change",
+                function() {
+
+                    const index =
+                        Number(
+                            this.dataset.index
+                        );
+
+
+                    const qtyInput =
+                        document.querySelector(
+                            `.dr-qty[data-index="${index}"]`
+                        );
+
+
+                    const descriptionInput =
+                        document.querySelector(
+                            `.dr-description[data-index="${index}"]`
+                        );
+
+
+                    const customToggle =
+                        document.querySelector(
+                            `.custom-description[data-index="${index}"]`
+                        );
+
+
+                    qtyInput.disabled =
+                        !this.checked;
+
+
+                    customToggle.disabled =
+                        !this.checked;
+
+
+                    descriptionInput.disabled =
+                        !this.checked ||
+                        !customToggle.checked;
+
+
+                    if (!this.checked) {
+
+                        qtyInput.value = 0;
+
+                        customToggle.checked =
+                            false;
+
+                        descriptionInput.value =
+                            selectedSO.items[index]
+                                .description;
+
+                    }
+
+
+                    updatePickingSummary();
+
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".custom-description")
+        .forEach(toggle => {
+
+            toggle.addEventListener(
+                "change",
+                function() {
+
+                    const index =
+                        Number(
+                            this.dataset.index
+                        );
+
+
+                    const descriptionInput =
+                        document.querySelector(
+                            `.dr-description[data-index="${index}"]`
+                        );
+
+
+                    descriptionInput.disabled =
+                        !this.checked;
+
+
+                    if (!this.checked) {
+
+                        descriptionInput.value =
+                            selectedSO.items[index]
+                                .description;
+
+                    }
+
+                }
+            );
+
+        });
+
+
+    document
+        .querySelectorAll(".dr-qty")
+        .forEach(input => {
+
+            input.addEventListener(
+                "input",
+                function() {
+
+                    const index =
+                        Number(
+                            this.dataset.index
+                        );
+
+
+                    const item =
+                        selectedSO.items[index];
+
+
+                    const remaining =
+                        getRemainingQty(
+                            selectedSO,
+                            item
+                        );
+
+
+                    let qty =
+                        Number(
+                            this.value
+                        );
+
+
+                    if (qty < 0) {
+
+                        qty = 0;
+
+                    }
+
+
+                    if (qty > remaining) {
+
+                        this.value =
+                            remaining;
+
+
+                        showWarning(
+                            "Quantity Exceeded",
+                            `Maximum remaining quantity for "${item.description}" is ${remaining}.`
+                        );
+
+                    }
+
+
+                    updatePickingSummary();
+
+                }
+            );
+
+        });
+
+}
+
+
+/* =========================================================
+   UPDATE PICKING SUMMARY
+========================================================= */
+
+function updatePickingSummary() {
+
+    const checks =
+        document.querySelectorAll(
+            ".item-check:checked"
+        );
+
+
+    let selectedCount = 0;
+
+    let totalQty = 0;
+
+
+    checks.forEach(check => {
+
+        const index =
+            Number(
+                check.dataset.index
+            );
+
+
+        const qtyInput =
+            document.querySelector(
+                `.dr-qty[data-index="${index}"]`
+            );
+
+
+        const qty =
+            Number(
+                qtyInput?.value || 0
+            );
+
+
+        if (qty > 0) {
+
+            selectedCount++;
+
+            totalQty += qty;
+
+        }
+
+    });
+
+
+    document
+        .getElementById("selectedItemCount")
+        .textContent =
+        selectedCount;
+
+
+    document
+        .getElementById("totalPickedQty")
+        .textContent =
+        totalQty;
+
+
+    const warning =
+        document.getElementById(
+            "pickingWarning"
+        );
+
+
+    if (selectedCount === 0) {
+
+        warning.textContent =
+            "Select at least one item.";
+
+        warning.classList.add("warning");
+
+    }
+
+    else {
+
+        warning.textContent =
+            "Items and quantities are ready.";
+
+        warning.classList.remove("warning");
+
+    }
+
+}
+
+
+/* =========================================================
+   BUILD PICKED ITEMS
+========================================================= */
+
+function buildPickedItems() {
+
+    const result = [];
+
+
+    document
+        .querySelectorAll(".item-check:checked")
+        .forEach(check => {
+
+            const index =
+                Number(
+                    check.dataset.index
+                );
+
+
+            const sourceItem =
+                selectedSO.items[index];
+
+
+            const qtyInput =
+                document.querySelector(
+                    `.dr-qty[data-index="${index}"]`
+                );
+
+
+            const descriptionInput =
+                document.querySelector(
+                    `.dr-description[data-index="${index}"]`
+                );
+
+
+            const qty =
+                Number(
+                    qtyInput.value || 0
+                );
+
+
+            const remaining =
+                getRemainingQty(
+                    selectedSO,
+                    sourceItem
+                );
+
+
+            if (qty <= 0) {
+
+                return;
+
+            }
+
+
+            if (qty > remaining) {
+
+                throw new Error(
+                    `Quantity for "${sourceItem.description}" cannot exceed ${remaining}.`
+                );
+
+            }
+
+
+            result.push({
+
+                sourceItemId:
+                    sourceItem.id,
+
+                sourceDescription:
+                    sourceItem.description,
+
+                description:
+                    descriptionInput.value.trim()
+                        || sourceItem.description,
+
+                qty: qty,
+
+                unit:
+                    sourceItem.unit || ""
+
+            });
+
+        });
+
+
+    return result;
+
+}
+
+
+/* =========================================================
+   PREPARE DR
+========================================================= */
+
+document
+    .getElementById("prepareButton")
+    .addEventListener(
+        "click",
+        prepareDR
+    );
+
+
+function prepareDR() {
+
+    if (!selectedSO) {
+
+        showWarning(
+            "Select Sales Order",
+            "Please select a Sales Order first."
+        );
+
+        return;
+
+    }
+
+
+    if (!dateOfTransfer.value) {
+
+        showWarning(
+            "Date of Transfer Required",
+            "Please enter the Date of Transfer before preparing the DR."
+        );
+
+        dateOfTransfer.focus();
+
+        return;
+
+    }
+
+
+    if (!deliveryAddress.value.trim()) {
+
+        showWarning(
+            "Delivery Address Required",
+            "Please enter the actual delivery address."
+        );
+
+        deliveryAddress.focus();
+
+        return;
+
+    }
+
+
+    let items;
+
+
+    try {
+
+        items =
+            buildPickedItems();
+
+    }
+
+    catch (error) {
+
+        showWarning(
+            "Invalid Quantity",
+            error.message
+        );
+
+        return;
+
+    }
+
+
+    if (!items.length) {
+
+        showWarning(
+            "No Items Selected",
+            "Please select at least one item and enter a quantity."
+        );
+
+        return;
+
+    }
+
+
+    currentDR = {
+
+        id:
+            document.getElementById(
+                "drNumber"
+            ).textContent,
+
+        drNumber:
+            document.getElementById(
+                "drNumber"
+            ).textContent,
+
+        soNumber:
+            selectedSO.soNumber,
+
+        soId:
+            selectedSO.id,
+
+        client:
+            selectedSO.client,
+
+        attention:
+            selectedSO.attention || "",
+
+        poNumber:
+            selectedSO.poNumber || "",
+
+        project:
+            selectedSO.project || "",
+
+        dateOfTransfer:
+            dateOfTransfer.value,
+
+        deliveryAddress:
+            deliveryAddress.value.trim(),
+
+        driverName:
+            document.getElementById(
+                "driverName"
+            ).value.trim(),
+
+        vehicleNumber:
+            document.getElementById(
+                "vehicleNumber"
+            ).value.trim(),
+
+        items: items,
+
+        status:
+            "PREPARED",
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    renderSummary();
+
+    updateWorkflow(3);
+
+    document
+        .getElementById("prepareButton")
+        .classList.add("hidden");
+
+    document
+        .getElementById("postButton")
+        .classList.remove("hidden");
+
+}
+
+
+/* =========================================================
+   RENDER SUMMARY
+========================================================= */
+
+function renderSummary() {
+
+    if (!currentDR) {
+
+        return;
+
+    }
+
+
+    document
+        .getElementById("summaryDrNumber")
+        .textContent =
+        currentDR.drNumber;
+
+
+    document
+        .getElementById("summarySoNumber")
+        .textContent =
+        currentDR.soNumber;
+
+
+    document
+        .getElementById("summaryClient")
+        .textContent =
+        currentDR.client;
+
+
+    document
+        .getElementById("summaryTransferDate")
+        .textContent =
+        formatDate(
+            currentDR.dateOfTransfer
+        );
+
+
+    document
+        .getElementById("summaryAddress")
+        .textContent =
+        currentDR.deliveryAddress;
+
+
+    const list =
+        document.getElementById(
+            "summaryItemsList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    currentDR.items.forEach(item => {
+
+        const row =
+            document.createElement("div");
+
+
+        row.className =
+            "summary-item-row";
+
+
+        row.innerHTML = `
+
+            <div>
+
+                <strong>
+                    ${escapeHTML(
+                        item.description
+                    )}
+                </strong>
+
+                <small>
+                    Source SO Item:
+                    ${escapeHTML(
+                        item.sourceDescription
+                    )}
+                </small>
+
+            </div>
+
+            <strong>
+                ${item.qty}
+                ${escapeHTML(item.unit)}
+            </strong>
+
+        `;
+
+
+        list.appendChild(row);
+
+    });
+
+
+    drSummarySection
+        .classList.remove("hidden");
+
+}
+
+
+/* =========================================================
+   POST DR
+========================================================= */
+
+document
+    .getElementById("postButton")
+    .addEventListener(
+        "click",
+        postDR
+    );
+
+
+function postDR() {
+
+    if (!currentDR) {
+
+        showWarning(
+            "No DR",
+            "There is no prepared DR to post."
+        );
+
+        return;
+
+    }
+
+
+    currentDR.status =
+        "POSTED";
+
+
+    currentDR.postedAt =
+        new Date().toISOString();
+
+
+    /*
+        Add DR to localStorage.
+    */
+
+    deliveryReceipts.push(
+        currentDR
+    );
+
+
+    /*
+        Update SO status based on remaining quantities.
+    */
+
+    updateSOStatusAfterDR(
+        selectedSO
+    );
+
+
+    saveData();
+
+
+    updateWorkflow(4);
+
+
+    showWarning(
+        "DR Posted Successfully",
+        `${currentDR.drNumber} has been posted successfully.`
+    );
+
+
+    setTimeout(() => {
+
+        window.location.href =
+            "delivery.html";
+
+    }, 1200);
+
+}
+
+
+/* =========================================================
+   UPDATE SO STATUS
+========================================================= */
+
+function updateSOStatusAfterDR(so) {
+
+    const remaining =
+        getSOItemsRemaining(so);
+
+
+    if (remaining <= 0) {
+
+        so.status =
+            "COMPLETED";
+
+    }
+
+    else {
+
+        so.status =
+            "PARTIAL";
+
+    }
+
+}
+
+
+/* =========================================================
+   PREVIEW
+========================================================= */
+
+document
+    .getElementById("previewButton")
+    .addEventListener(
+        "click",
+        previewDR
+    );
+
+
+function previewDR() {
+
+    if (!selectedSO) {
+
+        showWarning(
+            "Select Sales Order",
+            "Please select a Sales Order first."
+        );
+
+        return;
+
+    }
+
+
+    let items;
+
+
+    try {
+
+        items =
+            buildPickedItems();
+
+    }
+
+    catch (error) {
+
+        showWarning(
+            "Invalid Quantity",
+            error.message
+        );
+
+        return;
+
+    }
+
+
+    if (!items.length) {
+
+        showWarning(
+            "No Items Selected",
+            "Please select at least one item before previewing."
+        );
+
+        return;
+
+    }
+
+
+    document
+        .getElementById("previewDrNumber")
+        .textContent =
+        document.getElementById(
+            "drNumber"
+        ).textContent;
+
+
+    document
+        .getElementById("previewNumber")
+        .textContent =
+        document.getElementById(
+            "drNumber"
+        ).textContent;
+
+
+    document
+        .getElementById("previewDate")
+        .textContent =
+        formatDate(
+            dateOfTransfer.value
+        );
+
+
+    document
+        .getElementById("previewSO")
+        .textContent =
+        selectedSO.soNumber;
+
+
+    document
+        .getElementById("previewPO")
+        .textContent =
+        selectedSO.poNumber || "—";
+
+
+    document
+        .getElementById("previewClient")
+        .textContent =
+        selectedSO.client;
+
+
+    document
+        .getElementById("previewProject")
+        .textContent =
+        selectedSO.project || "—";
+
+
+    document
+        .getElementById("previewAddress")
+        .textContent =
+        deliveryAddress.value ||
+        "—";
+
+
+    const body =
+        document.getElementById(
+            "previewItemsBody"
+        );
+
+
+    body.innerHTML = "";
+
+
+    items.forEach(item => {
+
+        const row =
+            document.createElement("tr");
+
+
+        row.innerHTML = `
+
+            <td>
+                ${escapeHTML(
+                    item.description
+                )}
+            </td>
+
+            <td>
+                ${item.qty}
+                ${escapeHTML(
+                    item.unit
+                )}
+            </td>
+
+        `;
+
+
+        body.appendChild(row);
+
+    });
+
+
+    previewModal
+        .classList.remove("hidden");
+
+}
+
+
+/* =========================================================
+   WARNING MODAL
+========================================================= */
+
+function showWarning(
+    title,
+    message
+) {
+
+    document
+        .getElementById("warningTitle")
+        .textContent =
+        title;
+
+
+    document
+        .getElementById("warningMessage")
+        .textContent =
+        message;
+
+
+    warningModal
+        .classList.remove("hidden");
+
+}
+
+
+document
+    .getElementById("closeWarningButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            warningModal
+                .classList.add("hidden");
+
+        }
+    );
+
+
+/* =========================================================
+   CLOSE PREVIEW
+========================================================= */
+
+document
+    .getElementById("closePreviewButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            previewModal
+                .classList.add("hidden");
+
+        }
+    );
+
+
+document
+    .getElementById("closePreviewButton2")
+    .addEventListener(
+        "click",
+        () => {
+
+            previewModal
+                .classList.add("hidden");
+
+        }
+    );
+
+
+/* =========================================================
+   PRINT
+========================================================= */
+
+document
+    .getElementById("printButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.print();
+
+        }
+    );
+
+
+/* =========================================================
+   CANCEL
+========================================================= */
+
+document
+    .getElementById("cancelButton")
+    .addEventListener(
+        "click",
+        cancelDR
+    );
+
+
+function cancelDR() {
+
+    const confirmCancel =
+        window.confirm(
+            "Cancel this Delivery Receipt creation?"
+        );
+
+
+    if (!confirmCancel) {
+
+        return;
+
+    }
+
+
+    window.location.href =
+        "delivery.html";
+
+}
+
+
+/* =========================================================
+   BACK
+========================================================= */
+
+document
+    .getElementById("backButton")
+    .addEventListener(
+        "click",
+        () => {
+
+            window.location.href =
+                "delivery.html";
+
+        }
+    );
+
+
+/* =========================================================
+   CLEAR SO
+========================================================= */
+
+function clearSO() {
+
+    selectedSO = null;
+
+    pickedItems = [];
+
+    soInformationSection
+        .classList.add("hidden");
+
+    deliveryInformationSection
+        .classList.add("hidden");
+
+    itemPickingSection
+        .classList.add("hidden");
+
+    drSummarySection
+        .classList.add("hidden");
+
+    drActionsSection
+        .classList.add("hidden");
+
+}
+
+
+/* =========================================================
+   GENERATE DR NUMBER
+========================================================= */
+
+function generateDRNumber() {
+
+    const year =
+        new Date()
+            .getFullYear();
+
+
+    let maxNumber = 0;
+
+
+    deliveryReceipts.forEach(
+        dr => {
+
+            const match =
+                String(
+                    dr.drNumber || ""
+                ).match(
+                    /DR-\d{4}-(\d+)/
+                );
+
+
+            if (match) {
+
+                maxNumber =
+                    Math.max(
+                        maxNumber,
+                        Number(
+                            match[1]
+                        )
+                    );
+
+            }
+
+        }
+    );
+
+
+    const nextNumber =
+        String(
+            maxNumber + 1
+        ).padStart(
+            5,
+            "0"
+        );
+
+
+    document
+        .getElementById("drNumber")
+        .textContent =
+        `DR-${year}-${nextNumber}`;
+
+}
+
+
+/* =========================================================
+   TODAY
+========================================================= */
+
+function setToday() {
+
+    const now =
+        new Date();
+
+
+    const year =
+        now.getFullYear();
+
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(
+            2,
+            "0"
+        );
+
+
+    dateOfTransfer.value =
+        `${year}-${month}-${day}`;
+
+}
+
+
+/* =========================================================
+   WORKFLOW
+========================================================= */
+
+function updateWorkflow(step) {
+
+    document
+        .querySelectorAll(
+            ".workflow-step"
+        )
+        .forEach(
+            (element, index) => {
+
+                element.classList.toggle(
+                    "active",
+                    index < step
+                );
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(value) {
+
+    if (!value) {
+
+        return "—";
+
+    }
+
+
+    const date =
+        new Date(value);
+
+
+    if (
+        Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return value;
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-PH",
+        {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value) {
+
+    return String(
+        value ?? ""
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+function escapeAttribute(value) {
+
+    return escapeHTML(value);
+
+}
+
+
+/* =========================================================
+   SETUP EVENTS
+========================================================= */
+
+function setupEvents() {
+
+    /*
+        Prevent accidental form-like submission
+        if this page is embedded later.
+    */
+
+    document.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (
+                event.key === "Enter" &&
+                event.target.matches(
+                    ".dr-qty"
+                )
+            ) {
+
+                event.preventDefault();
+
+            }
+
+        }
+    );
+
+}
+
+</script>
+
+</body>
+</html>
