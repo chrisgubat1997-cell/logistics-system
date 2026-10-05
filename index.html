@@ -13,34 +13,54 @@
     <title>LOGIS-TECH SYSTEM</title>
 
 
-    <!-- MAIN / INDEX CSS -->
+    <!-- =====================================================
+         MAIN / INDEX CSS
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="css/index.css"
     >
-    
-<!-- DASHBOARD-->
-<link rel="stylesheet" href="css/dashboard.css">
 
-    
-    <!-- SALES ORDER CSS -->
+
+    <!-- =====================================================
+         DASHBOARD CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="css/dashboard.css"
+    >
+
+
+    <!-- =====================================================
+         SALES ORDER CSS
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="css/sales-order.css"
     >
 
 
-    <!-- DELIVERY CSS -->
+    <!-- =====================================================
+         DELIVERY CSS
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="css/delivery.css"
     >
 
-    <!-- FLEET & DELIVERY ANALYTICS CSS -->
-<link
-    rel="stylesheet"
-    href="css/fleet-analytics.css"
->
+
+    <!-- =====================================================
+         FLEET & DELIVERY ANALYTICS CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="css/fleet-analytics.css"
+    >
 
 </head>
 
@@ -48,78 +68,146 @@
 <body>
 
 
-<!-- =====================================================
+<!-- =========================================================
      SIDEBAR
-===================================================== -->
+========================================================= -->
 
 <div class="sidebar">
 
     <div class="logo">
+
         LOGIS - TECH
-        <span>SYSTEM</span>
+
+        <span>
+            SYSTEM
+        </span>
+
     </div>
 
 
     <div class="menu">
 
-    <button class="menu-btn active"
-        onclick="showPage('dashboard', this)">
-        🏠 Dashboard
-    </button>
 
-    <button class="menu-btn"
-        onclick="showPage('sales', this)">
-        📄 Sales Order
-    </button>
+        <!-- DASHBOARD -->
 
-    <button class="menu-btn"
-        onclick="showPage('delivery', this)">
-        🚚 Delivery
-    </button>
+        <button
+            class="menu-btn active"
+            onclick="showPage('dashboard', this)"
+        >
 
-        <button class="menu-btn"
-    onclick="showPage('fleetAnalytics', this)">
-    📊 Fleet & Delivery Analytics
-</button>
+            🏠 Dashboard
 
-    <button class="menu-btn"
-        onclick="showPage('invoice', this)">
-        🧾 Invoice
-    </button>
+        </button>
 
-    <button class="menu-btn"
-        onclick="showPage('payment', this)">
-        💳 Payment
-    </button>
 
-    <button class="menu-btn"
-        onclick="showPage('reports', this)">
-        📊 Reports
-    </button>
+        <!-- SALES ORDER -->
 
-    <button class="menu-btn"
-        onclick="showPage('settings', this)">
-        ⚙️ Settings
-    </button>
+        <button
+            class="menu-btn"
+            onclick="showPage('sales', this)"
+        >
+
+            📄 Sales Order
+
+        </button>
+
+
+        <!-- DELIVERY -->
+
+        <button
+            class="menu-btn"
+            onclick="showPage('delivery', this)"
+        >
+
+            🚚 Delivery
+
+        </button>
+
+
+        <!-- FLEET & DELIVERY ANALYTICS -->
+
+        <button
+            class="menu-btn"
+            onclick="showPage('fleetAnalytics', this)"
+        >
+
+            📊 Fleet & Delivery Analytics
+
+        </button>
+
+
+        <!-- INVOICE -->
+
+        <button
+            class="menu-btn"
+            onclick="showPage('invoice', this)"
+        >
+
+            🧾 Invoice
+
+        </button>
+
+
+        <!-- PAYMENT -->
+
+        <button
+            class="menu-btn"
+            onclick="showPage('payment', this)"
+        >
+
+            💳 Payment
+
+        </button>
+
+
+        <!-- REPORTS -->
+
+        <button
+            class="menu-btn"
+            onclick="showPage('reports', this)"
+        >
+
+            📊 Reports
+
+        </button>
+
+
+        <!-- SETTINGS -->
+
+        <button
+            class="menu-btn"
+            onclick="showPage('settings', this)"
+        >
+
+            ⚙️ Settings
+
+        </button>
+
+
+    </div>
 
 </div>
-</div>
 
 
-<!-- =====================================================
+
+<!-- =========================================================
      MAIN
-===================================================== -->
+========================================================= -->
 
 <div class="main">
 
 
-    <!-- TOPBAR -->
+    <!-- =====================================================
+         TOPBAR
+    ====================================================== -->
 
     <div class="topbar">
 
+
         <div
             class="page-title"
-            id="pageTitle">
+            id="pageTitle"
+        >
 
             Dashboard
 
@@ -128,14 +216,18 @@
 
         <div class="user-area">
 
+
             <span id="welcomeUser">
+
                 WELCOME, USER
+
             </span>
 
 
             <button
                 class="profile-btn"
-                onclick="openProfile()">
+                onclick="openProfile()"
+            >
 
                 👤 PROFILE
 
@@ -144,93 +236,108 @@
 
             <button
                 class="logout-btn"
-                onclick="logoutUser()">
+                onclick="logoutUser()"
+            >
 
                 LOGOUT
 
             </button>
+
 
         </div>
 
     </div>
 
 
-    <!-- CONTENT -->
+
+    <!-- =====================================================
+         CONTENT
+    ====================================================== -->
 
     <div class="content">
 
 
         <!-- =================================================
              DASHBOARD
-        ================================================= -->
+        ================================================== -->
 
         <div
             id="dashboard"
-            class="page active">
+            class="page active"
+        >
 
             <iframe
                 src="pages/dashboard.html"
                 class="dashboard-frame"
                 title="LOGI-TECH Dashboard"
-                scrolling="no">
-            </iframe>
+                scrolling="no"
+            ></iframe>
 
         </div>
 
 
+
         <!-- =================================================
              SALES ORDER MODULE
-        ================================================= -->
+        ================================================== -->
 
         <div
             id="sales"
-            class="page">
+            class="page"
+        >
 
             <div id="salesModule"></div>
 
         </div>
 
 
-        <!-- =================================================
-             DELIVERY
-        ================================================= -->
-
-        <!-- ================================================= 
-     DELIVERY MODULE
-================================================= -->
-
-<div 
-    id="delivery" 
-    class="page">
-
-    <div id="deliveryModule"></div>
-
-</div>
 
         <!-- =================================================
-     FLEET & DELIVERY ANALYTICS
-================================================= -->
+             DELIVERY MODULE
+        ================================================== -->
 
-<div
-    id="fleetAnalytics"
-    class="page">
+        <div
+            id="delivery"
+            class="page"
+        >
 
-    <div id="fleetAnalyticsModule"></div>
+            <div id="deliveryModule"></div>
 
-</div>
+        </div>
+
+
+
+        <!-- =================================================
+             FLEET & DELIVERY ANALYTICS
+        ================================================== -->
+
+        <div
+            id="fleetAnalytics"
+            class="page"
+        >
+
+            <div id="fleetAnalyticsModule"></div>
+
+        </div>
+
+
 
         <!-- =================================================
              DR PRINTING
-        ================================================= -->
+        ================================================== -->
 
         <div
             id="dr"
-            class="page">
+            class="page"
+        >
 
-            <h1>DR Printing</h1>
+            <h1>
+                DR Printing
+            </h1>
 
 
             <div class="section">
+
 
                 <h2>
                     Delivery Receipt Printing
@@ -240,6 +347,8 @@
                 <div class="form-grid">
 
 
+                    <!-- SALES ORDER -->
+
                     <div class="form-group">
 
                         <label>
@@ -248,7 +357,8 @@
 
                         <select
                             id="drSOSelect"
-                            onchange="loadDRItems()">
+                            onchange="loadDRItems()"
+                        >
 
                             <option value="">
                                 Select Sales Order
@@ -259,6 +369,8 @@
                     </div>
 
 
+                    <!-- ITEM -->
+
                     <div class="form-group">
 
                         <label>
@@ -267,7 +379,8 @@
 
                         <select
                             id="drItemSelect"
-                            onchange="loadDRItemDetails()">
+                            onchange="loadDRItemDetails()"
+                        >
 
                             <option value="">
                                 Select Item
@@ -278,6 +391,8 @@
                     </div>
 
 
+                    <!-- DR NUMBER -->
+
                     <div class="form-group">
 
                         <label>
@@ -287,10 +402,13 @@
                         <input
                             type="text"
                             id="drNumber"
-                            placeholder="Enter DR Number">
+                            placeholder="Enter DR Number"
+                        >
 
                     </div>
 
+
+                    <!-- DR DATE -->
 
                     <div class="form-group">
 
@@ -300,10 +418,13 @@
 
                         <input
                             type="date"
-                            id="drDate">
+                            id="drDate"
+                        >
 
                     </div>
 
+
+                    <!-- CLIENT -->
 
                     <div class="form-group">
 
@@ -314,10 +435,13 @@
                         <input
                             type="text"
                             id="drClientName"
-                            readonly>
+                            readonly
+                        >
 
                     </div>
 
+
+                    <!-- SE -->
 
                     <div class="form-group">
 
@@ -327,7 +451,8 @@
 
                         <select
                             id="drSE"
-                            disabled>
+                            disabled
+                        >
 
                             <option value="">
                                 Select SE
@@ -362,6 +487,8 @@
                     </div>
 
 
+                    <!-- PROJECT -->
+
                     <div class="form-group">
 
                         <label>
@@ -371,10 +498,13 @@
                         <input
                             type="text"
                             id="drProject"
-                            readonly>
+                            readonly
+                        >
 
                     </div>
 
+
+                    <!-- DELIVERY ADDRESS -->
 
                     <div class="form-group full">
 
@@ -385,10 +515,13 @@
                         <input
                             type="text"
                             id="drDeliveryAddress"
-                            readonly>
+                            readonly
+                        >
 
                     </div>
 
+
+                    <!-- ATTENTION -->
 
                     <div class="form-group">
 
@@ -399,10 +532,13 @@
                         <input
                             type="text"
                             id="drAttention"
-                            readonly>
+                            readonly
+                        >
 
                     </div>
 
+
+                    <!-- ITEM NAME -->
 
                     <div class="form-group">
 
@@ -413,10 +549,13 @@
                         <input
                             type="text"
                             id="drItemName"
-                            readonly>
+                            readonly
+                        >
 
                     </div>
 
+
+                    <!-- QTY -->
 
                     <div class="form-group">
 
@@ -427,10 +566,13 @@
                         <input
                             type="text"
                             id="drQty"
-                            readonly>
+                            readonly
+                        >
 
                     </div>
 
+
+                    <!-- UNIT -->
 
                     <div class="form-group">
 
@@ -441,10 +583,13 @@
                         <input
                             type="text"
                             id="drUnit"
-                            readonly>
+                            readonly
+                        >
 
                     </div>
 
+
+                    <!-- DESCRIPTION -->
 
                     <div class="form-group full">
 
@@ -455,21 +600,27 @@
                         <textarea
                             id="drDescription"
                             class="dr-description"
-                            readonly>
-                        </textarea>
+                            readonly
+                        ></textarea>
 
                     </div>
+
 
                 </div>
 
             </div>
 
 
+
+            <!-- DR ACTION BAR -->
+
             <div class="action-bar">
+
 
                 <button
                     class="btn btn-secondary"
-                    onclick="clearDRForm()">
+                    onclick="clearDRForm()"
+                >
 
                     CLEAR
 
@@ -478,26 +629,34 @@
 
                 <button
                     class="btn btn-primary"
-                    onclick="printDR()">
+                    onclick="printDR()"
+                >
 
                     🖨️ PRINT DR
 
                 </button>
 
+
             </div>
+
 
         </div>
 
 
+
         <!-- =================================================
              REPORTS
-        ================================================= -->
+        ================================================== -->
 
         <div
             id="reports"
-            class="page">
+            class="page"
+        >
 
-            <h1>Reports</h1>
+            <h1>
+                Reports
+            </h1>
+
 
             <div class="section">
 
@@ -514,15 +673,19 @@
         </div>
 
 
+
         <!-- =================================================
              PROFILE
-        ================================================= -->
+        ================================================== -->
 
         <div
             id="profile"
-            class="page">
+            class="page"
+        >
+
 
             <div class="page-header">
+
 
                 <div>
 
@@ -536,16 +699,21 @@
 
                 </div>
 
+
             </div>
+
 
 
             <div class="section profile-card">
 
+
                 <div class="profile-header">
+
 
                     <div
                         class="profile-avatar"
-                        id="profileAvatar">
+                        id="profileAvatar"
+                    >
 
                         U
 
@@ -554,9 +722,11 @@
 
                     <div>
 
+
                         <div
                             class="profile-name"
-                            id="profileName">
+                            id="profileName"
+                        >
 
                             User
 
@@ -569,23 +739,31 @@
 
                         </div>
 
+
                     </div>
 
+
                 </div>
+
 
 
                 <div class="profile-info">
 
 
+                    <!-- FULL NAME -->
+
                     <div class="profile-info-item">
 
                         <div class="profile-info-label">
+
                             FULL NAME
+
                         </div>
 
                         <div
                             class="profile-info-value"
-                            id="profileFullname">
+                            id="profileFullname"
+                        >
 
                             -
 
@@ -594,15 +772,20 @@
                     </div>
 
 
+                    <!-- USERNAME -->
+
                     <div class="profile-info-item">
 
                         <div class="profile-info-label">
+
                             USERNAME
+
                         </div>
 
                         <div
                             class="profile-info-value"
-                            id="profileUsername">
+                            id="profileUsername"
+                        >
 
                             -
 
@@ -611,10 +794,14 @@
                     </div>
 
 
+                    <!-- ACCOUNT TYPE -->
+
                     <div class="profile-info-item">
 
                         <div class="profile-info-label">
+
                             ACCOUNT TYPE
+
                         </div>
 
                         <div class="profile-info-value">
@@ -626,10 +813,14 @@
                     </div>
 
 
+                    <!-- ACCOUNT STATUS -->
+
                     <div class="profile-info-item">
 
                         <div class="profile-info-label">
+
                             ACCOUNT STATUS
+
                         </div>
 
                         <div class="profile-info-value">
@@ -643,30 +834,40 @@
 
                 </div>
 
+
             </div>
+
 
         </div>
 
 
+
         <!-- =================================================
              SETTINGS
-        ================================================= -->
+        ================================================== -->
 
         <div
             id="settings"
-            class="page">
+            class="page"
+        >
 
-            <h1>Settings</h1>
+            <h1>
+                Settings
+            </h1>
+
 
             <div class="section">
+
 
                 <h2>
                     System Settings
                 </h2>
 
+
                 <p>
                     System configuration.
                 </p>
+
 
             </div>
 
@@ -678,78 +879,100 @@
 </div>
 
 
-<!-- =====================================================
+
+<!-- =========================================================
      MAIN SYSTEM SCRIPT
-===================================================== -->
+========================================================= -->
 
 <script>
 
-/* =====================================================
-   SALES MODULE STATE
-===================================================== */
+
+/* =========================================================
+   MODULE STATE
+========================================================= */
 
 let salesModuleLoaded = false;
+
 let deliveryModuleLoaded = false;
+
 let fleetAnalyticsModuleLoaded = false;
 
 
-/* =====================================================
+
+/* =========================================================
    PAGE NAVIGATION
-===================================================== */
+========================================================= */
 
 function showPage(pageId, button) {
 
+    console.log(
+        'SHOW PAGE:',
+        pageId
+    );
 
-    /*
-     * =================================================
-     * HIDE ALL PAGES
-     * =================================================
-     */
+
+    /* =====================================================
+       HIDE ALL PAGES
+    ===================================================== */
 
     document
         .querySelectorAll('.page')
         .forEach(function(page) {
 
-            page.classList.remove('active');
+            page.classList.remove(
+                'active'
+            );
 
         });
 
 
-    /*
-     * =================================================
-     * SHOW SELECTED PAGE
-     * =================================================
-     */
+    /* =====================================================
+       SHOW SELECTED PAGE
+    ===================================================== */
 
     const page =
-        document.getElementById(pageId);
+        document.getElementById(
+            pageId
+        );
 
 
-    if (page) {
+    if (!page) {
 
-        page.classList.add('active');
+        console.error(
+            'Page not found:',
+            pageId
+        );
+
+        return;
 
     }
 
 
-    /*
-     * =================================================
-     * UPDATE SIDEBAR ACTIVE BUTTON
-     * =================================================
-     */
+    page.classList.add(
+        'active'
+    );
+
+
+    /* =====================================================
+       SIDEBAR ACTIVE BUTTON
+    ===================================================== */
 
     document
         .querySelectorAll('.menu-btn')
         .forEach(function(btn) {
 
-            btn.classList.remove('active');
+            btn.classList.remove(
+                'active'
+            );
 
         });
 
 
     if (button) {
 
-        button.classList.add('active');
+        button.classList.add(
+            'active'
+        );
 
 
         const pageTitle =
@@ -768,52 +991,362 @@ function showPage(pageId, button) {
     }
 
 
-    /*
-     * =================================================
-     * SALES ORDER
-     * =================================================
-     */
+    /* =====================================================
+       SALES ORDER
+    ===================================================== */
 
-    if (pageId === 'sales') {
+    if (
+        pageId === 'sales'
+    ) {
 
         loadSalesOrderModule();
 
     }
 
-    /* =================================================
-   FLEET & DELIVERY ANALYTICS
-================================================= */
 
-if (pageId === 'delivery') {
+    /* =====================================================
+       DELIVERY
+    ===================================================== */
 
-    loadDeliveryModule();
+    if (
+        pageId === 'delivery'
+    ) {
+
+        loadDeliveryModule();
+
+    }
+
+
+    /* =====================================================
+       FLEET & DELIVERY ANALYTICS
+    ===================================================== */
+
+    if (
+        pageId === 'fleetAnalytics'
+    ) {
+
+        loadFleetAnalyticsModule();
+
+    }
+
+
+    /* =====================================================
+       DR
+    ===================================================== */
+
+    if (
+        pageId === 'dr'
+    ) {
+
+        if (
+            typeof loadDRSalesOrders ===
+            'function'
+        ) {
+
+            loadDRSalesOrders();
+
+        }
+
+    }
+
+
+    /* =====================================================
+       DASHBOARD
+    ===================================================== */
+
+    if (
+        pageId === 'dashboard'
+    ) {
+
+        if (
+            typeof loadDashboard ===
+            'function'
+        ) {
+
+            loadDashboard();
+
+        }
+
+    }
 
 }
 
+
+
+/* =========================================================
+   LOAD SCRIPT ONCE
+========================================================= */
+
+function loadScriptOnce(
+    src,
+    attributeName
+) {
+
+    return new Promise(
+        function(resolve, reject) {
+
+
+            const existing =
+                document.querySelector(
+                    `script[${attributeName}]`
+                );
+
+
+            /* =================================================
+               ALREADY EXISTS
+            ================================================= */
+
+            if (existing) {
+
+
+                if (
+                    existing.dataset.loaded ===
+                    'true'
+                ) {
+
+                    resolve();
+
+                    return;
+
+                }
+
+
+                existing.addEventListener(
+                    'load',
+                    function() {
+
+                        resolve();
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
+
+                existing.addEventListener(
+                    'error',
+                    function() {
+
+                        reject(
+                            new Error(
+                                'Failed to load ' +
+                                src
+                            )
+                        );
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
+
+                return;
+
+            }
+
+
+
+            /* =================================================
+               CREATE SCRIPT
+            ================================================= */
+
+            const script =
+                document.createElement(
+                    'script'
+                );
+
+
+            script.src =
+                src;
+
+
+            script.setAttribute(
+                attributeName,
+                'true'
+            );
+
+
+            script.onload =
+                function() {
+
+                    script.dataset.loaded =
+                        'true';
+
+
+                    console.log(
+                        'Script loaded:',
+                        src
+                    );
+
+
+                    resolve();
+
+                };
+
+
+            script.onerror =
+                function() {
+
+                    console.error(
+                        'Failed to load:',
+                        src
+                    );
+
+
+                    reject(
+                        new Error(
+                            'Failed to load ' +
+                            src
+                        )
+                    );
+
+                };
+
+
+            document.body.appendChild(
+                script
+            );
+
+
+        }
+    );
+
 }
 
-    /* 
- * ================================================= 
- * DELIVERY
- * ================================================= 
- */
 
-if (pageId === 'delivery') {
 
-    loadDeliveryModule();
+/* =========================================================
+   LOAD SALES ORDER MODULE
+========================================================= */
+
+async function loadSalesOrderModule() {
+
+    console.log(
+        'Loading Sales Order module...'
+    );
+
+
+    if (
+        salesModuleLoaded
+    ) {
+
+        console.log(
+            'Sales Order module already loaded.'
+        );
+
+        return;
+
+    }
+
+
+    const container =
+        document.getElementById(
+            'salesModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'salesModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+
+        const response =
+            await fetch(
+                'pages/sales-order.html'
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                'Failed to load Sales Order module.'
+            );
+
+        }
+
+
+        const html =
+            await response.text();
+
+
+        container.innerHTML =
+            html;
+
+
+        salesModuleLoaded =
+            true;
+
+
+        console.log(
+            'Sales Order HTML loaded.'
+        );
+
+
+        if (
+            typeof loadSOList ===
+            'function'
+        ) {
+
+            await loadSOList();
+
+        }
+
+
+    } catch (error) {
+
+
+        console.error(
+            'Sales Order module error:',
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div style="
+                padding:30px;
+                color:#b00020;
+                background:#fff;
+                border-radius:10px;
+            ">
+
+                Failed to load Sales Order module.
+
+            </div>
+
+        `;
+
+    }
 
 }
-    /* ===================================================== 
+
+
+
+/* =========================================================
    LOAD DELIVERY MODULE
-===================================================== */
+========================================================= */
 
 async function loadDeliveryModule() {
 
-    /*
-     * Prevent duplicate loading
-     */
+    console.log(
+        'Loading Delivery module...'
+    );
 
-    if (deliveryModuleLoaded) {
+
+    if (
+        deliveryModuleLoaded
+    ) {
 
         console.log(
             'Delivery module already loaded.'
@@ -843,11 +1376,6 @@ async function loadDeliveryModule() {
 
     try {
 
-        /*
-         * =================================================
-         * LOAD DELIVERY HTML
-         * =================================================
-         */
 
         const response =
             await fetch(
@@ -868,63 +1396,32 @@ async function loadDeliveryModule() {
             await response.text();
 
 
-        /*
-         * =================================================
-         * INSERT DELIVERY MODULE
-         * =================================================
-         */
-
         container.innerHTML =
             html;
 
 
-        /*
-         * =================================================
-         * MARK AS LOADED
-         * =================================================
-         */
-
-        deliveryModuleLoaded = true;
+        deliveryModuleLoaded =
+            true;
 
 
         console.log(
-            'Delivery module loaded successfully.'
+            'Delivery HTML loaded.'
         );
 
 
-        /*
-         * =================================================
-         * LOAD DELIVERY JAVASCRIPT
-         * =================================================
-         */
+        await loadScriptOnce(
+            'js/delivery.js',
+            'data-delivery-js'
+        );
 
-        if (
-            !document.querySelector(
-                'script[data-delivery-js]'
-            )
-        ) {
 
-            const script =
-                document.createElement(
-                    'script'
-                );
-
-            script.src =
-                'js/delivery.js';
-
-            script.setAttribute(
-                'data-delivery-js',
-                'true'
-            );
-
-            document.body.appendChild(
-                script
-            );
-
-        }
+        console.log(
+            'Delivery module initialized.'
+        );
 
 
     } catch (error) {
+
 
         console.error(
             'Delivery module error:',
@@ -952,163 +1449,17 @@ async function loadDeliveryModule() {
 }
 
 
-    /*
-     * =================================================
-     * DR
-     * =================================================
-     */
 
-    if (pageId === 'dr') {
-
-        if (
-            typeof loadDRSalesOrders === 'function'
-        ) {
-
-            loadDRSalesOrders();
-
-        }
-
-    }
-
-
-    /*
-     * =================================================
-     * DASHBOARD
-     * =================================================
-     */
-
-    if (pageId === 'dashboard') {
-
-        if (
-            typeof loadDashboard === 'function'
-        ) {
-
-            loadDashboard();
-
-        }
-
-    }
-
-}
-/* =====================================================
-   LOAD SCRIPT ONCE
-===================================================== */
-
-function loadScriptOnce(src, attributeName) {
-
-    return new Promise(function(resolve, reject) {
-
-        const existing =
-            document.querySelector(
-                `script[${attributeName}]`
-            );
-
-        if (existing) {
-
-            /*
-             * If already loaded
-             */
-            if (existing.dataset.loaded === 'true') {
-
-                resolve();
-
-                return;
-
-            }
-
-            /*
-             * If currently loading,
-             * wait for it.
-             */
-            existing.addEventListener(
-                'load',
-                function() {
-
-                    resolve();
-
-                },
-                { once: true }
-            );
-
-            existing.addEventListener(
-                'error',
-                function() {
-
-                    reject(
-                        new Error(
-                            'Failed to load ' + src
-                        )
-                    );
-
-                },
-                { once: true }
-            );
-
-            return;
-
-        }
-
-
-        const script =
-            document.createElement('script');
-
-
-        script.src = src;
-
-
-        script.setAttribute(
-            attributeName,
-            'true'
-        );
-
-
-        script.onload =
-            function() {
-
-                script.dataset.loaded =
-                    'true';
-
-                console.log(
-                    'Script loaded:',
-                    src
-                );
-
-                resolve();
-
-            };
-
-
-        script.onerror =
-            function() {
-
-                console.error(
-                    'Failed to load:',
-                    src
-                );
-
-                reject(
-                    new Error(
-                        'Failed to load ' + src
-                    )
-                );
-
-            };
-
-
-        document.body.appendChild(
-            script
-        );
-
-    });
-
-}
-
-
-/* =====================================================
-   LOAD FLEET & DELIVERY ANALYTICS MODULE
-===================================================== */
+/* =========================================================
+   LOAD FLEET & DELIVERY ANALYTICS
+========================================================= */
 
 async function loadFleetAnalyticsModule() {
+
+    console.log(
+        'Loading Fleet & Delivery Analytics...'
+    );
+
 
     const container =
         document.getElementById(
@@ -1127,15 +1478,18 @@ async function loadFleetAnalyticsModule() {
     }
 
 
-    /*
-     * =================================================
-     * LOAD HTML ONLY ONCE
-     * =================================================
-     */
 
-    if (!fleetAnalyticsModuleLoaded) {
+    /* =====================================================
+       LOAD HTML
+    ===================================================== */
+
+    if (
+        !fleetAnalyticsModuleLoaded
+    ) {
+
 
         try {
+
 
             const response =
                 await fetch(
@@ -1171,6 +1525,7 @@ async function loadFleetAnalyticsModule() {
 
         } catch (error) {
 
+
             console.error(
                 'Fleet Analytics HTML error:',
                 error
@@ -1192,6 +1547,7 @@ async function loadFleetAnalyticsModule() {
 
             `;
 
+
             return;
 
         }
@@ -1199,13 +1555,17 @@ async function loadFleetAnalyticsModule() {
     }
 
 
-    /*
-     * =================================================
-     * LOAD CHART.JS
-     * =================================================
-     */
+
+    /* =====================================================
+       LOAD ANALYTICS JAVASCRIPT
+    ===================================================== */
 
     try {
+
+
+        /* =================================================
+           CHART.JS
+        ================================================= */
 
         await loadScriptOnce(
             'https://cdn.jsdelivr.net/npm/chart.js',
@@ -1213,11 +1573,10 @@ async function loadFleetAnalyticsModule() {
         );
 
 
-        /*
-         * =================================================
-         * MAIN FLEET ANALYTICS CONTROLLER
-         * =================================================
-         */
+
+        /* =================================================
+           MAIN ANALYTICS CONTROLLER
+        ================================================= */
 
         await loadScriptOnce(
             'js/fleet-analytics.js',
@@ -1225,11 +1584,10 @@ async function loadFleetAnalyticsModule() {
         );
 
 
-        /*
-         * =================================================
-         * FLEET PERFORMANCE
-         * =================================================
-         */
+
+        /* =================================================
+           FLEET PERFORMANCE
+        ================================================= */
 
         await loadScriptOnce(
             'js/fleet-performance.js',
@@ -1237,11 +1595,10 @@ async function loadFleetAnalyticsModule() {
         );
 
 
-        /*
-         * =================================================
-         * DELIVERY PERFORMANCE
-         * =================================================
-         */
+
+        /* =================================================
+           DELIVERY PERFORMANCE
+        ================================================= */
 
         await loadScriptOnce(
             'js/delivery-performance.js',
@@ -1249,11 +1606,10 @@ async function loadFleetAnalyticsModule() {
         );
 
 
-        /*
-         * =================================================
-         * DR MONITORING
-         * =================================================
-         */
+
+        /* =================================================
+           DR MONITORING
+        ================================================= */
 
         await loadScriptOnce(
             'js/dr-monitoring.js',
@@ -1261,16 +1617,16 @@ async function loadFleetAnalyticsModule() {
         );
 
 
-        /*
-         * =================================================
-         * INITIALIZE ANALYTICS
-         * =================================================
-         */
+
+        /* =================================================
+           INITIALIZE
+        ================================================= */
 
         if (
             typeof window.initializeFleetAnalytics ===
             'function'
         ) {
+
 
             window.initializeFleetAnalytics();
 
@@ -1279,163 +1635,36 @@ async function loadFleetAnalyticsModule() {
                 'Fleet Analytics initialized successfully.'
             );
 
+
         } else {
+
 
             console.error(
                 'initializeFleetAnalytics() not found.'
             );
 
+
         }
 
 
     } catch (error) {
+
 
         console.error(
             'Fleet Analytics JavaScript error:',
             error
         );
 
-    }
-
-}
-
-/* =====================================================
-   LOAD SALES ORDER MODULE
-===================================================== */
-
-async function loadSalesOrderModule() {
-
-
-    /*
-     * Prevent duplicate loading
-     */
-
-    if (salesModuleLoaded) {
-
-        console.log(
-            'Sales Order module already loaded.'
-        );
-
-        return;
-
-    }
-
-
-    const container =
-        document.getElementById(
-            'salesModule'
-        );
-
-
-    if (!container) {
-
-        console.error(
-            'salesModule not found.'
-        );
-
-        return;
-
-    }
-
-
-    try {
-
-
-        /*
-         * =================================================
-         * LOAD SALES ORDER HTML
-         * =================================================
-         */
-
-        const response =
-            await fetch(
-                'pages/sales-order.html'
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                'Failed to load Sales Order module.'
-            );
-
-        }
-
-
-        const html =
-            await response.text();
-
-
-        /*
-         * =================================================
-         * INSERT MODULE
-         * =================================================
-         */
-
-        container.innerHTML =
-            html;
-
-
-        /*
-         * =================================================
-         * MARK MODULE AS LOADED
-         * =================================================
-         */
-
-        salesModuleLoaded = true;
-
-
-        console.log(
-            'Sales Order module loaded successfully.'
-        );
-
-
-        /*
-         * =================================================
-         * LOAD SALES ORDER LIST
-         * =================================================
-         */
-
-        if (
-            typeof loadSOList === 'function'
-        ) {
-
-            await loadSOList();
-
-        }
-
-
-    } catch (error) {
-
-        console.error(
-            'Sales Order module error:',
-            error
-        );
-
-
-        container.innerHTML = `
-
-            <div style="
-                padding:30px;
-                color:#b00020;
-                background:#fff;
-                border-radius:10px;
-            ">
-
-                Failed to load Sales Order module.
-
-            </div>
-
-        `;
 
     }
 
 }
 
 
-/* =====================================================
+
+/* =========================================================
    USER ACCOUNT
-===================================================== */
+========================================================= */
 
 function loadUserAccount() {
 
@@ -1457,8 +1686,10 @@ function loadUserAccount() {
         loggedIn !== 'true'
     ) {
 
+
         window.location.href =
             'login.html';
+
 
         return;
 
@@ -1470,12 +1701,15 @@ function loadUserAccount() {
 
     try {
 
+
         user =
             JSON.parse(
                 savedUser
             );
 
+
     } catch (error) {
+
 
         localStorage.removeItem(
             'logitechUser'
@@ -1490,9 +1724,11 @@ function loadUserAccount() {
         window.location.href =
             'login.html';
 
+
         return;
 
     }
+
 
 
     const fullname =
@@ -1502,13 +1738,20 @@ function loadUserAccount() {
         'USER';
 
 
+
+    /* =================================================
+       WELCOME
+    ================================================= */
+
     const welcomeUser =
         document.getElementById(
             'welcomeUser'
         );
 
 
-    if (welcomeUser) {
+    if (
+        welcomeUser
+    ) {
 
         welcomeUser.innerText =
             'WELCOME, ' +
@@ -1517,13 +1760,20 @@ function loadUserAccount() {
     }
 
 
+
+    /* =================================================
+       PROFILE NAME
+    ================================================= */
+
     const profileName =
         document.getElementById(
             'profileName'
         );
 
 
-    if (profileName) {
+    if (
+        profileName
+    ) {
 
         profileName.innerText =
             fullname;
@@ -1531,13 +1781,20 @@ function loadUserAccount() {
     }
 
 
+
+    /* =================================================
+       PROFILE FULL NAME
+    ================================================= */
+
     const profileFullname =
         document.getElementById(
             'profileFullname'
         );
 
 
-    if (profileFullname) {
+    if (
+        profileFullname
+    ) {
 
         profileFullname.innerText =
             user.fullname ||
@@ -1547,13 +1804,20 @@ function loadUserAccount() {
     }
 
 
+
+    /* =================================================
+       USERNAME
+    ================================================= */
+
     const profileUsername =
         document.getElementById(
             'profileUsername'
         );
 
 
-    if (profileUsername) {
+    if (
+        profileUsername
+    ) {
 
         profileUsername.innerText =
             user.username ||
@@ -1562,13 +1826,20 @@ function loadUserAccount() {
     }
 
 
+
+    /* =================================================
+       AVATAR
+    ================================================= */
+
     const profileAvatar =
         document.getElementById(
             'profileAvatar'
         );
 
 
-    if (profileAvatar) {
+    if (
+        profileAvatar
+    ) {
 
         profileAvatar.innerText =
             fullname
@@ -1580,9 +1851,10 @@ function loadUserAccount() {
 }
 
 
-/* =====================================================
+
+/* =========================================================
    PROFILE
-===================================================== */
+========================================================= */
 
 function openProfile() {
 
@@ -1604,7 +1876,9 @@ function openProfile() {
         );
 
 
-    if (profile) {
+    if (
+        profile
+    ) {
 
         profile.classList.add(
             'active'
@@ -1619,7 +1893,9 @@ function openProfile() {
         );
 
 
-    if (pageTitle) {
+    if (
+        pageTitle
+    ) {
 
         pageTitle.innerText =
             'My Profile';
@@ -1640,9 +1916,10 @@ function openProfile() {
 }
 
 
-/* =====================================================
+
+/* =========================================================
    LOGOUT
-===================================================== */
+========================================================= */
 
 function logoutUser() {
 
@@ -1653,7 +1930,9 @@ function logoutUser() {
         );
 
 
-    if (!confirmLogout) {
+    if (
+        !confirmLogout
+    ) {
 
         return;
 
@@ -1681,29 +1960,31 @@ function logoutUser() {
 }
 
 
-/* =====================================================
+
+/* =========================================================
    PAGE LOAD
-===================================================== */
+========================================================= */
 
 document.addEventListener(
     'DOMContentLoaded',
     function() {
 
 
-        /*
-         * =================================================
-         * CHECK LOGIN
-         * =================================================
-         */
+        console.log(
+            'LOGIS-TECH SYSTEM initialized.'
+        );
+
+
+        /* =================================================
+           LOGIN CHECK
+        ================================================= */
 
         loadUserAccount();
 
 
-        /*
-         * =================================================
-         * DR DATE
-         * =================================================
-         */
+        /* =================================================
+           DR DATE
+        ================================================= */
 
         const drDate =
             document.getElementById(
@@ -1711,7 +1992,9 @@ document.addEventListener(
             );
 
 
-        if (drDate) {
+        if (
+            drDate
+        ) {
 
             drDate.value =
                 new Date()
@@ -1720,19 +2003,21 @@ document.addEventListener(
 
         }
 
+
     }
 );
 
 </script>
 
 
-<!-- =====================================================
+
+<!-- =========================================================
      SALES ORDER JAVASCRIPT
-===================================================== -->
+========================================================= -->
 
 <script
-    src="js/sales-order.js">
-</script>
+    src="js/sales-order.js"
+></script>
 
 
 </body>
