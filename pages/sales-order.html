@@ -2,13 +2,13 @@
 <!-- =====================================================
      LOGIS-TECH SYSTEM
      SALES ORDER MODULE
+     VERSION: 20261006
 ===================================================== -->
 
 <div
     id="salesOrderPage"
     class="sales-order-module"
 >
-     
 
     <!-- =================================================
          SALES ORDER LIST VIEW
@@ -32,26 +32,20 @@
                 </div>
 
                 <div>
-
-                    <h1>
-                        Sales Order
-                    </h1>
+                    <h1>Sales Order</h1>
 
                     <p>
                         Manage and monitor customer Sales Orders
                     </p>
-
                 </div>
 
             </div>
-
 
             <button
                 type="button"
                 class="so-create-btn"
                 onclick="openCreateSO()"
             >
-
                 <span class="so-create-icon">
                     +
                 </span>
@@ -59,7 +53,6 @@
                 <span>
                     CREATE SALES ORDER
                 </span>
-
             </button>
 
         </div>
@@ -216,7 +209,7 @@
                 <input
                     type="text"
                     id="soSearch"
-                    placeholder="Search SO number, client, project or PO..."
+                    placeholder="Search SO number, client, project, PO, DR or invoice..."
                     onkeyup="searchSO()"
                 >
 
@@ -265,6 +258,40 @@
             </div>
 
 
+            <!-- PAYMENT FILTER -->
+
+            <div class="so-filter-group">
+
+                <label for="soPaymentFilter">
+                    Payment
+                </label>
+
+                <select
+                    id="soPaymentFilter"
+                    onchange="filterSOList()"
+                >
+
+                    <option value="ALL">
+                        All Payment
+                    </option>
+
+                    <option value="PAID">
+                        Paid
+                    </option>
+
+                    <option value="PARTIAL">
+                        Partial
+                    </option>
+
+                    <option value="UNPAID">
+                        Unpaid
+                    </option>
+
+                </select>
+
+            </div>
+
+
             <!-- REFRESH -->
 
             <button
@@ -293,9 +320,11 @@
                     id="soSelectionText"
                     class="so-selection-content"
                 >
+
                     <span class="so-selection-empty">
                         No Sales Order selected
                     </span>
+
                 </div>
 
             </div>
@@ -345,8 +374,6 @@
 
         <div class="so-table-card">
 
-            <!-- TABLE HEADER -->
-
             <div class="so-table-header">
 
                 <div>
@@ -369,7 +396,9 @@
             </div>
 
 
-            <!-- TABLE -->
+            <!-- =================================================
+                 TABLE
+            ================================================== -->
 
             <div class="table-container so-modern-table">
 
@@ -410,6 +439,26 @@
                             <th>
                                 GRAND TOTAL
                             </th>
+
+                            <!-- NEW -->
+
+                            <th>
+                                DR NUMBER
+                            </th>
+
+                            <!-- NEW -->
+
+                            <th>
+                                INVOICE NUMBER
+                            </th>
+
+                            <!-- NEW -->
+
+                            <th>
+                                PAYMENT
+                            </th>
+
+                            <!-- EXISTING -->
 
                             <th>
                                 STATUS
@@ -561,8 +610,6 @@
             </div>
 
 
-            <!-- POSTING INFORMATION -->
-
             <div
                 id="soPostingMeta"
                 class="so-posting-meta"
@@ -590,6 +637,431 @@
                     <strong id="soPostedDate">
                         —
                     </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             NEW
+             TRANSACTION TRACKING
+        ================================================== -->
+
+        <div class="so-transaction-tracking">
+
+            <div class="so-transaction-header">
+
+                <div>
+
+                    <span class="so-section-number">
+                        TRACKING
+                    </span>
+
+                    <div>
+
+                        <h2>
+                            Sales Order Transaction Tracking
+                        </h2>
+
+                        <p>
+                            Delivery, invoice and payment monitoring
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 TRACKING SUMMARY CARDS
+            ================================================== -->
+
+            <div class="so-transaction-summary-grid">
+
+                <!-- DR -->
+
+                <div class="so-transaction-card">
+
+                    <div class="so-transaction-icon">
+                        🚚
+                    </div>
+
+                    <div>
+
+                        <span>
+                            DELIVERY RECEIPTS
+                        </span>
+
+                        <strong id="detailDRCount">
+                            0
+                        </strong>
+
+                        <small>
+                            DR RECORDS
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- INVOICE -->
+
+                <div class="so-transaction-card">
+
+                    <div class="so-transaction-icon">
+                        🧾
+                    </div>
+
+                    <div>
+
+                        <span>
+                            INVOICES
+                        </span>
+
+                        <strong id="detailInvoiceCount">
+                            0
+                        </strong>
+
+                        <small>
+                            INVOICE RECORDS
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAID -->
+
+                <div class="so-transaction-card so-payment-paid">
+
+                    <div class="so-transaction-icon">
+                        ✓
+                    </div>
+
+                    <div>
+
+                        <span>
+                            PAID
+                        </span>
+
+                        <strong id="detailPaidAmount">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            TOTAL PAID
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BALANCE -->
+
+                <div class="so-transaction-card so-payment-balance">
+
+                    <div class="so-transaction-icon">
+                        ₱
+                    </div>
+
+                    <div>
+
+                        <span>
+                            BALANCE
+                        </span>
+
+                        <strong id="detailPaymentBalance">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            REMAINING BALANCE
+                        </small>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 TRANSACTION STATUS
+            ================================================== -->
+
+            <div class="so-payment-status-panel">
+
+                <div class="so-payment-status-label">
+                    PAYMENT STATUS
+                </div>
+
+                <div
+                    id="detailPaymentStatus"
+                    class="so-payment-status-badge unpaid"
+                >
+                    UNPAID
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 DR LIST
+            ================================================== -->
+
+            <div class="so-tracking-section">
+
+                <div class="so-tracking-section-header">
+
+                    <div>
+
+                        <h3>
+                            🚚 Delivery Receipts
+                        </h3>
+
+                        <p>
+                            All DR numbers linked to this Sales Order
+                        </p>
+
+                    </div>
+
+                    <span
+                        id="detailDRHeaderCount"
+                        class="so-record-count"
+                    >
+                        0 RECORDS
+                    </span>
+
+                </div>
+
+
+                <div class="table-container so-tracking-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    DR NUMBER
+                                </th>
+
+                                <th>
+                                    DATE TRANSFER
+                                </th>
+
+                                <th>
+                                    DATE DELIVERED
+                                </th>
+
+                                <th>
+                                    STATUS
+                                </th>
+
+                                <th>
+                                    REMARKS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="detailDRBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="so-no-record"
+                                >
+                                    No Delivery Receipt records.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INVOICE LIST
+            ================================================== -->
+
+            <div class="so-tracking-section">
+
+                <div class="so-tracking-section-header">
+
+                    <div>
+
+                        <h3>
+                            🧾 Invoices
+                        </h3>
+
+                        <p>
+                            All invoice numbers linked to this Sales Order
+                        </p>
+
+                    </div>
+
+                    <span
+                        id="detailInvoiceHeaderCount"
+                        class="so-record-count"
+                    >
+                        0 RECORDS
+                    </span>
+
+                </div>
+
+
+                <div class="table-container so-tracking-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    INVOICE NUMBER
+                                </th>
+
+                                <th>
+                                    INVOICE DATE
+                                </th>
+
+                                <th>
+                                    AMOUNT
+                                </th>
+
+                                <th>
+                                    DUE DATE
+                                </th>
+
+                                <th>
+                                    PAYMENT STATUS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="detailInvoiceBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="so-no-record"
+                                >
+                                    No Invoice records.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 PAYMENT HISTORY
+            ================================================== -->
+
+            <div class="so-tracking-section">
+
+                <div class="so-tracking-section-header">
+
+                    <div>
+
+                        <h3>
+                            💰 Payment History
+                        </h3>
+
+                        <p>
+                            All payments recorded against this Sales Order
+                        </p>
+
+                    </div>
+
+                    <span
+                        id="detailPaymentHeaderCount"
+                        class="so-record-count"
+                    >
+                        0 RECORDS
+                    </span>
+
+                </div>
+
+
+                <div class="table-container so-tracking-table">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>
+                                    PAYMENT DATE
+                                </th>
+
+                                <th>
+                                    REFERENCE
+                                </th>
+
+                                <th>
+                                    AMOUNT
+                                </th>
+
+                                <th>
+                                    METHOD
+                                </th>
+
+                                <th>
+                                    STATUS
+                                </th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="detailPaymentBody">
+
+                            <tr>
+
+                                <td
+                                    colspan="5"
+                                    class="so-no-record"
+                                >
+                                    No payment records.
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
 
                 </div>
 
@@ -1471,3 +1943,12 @@
     </div>
 
 </div>
+
+
+**Important:** HTML structure pa lang ito. Ang bagong display ay hindi pa kusang magkakaroon ng data hangga't hindi natin ina-adjust ang `sales-order.js` at ang data/API structure.
+
+Sa next step, dapat nating ayusin ang **`sales-order.js`** para ma-load ang:
+
+`SO → multiple DR → multiple Invoice → multiple Payment`
+
+at hindi tayo gagawa ng duplicate records.
