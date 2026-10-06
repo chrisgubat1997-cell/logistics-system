@@ -202,20 +202,24 @@ document.addEventListener(
 
     }
 );
-
-
 /* =========================================================
    INITIALIZE CREATE SO
 ========================================================= */
 
-function initializeCreateSO() {
+async function initializeCreateSO() {
 
     setCreateSODate();
 
     generateSONumber();
 
-    loadCustomers();
+    /*
+     * Load Customer Master first.
+     */
+    await loadCustomers();
 
+    /*
+     * Setup customer dropdown event.
+     */
     setupCustomerSelection();
 
     setupCreateSOFileSection();
@@ -3046,6 +3050,7 @@ function setText(id, value) {
 
 /* =========================================================
    GET VALUE
+   Supports INPUT / SELECT / TEXTAREA
 ========================================================= */
 
 function getValue(id) {
@@ -3063,8 +3068,28 @@ function getValue(id) {
     }
 
 
+    /*
+     * Form controls
+     */
+    if (
+        element.tagName === "INPUT" ||
+        element.tagName === "SELECT" ||
+        element.tagName === "TEXTAREA"
+    ) {
+
+        return String(
+            element.value ||
+            ""
+        ).trim();
+
+    }
+
+
+    /*
+     * Other elements
+     */
     return String(
-        element.value ||
+        element.textContent ||
         ""
     ).trim();
 
