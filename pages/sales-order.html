@@ -1,14 +1,14 @@
-
 <!-- =====================================================
      LOGIS-TECH SYSTEM
      SALES ORDER MODULE
-     VERSION: 20261006
+     VERSION: 20261006-02
 ===================================================== -->
 
 <div
     id="salesOrderPage"
     class="sales-order-module"
 >
+
 
     <!-- =================================================
          SALES ORDER LIST VIEW
@@ -18,6 +18,7 @@
         id="salesOrderListView"
         class="so-list-view"
     >
+
 
         <!-- =================================================
              HEADER
@@ -32,30 +33,130 @@
                 </div>
 
                 <div>
-                    <h1>Sales Order</h1>
+
+                    <h1>
+                        Sales Order
+                    </h1>
 
                     <p>
                         Manage and monitor customer Sales Orders
                     </p>
+
                 </div>
 
             </div>
 
-            <button
-                type="button"
-                class="so-create-btn"
-                onclick="openCreateSO()"
-            >
-                <span class="so-create-icon">
-                    +
-                </span>
 
-                <span>
-                    CREATE SALES ORDER
-                </span>
-            </button>
+            <!-- =================================================
+                 HEADER ACTIONS
+            ================================================== -->
+
+            <div class="so-header-actions">
+
+
+                <!-- NEW CUSTOMER -->
+
+                <button
+                    type="button"
+                    id="newCustomerButton"
+                    class="so-create-btn so-customer-btn"
+                    onclick="openNewCustomerFromSalesOrder()"
+                >
+
+                    <span class="so-create-icon">
+                        +
+                    </span>
+
+                    <span>
+                        NEW CUSTOMER
+                    </span>
+
+                </button>
+
+
+                <!-- CREATE SALES ORDER -->
+
+                <button
+                    type="button"
+                    class="so-create-btn"
+                    onclick="openCreateSO()"
+                >
+
+                    <span class="so-create-icon">
+                        +
+                    </span>
+
+                    <span>
+                        CREATE SALES ORDER
+                    </span>
+
+                </button>
+
+            </div>
 
         </div>
+
+
+
+        <!-- =================================================
+             CUSTOMER FORM AREA
+        ================================================== -->
+
+        <div
+            id="customerArea"
+            class="so-customer-area"
+            style="display:none;"
+        >
+
+            <div class="so-customer-area-header">
+
+                <div class="so-customer-title">
+
+                    <div class="so-customer-icon">
+                        👥
+                    </div>
+
+                    <div>
+
+                        <h2>
+                            Customer Information
+                        </h2>
+
+                        <p>
+                            Register or update customer information
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    id="closeCustomerButton"
+                    class="so-customer-close-btn"
+                    onclick="closeCustomerFromSalesOrder()"
+                    title="Close Customer"
+                >
+
+                    ✕
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="customerFormContainer"
+                class="so-customer-form-container"
+            >
+
+                <!-- create-customer.html will load here -->
+
+            </div>
+
+        </div>
+
 
 
         <!-- =================================================
@@ -64,11 +165,13 @@
 
         <div class="so-summary-grid">
 
+
             <!-- TOTAL SALES ORDER -->
 
             <div
                 class="so-summary-card"
                 id="soTotalCard"
+                onclick="filterSOBySummary('ALL')"
             >
 
                 <div class="so-summary-icon">
@@ -90,10 +193,12 @@
             </div>
 
 
+
             <!-- PARTIAL -->
 
             <div
                 class="so-summary-card so-card-partial"
+                onclick="filterSOBySummary('PARTIAL')"
             >
 
                 <div class="so-summary-icon">
@@ -115,10 +220,12 @@
             </div>
 
 
+
             <!-- ACTIVE -->
 
             <div
                 class="so-summary-card so-card-active"
+                onclick="filterSOBySummary('ACTIVE')"
             >
 
                 <div class="so-summary-icon">
@@ -140,10 +247,12 @@
             </div>
 
 
+
             <!-- COMPLETED -->
 
             <div
                 class="so-summary-card so-card-completed"
+                onclick="filterSOBySummary('COMPLETED')"
             >
 
                 <div class="so-summary-icon">
@@ -165,10 +274,12 @@
             </div>
 
 
+
             <!-- CANCELLED -->
 
             <div
                 class="so-summary-card so-card-cancelled"
+                onclick="filterSOBySummary('CANCELLED')"
             >
 
                 <div class="so-summary-icon">
@@ -192,11 +303,70 @@
         </div>
 
 
+
+        <!-- =================================================
+             RECENT SALES ORDERS
+        ================================================== -->
+
+        <div class="so-recent-card">
+
+            <div class="so-recent-header">
+
+                <div>
+
+                    <h2>
+                        Recent Sales Orders
+                    </h2>
+
+                    <p>
+                        Latest Sales Orders recorded in the system
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="so-recent-view-btn"
+                    onclick="showAllSalesOrders()"
+                >
+
+                    VIEW ALL
+
+                    <span>
+                        →
+                    </span>
+
+                </button>
+
+            </div>
+
+
+            <div
+                id="recentSalesOrderList"
+                class="so-recent-list"
+            >
+
+                <div class="so-recent-loading">
+
+                    <span>
+                        Loading recent Sales Orders...
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
         <!-- =================================================
              TOOLBAR
         ================================================== -->
 
         <div class="so-toolbar">
+
 
             <!-- SEARCH -->
 
@@ -214,6 +384,7 @@
                 >
 
             </div>
+
 
 
             <!-- STATUS FILTER -->
@@ -258,6 +429,7 @@
             </div>
 
 
+
             <!-- PAYMENT FILTER -->
 
             <div class="so-filter-group">
@@ -292,6 +464,7 @@
             </div>
 
 
+
             <!-- REFRESH -->
 
             <button
@@ -304,6 +477,7 @@
             ></button>
 
         </div>
+
 
 
         <!-- =================================================
@@ -332,6 +506,7 @@
 
             <div class="so-action-buttons">
 
+
                 <!-- UPDATE -->
 
                 <button
@@ -346,6 +521,7 @@
                     UPDATE
 
                 </button>
+
 
 
                 <!-- CANCEL -->
@@ -366,6 +542,7 @@
             </div>
 
         </div>
+
 
 
         <!-- =================================================
@@ -396,9 +573,8 @@
             </div>
 
 
-            <!-- =================================================
-                 TABLE
-            ================================================== -->
+
+            <!-- TABLE -->
 
             <div class="table-container so-modern-table">
 
@@ -440,25 +616,17 @@
                                 GRAND TOTAL
                             </th>
 
-                            <!-- NEW -->
-
                             <th>
                                 DR NUMBER
                             </th>
-
-                            <!-- NEW -->
 
                             <th>
                                 INVOICE NUMBER
                             </th>
 
-                            <!-- NEW -->
-
                             <th>
                                 PAYMENT
                             </th>
-
-                            <!-- EXISTING -->
 
                             <th>
                                 STATUS
@@ -470,7 +638,9 @@
 
 
                     <tbody id="soTableBody">
+
                         <!-- SALES ORDERS WILL LOAD HERE -->
+
                     </tbody>
 
                 </table>
@@ -478,9 +648,8 @@
             </div>
 
 
-            <!-- =================================================
-                 EMPTY STATE
-            ================================================== -->
+
+            <!-- EMPTY STATE -->
 
             <div
                 id="soEmptyState"
@@ -517,6 +686,7 @@
     </div>
 
 
+
     <!-- =====================================================
          SALES ORDER DETAILS VIEW
     ===================================================== -->
@@ -526,6 +696,7 @@
         class="so-details-view"
         style="display:none;"
     >
+
 
         <!-- =================================================
              DETAILS HEADER
@@ -566,8 +737,6 @@
             </div>
 
 
-            <!-- CURRENT SO STATUS -->
-
             <div
                 id="detailStatusBadge"
                 class="so-detail-status"
@@ -576,6 +745,7 @@
             </div>
 
         </div>
+
 
 
         <!-- =================================================
@@ -645,8 +815,8 @@
         </div>
 
 
+
         <!-- =================================================
-             NEW
              TRANSACTION TRACKING
         ================================================== -->
 
@@ -677,11 +847,11 @@
             </div>
 
 
-            <!-- =================================================
-                 TRACKING SUMMARY CARDS
-            ================================================== -->
+
+            <!-- TRACKING SUMMARY -->
 
             <div class="so-transaction-summary-grid">
+
 
                 <!-- DR -->
 
@@ -708,6 +878,7 @@
                     </div>
 
                 </div>
+
 
 
                 <!-- INVOICE -->
@@ -737,9 +908,12 @@
                 </div>
 
 
+
                 <!-- PAID -->
 
-                <div class="so-transaction-card so-payment-paid">
+                <div
+                    class="so-transaction-card so-payment-paid"
+                >
 
                     <div class="so-transaction-icon">
                         ✓
@@ -764,9 +938,12 @@
                 </div>
 
 
+
                 <!-- BALANCE -->
 
-                <div class="so-transaction-card so-payment-balance">
+                <div
+                    class="so-transaction-card so-payment-balance"
+                >
 
                     <div class="so-transaction-icon">
                         ₱
@@ -793,9 +970,8 @@
             </div>
 
 
-            <!-- =================================================
-                 TRANSACTION STATUS
-            ================================================== -->
+
+            <!-- PAYMENT STATUS -->
 
             <div class="so-payment-status-panel">
 
@@ -813,9 +989,8 @@
             </div>
 
 
-            <!-- =================================================
-                 DR LIST
-            ================================================== -->
+
+            <!-- DR LIST -->
 
             <div class="so-tracking-section">
 
@@ -884,7 +1059,6 @@
                                     class="so-no-record"
                                 >
                                     No Delivery Receipt records.
-
                                 </td>
 
                             </tr>
@@ -898,9 +1072,8 @@
             </div>
 
 
-            <!-- =================================================
-                 INVOICE LIST
-            ================================================== -->
+
+            <!-- INVOICE LIST -->
 
             <div class="so-tracking-section">
 
@@ -969,7 +1142,6 @@
                                     class="so-no-record"
                                 >
                                     No Invoice records.
-
                                 </td>
 
                             </tr>
@@ -983,9 +1155,8 @@
             </div>
 
 
-            <!-- =================================================
-                 PAYMENT HISTORY
-            ================================================== -->
+
+            <!-- PAYMENT HISTORY -->
 
             <div class="so-tracking-section">
 
@@ -1054,7 +1225,6 @@
                                     class="so-no-record"
                                 >
                                     No payment records.
-
                                 </td>
 
                             </tr>
@@ -1070,13 +1240,13 @@
         </div>
 
 
+
         <!-- =================================================
              INFORMATION CARDS
         ================================================== -->
 
         <div class="so-detail-info-grid">
 
-            <!-- ORDER DATE -->
 
             <div class="so-detail-info-card">
 
@@ -1099,7 +1269,6 @@
             </div>
 
 
-            <!-- CLIENT -->
 
             <div class="so-detail-info-card">
 
@@ -1122,7 +1291,6 @@
             </div>
 
 
-            <!-- PROJECT -->
 
             <div class="so-detail-info-card">
 
@@ -1145,7 +1313,6 @@
             </div>
 
 
-            <!-- GRAND TOTAL -->
 
             <div
                 class="so-detail-info-card so-detail-total-card"
@@ -1170,6 +1337,7 @@
             </div>
 
         </div>
+
 
 
         <!-- =================================================
@@ -1206,7 +1374,6 @@
 
             <div class="form-grid so-detail-form">
 
-                <!-- DATE CREATION -->
 
                 <div class="form-group">
 
@@ -1223,7 +1390,6 @@
                 </div>
 
 
-                <!-- SALES ORDER NUMBER -->
 
                 <div class="form-group">
 
@@ -1240,7 +1406,6 @@
                 </div>
 
 
-                <!-- CLIENT -->
 
                 <div class="form-group">
 
@@ -1257,7 +1422,6 @@
                 </div>
 
 
-                <!-- SE -->
 
                 <div class="form-group">
 
@@ -1303,7 +1467,6 @@
                 </div>
 
 
-                <!-- ATTENTION -->
 
                 <div class="form-group">
 
@@ -1320,7 +1483,6 @@
                 </div>
 
 
-                <!-- TIN -->
 
                 <div class="form-group">
 
@@ -1337,7 +1499,6 @@
                 </div>
 
 
-                <!-- PO NUMBER -->
 
                 <div class="form-group">
 
@@ -1354,7 +1515,6 @@
                 </div>
 
 
-                <!-- PAYMENT TERMS -->
 
                 <div class="form-group">
 
@@ -1396,7 +1556,6 @@
                 </div>
 
 
-                <!-- JOB ORDER -->
 
                 <div class="form-group">
 
@@ -1413,7 +1572,6 @@
                 </div>
 
 
-                <!-- BILLING ADDRESS -->
 
                 <div class="form-group full">
 
@@ -1430,7 +1588,6 @@
                 </div>
 
 
-                <!-- DELIVERY ADDRESS -->
 
                 <div class="form-group full">
 
@@ -1447,7 +1604,6 @@
                 </div>
 
 
-                <!-- PROJECT -->
 
                 <div class="form-group full">
 
@@ -1466,6 +1622,7 @@
             </div>
 
         </div>
+
 
 
         <!-- =================================================
@@ -1513,8 +1670,6 @@
             </div>
 
 
-            <!-- ITEMS TABLE -->
-
             <div class="table-container so-items-table">
 
                 <table id="soDetailsItemsTable">
@@ -1561,7 +1716,6 @@
 
 
                     <tbody id="soDetailsItemsBody">
-                        <!-- DETAILS ITEMS WILL LOAD HERE -->
                     </tbody>
 
                 </table>
@@ -1569,11 +1723,9 @@
             </div>
 
 
-            <!-- TOTALS -->
 
             <div class="detail-summary">
 
-                <!-- SUBTOTAL -->
 
                 <div class="so-total-row">
 
@@ -1591,7 +1743,6 @@
                 </div>
 
 
-                <!-- DISCOUNT -->
 
                 <div class="so-total-row">
 
@@ -1616,7 +1767,6 @@
                 </div>
 
 
-                <!-- VAT -->
 
                 <div class="so-total-row">
 
@@ -1648,7 +1798,6 @@
                 </div>
 
 
-                <!-- VAT RATE -->
 
                 <div class="so-total-row">
 
@@ -1663,7 +1812,6 @@
                 </div>
 
 
-                <!-- GRAND TOTAL -->
 
                 <div class="so-total-row grand-total-row">
 
@@ -1683,6 +1831,7 @@
             </div>
 
         </div>
+
 
 
         <!-- =================================================
@@ -1726,6 +1875,7 @@
                         onchange="handleDetailSOFiles(event)"
                     >
 
+
                     <button
                         type="button"
                         id="detailAddFileButton"
@@ -1764,13 +1914,12 @@
         </div>
 
 
+
         <!-- =================================================
              DETAILS ACTIONS
         ================================================== -->
 
         <div class="so-details-actions">
-
-            <!-- BACK -->
 
             <button
                 type="button"
@@ -1786,7 +1935,6 @@
 
             <div class="so-details-action-right">
 
-                <!-- EMAIL -->
 
                 <button
                     type="button"
@@ -1801,7 +1949,6 @@
                 </button>
 
 
-                <!-- CANCEL -->
 
                 <button
                     type="button"
@@ -1816,7 +1963,6 @@
                 </button>
 
 
-                <!-- UPDATE -->
 
                 <button
                     type="button"
@@ -1831,7 +1977,6 @@
                 </button>
 
 
-                <!-- POST SO -->
 
                 <button
                     type="button"
@@ -1846,7 +1991,6 @@
                 </button>
 
 
-                <!-- SAVE -->
 
                 <button
                     type="button"
@@ -1864,6 +2008,7 @@
             </div>
 
         </div>
+
 
 
         <!-- =================================================
@@ -1941,5 +2086,6 @@
         </div>
 
     </div>
+
 
 </div>
