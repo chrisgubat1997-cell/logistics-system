@@ -2,19 +2,15 @@
    LOGIS-TECH SYSTEM
    CUSTOMER MANAGEMENT
    create-customer.js
-   VERSION: 20261006-01
+   VERSION: 20261006-02
 
    PURPOSE:
    - Create Customer
    - Edit Customer
    - Get Customer
    - Customer Master API
-   - Reusable by:
-       Sales Order
-       Delivery
-       Invoice
-       Payment
-       Reports
+   - Reusable Customer Module
+   - Works standalone OR embedded inside Sales Order
 ========================================================= */
 
 (function () {
@@ -39,6 +35,8 @@
     let editingCustomerId = "";
 
     let isSavingCustomer = false;
+
+    let customerFormInitialized = false;
 
 
     /* =====================================================
@@ -65,7 +63,6 @@
             await fetch(
                 CUSTOMER_API_URL,
                 {
-
                     method: "POST",
 
                     headers: {
@@ -83,7 +80,6 @@
                                 data
 
                         })
-
                 }
             );
 
@@ -109,8 +105,14 @@
 
             throw new Error(
                 result &&
-                result.error
-                    ? result.error
+                (
+                    result.error ||
+                    result.message
+                )
+                    ? (
+                        result.error ||
+                        result.message
+                    )
                     : "Unknown API error."
             );
 
@@ -123,7 +125,7 @@
 
 
     /* =====================================================
-       INITIALIZE
+       INITIALIZE CUSTOMER FORM
     ===================================================== */
 
     function initializeCustomerForm() {
@@ -133,7 +135,7 @@
         );
 
         console.log(
-            "LOGIS-TECH CUSTOMER FORM LOADED"
+            "LOGIS-TECH CUSTOMER FORM INITIALIZE"
         );
 
         console.log(
@@ -141,11 +143,63 @@
         );
 
 
+        const form =
+            getElement(
+                "customerForm"
+            );
+
+
+        /*
+         * Important:
+         * If the HTML has not yet been injected,
+         * do not mark the module initialized.
+         */
+
+        if (!form) {
+
+            console.warn(
+                "Customer form element not found."
+            );
+
+            return false;
+
+        }
+
+
+        /*
+         * Prevent duplicate event listeners.
+         */
+
+        if (
+            customerFormInitialized
+        ) {
+
+            console.log(
+                "Customer form already initialized."
+            );
+
+            return true;
+
+        }
+
+
         setupFormEvents();
 
         setupAddressEvents();
 
+        customerFormInitialized =
+            true;
+
+
         resetCustomerForm();
+
+
+        console.log(
+            "Customer form initialized successfully."
+        );
+
+
+        return true;
 
     }
 
@@ -348,17 +402,16 @@
 
         try {
 
-            isSavingCustomer = true;
+            isSavingCustomer =
+                true;
 
-            setSavingState(true);
+            setSavingState(
+                true
+            );
 
 
             let result;
 
-
-            /* =================================================
-               CREATE
-            ================================================= */
 
             if (
                 customerMode === "CREATE"
@@ -371,12 +424,6 @@
                     );
 
             }
-
-
-            /* =================================================
-               UPDATE
-            ================================================= */
-
             else if (
                 customerMode === "EDIT"
             ) {
@@ -388,8 +435,6 @@
                     );
 
             }
-
-
             else {
 
                 throw new Error(
@@ -398,10 +443,6 @@
 
             }
 
-
-            /* =================================================
-               SUCCESS
-            ================================================= */
 
             handleCustomerSaveSuccess(
                 result
@@ -425,9 +466,12 @@
 
         } finally {
 
-            isSavingCustomer = false;
+            isSavingCustomer =
+                false;
 
-            setSavingState(false);
+            setSavingState(
+                false
+            );
 
         }
 
@@ -572,13 +616,12 @@
         data
     ) {
 
-        if (
-            !data.clientName
-        ) {
+        if (!data.clientName) {
 
             return {
 
-                valid: false,
+                valid:
+                    false,
 
                 message:
                     "Client Name is required."
@@ -594,7 +637,8 @@
 
             return {
 
-                valid: false,
+                valid:
+                    false,
 
                 message:
                     "Client Name is too short."
@@ -604,9 +648,7 @@
         }
 
 
-        if (
-            data.email
-        ) {
+        if (data.email) {
 
             const emailPattern =
                 /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -620,7 +662,8 @@
 
                 return {
 
-                    valid: false,
+                    valid:
+                        false,
 
                     message:
                         "Please enter a valid email address."
@@ -639,7 +682,8 @@
 
             return {
 
-                valid: false,
+                valid:
+                    false,
 
                 message:
                     "Please enter a valid contact number."
@@ -651,7 +695,8 @@
 
         return {
 
-            valid: true
+            valid:
+                true
 
         };
 
@@ -734,10 +779,9 @@
         );
 
 
-        /* =================================================
-           GLOBAL EVENT
-           Other modules can listen to this.
-        ================================================= */
+        /*
+         * Notify parent module.
+         */
 
         try {
 
@@ -763,11 +807,11 @@
                 )
             );
 
-        } catch (eventError) {
+        } catch (error) {
 
             console.warn(
-                "Unable to dispatch customerSaved event:",
-                eventError
+                "customerSaved event failed:",
+                error
             );
 
         }
@@ -882,10 +926,8 @@
                 await customerAPI(
                     "getCustomer",
                     {
-
                         customerId:
                             customerId
-
                     }
                 );
 
@@ -1053,7 +1095,7 @@
 
 
     /* =====================================================
-       OPEN NEW CUSTOMER
+       NEW CUSTOMER
     ===================================================== */
 
     function newCustomer() {
@@ -1070,8 +1112,8 @@
     function handleCancel() {
 
         /*
-         * If this component is inside a modal,
-         * the parent module can override this function.
+         * DO NOT use window.history.back()
+         * when embedded inside Sales Order.
          */
 
         try {
@@ -1093,8 +1135,35 @@
 
 
         /*
-         * If opened as a standalone page,
-         * go back to previous page.
+         * Standalone page only.
+         */
+
+        const salesOrderCustomerArea =
+            document.getElementById(
+                "customerArea"
+            );
+
+
+        if (
+            salesOrderCustomerArea
+        ) {
+
+            if (
+                typeof window.closeCustomerFromSalesOrder ===
+                "function"
+            ) {
+
+                window.closeCustomerFromSalesOrder();
+
+            }
+
+            return;
+
+        }
+
+
+        /*
+         * Standalone fallback.
          */
 
         if (
@@ -1374,7 +1443,6 @@
 
     /* =====================================================
        PUBLIC API
-       Other LOGIS-TECH modules can use these.
     ===================================================== */
 
     window.initializeCustomerForm =
@@ -1401,26 +1469,17 @@
         showCustomerForm;
 
 
-    /* =====================================================
-       AUTO INITIALIZE
-       Works when HTML is loaded directly.
-    ===================================================== */
+    window.customerAPI =
+        customerAPI;
 
-    if (
-        document.readyState ===
-        "loading"
-    ) {
 
-        document.addEventListener(
-            "DOMContentLoaded",
-            initializeCustomerForm
-        );
-
-    } else {
-
-        initializeCustomerForm();
-
-    }
+    /*
+     * IMPORTANT:
+     * No automatic DOMContentLoaded initialization.
+     *
+     * Sales Order loader will initialize the module
+     * AFTER the HTML has been injected.
+     */
 
 
 })();
