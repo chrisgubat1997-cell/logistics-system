@@ -1,7 +1,7 @@
 <!-- =====================================================
      LOGIS-TECH SYSTEM
      SALES ORDER MODULE
-     VERSION: 20261006-02
+     VERSION: 20261006-03
 ===================================================== -->
 
 <div
@@ -91,67 +91,6 @@
                     </span>
 
                 </button>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =================================================
-             CUSTOMER FORM AREA
-        ================================================== -->
-
-        <div
-            id="customerArea"
-            class="so-customer-area"
-            style="display:none;"
-        >
-
-            <div class="so-customer-area-header">
-
-                <div class="so-customer-title">
-
-                    <div class="so-customer-icon">
-                        👥
-                    </div>
-
-                    <div>
-
-                        <h2>
-                            Customer Information
-                        </h2>
-
-                        <p>
-                            Register or update customer information
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <button
-                    type="button"
-                    id="closeCustomerButton"
-                    class="so-customer-close-btn"
-                    onclick="closeCustomerFromSalesOrder()"
-                    title="Close Customer"
-                >
-
-                    ✕
-
-                </button>
-
-            </div>
-
-
-            <div
-                id="customerFormContainer"
-                class="so-customer-form-container"
-            >
-
-                <!-- create-customer.html will load here -->
 
             </div>
 
@@ -680,6 +619,73 @@
                 </button>
 
             </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         CUSTOMER FORM AREA
+         
+         IMPORTANT:
+         THIS IS NOW OUTSIDE #salesOrderListView
+         
+         This prevents the customer form from being hidden
+         when salesOrderListView is set to display:none.
+    ===================================================== -->
+
+    <div
+        id="customerArea"
+        class="so-customer-area"
+        style="display:none;"
+    >
+
+        <div class="so-customer-area-header">
+
+            <div class="so-customer-title">
+
+                <div class="so-customer-icon">
+                    👥
+                </div>
+
+                <div>
+
+                    <h2>
+                        Customer Information
+                    </h2>
+
+                    <p>
+                        Register or update customer information
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                id="closeCustomerButton"
+                class="so-customer-close-btn"
+                onclick="closeCustomerFromSalesOrder()"
+                title="Close Customer"
+            >
+
+                ✕
+
+            </button>
+
+        </div>
+
+
+        <div
+            id="customerFormContainer"
+            class="so-customer-form-container"
+        >
+
+            <!-- create-customer.html will load here -->
 
         </div>
 
