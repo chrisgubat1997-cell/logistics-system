@@ -1,0 +1,2311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Reports | LOGIS-TECH SYSTEM</title>
+
+    <!-- REPORT CSS -->
+    <link rel="stylesheet" href="../css/report.css?v=20261006">
+</head>
+
+<body>
+
+<main class="report-page">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+    <header class="report-header">
+
+        <div class="report-header-left">
+
+            <button
+                type="button"
+                class="report-back-btn"
+                id="backToDashboardBtn"
+                title="Back to Dashboard">
+                ←
+            </button>
+
+            <div class="report-title-area">
+
+                <span class="report-eyebrow">
+                    LOGIS-TECH SYSTEM
+                </span>
+
+                <h1>Reports</h1>
+
+                <p>
+                    Management reports and operational analytics
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="report-header-actions">
+
+            <button
+                type="button"
+                class="report-btn report-btn-secondary"
+                id="printReportBtn">
+                🖨 Print
+            </button>
+
+            <button
+                type="button"
+                class="report-btn report-btn-primary"
+                id="exportReportBtn">
+                ↓ Export
+            </button>
+
+        </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         FILTER BAR
+    ====================================================== -->
+    <section class="report-filter-bar">
+
+        <div class="report-filter-title">
+
+            <span>REPORT FILTER</span>
+
+            <strong id="activeReportTitle">
+                Executive Summary
+            </strong>
+
+        </div>
+
+
+        <div class="report-filters">
+
+            <div class="report-filter-field">
+
+                <label for="reportDateFrom">
+                    From
+                </label>
+
+                <input
+                    type="date"
+                    id="reportDateFrom">
+
+            </div>
+
+
+            <div class="report-filter-field">
+
+                <label for="reportDateTo">
+                    To
+                </label>
+
+                <input
+                    type="date"
+                    id="reportDateTo">
+
+            </div>
+
+
+            <div class="report-filter-field">
+
+                <label for="reportClientFilter">
+                    Client
+                </label>
+
+                <select id="reportClientFilter">
+
+                    <option value="">
+                        All Clients
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="report-filter-field">
+
+                <label for="reportStatusFilter">
+                    Status
+                </label>
+
+                <select id="reportStatusFilter">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="report-filter-search">
+
+                <label for="reportSearch">
+                    Search
+                </label>
+
+                <div class="report-search-box">
+
+                    <span>⌕</span>
+
+                    <input
+                        type="search"
+                        id="reportSearch"
+                        placeholder="Search report...">
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="report-filter-apply"
+                id="applyReportFilterBtn">
+                Apply
+            </button>
+
+
+            <button
+                type="button"
+                class="report-filter-clear"
+                id="clearReportFilterBtn">
+                Clear
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         REPORT LAYOUT
+    ====================================================== -->
+    <div class="report-layout">
+
+
+        <!-- =================================================
+             MAIN REPORT CONTENT
+        ================================================== -->
+        <section class="report-content">
+
+
+            <!-- =============================================
+                 EXECUTIVE SUMMARY
+            ============================================== -->
+            <div
+                class="report-view active"
+                id="report-executive">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            MANAGEMENT OVERVIEW
+                        </span>
+
+                        <h2>
+                            Executive Summary
+                        </h2>
+
+                        <p>
+                            Overall performance of Sales,
+                            Logistics, Billing, Collection
+                            and Fleet.
+                        </p>
+
+                    </div>
+
+
+                    <div class="report-period">
+
+                        <span>
+                            REPORT PERIOD
+                        </span>
+
+                        <strong id="executiveReportPeriod">
+                            All Time
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SUMMARY CARDS -->
+                <div class="report-stat-grid">
+
+
+                    <div class="report-stat-card">
+
+                        <span class="stat-label">
+                            SALES ORDER
+                        </span>
+
+                        <strong id="summaryTotalSO">
+                            0
+                        </strong>
+
+                        <small>
+                            Total Sales Orders
+                        </small>
+
+                    </div>
+
+
+                    <div class="report-stat-card">
+
+                        <span class="stat-label">
+                            SO AMOUNT
+                        </span>
+
+                        <strong id="summarySOAmount">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Total order value
+                        </small>
+
+                    </div>
+
+
+                    <div class="report-stat-card">
+
+                        <span class="stat-label">
+                            DELIVERED
+                        </span>
+
+                        <strong id="summaryDelivered">
+                            0
+                        </strong>
+
+                        <small>
+                            Completed deliveries
+                        </small>
+
+                    </div>
+
+
+                    <div class="report-stat-card">
+
+                        <span class="stat-label">
+                            INVOICED
+                        </span>
+
+                        <strong id="summaryInvoiced">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Total invoiced amount
+                        </small>
+
+                    </div>
+
+
+                    <div class="report-stat-card">
+
+                        <span class="stat-label">
+                            COLLECTED
+                        </span>
+
+                        <strong id="summaryCollected">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Total payments received
+                        </small>
+
+                    </div>
+
+
+                    <div class="report-stat-card">
+
+                        <span class="stat-label">
+                            OUTSTANDING
+                        </span>
+
+                        <strong id="summaryOutstanding">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Remaining receivable
+                        </small>
+
+                    </div>
+
+
+                    <div class="report-stat-card">
+
+                        <span class="stat-label">
+                            ON-TIME DELIVERY
+                        </span>
+
+                        <strong id="summaryOnTime">
+                            0%
+                        </strong>
+
+                        <small>
+                            Delivery accuracy
+                        </small>
+
+                    </div>
+
+
+                    <div class="report-stat-card">
+
+                        <span class="stat-label">
+                            PENDING PAYMENT
+                        </span>
+
+                        <strong id="summaryPendingPayment">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Unsettled payments
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <!-- CHARTS -->
+                <div class="report-chart-grid">
+
+
+                    <div class="report-panel report-chart-panel">
+
+                        <div class="report-panel-header">
+
+                            <div>
+
+                                <span>
+                                    PERFORMANCE
+                                </span>
+
+                                <h3>
+                                    Monthly Sales & Collection
+                                </h3>
+
+                            </div>
+
+
+                            <select id="summaryChartPeriod">
+
+                                <option value="12">
+                                    12 Months
+                                </option>
+
+                                <option value="6">
+                                    6 Months
+                                </option>
+
+                                <option value="3">
+                                    3 Months
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div
+                            class="report-chart-placeholder"
+                            id="salesCollectionChart">
+
+                            <div class="chart-grid-lines">
+
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                                <span></span>
+
+                            </div>
+
+
+                            <div class="chart-placeholder-message">
+
+                                <strong>
+                                    Sales & Collection Chart
+                                </strong>
+
+                                <small>
+                                    Chart data will load from LocalStorage
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-panel report-chart-panel">
+
+                        <div class="report-panel-header">
+
+                            <div>
+
+                                <span>
+                                    LOGISTICS
+                                </span>
+
+                                <h3>
+                                    Delivery Performance
+                                </h3>
+
+                            </div>
+
+                        </div>
+
+
+                        <div
+                            class="delivery-chart-placeholder"
+                            id="deliveryPerformanceChart">
+
+
+                            <div class="donut-placeholder">
+
+                                <strong id="deliveryChartPercent">
+                                    0%
+                                </strong>
+
+                                <span>
+                                    On-Time
+                                </span>
+
+                            </div>
+
+
+                            <div class="delivery-legend">
+
+                                <div>
+
+                                    <span class="legend-dot on-time"></span>
+
+                                    <span>
+                                        On-Time
+                                    </span>
+
+                                    <strong id="deliveryChartOnTime">
+                                        0
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="legend-dot delayed"></span>
+
+                                    <span>
+                                        Delayed
+                                    </span>
+
+                                    <strong id="deliveryChartDelayed">
+                                        0
+                                    </strong>
+
+                                </div>
+
+
+                                <div>
+
+                                    <span class="legend-dot pending"></span>
+
+                                    <span>
+                                        Pending
+                                    </span>
+
+                                    <strong id="deliveryChartPending">
+                                        0
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MONTHLY PERFORMANCE -->
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                MONTHLY PERFORMANCE
+                            </span>
+
+                            <h3>
+                                Business Performance
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-table-wrapper">
+
+                        <table class="report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        Month
+                                    </th>
+
+                                    <th>
+                                        SO Count
+                                    </th>
+
+                                    <th>
+                                        SO Amount
+                                    </th>
+
+                                    <th>
+                                        Delivered
+                                    </th>
+
+                                    <th>
+                                        Invoiced
+                                    </th>
+
+                                    <th>
+                                        Collected
+                                    </th>
+
+                                    <th>
+                                        Outstanding
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="executiveReportTable">
+
+                                <tr>
+
+                                    <td colspan="7">
+
+                                        No report data available.
+
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 SALES ORDER REPORT
+            ============================================== -->
+            <div
+                class="report-view"
+                id="report-sales-order">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            SALES
+                        </span>
+
+                        <h2>
+                            Sales Order Report
+                        </h2>
+
+                        <p>
+                            Sales order volume, value and status.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-mini-stat-grid">
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total SO
+                        </span>
+
+                        <strong id="salesReportCount">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total Amount
+                        </span>
+
+                        <strong id="salesReportAmount">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Active
+                        </span>
+
+                        <strong id="salesReportActive">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Completed
+                        </span>
+
+                        <strong id="salesReportCompleted">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Cancelled
+                        </span>
+
+                        <strong id="salesReportCancelled">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                SALES ORDER DATA
+                            </span>
+
+                            <h3>
+                                Sales Order Details
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-table-wrapper">
+
+                        <table class="report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>SO No.</th>
+                                    <th>Date</th>
+                                    <th>Client</th>
+                                    <th>Project</th>
+                                    <th>SO Amount</th>
+                                    <th>Terms</th>
+                                    <th>Status</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="salesOrderReportTable">
+
+                                <tr>
+
+                                    <td colspan="7">
+                                        No Sales Order data available.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 DELIVERY REPORT
+            ============================================== -->
+            <div
+                class="report-view"
+                id="report-delivery">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            LOGISTICS
+                        </span>
+
+                        <h2>
+                            Delivery Report
+                        </h2>
+
+                        <p>
+                            Delivery performance and lead time.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-mini-stat-grid">
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total Deliveries
+                        </span>
+
+                        <strong id="deliveryReportTotal">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            On-Time
+                        </span>
+
+                        <strong id="deliveryReportOnTime">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Delayed
+                        </span>
+
+                        <strong id="deliveryReportDelayed">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Pending
+                        </span>
+
+                        <strong id="deliveryReportPending">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Accuracy
+                        </span>
+
+                        <strong id="deliveryReportAccuracy">
+                            0%
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                DELIVERY PERFORMANCE
+                            </span>
+
+                            <h3>
+                                Delivery Details
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-table-wrapper">
+
+                        <table class="report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>DR No.</th>
+                                    <th>SO No.</th>
+                                    <th>Client</th>
+                                    <th>Date Transfer</th>
+                                    <th>Committed</th>
+                                    <th>Delivered</th>
+                                    <th>Lead Time</th>
+                                    <th>Status</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="deliveryReportTable">
+
+                                <tr>
+
+                                    <td colspan="8">
+                                        No delivery data available.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 DR MONITORING
+            ============================================== -->
+            <div
+                class="report-view"
+                id="report-dr">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            DELIVERY RECEIPT
+                        </span>
+
+                        <h2>
+                            DR Monitoring
+                        </h2>
+
+                        <p>
+                            Monitor Delivery Receipt status and aging.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-mini-stat-grid">
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Prepared
+                        </span>
+
+                        <strong id="drPrepared">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Printed
+                        </span>
+
+                        <strong id="drPrinted">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            In Transit
+                        </span>
+
+                        <strong id="drTransit">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Delivered
+                        </span>
+
+                        <strong id="drDelivered">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Cancelled
+                        </span>
+
+                        <strong id="drCancelled">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                DR AGING
+                            </span>
+
+                            <h3>
+                                Delivery Receipt Monitoring
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="aging-grid">
+
+                        <div class="aging-card">
+
+                            <span>
+                                0–3 Days
+                            </span>
+
+                            <strong id="drAging03">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="aging-card">
+
+                            <span>
+                                4–7 Days
+                            </span>
+
+                            <strong id="drAging47">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="aging-card">
+
+                            <span>
+                                8–15 Days
+                            </span>
+
+                            <strong id="drAging815">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="aging-card">
+
+                            <span>
+                                15+ Days
+                            </span>
+
+                            <strong id="drAging15">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 INVOICE REPORT
+            ============================================== -->
+            <div
+                class="report-view"
+                id="report-invoice">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            BILLING
+                        </span>
+
+                        <h2>
+                            Invoice Report
+                        </h2>
+
+                        <p>
+                            Billing, EWT and invoice payment status.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-mini-stat-grid">
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total Invoice
+                        </span>
+
+                        <strong id="invoiceReportCount">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Amount Due
+                        </span>
+
+                        <strong id="invoiceReportAmount">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total EWT
+                        </span>
+
+                        <strong id="invoiceReportEWT">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Net Payable
+                        </span>
+
+                        <strong id="invoiceReportNet">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Unpaid
+                        </span>
+
+                        <strong id="invoiceReportUnpaid">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                INVOICE DATA
+                            </span>
+
+                            <h3>
+                                Invoice Details
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-table-wrapper">
+
+                        <table class="report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Invoice No.</th>
+                                    <th>SO No.</th>
+                                    <th>Client</th>
+                                    <th>Date</th>
+                                    <th>Amount Due</th>
+                                    <th>EWT</th>
+                                    <th>Net Payable</th>
+                                    <th>Status</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="invoiceReportTable">
+
+                                <tr>
+
+                                    <td colspan="8">
+                                        No invoice data available.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 PAYMENT REPORT
+            ============================================== -->
+            <div
+                class="report-view"
+                id="report-payment">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            COLLECTION
+                        </span>
+
+                        <h2>
+                            Payment Report
+                        </h2>
+
+                        <p>
+                            Payment transactions and collection performance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-mini-stat-grid">
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total Payments
+                        </span>
+
+                        <strong id="paymentReportCount">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total Collected
+                        </span>
+
+                        <strong id="paymentReportAmount">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Paid
+                        </span>
+
+                        <strong id="paymentReportPaid">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Partial
+                        </span>
+
+                        <strong id="paymentReportPartial">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Pending
+                        </span>
+
+                        <strong id="paymentReportPending">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                PAYMENT DATA
+                            </span>
+
+                            <h3>
+                                Collection Details
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-table-wrapper">
+
+                        <table class="report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Payment No.</th>
+                                    <th>Date</th>
+                                    <th>SO No.</th>
+                                    <th>Client</th>
+                                    <th>Method</th>
+                                    <th>Receipt</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="paymentReportTable">
+
+                                <tr>
+
+                                    <td colspan="8">
+                                        No payment data available.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 RECEIVABLE REPORT
+            ============================================== -->
+            <div
+                class="report-view"
+                id="report-receivable">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            FINANCE
+                        </span>
+
+                        <h2>
+                            Accounts Receivable
+                        </h2>
+
+                        <p>
+                            Outstanding balances by customer.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-mini-stat-grid">
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total Receivable
+                        </span>
+
+                        <strong id="receivableTotal">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Current
+                        </span>
+
+                        <strong id="receivableCurrent">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            1–30 Days
+                        </span>
+
+                        <strong id="receivable30">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            31–60 Days
+                        </span>
+
+                        <strong id="receivable60">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            60+ Days
+                        </span>
+
+                        <strong id="receivable90">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                CUSTOMER BALANCE
+                            </span>
+
+                            <h3>
+                                Outstanding Receivables
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-table-wrapper">
+
+                        <table class="report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Client</th>
+                                    <th>SO Total</th>
+                                    <th>Invoiced</th>
+                                    <th>Paid</th>
+                                    <th>Outstanding</th>
+                                    <th>Collection %</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="receivableReportTable">
+
+                                <tr>
+
+                                    <td colspan="6">
+                                        No receivable data available.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 FLEET REPORT
+            ============================================== -->
+            <div
+                class="report-view"
+                id="report-fleet">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            FLEET
+                        </span>
+
+                        <h2>
+                            Fleet Report
+                        </h2>
+
+                        <p>
+                            Vehicle utilization, fuel efficiency
+                            and maintenance.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-mini-stat-grid">
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Total KM
+                        </span>
+
+                        <strong id="fleetTotalKM">
+                            0 km
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Fuel Used
+                        </span>
+
+                        <strong id="fleetFuelUsed">
+                            0 L
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Average KM/L
+                        </span>
+
+                        <strong id="fleetAverageKM">
+                            0.00
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Trips
+                        </span>
+
+                        <strong id="fleetTrips">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="report-mini-card">
+
+                        <span>
+                            Maintenance Cost
+                        </span>
+
+                        <strong id="fleetMaintenanceCost">
+                            ₱0.00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                VEHICLE PERFORMANCE
+                            </span>
+
+                            <h3>
+                                Fleet Summary
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="report-table-wrapper">
+
+                        <table class="report-table">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>Vehicle</th>
+                                    <th>Total KM</th>
+                                    <th>Fuel Used</th>
+                                    <th>KM/L</th>
+                                    <th>Trips</th>
+                                    <th>Maintenance</th>
+                                    <th>Idle Days</th>
+
+                                </tr>
+
+                            </thead>
+
+
+                            <tbody id="fleetReportTable">
+
+                                <tr>
+
+                                    <td colspan="7">
+                                        No fleet data available.
+                                    </td>
+
+                                </tr>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =============================================
+                 MANAGEMENT REPORT
+            ============================================== -->
+            <div
+                class="report-view"
+                id="report-management">
+
+                <div class="report-section-heading">
+
+                    <div>
+
+                        <span class="section-eyebrow">
+                            MANAGEMENT
+                        </span>
+
+                        <h2>
+                            Management Report
+                        </h2>
+
+                        <p>
+                            Consolidated business performance report.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="management-report-banner">
+
+                    <div>
+
+                        <span>
+                            REPORT PERIOD
+                        </span>
+
+                        <strong id="managementReportPeriod">
+                            All Time
+                        </strong>
+
+                    </div>
+
+
+                    <div>
+
+                        <span>
+                            GENERATED
+                        </span>
+
+                        <strong id="managementGeneratedDate">
+                            —
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="management-grid">
+
+
+                    <div class="management-block">
+
+                        <span>
+                            SALES
+                        </span>
+
+                        <strong id="managementSales">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Total SO Amount
+                        </small>
+
+                    </div>
+
+
+                    <div class="management-block">
+
+                        <span>
+                            LOGISTICS
+                        </span>
+
+                        <strong id="managementDeliveries">
+                            0
+                        </strong>
+
+                        <small>
+                            Total Deliveries
+                        </small>
+
+                    </div>
+
+
+                    <div class="management-block">
+
+                        <span>
+                            BILLING
+                        </span>
+
+                        <strong id="managementBilling">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Total Invoiced
+                        </small>
+
+                    </div>
+
+
+                    <div class="management-block">
+
+                        <span>
+                            COLLECTION
+                        </span>
+
+                        <strong id="managementCollection">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Total Collected
+                        </small>
+
+                    </div>
+
+
+                    <div class="management-block">
+
+                        <span>
+                            RECEIVABLE
+                        </span>
+
+                        <strong id="managementReceivable">
+                            ₱0.00
+                        </strong>
+
+                        <small>
+                            Outstanding
+                        </small>
+
+                    </div>
+
+
+                    <div class="management-block">
+
+                        <span>
+                            FLEET
+                        </span>
+
+                        <strong id="managementFleetKM">
+                            0 km
+                        </strong>
+
+                        <small>
+                            Total Kilometer
+                        </small>
+
+                    </div>
+
+                </div>
+
+
+                <div class="report-panel">
+
+                    <div class="report-panel-header">
+
+                        <div>
+
+                            <span>
+                                MANAGEMENT SUMMARY
+                            </span>
+
+                            <h3>
+                                Key Performance Indicators
+                            </h3>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="kpi-list">
+
+
+                        <div class="kpi-row">
+
+                            <div>
+
+                                <strong>
+                                    Sales Conversion
+                                </strong>
+
+                                <small>
+                                    Sales order performance
+                                </small>
+
+                            </div>
+
+                            <strong id="kpiSalesConversion">
+                                0%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="kpi-row">
+
+                            <div>
+
+                                <strong>
+                                    Delivery Accuracy
+                                </strong>
+
+                                <small>
+                                    On-time delivery percentage
+                                </small>
+
+                            </div>
+
+                            <strong id="kpiDeliveryAccuracy">
+                                0%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="kpi-row">
+
+                            <div>
+
+                                <strong>
+                                    Collection Rate
+                                </strong>
+
+                                <small>
+                                    Collected vs SO value
+                                </small>
+
+                            </div>
+
+                            <strong id="kpiCollectionRate">
+                                0%
+                            </strong>
+
+                        </div>
+
+
+                        <div class="kpi-row">
+
+                            <div>
+
+                                <strong>
+                                    Fleet Efficiency
+                                </strong>
+
+                                <small>
+                                    Average kilometer per liter
+                                </small>
+
+                            </div>
+
+                            <strong id="kpiFleetEfficiency">
+                                0.00 KM/L
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =================================================
+             RIGHT REPORT NAVIGATION
+        ================================================== -->
+        <aside class="report-sidebar">
+
+
+            <div class="report-sidebar-header">
+
+                <span>
+                    REPORT CENTER
+                </span>
+
+                <strong>
+                    Reports
+                </strong>
+
+            </div>
+
+
+            <nav class="report-nav">
+
+
+                <button
+                    type="button"
+                    class="report-nav-item active"
+                    data-report="executive">
+
+                    <span class="report-nav-icon">
+                        ◈
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            Executive Summary
+                        </strong>
+
+                        <small>
+                            Overall performance
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-nav-item"
+                    data-report="sales-order">
+
+                    <span class="report-nav-icon">
+                        ▤
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            Sales Order
+                        </strong>
+
+                        <small>
+                            Sales performance
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-nav-item"
+                    data-report="delivery">
+
+                    <span class="report-nav-icon">
+                        ◫
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            Delivery
+                        </strong>
+
+                        <small>
+                            Delivery performance
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-nav-item"
+                    data-report="dr">
+
+                    <span class="report-nav-icon">
+                        ▣
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            DR Monitoring
+                        </strong>
+
+                        <small>
+                            Delivery receipts
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-nav-item"
+                    data-report="invoice">
+
+                    <span class="report-nav-icon">
+                        ▤
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            Invoice
+                        </strong>
+
+                        <small>
+                            Billing report
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-nav-item"
+                    data-report="payment">
+
+                    <span class="report-nav-icon">
+                        ₱
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            Payment
+                        </strong>
+
+                        <small>
+                            Collection report
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-nav-item"
+                    data-report="receivable">
+
+                    <span class="report-nav-icon">
+                        ◔
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            Receivable
+                        </strong>
+
+                        <small>
+                            Outstanding balance
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+                <button
+                    type="button"
+                    class="report-nav-item"
+                    data-report="fleet">
+
+                    <span class="report-nav-icon">
+                        ▰
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            Fleet
+                        </strong>
+
+                        <small>
+                            Vehicle performance
+                        </small>
+
+                    </span>
+
+                </button>
+
+
+                <div class="report-nav-divider"></div>
+
+
+                <button
+                    type="button"
+                    class="report-nav-item report-nav-management"
+                    data-report="management">
+
+                    <span class="report-nav-icon">
+                        ◆
+                    </span>
+
+                    <span class="report-nav-text">
+
+                        <strong>
+                            Management Report
+                        </strong>
+
+                        <small>
+                            Consolidated report
+                        </small>
+
+                    </span>
+
+                </button>
+
+            </nav>
+
+
+            <!-- SIDEBAR INFO -->
+            <div class="report-sidebar-info">
+
+                <span>
+                    DATA SOURCE
+                </span>
+
+                <strong>
+                    LocalStorage
+                </strong>
+
+                <small>
+                    Testing mode
+                </small>
+
+            </div>
+
+        </aside>
+
+    </div>
+
+</main>
+
+
+<!-- =====================================================
+     REPORT JS
+====================================================== -->
+<script src="../js/report.js?v=20261006"></script>
+
+</body>
+</html>
