@@ -110,6 +110,7 @@
 
             <div class="form-grid">
 
+
                 <!-- =================================================
                      DATE
                 ================================================== -->
@@ -123,7 +124,9 @@
 
                     <div class="input-wrapper">
 
-                        <span class="input-icon">▣</span>
+                        <span class="input-icon">
+                            ▣
+                        </span>
 
                         <input
                             type="date"
@@ -147,7 +150,9 @@
 
                     <div class="input-wrapper so-number-wrapper">
 
-                        <span class="input-icon">#</span>
+                        <span class="input-icon">
+                            #
+                        </span>
 
                         <input
                             type="text"
@@ -165,23 +170,37 @@
 
 
                 <!-- =================================================
-                     CUSTOMER SELECT
+                     CUSTOMER MASTER
                 ================================================== -->
 
                 <div class="form-group full">
 
                     <label for="customerSelect">
+
                         Customer
-                        <span class="required">*</span>
+
+                        <span class="required">
+                            *
+                        </span>
+
+                        <span class="customer-master-badge">
+                            CUSTOMER MASTER
+                        </span>
+
                     </label>
 
-                    <div class="input-wrapper select-wrapper">
+
+                    <div class="customer-select-wrapper">
 
                         <span class="input-icon">
                             ●
                         </span>
 
-                        <select id="customerSelect">
+
+                        <select
+                            id="customerSelect"
+                            required
+                        >
 
                             <option value="">
                                 Loading customers...
@@ -191,116 +210,76 @@
 
                     </div>
 
-                    <!-- CUSTOMER ID IS AUTOMATIC -->
+
+                    <!--
+                        CUSTOMER ID
+                        Automatically filled by Customer Master.
+                        User does not type this manually.
+                    -->
+
                     <input
                         type="hidden"
                         id="customerId"
                         value=""
                     >
 
-                    <small
-                        id="customerIdDisplay"
+
+                    <div
                         class="customer-id-display"
+                        id="customerIdDisplay"
                     >
-                        Customer ID: —
-                    </small>
+
+                        <span class="customer-id-label">
+                            Customer ID:
+                        </span>
+
+                        <span
+                            class="customer-id-value"
+                            id="customerIdValue"
+                        >
+                            —
+                        </span>
+
+                    </div>
 
                 </div>
 
 
-                <!-- =====================================================
-     CUSTOMER MASTER
-===================================================== -->
+                <!-- =================================================
+                     CLIENT NAME
+                ================================================== -->
 
-<div class="form-group full">
+                <div class="form-group">
 
-    <label for="customerSelect">
+                    <label for="clientName">
 
-        Customer
+                        Client Name
 
-        <span class="required">*</span>
+                        <span class="required">
+                            *
+                        </span>
 
-        <span class="customer-master-badge">
-            CUSTOMER MASTER
-        </span>
-
-    </label>
+                    </label>
 
 
-    <div class="customer-select-wrapper">
+                    <div class="input-wrapper">
 
-        <span class="input-icon">
-            ●
-        </span>
+                        <span class="input-icon">
+                            ●
+                        </span>
 
+                        <input
+                            type="text"
+                            id="clientName"
+                            class="customer-autofill"
+                            placeholder="Select customer first"
+                            readonly
+                        >
 
-        <select
-            id="customerSelect"
-            required
-        >
+                    </div>
 
-            <option value="">
-                Loading customers...
-            </option>
+                </div>
 
-        </select>
-
-    </div>
-
-
-    <div
-        class="customer-id-display"
-        id="customerIdDisplay"
-    >
-
-        <span class="customer-id-label">
-            Customer ID:
-        </span>
-
-        <span
-            class="customer-id-value"
-            id="customerIdValue"
-        >
-            —
-        </span>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     CLIENT NAME
-===================================================== -->
-
-<div class="form-group">
-
-    <label for="clientName">
-
-        Client Name
-
-        <span class="required">*</span>
-
-    </label>
-
-
-    <div class="input-wrapper">
-
-        <span class="input-icon">
-            ●
-        </span>
-
-        <input
-            type="text"
-            id="clientName"
-            class="customer-autofill"
-            placeholder="Select customer first"
-            readonly
-        >
-
-    </div>
-
-</div>
 
                 <!-- =================================================
                      ATTENTION
@@ -314,7 +293,9 @@
 
                     <div class="input-wrapper">
 
-                        <span class="input-icon">♙</span>
+                        <span class="input-icon">
+                            ♙
+                        </span>
 
                         <input
                             type="text"
@@ -529,8 +510,13 @@
                 <div class="form-group">
 
                     <label for="terms">
+
                         Terms
-                        <span class="required">*</span>
+
+                        <span class="required">
+                            *
+                        </span>
+
                     </label>
 
                     <div class="input-wrapper select-wrapper">
@@ -573,14 +559,19 @@
 
 
                 <!-- =================================================
-                     SE
+                     SALES ENGINEER
                 ================================================== -->
 
                 <div class="form-group">
 
                     <label for="soSE">
+
                         Sales Engineer
-                        <span class="required">*</span>
+
+                        <span class="required">
+                            *
+                        </span>
+
                     </label>
 
                     <div class="input-wrapper select-wrapper">
@@ -651,6 +642,7 @@
                     </div>
 
                 </div>
+
 
             </div>
 
@@ -810,6 +802,7 @@
 
                 <div class="so-totals">
 
+
                     <!-- SUBTOTAL -->
 
                     <div class="so-total-row">
@@ -925,6 +918,7 @@
                         </span>
 
                     </div>
+
 
                 </div>
 
@@ -1081,6 +1075,7 @@
             </div>
 
         </div>
+
 
     </div>
 
