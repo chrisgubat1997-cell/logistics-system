@@ -1,531 +1,632 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
    SALES ORDER MODULE
-   GOOGLE APPS SCRIPT API
-   VERSION: 20261006-03
+   sales-order.js
+
+   VERSION: 20261007-01
+
+   FEATURES:
+   - Load Sales Orders
+   - Search
+   - Filter
+   - Select SO
+   - Double Click View
+   - SO Details
+   - SO Items
+   - Update SO
+   - Cancel SO
+   - SO Files
+   - DR History
+   - Invoice History
+   - Payment History
+   - Transaction Summary
 ========================================================= */
 
+(function () {
 
-/* =========================================================
-   API CONFIG
-========================================================= */
+    "use strict";
 
-const SALES_ORDER_API_URL =
-    "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
+    /* =====================================================
+       CONFIGURATION
+    ===================================================== */
 
-/* =========================================================
-   GLOBAL VARIABLES
-========================================================= */
+    const SALES_ORDER_API_URL =
+        "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
-let salesOrders = [];
 
-let selectedSO = null;
+    const API_MAX_RETRIES =
+        3;
 
-let currentSO = null;
 
-let soDetailsEditMode = false;
+    const API_RETRY_DELAY =
+        800;
 
-let salesOrdersLoaded = false;
 
-let customerModuleLoaded = false;
+    const SO_FILE_MAX_SIZE =
+        10 * 1024 * 1024;
 
 
-/* =========================================================
-   SO DETAILS CACHE
-========================================================= */
+    const VAT_RATE =
+        0.12;
 
-const soDetailsCache = {};
 
+    /* =====================================================
+       STATE
+    ===================================================== */
 
-/* =========================================================
-   API RETRY SETTINGS
-========================================================= */
+    let salesOrders =
+        [];
 
-const API_MAX_RETRIES = 3;
+    let selectedSO =
+        null;
 
-const API_RETRY_DELAY = 800;
+    let currentSO =
+        null;
 
+    let soDetailsEditMode =
+        false;
 
-/* =========================================================
-   SO FILE CONFIG
-========================================================= */
+    let salesOrdersLoaded =
+        false;
 
-const SO_FILE_MAX_SIZE =
-    10 * 1024 * 1024;
+    let customerModuleLoaded =
+        false;
 
 
-/* =========================================================
-   SALES ORDER STATUS HELPERS
-========================================================= */
+    const soDetailsCache =
+        {};
 
-function getSOStatus(so) {
 
-    if (!so) {
-        return "";
-    }
+    /* =====================================================
+       BASIC HELPERS
+    ===================================================== */
 
-    return String(
-        so.status ||
-        so.Status ||
-        so.STATUS ||
-        ""
-    )
-    .trim()
-    .toUpperCase();
+    function wait(ms) {
 
-}
+        return new Promise(
+            function(resolve) {
 
+                setTimeout(
+                    resolve,
+                    ms
+                );
 
-function isActiveSO(so) {
-
-    const status = getSOStatus(so);
-
-    return (
-        status === "ACTIVE" ||
-        status === "OPEN" ||
-        status === ""
-    );
-
-}
-
-
-function isPartialSO(so) {
-
-    const status = getSOStatus(so);
-
-    return (
-        status === "PARTIAL" ||
-        status === "PARTIALLY COMPLETED" ||
-        status === "PARTIALLY DELIVERED"
-    );
-
-}
-
-
-function isCompletedSO(so) {
-
-    const status = getSOStatus(so);
-
-    return (
-        status === "COMPLETED" ||
-        status === "COMPLETE"
-    );
-
-}
-
-
-function isCancelledSO(so) {
-
-    const status = getSOStatus(so);
-
-    return (
-        status === "CANCELLED" ||
-        status === "CANCELED"
-    );
-
-}
-
-
-/* =========================================================
-   UPDATE SUMMARY CARDS
-   DATA COMES FROM GOOGLE SHEETS
-========================================================= */
-
-function updateSOSummary() {
-
-    const totalCount =
-        salesOrders.length;
-
-    const activeCount =
-        salesOrders.filter(
-            isActiveSO
-        ).length;
-
-    const partialCount =
-        salesOrders.filter(
-            isPartialSO
-        ).length;
-
-    const completedCount =
-        salesOrders.filter(
-            isCompletedSO
-        ).length;
-
-    const cancelledCount =
-        salesOrders.filter(
-            isCancelledSO
-        ).length;
-
-
-    setText(
-        "soTotalCount",
-        totalCount
-    );
-
-    setText(
-        "soPartialCount",
-        partialCount
-    );
-
-    setText(
-        "soActiveCount",
-        activeCount
-    );
-
-    setText(
-        "soCompletedCount",
-        completedCount
-    );
-
-    setText(
-        "soCancelledCount",
-        cancelledCount
-    );
-
-
-    console.log(
-        "================================="
-    );
-
-    console.log(
-        "LOGIS-TECH SO SUMMARY"
-    );
-
-    console.log(
-        "TOTAL:",
-        totalCount
-    );
-
-    console.log(
-        "ACTIVE:",
-        activeCount
-    );
-
-    console.log(
-        "PARTIAL:",
-        partialCount
-    );
-
-    console.log(
-        "COMPLETED:",
-        completedCount
-    );
-
-    console.log(
-        "CANCELLED:",
-        cancelledCount
-    );
-
-    console.log(
-        "================================="
-    );
-
-}
-
-
-/* =========================================================
-   DELAY HELPER
-========================================================= */
-
-function wait(ms) {
-
-    return new Promise(
-        function(resolve) {
-
-            setTimeout(
-                resolve,
-                ms
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   API REQUEST
-========================================================= */
-
-async function salesOrderAPI(
-    action,
-    data = {},
-    retryCount = 0
-) {
-
-    try {
-
-        console.log(
-            "LOGIS-TECH API REQUEST:",
-            action,
-            data,
-            "Attempt:",
-            retryCount + 1
+            }
         );
 
+    }
 
-        const response =
-            await fetch(
-                SALES_ORDER_API_URL,
+
+    function getSOValue(
+        object,
+        ...keys
+    ) {
+
+        if (!object) {
+
+            return "";
+
+        }
+
+
+        for (
+            const key of keys
+        ) {
+
+            if (
+                object[key] !==
+                undefined &&
+                object[key] !==
+                null
+            ) {
+
+                return object[key];
+
+            }
+
+        }
+
+
+        return "";
+
+    }
+
+
+    function setValue(
+        id,
+        value
+    ) {
+
+        const element =
+            document.getElementById(
+                id
+            );
+
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        element.value =
+            value === null ||
+            value === undefined
+                ? ""
+                : value;
+
+    }
+
+
+    function getValue(
+        id
+    ) {
+
+        const element =
+            document.getElementById(
+                id
+            );
+
+
+        return element
+            ? element.value
+            : "";
+
+    }
+
+
+    function setText(
+        id,
+        value
+    ) {
+
+        const element =
+            document.getElementById(
+                id
+            );
+
+
+        if (!element) {
+
+            return;
+
+        }
+
+
+        element.textContent =
+            value === null ||
+            value === undefined
+                ? ""
+                : value;
+
+    }
+
+
+    function escapeHTML(
+        value
+    ) {
+
+        return String(
+            value === undefined ||
+            value === null
+                ? ""
+                : value
+        )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+    }
+
+
+    function escapeAttribute(
+        value
+    ) {
+
+        return escapeHTML(
+            value
+        )
+        .replace(
+            /`/g,
+            "&#096;"
+        );
+
+    }
+
+
+    function formatMoney(
+        value
+    ) {
+
+        const amount =
+            Number(
+                value ||
+                0
+            );
+
+
+        return "₱" +
+            amount.toLocaleString(
+                "en-PH",
                 {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "text/plain;charset=utf-8"
-                    },
-
-                    body:
-                        JSON.stringify({
-                            action:
-                                action,
-
-                            data:
-                                data
-                        })
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
                 }
             );
 
-
-        const responseText =
-            await response.text();
+    }
 
 
-        console.log(
-            "LOGIS-TECH API STATUS:",
-            response.status
-        );
+    function formatSODate(
+        value
+    ) {
 
+        if (!value) {
 
-        if (!response.ok) {
-
-            const retryable =
-                [
-                    404,
-                    408,
-                    429,
-                    500,
-                    502,
-                    503,
-                    504
-                ].includes(
-                    response.status
-                );
-
-
-            if (
-                retryable &&
-                retryCount <
-                    API_MAX_RETRIES - 1
-            ) {
-
-                await wait(
-                    API_RETRY_DELAY *
-                    (retryCount + 1)
-                );
-
-
-                return await salesOrderAPI(
-                    action,
-                    data,
-                    retryCount + 1
-                );
-
-            }
-
-
-            throw new Error(
-                "API request failed: " +
-                response.status
-            );
+            return "";
 
         }
 
 
-        let result;
-
-
-        try {
-
-            result =
-                JSON.parse(
-                    responseText
-                );
-
-        } catch (jsonError) {
-
-            console.error(
-                "Invalid JSON response:",
-                responseText
+        const date =
+            new Date(
+                value
             );
-
-
-            if (
-                retryCount <
-                API_MAX_RETRIES - 1
-            ) {
-
-                await wait(
-                    API_RETRY_DELAY *
-                    (retryCount + 1)
-                );
-
-
-                return await salesOrderAPI(
-                    action,
-                    data,
-                    retryCount + 1
-                );
-
-            }
-
-
-            throw new Error(
-                "Invalid response from LOGIS-TECH API."
-            );
-
-        }
-
-
-        return result;
-
-
-    } catch (error) {
-
-        console.error(
-            "Sales Order API Error:",
-            error
-        );
 
 
         if (
-            retryCount <
-            API_MAX_RETRIES - 1
+            isNaN(
+                date.getTime()
+            )
         ) {
 
-            await wait(
-                API_RETRY_DELAY *
-                (retryCount + 1)
-            );
-
-
-            return await salesOrderAPI(
-                action,
-                data,
-                retryCount + 1
+            return String(
+                value
             );
 
         }
 
 
-        return {
-
-            success:
-                false,
-
-            message:
-                error.message
-
-        };
+        return date.toLocaleDateString(
+            "en-PH",
+            {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            }
+        );
 
     }
 
-}
 
-
-/* =========================================================
-   LOAD SALES ORDERS
-   MAIN DATA SOURCE:
-   GOOGLE SHEETS -> APPS SCRIPT -> WEBSITE
-========================================================= */
-
-async function loadSOList(
-    forceRefresh = false
-) {
-
-    const tbody =
-        document.getElementById(
-            "soTableBody"
-        );
-
-
-    /*
-     * USE CACHE
-     */
-
-    if (
-        salesOrdersLoaded &&
-        !forceRefresh
+    function parseSODate(
+        value
     ) {
 
-        console.log(
-            "Using cached Sales Orders."
-        );
+        if (!value) {
+
+            return 0;
+
+        }
 
 
-        updateSOSummary();
-
-        renderSOList(
-            salesOrders
-        );
-
-        renderRecentSalesOrders();
-
-        updateSOSelectionUI();
-
-        return;
-
-    }
+        const date =
+            new Date(
+                value
+            );
 
 
-    /*
-     * LOADING
-     */
+        const time =
+            date.getTime();
 
-    if (tbody) {
 
-        tbody.innerHTML = `
-
-            <tr>
-
-                <td
-                    colspan="12"
-                    style="text-align:center;"
-                >
-
-                    Loading Sales Orders...
-
-                </td>
-
-            </tr>
-
-        `;
+        return isNaN(time)
+            ? 0
+            : time;
 
     }
 
 
-    /*
-     * GET SALES ORDERS
-     */
-
-    const result =
-        await salesOrderAPI(
-            "getSalesOrders",
-            {}
-        );
-
-
-    console.log(
-        "GET SALES ORDERS RESULT:",
-        result
-    );
-
-
-    if (
-        !result ||
-        !result.success
+    function compareSalesOrderDate(
+        a,
+        b
     ) {
+
+        return (
+            parseSODate(
+                getSOValue(
+                    b,
+                    "dateCreation",
+                    "DATE_CREATION",
+                    "date"
+                )
+            )
+            -
+            parseSODate(
+                getSOValue(
+                    a,
+                    "dateCreation",
+                    "DATE_CREATION",
+                    "date"
+                )
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       API
+    ===================================================== */
+
+    async function salesOrderAPI(
+        action,
+        data = {},
+        retryCount = 0
+    ) {
+
+        try {
+
+            const response =
+                await fetch(
+                    SALES_ORDER_API_URL,
+                    {
+
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "text/plain;charset=utf-8"
+
+                        },
+
+                        body:
+                            JSON.stringify({
+
+                                action:
+                                    action,
+
+                                data:
+                                    data
+
+                            })
+
+                    }
+                );
+
+
+            const text =
+                await response.text();
+
+
+            let result;
+
+
+            try {
+
+                result =
+                    JSON.parse(
+                        text
+                    );
+
+            } catch (
+                parseError
+            ) {
+
+                throw new Error(
+                    "Invalid server response."
+                );
+
+            }
+
+
+            if (
+                !result
+            ) {
+
+                throw new Error(
+                    "Empty server response."
+                );
+
+            }
+
+
+            return result;
+
+
+        } catch (error) {
+
+            console.error(
+                "SALES ORDER API ERROR:",
+                action,
+                error
+            );
+
+
+            if (
+                retryCount <
+                API_MAX_RETRIES
+            ) {
+
+                await wait(
+                    API_RETRY_DELAY *
+                    (
+                        retryCount + 1
+                    )
+                );
+
+
+                return salesOrderAPI(
+                    action,
+                    data,
+                    retryCount + 1
+                );
+
+            }
+
+
+            return {
+
+                success:
+                    false,
+
+                message:
+                    error.message,
+
+                error:
+                    error.message
+
+            };
+
+        }
+
+    }
+
+
+    /* =====================================================
+       STATUS HELPERS
+    ===================================================== */
+
+    function getSOStatus(
+        so
+    ) {
+
+        return String(
+            getSOValue(
+                so,
+                "status",
+                "STATUS"
+            ) ||
+            "OPEN"
+        )
+        .trim()
+        .toUpperCase();
+
+    }
+
+
+    function isActiveSO(
+        so
+    ) {
+
+        const status =
+            getSOStatus(
+                so
+            );
+
+
+        return (
+            status !==
+            "CANCELLED"
+        );
+
+    }
+
+
+    function isPartialSO(
+        so
+    ) {
+
+        const status =
+            getSOStatus(
+                so
+            );
+
+
+        return (
+            status ===
+            "PARTIAL"
+        );
+
+    }
+
+
+    function isCompletedSO(
+        so
+    ) {
+
+        const status =
+            getSOStatus(
+                so
+            );
+
+
+        return (
+            status ===
+            "COMPLETED"
+        );
+
+    }
+
+
+    function isCancelledSO(
+        so
+    ) {
+
+        const status =
+            getSOStatus(
+                so
+            );
+
+
+        return (
+            status ===
+            "CANCELLED"
+        );
+
+    }
+
+
+    /* =====================================================
+       LOAD SO LIST
+    ===================================================== */
+
+    async function loadSOList(
+        forceRefresh = false
+    ) {
+
+        if (
+            salesOrdersLoaded &&
+            !forceRefresh
+        ) {
+
+            renderSOList(
+                salesOrders
+            );
+
+            updateSOSummary();
+
+            return;
+
+        }
+
+
+        const tbody =
+            document.getElementById(
+                "soTableBody"
+            );
+
 
         if (tbody) {
 
@@ -535,26 +636,9 @@ async function loadSOList(
 
                     <td
                         colspan="12"
-                        style="
-                            text-align:center;
-                            color:red;
-                            padding:30px;
-                        "
+                        style="text-align:center;padding:30px;"
                     >
-
-                        Failed to load Sales Orders.
-
-                        <br>
-
-                        <small>
-
-                            ${escapeHTML(
-                                result?.message ||
-                                "Unknown API error."
-                            )}
-
-                        </small>
-
+                        Loading Sales Orders...
                     </td>
 
                 </tr>
@@ -564,696 +648,84 @@ async function loadSOList(
         }
 
 
-        updateSOSummary();
-
-        renderRecentSalesOrders();
-
-        return;
-
-    }
-
-
-    /*
-     * GET DATA FROM APPS SCRIPT
-     */
-
-    salesOrders =
-        Array.isArray(
-            result.salesOrders
-        )
-            ? result.salesOrders
-            : Array.isArray(
-                result.data
-            )
-                ? result.data
-                : [];
-
-
-    /*
-     * MARK LOADED
-     */
-
-    salesOrdersLoaded =
-        true;
-
-
-    /*
-     * CACHE EACH SO
-     */
-
-    salesOrders.forEach(
-        function(so) {
-
-            const soNumber =
-                getSOValue(
-                    so,
-                    "soNumber",
-                    "SO_NUMBER",
-                    "SO Number"
-                );
-
-
-            if (soNumber) {
-
-                soDetailsCache[
-                    String(
-                        soNumber
-                    )
-                ] = so;
-
-            }
-
-        }
-    );
-
-
-    /*
-     * SUMMARY CARDS
-     */
-
-    updateSOSummary();
-
-
-    /*
-     * MAIN LIST
-     */
-
-    renderSOList(
-        salesOrders
-    );
-
-
-    /*
-     * RECENT SALES ORDERS
-     */
-
-    renderRecentSalesOrders();
-
-
-    /*
-     * RESTORE SELECTION
-     */
-
-    if (selectedSO) {
-
-        const selectedNumber =
-            String(
-                selectedSO.soNumber ||
-                selectedSO.SO_NUMBER ||
-                ""
-            );
-
-
-        const refreshedSelected =
-            salesOrders.find(
-                function(so) {
-
-                    return (
-                        String(
-                            getSOValue(
-                                so,
-                                "soNumber",
-                                "SO_NUMBER",
-                                "SO Number"
-                            )
-                        ) ===
-                        selectedNumber
-                    );
-
-                }
-            );
-
-
-        if (refreshedSelected) {
-
-            selectedSO =
-                refreshedSelected;
-
-        }
-
-    }
-
-
-    updateSOSelectionUI();
-
-}
-
-
-/* =========================================================
-   RECENT SALES ORDERS
-========================================================= */
-
-function renderRecentSalesOrders() {
-
-    const container =
-        document.getElementById(
-            "recentSalesOrderList"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    if (
-        !Array.isArray(
-            salesOrders
-        ) ||
-        salesOrders.length === 0
-    ) {
-
-        container.innerHTML = `
-
-            <div class="so-recent-empty">
-
-                <div class="so-recent-empty-icon">
-                    ▤
-                </div>
-
-                <strong>
-                    No Sales Orders yet
-                </strong>
-
-                <span>
-                    Sales Orders from the database
-                    will appear here.
-                </span>
-
-            </div>
-
-        `;
-
-        return;
-
-    }
-
-
-    const recent =
-        [...salesOrders]
-        .sort(
-            compareSalesOrderDate
-        )
-        .slice(
-            0,
-            5
-        );
-
-
-    container.innerHTML =
-        "";
-
-
-    recent.forEach(
-        function(so) {
-
-            const soNumber =
-                getSOValue(
-                    so,
-                    "soNumber",
-                    "SO_NUMBER",
-                    "SO Number"
-                );
-
-
-            const dateCreation =
-                getSOValue(
-                    so,
-                    "dateCreation",
-                    "DATE_CREATION",
-                    "DATE CREATED",
-                    "Date Creation"
-                );
-
-
-            const clientName =
-                getSOValue(
-                    so,
-                    "clientName",
-                    "CLIENT_NAME",
-                    "CLIENT NAME"
-                );
-
-
-            const project =
-                getSOValue(
-                    so,
-                    "project",
-                    "PROJECT"
-                );
-
-
-            const grandTotal =
-                getSOValue(
-                    so,
-                    "grandTotal",
-                    "GRAND_TOTAL",
-                    "GRAND TOTAL"
-                );
-
-
-            let statusClass =
-                "status-active";
-
-            let statusLabel =
-                "ACTIVE";
-
-
-            if (
-                isPartialSO(so)
-            ) {
-
-                statusClass =
-                    "status-partial";
-
-                statusLabel =
-                    "PARTIAL";
-
-            }
-            else if (
-                isCompletedSO(so)
-            ) {
-
-                statusClass =
-                    "status-completed";
-
-                statusLabel =
-                    "COMPLETED";
-
-            }
-            else if (
-                isCancelledSO(so)
-            ) {
-
-                statusClass =
-                    "status-cancelled";
-
-                statusLabel =
-                    "CANCELLED";
-
-            }
-
-
-            const item =
-                document.createElement(
-                    "div"
-                );
-
-
-            item.className =
-                "so-recent-item";
-
-
-            item.dataset.soNumber =
-                soNumber;
-
-
-            item.innerHTML = `
-
-                <div class="so-recent-main">
-
-                    <div class="so-recent-number">
-
-                        ${escapeHTML(
-                            soNumber || "-"
-                        )}
-
-                    </div>
-
-
-                    <div class="so-recent-client">
-
-                        ${escapeHTML(
-                            clientName || "-"
-                        )}
-
-                    </div>
-
-
-                    <div class="so-recent-project">
-
-                        ${escapeHTML(
-                            project || "-"
-                        )}
-
-                    </div>
-
-                </div>
-
-
-                <div class="so-recent-middle">
-
-                    <div class="so-recent-date">
-
-                        ${escapeHTML(
-                            formatSODate(
-                                dateCreation
-                            )
-                        )}
-
-                    </div>
-
-
-                    <div class="so-recent-total">
-
-                        ₱${formatMoney(
-                            grandTotal
-                        )}
-
-                    </div>
-
-                </div>
-
-
-                <div class="so-recent-status">
-
-                    <span
-                        class="status-badge ${statusClass}"
-                    >
-
-                        <span class="status-dot"></span>
-
-                        ${escapeHTML(
-                            statusLabel
-                        )}
-
-                    </span>
-
-                </div>
-
-            `;
-
-
-            item.addEventListener(
-                "click",
-                function() {
-
-                    selectSO(
-                        soNumber
-                    );
-
-
-                    document
-                        .querySelectorAll(
-                            ".so-recent-item"
-                        )
-                        .forEach(
-                            function(row) {
-
-                                row.classList.remove(
-                                    "selected"
-                                );
-
-                            }
-                        );
-
-
-                    item.classList.add(
-                        "selected"
-                    );
-
-                }
-            );
-
-
-            item.addEventListener(
-                "dblclick",
-                function() {
-
-                    openSODetails(
-                        soNumber
-                    );
-
-                }
-            );
-
-
-            container.appendChild(
-                item
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   RECENT SALES ORDER DATE SORT
-========================================================= */
-
-function compareSalesOrderDate(
-    a,
-    b
-) {
-
-    const dateA =
-        parseSODate(
-            getSOValue(
-                a,
-                "dateCreation",
-                "DATE_CREATION",
-                "DATE CREATED",
-                "Date Creation"
-            )
-        );
-
-
-    const dateB =
-        parseSODate(
-            getSOValue(
-                b,
-                "dateCreation",
-                "DATE_CREATION",
-                "DATE CREATED",
-                "Date Creation"
-            )
-        );
-
-
-    return (
-        dateB.getTime() -
-        dateA.getTime()
-    );
-
-}
-
-
-/* =========================================================
-   PARSE SO DATE
-========================================================= */
-
-function parseSODate(
-    value
-) {
-
-    if (!value) {
-
-        return new Date(0);
-
-    }
-
-
-    const date =
-        new Date(
-            value
-        );
-
-
-    if (
-        !Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return date;
-
-    }
-
-
-    const parts =
-        String(
-            value
-        ).split(
-            "/"
-        );
-
-
-    if (
-        parts.length === 3
-    ) {
-
-        const month =
-            Number(
-                parts[0]
-            ) - 1;
-
-        const day =
-            Number(
-                parts[1]
-            );
-
-        const year =
-            Number(
-                parts[2]
-            );
-
-
-        const parsed =
-            new Date(
-                year,
-                month,
-                day
+        const result =
+            await salesOrderAPI(
+                "getSalesOrders",
+                {}
             );
 
 
         if (
-            !Number.isNaN(
-                parsed.getTime()
-            )
+            !result ||
+            result.success !== true
         ) {
 
-            return parsed;
+            console.error(
+                "LOAD SO LIST ERROR:",
+                result
+            );
+
+
+            if (tbody) {
+
+                tbody.innerHTML = `
+
+                    <tr>
+
+                        <td
+                            colspan="12"
+                            style="text-align:center;padding:30px;"
+                        >
+                            Unable to load Sales Orders.
+                        </td>
+
+                    </tr>
+
+                `;
+
+            }
+
+
+            return;
 
         }
 
-    }
+
+        salesOrders =
+            result.salesOrders ||
+            result.data ||
+            [];
 
 
-    return new Date(0);
-
-}
-
-
-/* =========================================================
-   FORMAT SO DATE
-========================================================= */
-
-function formatSODate(
-    value
-) {
-
-    if (!value) {
-        return "-";
-    }
+        salesOrdersLoaded =
+            true;
 
 
-    const date =
-        parseSODate(
-            value
+        salesOrders.forEach(
+            function(so) {
+
+                const number =
+                    getSOValue(
+                        so,
+                        "soNumber",
+                        "SO_NUMBER"
+                    );
+
+
+                if (number) {
+
+                    soDetailsCache[
+                        String(number)
+                    ] =
+                        so;
+
+                }
+
+            }
         );
 
 
-    if (
-        date.getTime() === 0
-    ) {
-
-        return String(
-            value
-        );
-
-    }
-
-
-    return date.toLocaleDateString(
-        "en-PH",
-        {
-            year:
-                "numeric",
-
-            month:
-                "short",
-
-            day:
-                "2-digit"
-        }
-    );
-
-}
-
-
-/* =========================================================
-   VIEW ALL SALES ORDERS
-========================================================= */
-
-function showAllSalesOrders() {
-
-    const listView =
-        document.getElementById(
-            "salesOrderListView"
-        );
-
-
-    const customerArea =
-        document.getElementById(
-            "customerArea"
-        );
-
-
-    if (customerArea) {
-
-        customerArea.style.display =
-            "none";
-
-    }
-
-
-    if (listView) {
-
-        listView.style.display =
-            "block";
-
-    }
-
-
-    const table =
-        document.getElementById(
-            "soTable"
-        );
-
-
-    if (table) {
-
-        table.scrollIntoView({
-
-            behavior:
-                "smooth",
-
-            block:
-                "start"
-
-        });
-
-    }
-
-}
-
-
-/* =========================================================
-   SUMMARY CARD FILTER
-========================================================= */
-
-function filterSOBySummary(
-    type
-) {
-
-    const statusFilter =
-        document.getElementById(
-            "soStatusFilter"
-        );
-
-
-    if (
-        !type ||
-        type === "ALL"
-    ) {
-
-        if (statusFilter) {
-
-            statusFilter.value =
-                "ALL";
-
-        }
+        updateSOSummary();
 
 
         renderSOList(
@@ -1261,1307 +733,905 @@ function filterSOBySummary(
         );
 
 
-        updateSOSelectionUI();
-
-        return;
+        renderRecentSalesOrders();
 
     }
 
 
-    if (statusFilter) {
+    /* =====================================================
+       SUMMARY
+    ===================================================== */
 
-        statusFilter.value =
-            type;
+    function updateSOSummary() {
 
-    }
-
-
-    let filtered =
-        salesOrders;
+        const total =
+            salesOrders.length;
 
 
-    if (
-        type === "ACTIVE"
-    ) {
-
-        filtered =
+        const active =
             salesOrders.filter(
                 isActiveSO
-            );
+            ).length;
 
-    }
-    else if (
-        type === "PARTIAL"
-    ) {
 
-        filtered =
+        const partial =
             salesOrders.filter(
                 isPartialSO
-            );
+            ).length;
 
-    }
-    else if (
-        type === "COMPLETED"
-    ) {
 
-        filtered =
+        const completed =
             salesOrders.filter(
                 isCompletedSO
-            );
+            ).length;
 
-    }
-    else if (
-        type === "CANCELLED"
-    ) {
 
-        filtered =
+        const cancelled =
             salesOrders.filter(
                 isCancelledSO
+            ).length;
+
+
+        const mappings = {
+
+            total: [
+                "totalSalesOrder",
+                "totalSO"
+            ],
+
+            active: [
+                "activeSalesOrder",
+                "activeSO"
+            ],
+
+            partial: [
+                "partialSalesOrder",
+                "partialSO"
+            ],
+
+            completed: [
+                "completedSalesOrder",
+                "completedSO"
+            ],
+
+            cancelled: [
+                "cancelledSalesOrder",
+                "cancelledSO"
+            ]
+
+        };
+
+
+        function updateIds(
+            ids,
+            value
+        ) {
+
+            ids.forEach(
+                function(id) {
+
+                    setText(
+                        id,
+                        value
+                    );
+
+                }
             );
 
-    }
+        }
 
 
-    renderSOList(
-        filtered
-    );
-
-
-    updateSOSelectionUI();
-
-
-    const table =
-        document.getElementById(
-            "soTable"
+        updateIds(
+            mappings.total,
+            total
         );
 
 
-    if (table) {
-
-        table.scrollIntoView({
-
-            behavior:
-                "smooth",
-
-            block:
-                "start"
-
-        });
-
-    }
-
-}
-
-
-/* =========================================================
-   RENDER SALES ORDER LIST
-   FIXED:
-   EXACTLY 12 COLUMNS
-========================================================= */
-
-function renderSOList(
-    list
-) {
-
-    const tbody =
-        document.getElementById(
-            "soTableBody"
+        updateIds(
+            mappings.active,
+            active
         );
 
 
-    if (!tbody) {
-
-        console.error(
-            "soTableBody element not found."
+        updateIds(
+            mappings.partial,
+            partial
         );
 
-        return;
+
+        updateIds(
+            mappings.completed,
+            completed
+        );
+
+
+        updateIds(
+            mappings.cancelled,
+            cancelled
+        );
 
     }
 
 
-    tbody.innerHTML =
-        "";
+    /* =====================================================
+       RECENT SALES ORDERS
+    ===================================================== */
 
+    function renderRecentSalesOrders() {
 
-    if (
-        !Array.isArray(list) ||
-        list.length === 0
-    ) {
+        const container =
+            document.getElementById(
+                "recentSalesOrders"
+            );
 
-        tbody.innerHTML = `
 
-            <tr class="so-empty-row">
+        if (!container) {
 
-                <td
-                    colspan="12"
-                    style="
-                        text-align:center;
-                        padding:40px;
-                    "
-                >
+            return;
 
-                    <div class="so-empty-state">
+        }
 
-                        <div class="so-empty-icon">
-                            ▤
-                        </div>
 
-                        <strong>
-                            No Sales Order Found
-                        </strong>
+        const recent =
+            [...salesOrders]
+            .sort(
+                compareSalesOrderDate
+            )
+            .slice(
+                0,
+                5
+            );
 
-                        <span>
-                            Try changing your search or filter.
-                        </span>
 
-                    </div>
+        if (!recent.length) {
 
-                </td>
+            container.innerHTML = `
 
-            </tr>
-
-        `;
-
-        return;
-
-    }
-
-
-    list.forEach(
-        function(so) {
-
-            /* =================================================
-               BASIC SALES ORDER DATA
-            ================================================= */
-
-            const soNumber =
-                getSOValue(
-                    so,
-                    "soNumber",
-                    "SO_NUMBER",
-                    "SO Number"
-                );
-
-
-            const dateCreation =
-                getSOValue(
-                    so,
-                    "dateCreation",
-                    "DATE_CREATION",
-                    "DATE CREATED",
-                    "Date Creation"
-                );
-
-
-            const clientName =
-                getSOValue(
-                    so,
-                    "clientName",
-                    "CLIENT_NAME",
-                    "CLIENT NAME"
-                );
-
-
-            const se =
-                getSOValue(
-                    so,
-                    "se",
-                    "SE",
-                    "SALES_ENGINEER"
-                );
-
-
-            const project =
-                getSOValue(
-                    so,
-                    "project",
-                    "PROJECT"
-                );
-
-
-            const poNumber =
-                getSOValue(
-                    so,
-                    "poNumber",
-                    "PO_NUMBER",
-                    "PO NUMBER"
-                );
-
-
-            const terms =
-                getSOValue(
-                    so,
-                    "terms",
-                    "TERMS"
-                );
-
-
-            const grandTotal =
-                getSOValue(
-                    so,
-                    "grandTotal",
-                    "GRAND_TOTAL",
-                    "GRAND TOTAL"
-                );
-
-
-            /* =================================================
-               DR NUMBER
-            ================================================= */
-
-            const drNumber =
-                getSOValue(
-                    so,
-                    "drNumber",
-                    "DR_NUMBER",
-                    "DR NUMBER",
-                    "deliveryReceiptNumber",
-                    "DELIVERY_RECEIPT_NUMBER"
-                );
-
-
-            /* =================================================
-               INVOICE NUMBER
-            ================================================= */
-
-            const invoiceNumber =
-                getSOValue(
-                    so,
-                    "invoiceNumber",
-                    "INVOICE_NUMBER",
-                    "INVOICE NUMBER"
-                );
-
-
-            /* =================================================
-               PAYMENT
-            ================================================= */
-
-            const payment =
-                getSOValue(
-                    so,
-                    "payment",
-                    "PAYMENT",
-                    "paymentStatus",
-                    "PAYMENT_STATUS"
-                );
-
-
-            /* =================================================
-               STATUS
-            ================================================= */
-
-            let statusClass =
-                "status-active";
-
-
-            let statusLabel =
-                "ACTIVE";
-
-
-            if (
-                isPartialSO(so)
-            ) {
-
-                statusClass =
-                    "status-partial";
-
-                statusLabel =
-                    "PARTIAL";
-
-            }
-            else if (
-                isCompletedSO(so)
-            ) {
-
-                statusClass =
-                    "status-completed";
-
-                statusLabel =
-                    "COMPLETED";
-
-            }
-            else if (
-                isCancelledSO(so)
-            ) {
-
-                statusClass =
-                    "status-cancelled";
-
-                statusLabel =
-                    "CANCELLED";
-
-            }
-
-
-            /* =================================================
-               CREATE ROW
-            ================================================= */
-
-            const row =
-                document.createElement(
-                    "tr"
-                );
-
-
-            row.dataset.soNumber =
-                soNumber || "";
-
-
-            /* =================================================
-               TABLE COLUMNS
-               
-               01 SO NUMBER
-               02 DATE
-               03 CLIENT
-               04 SE
-               05 PROJECT
-               06 PO NUMBER
-               07 TERMS
-               08 GRAND TOTAL
-               09 DR NUMBER
-               10 INVOICE NUMBER
-               11 PAYMENT
-               12 STATUS
-            ================================================= */
-
-            row.innerHTML = `
-
-                <!-- 01 SO NUMBER -->
-
-                <td>
-
-                    <strong class="so-number-cell">
-
-                        ${escapeHTML(
-                            soNumber || ""
-                        )}
-
-                    </strong>
-
-                </td>
-
-
-                <!-- 02 DATE -->
-
-                <td>
-
-                    ${escapeHTML(
-                        dateCreation || ""
-                    )}
-
-                </td>
-
-
-                <!-- 03 CLIENT -->
-
-                <td>
-
-                    <span class="client-name-cell">
-
-                        ${escapeHTML(
-                            clientName || ""
-                        )}
-
-                    </span>
-
-                </td>
-
-
-                <!-- 04 SE -->
-
-                <td>
-
-                    ${escapeHTML(
-                        se || ""
-                    )}
-
-                </td>
-
-
-                <!-- 05 PROJECT -->
-
-                <td>
-
-                    ${escapeHTML(
-                        project || ""
-                    )}
-
-                </td>
-
-
-                <!-- 06 PO NUMBER -->
-
-                <td>
-
-                    ${escapeHTML(
-                        poNumber || ""
-                    )}
-
-                </td>
-
-
-                <!-- 07 TERMS -->
-
-                <td>
-
-                    ${escapeHTML(
-                        terms || ""
-                    )}
-
-                </td>
-
-
-                <!-- 08 GRAND TOTAL -->
-
-                <td class="so-amount-cell">
-
-                    ${formatMoney(
-                        grandTotal
-                    )}
-
-                </td>
-
-
-                <!-- 09 DR NUMBER -->
-
-                <td>
-
-                    ${escapeHTML(
-                        drNumber || ""
-                    )}
-
-                </td>
-
-
-                <!-- 10 INVOICE NUMBER -->
-
-                <td>
-
-                    ${escapeHTML(
-                        invoiceNumber || ""
-                    )}
-
-                </td>
-
-
-                <!-- 11 PAYMENT -->
-
-                <td>
-
-                    ${escapeHTML(
-                        payment || ""
-                    )}
-
-                </td>
-
-
-                <!-- 12 STATUS -->
-
-                <td>
-
-                    <span
-                        class="status-badge ${statusClass}"
-                    >
-
-                        <span class="status-dot"></span>
-
-                        ${escapeHTML(
-                            statusLabel
-                        )}
-
-                    </span>
-
-                </td>
+                <div class="empty-state">
+                    No Sales Orders found.
+                </div>
 
             `;
 
-
-            /* =================================================
-               RESTORE SELECTED ROW
-            ================================================= */
-
-            if (
-                selectedSO &&
-                String(
-                    selectedSO.soNumber ||
-                    selectedSO.SO_NUMBER ||
-                    ""
-                ) ===
-                String(
-                    soNumber
-                )
-            ) {
-
-                row.classList.add(
-                    "selected"
-                );
-
-            }
-
-
-            /* =================================================
-               CLICK
-            ================================================= */
-
-            row.addEventListener(
-                "click",
-                function() {
-
-                    selectSO(
-                        soNumber
-                    );
-
-                }
-            );
-
-
-            /* =================================================
-               DOUBLE CLICK
-            ================================================= */
-
-            row.addEventListener(
-                "dblclick",
-                function() {
-
-                    openSODetails(
-                        soNumber
-                    );
-
-                }
-            );
-
-
-            tbody.appendChild(
-                row
-            );
+            return;
 
         }
-    );
-
-}
 
 
-/* =========================================================
-   SELECT SALES ORDER
-========================================================= */
+        container.innerHTML =
+            recent
+            .map(
+                function(so) {
 
-function selectSO(
-    soNumber
-) {
-
-    const clickedSONumber =
-        String(
-            soNumber || ""
-        ).trim();
+                    const number =
+                        getSOValue(
+                            so,
+                            "soNumber",
+                            "SO_NUMBER"
+                        );
 
 
-    if (!clickedSONumber) {
-        return;
+                    const client =
+                        getSOValue(
+                            so,
+                            "clientName",
+                            "CLIENT_NAME"
+                        );
+
+
+                    const date =
+                        getSOValue(
+                            so,
+                            "dateCreation",
+                            "DATE_CREATION"
+                        );
+
+
+                    const total =
+                        getSOValue(
+                            so,
+                            "grandTotal",
+                            "GRAND_TOTAL"
+                        );
+
+
+                    return `
+
+                        <div
+                            class="recent-so-item"
+                            data-so="${escapeAttribute(number)}"
+                        >
+
+                            <div>
+
+                                <strong>
+                                    ${escapeHTML(number)}
+                                </strong>
+
+                                <span>
+                                    ${escapeHTML(client)}
+                                </span>
+
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    ${formatSODate(date)}
+                                </span>
+
+                                <strong>
+                                    ${formatMoney(total)}
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+
+        container
+            .querySelectorAll(
+                ".recent-so-item"
+            )
+            .forEach(
+                function(element) {
+
+                    const number =
+                        element.dataset.so;
+
+
+                    element.addEventListener(
+                        "click",
+                        function() {
+
+                            selectSO(
+                                number
+                            );
+
+                        }
+                    );
+
+
+                    element.addEventListener(
+                        "dblclick",
+                        function() {
+
+                            openSODetails(
+                                number
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
     }
 
 
-    const currentlySelected =
-        selectedSO &&
-        String(
-            selectedSO.soNumber ||
-            selectedSO.SO_NUMBER ||
-            ""
-        ).trim() ===
-        clickedSONumber;
+    /* =====================================================
+       RENDER SO LIST
+    ===================================================== */
+
+    function renderSOList(
+        records
+    ) {
+
+        const tbody =
+            document.getElementById(
+                "soTableBody"
+            );
 
 
-    if (currentlySelected) {
+        if (!tbody) {
 
-        clearSOSelection();
+            return;
 
-        return;
+        }
+
+
+        if (
+            !Array.isArray(
+                records
+            ) ||
+            !records.length
+        ) {
+
+            tbody.innerHTML = `
+
+                <tr>
+
+                    <td
+                        colspan="12"
+                        style="text-align:center;padding:30px;"
+                    >
+                        No Sales Orders found.
+                    </td>
+
+                </tr>
+
+            `;
+
+            return;
+
+        }
+
+
+        tbody.innerHTML =
+            records
+            .map(
+                function(so) {
+
+                    const number =
+                        getSOValue(
+                            so,
+                            "soNumber",
+                            "SO_NUMBER"
+                        );
+
+
+                    const date =
+                        getSOValue(
+                            so,
+                            "dateCreation",
+                            "DATE_CREATION"
+                        );
+
+
+                    const client =
+                        getSOValue(
+                            so,
+                            "clientName",
+                            "CLIENT_NAME"
+                        );
+
+
+                    const se =
+                        getSOValue(
+                            so,
+                            "salesEngineer",
+                            "SALES_ENGINEER",
+                            "se",
+                            "SE"
+                        );
+
+
+                    const project =
+                        getSOValue(
+                            so,
+                            "project",
+                            "PROJECT"
+                        );
+
+
+                    const po =
+                        getSOValue(
+                            so,
+                            "poNumber",
+                            "PO_NUMBER"
+                        );
+
+
+                    const terms =
+                        getSOValue(
+                            so,
+                            "terms",
+                            "TERMS"
+                        );
+
+
+                    const grandTotal =
+                        getSOValue(
+                            so,
+                            "grandTotal",
+                            "GRAND_TOTAL"
+                        );
+
+
+                    const drNumber =
+                        getSOValue(
+                            so,
+                            "drNumber",
+                            "DR_NUMBER"
+                        );
+
+
+                    const invoiceNumber =
+                        getSOValue(
+                            so,
+                            "invoiceNumber",
+                            "INVOICE_NUMBER",
+                            "INVOICE_NO"
+                        );
+
+
+                    const payment =
+                        getSOValue(
+                            so,
+                            "paymentStatus",
+                            "PAYMENT_STATUS",
+                            "PAYMENT"
+                        );
+
+
+                    const status =
+                        getSOStatus(
+                            so
+                        );
+
+
+                    return `
+
+                        <tr
+                            data-so-number="${escapeAttribute(number)}"
+                        >
+
+                            <td>
+                                ${escapeHTML(number)}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    formatSODate(date)
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(client)}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(se)}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(project)}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(po)}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(terms)}
+                            </td>
+
+                            <td>
+                                ${formatMoney(grandTotal)}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(drNumber || "-")}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    invoiceNumber || "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    payment || "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(status)}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+
+        tbody
+            .querySelectorAll(
+                "tr[data-so-number]"
+            )
+            .forEach(
+                function(row) {
+
+                    const number =
+                        row.dataset.soNumber;
+
+
+                    row.addEventListener(
+                        "click",
+                        function() {
+
+                            selectSO(
+                                number
+                            );
+
+                        }
+                    );
+
+
+                    row.addEventListener(
+                        "dblclick",
+                        function() {
+
+                            openSODetails(
+                                number
+                            );
+
+                        }
+                    );
+
+                }
+            );
+
+
+        updateSOSelectionUI();
 
     }
 
 
-    let so =
-        salesOrders.find(
-            function(item) {
+    /* =====================================================
+       SELECT SO
+    ===================================================== */
 
-                return (
-                    String(
-                        item.soNumber ||
-                        item.SO_NUMBER ||
-                        ""
+    function selectSO(
+        soNumber
+    ) {
+
+        const number =
+            String(
+                soNumber ||
+                ""
+            ).trim();
+
+
+        if (!number) {
+
+            return;
+
+        }
+
+
+        const found =
+            salesOrders.find(
+                function(item) {
+
+                    return String(
+                        getSOValue(
+                            item,
+                            "soNumber",
+                            "SO_NUMBER"
+                        )
                     ).trim() ===
-                    clickedSONumber
-                );
+                    number;
 
-            }
-        );
-
-
-    if (!so) {
-
-        so =
-            soDetailsCache[
-                clickedSONumber
-            ];
-
-    }
+                }
+            );
 
 
-    if (!so) {
+        if (!found) {
 
-        console.warn(
-            "Sales Order not found:",
-            clickedSONumber
-        );
-
-        return;
-
-    }
-
-
-    selectedSO =
-        so;
-
-
-    document
-        .querySelectorAll(
-            "#soTableBody tr"
-        )
-        .forEach(
-            function(row) {
-
-                row.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-
-
-    const selectedRow =
-        document.querySelector(
-            `#soTableBody tr[data-so-number="${cssEscape(
-                clickedSONumber
-            )}"]`
-        );
-
-
-    if (selectedRow) {
-
-        selectedRow.classList.add(
-            "selected"
-        );
-
-    }
-
-
-    updateSOSelectionUI();
-
-}
-
-
-/* =========================================================
-   UPDATE TOP SELECTION UI
-========================================================= */
-
-function updateSOSelectionUI() {
-
-    const selectionText =
-        document.getElementById(
-            "soSelectionText"
-        );
-
-
-    const updateButton =
-        document.getElementById(
-            "updateSOButton"
-        );
-
-
-    const cancelButton =
-        document.getElementById(
-            "cancelSOButton"
-        );
-
-
-    const statusDot =
-        document.querySelector(
-            ".so-status-dot"
-        );
-
-
-    const hasSelection =
-        !!selectedSO;
-
-
-    if (!hasSelection) {
-
-        if (selectionText) {
-
-            selectionText.innerHTML =
-                "No Sales Order selected";
+            return;
 
         }
 
 
-        if (statusDot) {
+        selectedSO =
+            found;
 
-            statusDot.classList.remove(
+
+        document
+            .querySelectorAll(
+                "#soTableBody tr"
+            )
+            .forEach(
+                function(row) {
+
+                    row.classList.remove(
+                        "selected"
+                    );
+
+                }
+            );
+
+
+        const row =
+            document.querySelector(
+                '#soTableBody tr[data-so-number="' +
+                CSS.escape(number) +
+                '"]'
+            );
+
+
+        if (row) {
+
+            row.classList.add(
                 "selected"
             );
 
         }
 
 
-        if (updateButton) {
+        updateSOSelectionUI();
 
-            updateButton.disabled =
-                true;
+    }
+
+
+    /* =====================================================
+       SELECTION UI
+    ===================================================== */
+
+    function updateSOSelectionUI() {
+
+        const updateButton =
+            document.getElementById(
+                "updateSOButton"
+            );
+
+
+        const cancelButton =
+            document.getElementById(
+                "cancelSOButton"
+            );
+
+
+        if (
+            selectedSO
+        ) {
+
+            if (updateButton) {
+
+                updateButton.disabled =
+                    false;
+
+            }
+
+
+            if (cancelButton) {
+
+                cancelButton.disabled =
+                    isCancelledSO(
+                        selectedSO
+                    );
+
+            }
+
+        }
+
+        else {
+
+            if (updateButton) {
+
+                updateButton.disabled =
+                    true;
+
+            }
+
+
+            if (cancelButton) {
+
+                cancelButton.disabled =
+                    true;
+
+            }
 
         }
 
 
-        if (cancelButton) {
-
-            cancelButton.disabled =
-                true;
-
-        }
-
-
-        return;
-
-    }
-
-
-    const so =
-        selectedSO;
-
-
-    const soNumber =
-        getSOValue(
-            so,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
-        );
-
-
-    const clientName =
-        getSOValue(
-            so,
-            "clientName",
-            "CLIENT_NAME",
-            "CLIENT NAME"
-        );
-
-
-    const project =
-        getSOValue(
-            so,
-            "project",
-            "PROJECT"
-        );
-
-
-    const poNumber =
-        getSOValue(
-            so,
-            "poNumber",
-            "PO_NUMBER",
-            "PO NUMBER"
-        );
-
-
-    const se =
-        getSOValue(
-            so,
-            "se",
-            "SE",
-            "SALES_ENGINEER"
-        );
-
-
-    const grandTotal =
-        getSOValue(
-            so,
-            "grandTotal",
-            "GRAND_TOTAL",
-            "GRAND TOTAL"
-        );
-
-
-    const status =
-        getSOStatus(so) ||
-        "ACTIVE";
-
-
-    let statusClass =
-        "selection-active";
-
-
-    let statusLabel =
-        "ACTIVE";
-
-
-    if (
-        isPartialSO(so)
-    ) {
-
-        statusClass =
-            "selection-partial";
-
-        statusLabel =
-            "PARTIAL";
-
-    }
-    else if (
-        isCompletedSO(so)
-    ) {
-
-        statusClass =
-            "selection-completed";
-
-        statusLabel =
-            "COMPLETED";
-
-    }
-    else if (
-        isCancelledSO(so)
-    ) {
-
-        statusClass =
-            "selection-cancelled";
-
-        statusLabel =
-            "CANCELLED";
-
-    }
-
-
-    if (selectionText) {
-
-        selectionText.innerHTML = `
-
-            <span class="so-selection-main">
-
-                <strong class="so-selection-number">
-
-                    ${escapeHTML(
-                        soNumber || "-"
-                    )}
-
-                </strong>
-
-                <span class="so-selection-divider">
-                    •
-                </span>
-
-                <span class="so-selection-client">
-
-                    ${escapeHTML(
-                        clientName || "-"
-                    )}
-
-                </span>
-
-            </span>
-
-
-            <span class="so-selection-details">
-
-                <span>
-
-                    PROJECT:
-
-                    <strong>
-                        ${escapeHTML(
-                            project || "-"
-                        )}
-                    </strong>
-
-                </span>
-
-
-                <span>
-
-                    PO:
-
-                    <strong>
-                        ${escapeHTML(
-                            poNumber || "-"
-                        )}
-                    </strong>
-
-                </span>
-
-
-                <span>
-
-                    SE:
-
-                    <strong>
-                        ${escapeHTML(
-                            se || "-"
-                        )}
-                    </strong>
-
-                </span>
-
-
-                <span>
-
-                    TOTAL:
-
-                    <strong>
-                        ₱${formatMoney(
-                            grandTotal
-                        )}
-                    </strong>
-
-                </span>
-
-
-                <span
-                    class="so-selection-status-label ${statusClass}"
-                >
-
-                    ${escapeHTML(
-                        statusLabel
-                    )}
-
-                </span>
-
-            </span>
-
-        `;
-
-    }
-
-
-    if (statusDot) {
-
-        statusDot.classList.add(
-            "selected"
-        );
-
-    }
-
-
-    if (updateButton) {
-
-        updateButton.disabled =
-            false;
-
-    }
-
-
-    if (cancelButton) {
-
-        cancelButton.disabled =
-            false;
-
-    }
-
-
-    document
-        .querySelectorAll(
-            "#soTableBody tr"
-        )
-        .forEach(
-            function(row) {
-
-                row.classList.toggle(
-                    "selected",
-                    String(
-                        row.dataset.soNumber ||
-                        ""
-                    ) ===
-                    String(
-                        soNumber ||
-                        ""
+        const selectedLabel =
+            document.getElementById(
+                "selectedSONumber"
+            );
+
+
+        if (selectedLabel) {
+
+            selectedLabel.textContent =
+                selectedSO
+                    ? getSOValue(
+                        selectedSO,
+                        "soNumber",
+                        "SO_NUMBER"
                     )
-                );
+                    : "No SO selected";
 
-            }
-        );
+        }
 
-}
-
-
-/* =========================================================
-   CLEAR SELECTION
-========================================================= */
-
-function clearSOSelection() {
-
-    selectedSO =
-        null;
-
-
-    document
-        .querySelectorAll(
-            "#soTableBody tr"
-        )
-        .forEach(
-            function(row) {
-
-                row.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-
-
-    document
-        .querySelectorAll(
-            ".so-recent-item"
-        )
-        .forEach(
-            function(row) {
-
-                row.classList.remove(
-                    "selected"
-                );
-
-            }
-        );
-
-
-    updateSOSelectionUI();
-
-    renderSelectedSOEmpty();
-
-}
-
-
-/* =========================================================
-   LEGACY PREVIEW
-========================================================= */
-
-function renderSelectedSOPreview(
-    so
-) {
-
-    if (!so) {
-        return;
-    }
-
-}
-
-
-/* =========================================================
-   EMPTY OLD PREVIEW
-========================================================= */
-
-function renderSelectedSOEmpty() {
-
-    const preview =
-        document.getElementById(
-            "selectedSOInfo"
-        );
-
-
-    if (!preview) {
-        return;
     }
 
 
-    preview.innerHTML =
-        "";
+    /* =====================================================
+       SHOW ALL
+    ===================================================== */
 
-    preview.style.display =
-        "none";
+    function showAllSalesOrders() {
 
-}
-
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-function searchSO() {
-
-    filterSOList();
-
-}
-
-
-/* =========================================================
-   FILTER SALES ORDERS
-========================================================= */
-
-function filterSOList() {
-
-    const searchInput =
-        document.getElementById(
-            "soSearch"
+        renderSOList(
+            salesOrders
         );
 
+    }
 
-    const statusFilter =
-        document.getElementById(
-            "soStatusFilter"
+
+    /* =====================================================
+       FILTER SUMMARY
+    ===================================================== */
+
+    function filterSOBySummary(
+        type
+    ) {
+
+        let filtered =
+            salesOrders;
+
+
+        switch (
+            String(
+                type ||
+                ""
+            ).toLowerCase()
+        ) {
+
+            case "active":
+
+                filtered =
+                    salesOrders.filter(
+                        isActiveSO
+                    );
+
+                break;
+
+
+            case "partial":
+
+                filtered =
+                    salesOrders.filter(
+                        isPartialSO
+                    );
+
+                break;
+
+
+            case "completed":
+
+                filtered =
+                    salesOrders.filter(
+                        isCompletedSO
+                    );
+
+                break;
+
+
+            case "cancelled":
+
+                filtered =
+                    salesOrders.filter(
+                        isCancelledSO
+                    );
+
+                break;
+
+
+            default:
+
+                filtered =
+                    salesOrders;
+
+        }
+
+
+        renderSOList(
+            filtered
         );
 
-
-    const keyword =
-        String(
-            searchInput
-                ? searchInput.value
-                : ""
-        )
-        .trim()
-        .toLowerCase();
+    }
 
 
-    const selectedStatus =
-        String(
-            statusFilter
-                ? statusFilter.value
-                : "ALL"
-        )
-        .trim()
-        .toUpperCase();
+    /* =====================================================
+       SEARCH
+    ===================================================== */
+
+    function searchSalesOrders(
+        searchValue
+    ) {
+
+        const input =
+            searchValue !==
+            undefined
+                ? searchValue
+                : getValue(
+                    "salesOrderSearch"
+                );
 
 
-    let filtered =
-        salesOrders;
+        const search =
+            String(
+                input ||
+                ""
+            )
+            .trim()
+            .toLowerCase();
 
 
-    if (keyword) {
+        if (!search) {
 
-        filtered =
-            filtered.filter(
+            renderSOList(
+                salesOrders
+            );
+
+            return;
+
+        }
+
+
+        const filtered =
+            salesOrders.filter(
                 function(so) {
 
                     return [
 
-                        so.soNumber,
-                        so.SO_NUMBER,
-                        so.clientName,
-                        so.CLIENT_NAME,
-                        so.project,
-                        so.PROJECT,
-                        so.poNumber,
-                        so.PO_NUMBER,
-                        so.jobOrder,
-                        so.JOB_ORDER,
-                        so.se,
-                        so.SE,
-                        so.status,
-                        so.STATUS
+                        getSOValue(
+                            so,
+                            "soNumber",
+                            "SO_NUMBER"
+                        ),
+
+                        getSOValue(
+                            so,
+                            "clientName",
+                            "CLIENT_NAME"
+                        ),
+
+                        getSOValue(
+                            so,
+                            "project",
+                            "PROJECT"
+                        ),
+
+                        getSOValue(
+                            so,
+                            "poNumber",
+                            "PO_NUMBER"
+                        ),
+
+                        getSOValue(
+                            so,
+                            "salesEngineer",
+                            "SALES_ENGINEER",
+                            "SE"
+                        )
 
                     ]
                     .join(" ")
                     .toLowerCase()
                     .includes(
-                        keyword
+                        search
                     );
 
                 }
             );
 
-    }
 
-
-    if (
-        selectedStatus &&
-        selectedStatus !== "ALL"
-    ) {
-
-        filtered =
-            filtered.filter(
-                function(so) {
-
-                    if (
-                        selectedStatus ===
-                        "ACTIVE"
-                    ) {
-
-                        return isActiveSO(so);
-
-                    }
-
-
-                    if (
-                        selectedStatus ===
-                        "PARTIAL"
-                    ) {
-
-                        return isPartialSO(so);
-
-                    }
-
-
-                    if (
-                        selectedStatus ===
-                        "COMPLETED"
-                    ) {
-
-                        return isCompletedSO(so);
-
-                    }
-
-
-                    if (
-                        selectedStatus ===
-                        "CANCELLED"
-                    ) {
-
-                        return isCancelledSO(so);
-
-                    }
-
-
-                    return (
-                        getSOStatus(so) ===
-                        selectedStatus
-                    );
-
-                }
-            );
-
-    }
-
-
-    renderSOList(
-        filtered
-    );
-
-
-    updateSOSelectionUI();
-
-}
-
-
-/* =========================================================
-   REFRESH SO LIST
-========================================================= */
-
-async function refreshSOList() {
-
-    const button =
-        document.getElementById(
-            "soRefreshBtn"
+        renderSOList(
+            filtered
         );
 
-
-    if (button) {
-
-        button.classList.add(
-            "refreshing"
-        );
-
-        button.disabled =
-            true;
-
     }
 
 
-    try {
+    /* =====================================================
+       REFRESH
+    ===================================================== */
+
+    async function refreshSalesOrders() {
 
         salesOrdersLoaded =
             false;
@@ -2571,897 +1641,238 @@ async function refreshSOList() {
             true
         );
 
-
-    } catch (error) {
-
-        console.error(
-            "Refresh Sales Order error:",
-            error
-        );
-
-
-    } finally {
-
-        if (button) {
-
-            button.disabled =
-                false;
-
-            setTimeout(
-                function() {
-
-                    button.classList.remove(
-                        "refreshing"
-                    );
-
-                },
-                300
-            );
-
-        }
-
     }
 
-}
 
+    /* =====================================================
+       OPEN CREATE SO
+    ===================================================== */
 
-/* =========================================================
-   OPEN CREATE SO
-========================================================= */
+    function openCreateSalesOrder() {
 
-function openCreateSO() {
-
-    window.location.href =
-        "pages/create-sales-order.html";
-
-}
-
-
-/* =========================================================
-   NEW CUSTOMER
-   OPEN INSIDE SALES ORDER
-========================================================= */
-
-/*
- * IMPORTANT:
- * customerModuleLoaded is already declared
- * in GLOBAL VARIABLES above.
- *
- * Do NOT declare it again here.
- */
-
-let customerSavedEventBound = false;
-
-let customerCancelEventBound = false;
-
-
-/* =========================================================
-   OPEN NEW CUSTOMER
-========================================================= */
-
-async function openNewCustomerFromSalesOrder() {
-
-    console.log(
-        "================================="
-    );
-
-    console.log(
-        "LOGIS-TECH: OPEN NEW CUSTOMER"
-    );
-
-    console.log(
-        "================================="
-    );
-
-
-    const listView =
-        document.getElementById(
-            "salesOrderListView"
-        );
-
-
-    const detailsPage =
-        document.getElementById(
-            "soDetails"
-        );
-
-
-    const customerArea =
-        document.getElementById(
-            "customerArea"
-        );
-
-
-    const container =
-        document.getElementById(
-            "customerFormContainer"
-        );
-
-
-    if (!customerArea) {
-
-        console.error(
-            "customerArea not found."
-        );
-
-        alert(
-            "Customer area not found in Sales Order."
-        );
-
-        return;
+        window.location.href =
+            "pages/create-sales-order.html";
 
     }
 
 
-    if (!container) {
+    /* =====================================================
+       OPEN SO DETAILS
+    ===================================================== */
 
-        console.error(
-            "customerFormContainer not found."
-        );
+    async function openSODetails(
+        soNumber
+    ) {
 
-        alert(
-            "Customer form container not found."
-        );
-
-        return;
-
-    }
-
-
-    if (listView) {
-
-        listView.style.display =
-            "none";
-
-    }
+        const number =
+            String(
+                soNumber ||
+                ""
+            ).trim();
 
 
-    if (detailsPage) {
+        if (!number) {
 
-        detailsPage.style.display =
-            "none";
-
-    }
-
-
-    customerArea.style.display =
-        "block";
-
-
-    container.innerHTML = `
-
-        <div
-            class="customer-module-loading"
-            style="
-                padding:60px 30px;
-                text-align:center;
-            "
-        >
-
-            <div
-                style="
-                    font-size:40px;
-                    margin-bottom:15px;
-                "
-            >
-                ⏳
-            </div>
-
-            <strong
-                style="
-                    display:block;
-                    font-size:18px;
-                    margin-bottom:8px;
-                "
-            >
-                Loading Customer Form...
-            </strong>
-
-            <span>
-                Please wait...
-            </span>
-
-        </div>
-
-    `;
-
-
-    try {
-
-        await loadCustomerCSS();
-
-
-        const response =
-            await fetch(
-                "pages/create-customer.html?v=" +
-                Date.now(),
-                {
-                    method:
-                        "GET",
-
-                    cache:
-                        "no-store"
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                "Unable to load create-customer.html. HTTP " +
-                response.status
-            );
+            return;
 
         }
 
 
-        const html =
-            await response.text();
+        showSODetailsLoading();
 
 
-        if (!html || !html.trim()) {
+        try {
 
-            throw new Error(
-                "create-customer.html is empty."
-            );
-
-        }
-
-
-        console.log(
-            "Customer HTML loaded successfully."
-        );
-
-
-        const parser =
-            new DOMParser();
-
-
-        const doc =
-            parser.parseFromString(
-                html,
-                "text/html"
-            );
-
-
-        if (!doc.body) {
-
-            throw new Error(
-                "Customer HTML body was not found."
-            );
-
-        }
-
-
-        doc
-            .querySelectorAll(
-                "script"
-            )
-            .forEach(
-                function(script) {
-
-                    script.remove();
-
-                }
-            );
-
-
-        doc
-            .querySelectorAll(
-                "link"
-            )
-            .forEach(
-                function(link) {
-
-                    link.remove();
-
-                }
-            );
-
-
-        container.innerHTML =
-            doc.body.innerHTML;
-
-
-        const customerForm =
-            document.getElementById(
-                "customerForm"
-            );
-
-
-        if (!customerForm) {
-
-            throw new Error(
-                "Customer form was not found after loading HTML."
-            );
-
-        }
-
-
-        await loadCustomerJS();
-
-
-        customerModuleLoaded =
-            true;
-
-
-        if (
-            typeof window.initializeCustomerForm ===
-            "function"
-        ) {
-
-            const initialized =
-                window.initializeCustomerForm();
+            const result =
+                await salesOrderAPI(
+                    "getSOTransactionDetails",
+                    {
+                        soNumber:
+                            number
+                    }
+                );
 
 
             if (
-                initialized === false
+                !result ||
+                result.success !== true
             ) {
 
                 throw new Error(
-                    "Customer form initialization failed."
-                );
-
-            }
-
-        }
-        else {
-
-            throw new Error(
-                "initializeCustomerForm() was not found."
-            );
-
-        }
-
-
-        bindCustomerModuleEvents();
-
-
-        customerArea.scrollIntoView({
-
-            behavior:
-                "smooth",
-
-            block:
-                "start"
-
-        });
-
-
-        console.log(
-            "================================="
-        );
-
-        console.log(
-            "CUSTOMER MODULE READY"
-        );
-
-        console.log(
-            "================================="
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "NEW CUSTOMER ERROR:",
-            error
-        );
-
-
-        container.innerHTML = `
-
-            <div
-                style="
-                    padding:50px 30px;
-                    text-align:center;
-                    color:#b42318;
-                "
-            >
-
-                <div
-                    style="
-                        font-size:42px;
-                        margin-bottom:15px;
-                    "
-                >
-                    ⚠
-                </div>
-
-                <strong
-                    style="
-                        display:block;
-                        font-size:18px;
-                        margin-bottom:10px;
-                    "
-                >
-                    Unable to Load Customer Form
-                </strong>
-
-                <small
-                    style="
-                        display:block;
-                        margin-bottom:20px;
-                    "
-                >
-
-                    ${escapeHTML(
-                        error.message ||
-                        "Unknown error."
-                    )}
-
-                </small>
-
-
-                <button
-                    type="button"
-                    class="btn btn-primary"
-                    onclick="
-                        openNewCustomerFromSalesOrder()
-                    "
-                >
-
-                    TRY AGAIN
-
-                </button>
-
-
-                <button
-                    type="button"
-                    class="btn btn-secondary"
-                    onclick="
-                        closeCustomerFromSalesOrder()
-                    "
-                    style="
-                        margin-left:8px;
-                    "
-                >
-
-                    CLOSE
-
-                </button>
-
-            </div>
-
-        `;
-
-    }
-
-}
-
-
-/* =========================================================
-   CLOSE NEW CUSTOMER
-========================================================= */
-
-function closeCustomerFromSalesOrder() {
-
-    console.log(
-        "Closing Customer Form..."
-    );
-
-
-    const customerArea =
-        document.getElementById(
-            "customerArea"
-        );
-
-
-    const listView =
-        document.getElementById(
-            "salesOrderListView"
-        );
-
-
-    const detailsPage =
-        document.getElementById(
-            "soDetails"
-        );
-
-
-    if (customerArea) {
-
-        customerArea.style.display =
-            "none";
-
-    }
-
-
-    if (detailsPage) {
-
-        detailsPage.style.display =
-            "none";
-
-    }
-
-
-    if (listView) {
-
-        listView.style.display =
-            "block";
-
-    }
-
-
-    refreshCustomerDataAfterSave();
-
-
-    customerModuleLoaded =
-        false;
-
-
-    const salesPage =
-        document.getElementById(
-            "salesOrderPage"
-        );
-
-
-    if (salesPage) {
-
-        salesPage.scrollIntoView({
-
-            behavior:
-                "smooth",
-
-            block:
-                "start"
-
-        });
-
-    }
-
-
-    console.log(
-        "Customer Form closed."
-    );
-
-}
-
-
-/* =========================================================
-   CUSTOMER MODULE EVENTS
-========================================================= */
-
-function bindCustomerModuleEvents() {
-
-    if (
-        !customerSavedEventBound
-    ) {
-
-        window.addEventListener(
-            "customerSaved",
-            function(event) {
-
-                console.log(
-                    "Customer saved event received:",
-                    event
-                );
-
-
-                refreshCustomerDataAfterSave();
-
-            }
-        );
-
-
-        customerSavedEventBound =
-            true;
-
-    }
-
-
-    if (
-        !customerCancelEventBound
-    ) {
-
-        window.addEventListener(
-            "customerFormCancel",
-            function() {
-
-                console.log(
-                    "Customer cancel event received."
-                );
-
-
-                closeCustomerFromSalesOrder();
-
-            }
-        );
-
-
-        customerCancelEventBound =
-            true;
-
-    }
-
-}
-
-
-/* =========================================================
-   CUSTOMER CSS LOADER
-========================================================= */
-
-function loadCustomerCSS() {
-
-    return new Promise(
-        function(resolve, reject) {
-
-            const existing =
-                document.querySelector(
-                    'link[data-customer-css="true"]'
-                );
-
-
-            if (existing) {
-
-                resolve();
-
-                return;
-
-            }
-
-
-            const link =
-                document.createElement(
-                    "link"
-                );
-
-
-            link.rel =
-                "stylesheet";
-
-
-            link.href =
-                "css/create-customer.css?v=20261006";
-
-
-            link.dataset.customerCss =
-                "true";
-
-
-            link.onload =
-                function() {
-
-                    console.log(
-                        "create-customer.css loaded."
-                    );
-
-                    resolve();
-
-                };
-
-
-            link.onerror =
-                function() {
-
-                    reject(
-                        new Error(
-                            "Unable to load create-customer.css"
+                    result &&
+                    (
+                        result.message ||
+                        result.error
+                    )
+                        ? (
+                            result.message ||
+                            result.error
                         )
-                    );
-
-                };
-
-
-            document.head.appendChild(
-                link
-            );
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CUSTOMER JS LOADER
-========================================================= */
-
-function loadCustomerJS() {
-
-    return new Promise(
-        function(resolve, reject) {
-
-            const existing =
-                document.querySelector(
-                    'script[data-customer-js="true"]'
+                        : "Unable to load Sales Order."
                 );
-
-
-            if (existing) {
-
-                resolve();
-
-                return;
 
             }
 
 
-            const script =
-                document.createElement(
-                    "script"
+            const so =
+                result.salesOrder ||
+                result.so ||
+                (
+                    result.data &&
+                    (
+                        result.data.salesOrder ||
+                        result.data.so
+                    )
                 );
 
 
-            script.src =
-                "js/create-customer.js?v=20261006";
+            if (!so) {
+
+                throw new Error(
+                    "Sales Order data was not returned."
+                );
+
+            }
 
 
-            script.dataset.customerJs =
-                "true";
+            so.items =
+                result.items ||
+                so.items ||
+                [];
 
 
-            script.onload =
-                function() {
-
-                    console.log(
-                        "create-customer.js loaded."
-                    );
-
-                    resolve();
-
-                };
+            so.deliveries =
+                result.deliveries ||
+                [];
 
 
-            script.onerror =
-                function() {
-
-                    reject(
-                        new Error(
-                            "Unable to load create-customer.js"
-                        )
-                    );
-
-                };
+            so.deliveryReceipts =
+                result.deliveryReceipts ||
+                [];
 
 
-            document.body.appendChild(
-                script
+            so.invoices =
+                result.invoices ||
+                [];
+
+
+            so.payments =
+                result.payments ||
+                [];
+
+
+            so.documents =
+                result.documents ||
+                [];
+
+
+            so.summary =
+                result.summary ||
+                {};
+
+
+            currentSO =
+                so;
+
+
+            selectedSO =
+                so;
+
+
+            soDetailsCache[
+                number
+            ] =
+                so;
+
+
+            updateSOSelectionUI();
+
+
+            showSODetailsPage(
+                so
             );
 
+
+            await loadSOFiles(
+                number
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "OPEN SO DETAILS ERROR:",
+                error
+            );
+
+
+            const details =
+                document.getElementById(
+                    "soDetails"
+                );
+
+
+            if (details) {
+
+                details.innerHTML = `
+
+                    <div class="so-error-box">
+
+                        <h3>
+                            Unable to Load Sales Order
+                        </h3>
+
+                        <p>
+                            ${escapeHTML(
+                                error.message
+                            )}
+                        </p>
+
+                        <div>
+
+                            <button
+                                type="button"
+                                onclick="openSODetails('${escapeAttribute(number)}')"
+                            >
+                                Retry
+                            </button>
+
+                            <button
+                                type="button"
+                                onclick="closeSODetails()"
+                            >
+                                Close
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                `;
+
+            }
+
         }
-    );
-
-}
-
-
-/* =========================================================
-   REFRESH CUSTOMER DATA
-========================================================= */
-
-function refreshCustomerDataAfterSave() {
-
-    try {
-
-        if (
-            typeof window.loadCustomers ===
-            "function"
-        ) {
-
-            window.loadCustomers();
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Unable to refresh customer dropdown:",
-            error
-        );
 
     }
 
-}
 
-/* =========================================================
-   OPEN SALES ORDER DETAILS
-========================================================= */
+    /* =====================================================
+       DETAILS LOADING
+    ===================================================== */
 
-async function openSODetails(
-    soNumber
-) {
+    function showSODetailsLoading() {
 
-    const number =
-        String(
-            soNumber || ""
-        ).trim();
-
-
-    if (!number) {
-
-        console.warn(
-            "Sales Order number is required."
-        );
-
-        return;
-
-    }
-
-
-    console.log(
-        "Opening Sales Order Details:",
-        number
-    );
-
-
-    showSODetailsLoading();
-
-
-    try {
-
-        const result =
-            await salesOrderAPI(
-                "getSalesOrder",
-                {
-                    soNumber:
-                        number
-                }
+        const listView =
+            document.getElementById(
+                "salesOrderListView"
             );
 
 
-        console.log(
-            "GET SO DETAILS RESULT:",
-            result
-        );
-
-
-        if (
-            !result ||
-            !result.success
-        ) {
-
-            throw new Error(
-                result?.message ||
-                result?.error ||
-                "Unable to load Sales Order details."
+        const customerArea =
+            document.getElementById(
+                "customerArea"
             );
-
-        }
-
-
-        const so =
-            result.so ||
-            result.salesOrder ||
-            result.data;
-
-
-        if (!so) {
-
-            throw new Error(
-                "Sales Order details were not returned."
-            );
-
-        }
-
-
-        currentSO =
-            so;
-
-
-        selectedSO =
-            so;
-
-
-        soDetailsCache[
-            number
-        ] =
-            so;
-
-
-        updateSOSelectionUI();
-
-
-        showSODetailsPage(
-            so
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "OPEN SO DETAILS ERROR:",
-            error
-        );
 
 
         const details =
@@ -3470,82 +1881,42 @@ async function openSODetails(
             );
 
 
+        if (listView) {
+
+            listView.style.display =
+                "none";
+
+        }
+
+
+        if (customerArea) {
+
+            customerArea.style.display =
+                "none";
+
+        }
+
+
         if (details) {
+
+            details.style.display =
+                "block";
+
 
             details.innerHTML = `
 
                 <div
-                    style="
-                        padding:50px;
-                        text-align:center;
-                        color:#b42318;
-                    "
+                    class="so-details-loading"
+                    style="padding:40px;text-align:center;"
                 >
 
-                    <div
-                        style="
-                            font-size:42px;
-                            margin-bottom:15px;
-                        "
-                    >
-                        ⚠
-                    </div>
-
-
-                    <strong
-                        style="
-                            display:block;
-                            font-size:18px;
-                            margin-bottom:10px;
-                        "
-                    >
-
-                        Unable to Load Sales Order
-
-                    </strong>
-
+                    <h3>
+                        Loading Sales Order...
+                    </h3>
 
                     <p>
-
-                        ${escapeHTML(
-                            error.message ||
-                            "Unknown error."
-                        )}
-
+                        Please wait.
                     </p>
-
-
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        onclick="
-                            openSODetails(
-                                '${escapeAttribute(
-                                    number
-                                )}'
-                            )
-                        "
-                    >
-
-                        TRY AGAIN
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        onclick="
-                            closeSODetails()
-                        "
-                        style="
-                            margin-left:8px;
-                        "
-                    >
-
-                        CLOSE
-
-                    </button>
 
                 </div>
 
@@ -3555,1122 +1926,593 @@ async function openSODetails(
 
     }
 
-}
 
+    /* =====================================================
+       SHOW DETAILS PAGE
+    ===================================================== */
 
-/* =========================================================
-   SHOW SO DETAILS LOADING
-========================================================= */
-
-function showSODetailsLoading() {
-
-    const listView =
-        document.getElementById(
-            "salesOrderListView"
-        );
-
-
-    const details =
-        document.getElementById(
-            "soDetails"
-        );
-
-
-    const customerArea =
-        document.getElementById(
-            "customerArea"
-        );
-
-
-    if (listView) {
-
-        listView.style.display =
-            "none";
-
-    }
-
-
-    if (customerArea) {
-
-        customerArea.style.display =
-            "none";
-
-    }
-
-
-    if (!details) {
-
-        console.error(
-            "soDetails element not found."
-        );
-
-        return;
-
-    }
-
-
-    details.style.display =
-        "block";
-
-
-    details.innerHTML = `
-
-        <div
-            style="
-                padding:70px 30px;
-                text-align:center;
-            "
-        >
-
-            <div
-                style="
-                    font-size:42px;
-                    margin-bottom:15px;
-                "
-            >
-                ⏳
-            </div>
-
-
-            <strong
-                style="
-                    display:block;
-                    font-size:18px;
-                    margin-bottom:8px;
-                "
-            >
-
-                Loading Sales Order Details...
-
-            </strong>
-
-
-            <span>
-
-                Please wait...
-
-            </span>
-
-        </div>
-
-    `;
-
-}
-
-
-/* =========================================================
-   SHOW SO DETAILS PAGE
-========================================================= */
-
-function showSODetailsPage(
-    so
-) {
-
-    const listView =
-        document.getElementById(
-            "salesOrderListView"
-        );
-
-
-    const details =
-        document.getElementById(
-            "soDetails"
-        );
-
-
-    const customerArea =
-        document.getElementById(
-            "customerArea"
-        );
-
-
-    if (listView) {
-
-        listView.style.display =
-            "none";
-
-    }
-
-
-    if (customerArea) {
-
-        customerArea.style.display =
-            "none";
-
-    }
-
-
-    if (!details) {
-
-        console.error(
-            "soDetails element not found."
-        );
-
-        return;
-
-    }
-
-
-    details.style.display =
-        "block";
-
-
-    renderSODetails(
+    function showSODetailsPage(
         so
-    );
+    ) {
+
+        const listView =
+            document.getElementById(
+                "salesOrderListView"
+            );
 
 
-    const soNumber =
-        getSOValue(
-            so,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
+        const customerArea =
+            document.getElementById(
+                "customerArea"
+            );
+
+
+        const details =
+            document.getElementById(
+                "soDetails"
+            );
+
+
+        if (listView) {
+
+            listView.style.display =
+                "none";
+
+        }
+
+
+        if (customerArea) {
+
+            customerArea.style.display =
+                "none";
+
+        }
+
+
+        if (details) {
+
+            details.style.display =
+                "block";
+
+        }
+
+
+        renderSODetails(
+            so
         );
 
 
-    loadSOFiles(
-        soNumber
-    );
+        setDetailsEditMode(
+            false
+        );
 
 
-    setDetailsEditMode(
-        false
-    );
+        window.scrollTo(
+            {
+                top: 0,
+                behavior: "smooth"
+            }
+        );
 
-
-    details.scrollIntoView({
-
-        behavior:
-            "smooth",
-
-        block:
-            "start"
-
-    });
-
-}
-
-
-/* =========================================================
-   RENDER SO DETAILS
-========================================================= */
-
-function renderSODetails(
-    so
-) {
-
-    if (!so) {
-        return;
     }
 
 
     /* =====================================================
-       HEADER / BASIC DETAILS
+       RENDER SO DETAILS
     ===================================================== */
 
-    setValue(
-        "detailSODate",
-        getSOValue(
-            so,
-            "dateCreation",
-            "DATE_CREATION",
-            "DATE CREATED",
-            "Date Creation"
-        )
-    );
+    function renderSODetails(
+        so
+    ) {
 
-
-    setValue(
-        "detailSONumber",
-        getSOValue(
-            so,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
-        )
-    );
-
-
-    setValue(
-        "detailClientName",
-        getSOValue(
-            so,
-            "clientName",
-            "CLIENT_NAME",
-            "CLIENT NAME"
-        )
-    );
-
-
-    setValue(
-        "detailSE",
-        getSOValue(
-            so,
-            "se",
-            "SE",
-            "SALES_ENGINEER"
-        )
-    );
-
-
-    setValue(
-        "detailAttention",
-        getSOValue(
-            so,
-            "attention",
-            "ATTENTION"
-        )
-    );
-
-
-    setValue(
-        "detailBillingAddress",
-        getSOValue(
-            so,
-            "billingAddress",
-            "BILLING_ADDRESS",
-            "BILLING ADDRESS"
-        )
-    );
-
-
-    setValue(
-        "detailDeliveryAddress",
-        getSOValue(
-            so,
-            "deliveryAddress",
-            "DELIVERY_ADDRESS",
-            "DELIVERY ADDRESS"
-        )
-    );
-
-
-    setValue(
-        "detailProject",
-        getSOValue(
-            so,
-            "project",
-            "PROJECT"
-        )
-    );
-
-
-    setValue(
-        "detailTIN",
-        getSOValue(
-            so,
-            "tin",
-            "TIN"
-        )
-    );
-
-
-    setValue(
-        "detailPONumber",
-        getSOValue(
-            so,
-            "poNumber",
-            "PO_NUMBER",
-            "PO NUMBER"
-        )
-    );
-
-
-    setValue(
-        "detailTerms",
-        getSOValue(
-            so,
-            "terms",
-            "TERMS"
-        )
-    );
-
-
-    setValue(
-        "detailJobOrder",
-        getSOValue(
-            so,
-            "jobOrder",
-            "JOB_ORDER",
-            "JOB ORDER"
-        )
-    );
-
-
-    /* =====================================================
-       ITEMS
-    ===================================================== */
-
-    const items =
-        Array.isArray(
-            so.items
-        )
-            ? so.items
-            : Array.isArray(
-                so.ITEMS
+        setValue(
+            "detailSODate",
+            getSOValue(
+                so,
+                "dateCreation",
+                "DATE_CREATION"
             )
-                ? so.ITEMS
+        );
+
+
+        setValue(
+            "detailSONumber",
+            getSOValue(
+                so,
+                "soNumber",
+                "SO_NUMBER"
+            )
+        );
+
+
+        setValue(
+            "detailClientName",
+            getSOValue(
+                so,
+                "clientName",
+                "CLIENT_NAME"
+            )
+        );
+
+
+        setValue(
+            "detailSE",
+            getSOValue(
+                so,
+                "salesEngineer",
+                "SALES_ENGINEER",
+                "se",
+                "SE"
+            )
+        );
+
+
+        setValue(
+            "detailAttention",
+            getSOValue(
+                so,
+                "attention",
+                "ATTENTION"
+            )
+        );
+
+
+        setValue(
+            "detailBillingAddress",
+            getSOValue(
+                so,
+                "billingAddress",
+                "BILLING_ADDRESS"
+            )
+        );
+
+
+        setValue(
+            "detailDeliveryAddress",
+            getSOValue(
+                so,
+                "deliveryAddress",
+                "DELIVERY_ADDRESS"
+            )
+        );
+
+
+        setValue(
+            "detailProject",
+            getSOValue(
+                so,
+                "project",
+                "PROJECT"
+            )
+        );
+
+
+        setValue(
+            "detailTIN",
+            getSOValue(
+                so,
+                "tin",
+                "TIN"
+            )
+        );
+
+
+        setValue(
+            "detailPONumber",
+            getSOValue(
+                so,
+                "poNumber",
+                "PO_NUMBER"
+            )
+        );
+
+
+        setValue(
+            "detailTerms",
+            getSOValue(
+                so,
+                "terms",
+                "TERMS"
+            )
+        );
+
+
+        setValue(
+            "detailJobOrder",
+            getSOValue(
+                so,
+                "jobOrder",
+                "JOB_ORDER"
+            )
+        );
+
+
+        const items =
+            Array.isArray(
+                so.items
+            )
+                ? so.items
                 : [];
 
 
-    renderSODetailItems(
-        items
-    );
-
-
-    /* =====================================================
-       TOTALS
-    ===================================================== */
-
-    const subtotal =
-        getSOValue(
-            so,
-            "subtotal",
-            "SUBTOTAL"
+        renderSODetailItems(
+            items
         );
 
 
-    const discount =
-        getSOValue(
-            so,
-            "discount",
-            "DISCOUNT"
-        );
+        const subtotal =
+            Number(
+                getSOValue(
+                    so,
+                    "subtotal",
+                    "SUBTOTAL"
+                ) ||
+                0
+            );
 
 
-    const vatable =
-        getSOValue(
-            so,
-            "vatable",
-            "VATABLE"
-        );
+        const discount =
+            Number(
+                getSOValue(
+                    so,
+                    "discount",
+                    "DISCOUNT"
+                ) ||
+                0
+            );
 
 
-    const vatRate =
-        getSOValue(
-            so,
-            "vatRate",
-            "VAT_RATE"
-        ) || 0.12;
+        const vatable =
+            Number(
+                getSOValue(
+                    so,
+                    "vatable",
+                    "VATABLE"
+                ) ||
+                0
+            );
 
 
-    const vatAmount =
-        getSOValue(
-            so,
-            "vatAmount",
-            "VAT_AMOUNT"
-        );
+        const vatRate =
+            Number(
+                getSOValue(
+                    so,
+                    "vatRate",
+                    "VAT_RATE"
+                ) ||
+                VAT_RATE
+            );
 
 
-    const grandTotal =
-        getSOValue(
-            so,
-            "grandTotal",
-            "GRAND_TOTAL",
-            "GRAND TOTAL"
-        );
+        const vatAmount =
+            Number(
+                getSOValue(
+                    so,
+                    "vatAmount",
+                    "VAT_AMOUNT"
+                ) ||
+                0
+            );
 
 
-    setValue(
-        "detailSubtotal",
-        formatMoney(
+        const grandTotal =
+            Number(
+                getSOValue(
+                    so,
+                    "grandTotal",
+                    "GRAND_TOTAL"
+                ) ||
+                0
+            );
+
+
+        setValue(
+            "detailSubtotal",
             subtotal
-        )
-    );
+        );
 
 
-    setValue(
-        "detailDiscount",
-        formatMoney(
+        setValue(
+            "detailDiscount",
             discount
-        )
-    );
+        );
 
 
-    setValue(
-        "detailVatable",
-        formatMoney(
+        setValue(
+            "detailVatable",
             vatable
-        )
-    );
+        );
 
 
-    setValue(
-        "detailVATRate",
-        Number(
+        setValue(
+            "detailVATRate",
             vatRate
-        ) * 100
-    );
-
-
-    setValue(
-        "detailVATAmount",
-        formatMoney(
-            vatAmount
-        )
-    );
-
-
-    setValue(
-        "detailGrandTotal",
-        formatMoney(
-            grandTotal
-        )
-    );
-
-
-    /* =====================================================
-       TEXT-ONLY TOTAL ELEMENTS
-    ===================================================== */
-
-    setText(
-        "detailSubtotalText",
-        formatMoney(
-            subtotal
-        )
-    );
-
-
-    setText(
-        "detailDiscountText",
-        formatMoney(
-            discount
-        )
-    );
-
-
-    setText(
-        "detailVatableText",
-        formatMoney(
-            vatable
-        )
-    );
-
-
-    setText(
-        "detailVATAmountText",
-        formatMoney(
-            vatAmount
-        )
-    );
-
-
-    setText(
-        "detailGrandTotalText",
-        formatMoney(
-            grandTotal
-        )
-    );
-
-}
-
-
-/* =========================================================
-   RENDER SO DETAIL ITEMS
-========================================================= */
-
-function renderSODetailItems(
-    items
-) {
-
-    const container =
-        document.getElementById(
-            "detailItemsContainer"
         );
 
 
-    if (!container) {
-
-        console.warn(
-            "detailItemsContainer not found."
+        setValue(
+            "detailVATAmount",
+            vatAmount
         );
 
-        return;
+
+        setValue(
+            "detailGrandTotal",
+            grandTotal
+        );
+
+
+        setText(
+            "detailSubtotalText",
+            formatMoney(
+                subtotal
+            )
+        );
+
+
+        setText(
+            "detailDiscountText",
+            formatMoney(
+                discount
+            )
+        );
+
+
+        setText(
+            "detailVatableText",
+            formatMoney(
+                vatable
+            )
+        );
+
+
+        setText(
+            "detailVATAmountText",
+            formatMoney(
+                vatAmount
+            )
+        );
+
+
+        setText(
+            "detailGrandTotalText",
+            formatMoney(
+                grandTotal
+            )
+        );
+
+
+        renderSOTransactionHistory(
+            so
+        );
 
     }
 
 
-    container.innerHTML =
-        "";
+    /* =====================================================
+       RENDER SO ITEMS
+    ===================================================== */
 
-
-    if (
-        !Array.isArray(items) ||
-        items.length === 0
+    function renderSODetailItems(
+        items
     ) {
 
-        container.innerHTML = `
+        const container =
+            document.getElementById(
+                "detailItemsContainer"
+            );
 
-            <div
-                class="so-detail-empty-items"
-            >
 
-                No Sales Order items found.
+        if (!container) {
 
-            </div>
+            return;
 
-        `;
+        }
 
-        return;
 
-    }
+        if (!items.length) {
 
+            container.innerHTML = `
 
-    items.forEach(
-        function(item, index) {
-
-            const itemName =
-                getSOValue(
-                    item,
-                    "itemName",
-                    "ITEM_NAME",
-                    "ITEM NAME",
-                    "description",
-                    "DESCRIPTION"
-                );
-
-
-            const description =
-                getSOValue(
-                    item,
-                    "description",
-                    "DESCRIPTION"
-                );
-
-
-            const quantity =
-                getSOValue(
-                    item,
-                    "quantity",
-                    "QTY",
-                    "QUANTITY"
-                );
-
-
-            const unit =
-                getSOValue(
-                    item,
-                    "unit",
-                    "UNIT"
-                );
-
-
-            const amount =
-                getSOValue(
-                    item,
-                    "amount",
-                    "UNIT_PRICE",
-                    "UNIT PRICE",
-                    "PRICE"
-                );
-
-
-            const total =
-                getSOValue(
-                    item,
-                    "total",
-                    "TOTAL",
-                    "LINE_TOTAL"
-                );
-
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-            row.className =
-                "so-detail-item-row";
-
-
-            row.dataset.itemIndex =
-                index;
-
-
-            row.innerHTML = `
-
-                <div
-                    class="so-detail-item-number"
-                >
-
-                    ${index + 1}
-
-                </div>
-
-
-                <div
-                    class="so-detail-item-field"
-                >
-
-                    <label>
-                        Item
-                    </label>
-
-                    <input
-                        type="text"
-                        class="detail-item-name"
-                        value="${escapeAttribute(
-                            itemName || ""
-                        )}"
-                        disabled
-                    >
-
-                </div>
-
-
-                <div
-                    class="so-detail-item-field"
-                >
-
-                    <label>
-                        Description
-                    </label>
-
-                    <input
-                        type="text"
-                        class="detail-item-description"
-                        value="${escapeAttribute(
-                            description || ""
-                        )}"
-                        disabled
-                    >
-
-                </div>
-
-
-                <div
-                    class="so-detail-item-field small"
-                >
-
-                    <label>
-                        Qty
-                    </label>
-
-                    <input
-                        type="number"
-                        class="detail-item-qty"
-                        value="${escapeAttribute(
-                            quantity || 0
-                        )}"
-                        min="0"
-                        step="any"
-                        disabled
-                        oninput="
-                            calculateDetailTotals()
-                        "
-                    >
-
-                </div>
-
-
-                <div
-                    class="so-detail-item-field small"
-                >
-
-                    <label>
-                        Unit
-                    </label>
-
-                    <input
-                        type="text"
-                        class="detail-item-unit"
-                        value="${escapeAttribute(
-                            unit || ""
-                        )}"
-                        disabled
-                    >
-
-                </div>
-
-
-                <div
-                    class="so-detail-item-field"
-                >
-
-                    <label>
-                        Amount
-                    </label>
-
-                    <input
-                        type="number"
-                        class="detail-item-amount"
-                        value="${escapeAttribute(
-                            amount || 0
-                        )}"
-                        min="0"
-                        step="0.01"
-                        disabled
-                        oninput="
-                            calculateDetailTotals()
-                        "
-                    >
-
-                </div>
-
-
-                <div
-                    class="so-detail-item-field"
-                >
-
-                    <label>
-                        Total
-                    </label>
-
-                    <input
-                        type="number"
-                        class="detail-item-total"
-                        value="${escapeAttribute(
-                            total || 0
-                        )}"
-                        readonly
-                    >
-
-                </div>
-
-
-                <div
-                    class="so-detail-item-actions"
-                >
-
-                    <button
-                        type="button"
-                        class="detail-item-delete"
-                        onclick="
-                            deleteDetailItem(
-                                ${index}
-                            )
-                        "
-                        style="
-                            display:none;
-                        "
-                    >
-
-                        ×
-
-                    </button>
-
+                <div class="empty-state">
+                    No items found.
                 </div>
 
             `;
 
-
-            container.appendChild(
-                row
-            );
+            return;
 
         }
-    );
 
 
-    calculateDetailTotals();
+        container.innerHTML =
+            items
+            .map(
+                function(item, index) {
 
-}
-
-
-/* =========================================================
-   ENABLE SO UPDATE
-========================================================= */
-
-function enableSOUpdate() {
-
-    if (!currentSO) {
-
-        alert(
-            "Please select a Sales Order first."
-        );
-
-        return;
-
-    }
+                    const itemName =
+                        getSOValue(
+                            item,
+                            "itemName",
+                            "ITEM_NAME"
+                        );
 
 
-    setDetailsEditMode(
-        true
-    );
-
-}
-
-
-/* =========================================================
-   SET DETAILS EDIT MODE
-========================================================= */
-
-function setDetailsEditMode(
-    enabled
-) {
-
-    soDetailsEditMode =
-        !!enabled;
+                    const description =
+                        getSOValue(
+                            item,
+                            "description",
+                            "DESCRIPTION"
+                        );
 
 
-    const details =
-        document.getElementById(
-            "soDetails"
-        );
+                    const quantity =
+                        getSOValue(
+                            item,
+                            "quantity",
+                            "qty",
+                            "QTY"
+                        );
 
 
-    if (!details) {
-        return;
-    }
+                    const unit =
+                        getSOValue(
+                            item,
+                            "unit",
+                            "UNIT"
+                        );
 
 
-    /*
-     * INPUTS
-     */
+                    const amount =
+                        getSOValue(
+                            item,
+                            "amount",
+                            "UNIT_PRICE",
+                            "unitPrice"
+                        );
 
-    details
-        .querySelectorAll(
-            "input, textarea, select"
-        )
-        .forEach(
-            function(element) {
 
-                if (
-                    element.id ===
-                    "detailSONumber"
-                ) {
+                    const total =
+                        getSOValue(
+                            item,
+                            "total",
+                            "TOTAL"
+                        );
 
-                    element.disabled =
-                        true;
 
-                    return;
+                    return `
+
+                        <div
+                            class="detail-item-row"
+                            data-item-index="${index}"
+                        >
+
+                            <input
+                                type="text"
+                                class="detail-item-name"
+                                value="${escapeAttribute(itemName)}"
+                                placeholder="Item"
+                                disabled
+                            >
+
+                            <input
+                                type="text"
+                                class="detail-item-description"
+                                value="${escapeAttribute(description)}"
+                                placeholder="Description"
+                                disabled
+                            >
+
+                            <input
+                                type="number"
+                                class="detail-item-qty"
+                                value="${escapeAttribute(quantity)}"
+                                min="0"
+                                step="any"
+                                disabled
+                            >
+
+                            <input
+                                type="text"
+                                class="detail-item-unit"
+                                value="${escapeAttribute(unit)}"
+                                placeholder="Unit"
+                                disabled
+                            >
+
+                            <input
+                                type="number"
+                                class="detail-item-amount"
+                                value="${escapeAttribute(amount)}"
+                                min="0"
+                                step="0.01"
+                                disabled
+                            >
+
+                            <input
+                                type="number"
+                                class="detail-item-total"
+                                value="${escapeAttribute(total)}"
+                                min="0"
+                                step="0.01"
+                                disabled
+                            >
+
+                            <button
+                                type="button"
+                                class="detail-item-delete"
+                                style="display:none;"
+                                onclick="deleteDetailItem(this)"
+                            >
+                                ×
+                            </button>
+
+                        </div>
+
+                    `;
 
                 }
+            )
+            .join("");
 
 
-                if (
-                    element.id ===
-                    "detailSOFileInput"
-                ) {
-
-                    element.disabled =
-                        false;
-
-                    return;
-
-                }
-
-
-                element.disabled =
-                    !enabled;
-
-            }
-        );
-
-
-    /*
-     * DELETE BUTTONS
-     */
-
-    details
-        .querySelectorAll(
-            ".detail-item-delete"
-        )
-        .forEach(
-            function(button) {
-
-                button.style.display =
-                    enabled
-                        ? "inline-flex"
-                        : "none";
-
-            }
-        );
-
-
-    /*
-     * ADD ITEM BUTTON
-     */
-
-    const addItemButton =
-        document.getElementById(
-            "addDetailItemButton"
-        );
-
-
-    if (addItemButton) {
-
-        addItemButton.style.display =
-            enabled
-                ? "inline-flex"
-                : "none";
+        calculateDetailTotals();
 
     }
 
 
-    /*
-     * SAVE BUTTON
-     */
+    /* =====================================================
+       ADD DETAIL ITEM
+    ===================================================== */
 
-    const saveButton =
-        document.getElementById(
-            "saveSOUpdateButton"
-        );
+    function addDetailItem() {
 
-
-    if (saveButton) {
-
-        saveButton.style.display =
-            enabled
-                ? "inline-flex"
-                : "none";
-
-    }
+        const container =
+            document.getElementById(
+                "detailItemsContainer"
+            );
 
 
-    /*
-     * UPDATE BUTTON
-     */
+        if (!container) {
 
-    const updateButton =
-        document.getElementById(
-            "enableSOUpdateButton"
-        );
+            return;
+
+        }
 
 
-    if (updateButton) {
-
-        updateButton.style.display =
-            enabled
-                ? "none"
-                : "inline-flex";
-
-    }
+        const index =
+            container.querySelectorAll(
+                ".detail-item-row"
+            ).length;
 
 
-    /*
-     * CANCEL EDIT BUTTON
-     */
-
-    const cancelEditButton =
-        document.getElementById(
-            "cancelSOEditButton"
-        );
+        const row =
+            document.createElement(
+                "div"
+            );
 
 
-    if (cancelEditButton) {
-
-        cancelEditButton.style.display =
-            enabled
-                ? "inline-flex"
-                : "none";
-
-    }
+        row.className =
+            "detail-item-row";
 
 
-    /*
-     * ADD FILE BUTTON
-     *
-     * File upload remains available.
-     */
-
-    const addFileButton =
-        document.getElementById(
-            "addSOFileButton"
-        );
+        row.dataset.itemIndex =
+            index;
 
 
-    if (addFileButton) {
-
-        addFileButton.style.display =
-            "inline-flex";
-
-    }
-
-}
-
-
-/* =========================================================
-   ADD DETAIL ITEM
-========================================================= */
-
-function addDetailItem() {
-
-    const container =
-        document.getElementById(
-            "detailItemsContainer"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    const index =
-        container.querySelectorAll(
-            ".so-detail-item-row"
-        ).length;
-
-
-    const row =
-        document.createElement(
-            "div"
-        );
-
-
-    row.className =
-        "so-detail-item-row";
-
-
-    row.dataset.itemIndex =
-        index;
-
-
-    row.innerHTML = `
-
-        <div
-            class="so-detail-item-number"
-        >
-
-            ${index + 1}
-
-        </div>
-
-
-        <div
-            class="so-detail-item-field"
-        >
-
-            <label>
-                Item
-            </label>
+        row.innerHTML = `
 
             <input
                 type="text"
                 class="detail-item-name"
-                value=""
+                placeholder="Item"
             >
-
-        </div>
-
-
-        <div
-            class="so-detail-item-field"
-        >
-
-            <label>
-                Description
-            </label>
 
             <input
                 type="text"
                 class="detail-item-description"
-                value=""
+                placeholder="Description"
             >
-
-        </div>
-
-
-        <div
-            class="so-detail-item-field small"
-        >
-
-            <label>
-                Qty
-            </label>
 
             <input
                 type="number"
@@ -4678,38 +2520,13 @@ function addDetailItem() {
                 value="0"
                 min="0"
                 step="any"
-                oninput="
-                    calculateDetailTotals()
-                "
             >
-
-        </div>
-
-
-        <div
-            class="so-detail-item-field small"
-        >
-
-            <label>
-                Unit
-            </label>
 
             <input
                 type="text"
                 class="detail-item-unit"
-                value=""
+                placeholder="Unit"
             >
-
-        </div>
-
-
-        <div
-            class="so-detail-item-field"
-        >
-
-            <label>
-                Amount
-            </label>
 
             <input
                 type="number"
@@ -4717,595 +2534,917 @@ function addDetailItem() {
                 value="0"
                 min="0"
                 step="0.01"
-                oninput="
-                    calculateDetailTotals()
-                "
             >
-
-        </div>
-
-
-        <div
-            class="so-detail-item-field"
-        >
-
-            <label>
-                Total
-            </label>
 
             <input
                 type="number"
                 class="detail-item-total"
                 value="0"
-                readonly
+                min="0"
+                step="0.01"
             >
-
-        </div>
-
-
-        <div
-            class="so-detail-item-actions"
-        >
 
             <button
                 type="button"
                 class="detail-item-delete"
-                onclick="
-                    deleteDetailItem(
-                        ${index}
-                    )
-                "
+                onclick="deleteDetailItem(this)"
             >
-
                 ×
-
             </button>
 
-        </div>
-
-    `;
+        `;
 
 
-    container.appendChild(
+        container.appendChild(
+            row
+        );
+
+
         row
-    );
-
-
-    renumberDetailItems();
-
-    calculateDetailTotals();
-
-}
-
-
-/* =========================================================
-   DELETE DETAIL ITEM
-========================================================= */
-
-function deleteDetailItem(
-    index
-) {
-
-    const container =
-        document.getElementById(
-            "detailItemsContainer"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    const rows =
-        container.querySelectorAll(
-            ".so-detail-item-row"
-        );
-
-
-    const row =
-        rows[index];
-
-
-    if (!row) {
-        return;
-    }
-
-
-    row.remove();
-
-
-    renumberDetailItems();
-
-    calculateDetailTotals();
-
-}
-
-
-/* =========================================================
-   RENUMBER DETAIL ITEMS
-========================================================= */
-
-function renumberDetailItems() {
-
-    const container =
-        document.getElementById(
-            "detailItemsContainer"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    const rows =
-        container.querySelectorAll(
-            ".so-detail-item-row"
-        );
-
-
-    rows.forEach(
-        function(row, index) {
-
-            row.dataset.itemIndex =
-                index;
-
-
-            const number =
-                row.querySelector(
-                    ".so-detail-item-number"
-                );
-
-
-            if (number) {
-
-                number.textContent =
-                    index + 1;
-
-            }
-
-
-            const deleteButton =
-                row.querySelector(
-                    ".detail-item-delete"
-                );
-
-
-            if (deleteButton) {
-
-                deleteButton.setAttribute(
-                    "onclick",
-                    "deleteDetailItem(" +
-                    index +
-                    ")"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   CALCULATE DETAIL TOTALS
-========================================================= */
-
-function calculateDetailTotals() {
-
-    const rows =
-        document.querySelectorAll(
-            "#detailItemsContainer .so-detail-item-row"
-        );
-
-
-    let subtotal =
-        0;
-
-
-    rows.forEach(
-        function(row) {
-
-            const qtyInput =
-                row.querySelector(
-                    ".detail-item-qty"
-                );
-
-
-            const amountInput =
-                row.querySelector(
-                    ".detail-item-amount"
-                );
-
-
-            const totalInput =
-                row.querySelector(
-                    ".detail-item-total"
-                );
-
-
-            const qty =
-                Number(
-                    qtyInput?.value ||
-                    0
-                );
-
-
-            const amount =
-                Number(
-                    amountInput?.value ||
-                    0
-                );
-
-
-            const total =
-                qty *
-                amount;
-
-
-            if (totalInput) {
-
-                totalInput.value =
-                    total.toFixed(
-                        2
+            .querySelectorAll(
+                "input"
+            )
+            .forEach(
+                function(input) {
+
+                    input.addEventListener(
+                        "input",
+                        calculateDetailTotals
                     );
 
-            }
-
-
-            subtotal +=
-                total;
-
-        }
-    );
-
-
-    const discountInput =
-        document.getElementById(
-            "detailDiscount"
-        );
-
-
-    const discount =
-        Number(
-            discountInput?.value ||
-            0
-        );
-
-
-    const vatable =
-        subtotal -
-        discount;
-
-
-    const vatRate =
-        0.12;
-
-
-    const vatAmount =
-        vatable *
-        vatRate;
-
-
-    const grandTotal =
-        vatable +
-        vatAmount;
-
-
-    setValue(
-        "detailSubtotal",
-        subtotal.toFixed(
-            2
-        )
-    );
-
-
-    setValue(
-        "detailVatable",
-        vatable.toFixed(
-            2
-        )
-    );
-
-
-    setValue(
-        "detailVATAmount",
-        vatAmount.toFixed(
-            2
-        )
-    );
-
-
-    setValue(
-        "detailGrandTotal",
-        grandTotal.toFixed(
-            2
-        )
-    );
-
-
-    setText(
-        "detailSubtotalText",
-        formatMoney(
-            subtotal
-        )
-    );
-
-
-    setText(
-        "detailVatableText",
-        formatMoney(
-            vatable
-        )
-    );
-
-
-    setText(
-        "detailVATAmountText",
-        formatMoney(
-            vatAmount
-        )
-    );
-
-
-    setText(
-        "detailGrandTotalText",
-        formatMoney(
-            grandTotal
-        )
-    );
-
-}
-
-
-/* =========================================================
-   SAVE SALES ORDER UPDATE
-========================================================= */
-
-async function saveSOUpdate() {
-
-    if (!currentSO) {
-
-        alert(
-            "No Sales Order selected."
-        );
-
-        return;
+                }
+            );
 
     }
 
 
-    const soNumber =
-        getSOValue(
-            currentSO,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
-        );
+    /* =====================================================
+       DELETE DETAIL ITEM
+    ===================================================== */
 
+    function deleteDetailItem(
+        button
+    ) {
 
-    const items =
-        collectDetailItems();
-
-
-    const subtotal =
-        Number(
-            getValue(
-                "detailSubtotal"
-            ) ||
-            0
-        );
-
-
-    const discount =
-        Number(
-            getValue(
-                "detailDiscount"
-            ) ||
-            0
-        );
-
-
-    const vatable =
-        Number(
-            getValue(
-                "detailVatable"
-            ) ||
-            0
-        );
-
-
-    const vatRate =
-        0.12;
-
-
-    const vatAmount =
-        Number(
-            getValue(
-                "detailVATAmount"
-            ) ||
-            0
-        );
-
-
-    const grandTotal =
-        Number(
-            getValue(
-                "detailGrandTotal"
-            ) ||
-            0
-        );
-
-
-    const data = {
-
-        soNumber:
-            soNumber,
-
-        dateCreation:
-            getValue(
-                "detailSODate"
-            ),
-
-        clientName:
-            getValue(
-                "detailClientName"
-            ),
-
-        se:
-            getValue(
-                "detailSE"
-            ),
-
-        attention:
-            getValue(
-                "detailAttention"
-            ),
-
-        billingAddress:
-            getValue(
-                "detailBillingAddress"
-            ),
-
-        deliveryAddress:
-            getValue(
-                "detailDeliveryAddress"
-            ),
-
-        project:
-            getValue(
-                "detailProject"
-            ),
-
-        tin:
-            getValue(
-                "detailTIN"
-            ),
-
-        poNumber:
-            getValue(
-                "detailPONumber"
-            ),
-
-        terms:
-            getValue(
-                "detailTerms"
-            ),
-
-        jobOrder:
-            getValue(
-                "detailJobOrder"
-            ),
-
-        status:
-            currentSO.status ||
-            currentSO.STATUS ||
-            "ACTIVE",
-
-        subtotal:
-            subtotal,
-
-        discount:
-            discount,
-
-        vatable:
-            vatable,
-
-        vatRate:
-            vatRate,
-
-        vatAmount:
-            vatAmount,
-
-        grandTotal:
-            grandTotal,
-
-        createdBy:
-            currentSO.createdBy ||
-            currentSO.CREATED_BY ||
-            "",
-
-        createdDate:
-            currentSO.createdDate ||
-            currentSO.CREATED_DATE ||
-            "",
-
-        items:
-            items
-
-    };
-
-
-    console.log(
-        "UPDATING SALES ORDER:",
-        data
-    );
-
-
-    const saveButton =
-        document.getElementById(
-            "saveSOUpdateButton"
-        );
-
-
-    if (saveButton) {
-
-        saveButton.disabled =
-            true;
-
-        saveButton.textContent =
-            "SAVING...";
-
-    }
-
-
-    try {
-
-        const result =
-            await salesOrderAPI(
-                "updateSalesOrder",
-                data
+        const row =
+            button.closest(
+                ".detail-item-row"
             );
 
 
-        console.log(
-            "UPDATE SO RESULT:",
-            result
+        if (!row) {
+
+            return;
+
+        }
+
+
+        row.remove();
+
+
+        renumberDetailItems();
+
+
+        calculateDetailTotals();
+
+    }
+
+
+    /* =====================================================
+       RENUMBER ITEMS
+    ===================================================== */
+
+    function renumberDetailItems() {
+
+        const container =
+            document.getElementById(
+                "detailItemsContainer"
+            );
+
+
+        if (!container) {
+
+            return;
+
+        }
+
+
+        container
+            .querySelectorAll(
+                ".detail-item-row"
+            )
+            .forEach(
+                function(row, index) {
+
+                    row.dataset.itemIndex =
+                        index;
+
+                }
+            );
+
+    }
+
+
+    /* =====================================================
+       CALCULATE DETAIL TOTALS
+    ===================================================== */
+
+    function calculateDetailTotals() {
+
+        const container =
+            document.getElementById(
+                "detailItemsContainer"
+            );
+
+
+        if (!container) {
+
+            return;
+
+        }
+
+
+        let subtotal =
+            0;
+
+
+        container
+            .querySelectorAll(
+                ".detail-item-row"
+            )
+            .forEach(
+                function(row) {
+
+                    const qty =
+                        Number(
+                            row.querySelector(
+                                ".detail-item-qty"
+                            )?.value ||
+                            0
+                        );
+
+
+                    const amount =
+                        Number(
+                            row.querySelector(
+                                ".detail-item-amount"
+                            )?.value ||
+                            0
+                        );
+
+
+                    const total =
+                        qty *
+                        amount;
+
+
+                    const totalInput =
+                        row.querySelector(
+                            ".detail-item-total"
+                        );
+
+
+                    if (
+                        totalInput
+                    ) {
+
+                        totalInput.value =
+                            total.toFixed(
+                                2
+                            );
+
+                    }
+
+
+                    subtotal +=
+                        total;
+
+                }
+            );
+
+
+        const discount =
+            Number(
+                getValue(
+                    "detailDiscount"
+                ) ||
+                0
+            );
+
+
+        const vatable =
+            Math.max(
+                subtotal -
+                discount,
+                0
+            );
+
+
+        const vatRate =
+            Number(
+                getValue(
+                    "detailVATRate"
+                ) ||
+                VAT_RATE
+            );
+
+
+        const vatAmount =
+            vatable *
+            vatRate;
+
+
+        const grandTotal =
+            vatable +
+            vatAmount;
+
+
+        setValue(
+            "detailSubtotal",
+            subtotal.toFixed(
+                2
+            )
         );
+
+
+        setValue(
+            "detailVatable",
+            vatable.toFixed(
+                2
+            )
+        );
+
+
+        setValue(
+            "detailVATAmount",
+            vatAmount.toFixed(
+                2
+            )
+        );
+
+
+        setValue(
+            "detailGrandTotal",
+            grandTotal.toFixed(
+                2
+            )
+        );
+
+
+        setText(
+            "detailSubtotalText",
+            formatMoney(
+                subtotal
+            )
+        );
+
+
+        setText(
+            "detailVatableText",
+            formatMoney(
+                vatable
+            )
+        );
+
+
+        setText(
+            "detailVATAmountText",
+            formatMoney(
+                vatAmount
+            )
+        );
+
+
+        setText(
+            "detailGrandTotalText",
+            formatMoney(
+                grandTotal
+            )
+        );
+
+    }
+
+
+    /* =====================================================
+       ENABLE UPDATE
+    ===================================================== */
+
+    function enableSOUpdate() {
+
+        if (!currentSO) {
+
+            alert(
+                "Please open a Sales Order first."
+            );
+
+            return;
+
+        }
+
+
+        setDetailsEditMode(
+            true
+        );
+
+    }
+
+
+    /* =====================================================
+       SET EDIT MODE
+    ===================================================== */
+
+    function setDetailsEditMode(
+        enabled
+    ) {
+
+        soDetailsEditMode =
+            enabled;
+
+
+        const details =
+            document.getElementById(
+                "soDetails"
+            );
+
+
+        if (!details) {
+
+            return;
+
+        }
+
+
+        details
+            .querySelectorAll(
+                "input, textarea, select"
+            )
+            .forEach(
+                function(element) {
+
+                    if (
+                        element.id ===
+                        "detailSONumber"
+                    ) {
+
+                        element.disabled =
+                            true;
+
+                        return;
+
+                    }
+
+
+                    if (
+                        element.id ===
+                        "detailSOFileInput"
+                    ) {
+
+                        element.disabled =
+                            false;
+
+                        return;
+
+                    }
+
+
+                    element.disabled =
+                        !enabled;
+
+                }
+            );
+
+
+        details
+            .querySelectorAll(
+                ".detail-item-delete"
+            )
+            .forEach(
+                function(button) {
+
+                    button.style.display =
+                        enabled
+                            ? "inline-flex"
+                            : "none";
+
+                }
+            );
+
+
+        const addButton =
+            document.getElementById(
+                "addDetailItemButton"
+            );
+
+
+        if (addButton) {
+
+            addButton.style.display =
+                enabled
+                    ? "inline-flex"
+                    : "none";
+
+        }
+
+
+        const saveButton =
+            document.getElementById(
+                "saveSOUpdateButton"
+            );
+
+
+        if (saveButton) {
+
+            saveButton.style.display =
+                enabled
+                    ? "inline-flex"
+                    : "none";
+
+        }
+
+
+        const enableButton =
+            document.getElementById(
+                "enableSOUpdateButton"
+            );
+
+
+        if (enableButton) {
+
+            enableButton.style.display =
+                enabled
+                    ? "none"
+                    : "inline-flex";
+
+        }
+
+
+        const cancelButton =
+            document.getElementById(
+                "cancelSOEditButton"
+            );
+
+
+        if (cancelButton) {
+
+            cancelButton.style.display =
+                enabled
+                    ? "inline-flex"
+                    : "none";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       COLLECT DETAIL ITEMS
+    ===================================================== */
+
+    function collectDetailItems() {
+
+        const container =
+            document.getElementById(
+                "detailItemsContainer"
+            );
+
+
+        if (!container) {
+
+            return [];
+
+        }
+
+
+        return Array.from(
+            container.querySelectorAll(
+                ".detail-item-row"
+            )
+        )
+        .map(
+            function(row, index) {
+
+                const qty =
+                    Number(
+                        row.querySelector(
+                            ".detail-item-qty"
+                        )?.value ||
+                        0
+                    );
+
+
+                const amount =
+                    Number(
+                        row.querySelector(
+                            ".detail-item-amount"
+                        )?.value ||
+                        0
+                    );
+
+
+                const total =
+                    Number(
+                        row.querySelector(
+                            ".detail-item-total"
+                        )?.value ||
+                        (
+                            qty *
+                            amount
+                        )
+                    );
+
+
+                return {
+
+                    itemNumber:
+                        String(
+                            index + 1
+                        ),
+
+                    itemName:
+                        row.querySelector(
+                            ".detail-item-name"
+                        )?.value ||
+                        "",
+
+                    description:
+                        row.querySelector(
+                            ".detail-item-description"
+                        )?.value ||
+                        "",
+
+                    quantity:
+                        qty,
+
+                    qty:
+                        qty,
+
+                    unit:
+                        row.querySelector(
+                            ".detail-item-unit"
+                        )?.value ||
+                        "",
+
+                    unitPrice:
+                        amount,
+
+                    amount:
+                        amount,
+
+                    total:
+                        total
+
+                };
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       SAVE SO UPDATE
+    ===================================================== */
+
+    async function saveSOUpdate() {
+
+        if (!currentSO) {
+
+            alert(
+                "No Sales Order is currently open."
+            );
+
+            return;
+
+        }
+
+
+        const soNumber =
+            getSOValue(
+                currentSO,
+                "soNumber",
+                "SO_NUMBER"
+            );
+
+
+        const data = {
+
+            soNumber:
+                soNumber,
+
+            soId:
+                getSOValue(
+                    currentSO,
+                    "soId",
+                    "SO_ID"
+                ),
+
+            dateCreation:
+                getValue(
+                    "detailSODate"
+                ),
+
+            clientName:
+                getValue(
+                    "detailClientName"
+                ),
+
+            salesEngineer:
+                getValue(
+                    "detailSE"
+                ),
+
+            se:
+                getValue(
+                    "detailSE"
+                ),
+
+            attention:
+                getValue(
+                    "detailAttention"
+                ),
+
+            billingAddress:
+                getValue(
+                    "detailBillingAddress"
+                ),
+
+            deliveryAddress:
+                getValue(
+                    "detailDeliveryAddress"
+                ),
+
+            project:
+                getValue(
+                    "detailProject"
+                ),
+
+            tin:
+                getValue(
+                    "detailTIN"
+                ),
+
+            poNumber:
+                getValue(
+                    "detailPONumber"
+                ),
+
+            terms:
+                getValue(
+                    "detailTerms"
+                ),
+
+            jobOrder:
+                getValue(
+                    "detailJobOrder"
+                ),
+
+            subtotal:
+                Number(
+                    getValue(
+                        "detailSubtotal"
+                    ) ||
+                    0
+                ),
+
+            discount:
+                Number(
+                    getValue(
+                        "detailDiscount"
+                    ) ||
+                    0
+                ),
+
+            vatable:
+                Number(
+                    getValue(
+                        "detailVatable"
+                    ) ||
+                    0
+                ),
+
+            vatRate:
+                Number(
+                    getValue(
+                        "detailVATRate"
+                    ) ||
+                    VAT_RATE
+                ),
+
+            vatAmount:
+                Number(
+                    getValue(
+                        "detailVATAmount"
+                    ) ||
+                    0
+                ),
+
+            grandTotal:
+                Number(
+                    getValue(
+                        "detailGrandTotal"
+                    ) ||
+                    0
+                ),
+
+            status:
+                getSOStatus(
+                    currentSO
+                ),
+
+            items:
+                collectDetailItems(),
+
+            updatedBy:
+                getCurrentUserName()
+
+        };
+
+
+        const saveButton =
+            document.getElementById(
+                "saveSOUpdateButton"
+            );
+
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                true;
+
+            saveButton.textContent =
+                "Saving...";
+
+        }
+
+
+        try {
+
+            const result =
+                await salesOrderAPI(
+                    "updateSalesOrder",
+                    data
+                );
+
+
+            if (
+                !result ||
+                result.success !== true
+            ) {
+
+                throw new Error(
+                    result &&
+                    (
+                        result.message ||
+                        result.error
+                    )
+                        ? (
+                            result.message ||
+                            result.error
+                        )
+                        : "Unable to update Sales Order."
+                );
+
+            }
+
+
+            alert(
+                "Sales Order updated successfully."
+            );
+
+
+            soDetailsEditMode =
+                false;
+
+
+            salesOrdersLoaded =
+                false;
+
+
+            await loadSOList(
+                true
+            );
+
+
+            await openSODetails(
+                soNumber
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "SAVE SO UPDATE ERROR:",
+                error
+            );
+
+
+            alert(
+                "Unable to update Sales Order:\n\n" +
+                error.message
+            );
+
+        } finally {
+
+            if (saveButton) {
+
+                saveButton.disabled =
+                    false;
+
+                saveButton.textContent =
+                    "Save Update";
+
+            }
+
+        }
+
+    }
+
+
+    /* =====================================================
+       CANCEL EDIT
+    ===================================================== */
+
+    function cancelSOEdit() {
+
+        if (!currentSO) {
+
+            return;
+
+        }
+
+
+        renderSODetails(
+            currentSO
+        );
+
+
+        setDetailsEditMode(
+            false
+        );
+
+    }
+
+
+    /* =====================================================
+       UPDATE SELECTED SO
+    ===================================================== */
+
+    async function updateSelectedSO() {
+
+        const so =
+            selectedSO ||
+            currentSO;
+
+
+        if (!so) {
+
+            alert(
+                "Please select a Sales Order first."
+            );
+
+            return;
+
+        }
+
+
+        const soNumber =
+            getSOValue(
+                so,
+                "soNumber",
+                "SO_NUMBER"
+            );
+
+
+        if (!soNumber) {
+
+            alert(
+                "Sales Order number is missing."
+            );
+
+            return;
+
+        }
 
 
         if (
-            !result ||
-            !result.success
+            currentSO &&
+            String(
+                getSOValue(
+                    currentSO,
+                    "soNumber",
+                    "SO_NUMBER"
+                )
+            ) ===
+            String(
+                soNumber
+            )
         ) {
 
-            throw new Error(
-                result?.message ||
-                result?.error ||
-                "Unable to update Sales Order."
-            );
+            enableSOUpdate();
+
+            return;
 
         }
-
-
-        alert(
-            "Sales Order updated successfully."
-        );
-
-
-        soDetailsEditMode =
-            false;
-
-
-        salesOrdersLoaded =
-            false;
-
-
-        await loadSOList(
-            true
-        );
 
 
         await openSODetails(
@@ -5313,224 +3452,93 @@ async function saveSOUpdate() {
         );
 
 
-    } catch (error) {
+        if (
+            currentSO
+        ) {
 
-        console.error(
-            "SAVE SO UPDATE ERROR:",
-            error
-        );
-
-
-        alert(
-            "Unable to update Sales Order.\n\n" +
-            error.message
-        );
-
-
-    } finally {
-
-        if (saveButton) {
-
-            saveButton.disabled =
-                false;
-
-            saveButton.textContent =
-                "SAVE UPDATE";
+            enableSOUpdate();
 
         }
 
     }
 
-}
+
+    /* =====================================================
+       CANCEL SELECTED SO
+    ===================================================== */
+
+    async function cancelSelectedSO() {
+
+        const so =
+            selectedSO ||
+            currentSO;
 
 
-/* =========================================================
-   COLLECT DETAIL ITEMS
-========================================================= */
+        if (!so) {
 
-function collectDetailItems() {
+            alert(
+                "Please select a Sales Order first."
+            );
 
-    const rows =
-        document.querySelectorAll(
-            "#detailItemsContainer .so-detail-item-row"
-        );
-
-
-    const items =
-        [];
-
-
-    rows.forEach(
-        function(row, index) {
-
-            const itemName =
-                row.querySelector(
-                    ".detail-item-name"
-                )?.value ||
-                "";
-
-
-            const description =
-                row.querySelector(
-                    ".detail-item-description"
-                )?.value ||
-                "";
-
-
-            const quantity =
-                Number(
-                    row.querySelector(
-                        ".detail-item-qty"
-                    )?.value ||
-                    0
-                );
-
-
-            const unit =
-                row.querySelector(
-                    ".detail-item-unit"
-                )?.value ||
-                "";
-
-
-            const amount =
-                Number(
-                    row.querySelector(
-                        ".detail-item-amount"
-                    )?.value ||
-                    0
-                );
-
-
-            const total =
-                Number(
-                    row.querySelector(
-                        ".detail-item-total"
-                    )?.value ||
-                    quantity *
-                    amount
-                );
-
-
-            items.push({
-
-                itemNo:
-                    index + 1,
-
-                itemName:
-                    itemName,
-
-                description:
-                    description,
-
-                quantity:
-                    quantity,
-
-                unit:
-                    unit,
-
-                amount:
-                    amount,
-
-                total:
-                    total
-
-            });
+            return;
 
         }
-    );
 
 
-    return items;
-
-}
-
-
-/* =========================================================
-   CANCEL SELECTED SALES ORDER
-========================================================= */
-
-async function cancelSelectedSO() {
-
-    const so =
-        selectedSO ||
-        currentSO;
+        const soNumber =
+            getSOValue(
+                so,
+                "soNumber",
+                "SO_NUMBER"
+            );
 
 
-    if (!so) {
+        if (!soNumber) {
 
-        alert(
-            "Please select a Sales Order first."
-        );
+            return;
 
-        return;
-
-    }
+        }
 
 
-    const soNumber =
-        getSOValue(
-            so,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
-        );
+        if (
+            !confirm(
+                "Are you sure you want to cancel " +
+                soNumber +
+                "?"
+            )
+        ) {
 
+            return;
 
-    if (
-        isCancelledSO(so)
-    ) {
+        }
 
-        alert(
-            "This Sales Order is already cancelled."
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            "Are you sure you want to CANCEL Sales Order " +
-            soNumber +
-            "?"
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
 
         const result =
             await salesOrderAPI(
                 "cancelSalesOrder",
                 {
+
                     soNumber:
-                        soNumber
+                        soNumber,
+
+                    updatedBy:
+                        getCurrentUserName()
+
                 }
             );
 
 
-        console.log(
-            "CANCEL SO RESULT:",
-            result
-        );
-
-
         if (
             !result ||
-            !result.success
+            result.success !== true
         ) {
 
-            throw new Error(
+            alert(
                 result?.message ||
-                result?.error ||
                 "Unable to cancel Sales Order."
             );
+
+            return;
 
         }
 
@@ -5538,56 +3546,6 @@ async function cancelSelectedSO() {
         alert(
             "Sales Order cancelled successfully."
         );
-
-
-        /*
-         * UPDATE LOCAL CACHE
-         */
-
-        const index =
-            salesOrders.findIndex(
-                function(item) {
-
-                    return (
-                        String(
-                            getSOValue(
-                                item,
-                                "soNumber",
-                                "SO_NUMBER",
-                                "SO Number"
-                            )
-                        ) ===
-                        String(
-                            soNumber
-                        )
-                    );
-
-                }
-            );
-
-
-        if (index !== -1) {
-
-            salesOrders[
-                index
-            ].status =
-                "CANCELLED";
-
-        }
-
-
-        if (
-            soDetailsCache[
-                soNumber
-            ]
-        ) {
-
-            soDetailsCache[
-                soNumber
-            ].status =
-                "CANCELLED";
-
-        }
 
 
         selectedSO =
@@ -5609,229 +3567,782 @@ async function cancelSelectedSO() {
 
         closeSODetails();
 
-
-    } catch (error) {
-
-        console.error(
-            "CANCEL SO ERROR:",
-            error
-        );
-
-
-        alert(
-            "Unable to cancel Sales Order.\n\n" +
-            error.message
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE SELECTED SALES ORDER
-========================================================= */
-
-function updateSelectedSO() {
-
-    const so =
-        selectedSO ||
-        currentSO;
-
-
-    if (!so) {
-
-        alert(
-            "Please select a Sales Order first."
-        );
-
-        return;
-
     }
 
 
-    const soNumber =
-        getSOValue(
-            so,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
-        );
+    /* =====================================================
+       TRANSACTION HISTORY
+    ===================================================== */
 
-
-    openSODetails(
-        soNumber
-    );
-
-}
-
-
-/* =========================================================
-   CLOSE SO DETAILS
-========================================================= */
-
-function closeSODetails() {
-
-    const details =
-        document.getElementById(
-            "soDetails"
-        );
-
-
-    const listView =
-        document.getElementById(
-            "salesOrderListView"
-        );
-
-
-    const customerArea =
-        document.getElementById(
-            "customerArea"
-        );
-
-
-    if (details) {
-
-        details.style.display =
-            "none";
-
-    }
-
-
-    if (customerArea) {
-
-        customerArea.style.display =
-            "none";
-
-    }
-
-
-    if (listView) {
-
-        listView.style.display =
-            "block";
-
-    }
-
-
-    currentSO =
-        null;
-
-
-    soDetailsEditMode =
-        false;
-
-
-    updateSOSelectionUI();
-
-
-    const salesPage =
-        document.getElementById(
-            "salesOrderPage"
-        );
-
-
-    if (salesPage) {
-
-        salesPage.scrollIntoView({
-
-            behavior:
-                "smooth",
-
-            block:
-                "start"
-
-        });
-
-    }
-
-}
-
-
-/* =========================================================
-   SELECT SO FILES
-========================================================= */
-
-function selectDetailSOFiles() {
-
-    const input =
-        document.getElementById(
-            "detailSOFileInput"
-        );
-
-
-    if (!input) {
-
-        alert(
-            "SO file input not found."
-        );
-
-        return;
-
-    }
-
-
-    input.click();
-
-}
-
-
-/* =========================================================
-   HANDLE SO FILES
-========================================================= */
-
-async function handleDetailSOFiles(
-    event
-) {
-
-    const files =
-        Array.from(
-            event.target.files ||
-            []
-        );
-
-
-    if (
-        files.length === 0
+    function renderSOTransactionHistory(
+        so
     ) {
 
-        return;
+        const container =
+            document.getElementById(
+                "soTransactionHistory"
+            );
+
+
+        if (!container) {
+
+            return;
+
+        }
+
+
+        const drs =
+            Array.isArray(
+                so.deliveryReceipts
+            )
+                ? so.deliveryReceipts
+                : [];
+
+
+        const invoices =
+            Array.isArray(
+                so.invoices
+            )
+                ? so.invoices
+                : [];
+
+
+        const payments =
+            Array.isArray(
+                so.payments
+            )
+                ? so.payments
+                : [];
+
+
+        const summary =
+            so.summary ||
+            {};
+
+
+        let html = `
+
+            <div class="so-transaction-header">
+
+                <h3>
+                    Transaction History
+                </h3>
+
+                <div class="so-transaction-summary">
+
+                    <div>
+                        <span>DR</span>
+                        <strong>
+                            ${drs.length}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Invoice</span>
+                        <strong>
+                            ${invoices.length}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Payment</span>
+                        <strong>
+                            ${payments.length}
+                        </strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        /* =================================================
+           DR
+        ================================================= */
+
+        html += `
+
+            <div class="so-transaction-section">
+
+                <div class="so-section-title">
+                    Delivery Receipts
+                </div>
+
+        `;
+
+
+        if (!drs.length) {
+
+            html += `
+
+                <div class="so-empty-state">
+                    No Delivery Receipt recorded.
+                </div>
+
+            `;
+
+        }
+
+        else {
+
+            html += `
+
+                <div class="so-transaction-table-wrap">
+
+                    <table class="so-transaction-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>DR Number</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Delivered</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+            `;
+
+
+            drs.forEach(
+                function(dr) {
+
+                    html += `
+
+                        <tr>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        dr,
+                                        "DR_NUMBER",
+                                        "drNumber"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        dr,
+                                        "DATE_CREATION",
+                                        "DATE",
+                                        "DATE_TRANSFER"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        dr,
+                                        "STATUS",
+                                        "status"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        dr,
+                                        "DATE_DELIVERED",
+                                        "DELIVERED_DATE"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            );
+
+
+            html += `
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            `;
+
+        }
+
+
+        html += `</div>`;
+
+
+        /* =================================================
+           INVOICE
+        ================================================= */
+
+        html += `
+
+            <div class="so-transaction-section">
+
+                <div class="so-section-title">
+                    Invoices
+                </div>
+
+        `;
+
+
+        if (!invoices.length) {
+
+            html += `
+
+                <div class="so-empty-state">
+                    No Invoice recorded.
+                </div>
+
+            `;
+
+        }
+
+        else {
+
+            html += `
+
+                <div class="so-transaction-table-wrap">
+
+                    <table class="so-transaction-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Invoice No.</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+            `;
+
+
+            invoices.forEach(
+                function(invoice) {
+
+                    const amount =
+                        Number(
+                            getSOValue(
+                                invoice,
+                                "FINAL_AMOUNT_DUE",
+                                "AMOUNT_DUE",
+                                "GRAND_TOTAL",
+                                "TOTAL_AMOUNT"
+                            ) ||
+                            0
+                        );
+
+
+                    html += `
+
+                        <tr>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        invoice,
+                                        "INVOICE_NO",
+                                        "invoiceNo",
+                                        "INVOICE_NUMBER"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        invoice,
+                                        "DATE_CREATION",
+                                        "INVOICE_DATE",
+                                        "DATE"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatMoney(
+                                    amount
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        invoice,
+                                        "STATUS",
+                                        "status"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            );
+
+
+            html += `
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            `;
+
+        }
+
+
+        html += `</div>`;
+
+
+        /* =================================================
+           PAYMENTS
+        ================================================= */
+
+        html += `
+
+            <div class="so-transaction-section">
+
+                <div class="so-section-title">
+                    Payments
+                </div>
+
+        `;
+
+
+        if (!payments.length) {
+
+            html += `
+
+                <div class="so-empty-state">
+                    No Payment recorded.
+                </div>
+
+            `;
+
+        }
+
+        else {
+
+            html += `
+
+                <div class="so-transaction-table-wrap">
+
+                    <table class="so-transaction-table">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Payment Date</th>
+                                <th>Reference</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+            `;
+
+
+            payments.forEach(
+                function(payment) {
+
+                    const amount =
+                        Number(
+                            getSOValue(
+                                payment,
+                                "CURRENT_PAYMENT",
+                                "PAYMENT_AMOUNT",
+                                "AMOUNT"
+                            ) ||
+                            0
+                        );
+
+
+                    html += `
+
+                        <tr>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        payment,
+                                        "PAYMENT_DATE",
+                                        "DATE_CREATION",
+                                        "DATE"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        payment,
+                                        "PAYMENT_REFERENCE",
+                                        "REFERENCE_NUMBER",
+                                        "OR_NUMBER"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                            <td>
+                                ${formatMoney(
+                                    amount
+                                )}
+                            </td>
+
+                            <td>
+                                ${escapeHTML(
+                                    getSOValue(
+                                        payment,
+                                        "STATUS",
+                                        "status"
+                                    ) ||
+                                    "-"
+                                )}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            );
+
+
+            html += `
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            `;
+
+        }
+
+
+        html += `</div>`;
+
+
+        /* =================================================
+           FINANCIAL SUMMARY
+        ================================================= */
+
+        html += `
+
+            <div class="so-financial-summary">
+
+                <div>
+
+                    <span>
+                        SO Amount
+                    </span>
+
+                    <strong>
+                        ${formatMoney(
+                            summary.soAmount ||
+                            0
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Delivered
+                    </span>
+
+                    <strong>
+                        ${formatMoney(
+                            summary.deliveredAmount ||
+                            0
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Invoiced
+                    </span>
+
+                    <strong>
+                        ${formatMoney(
+                            summary.invoicedAmount ||
+                            0
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Paid
+                    </span>
+
+                    <strong>
+                        ${formatMoney(
+                            summary.paidAmount ||
+                            0
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        Invoice Balance
+                    </span>
+
+                    <strong>
+                        ${formatMoney(
+                            summary.invoiceBalance ||
+                            0
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>
+                        SO Balance
+                    </span>
+
+                    <strong>
+                        ${formatMoney(
+                            summary.soBalance ||
+                            0
+                        )}
+                    </strong>
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        container.innerHTML =
+            html;
 
     }
 
 
-    if (!currentSO) {
+    /* =====================================================
+       SO FILES
+    ===================================================== */
 
-        alert(
-            "Please open a Sales Order first."
-        );
-
-        return;
-
-    }
-
-
-    for (
-        const file of files
+    function selectDetailSOFiles(
+        event
     ) {
 
-        try {
+        const files =
+            event.target.files;
+
+
+        handleDetailSOFiles(
+            files
+        );
+
+    }
+
+
+    async function handleDetailSOFiles(
+        files
+    ) {
+
+        if (!files) {
+
+            return;
+
+        }
+
+
+        const soNumber =
+            getSOValue(
+                currentSO,
+                "soNumber",
+                "SO_NUMBER"
+            );
+
+
+        if (!soNumber) {
+
+            return;
+
+        }
+
+
+        for (
+            const file of files
+        ) {
+
+            if (
+                file.size >
+                SO_FILE_MAX_SIZE
+            ) {
+
+                alert(
+                    file.name +
+                    " exceeds the 10 MB file limit."
+                );
+
+                continue;
+
+            }
+
 
             await uploadDetailSOFile(
                 file
             );
 
+        }
+
+
+        await loadSOFiles(
+            soNumber
+        );
+
+    }
+
+
+    async function uploadDetailSOFile(
+        file
+    ) {
+
+        const soNumber =
+            getSOValue(
+                currentSO,
+                "soNumber",
+                "SO_NUMBER"
+            );
+
+
+        const soId =
+            getSOValue(
+                currentSO,
+                "soId",
+                "SO_ID"
+            );
+
+
+        if (!soNumber) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const base64 =
+                await fileToBase64(
+                    file
+                );
+
+
+            const result =
+                await salesOrderAPI(
+                    "uploadSOFile",
+                    {
+
+                        soNumber:
+                            soNumber,
+
+                        soId:
+                            soId,
+
+                        fileName:
+                            file.name,
+
+                        mimeType:
+                            file.type,
+
+                        base64Data:
+                            base64,
+
+                        uploadedBy:
+                            getCurrentUserName(),
+
+                        dateCreation:
+                            new Date().toISOString()
+
+                    }
+                );
+
+
+            if (
+                !result ||
+                result.success !== true
+            ) {
+
+                throw new Error(
+                    result?.message ||
+                    "Upload failed."
+                );
+
+            }
+
         } catch (error) {
 
             console.error(
-                "SO FILE UPLOAD ERROR:",
+                "UPLOAD SO FILE ERROR:",
                 error
             );
+
 
             alert(
                 "Unable to upload " +
                 file.name +
-                ".\n\n" +
+                ":\n\n" +
                 error.message
             );
 
@@ -5840,926 +4351,699 @@ async function handleDetailSOFiles(
     }
 
 
-    event.target.value =
-        "";
-
-
-    const soNumber =
-        getSOValue(
-            currentSO,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
-        );
-
-
-    loadSOFiles(
-        soNumber
-    );
-
-}
-
-
-/* =========================================================
-   UPLOAD SO FILE
-========================================================= */
-
-async function uploadDetailSOFile(
-    file
-) {
-
-    if (!file) {
-        return;
-    }
-
-
-    const fileName =
-        String(
-            file.name ||
-            ""
-        );
-
-
-    const extension =
-        fileName
-            .split(".")
-            .pop()
-            .toLowerCase();
-
-
-    if (
-        extension !==
-        "pdf"
+    function fileToBase64(
+        file
     ) {
 
-        throw new Error(
-            "Only PDF files are allowed."
-        );
+        return new Promise(
+            function(resolve, reject) {
 
-    }
-
-
-    if (
-        file.size >
-        SO_FILE_MAX_SIZE
-    ) {
-
-        throw new Error(
-            "PDF file is too large. Maximum size is 10 MB."
-        );
-
-    }
+                const reader =
+                    new FileReader();
 
 
-    const soNumber =
-        getSOValue(
-            currentSO,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
-        );
+                reader.onload =
+                    function() {
+
+                        const result =
+                            String(
+                                reader.result
+                            );
 
 
-    if (!soNumber) {
-
-        throw new Error(
-            "Sales Order number is missing."
-        );
-
-    }
+                        const comma =
+                            result.indexOf(
+                                ","
+                            );
 
 
-    const base64Data =
-        await fileToBase64(
-            file
-        );
+                        resolve(
+                            comma >= 0
+                                ? result.substring(
+                                    comma + 1
+                                )
+                                : result
+                        );
+
+                    };
 
 
-    const currentUser =
-        localStorage.getItem(
-            "logitechUser"
-        ) ||
-        localStorage.getItem(
-            "currentUser"
-        ) ||
-        "";
+                reader.onerror =
+                    reject;
 
 
-    const result =
-        await salesOrderAPI(
-            "uploadSOFile",
-            {
-
-                soNumber:
-                    soNumber,
-
-                soId:
-                    currentSO.soId ||
-                    currentSO.SO_ID ||
-                    currentSO.id ||
-                    "",
-
-                fileName:
-                    fileName,
-
-                mimeType:
-                    file.type ||
-                    "application/pdf",
-
-                base64Data:
-                    base64Data,
-
-                uploadedBy:
-                    currentSO.createdBy ||
-                    currentSO.CREATED_BY ||
-                    currentUser,
-
-                dateCreation:
-                    getSOValue(
-                        currentSO,
-                        "dateCreation",
-                        "DATE_CREATION",
-                        "DATE CREATED"
-                    )
+                reader.readAsDataURL(
+                    file
+                );
 
             }
         );
 
-
-    console.log(
-        "UPLOAD SO FILE RESULT:",
-        result
-    );
+    }
 
 
-    if (
-        !result ||
-        !result.success
+    async function loadSOFiles(
+        soNumber
     ) {
 
-        throw new Error(
-            result?.message ||
-            result?.error ||
-            "Unable to upload SO file."
-        );
+        if (!soNumber) {
 
-    }
-
-
-    alert(
-        fileName +
-        " uploaded successfully."
-    );
-
-
-    return result;
-
-}
-
-
-/* =========================================================
-   FILE TO BASE64
-========================================================= */
-
-function fileToBase64(
-    file
-) {
-
-    return new Promise(
-        function(resolve, reject) {
-
-            const reader =
-                new FileReader();
-
-
-            reader.onload =
-                function() {
-
-                    const result =
-                        String(
-                            reader.result ||
-                            ""
-                        );
-
-
-                    const commaIndex =
-                        result.indexOf(
-                            ","
-                        );
-
-
-                    if (
-                        commaIndex ===
-                        -1
-                    ) {
-
-                        resolve(
-                            result
-                        );
-
-                        return;
-
-                    }
-
-
-                    resolve(
-                        result.substring(
-                            commaIndex + 1
-                        )
-                    );
-
-                };
-
-
-            reader.onerror =
-                function() {
-
-                    reject(
-                        new Error(
-                            "Unable to read file."
-                        )
-                    );
-
-                };
-
-
-            reader.readAsDataURL(
-                file
-            );
+            return;
 
         }
-    );
 
-}
-
-
-/* =========================================================
-   LOAD SO FILES
-========================================================= */
-
-async function loadSOFiles(
-    soNumber
-) {
-
-    const container =
-        document.getElementById(
-            "soFilesList"
-        );
-
-
-    if (!container) {
-
-        return;
-
-    }
-
-
-    if (!soNumber) {
-
-        container.innerHTML =
-            "";
-
-        return;
-
-    }
-
-
-    container.innerHTML = `
-
-        <div
-            class="so-files-loading"
-        >
-
-            Loading files...
-
-        </div>
-
-    `;
-
-
-    try {
 
         const result =
             await salesOrderAPI(
                 "getSOFiles",
                 {
+
                     soNumber:
                         soNumber
+
                 }
             );
 
 
-        console.log(
-            "GET SO FILES RESULT:",
-            result
-        );
-
-
         if (
             !result ||
-            !result.success
+            result.success !== true
         ) {
 
-            throw new Error(
-                result?.message ||
-                result?.error ||
-                "Unable to load SO files."
-            );
+            return;
 
         }
 
 
-        const files =
-            Array.isArray(
-                result.files
-            )
-                ? result.files
-                : [];
-
-
         renderSOFiles(
-            files
+            result.files ||
+            result.data ||
+            []
         );
-
-
-    } catch (error) {
-
-        console.error(
-            "LOAD SO FILES ERROR:",
-            error
-        );
-
-
-        container.innerHTML = `
-
-            <div
-                class="so-files-error"
-            >
-
-                Unable to load files.
-
-                <br>
-
-                <small>
-
-                    ${escapeHTML(
-                        error.message
-                    )}
-
-                </small>
-
-            </div>
-
-        `;
 
     }
 
-}
 
-
-/* =========================================================
-   RENDER SO FILES
-========================================================= */
-
-function renderSOFiles(
-    files
-) {
-
-    const container =
-        document.getElementById(
-            "soFilesList"
-        );
-
-
-    if (!container) {
-        return;
-    }
-
-
-    container.innerHTML =
-        "";
-
-
-    if (
-        !Array.isArray(files) ||
-        files.length === 0
+    function renderSOFiles(
+        files
     ) {
 
-        container.innerHTML = `
-
-            <div
-                class="so-files-empty"
-            >
-
-                No attached Sales Order files.
-
-            </div>
-
-        `;
-
-        return;
-
-    }
+        const container =
+            document.getElementById(
+                "soFilesContainer"
+            );
 
 
-    files.forEach(
-        function(file) {
+        if (!container) {
 
-            const fileId =
-                getSOValue(
-                    file,
-                    "fileId",
-                    "FILE_ID",
-                    "id",
-                    "ID"
-                );
+            return;
+
+        }
 
 
-            const fileName =
-                getSOValue(
-                    file,
-                    "fileName",
-                    "FILE_NAME",
-                    "name",
-                    "NAME"
-                );
+        if (
+            !Array.isArray(files) ||
+            !files.length
+        ) {
 
+            container.innerHTML = `
 
-            const fileUrl =
-                getSOValue(
-                    file,
-                    "fileUrl",
-                    "FILE_URL",
-                    "url",
-                    "URL",
-                    "webViewUrl"
-                );
-
-
-            const uploadedBy =
-                getSOValue(
-                    file,
-                    "uploadedBy",
-                    "UPLOADED_BY"
-                );
-
-
-            const uploadedAt =
-                getSOValue(
-                    file,
-                    "uploadedAt",
-                    "UPLOADED_AT",
-                    "createdAt",
-                    "CREATED_AT"
-                );
-
-
-            const fileSize =
-                getSOValue(
-                    file,
-                    "fileSize",
-                    "FILE_SIZE",
-                    "size",
-                    "SIZE"
-                );
-
-
-            const item =
-                document.createElement(
-                    "div"
-                );
-
-
-            item.className =
-                "so-file-item";
-
-
-            item.innerHTML = `
-
-                <div
-                    class="so-file-icon"
-                >
-
-                    PDF
-
-                </div>
-
-
-                <div
-                    class="so-file-info"
-                >
-
-                    <strong>
-
-                        ${escapeHTML(
-                            fileName || "-"
-                        )}
-
-                    </strong>
-
-
-                    <span>
-
-                        ${escapeHTML(
-                            formatFileSize(
-                                fileSize
-                            )
-                        )}
-
-                    </span>
-
-
-                    <span>
-
-                        Uploaded by:
-
-                        ${escapeHTML(
-                            uploadedBy || "-"
-                        )}
-
-                    </span>
-
-
-                    <span>
-
-                        ${escapeHTML(
-                            formatSOFileDate(
-                                uploadedAt
-                            )
-                        )}
-
-                    </span>
-
-                </div>
-
-
-                <div
-                    class="so-file-actions"
-                >
-
-                    <button
-                        type="button"
-                        onclick="
-                            viewSOFile(
-                                '${escapeAttribute(
-                                    fileUrl || ""
-                                )}'
-                            )
-                        "
-                    >
-
-                        VIEW
-
-                    </button>
-
-
-                    <button
-                        type="button"
-                        class="danger"
-                        onclick="
-                            deleteSOFile(
-                                '${escapeAttribute(
-                                    fileId || ""
-                                )}',
-                                '${escapeAttribute(
-                                    fileName || ""
-                                )}'
-                            )
-                        "
-                    >
-
-                        DELETE
-
-                    </button>
-
+                <div class="empty-state">
+                    No files uploaded.
                 </div>
 
             `;
 
+            return;
 
-            container.appendChild(
-                item
+        }
+
+
+        container.innerHTML =
+            files
+            .map(
+                function(file) {
+
+                    const fileId =
+                        getSOValue(
+                            file,
+                            "FILE_ID",
+                            "fileId",
+                            "ID"
+                        );
+
+
+                    const fileName =
+                        getSOValue(
+                            file,
+                            "FILE_NAME",
+                            "fileName",
+                            "NAME"
+                        );
+
+
+                    const size =
+                        getSOValue(
+                            file,
+                            "FILE_SIZE",
+                            "fileSize",
+                            "SIZE"
+                        );
+
+
+                    return `
+
+                        <div
+                            class="so-file-item"
+                        >
+
+                            <div>
+
+                                <strong>
+                                    ${escapeHTML(fileName)}
+                                </strong>
+
+                                <small>
+                                    ${formatFileSize(size)}
+                                </small>
+
+                            </div>
+
+                            <div>
+
+                                <button
+                                    type="button"
+                                    onclick="viewSOFile('${escapeAttribute(fileId)}')"
+                                >
+                                    View
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onclick="deleteSOFile('${escapeAttribute(fileId)}')"
+                                >
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+    }
+
+
+    async function viewSOFile(
+        fileId
+    ) {
+
+        const result =
+            await salesOrderAPI(
+                "getSOFile",
+                {
+
+                    fileId:
+                        fileId
+
+                }
+            );
+
+
+        if (
+            !result ||
+            result.success !== true
+        ) {
+
+            alert(
+                result?.message ||
+                "Unable to open file."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            result.url
+        ) {
+
+            window.open(
+                result.url,
+                "_blank"
             );
 
         }
-    );
-
-}
-
-
-/* =========================================================
-   VIEW SO FILE
-========================================================= */
-
-function viewSOFile(
-    fileUrl
-) {
-
-    const url =
-        String(
-            fileUrl || ""
-        ).trim();
-
-
-    if (!url) {
-
-        alert(
-            "File URL is not available."
-        );
-
-        return;
 
     }
 
 
-    window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-    );
+    async function deleteSOFile(
+        fileId
+    ) {
 
-}
+        if (
+            !confirm(
+                "Delete this file?"
+            )
+        ) {
 
+            return;
 
-/* =========================================================
-   DELETE SO FILE
-========================================================= */
+        }
 
-async function deleteSOFile(
-    fileId,
-    fileName
-) {
-
-    if (!fileId) {
-
-        alert(
-            "File ID is missing."
-        );
-
-        return;
-
-    }
-
-
-    const confirmed =
-        confirm(
-            "Delete this file?\n\n" +
-            fileName
-        );
-
-
-    if (!confirmed) {
-        return;
-    }
-
-
-    try {
 
         const result =
             await salesOrderAPI(
                 "deleteSOFile",
                 {
+
                     fileId:
                         fileId
+
                 }
             );
 
 
-        console.log(
-            "DELETE SO FILE RESULT:",
-            result
-        );
-
-
         if (
             !result ||
-            !result.success
+            result.success !== true
         ) {
 
-            throw new Error(
+            alert(
                 result?.message ||
-                result?.error ||
                 "Unable to delete file."
             );
+
+            return;
 
         }
 
 
-        alert(
-            "File deleted successfully."
+        await loadSOFiles(
+            getSOValue(
+                currentSO,
+                "soNumber",
+                "SO_NUMBER"
+            )
         );
+
+    }
+
+
+    function formatFileSize(
+        bytes
+    ) {
+
+        const value =
+            Number(
+                bytes ||
+                0
+            );
+
+
+        if (!value) {
+
+            return "0 B";
+
+        }
+
+
+        const units =
+            [
+                "B",
+                "KB",
+                "MB",
+                "GB"
+            ];
+
+
+        const index =
+            Math.floor(
+                Math.log(
+                    value
+                ) /
+                Math.log(
+                    1024
+                )
+            );
+
+
+        return (
+            value /
+            Math.pow(
+                1024,
+                index
+            )
+        )
+        .toFixed(
+            index === 0
+                ? 0
+                : 2
+        ) +
+        " " +
+        units[
+            index
+        ];
+
+    }
+
+
+    function formatSOFileDate(
+        value
+    ) {
+
+        return formatSODate(
+            value
+        );
+
+    }
+
+
+    /* =====================================================
+       CLOSE SO DETAILS
+    ===================================================== */
+
+    function closeSODetails() {
+
+        const details =
+            document.getElementById(
+                "soDetails"
+            );
+
+
+        const customerArea =
+            document.getElementById(
+                "customerArea"
+            );
+
+
+        const listView =
+            document.getElementById(
+                "salesOrderListView"
+            );
+
+
+        if (details) {
+
+            details.style.display =
+                "none";
+
+        }
+
+
+        if (customerArea) {
+
+            customerArea.style.display =
+                "none";
+
+        }
+
+
+        if (listView) {
+
+            listView.style.display =
+                "block";
+
+        }
+
+
+        currentSO =
+            null;
+
+
+        soDetailsEditMode =
+            false;
+
+
+        updateSOSelectionUI();
+
+    }
+
+
+    /* =====================================================
+       CUSTOMER MODULE
+    ===================================================== */
+
+    async function openNewCustomerFromSalesOrder() {
+
+        const area =
+            document.getElementById(
+                "customerArea"
+            );
+
+
+        if (!area) {
+
+            return;
+
+        }
+
+
+        try {
+
+            area.style.display =
+                "block";
+
+
+            area.innerHTML =
+                "<div>Loading Customer module...</div>";
+
+
+            const response =
+                await fetch(
+                    "pages/create-customer.html"
+                );
+
+
+            const html =
+                await response.text();
+
+
+            area.innerHTML =
+                html;
+
+
+            await loadCustomerCSS();
+
+
+            await loadCustomerJS();
+
+
+            if (
+                typeof window.initializeCustomerForm ===
+                "function"
+            ) {
+
+                window.initializeCustomerForm();
+
+            }
+
+
+        } catch (error) {
+
+            console.error(
+                "CUSTOMER MODULE ERROR:",
+                error
+            );
+
+
+            area.innerHTML = `
+
+                <div class="error-box">
+
+                    Unable to load Customer module.
+
+                </div>
+
+            `;
+
+        }
+
+    }
+
+
+    function closeCustomerFromSalesOrder() {
+
+        const area =
+            document.getElementById(
+                "customerArea"
+            );
+
+
+        if (area) {
+
+            area.style.display =
+                "none";
+
+            area.innerHTML =
+                "";
+
+        }
+
+    }
+
+
+    function loadCustomerCSS() {
+
+        return new Promise(
+            function(resolve) {
+
+                if (
+                    document.querySelector(
+                        'link[data-customer-css="true"]'
+                    )
+                ) {
+
+                    resolve();
+
+                    return;
+
+                }
+
+
+                const link =
+                    document.createElement(
+                        "link"
+                    );
+
+
+                link.rel =
+                    "stylesheet";
+
+
+                link.href =
+                    "css/create-customer.css";
+
+
+                link.dataset.customerCss =
+                    "true";
+
+
+                link.onload =
+                    resolve;
+
+
+                link.onerror =
+                    resolve;
+
+
+                document.head.appendChild(
+                    link
+                );
+
+            }
+        );
+
+    }
+
+
+    function loadCustomerJS() {
+
+        return new Promise(
+            function(resolve) {
+
+                if (
+                    document.querySelector(
+                        'script[data-customer-js="true"]'
+                    )
+                ) {
+
+                    resolve();
+
+                    return;
+
+                }
+
+
+                const script =
+                    document.createElement(
+                        "script"
+                    );
+
+
+                script.src =
+                    "js/create-customer.js";
+
+
+                script.dataset.customerJs =
+                    "true";
+
+
+                script.onload =
+                    function() {
+
+                        customerModuleLoaded =
+                            true;
+
+                        resolve();
+
+                    };
+
+
+                script.onerror =
+                    function() {
+
+                        resolve();
+
+                    };
+
+
+                document.body.appendChild(
+                    script
+                );
+
+            }
+        );
+
+    }
+
+
+    function refreshCustomerDataAfterSave() {
+
+        closeCustomerFromSalesOrder();
+
+        loadSOList(
+            true
+        );
+
+    }
+
+
+    /* =====================================================
+       EMAIL SO
+    ===================================================== */
+
+    async function emailSelectedSO() {
+
+        const so =
+            selectedSO ||
+            currentSO;
+
+
+        if (!so) {
+
+            alert(
+                "Please select a Sales Order first."
+            );
+
+            return;
+
+        }
 
 
         const soNumber =
             getSOValue(
-                currentSO,
+                so,
                 "soNumber",
-                "SO_NUMBER",
-                "SO Number"
+                "SO_NUMBER"
             );
 
-
-        loadSOFiles(
-            soNumber
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "DELETE SO FILE ERROR:",
-            error
-        );
-
-
-        alert(
-            "Unable to delete file.\n\n" +
-            error.message
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   FORMAT FILE SIZE
-========================================================= */
-
-function formatFileSize(
-    bytes
-) {
-
-    const size =
-        Number(
-            bytes
-        );
-
-
-    if (
-        !Number.isFinite(size) ||
-        size <= 0
-    ) {
-
-        return "-";
-
-    }
-
-
-    if (
-        size < 1024
-    ) {
-
-        return (
-            size +
-            " B"
-        );
-
-    }
-
-
-    if (
-        size < 1024 * 1024
-    ) {
-
-        return (
-            (size / 1024)
-                .toFixed(1) +
-            " KB"
-        );
-
-    }
-
-
-    return (
-        (size / (
-            1024 *
-            1024
-        ))
-        .toFixed(1) +
-        " MB"
-    );
-
-}
-
-
-/* =========================================================
-   FORMAT SO FILE DATE
-========================================================= */
-
-function formatSOFileDate(
-    value
-) {
-
-    if (!value) {
-
-        return "-";
-
-    }
-
-
-    const date =
-        new Date(
-            value
-        );
-
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-
-        return String(
-            value
-        );
-
-    }
-
-
-    return date.toLocaleString(
-        "en-PH",
-        {
-            year:
-                "numeric",
-
-            month:
-                "short",
-
-            day:
-                "2-digit",
-
-            hour:
-                "2-digit",
-
-            minute:
-                "2-digit"
-        }
-    );
-
-}
-
-
-/* =========================================================
-   EMAIL SELECTED SALES ORDER
-========================================================= */
-
-async function emailSelectedSO() {
-
-    const so =
-        selectedSO ||
-        currentSO;
-
-
-    if (!so) {
-
-        alert(
-            "Please select a Sales Order first."
-        );
-
-        return;
-
-    }
-
-
-    const recipient =
-        prompt(
-            "Enter recipient email address:"
-        );
-
-
-    if (!recipient) {
-        return;
-    }
-
-
-    const soNumber =
-        getSOValue(
-            so,
-            "soNumber",
-            "SO_NUMBER",
-            "SO Number"
-        );
-
-
-    const clientName =
-        getSOValue(
-            so,
-            "clientName",
-            "CLIENT_NAME",
-            "CLIENT NAME"
-        );
-
-
-    const project =
-        getSOValue(
-            so,
-            "project",
-            "PROJECT"
-        );
-
-
-    try {
 
         const result =
             await salesOrderAPI(
@@ -6767,369 +5051,231 @@ async function emailSelectedSO() {
                 {
 
                     soNumber:
-                        soNumber,
-
-                    clientName:
-                        clientName,
-
-                    project:
-                        project,
-
-                    recipient:
-                        recipient
+                        soNumber
 
                 }
             );
 
 
-        console.log(
-            "EMAIL SO RESULT:",
-            result
-        );
-
-
         if (
             !result ||
-            !result.success
+            result.success !== true
         ) {
 
-            throw new Error(
+            alert(
                 result?.message ||
-                result?.error ||
-                "Unable to email Sales Order."
+                "Unable to send Sales Order."
             );
+
+            return;
 
         }
 
 
         alert(
-            "Sales Order sent successfully."
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "EMAIL SO ERROR:",
-            error
-        );
-
-
-        alert(
-            "Unable to send Sales Order.\n\n" +
-            error.message
+            "Sales Order email sent successfully."
         );
 
     }
 
-}
+
+    /* =====================================================
+       CURRENT USER
+    ===================================================== */
+
+    function getCurrentUserName() {
+
+        try {
+
+            const user =
+                localStorage.getItem(
+                    "logitechUser"
+                );
 
 
-/* =========================================================
-   GENERIC VALUE HELPER
-========================================================= */
+            if (!user) {
 
-function getSOValue(
-    object,
-    ...keys
-) {
-
-    if (!object) {
-        return "";
-    }
-
-
-    for (
-        const key of keys
-    ) {
-
-        if (
-            Object.prototype.hasOwnProperty.call(
-                object,
-                key
-            )
-        ) {
-
-            const value =
-                object[key];
-
-
-            if (
-                value !== null &&
-                value !== undefined &&
-                String(
-                    value
-                ).trim() !== ""
-            ) {
-
-                return value;
+                return "SYSTEM";
 
             }
 
+
+            try {
+
+                const parsed =
+                    JSON.parse(
+                        user
+                    );
+
+
+                return (
+                    parsed.name ||
+                    parsed.username ||
+                    parsed.accountName ||
+                    parsed.email ||
+                    "SYSTEM"
+                );
+
+            } catch (
+                jsonError
+            ) {
+
+                return user;
+
+            }
+
+        } catch (error) {
+
+            return "SYSTEM";
+
         }
 
     }
 
 
-    return "";
+    /* =====================================================
+       PUBLIC FUNCTIONS
+    ===================================================== */
 
-}
-
-
-/* =========================================================
-   SET VALUE
-========================================================= */
-
-function setValue(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
+    window.loadSOList =
+        loadSOList;
 
 
-    if (!element) {
-        return;
-    }
+    window.renderSOList =
+        renderSOList;
 
 
-    element.value =
-        value === null ||
-        value === undefined
-            ? ""
-            : value;
-
-}
+    window.selectSO =
+        selectSO;
 
 
-/* =========================================================
-   GET VALUE
-========================================================= */
-
-function getValue(
-    id
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
+    window.showAllSalesOrders =
+        showAllSalesOrders;
 
 
-    if (!element) {
-        return "";
-    }
+    window.filterSOBySummary =
+        filterSOBySummary;
 
 
-    return element.value;
-
-}
-
-
-/* =========================================================
-   SET TEXT
-========================================================= */
-
-function setText(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
+    window.searchSalesOrders =
+        searchSalesOrders;
 
 
-    if (!element) {
-        return;
-    }
+    window.refreshSalesOrders =
+        refreshSalesOrders;
 
 
-    element.textContent =
-        value === null ||
-        value === undefined
-            ? ""
-            : value;
-
-}
+    window.openCreateSalesOrder =
+        openCreateSalesOrder;
 
 
-/* =========================================================
-   FORMAT MONEY
-========================================================= */
-
-function formatMoney(
-    value
-) {
-
-    const number =
-        Number(
-            value
-        );
+    window.openSODetails =
+        openSODetails;
 
 
-    if (
-        !Number.isFinite(
-            number
-        )
-    ) {
-
-        return "0.00";
-
-    }
+    window.closeSODetails =
+        closeSODetails;
 
 
-    return number.toLocaleString(
-        "en-PH",
-        {
-            minimumFractionDigits:
-                2,
+    window.updateSelectedSO =
+        updateSelectedSO;
 
-            maximumFractionDigits:
-                2
+
+    window.enableSOUpdate =
+        enableSOUpdate;
+
+
+    window.saveSOUpdate =
+        saveSOUpdate;
+
+
+    window.cancelSOEdit =
+        cancelSOEdit;
+
+
+    window.cancelSelectedSO =
+        cancelSelectedSO;
+
+
+    window.addDetailItem =
+        addDetailItem;
+
+
+    window.deleteDetailItem =
+        deleteDetailItem;
+
+
+    window.calculateDetailTotals =
+        calculateDetailTotals;
+
+
+    window.selectDetailSOFiles =
+        selectDetailSOFiles;
+
+
+    window.handleDetailSOFiles =
+        handleDetailSOFiles;
+
+
+    window.viewSOFile =
+        viewSOFile;
+
+
+    window.deleteSOFile =
+        deleteSOFile;
+
+
+    window.emailSelectedSO =
+        emailSelectedSO;
+
+
+    window.openNewCustomerFromSalesOrder =
+        openNewCustomerFromSalesOrder;
+
+
+    window.closeCustomerFromSalesOrder =
+        closeCustomerFromSalesOrder;
+
+
+    window.refreshCustomerDataAfterSave =
+        refreshCustomerDataAfterSave;
+
+
+    /* =====================================================
+       DOM READY
+    ===================================================== */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function() {
+
+            console.log(
+                "========================================"
+            );
+
+
+            console.log(
+                "LOGIS-TECH SALES ORDER JS LOADED"
+            );
+
+
+            console.log(
+                "VERSION: 20261007-01"
+            );
+
+
+            console.log(
+                "========================================"
+            );
+
+
+            /*
+             * Do not automatically reload if
+             * the module is injected later.
+             */
+
         }
     );
 
-}
 
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHTML(
-    value
-) {
-
-    return String(
-        value === null ||
-        value === undefined
-            ? ""
-            : value
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
-
-
-/* =========================================================
-   ESCAPE ATTRIBUTE
-========================================================= */
-
-function escapeAttribute(
-    value
-) {
-
-    return String(
-        value === null ||
-        value === undefined
-            ? ""
-            : value
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    );
-
-}
-
-
-/* =========================================================
-   CSS ESCAPE
-========================================================= */
-
-function cssEscape(
-    value
-) {
-
-    if (
-        window.CSS &&
-        typeof window.CSS.escape ===
-            "function"
-    ) {
-
-        return window.CSS.escape(
-            String(
-                value
-            )
-        );
-
-    }
-
-
-    return String(
-        value
-    )
-    .replace(
-        /([^\w-])/g,
-        "\\$1"
-    );
-
-}
-
-
-/* =========================================================
-   DOM CONTENT LOADED
-========================================================= */
-
-document.addEventListener(
-    "DOMContentLoaded",
-    function() {
-
-        console.log(
-            "================================="
-        );
-
-        console.log(
-            "LOGIS-TECH SALES ORDER.JS LOADED"
-        );
-
-        console.log(
-            "VERSION: 20261006-03"
-        );
-
-        console.log(
-            "================================="
-        );
-
-    }
-);
+})();
