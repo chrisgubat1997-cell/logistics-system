@@ -314,26 +314,43 @@ function bindInvoicingEvents() {
 
 }
 
-
 /* =========================================================
    OPEN CREATE INVOICE PAGE
 ========================================================= */
 
 function openCreateInvoicePage() {
 
+    console.log(
+        "LOGIS-TECH: Prepare Invoice button clicked."
+    );
+
     /*
-       invoicing.html is dynamically loaded from index.html.
+       IMPORTANT:
 
-       Therefore:
-
-       index.html
-       └── pages/create-invoice.html
+       index.html is the main page.
+       Therefore navigation must be relative
+       to index.html, NOT invoicing.html.
     */
 
-    window.location.href =
+    const targetPage =
         "pages/create-invoice.html";
 
+
+    try {
+
+        window.location.assign(targetPage);
+
+    } catch (error) {
+
+        console.error(
+            "LOGIS-TECH: Failed to open Create Invoice page.",
+            error
+        );
+
+    }
+
 }
+
 
 
 /* =========================================================
