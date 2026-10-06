@@ -1,0 +1,750 @@
+```css
+/* =========================================================
+   LOGIS-TECH SYSTEM
+   CREATE CUSTOMER
+   create-customer.css
+   VERSION: 20261006-01
+========================================================= */
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+.customer-page,
+.customer-page * {
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.customer-page {
+    width: 100%;
+    min-height: 100vh;
+    padding: 28px;
+    background: #f5f7fb;
+    color: #172033;
+    font-family:
+        "Segoe UI",
+        Arial,
+        Helvetica,
+        sans-serif;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.customer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+
+    margin-bottom: 22px;
+    padding: 22px 24px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e9f2;
+    border-radius: 14px;
+
+    box-shadow:
+        0 4px 14px rgba(20, 35, 60, 0.05);
+}
+
+
+.customer-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+
+.customer-icon {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: #eef4ff;
+
+    font-size: 22px;
+}
+
+
+.customer-header h1 {
+    margin: 0 0 4px;
+
+    font-size: 23px;
+    font-weight: 700;
+
+    color: #172033;
+}
+
+
+.customer-header p {
+    margin: 0;
+
+    font-size: 13px;
+    color: #6b7280;
+}
+
+
+.customer-header-right {
+    display: flex;
+    align-items: center;
+}
+
+
+.customer-mode-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 32px;
+    padding: 0 12px;
+
+    border-radius: 20px;
+
+    background: #eef4ff;
+    color: #315ea8;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.customer-form {
+    width: 100%;
+}
+
+
+.customer-section {
+    margin-bottom: 18px;
+    padding: 22px 24px;
+
+    background: #ffffff;
+
+    border: 1px solid #e5e9f2;
+    border-radius: 14px;
+
+    box-shadow:
+        0 3px 12px rgba(20, 35, 60, 0.04);
+}
+
+
+.section-title {
+    margin-bottom: 20px;
+}
+
+
+.section-title h2 {
+    margin: 0 0 5px;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    color: #172033;
+}
+
+
+.section-title p {
+    margin: 0;
+
+    font-size: 12px;
+    line-height: 1.5;
+
+    color: #7a8495;
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.customer-grid {
+    display: grid;
+    gap: 18px;
+}
+
+
+.customer-grid-2 {
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+}
+
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+.form-group {
+    min-width: 0;
+}
+
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: #374151;
+}
+
+
+.required {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+
+.field-help {
+    display: block;
+
+    margin-top: 6px;
+
+    font-size: 11px;
+    line-height: 1.4;
+
+    color: #8a94a6;
+}
+
+
+/* =========================================================
+   INPUTS
+========================================================= */
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+
+    border: 1px solid #d9deea;
+    border-radius: 8px;
+
+    background: #ffffff;
+    color: #172033;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    font-size: 13px;
+
+    outline: none;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease;
+}
+
+
+.form-group input,
+.form-group select {
+    height: 42px;
+    padding: 0 12px;
+}
+
+
+.form-group textarea {
+    min-height: 100px;
+
+    padding: 11px 12px;
+
+    resize: vertical;
+
+    line-height: 1.5;
+}
+
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #a3aab7;
+}
+
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #4f7fc4;
+
+    box-shadow:
+        0 0 0 3px rgba(79, 127, 196, 0.10);
+}
+
+
+.form-group input[readonly] {
+    background: #f6f8fb;
+    color: #596579;
+
+    cursor: default;
+}
+
+
+/* =========================================================
+   CUSTOMER ID
+========================================================= */
+
+.customer-id-wrapper {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+}
+
+
+.customer-id-wrapper input {
+    padding-right: 75px;
+}
+
+
+.auto-generated-label {
+    position: absolute;
+
+    right: 10px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 24px;
+    padding: 0 8px;
+
+    border-radius: 5px;
+
+    background: #eaf7ef;
+    color: #21864a;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 0.5px;
+}
+
+
+/* =========================================================
+   LABEL ACTION
+========================================================= */
+
+.label-with-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 7px;
+}
+
+
+.label-with-action label {
+    margin-bottom: 0;
+}
+
+
+.text-button {
+    padding: 0;
+
+    border: 0;
+    background: transparent;
+
+    color: #3268ad;
+
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+
+.text-button:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+   SYSTEM SECTION
+========================================================= */
+
+.system-section {
+    background: #fafbfc;
+}
+
+
+.system-section input[readonly] {
+    background: #f1f3f6;
+}
+
+
+/* =========================================================
+   FORM MESSAGE
+========================================================= */
+
+.customer-form-message {
+    display: none;
+
+    margin-bottom: 18px;
+    padding: 12px 14px;
+
+    border-radius: 8px;
+
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+
+.customer-form-message.show {
+    display: block;
+}
+
+
+.customer-form-message.success {
+    background: #eaf7ef;
+    border: 1px solid #bfe5cc;
+    color: #21733e;
+}
+
+
+.customer-form-message.error {
+    background: #fff0f0;
+    border: 1px solid #f2c2c2;
+    color: #b42318;
+}
+
+
+.customer-form-message.info {
+    background: #eef5ff;
+    border: 1px solid #cbdcf5;
+    color: #315ea8;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.customer-form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    gap: 10px;
+
+    margin-top: 18px;
+    padding: 18px 0 5px;
+}
+
+
+.btn {
+    min-height: 40px;
+
+    padding: 0 17px;
+
+    border-radius: 8px;
+
+    border: 1px solid transparent;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.12s ease,
+        box-shadow 0.15s ease,
+        background 0.15s ease;
+}
+
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+
+.btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+}
+
+
+/* PRIMARY */
+
+.btn-primary {
+    background: #315ea8;
+    color: #ffffff;
+
+    box-shadow:
+        0 4px 10px rgba(49, 94, 168, 0.18);
+}
+
+
+.btn-primary:hover {
+    background: #294f91;
+}
+
+
+/* SECONDARY */
+
+.btn-secondary {
+    background: #ffffff;
+    color: #475569;
+
+    border-color: #d8dee9;
+}
+
+
+.btn-secondary:hover {
+    background: #f7f9fc;
+}
+
+
+/* LIGHT */
+
+.btn-light {
+    background: #f3f5f8;
+    color: #475569;
+
+    border-color: #e1e5ec;
+}
+
+
+.btn-light:hover {
+    background: #e9edf3;
+}
+
+
+/* =========================================================
+   SUCCESS PANEL
+========================================================= */
+
+.customer-success-panel {
+    width: 100%;
+
+    padding: 40px 28px;
+
+    background: #ffffff;
+
+    border: 1px solid #dcefe3;
+    border-radius: 14px;
+
+    text-align: center;
+
+    box-shadow:
+        0 5px 18px rgba(20, 35, 60, 0.06);
+}
+
+
+.customer-success-panel[hidden] {
+    display: none;
+}
+
+
+.success-icon {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 15px;
+
+    border-radius: 50%;
+
+    background: #eaf7ef;
+    color: #23834a;
+
+    font-size: 28px;
+    font-weight: 700;
+}
+
+
+.customer-success-panel h2 {
+    margin: 0 0 7px;
+
+    font-size: 20px;
+    color: #172033;
+}
+
+
+.customer-success-panel > p {
+    margin: 0 0 20px;
+
+    font-size: 13px;
+    color: #6b7280;
+}
+
+
+.generated-customer-id {
+    display: inline-flex;
+    flex-direction: column;
+
+    min-width: 220px;
+
+    margin: 0 auto 25px;
+    padding: 14px 22px;
+
+    background: #f5f8fd;
+
+    border: 1px solid #d9e4f4;
+    border-radius: 10px;
+}
+
+
+.generated-customer-id span {
+    margin-bottom: 4px;
+
+    color: #718096;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    letter-spacing: 0.7px;
+}
+
+
+.generated-customer-id strong {
+    color: #315ea8;
+
+    font-size: 20px;
+    letter-spacing: 0.5px;
+}
+
+
+.success-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 10px;
+}
+
+
+/* =========================================================
+   LOADING STATE
+========================================================= */
+
+.customer-page.is-loading {
+    pointer-events: none;
+}
+
+
+.customer-page.is-loading .customer-form {
+    opacity: 0.65;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 800px) {
+
+    .customer-page {
+        padding: 18px;
+    }
+
+
+    .customer-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+
+    .customer-header-right {
+        width: 100%;
+    }
+
+
+    .customer-grid-2 {
+        grid-template-columns: 1fr;
+    }
+
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+}
+
+
+@media (max-width: 520px) {
+
+    .customer-page {
+        padding: 12px;
+    }
+
+
+    .customer-header,
+    .customer-section {
+        padding: 17px;
+    }
+
+
+    .customer-header-left {
+        align-items: flex-start;
+    }
+
+
+    .customer-icon {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+    }
+
+
+    .customer-header h1 {
+        font-size: 19px;
+    }
+
+
+    .customer-form-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+
+    .customer-form-actions .btn {
+        width: 100%;
+    }
+
+
+    .success-actions {
+        flex-direction: column;
+    }
+
+
+    .success-actions .btn {
+        width: 100%;
+    }
+
+}
+```
