@@ -1,39 +1,693 @@
-<!-- =================================================
-     PAID THIS MONTH
-================================================== -->
+<!-- =========================================================
+     LOGIS-TECH SYSTEM
+     PAYMENT MODULE
 
-<div
-    class="payment-summary-card"
-    id="paidThisMonthCard"
->
+     FILE:
+     pages/payment.html
 
-    <div class="payment-summary-top">
+     NOTE:
+     This file is dynamically loaded inside index.html.
+     DO NOT add:
+     <html>
+     <head>
+     <body>
+     <link>
+     <script>
+     ========================================================= -->
 
-        <span class="payment-summary-label">
-            PAID THIS MONTH
-        </span>
 
-        <span class="payment-summary-icon">
-            ✓
-        </span>
+<div class="payment-module">
+
+
+    <!-- =====================================================
+         PAYMENT HEADER
+         ===================================================== -->
+
+    <div class="payment-page-header">
+
+        <div class="payment-page-title-area">
+
+            <h1 class="payment-page-title">
+                Payment
+            </h1>
+
+            <p class="payment-page-subtitle">
+                Payment Monitoring
+            </p>
+
+        </div>
+
+
+        <div class="payment-page-actions">
+
+            <button
+                type="button"
+                class="payment-primary-button"
+                id="preparePaymentBtn"
+            >
+                <span class="payment-button-icon">
+                    ＋
+                </span>
+
+                PREPARE PAYMENT
+
+            </button>
+
+        </div>
 
     </div>
 
 
-    <div
-        class="payment-summary-value"
-        id="paidThisMonthValue"
-    >
 
-        ₱0.00
+    <!-- =====================================================
+         PAYMENT SUMMARY CARDS
+         ===================================================== -->
+
+    <div class="payment-summary-grid">
+
+
+        <!-- =================================================
+             TOTAL PAYMENT
+        ================================================= -->
+
+        <div
+            class="payment-summary-card"
+            id="totalPaymentCard"
+        >
+
+            <div class="payment-summary-top">
+
+                <span class="payment-summary-label">
+                    TOTAL PAYMENT
+                </span>
+
+                <span class="payment-summary-icon">
+                    ₱
+                </span>
+
+            </div>
+
+
+            <div
+                class="payment-summary-value"
+                id="totalPaymentValue"
+            >
+                ₱0.00
+            </div>
+
+
+            <div class="payment-summary-footer">
+                Total payments recorded
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             TODAY'S PAYMENT
+        ================================================= -->
+
+        <div
+            class="payment-summary-card"
+            id="todaysPaymentCard"
+        >
+
+            <div class="payment-summary-top">
+
+                <span class="payment-summary-label">
+                    TODAY'S PAYMENT
+                </span>
+
+                <span class="payment-summary-icon">
+                    ◷
+                </span>
+
+            </div>
+
+
+            <div
+                class="payment-summary-value"
+                id="todaysPaymentValue"
+            >
+                ₱0.00
+            </div>
+
+
+            <div class="payment-summary-footer">
+                Payments received today
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PAID THIS MONTH
+        ================================================= -->
+
+        <div
+            class="payment-summary-card"
+            id="paidThisMonthCard"
+        >
+
+            <div class="payment-summary-top">
+
+                <span class="payment-summary-label">
+                    PAID THIS MONTH
+                </span>
+
+                <span class="payment-summary-icon">
+                    ✓
+                </span>
+
+            </div>
+
+
+            <div
+                class="payment-summary-value"
+                id="paidThisMonthValue"
+            >
+                ₱0.00
+            </div>
+
+
+            <div class="payment-summary-footer">
+                Total payments received this month
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PENDING PAYMENT
+        ================================================= -->
+
+        <div
+            class="payment-summary-card"
+            id="pendingPaymentCard"
+        >
+
+            <div class="payment-summary-top">
+
+                <span class="payment-summary-label">
+                    PENDING PAYMENT
+                </span>
+
+                <span class="payment-summary-icon">
+                    !
+                </span>
+
+            </div>
+
+
+            <div
+                class="payment-summary-value"
+                id="pendingPaymentValue"
+            >
+                ₱0.00
+            </div>
+
+
+            <div class="payment-summary-footer">
+                Payments still pending
+            </div>
+
+        </div>
 
     </div>
 
 
-    <div class="payment-summary-footer">
 
-        Total payments received this month
+    <!-- =====================================================
+         RECENT PAYMENT
+         ===================================================== -->
 
-    </div>
+    <section class="payment-section">
+
+
+        <!-- =================================================
+             SECTION HEADER
+        ================================================= -->
+
+        <div class="payment-section-header">
+
+            <div class="payment-section-title-area">
+
+                <h2 class="payment-section-title">
+                    Recent Payment
+                </h2>
+
+                <p class="payment-section-subtitle">
+                    Latest payment transactions
+                </p>
+
+            </div>
+
+
+            <div class="payment-section-actions">
+
+
+                <!-- SEARCH -->
+                <button
+                    type="button"
+                    class="payment-tool-button"
+                    id="paymentSearchToggleBtn"
+                    title="Search Payment"
+                >
+                    🔍
+                </button>
+
+
+                <!-- REFRESH -->
+                <button
+                    type="button"
+                    class="payment-tool-button"
+                    id="refreshPaymentBtn"
+                    title="Refresh Payment"
+                >
+                    ↻
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PAYMENT SEARCH
+        ================================================= -->
+
+        <div
+            class="payment-search-box"
+            id="paymentSearchBox"
+            style="display:none;"
+        >
+
+            <div class="payment-search-inner">
+
+                <span class="payment-search-icon">
+                    🔍
+                </span>
+
+
+                <input
+                    type="text"
+                    id="paymentSearchInput"
+                    class="payment-search-input"
+                    placeholder="Search payment no., invoice no., SO no., client..."
+                    autocomplete="off"
+                >
+
+
+                <button
+                    type="button"
+                    id="paymentSearchClearBtn"
+                    class="payment-search-clear"
+                    title="Clear Search"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PAYMENT FILTER
+        ================================================= -->
+
+        <div class="payment-filter-bar">
+
+
+            <div class="payment-filter-group">
+
+                <label
+                    for="paymentFilterMonth"
+                >
+                    MONTH
+                </label>
+
+
+                <select
+                    id="paymentFilterMonth"
+                >
+
+                    <option value="all">
+                        All Months
+                    </option>
+
+                    <option value="01">
+                        January
+                    </option>
+
+                    <option value="02">
+                        February
+                    </option>
+
+                    <option value="03">
+                        March
+                    </option>
+
+                    <option value="04">
+                        April
+                    </option>
+
+                    <option value="05">
+                        May
+                    </option>
+
+                    <option value="06">
+                        June
+                    </option>
+
+                    <option value="07">
+                        July
+                    </option>
+
+                    <option value="08">
+                        August
+                    </option>
+
+                    <option value="09">
+                        September
+                    </option>
+
+                    <option value="10">
+                        October
+                    </option>
+
+                    <option value="11">
+                        November
+                    </option>
+
+                    <option value="12">
+                        December
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <div class="payment-filter-group">
+
+                <label
+                    for="paymentFilterYear"
+                >
+                    YEAR
+                </label>
+
+
+                <select
+                    id="paymentFilterYear"
+                >
+
+                    <option value="all">
+                        All Years
+                    </option>
+
+                </select>
+
+            </div>
+
+
+
+            <button
+                type="button"
+                class="payment-filter-clear"
+                id="clearPaymentFilterBtn"
+            >
+                CLEAR FILTER
+            </button>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PAYMENT TABLE
+        ================================================= -->
+
+        <div class="payment-table-wrapper">
+
+            <table class="payment-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            PAYMENT NO.
+                        </th>
+
+                        <th>
+                            INVOICE NO.
+                        </th>
+
+                        <th>
+                            SI NO.
+                        </th>
+
+                        <th>
+                            SO NO.
+                        </th>
+
+                        <th>
+                            CLIENT
+                        </th>
+
+                        <th>
+                            PROJECT
+                        </th>
+
+                        <th>
+                            DATE
+                        </th>
+
+                        <th class="payment-amount-column">
+                            AMOUNT
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            ACTIONS
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="recentPaymentBody">
+
+                    <tr>
+
+                        <td
+                            colspan="10"
+                            class="payment-empty-state"
+                        >
+
+                            No payment records found.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         RECENT SALES ORDER
+         ===================================================== -->
+
+    <section class="payment-section">
+
+
+        <!-- =================================================
+             SECTION HEADER
+        ================================================= -->
+
+        <div class="payment-section-header">
+
+            <div class="payment-section-title-area">
+
+                <h2 class="payment-section-title">
+                    Recent Sales Order
+                </h2>
+
+                <p class="payment-section-subtitle">
+                    Sales orders available for payment monitoring
+                </p>
+
+            </div>
+
+
+            <div class="payment-section-actions">
+
+
+                <!-- SEARCH -->
+                <button
+                    type="button"
+                    class="payment-tool-button"
+                    id="salesOrderPaymentSearchToggleBtn"
+                    title="Search Sales Order"
+                >
+                    🔍
+                </button>
+
+
+                <!-- REFRESH -->
+                <button
+                    type="button"
+                    class="payment-tool-button"
+                    id="refreshPaymentSOBtn"
+                    title="Refresh Sales Order"
+                >
+                    ↻
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             SALES ORDER SEARCH
+        ================================================= -->
+
+        <div
+            class="payment-search-box"
+            id="salesOrderPaymentSearchBox"
+            style="display:none;"
+        >
+
+            <div class="payment-search-inner">
+
+                <span class="payment-search-icon">
+                    🔍
+                </span>
+
+
+                <input
+                    type="text"
+                    id="salesOrderPaymentSearchInput"
+                    class="payment-search-input"
+                    placeholder="Search SO no., client, project, invoice no..."
+                    autocomplete="off"
+                >
+
+
+                <button
+                    type="button"
+                    id="salesOrderPaymentSearchClearBtn"
+                    class="payment-search-clear"
+                    title="Clear Search"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             SALES ORDER TABLE
+        ================================================= -->
+
+        <div class="payment-table-wrapper">
+
+            <table class="payment-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            SO NO.
+                        </th>
+
+                        <th>
+                            CLIENT
+                        </th>
+
+                        <th>
+                            PROJECT
+                        </th>
+
+                        <th>
+                            DATE
+                        </th>
+
+                        <th>
+                            INVOICE NO.
+                        </th>
+
+                        <th class="payment-amount-column">
+                            TOTAL
+                        </th>
+
+                        <th class="payment-amount-column">
+                            PAID
+                        </th>
+
+                        <th class="payment-amount-column">
+                            BALANCE
+                        </th>
+
+                        <th>
+                            STATUS
+                        </th>
+
+                        <th>
+                            ACTION
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="recentPaymentSalesOrderBody">
+
+                    <tr>
+
+                        <td
+                            colspan="10"
+                            class="payment-empty-state"
+                        >
+
+                            No Sales Order records found.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
 
 </div>
