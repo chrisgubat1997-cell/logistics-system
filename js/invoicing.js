@@ -1,5 +1,3 @@
-
-```javascript
 /* =========================================================
    LOGIS-TECH SYSTEM
    INVOICING MODULE
@@ -2463,4 +2461,3 @@ Recommended:
 
 This prevents duplicate event listeners.
 ========================================================= */
-```
