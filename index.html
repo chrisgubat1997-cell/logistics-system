@@ -62,6 +62,15 @@
         href="css/fleet-analytics.css?v=20261006"
     >
 
+    <!-- =====================================================
+     FLEET & DELIVERY DATA ENTRY CSS
+====================================================== -->
+
+<link
+    rel="stylesheet"
+    href="css/fleet-delivery-data.css?v=20261006"
+>
+
 
     <!-- =====================================================
          INVOICING CSS
@@ -171,6 +180,19 @@
             📊 Fleet & Delivery Analytics
 
         </button>
+
+        <!-- =================================================
+     FLEET & DELIVERY DATA ENTRY
+================================================== -->
+
+<button
+    class="menu-btn"
+    onclick="showPage('fleetDataEntry', this)"
+>
+
+    📝 Fleet & Delivery Data Entry
+
+</button>
 
 
         <!-- =================================================
@@ -361,6 +383,19 @@
             <div id="fleetAnalyticsModule"></div>
 
         </div>
+
+        <!-- =================================================
+     FLEET & DELIVERY DATA ENTRY MODULE
+================================================== -->
+
+<div
+    id="fleetDataEntry"
+    class="page"
+>
+
+    <div id="fleetDataEntryModule"></div>
+
+</div>
 
 
 
@@ -914,6 +949,8 @@ let deliveryModuleLoaded = false;
 
 let fleetAnalyticsModuleLoaded = false;
 
+let fleetDataEntryModuleLoaded = false;
+
 let invoicingModuleLoaded = false;
 
 let paymentModuleLoaded = false;
@@ -1055,6 +1092,17 @@ function showPage(pageId, button) {
 
     }
 
+    /* =====================================================
+   FLEET & DELIVERY DATA ENTRY
+===================================================== */
+
+if (
+    pageId === 'fleetDataEntry'
+) {
+
+    loadFleetDataEntryModule();
+
+}
 
     /* =====================================================
        INVOICE
@@ -1692,6 +1740,188 @@ async function loadFleetAnalyticsModule() {
 
         console.error(
             'Fleet Analytics JavaScript error:',
+            error
+        );
+
+    }
+
+}
+
+    /* =========================================================
+   LOAD FLEET & DELIVERY DATA ENTRY MODULE
+========================================================= */
+
+async function loadFleetDataEntryModule() {
+
+    console.log(
+        '========================================'
+    );
+
+    console.log(
+        'Loading Fleet & Delivery Data Entry...'
+    );
+
+
+    const container =
+        document.getElementById(
+            'fleetDataEntryModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'ERROR: #fleetDataEntryModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD HTML ONLY ONCE
+    ===================================================== */
+
+    if (
+        !fleetDataEntryModuleLoaded
+    ) {
+
+        try {
+
+            const response =
+                await fetch(
+                    'pages/fleet-delivery-data.html?v=' +
+                    Date.now(),
+                    {
+                        cache: 'no-store'
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'HTTP ' +
+                    response.status +
+                    ' - ' +
+                    response.statusText
+                );
+
+            }
+
+
+            const html =
+                await response.text();
+
+
+            if (
+                !html ||
+                !html.trim()
+            ) {
+
+                throw new Error(
+                    'fleet-delivery-data.html is empty.'
+                );
+
+            }
+
+
+            container.innerHTML =
+                html;
+
+
+            fleetDataEntryModuleLoaded =
+                true;
+
+
+            console.log(
+                'Fleet & Delivery Data Entry HTML loaded.'
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                'Fleet Data Entry HTML error:',
+                error
+            );
+
+
+            container.innerHTML = `
+
+                <div style="
+                    margin:20px;
+                    padding:25px;
+                    background:#ffffff;
+                    border:1px solid #f0c9c5;
+                    border-radius:12px;
+                    color:#7f1d1d;
+                    font-family:Segoe UI,Arial,sans-serif;
+                ">
+
+                    <div style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:10px;
+                    ">
+
+                        Failed to load Fleet & Delivery Data Entry.
+
+                    </div>
+
+                    <div style="
+                        font-size:12px;
+                        line-height:1.7;
+                    ">
+
+                        ${error.message}
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            return;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LOAD JAVASCRIPT
+    ===================================================== */
+
+    try {
+
+        await loadScriptOnce(
+            'js/fleet-delivery-data.js?v=20261006',
+            'data-fleet-delivery-data-js'
+        );
+
+
+        if (
+            typeof window.initializeFleetDataEntry ===
+            'function'
+        ) {
+
+            window.initializeFleetDataEntry();
+
+        }
+
+
+        console.log(
+            'Fleet & Delivery Data Entry initialized.'
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            'Fleet Data Entry JavaScript error:',
             error
         );
 
