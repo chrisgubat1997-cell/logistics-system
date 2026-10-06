@@ -1,1 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
 
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Create Payment | LOGIS-TECH SYSTEM</title>
+
+    <!-- =====================================================
+         CREATE PAYMENT CSS
+         ===================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="../css/create-payment.css?v=20261006"
+    >
+</head>
+
+<body>
+
+    <!-- =====================================================
+         CREATE PAYMENT PAGE
+         ===================================================== -->
+
+    <main class="create-payment-page">
+
+        <div class="create-payment-container">
+
+            <!-- =================================================
+                 PAGE HEADER
+                 ================================================= -->
+
+            <header class="create-payment-header">
+
+                <div class="create-payment-header-left">
+
+                    <button
+                        type="button"
+                        class="create-payment-back-btn"
+                        id="backToPaymentBtn"
+                        title="Back to Payment"
+                    >
+                        <span class="back-icon">←</span>
+                    </button>
+
+                    <div class="create-payment-title-area">
+
+                        <h1>
+                            Create Payment
+                        </h1>
+
+                        <p>
+                            Record customer payment transaction
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="create-payment-header-actions">
+
+                    <button
+                        type="button"
+                        class="create-payment-btn create-payment-btn-secondary"
+                        id="cancelPaymentBtn"
+                    >
+                        CANCEL
+                    </button>
+
+                    <button
+                        type="button"
+                        class="create-payment-btn create-payment-btn-primary"
+                        id="savePaymentBtn"
+                    >
+                        <span>＋</span>
+                        SAVE PAYMENT
+                    </button>
+
+                </div>
+
+            </header>
+
+
+            <!-- =================================================
+                 PAGE CONTENT
+                 ================================================= -->
+
+            <div class="create-payment-layout">
+
+                <!-- =============================================
+                     LEFT COLUMN
+                     ============================================= -->
+
+                <div class="create-payment-main">
+
+
+                    <!-- =========================================
+                         PAYMENT INFORMATION
+                         ========================================= -->
+
+                    <section class="create-payment-card">
+
+                        <div class="create-payment-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Payment Information
+                                </h2>
+
+                                <p>
+                                    Basic information of the payment transaction.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="create-payment-card-body">
+
+                            <div class="create-payment-form-grid">
+
+
+                                <!-- PAYMENT NO. -->
+
+                                <div class="create-payment-field">
+
+                                    <label for="paymentNo">
+                                        PAYMENT NO.
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="paymentNo"
+                                        name="paymentNo"
+                                        placeholder="Auto generated"
+                                        readonly
+                                    >
+
+                                    <small>
+                                        System generated payment number
+                                    </small>
+
+                                </div>
+
+
+                                <!-- PAYMENT DATE -->
+
+                                <div class="create-payment-field">
+
+                                    <label for="paymentDate">
+                                        PAYMENT DATE
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        type="date"
+                                        id="paymentDate"
+                                        name="paymentDate"
+                                        required
+                                    >
+
+                                </div>
+
+
+                                <!-- PAYMENT METHOD -->
+
+                                <div class="create-payment-field">
+
+                                    <label for="paymentMethod">
+                                        PAYMENT METHOD
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <select
+                                        id="paymentMethod"
+                                        name="paymentMethod"
+                                    >
+
+                                        <option value="">
+                                            Select Payment Method
+                                        </option>
+
+                                        <option value="Cash">
+                                            Cash
+                                        </option>
+
+                                        <option value="Bank Transfer">
+                                            Bank Transfer
+                                        </option>
+
+                                        <option value="Cheque">
+                                            Cheque
+                                        </option>
+
+                                        <option value="GCash">
+                                            GCash
+                                        </option>
+
+                                        <option value="Online Transfer">
+                                            Online Transfer
+                                        </option>
+
+                                        <option value="Other">
+                                            Other
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+
+                                <!-- STATUS -->
+
+                                <div class="create-payment-field">
+
+                                    <label for="paymentStatus">
+                                        STATUS
+                                    </label>
+
+                                    <select
+                                        id="paymentStatus"
+                                        name="paymentStatus"
+                                    >
+
+                                        <option value="Paid">
+                                            Paid
+                                        </option>
+
+                                        <option value="Partial">
+                                            Partial
+                                        </option>
+
+                                        <option value="Pending">
+                                            Pending
+                                        </option>
+
+                                    </select>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =========================================
+                         PAYMENT REFERENCE
+                         ========================================= -->
+
+                    <section class="create-payment-card">
+
+                        <div class="create-payment-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Payment Reference
+                                </h2>
+
+                                <p>
+                                    Connect the payment to the related Sales Order and Invoice.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="create-payment-card-body">
+
+
+                            <div class="create-payment-reference-box">
+
+                                <div class="create-payment-reference-title">
+                                    Transaction Reference
+                                </div>
+
+
+                                <div class="create-payment-form-grid">
+
+
+                                    <!-- SALES ORDER -->
+
+                                    <div class="create-payment-field">
+
+                                        <label for="paymentSONo">
+                                            SALES ORDER NO.
+                                            <span class="required">*</span>
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="paymentSONo"
+                                            name="paymentSONo"
+                                            placeholder="e.g. SO-2026-0001"
+                                            autocomplete="off"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- INVOICE -->
+
+                                    <div class="create-payment-field">
+
+                                        <label for="paymentInvoiceNo">
+                                            INVOICE NO.
+                                            <span class="required">*</span>
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="paymentInvoiceNo"
+                                            name="paymentInvoiceNo"
+                                            placeholder="e.g. INV-2026-0001"
+                                            autocomplete="off"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- SI NO -->
+
+                                    <div class="create-payment-field">
+
+                                        <label for="paymentSINo">
+                                            SI NO.
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="paymentSINo"
+                                            name="paymentSINo"
+                                            placeholder="Enter SI No."
+                                            autocomplete="off"
+                                        >
+
+                                    </div>
+
+
+                                    <!-- REFERENCE NO -->
+
+                                    <div class="create-payment-field">
+
+                                        <label for="paymentReferenceNo">
+                                            REFERENCE NO.
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            id="paymentReferenceNo"
+                                            name="paymentReferenceNo"
+                                            placeholder="Bank / cheque / transaction reference"
+                                            autocomplete="off"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =========================================
+                         CUSTOMER INFORMATION
+                         ========================================= -->
+
+                    <section class="create-payment-card">
+
+                        <div class="create-payment-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Customer Information
+                                </h2>
+
+                                <p>
+                                    Customer and project information.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="create-payment-card-body">
+
+                            <div class="create-payment-form-grid">
+
+
+                                <!-- CLIENT -->
+
+                                <div class="create-payment-field create-payment-field-full">
+
+                                    <label for="paymentClient">
+                                        CLIENT
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="paymentClient"
+                                        name="paymentClient"
+                                        placeholder="Enter client name"
+                                        autocomplete="off"
+                                    >
+
+                                </div>
+
+
+                                <!-- PROJECT -->
+
+                                <div class="create-payment-field create-payment-field-full">
+
+                                    <label for="paymentProject">
+                                        PROJECT
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        id="paymentProject"
+                                        name="paymentProject"
+                                        placeholder="Enter project name"
+                                        autocomplete="off"
+                                    >
+
+                                </div>
+
+
+                                <!-- BILLING ADDRESS -->
+
+                                <div class="create-payment-field create-payment-field-full">
+
+                                    <label for="paymentBillingAddress">
+                                        BILLING ADDRESS
+                                    </label>
+
+                                    <textarea
+                                        id="paymentBillingAddress"
+                                        name="paymentBillingAddress"
+                                        rows="3"
+                                        placeholder="Enter billing address"
+                                    ></textarea>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =========================================
+                         PAYMENT AMOUNT
+                         ========================================= -->
+
+                    <section class="create-payment-card">
+
+                        <div class="create-payment-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Payment Amount
+                                </h2>
+
+                                <p>
+                                    Enter the amount received from the customer.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="create-payment-card-body">
+
+                            <div class="create-payment-form-grid">
+
+
+                                <!-- INVOICE AMOUNT -->
+
+                                <div class="create-payment-field">
+
+                                    <label for="paymentInvoiceAmountInput">
+                                        INVOICE AMOUNT
+                                    </label>
+
+                                    <div class="create-payment-input-money">
+
+                                        <span>₱</span>
+
+                                        <input
+                                            type="number"
+                                            id="paymentInvoiceAmountInput"
+                                            name="paymentInvoiceAmount"
+                                            min="0"
+                                            step="0.01"
+                                            value="0"
+                                            placeholder="0.00"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- PREVIOUS PAID -->
+
+                                <div class="create-payment-field">
+
+                                    <label for="paymentPreviousPaidInput">
+                                        PREVIOUS PAID
+                                    </label>
+
+                                    <div class="create-payment-input-money">
+
+                                        <span>₱</span>
+
+                                        <input
+                                            type="number"
+                                            id="paymentPreviousPaidInput"
+                                            name="paymentPreviousPaid"
+                                            min="0"
+                                            step="0.01"
+                                            value="0"
+                                            placeholder="0.00"
+                                        >
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- CURRENT PAYMENT -->
+
+                                <div class="create-payment-field">
+
+                                    <label for="paymentCurrentAmountInput">
+                                        CURRENT PAYMENT
+                                        <span class="required">*</span>
+                                    </label>
+
+                                    <div class="create-payment-input-money create-payment-input-money-primary">
+
+                                        <span>₱</span>
+
+                                        <input
+                                            type="number"
+                                            id="paymentCurrentAmountInput"
+                                            name="paymentCurrentAmount"
+                                            min="0"
+                                            step="0.01"
+                                            value="0"
+                                            placeholder="0.00"
+                                            required
+                                        >
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- REMAINING BALANCE -->
+
+                                <div class="create-payment-field">
+
+                                    <label>
+                                        REMAINING BALANCE
+                                    </label>
+
+                                    <div
+                                        class="create-payment-readonly-amount"
+                                        id="paymentRemainingBalanceInput"
+                                    >
+                                        ₱0.00
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =========================================
+                         REMARKS
+                         ========================================= -->
+
+                    <section class="create-payment-card">
+
+                        <div class="create-payment-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Remarks
+                                </h2>
+
+                                <p>
+                                    Add additional information if needed.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="create-payment-card-body">
+
+                            <div class="create-payment-field">
+
+                                <label for="paymentRemarks">
+                                    REMARKS
+                                </label>
+
+                                <textarea
+                                    id="paymentRemarks"
+                                    name="paymentRemarks"
+                                    rows="5"
+                                    placeholder="Enter payment remarks..."
+                                ></textarea>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+                </div>
+
+
+
+                <!-- =============================================
+                     RIGHT COLUMN
+                     ============================================= -->
+
+                <aside class="create-payment-sidebar">
+
+
+                    <!-- =========================================
+                         PAYMENT SUMMARY
+                         ========================================= -->
+
+                    <section class="create-payment-card create-payment-summary-card">
+
+                        <div class="create-payment-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Payment Summary
+                                </h2>
+
+                                <p>
+                                    Current transaction summary.
+                                </p>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="create-payment-card-body">
+
+
+                            <div class="create-payment-summary-list">
+
+
+                                <div class="create-payment-summary-row">
+
+                                    <span>
+                                        Invoice Amount
+                                    </span>
+
+                                    <strong id="paymentInvoiceAmountDisplay">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="create-payment-summary-row">
+
+                                    <span>
+                                        Previous Paid
+                                    </span>
+
+                                    <strong id="paymentPreviousPaidDisplay">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="create-payment-summary-row">
+
+                                    <span>
+                                        Current Payment
+                                    </span>
+
+                                    <strong id="paymentCurrentAmountDisplay">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="create-payment-summary-row create-payment-summary-balance">
+
+                                    <span>
+                                        Remaining Balance
+                                    </span>
+
+                                    <strong id="paymentRemainingBalanceDisplay">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="create-payment-summary-total">
+
+                                    <span>
+                                        PAYMENT AMOUNT
+                                    </span>
+
+                                    <strong id="paymentAmountDisplay">
+                                        ₱0.00
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- BALANCE BOX -->
+
+                            <div class="create-payment-balance-box">
+
+                                <div class="create-payment-balance-label">
+                                    Outstanding Balance
+                                </div>
+
+                                <div
+                                    class="create-payment-balance-value"
+                                    id="paymentBalanceDisplay"
+                                >
+                                    ₱0.00
+                                </div>
+
+                            </div>
+
+
+                            <!-- STATUS -->
+
+                            <div class="create-payment-status-box">
+
+                                <div class="create-payment-status-label">
+                                    PAYMENT STATUS
+                                </div>
+
+                                <div
+                                    class="create-payment-status-badge"
+                                    id="paymentStatusPreview"
+                                >
+                                    PAID
+                                </div>
+
+                            </div>
+
+
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =========================================
+                         TRANSACTION INFORMATION
+                         ========================================= -->
+
+                    <section class="create-payment-card create-payment-info-card">
+
+                        <div class="create-payment-card-header">
+
+                            <div>
+
+                                <h2>
+                                    Transaction Information
+                                </h2>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="create-payment-card-body">
+
+                            <div class="create-payment-info-list">
+
+                                <div class="create-payment-info-row">
+
+                                    <span>
+                                        Payment No.
+                                    </span>
+
+                                    <strong id="summaryPaymentNo">
+                                        —
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="create-payment-info-row">
+
+                                    <span>
+                                        Payment Date
+                                    </span>
+
+                                    <strong id="summaryPaymentDate">
+                                        —
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="create-payment-info-row">
+
+                                    <span>
+                                        Payment Method
+                                    </span>
+
+                                    <strong id="summaryPaymentMethod">
+                                        —
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="create-payment-info-row">
+
+                                    <span>
+                                        Sales Order
+                                    </span>
+
+                                    <strong id="summaryPaymentSO">
+                                        —
+                                    </strong>
+
+                                </div>
+
+
+                                <div class="create-payment-info-row">
+
+                                    <span>
+                                        Invoice
+                                    </span>
+
+                                    <strong id="summaryPaymentInvoice">
+                                        —
+                                    </strong>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </section>
+
+
+
+                    <!-- =========================================
+                         NOTICE
+                         ========================================= -->
+
+                    <div class="create-payment-notice">
+
+                        <div class="create-payment-notice-icon">
+                            i
+                        </div>
+
+                        <div>
+
+                            <strong>
+                                Payment Monitoring
+                            </strong>
+
+                            <p>
+                                Saved payment records will be used
+                                for payment monitoring and Sales Order
+                                balance tracking.
+                            </p>
+
+                        </div>
+
+                    </div>
+
+
+                </aside>
+
+            </div>
+
+
+            <!-- =================================================
+                 BOTTOM ACTIONS
+                 ================================================= -->
+
+            <footer class="create-payment-footer">
+
+                <button
+                    type="button"
+                    class="create-payment-btn create-payment-btn-secondary"
+                    id="bottomCancelPaymentBtn"
+                >
+                    CANCEL
+                </button>
+
+                <button
+                    type="button"
+                    class="create-payment-btn create-payment-btn-primary"
+                    id="bottomSavePaymentBtn"
+                >
+                    <span>＋</span>
+                    SAVE PAYMENT
+                </button>
+
+            </footer>
+
+        </div>
+
+    </main>
+
+
+    <!-- =========================================================
+         CREATE PAYMENT JAVASCRIPT
+         ========================================================= -->
+
+    <script
+        src="../js/create-payment.js?v=20261006"
+    ></script>
+
+</body>
+</html>
