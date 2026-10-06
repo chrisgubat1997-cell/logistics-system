@@ -935,95 +935,43 @@ async function saveSO() {
        GET FORM VALUES
     ========================================== */
 
-    const soNumber =
-        getValue(
-            "soNumber"
-        );
-
-
     const dateCreation =
-        getValue(
-            "soDate"
-        );
-
+        getValue("soDate");
 
     const clientName =
-        getValue(
-            "clientName"
-        );
-
+        getValue("clientName");
 
     const attention =
-        getValue(
-            "attention"
-        );
-
+        getValue("attention");
 
     const billingAddress =
-        getValue(
-            "billingAddress"
-        );
-
+        getValue("billingAddress");
 
     const deliveryAddress =
-        getValue(
-            "deliveryAddress"
-        );
-
+        getValue("deliveryAddress");
 
     const project =
-        getValue(
-            "project"
-        );
-
+        getValue("project");
 
     const tin =
-        getValue(
-            "tinNumber"
-        );
-
+        getValue("tinNumber");
 
     const poNumber =
-        getValue(
-            "poNumber"
-        );
-
+        getValue("poNumber");
 
     const terms =
-        getValue(
-            "terms"
-        );
-
+        getValue("terms");
 
     const se =
-        getValue(
-            "soSE"
-        );
-
+        getValue("soSE");
 
     const jobOrder =
-        getValue(
-            "jobOrder"
-        );
+        getValue("jobOrder");
 
 
     /* ==========================================
        VALIDATION
     ========================================== */
-
-    if (
-        !soNumber ||
-        soNumber === "Generating..."
-    ) {
-
-        alert(
-            "Hindi pa ready ang SO Number."
-        );
-
-        return;
-
-    }
-
 
     if (!clientName) {
 
@@ -1078,9 +1026,7 @@ async function saveSO() {
 
 
         if (
-            Number(
-                items[i].qty
-            ) <= 0
+            Number(items[i].qty) <= 0
         ) {
 
             alert(
@@ -1168,12 +1114,13 @@ async function saveSO() {
 
     /* ==========================================
        API DATA
+       
+       IMPORTANT:
+       SO NUMBER IS NOT SENT AS FINAL NUMBER.
+       BACKEND GENERATES THE OFFICIAL SO NUMBER.
     ========================================== */
 
     const data = {
-
-        soNumber:
-            soNumber,
 
         dateCreation:
             dateCreation,
@@ -1235,8 +1182,14 @@ async function saveSO() {
     };
 
 
+    console.log(
+        "CREATING SALES ORDER:",
+        data
+    );
+
+
     /* ==========================================
-       SAVE TO GOOGLE SHEETS
+       CREATE SALES ORDER
     ========================================== */
 
     const result =
@@ -1265,11 +1218,22 @@ async function saveSO() {
        API ERROR
     ========================================== */
 
-    if (!result.success) {
+    if (
+        !result ||
+        !result.success
+    ) {
 
         alert(
-            result.message ||
-            "Failed to save Sales Order."
+            result &&
+            (
+                result.message ||
+                result.error
+            )
+                ? (
+                    result.message ||
+                    result.error
+                )
+                : "Failed to save Sales Order."
         );
 
         return;
@@ -1278,205 +1242,305 @@ async function saveSO() {
 
 
     /* ==========================================
-   SUCCESS - UPLOAD SO FILES
-========================================== */
+       GET OFFICIAL BACKEND VALUES
+    ========================================== */
 
-console.log("SALES ORDER CREATED:", result);
+    const createdSO =
+        result.data ||
+        {};
 
 
-/* ------------------------------------------
-   UPLOAD SELECTED PDF FILES
------------------------------------------- */
+    const finalSOId =
+        result.soId ||
+        createdSO.soId ||
+        "";
 
-let uploadErrors = [];
 
-if (soCreateFiles.length > 0) {
+    const finalSONumber =
+        result.soNumber ||
+        createdSO.soNumber ||
+        "";
+
+
+    const finalFolderId =
+        result.folderId ||
+        createdSO.folderId ||
+        "";
+
+
+    const finalFolderUrl =
+        result.folderUrl ||
+        createdSO.folderUrl ||
+        "";
+
 
     console.log(
-        "FILES TO UPLOAD:",
-        soCreateFiles
+        "================================="
     );
 
-    for (
-        let i = 0;
-        i < soCreateFiles.length;
-        i++
+    console.log(
+        "SALES ORDER CREATED SUCCESSFULLY"
+    );
+
+    console.log(
+        "SO NUMBER:",
+        finalSONumber
+    );
+
+    console.log(
+        "SO ID:",
+        finalSOId
+    );
+
+    console.log(
+        "FOLDER ID:",
+        finalFolderId
+    );
+
+    console.log(
+        "FOLDER URL:",
+        finalFolderUrl
+    );
+
+    console.log(
+        "================================="
+    );
+
+
+    /* ==========================================
+       VALIDATE BACKEND RESPONSE
+    ========================================== */
+
+    if (!finalSONumber) {
+
+        alert(
+            "Sales Order was created, but the backend did not return an SO Number."
+        );
+
+        return;
+
+    }
+
+
+    if (!finalSOId) {
+
+        console.warn(
+            "Backend did not return SO ID."
+        );
+
+    }
+
+
+    /* ==========================================
+       UPLOAD SELECTED FILES
+    ========================================== */
+
+    let uploadErrors = [];
+
+
+    if (
+        soCreateFiles.length > 0
     ) {
 
-        const file =
-            soCreateFiles[i];
-
-        try {
-
-            console.log(
-                "START UPLOAD:",
-                file.name
-            );
+        console.log(
+            "FILES TO UPLOAD:",
+            soCreateFiles
+        );
 
 
-            /* Convert PDF to Base64 */
+        for (
+            let i = 0;
+            i < soCreateFiles.length;
+            i++
+        ) {
 
-            const base64Data =
-                await fileToBase64(file);
-
-
-            console.log(
-                "BASE64 READY:",
-                file.name
-            );
+            const file =
+                soCreateFiles[i];
 
 
-            /* Prepare upload data */
+            try {
 
-            const uploadData = {
-
-                soNumber:
-                    soNumber,
-
-                soId:
-                    result.so &&
-                    result.so.soId
-                        ? result.so.soId
-                        : "",
-
-                fileName:
-                    file.name,
-
-                mimeType:
-                    file.type ||
-                    "application/pdf",
-
-                base64Data:
-                    base64Data,
-
-                uploadedBy:
-                    getCurrentUser(),
-
-                dateCreation:
-                    dateCreation
-
-            };
-
-
-            console.log(
-                "UPLOAD DATA:",
-                {
-                    soNumber:
-                        uploadData.soNumber,
-
-                    soId:
-                        uploadData.soId,
-
-                    fileName:
-                        uploadData.fileName,
-
-                    mimeType:
-                        uploadData.mimeType
-                }
-            );
-
-
-            /* Send file to Google Apps Script */
-
-            const uploadResult =
-                await createSOAPI(
-                    "uploadSOFile",
-                    uploadData
+                console.log(
+                    "START UPLOAD:",
+                    file.name
                 );
 
 
-            console.log(
-                "UPLOAD RESULT:",
-                uploadResult
-            );
+                const base64Data =
+                    await fileToBase64(
+                        file
+                    );
 
 
-            if (
-                !uploadResult ||
-                !uploadResult.success
-            ) {
+                const uploadData = {
+
+                    soNumber:
+                        finalSONumber,
+
+                    soId:
+                        finalSOId,
+
+                    fileName:
+                        file.name,
+
+                    mimeType:
+                        file.type ||
+                        "application/pdf",
+
+                    base64Data:
+                        base64Data,
+
+                    uploadedBy:
+                        getCurrentUser(),
+
+                    dateCreation:
+                        dateCreation
+
+                };
+
+
+                console.log(
+                    "UPLOAD DATA:",
+                    {
+                        soNumber:
+                            uploadData.soNumber,
+
+                        soId:
+                            uploadData.soId,
+
+                        fileName:
+                            uploadData.fileName,
+
+                        mimeType:
+                            uploadData.mimeType
+                    }
+                );
+
+
+                const uploadResult =
+                    await createSOAPI(
+                        "uploadSOFile",
+                        uploadData
+                    );
+
+
+                console.log(
+                    "UPLOAD RESULT:",
+                    uploadResult
+                );
+
+
+                if (
+                    !uploadResult ||
+                    !uploadResult.success
+                ) {
+
+                    uploadErrors.push(
+
+                        file.name +
+                        ": " +
+                        (
+                            uploadResult &&
+                            (
+                                uploadResult.message ||
+                                uploadResult.error
+                            )
+                                ? (
+                                    uploadResult.message ||
+                                    uploadResult.error
+                                )
+                                : "Upload failed."
+                        )
+
+                    );
+
+                }
+
+            } catch (error) {
+
+                console.error(
+                    "FILE UPLOAD ERROR:",
+                    file.name,
+                    error
+                );
+
 
                 uploadErrors.push(
+
                     file.name +
                     ": " +
-                    (
-                        uploadResult &&
-                        uploadResult.message
-                            ? uploadResult.message
-                            : "Upload failed."
-                    )
+                    error.message
+
                 );
 
             }
-
-        } catch (error) {
-
-            console.error(
-                "FILE UPLOAD ERROR:",
-                file.name,
-                error
-            );
-
-            uploadErrors.push(
-                file.name +
-                ": " +
-                error.message
-            );
 
         }
 
     }
 
-}
+
+    /* ==========================================
+       FINAL SUCCESS MESSAGE
+    ========================================== */
+
+    if (
+        uploadErrors.length > 0
+    ) {
+
+        alert(
+
+            "Sales Order " +
+            finalSONumber +
+            " was saved successfully, but some files failed to upload.\n\n" +
+            uploadErrors.join("\n")
+
+        );
+
+    }
+
+    else if (
+        soCreateFiles.length > 0
+    ) {
+
+        alert(
+
+            "Sales Order " +
+            finalSONumber +
+            " and " +
+            soCreateFiles.length +
+            " PDF file(s) were saved successfully."
+
+        );
+
+    }
+
+    else {
+
+        alert(
+
+            "Sales Order " +
+            finalSONumber +
+            " saved successfully."
+
+        );
+
+    }
 
 
-/* ------------------------------------------
-   FINAL MESSAGE
------------------------------------------- */
+    /* ==========================================
+       CLEAR FORM
+    ========================================== */
 
-if (uploadErrors.length > 0) {
-
-    alert(
-        "Sales Order " +
-        soNumber +
-        " was saved, but some files failed to upload.\n\n" +
-        uploadErrors.join("\n")
-    );
-
-} else if (soCreateFiles.length > 0) {
-
-    alert(
-        "Sales Order " +
-        soNumber +
-        " and " +
-        soCreateFiles.length +
-        " PDF file(s) were saved successfully."
-    );
-
-} else {
-
-    alert(
-        "Sales Order " +
-        soNumber +
-        " saved successfully."
-    );
-
-}
+    clearCreateSOForm();
 
 
-/* ------------------------------------------
-   CLEAR FORM
------------------------------------------- */
+    /* ==========================================
+       RETURN TO MAIN SYSTEM
+    ========================================== */
 
-clearCreateSOForm();
-
-
-/* ------------------------------------------
-   RETURN TO SALES ORDER
------------------------------------------- */
-
-window.location.href =
-    "../index.html";
+    window.location.href =
+        "../index.html";
 
 }
 
