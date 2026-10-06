@@ -1,182 +1,1416 @@
+<!-- =========================================================
+     LOGIS-TECH SYSTEM
+     FLEET & DELIVERY DATA ENTRY
+     HTML MODULE
+========================================================= -->
 
-/* =========================================================
-   LOAD FLEET & DELIVERY DATA ENTRY MODULE
-========================================================= */
+<div class="fleet-data-entry">
 
-async function loadFleetDataEntryModule() {
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
 
-    console.log(
-        '========================================'
-    );
+    <div class="fde-header">
 
-    console.log(
-        'Loading Fleet & Delivery Data Entry...'
-    );
+        <div>
+            <div class="fde-title">
+                Fleet &amp; Delivery Data Entry
+            </div>
 
+            <div class="fde-subtitle">
+                Encode and manage fleet, fuel, maintenance,
+                delivery and delivery receipt records.
+            </div>
+        </div>
 
-    const container =
-        document.getElementById(
-            'fleetDataEntryModule'
-        );
+        <div class="fde-storage-status">
+            <span class="fde-status-dot"></span>
+            <span>Local Data Storage</span>
+        </div>
 
+    </div>
 
-    if (!container) {
 
-        console.error(
-            'ERROR: #fleetDataEntryModule not found.'
-        );
+    <!-- =====================================================
+         TABS
+    ====================================================== -->
 
-        return;
+    <div class="fde-tabs">
 
-    }
+        <button
+            type="button"
+            class="fde-tab active"
+            data-section="tripTicket">
+            🚚 Fleet / Trip Ticket
+        </button>
 
+        <button
+            type="button"
+            class="fde-tab"
+            data-section="fuel">
+            ⛽ Fuel
+        </button>
 
-    /* =====================================================
-       LOAD HTML ONLY ONCE
-    ===================================================== */
+        <button
+            type="button"
+            class="fde-tab"
+            data-section="maintenance">
+            🔧 Maintenance
+        </button>
 
-    if (
-        !fleetDataEntryModuleLoaded
-    ) {
+        <button
+            type="button"
+            class="fde-tab"
+            data-section="delivery">
+            📦 Delivery
+        </button>
 
-        try {
+        <button
+            type="button"
+            class="fde-tab"
+            data-section="dr">
+            📄 DR
+        </button>
 
-            const response =
-                await fetch(
-                    'pages/fleet-delivery-data.html?v=' +
-                    Date.now(),
-                    {
-                        cache: 'no-store'
-                    }
-                );
+    </div>
 
 
-            if (!response.ok) {
+    <!-- =====================================================
+         FLEET / TRIP TICKET
+    ====================================================== -->
 
-                throw new Error(
-                    'HTTP ' +
-                    response.status +
-                    ' - ' +
-                    response.statusText
-                );
+    <div
+        id="fde-tripTicket-section"
+        class="fde-section active">
 
-            }
+        <div class="fde-section-header">
 
+            <div>
+                <h2>Fleet / Trip Ticket</h2>
 
-            const html =
-                await response.text();
+                <p>
+                    Encode trip ticket, vehicle movement
+                    and actual kilometer data.
+                </p>
+            </div>
 
+        </div>
 
-            if (
-                !html ||
-                !html.trim()
-            ) {
 
-                throw new Error(
-                    'fleet-delivery-data.html is empty.'
-                );
+        <div class="fde-form-grid">
 
-            }
+            <div class="fde-field">
 
+                <label for="fde-tripTicketNo">
+                    Trip Ticket No.
+                </label>
 
-            container.innerHTML =
-                html;
+                <input
+                    type="text"
+                    id="fde-tripTicketNo"
+                    placeholder="Enter trip ticket number">
 
+            </div>
 
-            fleetDataEntryModuleLoaded =
-                true;
 
+            <div class="fde-field">
 
-            console.log(
-                'Fleet & Delivery Data Entry HTML loaded.'
-            );
+                <label for="fde-tripDate">
+                    Date
+                </label>
 
+                <input
+                    type="date"
+                    id="fde-tripDate">
 
-        } catch (error) {
+            </div>
 
-            console.error(
-                'Fleet Data Entry HTML error:',
-                error
-            );
 
+            <div class="fde-field">
 
-            container.innerHTML = `
+                <label for="fde-tripVehicle">
+                    Vehicle
+                </label>
 
-                <div style="
-                    margin:20px;
-                    padding:25px;
-                    background:#ffffff;
-                    border:1px solid #f0c9c5;
-                    border-radius:12px;
-                    color:#7f1d1d;
-                    font-family:Segoe UI,Arial,sans-serif;
-                ">
+                <select id="fde-tripVehicle">
 
-                    <div style="
-                        font-size:16px;
-                        font-weight:800;
-                        margin-bottom:10px;
-                    ">
+                    <option value="">
+                        Select Vehicle
+                    </option>
 
-                        Failed to load Fleet & Delivery Data Entry.
+                    <option value="TBO710">TBO710</option>
+                    <option value="TBO711">TBO711</option>
+                    <option value="TBO712">TBO712</option>
+                    <option value="TBO713">TBO713</option>
+                    <option value="TBO714">TBO714</option>
+                    <option value="TBO715">TBO715</option>
+                    <option value="TBO716">TBO716</option>
+                    <option value="TBO717">TBO717</option>
+                    <option value="TBO718">TBO718</option>
+                    <option value="TBO719">TBO719</option>
+                    <option value="TBO720">TBO720</option>
+                    <option value="TBO721">TBO721</option>
+                    <option value="TBO722">TBO722</option>
+                    <option value="TBO723">TBO723</option>
+                    <option value="TBO724">TBO724</option>
 
-                    </div>
+                </select>
 
-                    <div style="
-                        font-size:12px;
-                        line-height:1.7;
-                    ">
+            </div>
 
-                        ${error.message}
 
-                    </div>
+            <div class="fde-field">
 
-                </div>
+                <label for="fde-tripDriver">
+                    Driver
+                </label>
 
-            `;
+                <input
+                    type="text"
+                    id="fde-tripDriver"
+                    placeholder="Driver name">
 
+            </div>
 
-            return;
 
-        }
+            <div class="fde-field">
 
-    }
+                <label for="fde-startKm">
+                    Start KM
+                </label>
 
+                <input
+                    type="number"
+                    id="fde-startKm"
+                    min="0"
+                    step="0.01"
+                    placeholder="0">
 
-    /* =====================================================
-       LOAD JAVASCRIPT
-    ===================================================== */
+            </div>
 
-    try {
 
-        await loadScriptOnce(
-            'js/fleet-delivery-data.js?v=20261006',
-            'data-fleet-delivery-data-js'
-        );
+            <div class="fde-field">
 
+                <label for="fde-endKm">
+                    End KM
+                </label>
 
-        if (
-            typeof window.initializeFleetDataEntry ===
-            'function'
-        ) {
+                <input
+                    type="number"
+                    id="fde-endKm"
+                    min="0"
+                    step="0.01"
+                    placeholder="0">
 
-            window.initializeFleetDataEntry();
+            </div>
 
-        }
 
+            <div class="fde-field">
 
-        console.log(
-            'Fleet & Delivery Data Entry initialized.'
-        );
+                <label for="fde-totalKm">
+                    Total KM
+                </label>
 
+                <input
+                    type="number"
+                    id="fde-totalKm"
+                    readonly
+                    placeholder="Auto calculated">
 
-    } catch (error) {
+            </div>
 
-        console.error(
-            'Fleet Data Entry JavaScript error:',
-            error
-        );
 
-    }
+            <div class="fde-field">
 
-}
+                <label for="fde-tripStatus">
+                    Status
+                </label>
+
+                <select id="fde-tripStatus">
+
+                    <option value="Completed">
+                        Completed
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="Cancelled">
+                        Cancelled
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-origin">
+                    Origin
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-origin"
+                    placeholder="Origin">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-destination">
+                    Destination
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-destination"
+                    placeholder="Destination">
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-purpose">
+                    Purpose
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-purpose"
+                    placeholder="Trip purpose">
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-tripRemarks">
+                    Remarks
+                </label>
+
+                <textarea
+                    id="fde-tripRemarks"
+                    placeholder="Additional remarks"></textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="fde-actions">
+
+            <button
+                type="button"
+                class="fde-btn secondary"
+                id="fde-clearTripBtn">
+                Clear
+            </button>
+
+            <button
+                type="button"
+                class="fde-btn primary"
+                id="fde-saveTripBtn">
+                Save Trip Ticket
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         FUEL
+    ====================================================== -->
+
+    <div
+        id="fde-fuel-section"
+        class="fde-section">
+
+        <div class="fde-section-header">
+
+            <div>
+                <h2>Fuel</h2>
+
+                <p>
+                    Encode fuel consumption and fuel cost
+                    per vehicle.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="fde-form-grid">
+
+            <div class="fde-field">
+
+                <label for="fde-fuelDate">
+                    Date
+                </label>
+
+                <input
+                    type="date"
+                    id="fde-fuelDate">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-fuelVehicle">
+                    Vehicle
+                </label>
+
+                <select id="fde-fuelVehicle">
+
+                    <option value="">
+                        Select Vehicle
+                    </option>
+
+                    <option value="TBO710">TBO710</option>
+                    <option value="TBO711">TBO711</option>
+                    <option value="TBO712">TBO712</option>
+                    <option value="TBO713">TBO713</option>
+                    <option value="TBO714">TBO714</option>
+                    <option value="TBO715">TBO715</option>
+                    <option value="TBO716">TBO716</option>
+                    <option value="TBO717">TBO717</option>
+                    <option value="TBO718">TBO718</option>
+                    <option value="TBO719">TBO719</option>
+                    <option value="TBO720">TBO720</option>
+                    <option value="TBO721">TBO721</option>
+                    <option value="TBO722">TBO722</option>
+                    <option value="TBO723">TBO723</option>
+                    <option value="TBO724">TBO724</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-fuelTripTicket">
+                    Trip Ticket No.
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-fuelTripTicket"
+                    placeholder="Optional">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-fuelStation">
+                    Fuel Station
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-fuelStation"
+                    placeholder="Fuel station">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-fuelLiters">
+                    Liters
+                </label>
+
+                <input
+                    type="number"
+                    id="fde-fuelLiters"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-fuelAmount">
+                    Amount
+                </label>
+
+                <input
+                    type="number"
+                    id="fde-fuelAmount"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-fuelOdometer">
+                    Odometer
+                </label>
+
+                <input
+                    type="number"
+                    id="fde-fuelOdometer"
+                    min="0"
+                    step="0.01"
+                    placeholder="0">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-fuelReceiptNo">
+                    Fuel Receipt No.
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-fuelReceiptNo"
+                    placeholder="Receipt number">
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-fuelRemarks">
+                    Remarks
+                </label>
+
+                <textarea
+                    id="fde-fuelRemarks"
+                    placeholder="Additional remarks"></textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="fde-actions">
+
+            <button
+                type="button"
+                class="fde-btn secondary"
+                id="fde-clearFuelBtn">
+                Clear
+            </button>
+
+            <button
+                type="button"
+                class="fde-btn primary"
+                id="fde-saveFuelBtn">
+                Save Fuel Record
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MAINTENANCE
+    ====================================================== -->
+
+    <div
+        id="fde-maintenance-section"
+        class="fde-section">
+
+        <div class="fde-section-header">
+
+            <div>
+                <h2>Maintenance</h2>
+
+                <p>
+                    Encode vehicle defects, repairs,
+                    maintenance cost and idle days.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="fde-form-grid">
+
+            <div class="fde-field">
+
+                <label for="fde-maintenanceDate">
+                    Date
+                </label>
+
+                <input
+                    type="date"
+                    id="fde-maintenanceDate">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-maintenanceVehicle">
+                    Vehicle
+                </label>
+
+                <select id="fde-maintenanceVehicle">
+
+                    <option value="">
+                        Select Vehicle
+                    </option>
+
+                    <option value="TBO710">TBO710</option>
+                    <option value="TBO711">TBO711</option>
+                    <option value="TBO712">TBO712</option>
+                    <option value="TBO713">TBO713</option>
+                    <option value="TBO714">TBO714</option>
+                    <option value="TBO715">TBO715</option>
+                    <option value="TBO716">TBO716</option>
+                    <option value="TBO717">TBO717</option>
+                    <option value="TBO718">TBO718</option>
+                    <option value="TBO719">TBO719</option>
+                    <option value="TBO720">TBO720</option>
+                    <option value="TBO721">TBO721</option>
+                    <option value="TBO722">TBO722</option>
+                    <option value="TBO723">TBO723</option>
+                    <option value="TBO724">TBO724</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-maintenanceType">
+                    Maintenance Type
+                </label>
+
+                <select id="fde-maintenanceType">
+
+                    <option value="">
+                        Select Type
+                    </option>
+
+                    <option value="Preventive">
+                        Preventive
+                    </option>
+
+                    <option value="Corrective">
+                        Corrective
+                    </option>
+
+                    <option value="Emergency">
+                        Emergency
+                    </option>
+
+                    <option value="Repair">
+                        Repair
+                    </option>
+
+                    <option value="PMS">
+                        PMS
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-maintenanceCost">
+                    Cost
+                </label>
+
+                <input
+                    type="number"
+                    id="fde-maintenanceCost"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-idleDays">
+                    Idle Days
+                </label>
+
+                <input
+                    type="number"
+                    id="fde-idleDays"
+                    min="0"
+                    step="1"
+                    placeholder="0">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-maintenanceStatus">
+                    Status
+                </label>
+
+                <select id="fde-maintenanceStatus">
+
+                    <option value="Completed">
+                        Completed
+                    </option>
+
+                    <option value="Ongoing">
+                        Ongoing
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-defect">
+                    Defect
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-defect"
+                    placeholder="Vehicle defect / issue">
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-repair">
+                    Repair / Action Taken
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-repair"
+                    placeholder="Repair performed">
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-maintenanceRemarks">
+                    Remarks
+                </label>
+
+                <textarea
+                    id="fde-maintenanceRemarks"
+                    placeholder="Additional remarks"></textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="fde-actions">
+
+            <button
+                type="button"
+                class="fde-btn secondary"
+                id="fde-clearMaintenanceBtn">
+                Clear
+            </button>
+
+            <button
+                type="button"
+                class="fde-btn primary"
+                id="fde-saveMaintenanceBtn">
+                Save Maintenance
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DELIVERY
+    ====================================================== -->
+
+    <div
+        id="fde-delivery-section"
+        class="fde-section">
+
+        <div class="fde-section-header">
+
+            <div>
+                <h2>Delivery</h2>
+
+                <p>
+                    Encode transfer, committed date,
+                    actual delivery and delay information.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="fde-form-grid">
+
+            <div class="fde-field">
+
+                <label for="fde-deliveryNo">
+                    Delivery No.
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-deliveryNo"
+                    placeholder="Delivery reference">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-deliverySO">
+                    SO Number
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-deliverySO"
+                    placeholder="SO Number">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-deliveryClient">
+                    Client
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-deliveryClient"
+                    placeholder="Client name">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-deliveryProject">
+                    Project
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-deliveryProject"
+                    placeholder="Project">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-deliveryVehicle">
+                    Vehicle
+                </label>
+
+                <select id="fde-deliveryVehicle">
+
+                    <option value="">
+                        Select Vehicle
+                    </option>
+
+                    <option value="TBO710">TBO710</option>
+                    <option value="TBO711">TBO711</option>
+                    <option value="TBO712">TBO712</option>
+                    <option value="TBO713">TBO713</option>
+                    <option value="TBO714">TBO714</option>
+                    <option value="TBO715">TBO715</option>
+                    <option value="TBO716">TBO716</option>
+                    <option value="TBO717">TBO717</option>
+                    <option value="TBO718">TBO718</option>
+                    <option value="TBO719">TBO719</option>
+                    <option value="TBO720">TBO720</option>
+                    <option value="TBO721">TBO721</option>
+                    <option value="TBO722">TBO722</option>
+                    <option value="TBO723">TBO723</option>
+                    <option value="TBO724">TBO724</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-dateTransfer">
+                    Date Transfer
+                </label>
+
+                <input
+                    type="date"
+                    id="fde-dateTransfer">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-committedDate">
+                    Committed Date
+                </label>
+
+                <input
+                    type="date"
+                    id="fde-committedDate">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-actualDate">
+                    Actual Date
+                </label>
+
+                <input
+                    type="date"
+                    id="fde-actualDate">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-leadTime">
+                    Lead Time
+                </label>
+
+                <input
+                    type="number"
+                    id="fde-leadTime"
+                    readonly
+                    placeholder="Auto calculated">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-deliveryStatus">
+                    Delivery Status
+                </label>
+
+                <select id="fde-deliveryStatus">
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="On Time">
+                        On Time
+                    </option>
+
+                    <option value="Delayed">
+                        Delayed
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-delaySource">
+                    Delay Source
+                </label>
+
+                <select id="fde-delaySource">
+
+                    <option value="">
+                        Select
+                    </option>
+
+                    <option value="Production">
+                        Production
+                    </option>
+
+                    <option value="Truck">
+                        Truck
+                    </option>
+
+                    <option value="Client">
+                        Client
+                    </option>
+
+                    <option value="Traffic">
+                        Traffic
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-delayReason">
+                    Delay Reason
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-delayReason"
+                    placeholder="Reason for delay">
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-deliveryRemarks">
+                    Remarks
+                </label>
+
+                <textarea
+                    id="fde-deliveryRemarks"
+                    placeholder="Additional remarks"></textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="fde-actions">
+
+            <button
+                type="button"
+                class="fde-btn secondary"
+                id="fde-clearDeliveryBtn">
+                Clear
+            </button>
+
+            <button
+                type="button"
+                class="fde-btn primary"
+                id="fde-saveDeliveryBtn">
+                Save Delivery
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         DR
+    ====================================================== -->
+
+    <div
+        id="fde-dr-section"
+        class="fde-section">
+
+        <div class="fde-section-header">
+
+            <div>
+                <h2>Delivery Receipt</h2>
+
+                <p>
+                    Encode DR monitoring information,
+                    delivery dates and status.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="fde-form-grid">
+
+            <div class="fde-field">
+
+                <label for="fde-drNumber">
+                    DR Number
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-drNumber"
+                    placeholder="DR Number">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drSO">
+                    SO Number
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-drSO"
+                    placeholder="SO Number">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drClient">
+                    Client
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-drClient"
+                    placeholder="Client name">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drProject">
+                    Project
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-drProject"
+                    placeholder="Project">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drVehicle">
+                    Vehicle
+                </label>
+
+                <select id="fde-drVehicle">
+
+                    <option value="">
+                        Select Vehicle
+                    </option>
+
+                    <option value="TBO710">TBO710</option>
+                    <option value="TBO711">TBO711</option>
+                    <option value="TBO712">TBO712</option>
+                    <option value="TBO713">TBO713</option>
+                    <option value="TBO714">TBO714</option>
+                    <option value="TBO715">TBO715</option>
+                    <option value="TBO716">TBO716</option>
+                    <option value="TBO717">TBO717</option>
+                    <option value="TBO718">TBO718</option>
+                    <option value="TBO719">TBO719</option>
+                    <option value="TBO720">TBO720</option>
+                    <option value="TBO721">TBO721</option>
+                    <option value="TBO722">TBO722</option>
+                    <option value="TBO723">TBO723</option>
+                    <option value="TBO724">TBO724</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drDateTransfer">
+                    Date Transfer
+                </label>
+
+                <input
+                    type="date"
+                    id="fde-drDateTransfer">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drCommittedDate">
+                    Committed Date
+                </label>
+
+                <input
+                    type="date"
+                    id="fde-drCommittedDate">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drDateDelivered">
+                    Date Delivered
+                </label>
+
+                <input
+                    type="date"
+                    id="fde-drDateDelivered">
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drStatus">
+                    Status
+                </label>
+
+                <select id="fde-drStatus">
+
+                    <option value="Prepared">
+                        Prepared
+                    </option>
+
+                    <option value="Released">
+                        Released
+                    </option>
+
+                    <option value="Delivered">
+                        Delivered
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="Overdue">
+                        Overdue
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field">
+
+                <label for="fde-drDelaySource">
+                    Delay Source
+                </label>
+
+                <select id="fde-drDelaySource">
+
+                    <option value="">
+                        Select
+                    </option>
+
+                    <option value="Production">
+                        Production
+                    </option>
+
+                    <option value="Truck">
+                        Truck
+                    </option>
+
+                    <option value="Client">
+                        Client
+                    </option>
+
+                    <option value="Traffic">
+                        Traffic
+                    </option>
+
+                    <option value="Other">
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-drDelayReason">
+                    Delay Reason
+                </label>
+
+                <input
+                    type="text"
+                    id="fde-drDelayReason"
+                    placeholder="Reason for delay">
+
+            </div>
+
+
+            <div class="fde-field full">
+
+                <label for="fde-drRemarks">
+                    Remarks
+                </label>
+
+                <textarea
+                    id="fde-drRemarks"
+                    placeholder="Additional remarks"></textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="fde-actions">
+
+            <button
+                type="button"
+                class="fde-btn secondary"
+                id="fde-clearDRBtn">
+                Clear
+            </button>
+
+            <button
+                type="button"
+                class="fde-btn primary"
+                id="fde-saveDRBtn">
+                Save DR
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ENCODED RECORDS
+    ====================================================== -->
+
+    <div class="fde-records">
+
+        <div class="fde-records-header">
+
+            <div>
+
+                <h2>
+                    Encoded Records
+                </h2>
+
+                <p>
+                    Saved fleet and delivery records.
+                </p>
+
+            </div>
+
+
+            <div class="fde-record-count">
+
+                Records:
+                <span id="fde-recordCount">
+                    0
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="fde-record-toolbar">
+
+            <select id="fde-recordTypeFilter">
+
+                <option value="all">
+                    All Records
+                </option>
+
+                <option value="tripTicket">
+                    Trip Ticket
+                </option>
+
+                <option value="fuel">
+                    Fuel
+                </option>
+
+                <option value="maintenance">
+                    Maintenance
+                </option>
+
+                <option value="delivery">
+                    Delivery
+                </option>
+
+                <option value="dr">
+                    DR
+                </option>
+
+            </select>
+
+
+            <input
+                type="text"
+                id="fde-recordSearch"
+                placeholder="Search vehicle, SO, DR, client, trip ticket...">
+
+        </div>
+
+
+        <div class="fde-table-wrap">
+
+            <table class="fde-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Reference</th>
+                        <th>Vehicle</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody id="fde-recordTableBody">
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="fde-empty">
+
+                            No records encoded yet.
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
