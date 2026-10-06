@@ -1,7 +1,8 @@
 <!-- =====================================================
      LOGIS-TECH SYSTEM
      SALES ORDER MODULE
-     VERSION: 20261006-03
+     sales-order.html
+     VERSION: 20261007-01
 ===================================================== -->
 
 <div
@@ -18,7 +19,6 @@
         id="salesOrderListView"
         class="so-list-view"
     >
-
 
         <!-- =================================================
              HEADER
@@ -47,14 +47,7 @@
             </div>
 
 
-            <!-- =================================================
-                 HEADER ACTIONS
-            ================================================== -->
-
             <div class="so-header-actions">
-
-
-                <!-- NEW CUSTOMER -->
 
                 <button
                     type="button"
@@ -73,8 +66,6 @@
 
                 </button>
 
-
-                <!-- CREATE SALES ORDER -->
 
                 <button
                     type="button"
@@ -104,9 +95,6 @@
 
         <div class="so-summary-grid">
 
-
-            <!-- TOTAL SALES ORDER -->
-
             <div
                 class="so-summary-card"
                 id="soTotalCard"
@@ -132,9 +120,6 @@
             </div>
 
 
-
-            <!-- PARTIAL -->
-
             <div
                 class="so-summary-card so-card-partial"
                 onclick="filterSOBySummary('PARTIAL')"
@@ -158,9 +143,6 @@
 
             </div>
 
-
-
-            <!-- ACTIVE -->
 
             <div
                 class="so-summary-card so-card-active"
@@ -186,9 +168,6 @@
             </div>
 
 
-
-            <!-- COMPLETED -->
-
             <div
                 class="so-summary-card so-card-completed"
                 onclick="filterSOBySummary('COMPLETED')"
@@ -212,9 +191,6 @@
 
             </div>
 
-
-
-            <!-- CANCELLED -->
 
             <div
                 class="so-summary-card so-card-cancelled"
@@ -249,9 +225,6 @@
 
         <div class="so-toolbar">
 
-
-            <!-- SEARCH -->
-
             <div class="so-search-box">
 
                 <span class="so-search-icon">
@@ -267,9 +240,6 @@
 
             </div>
 
-
-
-            <!-- STATUS FILTER -->
 
             <div class="so-filter-group">
 
@@ -311,9 +281,6 @@
             </div>
 
 
-
-            <!-- PAYMENT FILTER -->
-
             <div class="so-filter-group">
 
                 <label for="soPaymentFilter">
@@ -345,9 +312,6 @@
 
             </div>
 
-
-
-            <!-- REFRESH -->
 
             <button
                 type="button"
@@ -388,9 +352,6 @@
 
             <div class="so-action-buttons">
 
-
-                <!-- UPDATE -->
-
                 <button
                     type="button"
                     id="updateSOButton"
@@ -404,9 +365,6 @@
 
                 </button>
 
-
-
-                <!-- CANCEL -->
 
                 <button
                     type="button"
@@ -454,9 +412,6 @@
 
             </div>
 
-
-
-            <!-- TABLE -->
 
             <div class="table-container so-modern-table">
 
@@ -519,19 +474,12 @@
                     </thead>
 
 
-                    <tbody id="soTableBody">
-
-                        <!-- SALES ORDERS WILL LOAD HERE -->
-
-                    </tbody>
+                    <tbody id="soTableBody"></tbody>
 
                 </table>
 
             </div>
 
-
-
-            <!-- EMPTY STATE -->
 
             <div
                 id="soEmptyState"
@@ -570,13 +518,7 @@
 
 
     <!-- =====================================================
-         CUSTOMER FORM AREA
-         
-         IMPORTANT:
-         THIS IS NOW OUTSIDE #salesOrderListView
-         
-         This prevents the customer form from being hidden
-         when salesOrderListView is set to display:none.
+         CUSTOMER AREA
     ===================================================== -->
 
     <div
@@ -626,11 +568,7 @@
         <div
             id="customerFormContainer"
             class="so-customer-form-container"
-        >
-
-            <!-- create-customer.html will load here -->
-
-        </div>
+        ></div>
 
     </div>
 
@@ -698,7 +636,7 @@
 
 
         <!-- =================================================
-             POSTING STATUS PANEL
+             POSTING STATUS
         ================================================== -->
 
         <div
@@ -797,12 +735,10 @@
 
 
 
-            <!-- TRACKING SUMMARY -->
+            <!-- SUMMARY -->
 
             <div class="so-transaction-summary-grid">
 
-
-                <!-- DR -->
 
                 <div class="so-transaction-card">
 
@@ -829,9 +765,6 @@
                 </div>
 
 
-
-                <!-- INVOICE -->
-
                 <div class="so-transaction-card">
 
                     <div class="so-transaction-icon">
@@ -856,9 +789,6 @@
 
                 </div>
 
-
-
-                <!-- PAID -->
 
                 <div
                     class="so-transaction-card so-payment-paid"
@@ -886,9 +816,6 @@
 
                 </div>
 
-
-
-                <!-- BALANCE -->
 
                 <div
                     class="so-transaction-card so-payment-balance"
@@ -939,7 +866,9 @@
 
 
 
-            <!-- DR LIST -->
+            <!-- =================================================
+                 DELIVERY RECEIPTS
+            ================================================== -->
 
             <div class="so-tracking-section">
 
@@ -999,6 +928,7 @@
 
                         </thead>
 
+
                         <tbody id="detailDRBody">
 
                             <tr>
@@ -1022,7 +952,9 @@
 
 
 
-            <!-- INVOICE LIST -->
+            <!-- =================================================
+                 INVOICES
+            ================================================== -->
 
             <div class="so-tracking-section">
 
@@ -1082,6 +1014,7 @@
 
                         </thead>
 
+
                         <tbody id="detailInvoiceBody">
 
                             <tr>
@@ -1105,7 +1038,9 @@
 
 
 
-            <!-- PAYMENT HISTORY -->
+            <!-- =================================================
+                 PAYMENT HISTORY
+            ================================================== -->
 
             <div class="so-tracking-section">
 
@@ -1165,6 +1100,7 @@
 
                         </thead>
 
+
                         <tbody id="detailPaymentBody">
 
                             <tr>
@@ -1218,7 +1154,6 @@
             </div>
 
 
-
             <div class="so-detail-info-card">
 
                 <div class="so-detail-card-icon">
@@ -1240,7 +1175,6 @@
             </div>
 
 
-
             <div class="so-detail-info-card">
 
                 <div class="so-detail-card-icon">
@@ -1260,7 +1194,6 @@
                 </div>
 
             </div>
-
 
 
             <div
@@ -1339,7 +1272,6 @@
                 </div>
 
 
-
                 <div class="form-group">
 
                     <label for="detailSONumber">
@@ -1355,7 +1287,6 @@
                 </div>
 
 
-
                 <div class="form-group">
 
                     <label for="detailClientName">
@@ -1369,7 +1300,6 @@
                     >
 
                 </div>
-
 
 
                 <div class="form-group">
@@ -1416,7 +1346,6 @@
                 </div>
 
 
-
                 <div class="form-group">
 
                     <label for="detailAttention">
@@ -1430,7 +1359,6 @@
                     >
 
                 </div>
-
 
 
                 <div class="form-group">
@@ -1448,7 +1376,6 @@
                 </div>
 
 
-
                 <div class="form-group">
 
                     <label for="detailPONumber">
@@ -1462,7 +1389,6 @@
                     >
 
                 </div>
-
 
 
                 <div class="form-group">
@@ -1505,7 +1431,6 @@
                 </div>
 
 
-
                 <div class="form-group">
 
                     <label for="detailJobOrder">
@@ -1519,7 +1444,6 @@
                     >
 
                 </div>
-
 
 
                 <div class="form-group full">
@@ -1537,7 +1461,6 @@
                 </div>
 
 
-
                 <div class="form-group full">
 
                     <label for="detailDeliveryAddress">
@@ -1551,7 +1474,6 @@
                     >
 
                 </div>
-
 
 
                 <div class="form-group full">
@@ -1606,7 +1528,7 @@
 
                 <button
                     type="button"
-                    id="detailAddItemButton"
+                    id="addDetailItemButton"
                     class="so-btn so-btn-primary"
                     onclick="addDetailItem()"
                     style="display:none;"
@@ -1664,13 +1586,12 @@
                     </thead>
 
 
-                    <tbody id="soDetailsItemsBody">
+                    <tbody id="detailItemsContainer">
                     </tbody>
 
                 </table>
 
             </div>
-
 
 
             <div class="detail-summary">
@@ -1682,15 +1603,23 @@
                         Subtotal
                     </span>
 
+                    <input
+                        type="number"
+                        id="detailSubtotal"
+                        class="so-total-input"
+                        value="0"
+                        disabled
+                        style="display:none;"
+                    >
+
                     <span
                         class="so-total-value"
-                        id="detailSubtotal"
+                        id="detailSubtotalText"
                     >
                         ₱0.00
                     </span>
 
                 </div>
-
 
 
                 <div class="so-total-row">
@@ -1716,7 +1645,6 @@
                 </div>
 
 
-
                 <div class="so-total-row">
 
                     <label class="so-total-label">
@@ -1737,15 +1665,22 @@
                     </label>
 
 
+                    <input
+                        type="number"
+                        id="detailVATAmount"
+                        value="0"
+                        disabled
+                        style="display:none;"
+                    >
+
                     <span
                         class="so-total-value"
-                        id="detailVAT"
+                        id="detailVATText"
                     >
                         ₱0.00
                     </span>
 
                 </div>
-
 
 
                 <div class="so-total-row">
@@ -1754,12 +1689,43 @@
                         VAT Rate
                     </span>
 
+                    <input
+                        type="number"
+                        id="detailVATRate"
+                        value="12"
+                        disabled
+                        style="display:none;"
+                    >
+
                     <span class="so-total-value">
                         12%
                     </span>
 
                 </div>
 
+
+                <div class="so-total-row">
+
+                    <span class="so-total-label">
+                        Vatable Amount
+                    </span>
+
+                    <input
+                        type="number"
+                        id="detailVatableAmount"
+                        value="0"
+                        disabled
+                        style="display:none;"
+                    >
+
+                    <span
+                        class="so-total-value"
+                        id="detailVatableText"
+                    >
+                        ₱0.00
+                    </span>
+
+                </div>
 
 
                 <div class="so-total-row grand-total-row">
@@ -1768,9 +1734,17 @@
                         GRAND TOTAL
                     </span>
 
+                    <input
+                        type="number"
+                        id="detailGrandTotal"
+                        value="0"
+                        disabled
+                        style="display:none;"
+                    >
+
                     <span
                         class="so-total-value"
-                        id="detailGrandTotal"
+                        id="detailGrandTotalText"
                     >
                         ₱0.00
                     </span>
@@ -1827,7 +1801,7 @@
 
                     <button
                         type="button"
-                        id="detailAddFileButton"
+                        id="addSOFileButton"
                         class="so-btn so-btn-primary"
                         onclick="selectDetailSOFiles()"
                         style="display:none;"
@@ -1898,7 +1872,6 @@
                 </button>
 
 
-
                 <button
                     type="button"
                     id="detailCancelButton"
@@ -1912,10 +1885,9 @@
                 </button>
 
 
-
                 <button
                     type="button"
-                    id="detailEditButton"
+                    id="enableSOUpdateButton"
                     class="so-btn so-btn-secondary"
                     onclick="enableSOUpdate()"
                 >
@@ -1924,7 +1896,6 @@
                     UPDATE
 
                 </button>
-
 
 
                 <button
@@ -1940,10 +1911,9 @@
                 </button>
 
 
-
                 <button
                     type="button"
-                    id="detailSaveButton"
+                    id="saveSOUpdateButton"
                     class="so-btn so-btn-success"
                     onclick="saveSOUpdate()"
                     style="display:none;"
@@ -1961,7 +1931,7 @@
 
 
         <!-- =================================================
-             UPDATE MODE ACTIONS
+             UPDATE MODE ACTION BAR
         ================================================== -->
 
         <div
@@ -1995,7 +1965,7 @@
 
                 <button
                     type="button"
-                    id="soUpdateCancelButton"
+                    id="cancelSOEditButton"
                     class="so-btn so-btn-secondary"
                     onclick="cancelSOUpdateMode()"
                 >
@@ -2035,6 +2005,5 @@
         </div>
 
     </div>
-
 
 </div>
