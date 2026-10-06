@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,7 +19,7 @@
 
     <link
         rel="stylesheet"
-        href="css/index.css"
+        href="css/index.css?v=20261006"
     >
 
 
@@ -30,7 +29,7 @@
 
     <link
         rel="stylesheet"
-        href="css/dashboard.css"
+        href="css/dashboard.css?v=20261006"
     >
 
 
@@ -40,7 +39,7 @@
 
     <link
         rel="stylesheet"
-        href="css/sales-order.css"
+        href="css/sales-order.css?v=20261006"
     >
 
 
@@ -50,7 +49,7 @@
 
     <link
         rel="stylesheet"
-        href="css/delivery.css"
+        href="css/delivery.css?v=20261006"
     >
 
 
@@ -60,7 +59,7 @@
 
     <link
         rel="stylesheet"
-        href="css/fleet-analytics.css"
+        href="css/fleet-analytics.css?v=20261006"
     >
 
 
@@ -70,7 +69,7 @@
 
     <link
         rel="stylesheet"
-        href="css/invoicing.css"
+        href="css/invoicing.css?v=20261006"
     >
 
 
@@ -80,7 +79,7 @@
 
     <link
         rel="stylesheet"
-        href="css/system-settings.css"
+        href="css/system-settings.css?v=20261006"
     >
 
 </head>
@@ -240,7 +239,6 @@
 
     <div class="topbar">
 
-
         <div
             class="page-title"
             id="pageTitle"
@@ -252,7 +250,6 @@
 
 
         <div class="user-area">
-
 
             <span id="welcomeUser">
 
@@ -280,7 +277,6 @@
 
             </button>
 
-
         </div>
 
     </div>
@@ -289,7 +285,7 @@
 
     <!-- =====================================================
          CONTENT
-    ===================================================== -->
+    ====================================================== -->
 
     <div class="content">
 
@@ -374,7 +370,6 @@
 
 
             <div class="section">
-
 
                 <h2>
                     Delivery Receipt Printing
@@ -653,7 +648,6 @@
 
             <div class="action-bar">
 
-
                 <button
                     class="btn btn-secondary"
                     onclick="clearDRForm()"
@@ -672,7 +666,6 @@
                     🖨️ PRINT DR
 
                 </button>
-
 
             </div>
 
@@ -770,16 +763,14 @@
 
         <!-- =================================================
              PROFILE
-        ================================================= -->
+        ================================================== -->
 
         <div
             id="profile"
             class="page"
         >
 
-
             <div class="page-header">
-
 
                 <div>
 
@@ -793,16 +784,12 @@
 
                 </div>
 
-
             </div>
-
 
 
             <div class="section profile-card">
 
-
                 <div class="profile-header">
-
 
                     <div
                         class="profile-avatar"
@@ -815,7 +802,6 @@
 
 
                     <div>
-
 
                         <div
                             class="profile-name"
@@ -833,9 +819,7 @@
 
                         </div>
 
-
                     </div>
-
 
                 </div>
 
@@ -849,9 +833,7 @@
                     <div class="profile-info-item">
 
                         <div class="profile-info-label">
-
                             FULL NAME
-
                         </div>
 
                         <div
@@ -871,9 +853,7 @@
                     <div class="profile-info-item">
 
                         <div class="profile-info-label">
-
                             USERNAME
-
                         </div>
 
                         <div
@@ -893,9 +873,7 @@
                     <div class="profile-info-item">
 
                         <div class="profile-info-label">
-
                             ACCOUNT TYPE
-
                         </div>
 
                         <div class="profile-info-value">
@@ -912,9 +890,7 @@
                     <div class="profile-info-item">
 
                         <div class="profile-info-label">
-
                             ACCOUNT STATUS
-
                         </div>
 
                         <div class="profile-info-value">
@@ -928,9 +904,7 @@
 
                 </div>
 
-
             </div>
-
 
         </div>
 
@@ -974,15 +948,6 @@ let deliveryModuleLoaded = false;
 let fleetAnalyticsModuleLoaded = false;
 
 let invoicingModuleLoaded = false;
-
-
-/*
- * IMPORTANT
- *
- * System Settings must start as FALSE.
- *
- * The HTML has not been loaded when the page first opens.
- */
 
 let systemSettingsModuleLoaded = false;
 
@@ -1200,7 +1165,6 @@ function loadScriptOnce(
     return new Promise(
         function(resolve, reject) {
 
-
             const existing =
                 document.querySelector(
                     `script[${attributeName}]`
@@ -1212,7 +1176,6 @@ function loadScriptOnce(
             ================================================= */
 
             if (existing) {
-
 
                 if (
                     existing.dataset.loaded ===
@@ -1260,7 +1223,6 @@ function loadScriptOnce(
                 return;
 
             }
-
 
 
             /* =================================================
@@ -1324,7 +1286,6 @@ function loadScriptOnce(
                 script
             );
 
-
         }
     );
 
@@ -1375,10 +1336,13 @@ async function loadSalesOrderModule() {
 
     try {
 
-
         const response =
             await fetch(
-                'pages/sales-order.html'
+                'pages/sales-order.html?v=' +
+                Date.now(),
+                {
+                    cache: 'no-store'
+                }
             );
 
 
@@ -1419,7 +1383,6 @@ async function loadSalesOrderModule() {
 
 
     } catch (error) {
-
 
         console.error(
             'Sales Order module error:',
@@ -1491,10 +1454,13 @@ async function loadDeliveryModule() {
 
     try {
 
-
         const response =
             await fetch(
-                'pages/delivery.html'
+                'pages/delivery.html?v=' +
+                Date.now(),
+                {
+                    cache: 'no-store'
+                }
             );
 
 
@@ -1525,7 +1491,7 @@ async function loadDeliveryModule() {
 
 
         await loadScriptOnce(
-            'js/delivery.js',
+            'js/delivery.js?v=20261006',
             'data-delivery-js'
         );
 
@@ -1536,7 +1502,6 @@ async function loadDeliveryModule() {
 
 
     } catch (error) {
-
 
         console.error(
             'Delivery module error:',
@@ -1593,7 +1558,6 @@ async function loadFleetAnalyticsModule() {
     }
 
 
-
     /* =====================================================
        LOAD HTML
     ===================================================== */
@@ -1602,13 +1566,15 @@ async function loadFleetAnalyticsModule() {
         !fleetAnalyticsModuleLoaded
     ) {
 
-
         try {
-
 
             const response =
                 await fetch(
-                    'pages/fleet-analytics.html'
+                    'pages/fleet-analytics.html?v=' +
+                    Date.now(),
+                    {
+                        cache: 'no-store'
+                    }
                 );
 
 
@@ -1640,7 +1606,6 @@ async function loadFleetAnalyticsModule() {
 
         } catch (error) {
 
-
             console.error(
                 'Fleet Analytics HTML error:',
                 error
@@ -1670,17 +1635,11 @@ async function loadFleetAnalyticsModule() {
     }
 
 
-
     /* =====================================================
        LOAD ANALYTICS JAVASCRIPT
     ===================================================== */
 
     try {
-
-
-        /* =================================================
-           CHART.JS
-        ================================================= */
 
         await loadScriptOnce(
             'https://cdn.jsdelivr.net/npm/chart.js',
@@ -1688,60 +1647,34 @@ async function loadFleetAnalyticsModule() {
         );
 
 
-
-        /* =================================================
-           MAIN ANALYTICS CONTROLLER
-        ================================================= */
-
         await loadScriptOnce(
-            'js/fleet-analytics.js',
+            'js/fleet-analytics.js?v=20261006',
             'data-fleet-analytics-js'
         );
 
 
-
-        /* =================================================
-           FLEET PERFORMANCE
-        ================================================= */
-
         await loadScriptOnce(
-            'js/fleet-performance.js',
+            'js/fleet-performance.js?v=20261006',
             'data-fleet-performance-js'
         );
 
 
-
-        /* =================================================
-           DELIVERY PERFORMANCE
-        ================================================= */
-
         await loadScriptOnce(
-            'js/delivery-performance.js',
+            'js/delivery-performance.js?v=20261006',
             'data-delivery-performance-js'
         );
 
 
-
-        /* =================================================
-           DR MONITORING
-        ================================================= */
-
         await loadScriptOnce(
-            'js/dr-monitoring.js',
+            'js/dr-monitoring.js?v=20261006',
             'data-dr-monitoring-js'
         );
 
-
-
-        /* =================================================
-           INITIALIZE
-        ================================================= */
 
         if (
             typeof window.initializeFleetAnalytics ===
             'function'
         ) {
-
 
             window.initializeFleetAnalytics();
 
@@ -1750,26 +1683,21 @@ async function loadFleetAnalyticsModule() {
                 'Fleet Analytics initialized successfully.'
             );
 
-
         } else {
-
 
             console.error(
                 'initializeFleetAnalytics() not found.'
             );
-
 
         }
 
 
     } catch (error) {
 
-
         console.error(
             'Fleet Analytics JavaScript error:',
             error
         );
-
 
     }
 
@@ -1814,17 +1742,14 @@ async function loadInvoicingModule() {
 
 
     /* =====================================================
-       LOAD HTML ONLY ONCE
+       LOAD INVOICING HTML ONLY ONCE
     ===================================================== */
 
-    if (!invoicingModuleLoaded) {
+    if (
+        !invoicingModuleLoaded
+    ) {
 
         try {
-
-            /*
-             * Build the URL from the current GitHub Pages
-             * location instead of relying on a relative path.
-             */
 
             const invoiceHTMLUrl =
                 new URL(
@@ -1838,10 +1763,6 @@ async function loadInvoicingModule() {
                 invoiceHTMLUrl
             );
 
-
-            /* =================================================
-               FETCH HTML
-            ================================================= */
 
             const response =
                 await fetch(
@@ -1862,10 +1783,6 @@ async function loadInvoicingModule() {
             );
 
 
-            /* =================================================
-               HTTP ERROR
-            ================================================= */
-
             if (!response.ok) {
 
                 throw new Error(
@@ -1878,23 +1795,9 @@ async function loadInvoicingModule() {
             }
 
 
-            /* =================================================
-               READ HTML
-            ================================================= */
-
             const html =
                 await response.text();
 
-
-            console.log(
-                'Invoice HTML length:',
-                html.length
-            );
-
-
-            /* =================================================
-               EMPTY HTML
-            ================================================= */
 
             if (
                 !html ||
@@ -1925,13 +1828,6 @@ async function loadInvoicingModule() {
             );
 
 
-            /* =================================================
-               IMPORTANT:
-               We intentionally stop here if JS does not
-               exist yet.
-            ================================================= */
-
-
         } catch (error) {
 
             console.error(
@@ -1960,7 +1856,7 @@ async function loadInvoicingModule() {
                     border:1px solid #f0c9c5;
                     border-radius:12px;
                     color:#7f1d1d;
-                    font-family:Segoe UI, Arial, sans-serif;
+                    font-family:Segoe UI,Arial,sans-serif;
                 ">
 
                     <div style="
@@ -2012,47 +1908,70 @@ async function loadInvoicingModule() {
 
 
     /* =====================================================
-       INVOICE JAVASCRIPT
-
-       JS file does not exist yet.
-
-       DO NOT show an HTML load error because of this.
+       LOAD INVOICING JAVASCRIPT
     ===================================================== */
 
-    const invoiceScript =
-        document.querySelector(
-            'script[data-invoicing-js]'
+    try {
+
+        await loadScriptOnce(
+            'js/invoicing.js?v=20261006',
+            'data-invoicing-js'
         );
 
-
-    if (invoiceScript) {
 
         console.log(
-            'Invoicing JavaScript already exists.'
+            'Invoicing JavaScript loaded successfully.'
         );
 
-        return;
+
+        /* =================================================
+           INITIALIZE INVOICING
+        ================================================= */
+
+        if (
+            typeof window.initializeInvoicing ===
+            'function'
+        ) {
+
+            window.initializeInvoicing();
+
+
+            console.log(
+                'Invoicing initialized successfully.'
+            );
+
+        } else {
+
+            console.warn(
+                'initializeInvoicing() not found in js/invoicing.js'
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            '========================================'
+        );
+
+        console.error(
+            'INVOICING JAVASCRIPT ERROR'
+        );
+
+        console.error(
+            error
+        );
+
+        console.error(
+            '========================================'
+        );
 
     }
 
 
-    /*
-     * TEMPORARY:
-     * We are intentionally NOT loading js/invoicing.js
-     * until we build the Supabase version.
-     */
-
     console.log(
-        'Invoicing HTML ready.'
-    );
-
-    console.log(
-        'Invoicing JavaScript will be connected after Supabase setup.'
-    );
-
-
-    console.log(
-        '========================================'
+        'Invoicing module ready.'
     );
 
 }
@@ -2080,10 +1999,6 @@ async function loadSystemSettingsModule() {
         );
 
 
-    /* =====================================================
-       CHECK CONTAINER
-    ===================================================== */
-
     if (!container) {
 
         console.error(
@@ -2096,7 +2011,7 @@ async function loadSystemSettingsModule() {
 
 
     /* =====================================================
-       LOAD HTML ONLY ONCE
+       LOAD HTML
     ===================================================== */
 
     if (
@@ -2105,23 +2020,12 @@ async function loadSystemSettingsModule() {
 
         try {
 
-
             const settingsHTMLUrl =
                 new URL(
                     'pages/system-settings.html',
                     window.location.href
                 ).href;
 
-
-            console.log(
-                'System Settings HTML URL:',
-                settingsHTMLUrl
-            );
-
-
-            /* =================================================
-               FETCH HTML
-            ================================================= */
 
             const response =
                 await fetch(
@@ -2135,17 +2039,6 @@ async function loadSystemSettingsModule() {
                 );
 
 
-            console.log(
-                'System Settings response:',
-                response.status,
-                response.statusText
-            );
-
-
-            /* =================================================
-               HTTP ERROR
-            ================================================= */
-
             if (!response.ok) {
 
                 throw new Error(
@@ -2158,23 +2051,9 @@ async function loadSystemSettingsModule() {
             }
 
 
-            /* =================================================
-               READ HTML
-            ================================================= */
-
             const html =
                 await response.text();
 
-
-            console.log(
-                'System Settings HTML length:',
-                html.length
-            );
-
-
-            /* =================================================
-               EMPTY HTML
-            ================================================= */
 
             if (
                 !html ||
@@ -2187,10 +2066,6 @@ async function loadSystemSettingsModule() {
 
             }
 
-
-            /* =================================================
-               INSERT HTML
-            ================================================= */
 
             container.innerHTML =
                 html;
@@ -2207,21 +2082,9 @@ async function loadSystemSettingsModule() {
 
         } catch (error) {
 
-
             console.error(
-                '========================================'
-            );
-
-            console.error(
-                'SYSTEM SETTINGS HTML LOAD ERROR'
-            );
-
-            console.error(
+                'SYSTEM SETTINGS HTML LOAD ERROR:',
                 error
-            );
-
-            console.error(
-                '========================================'
             );
 
 
@@ -2257,22 +2120,6 @@ async function loadSystemSettingsModule() {
 
                     </div>
 
-
-                    <div style="
-                        margin-top:15px;
-                        padding:12px;
-                        background:#fff7f6;
-                        border-radius:8px;
-                        font-size:11px;
-                        line-height:1.7;
-                    ">
-
-                        <strong>Expected file:</strong><br>
-
-                        pages/system-settings.html
-
-                    </div>
-
                 </div>
 
             `;
@@ -2286,14 +2133,13 @@ async function loadSystemSettingsModule() {
 
 
     /* =====================================================
-       LOAD SYSTEM SETTINGS JAVASCRIPT
+       LOAD SETTINGS JAVASCRIPT
     ===================================================== */
 
     try {
 
-
         await loadScriptOnce(
-            'js/system-settings.js',
+            'js/system-settings.js?v=20261006',
             'data-system-settings-js'
         );
 
@@ -2303,15 +2149,10 @@ async function loadSystemSettingsModule() {
         );
 
 
-        /* =================================================
-           INITIALIZE SETTINGS
-        ================================================= */
-
         if (
             typeof initializeSystemSettings ===
             'function'
         ) {
-
 
             initializeSystemSettings();
 
@@ -2320,35 +2161,20 @@ async function loadSystemSettingsModule() {
                 'System Settings initialized successfully.'
             );
 
-
         } else {
-
 
             console.error(
                 'initializeSystemSettings() not found.'
             );
-
 
         }
 
 
     } catch (error) {
 
-
         console.error(
-            '========================================'
-        );
-
-        console.error(
-            'SYSTEM SETTINGS JAVASCRIPT ERROR'
-        );
-
-        console.error(
+            'SYSTEM SETTINGS JAVASCRIPT ERROR:',
             error
-        );
-
-        console.error(
-            '========================================'
         );
 
     }
@@ -2368,7 +2194,6 @@ async function loadSystemSettingsModule() {
 
 function loadUserAccount() {
 
-
     const savedUser =
         localStorage.getItem(
             'logitechUser'
@@ -2386,10 +2211,8 @@ function loadUserAccount() {
         loggedIn !== 'true'
     ) {
 
-
         window.location.href =
             'login.html';
-
 
         return;
 
@@ -2401,34 +2224,27 @@ function loadUserAccount() {
 
     try {
 
-
         user =
             JSON.parse(
                 savedUser
             );
 
-
     } catch (error) {
-
 
         localStorage.removeItem(
             'logitechUser'
         );
 
-
         localStorage.removeItem(
             'logitechLoggedIn'
         );
 
-
         window.location.href =
             'login.html';
-
 
         return;
 
     }
-
 
 
     const fullname =
@@ -2436,7 +2252,6 @@ function loadUserAccount() {
         user.fullName ||
         user.username ||
         'USER';
-
 
 
     /* =================================================
@@ -2460,7 +2275,6 @@ function loadUserAccount() {
     }
 
 
-
     /* =================================================
        PROFILE NAME
     ================================================= */
@@ -2479,7 +2293,6 @@ function loadUserAccount() {
             fullname;
 
     }
-
 
 
     /* =================================================
@@ -2504,7 +2317,6 @@ function loadUserAccount() {
     }
 
 
-
     /* =================================================
        USERNAME
     ================================================= */
@@ -2524,7 +2336,6 @@ function loadUserAccount() {
             '-';
 
     }
-
 
 
     /* =================================================
@@ -2557,7 +2368,6 @@ function loadUserAccount() {
 ========================================================= */
 
 function openProfile() {
-
 
     document
         .querySelectorAll('.page')
@@ -2623,7 +2433,6 @@ function openProfile() {
 
 function logoutUser() {
 
-
     const confirmLogout =
         confirm(
             'Are you sure you want to logout?'
@@ -2669,7 +2478,6 @@ document.addEventListener(
     'DOMContentLoaded',
     function() {
 
-
         console.log(
             'LOGIS-TECH SYSTEM initialized.'
         );
@@ -2703,7 +2511,6 @@ document.addEventListener(
 
         }
 
-
     }
 );
 
@@ -2716,7 +2523,7 @@ document.addEventListener(
 ========================================================= -->
 
 <script
-    src="js/sales-order.js"
+    src="js/sales-order.js?v=20261006"
 ></script>
 
 
