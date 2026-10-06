@@ -2534,16 +2534,41 @@ function openCreateSO() {
    OPEN INSIDE SALES ORDER
 ========================================================= */
 
+let customerModuleLoaded = false;
+
+let customerSavedEventBound = false;
+
+let customerCancelEventBound = false;
+
+
+/* =========================================================
+   OPEN NEW CUSTOMER
+========================================================= */
+
 async function openNewCustomerFromSalesOrder() {
 
     console.log(
-        "Opening New Customer..."
+        "================================="
+    );
+
+    console.log(
+        "LOGIS-TECH: OPEN NEW CUSTOMER"
+    );
+
+    console.log(
+        "================================="
     );
 
 
     const listView =
         document.getElementById(
             "salesOrderListView"
+        );
+
+
+    const detailsPage =
+        document.getElementById(
+            "soDetails"
         );
 
 
@@ -2561,8 +2586,12 @@ async function openNewCustomerFromSalesOrder() {
 
     if (!customerArea) {
 
+        console.error(
+            "customerArea not found."
+        );
+
         alert(
-            "Customer area not found in Sales Order HTML."
+            "Customer area not found in Sales Order."
         );
 
         return;
@@ -2571,6 +2600,10 @@ async function openNewCustomerFromSalesOrder() {
 
 
     if (!container) {
+
+        console.error(
+            "customerFormContainer not found."
+        );
 
         alert(
             "Customer form container not found."
@@ -2582,7 +2615,7 @@ async function openNewCustomerFromSalesOrder() {
 
 
     /*
-     * Hide SO list
+     * HIDE SALES ORDER CONTENT
      */
 
     if (listView) {
@@ -2593,8 +2626,16 @@ async function openNewCustomerFromSalesOrder() {
     }
 
 
+    if (detailsPage) {
+
+        detailsPage.style.display =
+            "none";
+
+    }
+
+
     /*
-     * Show customer area
+     * SHOW CUSTOMER AREA
      */
 
     customerArea.style.display =
@@ -2602,29 +2643,41 @@ async function openNewCustomerFromSalesOrder() {
 
 
     /*
-     * Loading
+     * LOADING DISPLAY
      */
 
     container.innerHTML = `
 
         <div
+            class="customer-module-loading"
             style="
-                padding:40px;
+                padding:60px 30px;
                 text-align:center;
             "
         >
 
-            <div style="font-size:30px;">
+            <div
+                style="
+                    font-size:40px;
+                    margin-bottom:15px;
+                "
+            >
                 ⏳
             </div>
 
-            <strong>
+            <strong
+                style="
+                    display:block;
+                    font-size:18px;
+                    margin-bottom:8px;
+                "
+            >
                 Loading Customer Form...
             </strong>
 
-            <div style="margin-top:8px;">
+            <span>
                 Please wait...
-            </div>
+            </span>
 
         </div>
 
@@ -2634,26 +2687,39 @@ async function openNewCustomerFromSalesOrder() {
     try {
 
         /*
-         * LOAD CSS
+         * =================================================
+         * LOAD CUSTOMER CSS
+         * =================================================
          */
 
         await loadCustomerCSS();
 
 
         /*
-         * LOAD HTML
+         * =================================================
+         * FETCH CUSTOMER HTML
+         * =================================================
          */
 
         const response =
             await fetch(
-                "pages/create-customer.html?v=20261006"
+                "pages/create-customer.html?v=" +
+                Date.now(),
+                {
+                    method:
+                        "GET",
+
+                    cache:
+                        "no-store"
+                }
             );
 
 
         if (!response.ok) {
 
             throw new Error(
-                "Unable to load create-customer.html"
+                "Unable to load create-customer.html. HTTP " +
+                response.status
             );
 
         }
@@ -2663,8 +2729,24 @@ async function openNewCustomerFromSalesOrder() {
             await response.text();
 
 
+        if (!html || !html.trim()) {
+
+            throw new Error(
+                "create-customer.html is empty."
+            );
+
+        }
+
+
+        console.log(
+            "Customer HTML loaded successfully."
+        );
+
+
         /*
-         * Extract BODY content
+         * =================================================
+         * PARSE HTML
+         * =================================================
          */
 
         const parser =
@@ -2678,9 +2760,19 @@ async function openNewCustomerFromSalesOrder() {
             );
 
 
+        if (!doc.body) {
+
+            throw new Error(
+                "Customer HTML body was not found."
+            );
+
+        }
+
+
         /*
-         * Remove script tags from HTML
-         * because we load JS separately
+         * REMOVE SCRIPTS
+         *
+         * create-customer.js is loaded separately.
          */
 
         doc
@@ -2696,14 +2788,58 @@ async function openNewCustomerFromSalesOrder() {
             );
 
 
-        container.innerHTML =
-            doc.body
-                ? doc.body.innerHTML
-                : html;
+        /*
+         * REMOVE LINK TAGS
+         *
+         * CSS is loaded separately.
+         */
+
+        doc
+            .querySelectorAll(
+                "link"
+            )
+            .forEach(
+                function(link) {
+
+                    link.remove();
+
+                }
+            );
 
 
         /*
+         * =================================================
+         * INJECT CUSTOMER BODY
+         * =================================================
+         */
+
+        container.innerHTML =
+            doc.body.innerHTML;
+
+
+        /*
+         * VERIFY FORM EXISTS
+         */
+
+        const customerForm =
+            document.getElementById(
+                "customerForm"
+            );
+
+
+        if (!customerForm) {
+
+            throw new Error(
+                "Customer form was not found after loading HTML."
+            );
+
+        }
+
+
+        /*
+         * =================================================
          * LOAD CUSTOMER JS
+         * =================================================
          */
 
         await loadCustomerJS();
@@ -2714,46 +2850,77 @@ async function openNewCustomerFromSalesOrder() {
 
 
         /*
-         * INITIALIZE CUSTOMER FORM
+         * =================================================
+         * INITIALIZE CUSTOMER MODULE
+         * =================================================
          */
 
         if (
-            typeof window.initializeCreateCustomer ===
-            "function"
-        ) {
-
-            await window.initializeCreateCustomer();
-
-        }
-        else if (
             typeof window.initializeCustomerForm ===
             "function"
         ) {
 
-            await window.initializeCustomerForm();
+            const initialized =
+                window.initializeCustomerForm();
+
+
+            if (
+                initialized === false
+            ) {
+
+                throw new Error(
+                    "Customer form initialization failed."
+                );
+
+            }
 
         }
-        else if (
-            typeof window.loadCustomerForm ===
-            "function"
-        ) {
+        else {
 
-            await window.loadCustomerForm();
+            throw new Error(
+                "initializeCustomerForm() was not found."
+            );
 
         }
 
 
         /*
-         * SCROLL TO FORM
+         * =================================================
+         * BIND EVENTS
+         * =================================================
+         */
+
+        bindCustomerModuleEvents();
+
+
+        /*
+         * =================================================
+         * SCROLL
+         * =================================================
          */
 
         customerArea.scrollIntoView({
+
             behavior:
                 "smooth",
 
             block:
                 "start"
+
         });
+
+
+        console.log(
+            "================================="
+        );
+
+        console.log(
+            "CUSTOMER MODULE READY"
+        );
+
+        console.log(
+            "================================="
+        );
 
 
     } catch (error) {
@@ -2768,31 +2935,68 @@ async function openNewCustomerFromSalesOrder() {
 
             <div
                 style="
-                    padding:40px;
+                    padding:50px 30px;
                     text-align:center;
                     color:#b42318;
                 "
             >
 
-                <strong>
-                    Unable to load Customer Form.
+                <div
+                    style="
+                        font-size:42px;
+                        margin-bottom:15px;
+                    "
+                >
+                    ⚠
+                </div>
+
+                <strong
+                    style="
+                        display:block;
+                        font-size:18px;
+                        margin-bottom:10px;
+                    "
+                >
+                    Unable to Load Customer Form
                 </strong>
 
-                <br><br>
+                <small
+                    style="
+                        display:block;
+                        margin-bottom:20px;
+                    "
+                >
 
-                <small>
                     ${escapeHTML(
-                        error.message
+                        error.message ||
+                        "Unknown error."
                     )}
+
                 </small>
 
-                <br><br>
 
                 <button
                     type="button"
-                    onclick="openNewCustomerFromSalesOrder()"
+                    class="btn btn-primary"
+                    onclick="
+                        openNewCustomerFromSalesOrder()
+                    "
                 >
                     TRY AGAIN
+                </button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-secondary"
+                    onclick="
+                        closeCustomerFromSalesOrder()
+                    "
+                    style="
+                        margin-left:8px;
+                    "
+                >
+                    CLOSE
                 </button>
 
             </div>
@@ -2810,6 +3014,11 @@ async function openNewCustomerFromSalesOrder() {
 
 function closeCustomerFromSalesOrder() {
 
+    console.log(
+        "Closing Customer Form..."
+    );
+
+
     const customerArea =
         document.getElementById(
             "customerArea"
@@ -2822,6 +3031,16 @@ function closeCustomerFromSalesOrder() {
         );
 
 
+    const detailsPage =
+        document.getElementById(
+            "soDetails"
+        );
+
+
+    /*
+     * HIDE CUSTOMER
+     */
+
     if (customerArea) {
 
         customerArea.style.display =
@@ -2829,6 +3048,22 @@ function closeCustomerFromSalesOrder() {
 
     }
 
+
+    /*
+     * HIDE DETAILS
+     */
+
+    if (detailsPage) {
+
+        detailsPage.style.display =
+            "none";
+
+    }
+
+
+    /*
+     * SHOW SALES ORDER LIST
+     */
 
     if (listView) {
 
@@ -2840,16 +3075,21 @@ function closeCustomerFromSalesOrder() {
 
     /*
      * REFRESH CUSTOMER DATA
-     *
-     * This is important if a new customer
-     * was just created.
      */
 
     refreshCustomerDataAfterSave();
 
 
     /*
-     * Scroll top
+     * RESET CUSTOMER MODULE STATE
+     */
+
+    customerModuleLoaded =
+        false;
+
+
+    /*
+     * SCROLL TO SALES ORDER
      */
 
     const salesPage =
@@ -2861,12 +3101,84 @@ function closeCustomerFromSalesOrder() {
     if (salesPage) {
 
         salesPage.scrollIntoView({
+
             behavior:
                 "smooth",
 
             block:
                 "start"
+
         });
+
+    }
+
+
+    console.log(
+        "Customer Form closed."
+    );
+
+}
+
+
+/* =========================================================
+   CUSTOMER MODULE EVENTS
+========================================================= */
+
+function bindCustomerModuleEvents() {
+
+    if (
+        !customerSavedEventBound
+    ) {
+
+        window.addEventListener(
+            "customerSaved",
+            function(event) {
+
+                console.log(
+                    "Customer saved event received:",
+                    event
+                );
+
+
+                /*
+                 * Keep the success panel visible.
+                 *
+                 * User can click DONE.
+                 */
+
+                refreshCustomerDataAfterSave();
+
+            }
+        );
+
+
+        customerSavedEventBound =
+            true;
+
+    }
+
+
+    if (
+        !customerCancelEventBound
+    ) {
+
+        window.addEventListener(
+            "customerFormCancel",
+            function() {
+
+                console.log(
+                    "Customer cancel event received."
+                );
+
+
+                closeCustomerFromSalesOrder();
+
+            }
+        );
+
+
+        customerCancelEventBound =
+            true;
 
     }
 
@@ -2918,6 +3230,10 @@ function loadCustomerCSS() {
             link.onload =
                 function() {
 
+                    console.log(
+                        "create-customer.css loaded."
+                    );
+
                     resolve();
 
                 };
@@ -2958,11 +3274,13 @@ function loadCustomerJS() {
              * Already loaded
              */
 
-            if (
+            const existing =
                 document.querySelector(
                     'script[data-customer-js="true"]'
-                )
-            ) {
+                );
+
+
+            if (existing) {
 
                 resolve();
 
@@ -2987,6 +3305,10 @@ function loadCustomerJS() {
 
             script.onload =
                 function() {
+
+                    console.log(
+                        "create-customer.js loaded."
+                    );
 
                     resolve();
 
@@ -3016,17 +3338,14 @@ function loadCustomerJS() {
 
 
 /* =========================================================
-   CUSTOMER SAVED EVENT
+   REFRESH CUSTOMER DATA
 ========================================================= */
 
 function refreshCustomerDataAfterSave() {
 
     /*
-     * Refresh Create SO customer dropdown
-     * if Create SO is opened later.
-     *
-     * create-sales-order.js owns the actual
-     * customer dropdown.
+     * If Create Sales Order customer loader exists,
+     * refresh it.
      */
 
     try {
@@ -3044,32 +3363,6 @@ function refreshCustomerDataAfterSave() {
 
         console.warn(
             "Unable to refresh customer dropdown:",
-            error
-        );
-
-    }
-
-
-    /*
-     * If customer module has a reset function,
-     * call it safely.
-     */
-
-    try {
-
-        if (
-            typeof window.resetCreateCustomerForm ===
-            "function"
-        ) {
-
-            window.resetCreateCustomerForm();
-
-        }
-
-    } catch (error) {
-
-        console.warn(
-            "Customer form reset skipped:",
             error
         );
 
