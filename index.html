@@ -2,7 +2,9 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -10,45 +12,70 @@
 
     <title>LOGIS-TECH SYSTEM</title>
 
-    <!-- =========================================================
-         GLOBAL CSS
-         ========================================================= -->
+
+    <!-- =====================================================
+         MAIN / INDEX CSS
+    ====================================================== -->
 
     <link
         rel="stylesheet"
         href="css/index.css?v=20261006"
     >
 
+
+    <!-- =====================================================
+         DASHBOARD CSS
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="css/dashboard.css?v=20261006"
     >
+
+
+    <!-- =====================================================
+         SALES ORDER CSS
+    ====================================================== -->
 
     <link
         rel="stylesheet"
         href="css/sales-order.css?v=20261006"
     >
 
+
+    <!-- =====================================================
+         DELIVERY CSS
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="css/delivery.css?v=20261006"
     >
+
+
+    <!-- =====================================================
+         FLEET & DELIVERY ANALYTICS CSS
+    ====================================================== -->
 
     <link
         rel="stylesheet"
         href="css/fleet-analytics.css?v=20261006"
     >
 
+
+    <!-- =====================================================
+         INVOICING CSS
+    ====================================================== -->
+
     <link
         rel="stylesheet"
         href="css/invoicing.css?v=20261006"
     >
 
-    <!-- PAYMENT CSS -->
-    <link
-        rel="stylesheet"
-        href="css/payment.css?v=20261006"
-    >
+
+    <!-- =====================================================
+         SYSTEM SETTINGS CSS
+    ====================================================== -->
 
     <link
         rel="stylesheet"
@@ -57,1550 +84,2448 @@
 
 </head>
 
+
 <body>
 
-    <!-- =========================================================
-         APP
-         ========================================================= -->
 
-    <div class="app-container">
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
 
-        <!-- =====================================================
-             SIDEBAR
-             ===================================================== -->
+<div class="sidebar">
 
-        <aside class="sidebar">
+    <div class="logo">
 
-            <div class="sidebar-logo">
+        LOGIS - TECH
 
-                <img
-                    src="assets/logo.png"
-                    alt="LOGIS-TECH SYSTEM"
-                >
-
-            </div>
-
-            <nav class="sidebar-nav">
-
-                <!-- DASHBOARD -->
-                <button
-                    type="button"
-                    class="nav-item active"
-                    onclick="showPage('dashboard', this)"
-                >
-                    <span class="nav-icon">▦</span>
-                    <span>Dashboard</span>
-                </button>
-
-
-                <!-- SALES ORDER -->
-                <button
-                    type="button"
-                    class="nav-item"
-                    onclick="showPage('sales', this)"
-                >
-                    <span class="nav-icon">▤</span>
-                    <span>Sales Order</span>
-                </button>
-
-
-                <!-- DELIVERY -->
-                <button
-                    type="button"
-                    class="nav-item"
-                    onclick="showPage('delivery', this)"
-                >
-                    <span class="nav-icon">▣</span>
-                    <span>Delivery</span>
-                </button>
-
-
-                <!-- FLEET & DELIVERY ANALYTICS -->
-                <button
-                    type="button"
-                    class="nav-item"
-                    onclick="showPage('fleetAnalytics', this)"
-                >
-                    <span class="nav-icon">◈</span>
-                    <span>Fleet &amp; Delivery Analytics</span>
-                </button>
-
-
-                <!-- INVOICE -->
-                <button
-                    type="button"
-                    class="nav-item"
-                    onclick="showPage('invoice', this)"
-                >
-                    <span class="nav-icon">▥</span>
-                    <span>Invoice</span>
-                </button>
-
-
-                <!-- PAYMENT -->
-                <button
-                    type="button"
-                    class="nav-item"
-                    onclick="showPage('payment', this)"
-                >
-                    <span class="nav-icon">₱</span>
-                    <span>Payment</span>
-                </button>
-
-
-                <!-- REPORTS -->
-                <button
-                    type="button"
-                    class="nav-item"
-                    onclick="showPage('reports', this)"
-                >
-                    <span class="nav-icon">▥</span>
-                    <span>Reports</span>
-                </button>
-
-
-                <!-- SETTINGS -->
-                <button
-                    type="button"
-                    class="nav-item"
-                    onclick="showPage('settings', this)"
-                >
-                    <span class="nav-icon">⚙</span>
-                    <span>Settings</span>
-                </button>
-
-            </nav>
-
-        </aside>
-
-
-        <!-- =====================================================
-             MAIN AREA
-             ===================================================== -->
-
-        <main class="main-content">
-
-            <!-- =================================================
-                 TOPBAR
-                 ================================================= -->
-
-            <header class="topbar">
-
-                <div class="topbar-left">
-
-                    <div
-                        id="pageTitle"
-                        class="page-title"
-                    >
-                        Dashboard
-                    </div>
-
-                </div>
-
-
-                <div class="topbar-right">
-
-                    <div
-                        id="welcomeUser"
-                        class="welcome-user"
-                    >
-                        WELCOME
-                    </div>
-
-                    <button
-                        type="button"
-                        class="profile-button"
-                        onclick="showPage('profile', this)"
-                    >
-                        Profile
-                    </button>
-
-                    <button
-                        type="button"
-                        class="logout-button"
-                        onclick="logout()"
-                    >
-                        Logout
-                    </button>
-
-                </div>
-
-            </header>
-
-
-            <!-- =================================================
-                 PAGE CONTENT
-                 ================================================= -->
-
-            <div class="content-area">
-
-
-                <!-- =================================================
-                     DASHBOARD
-                     ================================================= -->
-
-                <div
-                    id="dashboard"
-                    class="page active"
-                >
-
-                    <iframe
-                        id="dashboardFrame"
-                        src="pages/dashboard.html"
-                        title="Dashboard"
-                        frameborder="0"
-                    ></iframe>
-
-                </div>
-
-
-                <!-- =================================================
-                     SALES ORDER
-                     ================================================= -->
-
-                <div
-                    id="sales"
-                    class="page"
-                >
-
-                    <div id="salesModule"></div>
-
-                </div>
-
-
-                <!-- =================================================
-                     DELIVERY
-                     ================================================= -->
-
-                <div
-                    id="delivery"
-                    class="page"
-                >
-
-                    <div id="deliveryModule"></div>
-
-                </div>
-
-
-                <!-- =================================================
-                     FLEET & DELIVERY ANALYTICS
-                     ================================================= -->
-
-                <div
-                    id="fleetAnalytics"
-                    class="page"
-                >
-
-                    <div id="fleetAnalyticsModule"></div>
-
-                </div>
-
-
-                <!-- =================================================
-                     OLD DR PAGE
-                     ================================================= -->
-
-                <div
-                    id="dr"
-                    class="page"
-                >
-
-                    <div
-                        id="drModule"
-                    ></div>
-
-                </div>
-
-
-                <!-- =================================================
-                     INVOICE
-                     ================================================= -->
-
-                <div
-                    id="invoice"
-                    class="page"
-                >
-
-                    <div id="invoicingModule"></div>
-
-                </div>
-
-
-                <!-- =================================================
-                     PAYMENT
-                     ================================================= -->
-
-                <div
-                    id="payment"
-                    class="page"
-                >
-
-                    <div id="paymentModule"></div>
-
-                </div>
-
-
-                <!-- =================================================
-                     REPORTS
-                     ================================================= -->
-
-                <div
-                    id="reports"
-                    class="page"
-                >
-
-                    <div class="page-header">
-
-                        <div>
-
-                            <h1>Reports</h1>
-
-                            <p class="subtitle">
-                                Logistics Reports
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="section">
-
-                        <h2>Reports</h2>
-
-                        <p>
-                            Reports module will be displayed here.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <!-- =================================================
-                     PROFILE
-                     ================================================= -->
-
-                <div
-                    id="profile"
-                    class="page"
-                >
-
-                    <div class="page-header">
-
-                        <div>
-
-                            <h1>Profile</h1>
-
-                            <p class="subtitle">
-                                Account Profile
-                            </p>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="section">
-
-                        <h2>Profile</h2>
-
-                        <p>
-                            User profile information will be displayed here.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <!-- =================================================
-                     SETTINGS
-                     ================================================= -->
-
-                <div
-                    id="settings"
-                    class="page"
-                >
-
-                    <div id="systemSettingsModule"></div>
-
-                </div>
-
-            </div>
-
-        </main>
+        <span>
+            SYSTEM
+        </span>
 
     </div>
 
 
-    <!-- =========================================================
-         GLOBAL JAVASCRIPT
-         ========================================================= -->
+    <div class="menu">
 
-    <script>
 
-        /* =========================================================
-           MODULE STATES
-           ========================================================= */
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
 
-        let salesModuleLoaded = false;
+        <button
+            class="menu-btn active"
+            onclick="showPage('dashboard', this)"
+        >
 
-        let deliveryModuleLoaded = false;
+            🏠 Dashboard
 
-        let fleetAnalyticsModuleLoaded = false;
+        </button>
 
-        let invoicingModuleLoaded = false;
 
-        let paymentModuleLoaded = false;
+        <!-- =================================================
+             SALES ORDER
+        ================================================== -->
 
-        let systemSettingsModuleLoaded = false;
+        <button
+            class="menu-btn"
+            onclick="showPage('sales', this)"
+        >
 
+            📄 Sales Order
 
-        /* =========================================================
-           SHOW PAGE
-           ========================================================= */
+        </button>
 
-        function showPage(pageId, button) {
 
-            /*
-             * Hide every page
-             */
-            document
-                .querySelectorAll('.page')
-                .forEach(page => {
+        <!-- =================================================
+             DELIVERY
+        ================================================== -->
 
-                    page.classList.remove('active');
+        <button
+            class="menu-btn"
+            onclick="showPage('delivery', this)"
+        >
 
-                });
+            🚚 Delivery
 
+        </button>
 
-            /*
-             * Show selected page
-             */
-            const selectedPage =
-                document.getElementById(pageId);
 
-            if (!selectedPage) {
+        <!-- =================================================
+             FLEET & DELIVERY ANALYTICS
+        ================================================== -->
 
-                console.error(
-                    'Page not found:',
-                    pageId
-                );
+        <button
+            class="menu-btn"
+            onclick="showPage('fleetAnalytics', this)"
+        >
 
-                return;
+            📊 Fleet & Delivery Analytics
 
-            }
+        </button>
 
 
-            selectedPage.classList.add('active');
+        <!-- =================================================
+             INVOICE
+        ================================================== -->
 
+        <button
+            class="menu-btn"
+            onclick="showPage('invoice', this)"
+        >
 
-            /*
-             * Update sidebar active state
-             */
-            document
-                .querySelectorAll('.nav-item')
-                .forEach(item => {
+            🧾 Invoice
 
-                    item.classList.remove('active');
+        </button>
 
-                });
 
+        <!-- =================================================
+             PAYMENT
+        ================================================== -->
 
-            if (button) {
+        <button
+            class="menu-btn"
+            onclick="showPage('payment', this)"
+        >
 
-                button.classList.add('active');
+            💳 Payment
 
-            }
+        </button>
 
 
-            /*
-             * Page title
-             */
-            const pageTitle =
-                document.getElementById('pageTitle');
+        <!-- =================================================
+             REPORTS
+        ================================================== -->
 
+        <button
+            class="menu-btn"
+            onclick="showPage('reports', this)"
+        >
 
-            const titles = {
+            📊 Reports
 
-                dashboard:
-                    'Dashboard',
+        </button>
 
-                sales:
-                    'Sales Order',
 
-                delivery:
-                    'Delivery',
+        <!-- =================================================
+             SETTINGS
+        ================================================== -->
 
-                fleetAnalytics:
-                    'Fleet & Delivery Analytics',
+        <button
+            class="menu-btn"
+            onclick="showPage('settings', this)"
+        >
 
-                invoice:
-                    'Invoice',
+            ⚙️ Settings
 
-                payment:
-                    'Payment',
+        </button>
 
-                reports:
-                    'Reports',
 
-                profile:
-                    'Profile',
+    </div>
 
-                settings:
-                    'Settings'
+</div>
 
-            };
 
 
-            if (pageTitle) {
+<!-- =========================================================
+     MAIN
+========================================================= -->
 
-                pageTitle.textContent =
-                    titles[pageId] || 'LOGIS-TECH SYSTEM';
+<div class="main">
 
-            }
 
+    <!-- =====================================================
+         TOPBAR
+    ====================================================== -->
 
-            /* =====================================================
-               DASHBOARD
-               ===================================================== */
+    <div class="topbar">
 
-            if (pageId === 'dashboard') {
+        <div
+            class="page-title"
+            id="pageTitle"
+        >
 
-                const dashboardFrame =
-                    document.getElementById(
-                        'dashboardFrame'
-                    );
+            Dashboard
 
-                if (
-                    dashboardFrame &&
-                    !dashboardFrame.src
-                ) {
+        </div>
 
-                    dashboardFrame.src =
-                        'pages/dashboard.html';
 
-                }
+        <div class="user-area">
 
-            }
+            <span id="welcomeUser">
 
+                WELCOME, USER
 
-            /* =====================================================
-               SALES ORDER
-               ===================================================== */
+            </span>
 
-            if (pageId === 'sales') {
 
-                loadSalesOrderModule();
+            <button
+                class="profile-btn"
+                onclick="openProfile()"
+            >
 
-            }
+                👤 PROFILE
 
+            </button>
 
-            /* =====================================================
-               DELIVERY
-               ===================================================== */
 
-            if (pageId === 'delivery') {
+            <button
+                class="logout-btn"
+                onclick="logoutUser()"
+            >
 
-                loadDeliveryModule();
+                LOGOUT
 
-            }
+            </button>
 
+        </div>
 
-            /* =====================================================
-               FLEET ANALYTICS
-               ===================================================== */
+    </div>
 
-            if (pageId === 'fleetAnalytics') {
 
-                loadFleetAnalyticsModule();
 
-            }
+    <!-- =====================================================
+         CONTENT
+    ====================================================== -->
 
+    <div class="content">
 
-            /* =====================================================
-               INVOICE
-               ===================================================== */
 
-            if (pageId === 'invoice') {
+        <!-- =================================================
+             DASHBOARD
+        ================================================== -->
 
-                loadInvoicingModule();
+        <div
+            id="dashboard"
+            class="page active"
+        >
 
-            }
+            <iframe
+                src="pages/dashboard.html"
+                class="dashboard-frame"
+                title="LOGI-TECH Dashboard"
+                scrolling="no"
+            ></iframe>
 
+        </div>
 
-            /* =====================================================
-               PAYMENT
-               ===================================================== */
 
-            if (pageId === 'payment') {
 
-                loadPaymentModule();
+        <!-- =================================================
+             SALES ORDER MODULE
+        ================================================== -->
 
-            }
+        <div
+            id="sales"
+            class="page"
+        >
 
+            <div id="salesModule"></div>
 
-            /* =====================================================
-               OLD DR MODULE
-               ===================================================== */
+        </div>
 
-            if (pageId === 'dr') {
 
-                if (
-                    typeof loadDRModule === 'function'
-                ) {
 
-                    loadDRModule();
+        <!-- =================================================
+             DELIVERY MODULE
+        ================================================== -->
 
-                }
+        <div
+            id="delivery"
+            class="page"
+        >
 
-            }
+            <div id="deliveryModule"></div>
 
+        </div>
 
-            /* =====================================================
-               SETTINGS
-               ===================================================== */
 
-            if (pageId === 'settings') {
 
-                loadSystemSettingsModule();
+        <!-- =================================================
+             FLEET & DELIVERY ANALYTICS
+        ================================================== -->
 
-            }
+        <div
+            id="fleetAnalytics"
+            class="page"
+        >
 
-        }
+            <div id="fleetAnalyticsModule"></div>
 
+        </div>
 
-        /* =========================================================
-           LOAD SCRIPT ONCE
-           ========================================================= */
 
-        function loadScriptOnce(
-            src,
-            attributeName
-        ) {
 
-            return new Promise(
-                (resolve, reject) => {
+        <!-- =================================================
+             DR PRINTING
+        ================================================== -->
 
-                    /*
-                     * Already loaded
-                     */
-                    const existingScript =
-                        document.querySelector(
-                            `script[${attributeName}]`
-                        );
+        <div
+            id="dr"
+            class="page"
+        >
 
+            <h1>
+                DR Printing
+            </h1>
 
-                    if (existingScript) {
 
-                        resolve();
+            <div class="section">
 
-                        return;
+                <h2>
+                    Delivery Receipt Printing
+                </h2>
 
-                    }
 
+                <div class="form-grid">
 
-                    /*
-                     * Create script
-                     */
-                    const script =
-                        document.createElement('script');
 
+                    <!-- SALES ORDER -->
 
-                    script.src = src;
+                    <div class="form-group">
 
-                    script.setAttribute(
-                        attributeName,
-                        'true'
-                    );
+                        <label>
+                            Sales Order
+                        </label>
 
+                        <select
+                            id="drSOSelect"
+                            onchange="loadDRItems()"
+                        >
 
-                    script.onload = () => {
+                            <option value="">
+                                Select Sales Order
+                            </option>
 
-                        resolve();
-
-                    };
-
-
-                    script.onerror = () => {
-
-                        reject(
-                            new Error(
-                                `Failed to load script: ${src}`
-                            )
-                        );
-
-                    };
-
-
-                    document.body.appendChild(
-                        script
-                    );
-
-                }
-            );
-
-        }
-
-
-        /* =========================================================
-           SALES ORDER MODULE
-           ========================================================= */
-
-        async function loadSalesOrderModule() {
-
-            const container =
-                document.getElementById(
-                    'salesModule'
-                );
-
-
-            if (!container) {
-
-                console.error(
-                    'salesModule container not found.'
-                );
-
-                return;
-
-            }
-
-
-            if (salesModuleLoaded) {
-
-                if (
-                    typeof window.initializeSalesOrder ===
-                    'function'
-                ) {
-
-                    window.initializeSalesOrder();
-
-                }
-
-                return;
-
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `pages/sales-order.html?v=${Date.now()}`,
-                        {
-                            cache: 'no-store'
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `HTTP ${response.status}`
-                    );
-
-                }
-
-
-                const html =
-                    await response.text();
-
-
-                container.innerHTML =
-                    html;
-
-
-                salesModuleLoaded =
-                    true;
-
-
-                await loadScriptOnce(
-                    `js/sales-order.js?v=20261006`,
-                    'data-sales-order-js'
-                );
-
-
-                if (
-                    typeof window.initializeSalesOrder ===
-                    'function'
-                ) {
-
-                    window.initializeSalesOrder();
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    'Sales Order module error:',
-                    error
-                );
-
-
-                container.innerHTML = `
-
-                    <div class="module-error">
-
-                        <h3>
-                            Unable to load Sales Order
-                        </h3>
-
-                        <p>
-                            ${error.message}
-                        </p>
+                        </select>
 
                     </div>
 
-                `;
 
-            }
+                    <!-- ITEM -->
 
-        }
+                    <div class="form-group">
 
+                        <label>
+                            Item Number
+                        </label>
 
-        /* =========================================================
-           DELIVERY MODULE
-           ========================================================= */
+                        <select
+                            id="drItemSelect"
+                            onchange="loadDRItemDetails()"
+                        >
 
-        async function loadDeliveryModule() {
+                            <option value="">
+                                Select Item
+                            </option>
 
-            const container =
-                document.getElementById(
-                    'deliveryModule'
-                );
-
-
-            if (!container) {
-
-                console.error(
-                    'deliveryModule container not found.'
-                );
-
-                return;
-
-            }
-
-
-            if (deliveryModuleLoaded) {
-
-                if (
-                    typeof window.initializeDelivery ===
-                    'function'
-                ) {
-
-                    window.initializeDelivery();
-
-                }
-
-                return;
-
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `pages/delivery.html?v=${Date.now()}`,
-                        {
-                            cache: 'no-store'
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `HTTP ${response.status}`
-                    );
-
-                }
-
-
-                const html =
-                    await response.text();
-
-
-                container.innerHTML =
-                    html;
-
-
-                deliveryModuleLoaded =
-                    true;
-
-
-                await loadScriptOnce(
-                    `js/delivery.js?v=20261006`,
-                    'data-delivery-js'
-                );
-
-
-                if (
-                    typeof window.initializeDelivery ===
-                    'function'
-                ) {
-
-                    window.initializeDelivery();
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    'Delivery module error:',
-                    error
-                );
-
-
-                container.innerHTML = `
-
-                    <div class="module-error">
-
-                        <h3>
-                            Unable to load Delivery
-                        </h3>
-
-                        <p>
-                            ${error.message}
-                        </p>
+                        </select>
 
                     </div>
 
-                `;
 
-            }
+                    <!-- DR NUMBER -->
 
-        }
+                    <div class="form-group">
 
+                        <label>
+                            DR Number
+                        </label>
 
-        /* =========================================================
-           FLEET ANALYTICS MODULE
-           ========================================================= */
-
-        async function loadFleetAnalyticsModule() {
-
-            const container =
-                document.getElementById(
-                    'fleetAnalyticsModule'
-                );
-
-
-            if (!container) {
-
-                console.error(
-                    'fleetAnalyticsModule container not found.'
-                );
-
-                return;
-
-            }
-
-
-            if (fleetAnalyticsModuleLoaded) {
-
-                if (
-                    typeof window.initializeFleetAnalytics ===
-                    'function'
-                ) {
-
-                    window.initializeFleetAnalytics();
-
-                }
-
-                return;
-
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `pages/fleet-analytics.html?v=${Date.now()}`,
-                        {
-                            cache: 'no-store'
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `HTTP ${response.status}`
-                    );
-
-                }
-
-
-                const html =
-                    await response.text();
-
-
-                container.innerHTML =
-                    html;
-
-
-                fleetAnalyticsModuleLoaded =
-                    true;
-
-
-                await loadScriptOnce(
-                    `js/fleet-analytics.js?v=20261006`,
-                    'data-fleet-analytics-js'
-                );
-
-
-                if (
-                    typeof window.initializeFleetAnalytics ===
-                    'function'
-                ) {
-
-                    window.initializeFleetAnalytics();
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    'Fleet Analytics module error:',
-                    error
-                );
-
-
-                container.innerHTML = `
-
-                    <div class="module-error">
-
-                        <h3>
-                            Unable to load Fleet &amp; Delivery Analytics
-                        </h3>
-
-                        <p>
-                            ${error.message}
-                        </p>
+                        <input
+                            type="text"
+                            id="drNumber"
+                            placeholder="Enter DR Number"
+                        >
 
                     </div>
 
-                `;
 
-            }
+                    <!-- DR DATE -->
 
-        }
+                    <div class="form-group">
 
+                        <label>
+                            DR Date
+                        </label>
 
-        /* =========================================================
-           INVOICE MODULE
-           ========================================================= */
-
-        async function loadInvoicingModule() {
-
-            const container =
-                document.getElementById(
-                    'invoicingModule'
-                );
-
-
-            if (!container) {
-
-                console.error(
-                    'invoicingModule container not found.'
-                );
-
-                return;
-
-            }
-
-
-            if (invoicingModuleLoaded) {
-
-                if (
-                    typeof window.initializeInvoicing ===
-                    'function'
-                ) {
-
-                    window.initializeInvoicing();
-
-                }
-
-                return;
-
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `pages/invoicing.html?v=${Date.now()}`,
-                        {
-                            cache: 'no-store'
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `HTTP ${response.status}`
-                    );
-
-                }
-
-
-                const html =
-                    await response.text();
-
-
-                container.innerHTML =
-                    html;
-
-
-                invoicingModuleLoaded =
-                    true;
-
-
-                await loadScriptOnce(
-                    `js/invoicing.js?v=20261006`,
-                    'data-invoicing-js'
-                );
-
-
-                if (
-                    typeof window.initializeInvoicing ===
-                    'function'
-                ) {
-
-                    window.initializeInvoicing();
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    'Invoicing module error:',
-                    error
-                );
-
-
-                container.innerHTML = `
-
-                    <div class="module-error">
-
-                        <h3>
-                            Unable to load Invoice
-                        </h3>
-
-                        <p>
-                            ${error.message}
-                        </p>
+                        <input
+                            type="date"
+                            id="drDate"
+                        >
 
                     </div>
 
-                `;
 
-            }
+                    <!-- CLIENT -->
 
-        }
+                    <div class="form-group">
 
+                        <label>
+                            Client Name
+                        </label>
 
-        /* =========================================================
-           PAYMENT MODULE
-           ========================================================= */
+                        <input
+                            type="text"
+                            id="drClientName"
+                            readonly
+                        >
 
-        async function loadPaymentModule() {
-
-            const container =
-                document.getElementById(
-                    'paymentModule'
-                );
-
-
-            if (!container) {
-
-                console.error(
-                    'paymentModule container not found.'
-                );
-
-                return;
-
-            }
+                    </div>
 
 
-            /*
-             * If already loaded,
-             * initialize again instead of fetching again.
-             */
-            if (paymentModuleLoaded) {
+                    <!-- SE -->
 
-                if (
-                    typeof window.initializePayment ===
-                    'function'
-                ) {
+                    <div class="form-group">
 
-                    window.initializePayment();
+                        <label>
+                            SE
+                        </label>
 
-                }
+                        <select
+                            id="drSE"
+                            disabled
+                        >
 
-                return;
+                            <option value="">
+                                Select SE
+                            </option>
 
-            }
+                            <option value="JBG">
+                                JBG
+                            </option>
 
+                            <option value="MHT">
+                                MHT
+                            </option>
 
-            try {
+                            <option value="HHF">
+                                HHF
+                            </option>
 
-                /*
-                 * Load payment HTML
-                 */
-                const response =
-                    await fetch(
-                        `pages/payment.html?v=${Date.now()}`,
-                        {
-                            cache: 'no-store'
-                        }
-                    );
+                            <option value="IAF">
+                                IAF
+                            </option>
 
+                            <option value="GRF">
+                                GRF
+                            </option>
 
-                if (!response.ok) {
+                            <option value="KBO">
+                                KBO
+                            </option>
 
-                    throw new Error(
-                        `HTTP ${response.status}`
-                    );
+                        </select>
 
-                }
-
-
-                const html =
-                    await response.text();
-
-
-                /*
-                 * Inject HTML
-                 */
-                container.innerHTML =
-                    html;
+                    </div>
 
 
-                /*
-                 * Mark as loaded
-                 */
-                paymentModuleLoaded =
-                    true;
+                    <!-- PROJECT -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Project
+                        </label>
+
+                        <input
+                            type="text"
+                            id="drProject"
+                            readonly
+                        >
+
+                    </div>
 
 
-                /*
-                 * Load payment JS
-                 */
-                await loadScriptOnce(
-                    `js/payment.js?v=20261006`,
-                    'data-payment-js'
-                );
+                    <!-- DELIVERY ADDRESS -->
+
+                    <div class="form-group full">
+
+                        <label>
+                            Delivery Address
+                        </label>
+
+                        <input
+                            type="text"
+                            id="drDeliveryAddress"
+                            readonly
+                        >
+
+                    </div>
 
 
-                /*
-                 * Initialize payment module
-                 */
-                if (
-                    typeof window.initializePayment ===
-                    'function'
-                ) {
+                    <!-- ATTENTION -->
 
-                    window.initializePayment();
+                    <div class="form-group">
 
-                }
+                        <label>
+                            Attention
+                        </label>
 
+                        <input
+                            type="text"
+                            id="drAttention"
+                            readonly
+                        >
 
-            } catch (error) {
-
-                console.error(
-                    'Payment module error:',
-                    error
-                );
+                    </div>
 
 
-                container.innerHTML = `
+                    <!-- ITEM NAME -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Item Name
+                        </label>
+
+                        <input
+                            type="text"
+                            id="drItemName"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <!-- QTY -->
+
+                    <div class="form-group">
+
+                        <label>
+                            QTY
+                        </label>
+
+                        <input
+                            type="text"
+                            id="drQty"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <!-- UNIT -->
+
+                    <div class="form-group">
+
+                        <label>
+                            Unit
+                        </label>
+
+                        <input
+                            type="text"
+                            id="drUnit"
+                            readonly
+                        >
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="form-group full">
+
+                        <label>
+                            Description
+                        </label>
+
+                        <textarea
+                            id="drDescription"
+                            class="dr-description"
+                            readonly
+                        ></textarea>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+
+            <!-- DR ACTION BAR -->
+
+            <div class="action-bar">
+
+                <button
+                    class="btn btn-secondary"
+                    onclick="clearDRForm()"
+                >
+
+                    CLEAR
+
+                </button>
+
+
+                <button
+                    class="btn btn-primary"
+                    onclick="printDR()"
+                >
+
+                    🖨️ PRINT DR
+
+                </button>
+
+            </div>
+
+
+        </div>
+
+
+
+        <!-- =================================================
+             INVOICING MODULE
+        ================================================== -->
+
+        <div
+            id="invoice"
+            class="page"
+        >
+
+            <div id="invoicingModule"></div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PAYMENT
+        ================================================== -->
+
+        <div
+            id="payment"
+            class="page"
+        >
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+                        Payment
+                    </h1>
+
+                    <p class="subtitle">
+                        Payment Monitoring
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="section">
+
+                <h2>
+                    Payment Monitoring
+                </h2>
+
+                <p>
+                    Payment module will be displayed here.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             REPORTS
+        ================================================== -->
+
+        <div
+            id="reports"
+            class="page"
+        >
+
+            <h1>
+                Reports
+            </h1>
+
+
+            <div class="section">
+
+                <h2>
+                    Reports
+                </h2>
+
+                <p>
+                    SO, Delivery and DR Reports.
+                </p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             PROFILE
+        ================================================== -->
+
+        <div
+            id="profile"
+            class="page"
+        >
+
+            <div class="page-header">
+
+                <div>
+
+                    <h1>
+                        My Profile
+                    </h1>
+
+                    <p class="subtitle">
+                        Account Information
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="section profile-card">
+
+                <div class="profile-header">
 
                     <div
-                        class="module-error"
-                        style="
-                            margin:20px;
-                            padding:20px;
-                            border:1px solid #f1caca;
-                            border-radius:10px;
-                            background:#fff7f7;
-                        "
+                        class="profile-avatar"
+                        id="profileAvatar"
                     >
 
-                        <h3>
-                            Unable to load Payment
-                        </h3>
-
-                        <p>
-                            ${error.message}
-                        </p>
-
-                        <p>
-                            Please check that
-                            <strong>
-                                pages/payment.html
-                            </strong>
-                            exists.
-                        </p>
+                        U
 
                     </div>
 
-                `;
 
-            }
+                    <div>
 
-        }
+                        <div
+                            class="profile-name"
+                            id="profileName"
+                        >
 
+                            User
 
-        /* =========================================================
-           SYSTEM SETTINGS MODULE
-           ========================================================= */
-
-        async function loadSystemSettingsModule() {
-
-            const container =
-                document.getElementById(
-                    'systemSettingsModule'
-                );
+                        </div>
 
 
-            if (!container) {
+                        <div class="profile-role">
 
-                console.error(
-                    'systemSettingsModule container not found.'
-                );
+                            LOGI-TECH User
 
-                return;
-
-            }
-
-
-            if (systemSettingsModuleLoaded) {
-
-                if (
-                    typeof window.initializeSystemSettings ===
-                    'function'
-                ) {
-
-                    window.initializeSystemSettings();
-
-                }
-
-                return;
-
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `pages/system-settings.html?v=${Date.now()}`,
-                        {
-                            cache: 'no-store'
-                        }
-                    );
-
-
-                if (!response.ok) {
-
-                    throw new Error(
-                        `HTTP ${response.status}`
-                    );
-
-                }
-
-
-                const html =
-                    await response.text();
-
-
-                container.innerHTML =
-                    html;
-
-
-                systemSettingsModuleLoaded =
-                    true;
-
-
-                await loadScriptOnce(
-                    `js/system-settings.js?v=20261006`,
-                    'data-system-settings-js'
-                );
-
-
-                if (
-                    typeof window.initializeSystemSettings ===
-                    'function'
-                ) {
-
-                    window.initializeSystemSettings();
-
-                }
-
-            } catch (error) {
-
-                console.error(
-                    'System Settings module error:',
-                    error
-                );
-
-
-                container.innerHTML = `
-
-                    <div class="module-error">
-
-                        <h3>
-                            Unable to load Settings
-                        </h3>
-
-                        <p>
-                            ${error.message}
-                        </p>
+                        </div>
 
                     </div>
 
-                `;
+                </div>
 
-            }
+
+
+                <div class="profile-info">
+
+
+                    <!-- FULL NAME -->
+
+                    <div class="profile-info-item">
+
+                        <div class="profile-info-label">
+                            FULL NAME
+                        </div>
+
+                        <div
+                            class="profile-info-value"
+                            id="profileFullname"
+                        >
+
+                            -
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- USERNAME -->
+
+                    <div class="profile-info-item">
+
+                        <div class="profile-info-label">
+                            USERNAME
+                        </div>
+
+                        <div
+                            class="profile-info-value"
+                            id="profileUsername"
+                        >
+
+                            -
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACCOUNT TYPE -->
+
+                    <div class="profile-info-item">
+
+                        <div class="profile-info-label">
+                            ACCOUNT TYPE
+                        </div>
+
+                        <div class="profile-info-value">
+
+                            LOGI-TECH User
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ACCOUNT STATUS -->
+
+                    <div class="profile-info-item">
+
+                        <div class="profile-info-label">
+                            ACCOUNT STATUS
+                        </div>
+
+                        <div class="profile-info-value">
+
+                            ACTIVE
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             SYSTEM SETTINGS MODULE
+        ================================================== -->
+
+        <div
+            id="settings"
+            class="page"
+        >
+
+            <div id="systemSettingsModule"></div>
+
+        </div>
+
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================================================
+     MAIN SYSTEM SCRIPT
+========================================================= -->
+
+<script>
+
+
+/* =========================================================
+   MODULE STATE
+========================================================= */
+
+let salesModuleLoaded = false;
+
+let deliveryModuleLoaded = false;
+
+let fleetAnalyticsModuleLoaded = false;
+
+let invoicingModuleLoaded = false;
+
+let systemSettingsModuleLoaded = false;
+
+
+
+/* =========================================================
+   PAGE NAVIGATION
+========================================================= */
+
+function showPage(pageId, button) {
+
+    console.log(
+        'SHOW PAGE:',
+        pageId
+    );
+
+
+    /* =====================================================
+       HIDE ALL PAGES
+    ===================================================== */
+
+    document
+        .querySelectorAll('.page')
+        .forEach(function(page) {
+
+            page.classList.remove(
+                'active'
+            );
+
+        });
+
+
+    /* =====================================================
+       SHOW SELECTED PAGE
+    ===================================================== */
+
+    const page =
+        document.getElementById(
+            pageId
+        );
+
+
+    if (!page) {
+
+        console.error(
+            'Page not found:',
+            pageId
+        );
+
+        return;
+
+    }
+
+
+    page.classList.add(
+        'active'
+    );
+
+
+    /* =====================================================
+       SIDEBAR ACTIVE BUTTON
+    ===================================================== */
+
+    document
+        .querySelectorAll('.menu-btn')
+        .forEach(function(btn) {
+
+            btn.classList.remove(
+                'active'
+            );
+
+        });
+
+
+    if (button) {
+
+        button.classList.add(
+            'active'
+        );
+
+
+        const pageTitle =
+            document.getElementById(
+                'pageTitle'
+            );
+
+
+        if (pageTitle) {
+
+            pageTitle.innerText =
+                button.innerText.trim();
 
         }
 
-
-        /* =========================================================
-           LOGOUT
-           ========================================================= */
-
-        function logout() {
-
-            try {
-
-                localStorage.removeItem(
-                    'logitechUser'
-                );
-
-            } catch (error) {
-
-                console.error(
-                    'Logout error:',
-                    error
-                );
-
-            }
+    }
 
 
-            window.location.href =
-                'login.html';
+    /* =====================================================
+       SALES ORDER
+    ===================================================== */
+
+    if (
+        pageId === 'sales'
+    ) {
+
+        loadSalesOrderModule();
+
+    }
+
+
+    /* =====================================================
+       DELIVERY
+    ===================================================== */
+
+    if (
+        pageId === 'delivery'
+    ) {
+
+        loadDeliveryModule();
+
+    }
+
+
+    /* =====================================================
+       FLEET & DELIVERY ANALYTICS
+    ===================================================== */
+
+    if (
+        pageId === 'fleetAnalytics'
+    ) {
+
+        loadFleetAnalyticsModule();
+
+    }
+
+
+    /* =====================================================
+       INVOICE
+    ===================================================== */
+
+    if (
+        pageId === 'invoice'
+    ) {
+
+        loadInvoicingModule();
+
+    }
+
+
+    /* =====================================================
+       DR
+    ===================================================== */
+
+    if (
+        pageId === 'dr'
+    ) {
+
+        if (
+            typeof loadDRSalesOrders ===
+            'function'
+        ) {
+
+            loadDRSalesOrders();
 
         }
 
+    }
 
-        /* =========================================================
-           LOAD CURRENT USER
-           ========================================================= */
 
-        function loadCurrentUser() {
+    /* =====================================================
+       SYSTEM SETTINGS
+    ===================================================== */
 
-            const welcomeUser =
-                document.getElementById(
-                    'welcomeUser'
+    if (
+        pageId === 'settings'
+    ) {
+
+        loadSystemSettingsModule();
+
+    }
+
+
+    /* =====================================================
+       DASHBOARD
+    ===================================================== */
+
+    if (
+        pageId === 'dashboard'
+    ) {
+
+        if (
+            typeof loadDashboard ===
+            'function'
+        ) {
+
+            loadDashboard();
+
+        }
+
+    }
+
+}
+
+
+
+/* =========================================================
+   LOAD SCRIPT ONCE
+========================================================= */
+
+function loadScriptOnce(
+    src,
+    attributeName
+) {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            const existing =
+                document.querySelector(
+                    `script[${attributeName}]`
                 );
 
 
-            if (!welcomeUser) {
+            /* =================================================
+               ALREADY EXISTS
+            ================================================= */
 
-                return;
+            if (existing) {
 
-            }
+                if (
+                    existing.dataset.loaded ===
+                    'true'
+                ) {
 
-
-            try {
-
-                const storedUser =
-                    localStorage.getItem(
-                        'logitechUser'
-                    );
-
-
-                if (!storedUser) {
-
-                    welcomeUser.textContent =
-                        'WELCOME';
+                    resolve();
 
                     return;
 
                 }
 
 
-                const user =
-                    JSON.parse(
-                        storedUser
-                    );
+                existing.addEventListener(
+                    'load',
+                    function() {
 
+                        resolve();
 
-                const accountName =
-                    user.accountName ||
-                    user.name ||
-                    user.fullName ||
-                    user.username ||
-                    'USER';
-
-
-                welcomeUser.textContent =
-                    `WELCOME ${accountName}`;
-
-            } catch (error) {
-
-                console.error(
-                    'Unable to load current user:',
-                    error
+                    },
+                    {
+                        once: true
+                    }
                 );
 
 
-                welcomeUser.textContent =
-                    'WELCOME';
+                existing.addEventListener(
+                    'error',
+                    function() {
+
+                        reject(
+                            new Error(
+                                'Failed to load ' +
+                                src
+                            )
+                        );
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
+
+                return;
 
             }
+
+
+            /* =================================================
+               CREATE SCRIPT
+            ================================================= */
+
+            const script =
+                document.createElement(
+                    'script'
+                );
+
+
+            script.src =
+                src;
+
+
+            script.setAttribute(
+                attributeName,
+                'true'
+            );
+
+
+            script.onload =
+                function() {
+
+                    script.dataset.loaded =
+                        'true';
+
+
+                    console.log(
+                        'Script loaded:',
+                        src
+                    );
+
+
+                    resolve();
+
+                };
+
+
+            script.onerror =
+                function() {
+
+                    console.error(
+                        'Failed to load:',
+                        src
+                    );
+
+
+                    reject(
+                        new Error(
+                            'Failed to load ' +
+                            src
+                        )
+                    );
+
+                };
+
+
+            document.body.appendChild(
+                script
+            );
+
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   LOAD SALES ORDER MODULE
+========================================================= */
+
+async function loadSalesOrderModule() {
+
+    console.log(
+        'Loading Sales Order module...'
+    );
+
+
+    if (
+        salesModuleLoaded
+    ) {
+
+        console.log(
+            'Sales Order module already loaded.'
+        );
+
+        return;
+
+    }
+
+
+    const container =
+        document.getElementById(
+            'salesModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'salesModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                'pages/sales-order.html?v=' +
+                Date.now(),
+                {
+                    cache: 'no-store'
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                'Failed to load Sales Order module.'
+            );
 
         }
 
 
-        /* =========================================================
-           INITIALIZE APP
-           ========================================================= */
-
-        document.addEventListener(
-            'DOMContentLoaded',
-            function () {
-
-                loadCurrentUser();
+        const html =
+            await response.text();
 
 
-                /*
-                 * Keep Dashboard active on first load
-                 */
-                const dashboardButton =
-                    document.querySelector(
-                        '.nav-item'
-                    );
+        container.innerHTML =
+            html;
 
 
-                if (dashboardButton) {
+        salesModuleLoaded =
+            true;
 
-                    dashboardButton.classList.add(
-                        'active'
-                    );
 
-                }
-
-            }
+        console.log(
+            'Sales Order HTML loaded.'
         );
 
-    </script>
+
+        if (
+            typeof loadSOList ===
+            'function'
+        ) {
+
+            await loadSOList();
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            'Sales Order module error:',
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div style="
+                padding:30px;
+                color:#b00020;
+                background:#fff;
+                border-radius:10px;
+            ">
+
+                Failed to load Sales Order module.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   LOAD DELIVERY MODULE
+========================================================= */
+
+async function loadDeliveryModule() {
+
+    console.log(
+        'Loading Delivery module...'
+    );
+
+
+    if (
+        deliveryModuleLoaded
+    ) {
+
+        console.log(
+            'Delivery module already loaded.'
+        );
+
+        return;
+
+    }
+
+
+    const container =
+        document.getElementById(
+            'deliveryModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'deliveryModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                'pages/delivery.html?v=' +
+                Date.now(),
+                {
+                    cache: 'no-store'
+                }
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                'Failed to load Delivery module.'
+            );
+
+        }
+
+
+        const html =
+            await response.text();
+
+
+        container.innerHTML =
+            html;
+
+
+        deliveryModuleLoaded =
+            true;
+
+
+        console.log(
+            'Delivery HTML loaded.'
+        );
+
+
+        await loadScriptOnce(
+            'js/delivery.js?v=20261006',
+            'data-delivery-js'
+        );
+
+
+        console.log(
+            'Delivery module initialized.'
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            'Delivery module error:',
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div style="
+                padding:30px;
+                color:#b00020;
+                background:#fff;
+                border-radius:10px;
+            ">
+
+                Failed to load Delivery module.
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+
+/* =========================================================
+   LOAD FLEET & DELIVERY ANALYTICS
+========================================================= */
+
+async function loadFleetAnalyticsModule() {
+
+    console.log(
+        'Loading Fleet & Delivery Analytics...'
+    );
+
+
+    const container =
+        document.getElementById(
+            'fleetAnalyticsModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'fleetAnalyticsModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD HTML
+    ===================================================== */
+
+    if (
+        !fleetAnalyticsModuleLoaded
+    ) {
+
+        try {
+
+            const response =
+                await fetch(
+                    'pages/fleet-analytics.html?v=' +
+                    Date.now(),
+                    {
+                        cache: 'no-store'
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'Failed to load Fleet Analytics HTML.'
+                );
+
+            }
+
+
+            const html =
+                await response.text();
+
+
+            container.innerHTML =
+                html;
+
+
+            fleetAnalyticsModuleLoaded =
+                true;
+
+
+            console.log(
+                'Fleet Analytics HTML loaded.'
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                'Fleet Analytics HTML error:',
+                error
+            );
+
+
+            container.innerHTML = `
+
+                <div style="
+                    padding:30px;
+                    color:#b00020;
+                    background:#fff;
+                    border-radius:10px;
+                ">
+
+                    Failed to load Fleet & Delivery Analytics module.
+
+                </div>
+
+            `;
+
+
+            return;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LOAD ANALYTICS JAVASCRIPT
+    ===================================================== */
+
+    try {
+
+        await loadScriptOnce(
+            'https://cdn.jsdelivr.net/npm/chart.js',
+            'data-chartjs'
+        );
+
+
+        await loadScriptOnce(
+            'js/fleet-analytics.js?v=20261006',
+            'data-fleet-analytics-js'
+        );
+
+
+        await loadScriptOnce(
+            'js/fleet-performance.js?v=20261006',
+            'data-fleet-performance-js'
+        );
+
+
+        await loadScriptOnce(
+            'js/delivery-performance.js?v=20261006',
+            'data-delivery-performance-js'
+        );
+
+
+        await loadScriptOnce(
+            'js/dr-monitoring.js?v=20261006',
+            'data-dr-monitoring-js'
+        );
+
+
+        if (
+            typeof window.initializeFleetAnalytics ===
+            'function'
+        ) {
+
+            window.initializeFleetAnalytics();
+
+
+            console.log(
+                'Fleet Analytics initialized successfully.'
+            );
+
+        } else {
+
+            console.error(
+                'initializeFleetAnalytics() not found.'
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            'Fleet Analytics JavaScript error:',
+            error
+        );
+
+    }
+
+}
+
+
+
+/* =========================================================
+   LOAD INVOICING MODULE
+========================================================= */
+
+async function loadInvoicingModule() {
+
+    console.log(
+        '========================================'
+    );
+
+    console.log(
+        'Loading Invoicing module...'
+    );
+
+
+    const container =
+        document.getElementById(
+            'invoicingModule'
+        );
+
+
+    /* =====================================================
+       CHECK CONTAINER
+    ===================================================== */
+
+    if (!container) {
+
+        console.error(
+            'ERROR: #invoicingModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD INVOICING HTML ONLY ONCE
+    ===================================================== */
+
+    if (
+        !invoicingModuleLoaded
+    ) {
+
+        try {
+
+            const invoiceHTMLUrl =
+                new URL(
+                    'pages/invoicing.html',
+                    window.location.href
+                ).href;
+
+
+            console.log(
+                'Invoice HTML URL:',
+                invoiceHTMLUrl
+            );
+
+
+            const response =
+                await fetch(
+                    invoiceHTMLUrl +
+                    '?v=' +
+                    Date.now(),
+                    {
+                        method: 'GET',
+                        cache: 'no-store'
+                    }
+                );
+
+
+            console.log(
+                'Invoice HTML response:',
+                response.status,
+                response.statusText
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'HTTP ' +
+                    response.status +
+                    ' - ' +
+                    response.statusText
+                );
+
+            }
+
+
+            const html =
+                await response.text();
+
+
+            if (
+                !html ||
+                !html.trim()
+            ) {
+
+                throw new Error(
+                    'invoicing.html is empty.'
+                );
+
+            }
+
+
+            /* =================================================
+               INSERT HTML
+            ================================================= */
+
+            container.innerHTML =
+                html;
+
+
+            invoicingModuleLoaded =
+                true;
+
+
+            console.log(
+                'Invoicing HTML loaded successfully.'
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                '========================================'
+            );
+
+            console.error(
+                'INVOICING HTML LOAD ERROR'
+            );
+
+            console.error(
+                error
+            );
+
+            console.error(
+                '========================================'
+            );
+
+
+            container.innerHTML = `
+
+                <div style="
+                    margin:20px;
+                    padding:25px;
+                    background:#ffffff;
+                    border:1px solid #f0c9c5;
+                    border-radius:12px;
+                    color:#7f1d1d;
+                    font-family:Segoe UI,Arial,sans-serif;
+                ">
+
+                    <div style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:10px;
+                    ">
+
+                        Failed to load Invoicing module.
+
+                    </div>
+
+
+                    <div style="
+                        font-size:12px;
+                        line-height:1.7;
+                    ">
+
+                        ${error.message}
+
+                    </div>
+
+
+                    <div style="
+                        margin-top:15px;
+                        padding:12px;
+                        background:#fff7f6;
+                        border-radius:8px;
+                        font-size:11px;
+                        line-height:1.7;
+                    ">
+
+                        <strong>Expected file:</strong><br>
+
+                        pages/invoicing.html
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            return;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LOAD INVOICING JAVASCRIPT
+    ===================================================== */
+
+    try {
+
+        await loadScriptOnce(
+            'js/invoicing.js?v=20261006',
+            'data-invoicing-js'
+        );
+
+
+        console.log(
+            'Invoicing JavaScript loaded successfully.'
+        );
+
+
+        /* =================================================
+           INITIALIZE INVOICING
+        ================================================= */
+
+        if (
+            typeof window.initializeInvoicing ===
+            'function'
+        ) {
+
+            window.initializeInvoicing();
+
+
+            console.log(
+                'Invoicing initialized successfully.'
+            );
+
+        } else {
+
+            console.warn(
+                'initializeInvoicing() not found in js/invoicing.js'
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            '========================================'
+        );
+
+        console.error(
+            'INVOICING JAVASCRIPT ERROR'
+        );
+
+        console.error(
+            error
+        );
+
+        console.error(
+            '========================================'
+        );
+
+    }
+
+
+    console.log(
+        'Invoicing module ready.'
+    );
+
+}
+
+
+
+/* =========================================================
+   LOAD SYSTEM SETTINGS MODULE
+========================================================= */
+
+async function loadSystemSettingsModule() {
+
+    console.log(
+        '========================================'
+    );
+
+    console.log(
+        'Loading System Settings module...'
+    );
+
+
+    const container =
+        document.getElementById(
+            'systemSettingsModule'
+        );
+
+
+    if (!container) {
+
+        console.error(
+            'ERROR: #systemSettingsModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD HTML
+    ===================================================== */
+
+    if (
+        !systemSettingsModuleLoaded
+    ) {
+
+        try {
+
+            const settingsHTMLUrl =
+                new URL(
+                    'pages/system-settings.html',
+                    window.location.href
+                ).href;
+
+
+            const response =
+                await fetch(
+                    settingsHTMLUrl +
+                    '?v=' +
+                    Date.now(),
+                    {
+                        method: 'GET',
+                        cache: 'no-store'
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'HTTP ' +
+                    response.status +
+                    ' - ' +
+                    response.statusText
+                );
+
+            }
+
+
+            const html =
+                await response.text();
+
+
+            if (
+                !html ||
+                !html.trim()
+            ) {
+
+                throw new Error(
+                    'system-settings.html is empty.'
+                );
+
+            }
+
+
+            container.innerHTML =
+                html;
+
+
+            systemSettingsModuleLoaded =
+                true;
+
+
+            console.log(
+                'System Settings HTML loaded successfully.'
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                'SYSTEM SETTINGS HTML LOAD ERROR:',
+                error
+            );
+
+
+            container.innerHTML = `
+
+                <div style="
+                    margin:20px;
+                    padding:25px;
+                    background:#ffffff;
+                    border:1px solid #f0c9c5;
+                    border-radius:12px;
+                    color:#7f1d1d;
+                    font-family:Segoe UI,Arial,sans-serif;
+                ">
+
+                    <div style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:10px;
+                    ">
+
+                        Failed to load System Settings.
+
+                    </div>
+
+
+                    <div style="
+                        font-size:12px;
+                        line-height:1.7;
+                    ">
+
+                        ${error.message}
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            return;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LOAD SETTINGS JAVASCRIPT
+    ===================================================== */
+
+    try {
+
+        await loadScriptOnce(
+            'js/system-settings.js?v=20261006',
+            'data-system-settings-js'
+        );
+
+
+        console.log(
+            'System Settings JavaScript loaded.'
+        );
+
+
+        if (
+            typeof initializeSystemSettings ===
+            'function'
+        ) {
+
+            initializeSystemSettings();
+
+
+            console.log(
+                'System Settings initialized successfully.'
+            );
+
+        } else {
+
+            console.error(
+                'initializeSystemSettings() not found.'
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            'SYSTEM SETTINGS JAVASCRIPT ERROR:',
+            error
+        );
+
+    }
+
+
+    console.log(
+        '========================================'
+    );
+
+}
+
+
+
+/* =========================================================
+   USER ACCOUNT
+========================================================= */
+
+function loadUserAccount() {
+
+    const savedUser =
+        localStorage.getItem(
+            'logitechUser'
+        );
+
+
+    const loggedIn =
+        localStorage.getItem(
+            'logitechLoggedIn'
+        );
+
+
+    if (
+        !savedUser ||
+        loggedIn !== 'true'
+    ) {
+
+        window.location.href =
+            'login.html';
+
+        return;
+
+    }
+
+
+    let user;
+
+
+    try {
+
+        user =
+            JSON.parse(
+                savedUser
+            );
+
+    } catch (error) {
+
+        localStorage.removeItem(
+            'logitechUser'
+        );
+
+        localStorage.removeItem(
+            'logitechLoggedIn'
+        );
+
+        window.location.href =
+            'login.html';
+
+        return;
+
+    }
+
+
+    const fullname =
+        user.fullname ||
+        user.fullName ||
+        user.username ||
+        'USER';
+
+
+    /* =================================================
+       WELCOME
+    ================================================= */
+
+    const welcomeUser =
+        document.getElementById(
+            'welcomeUser'
+        );
+
+
+    if (
+        welcomeUser
+    ) {
+
+        welcomeUser.innerText =
+            'WELCOME, ' +
+            fullname;
+
+    }
+
+
+    /* =================================================
+       PROFILE NAME
+    ================================================= */
+
+    const profileName =
+        document.getElementById(
+            'profileName'
+        );
+
+
+    if (
+        profileName
+    ) {
+
+        profileName.innerText =
+            fullname;
+
+    }
+
+
+    /* =================================================
+       PROFILE FULL NAME
+    ================================================= */
+
+    const profileFullname =
+        document.getElementById(
+            'profileFullname'
+        );
+
+
+    if (
+        profileFullname
+    ) {
+
+        profileFullname.innerText =
+            user.fullname ||
+            user.fullName ||
+            '-';
+
+    }
+
+
+    /* =================================================
+       USERNAME
+    ================================================= */
+
+    const profileUsername =
+        document.getElementById(
+            'profileUsername'
+        );
+
+
+    if (
+        profileUsername
+    ) {
+
+        profileUsername.innerText =
+            user.username ||
+            '-';
+
+    }
+
+
+    /* =================================================
+       AVATAR
+    ================================================= */
+
+    const profileAvatar =
+        document.getElementById(
+            'profileAvatar'
+        );
+
+
+    if (
+        profileAvatar
+    ) {
+
+        profileAvatar.innerText =
+            fullname
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+
+/* =========================================================
+   PROFILE
+========================================================= */
+
+function openProfile() {
+
+    document
+        .querySelectorAll('.page')
+        .forEach(function(page) {
+
+            page.classList.remove(
+                'active'
+            );
+
+        });
+
+
+    const profile =
+        document.getElementById(
+            'profile'
+        );
+
+
+    if (
+        profile
+    ) {
+
+        profile.classList.add(
+            'active'
+        );
+
+    }
+
+
+    const pageTitle =
+        document.getElementById(
+            'pageTitle'
+        );
+
+
+    if (
+        pageTitle
+    ) {
+
+        pageTitle.innerText =
+            'My Profile';
+
+    }
+
+
+    document
+        .querySelectorAll('.menu-btn')
+        .forEach(function(btn) {
+
+            btn.classList.remove(
+                'active'
+            );
+
+        });
+
+}
+
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+function logoutUser() {
+
+    const confirmLogout =
+        confirm(
+            'Are you sure you want to logout?'
+        );
+
+
+    if (
+        !confirmLogout
+    ) {
+
+        return;
+
+    }
+
+
+    localStorage.removeItem(
+        'logitechLoggedIn'
+    );
+
+
+    localStorage.removeItem(
+        'logitechUser'
+    );
+
+
+    localStorage.removeItem(
+        'logitechLoginTime'
+    );
+
+
+    window.location.href =
+        'login.html';
+
+}
+
+
+
+/* =========================================================
+   PAGE LOAD
+========================================================= */
+
+document.addEventListener(
+    'DOMContentLoaded',
+    function() {
+
+        console.log(
+            'LOGIS-TECH SYSTEM initialized.'
+        );
+
+
+        /* =================================================
+           LOGIN CHECK
+        ================================================= */
+
+        loadUserAccount();
+
+
+        /* =================================================
+           DR DATE
+        ================================================= */
+
+        const drDate =
+            document.getElementById(
+                'drDate'
+            );
+
+
+        if (
+            drDate
+        ) {
+
+            drDate.value =
+                new Date()
+                    .toISOString()
+                    .split('T')[0];
+
+        }
+
+    }
+);
+
+</script>
+
+
+
+<!-- =========================================================
+     SALES ORDER JAVASCRIPT
+========================================================= -->
+
+<script
+    src="js/sales-order.js?v=20261006"
+></script>
+
 
 </body>
 
