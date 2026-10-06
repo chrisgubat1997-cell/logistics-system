@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    CREATE SALES ORDER
    GOOGLE APPS SCRIPT API
-   VERSION: 20261006-04
+   VERSION: 20261006-05
 ========================================================= */
 
 
@@ -25,6 +25,13 @@ let soItemCount = 0;
 let soCreateFiles = [];
 
 let isSavingSO = false;
+
+
+/* =========================================================
+   CUSTOMER MASTER
+========================================================= */
+
+let soCustomers = [];
 
 
 /* =========================================================
@@ -183,7 +190,7 @@ document.addEventListener(
         );
 
         console.log(
-            "VERSION: 20261006-04"
+            "VERSION: 20261006-05"
         );
 
         console.log(
@@ -207,9 +214,535 @@ function initializeCreateSO() {
 
     generateSONumber();
 
+    loadCustomers();
+
+    setupCustomerSelection();
+
     setupCreateSOFileSection();
 
     calculateSOTotals();
+
+}
+
+
+/* =========================================================
+   LOAD CUSTOMERS
+========================================================= */
+
+async function loadCustomers() {
+
+    const select =
+        document.getElementById(
+            "customerSelect"
+        );
+
+
+    if (!select) {
+
+        console.warn(
+            "customerSelect not found."
+        );
+
+        return;
+
+    }
+
+
+    select.innerHTML =
+        `
+        <option value="">
+            Loading customers...
+        </option>
+        `;
+
+
+    const result =
+        await createSOAPI(
+            "getCustomers"
+        );
+
+
+    if (
+        !result ||
+        !result.success
+    ) {
+
+        console.error(
+            "FAILED TO LOAD CUSTOMERS:",
+            result
+        );
+
+
+        select.innerHTML =
+            `
+            <option value="">
+                Unable to load customers
+            </option>
+            `;
+
+        return;
+
+    }
+
+
+    soCustomers =
+        Array.isArray(
+            result.customers
+        )
+            ? result.customers
+            : (
+                Array.isArray(
+                    result.data
+                )
+                    ? result.data
+                    : []
+            );
+
+
+    console.log(
+        "CUSTOMERS LOADED:",
+        soCustomers
+    );
+
+
+    select.innerHTML =
+        `
+        <option value="">
+            Select Customer
+        </option>
+        `;
+
+
+    if (
+        soCustomers.length === 0
+    ) {
+
+        select.innerHTML =
+            `
+            <option value="">
+                No customers found
+            </option>
+            `;
+
+        return;
+
+    }
+
+
+    soCustomers.forEach(
+        function(customer) {
+
+            const customerId =
+                getCustomerField(
+                    customer,
+                    "CUSTOMER_ID"
+                );
+
+
+            const clientName =
+                getCustomerField(
+                    customer,
+                    "CLIENT_NAME"
+                );
+
+
+            if (!customerId) {
+
+                return;
+
+            }
+
+
+            const option =
+                document.createElement(
+                    "option"
+                );
+
+
+            option.value =
+                customerId;
+
+
+            option.textContent =
+                customerId +
+                " — " +
+                clientName;
+
+
+            select.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CUSTOMER SELECTION EVENT
+========================================================= */
+
+function setupCustomerSelection() {
+
+    const select =
+        document.getElementById(
+            "customerSelect"
+        );
+
+
+    if (!select) {
+
+        return;
+
+    }
+
+
+    select.addEventListener(
+        "change",
+        function() {
+
+            handleCustomerSelection(
+                this.value
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   HANDLE CUSTOMER SELECTION
+========================================================= */
+
+function handleCustomerSelection(customerId) {
+
+    const hiddenCustomerId =
+        document.getElementById(
+            "customerId"
+        );
+
+
+    const customerIdDisplay =
+        document.getElementById(
+            "customerIdDisplay"
+        );
+
+
+    if (!customerId) {
+
+        clearCustomerFields();
+
+        return;
+
+    }
+
+
+    const customer =
+        soCustomers.find(
+            function(item) {
+
+                return (
+                    getCustomerField(
+                        item,
+                        "CUSTOMER_ID"
+                    ) === customerId
+                );
+
+            }
+        );
+
+
+    if (!customer) {
+
+        console.warn(
+            "Customer not found:",
+            customerId
+        );
+
+        clearCustomerFields();
+
+        return;
+
+    }
+
+
+    const clientName =
+        getCustomerField(
+            customer,
+            "CLIENT_NAME"
+        );
+
+
+    const attention =
+        getCustomerField(
+            customer,
+            "ATTENTION"
+        );
+
+
+    const tin =
+        getCustomerField(
+            customer,
+            "TIN"
+        );
+
+
+    const billingAddress =
+        getCustomerField(
+            customer,
+            "BILLING_ADDRESS"
+        );
+
+
+    const deliveryAddress =
+        getCustomerField(
+            customer,
+            "DELIVERY_ADDRESS"
+        );
+
+
+    const contactNumber =
+        getCustomerField(
+            customer,
+            "CONTACT_NUMBER"
+        );
+
+
+    const email =
+        getCustomerField(
+            customer,
+            "EMAIL"
+        );
+
+
+    if (hiddenCustomerId) {
+
+        hiddenCustomerId.value =
+            customerId;
+
+    }
+
+
+    if (customerIdDisplay) {
+
+        customerIdDisplay.textContent =
+            "Customer ID: " +
+            customerId;
+
+    }
+
+
+    setInputValue(
+        "clientName",
+        clientName
+    );
+
+
+    setInputValue(
+        "attention",
+        attention
+    );
+
+
+    setInputValue(
+        "tinNumber",
+        tin
+    );
+
+
+    setInputValue(
+        "billingAddress",
+        billingAddress
+    );
+
+
+    setInputValue(
+        "deliveryAddress",
+        deliveryAddress
+    );
+
+
+    setInputValue(
+        "contactNumber",
+        contactNumber
+    );
+
+
+    setInputValue(
+        "customerEmail",
+        email
+    );
+
+
+    console.log(
+        "CUSTOMER SELECTED:",
+        customer
+    );
+
+}
+
+
+/* =========================================================
+   GET CUSTOMER FIELD
+   Supports uppercase database headers and
+   lowercase/camelCase responses.
+========================================================= */
+
+function getCustomerField(
+    customer,
+    field
+) {
+
+    if (!customer) {
+
+        return "";
+
+    }
+
+
+    const variants = [
+
+        field,
+
+        field.toLowerCase(),
+
+        field
+            .toLowerCase()
+            .replace(
+                /_([a-z])/g,
+                function(match, letter) {
+                    return letter.toUpperCase();
+                }
+            )
+
+    ];
+
+
+    for (
+        let i = 0;
+        i < variants.length;
+        i++
+    ) {
+
+        const key =
+            variants[i];
+
+
+        if (
+            customer[key] !== undefined &&
+            customer[key] !== null
+        ) {
+
+            return String(
+                customer[key]
+            ).trim();
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   SET INPUT VALUE
+========================================================= */
+
+function setInputValue(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+
+        return;
+
+    }
+
+
+    element.value =
+        value || "";
+
+}
+
+
+/* =========================================================
+   CLEAR CUSTOMER FIELDS
+========================================================= */
+
+function clearCustomerFields() {
+
+    setInputValue(
+        "customerId",
+        ""
+    );
+
+
+    const customerIdDisplay =
+        document.getElementById(
+            "customerIdDisplay"
+        );
+
+
+    if (customerIdDisplay) {
+
+        customerIdDisplay.textContent =
+            "Customer ID: —";
+
+    }
+
+
+    setInputValue(
+        "clientName",
+        ""
+    );
+
+
+    setInputValue(
+        "attention",
+        ""
+    );
+
+
+    setInputValue(
+        "tinNumber",
+        ""
+    );
+
+
+    setInputValue(
+        "billingAddress",
+        ""
+    );
+
+
+    setInputValue(
+        "deliveryAddress",
+        ""
+    );
+
+
+    setInputValue(
+        "contactNumber",
+        ""
+    );
+
+
+    setInputValue(
+        "customerEmail",
+        ""
+    );
 
 }
 
@@ -366,16 +899,6 @@ async function generateNextSONumber() {
 
     orders.forEach(
         function(so) {
-
-            /*
-             * Supports both:
-             *
-             * SO_NUMBER
-             *
-             * and
-             *
-             * soNumber
-             */
 
             const number =
                 String(
@@ -841,11 +1364,6 @@ function calculateSOTotals() {
     );
 
 
-    /*
-     * Do not overwrite the input
-     * value if soDiscount is an input.
-     */
-
     const discountDisplay =
         document.getElementById(
             "soDiscountDisplay"
@@ -1037,7 +1555,7 @@ async function saveSO() {
     );
 
     console.log(
-        "20261006-04"
+        "20261006-05"
     );
 
     console.log(
@@ -1076,6 +1594,12 @@ async function saveSO() {
         );
 
 
+    const customerId =
+        getValue(
+            "customerId"
+        );
+
+
     const clientName =
         getValue(
             "clientName"
@@ -1097,6 +1621,18 @@ async function saveSO() {
     const deliveryAddress =
         getValue(
             "deliveryAddress"
+        );
+
+
+    const contactNumber =
+        getValue(
+            "contactNumber"
+        );
+
+
+    const customerEmail =
+        getValue(
+            "customerEmail"
         );
 
 
@@ -1166,13 +1702,13 @@ async function saveSO() {
 
 
     /* ==========================================
-       CLIENT VALIDATION
+       CUSTOMER VALIDATION
     ========================================== */
 
-    if (!clientName) {
+    if (!customerId) {
 
         alert(
-            "Please enter Client Name."
+            "Please select a Customer."
         );
 
 
@@ -1181,7 +1717,32 @@ async function saveSO() {
 
 
         focusElement(
-            "clientName"
+            "customerSelect"
+        );
+
+
+        return;
+
+    }
+
+
+    /* ==========================================
+       CLIENT VALIDATION
+    ========================================== */
+
+    if (!clientName) {
+
+        alert(
+            "Selected Customer has no Client Name."
+        );
+
+
+        isSavingSO =
+            false;
+
+
+        focusElement(
+            "customerSelect"
         );
 
 
@@ -1392,19 +1953,20 @@ async function saveSO() {
 
     const data = {
 
-        /*
-         * IMPORTANT
-         *
-         * Current API requires SO Number.
-         * Therefore we explicitly send it.
-         */
-
         soNumber:
             soNumber,
 
 
         dateCreation:
             dateCreation,
+
+
+        /* ======================================
+           CUSTOMER MASTER LINK
+        ====================================== */
+
+        customerId:
+            customerId,
 
 
         clientName:
@@ -1421,6 +1983,14 @@ async function saveSO() {
 
         deliveryAddress:
             deliveryAddress,
+
+
+        contactNumber:
+            contactNumber,
+
+
+        email:
+            customerEmail,
 
 
         project:
@@ -1494,8 +2064,13 @@ async function saveSO() {
     );
 
     console.log(
-        "SO NUMBER BEING SENT:",
+        "SO NUMBER:",
         soNumber
+    );
+
+    console.log(
+        "CUSTOMER ID:",
+        customerId
     );
 
     console.log(
@@ -1641,6 +2216,11 @@ async function saveSO() {
     );
 
     console.log(
+        "CUSTOMER ID:",
+        customerId
+    );
+
+    console.log(
         "FOLDER ID:",
         finalFolderId
     );
@@ -1731,11 +2311,6 @@ async function saveSO() {
                     mimeType:
                         file.type ||
                         "application/pdf",
-
-                    /*
-                     * Keep both names for
-                     * backend compatibility.
-                     */
 
                     base64:
                         base64Data,
@@ -2032,6 +2607,23 @@ function clearCreateSOForm() {
 
     soCreateFiles =
         [];
+
+
+    clearCustomerFields();
+
+
+    const customerSelect =
+        document.getElementById(
+            "customerSelect"
+        );
+
+
+    if (customerSelect) {
+
+        customerSelect.value =
+            "";
+
+    }
 
 
     renderCreateSOFiles();
