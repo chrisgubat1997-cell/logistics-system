@@ -2562,8 +2562,7 @@ function escapeAttribute(
 
 function goBackToInvoicing() {
 
-    window.location.href =
-        "invoicing.html";
+    window.location.href = "../index.html";
 
 }
 
