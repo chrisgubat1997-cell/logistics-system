@@ -110,7 +110,9 @@
 
             <div class="form-grid">
 
-                <!-- DATE -->
+                <!-- =================================================
+                     DATE
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -133,7 +135,9 @@
                 </div>
 
 
-                <!-- SO NUMBER -->
+                <!-- =================================================
+                     SO NUMBER
+                ================================================== -->
 
                 <div class="form-group so-number-group">
 
@@ -160,7 +164,53 @@
                 </div>
 
 
-                <!-- CLIENT -->
+                <!-- =================================================
+                     CUSTOMER SELECT
+                ================================================== -->
+
+                <div class="form-group full">
+
+                    <label for="customerSelect">
+                        Customer
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="input-wrapper select-wrapper">
+
+                        <span class="input-icon">
+                            ●
+                        </span>
+
+                        <select id="customerSelect">
+
+                            <option value="">
+                                Loading customers...
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- CUSTOMER ID IS AUTOMATIC -->
+                    <input
+                        type="hidden"
+                        id="customerId"
+                        value=""
+                    >
+
+                    <small
+                        id="customerIdDisplay"
+                        class="customer-id-display"
+                    >
+                        Customer ID: —
+                    </small>
+
+                </div>
+
+
+                <!-- =================================================
+                     CLIENT NAME
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -176,7 +226,8 @@
                         <input
                             type="text"
                             id="clientName"
-                            placeholder="Enter client name"
+                            placeholder="Select customer above"
+                            readonly
                         >
 
                     </div>
@@ -184,7 +235,9 @@
                 </div>
 
 
-                <!-- ATTENTION -->
+                <!-- =================================================
+                     ATTENTION
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -199,7 +252,8 @@
                         <input
                             type="text"
                             id="attention"
-                            placeholder="Enter contact person"
+                            placeholder="Select customer above"
+                            readonly
                         >
 
                     </div>
@@ -207,7 +261,9 @@
                 </div>
 
 
-                <!-- BILLING ADDRESS -->
+                <!-- =================================================
+                     BILLING ADDRESS
+                ================================================== -->
 
                 <div class="form-group full">
 
@@ -217,12 +273,15 @@
 
                     <div class="input-wrapper textarea-wrapper">
 
-                        <span class="input-icon textarea-icon">⌂</span>
+                        <span class="input-icon textarea-icon">
+                            ⌂
+                        </span>
 
                         <input
                             type="text"
                             id="billingAddress"
-                            placeholder="Enter complete billing address"
+                            placeholder="Select customer above"
+                            readonly
                         >
 
                     </div>
@@ -230,7 +289,9 @@
                 </div>
 
 
-                <!-- DELIVERY ADDRESS -->
+                <!-- =================================================
+                     DELIVERY ADDRESS
+                ================================================== -->
 
                 <div class="form-group full">
 
@@ -240,12 +301,15 @@
 
                     <div class="input-wrapper">
 
-                        <span class="input-icon">⌖</span>
+                        <span class="input-icon">
+                            ⌖
+                        </span>
 
                         <input
                             type="text"
                             id="deliveryAddress"
-                            placeholder="Enter complete delivery address"
+                            placeholder="Select customer above"
+                            readonly
                         >
 
                     </div>
@@ -253,7 +317,65 @@
                 </div>
 
 
-                <!-- PROJECT -->
+                <!-- =================================================
+                     CONTACT NUMBER
+                ================================================== -->
+
+                <div class="form-group">
+
+                    <label for="contactNumber">
+                        Contact Number
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">
+                            ☎
+                        </span>
+
+                        <input
+                            type="text"
+                            id="contactNumber"
+                            placeholder="Select customer above"
+                            readonly
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     EMAIL
+                ================================================== -->
+
+                <div class="form-group">
+
+                    <label for="customerEmail">
+                        Email
+                    </label>
+
+                    <div class="input-wrapper">
+
+                        <span class="input-icon">
+                            @
+                        </span>
+
+                        <input
+                            type="email"
+                            id="customerEmail"
+                            placeholder="Select customer above"
+                            readonly
+                        >
+
+                    </div>
+
+                </div>
+
+
+                <!-- =================================================
+                     PROJECT
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -263,7 +385,9 @@
 
                     <div class="input-wrapper">
 
-                        <span class="input-icon">▤</span>
+                        <span class="input-icon">
+                            ▤
+                        </span>
 
                         <input
                             type="text"
@@ -276,7 +400,9 @@
                 </div>
 
 
-                <!-- TIN -->
+                <!-- =================================================
+                     TIN
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -286,12 +412,15 @@
 
                     <div class="input-wrapper">
 
-                        <span class="input-icon">ID</span>
+                        <span class="input-icon">
+                            ID
+                        </span>
 
                         <input
                             type="text"
                             id="tinNumber"
-                            placeholder="Enter TIN number"
+                            placeholder="Select customer above"
+                            readonly
                         >
 
                     </div>
@@ -299,7 +428,9 @@
                 </div>
 
 
-                <!-- PO NUMBER -->
+                <!-- =================================================
+                     PO NUMBER
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -309,7 +440,9 @@
 
                     <div class="input-wrapper">
 
-                        <span class="input-icon">PO</span>
+                        <span class="input-icon">
+                            PO
+                        </span>
 
                         <input
                             type="text"
@@ -322,7 +455,9 @@
                 </div>
 
 
-                <!-- TERMS -->
+                <!-- =================================================
+                     TERMS
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -333,7 +468,9 @@
 
                     <div class="input-wrapper select-wrapper">
 
-                        <span class="input-icon">◷</span>
+                        <span class="input-icon">
+                            ◷
+                        </span>
 
                         <select id="terms">
 
@@ -368,7 +505,9 @@
                 </div>
 
 
-                <!-- SE -->
+                <!-- =================================================
+                     SE
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -379,7 +518,9 @@
 
                     <div class="input-wrapper select-wrapper">
 
-                        <span class="input-icon">SE</span>
+                        <span class="input-icon">
+                            SE
+                        </span>
 
                         <select id="soSE">
 
@@ -418,7 +559,9 @@
                 </div>
 
 
-                <!-- JOB ORDER -->
+                <!-- =================================================
+                     JOB ORDER
+                ================================================== -->
 
                 <div class="form-group">
 
@@ -428,7 +571,9 @@
 
                     <div class="input-wrapper">
 
-                        <span class="input-icon">JO</span>
+                        <span class="input-icon">
+                            JO
+                        </span>
 
                         <input
                             type="text"
