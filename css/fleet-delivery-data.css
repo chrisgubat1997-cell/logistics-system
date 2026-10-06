@@ -1,1 +1,448 @@
 
+/* =========================================================
+   LOGIS-TECH SYSTEM
+   FLEET & DELIVERY DATA ENTRY
+========================================================= */
+
+.fleet-data-entry,
+.fleet-data-entry * {
+    box-sizing: border-box;
+}
+
+.fleet-data-entry {
+    width: 100%;
+    min-height: 100%;
+    padding: 22px;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: #172033;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.fde-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+}
+
+.fde-title {
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -.3px;
+}
+
+.fde-subtitle {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #718096;
+}
+
+.fde-storage-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 13px;
+    border: 1px solid #dce3ec;
+    border-radius: 999px;
+    background: #fff;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.fde-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16a34a;
+}
+
+
+/* =========================================================
+   TABS
+========================================================= */
+
+.fde-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 6px;
+    background: #eef2f7;
+    border-radius: 12px;
+}
+
+.fde-tab {
+    border: 0;
+    padding: 11px 16px;
+    border-radius: 9px;
+    background: transparent;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 800;
+    transition: .2s ease;
+}
+
+.fde-tab:hover {
+    background: #ffffff;
+    color: #1f2937;
+}
+
+.fde-tab.active {
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+}
+
+
+/* =========================================================
+   SECTIONS
+========================================================= */
+
+.fde-section,
+.fde-records {
+    background: #ffffff;
+    border: 1px solid #e3e8ef;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, .04);
+}
+
+.fde-section {
+    display: none;
+    padding: 20px;
+}
+
+.fde-section.active {
+    display: block;
+}
+
+.fde-records {
+    margin-top: 18px;
+    padding: 20px;
+}
+
+.fde-section-header,
+.fde-records-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 18px;
+}
+
+.fde-section-header h2,
+.fde-records-header h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.fde-section-header p,
+.fde-records-header p {
+    margin: 5px 0 0;
+    color: #7a8699;
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.fde-form-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.fde-field {
+    min-width: 0;
+}
+
+.fde-field.full {
+    grid-column: 1 / -1;
+}
+
+.fde-field label {
+    display: block;
+    margin-bottom: 6px;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+.fde-field input,
+.fde-field select,
+.fde-field textarea,
+.fde-record-toolbar input,
+.fde-record-toolbar select {
+    width: 100%;
+    border: 1px solid #d9e0e8;
+    border-radius: 8px;
+    outline: none;
+    background: #fff;
+    color: #172033;
+    font-family: inherit;
+    font-size: 13px;
+    transition: .2s ease;
+}
+
+.fde-field input,
+.fde-field select,
+.fde-record-toolbar input,
+.fde-record-toolbar select {
+    height: 40px;
+    padding: 0 11px;
+}
+
+.fde-field textarea {
+    min-height: 82px;
+    padding: 10px 11px;
+    resize: vertical;
+}
+
+.fde-field input:focus,
+.fde-field select:focus,
+.fde-field textarea:focus,
+.fde-record-toolbar input:focus,
+.fde-record-toolbar select:focus {
+    border-color: #7b8799;
+    box-shadow: 0 0 0 3px rgba(100, 116, 139, .10);
+}
+
+.fde-field input[readonly] {
+    background: #f7f9fb;
+    color: #64748b;
+}
+
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.fde-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 9px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #edf0f4;
+}
+
+.fde-btn {
+    min-width: 150px;
+    height: 40px;
+    padding: 0 17px;
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 800;
+    transition: .2s ease;
+}
+
+.fde-btn.primary {
+    background: #172033;
+    color: #fff;
+}
+
+.fde-btn.primary:hover {
+    background: #0f172a;
+    transform: translateY(-1px);
+}
+
+.fde-btn.secondary {
+    background: #edf1f5;
+    color: #475569;
+}
+
+.fde-btn.secondary:hover {
+    background: #e2e8f0;
+}
+
+
+/* =========================================================
+   RECORD TOOLBAR
+========================================================= */
+
+.fde-records-header {
+    align-items: center;
+}
+
+.fde-record-count {
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.fde-record-count span {
+    color: #172033;
+    font-size: 14px;
+}
+
+.fde-record-toolbar {
+    display: grid;
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.fde-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #e4e9ef;
+    border-radius: 10px;
+}
+
+.fde-table {
+    width: 100%;
+    min-width: 850px;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.fde-table th {
+    padding: 11px 12px;
+    border-bottom: 1px solid #e3e8ef;
+    background: #f7f9fb;
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.fde-table td {
+    padding: 11px 12px;
+    border-bottom: 1px solid #edf0f4;
+    color: #334155;
+    font-size: 12px;
+    vertical-align: middle;
+}
+
+.fde-table tbody tr:hover {
+    background: #fafbfc;
+}
+
+.fde-empty {
+    padding: 35px !important;
+    color: #94a3b8 !important;
+    text-align: center !important;
+}
+
+
+/* =========================================================
+   RECORD BADGES
+========================================================= */
+
+.fde-type-badge,
+.fde-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 9px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.fde-type-badge {
+    background: #eef2f7;
+    color: #475569;
+}
+
+.fde-status-badge {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+
+/* =========================================================
+   TABLE ACTIONS
+========================================================= */
+
+.fde-delete-btn {
+    border: 0;
+    padding: 6px 9px;
+    border-radius: 6px;
+    background: #fff1f2;
+    color: #be123c;
+    cursor: pointer;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.fde-delete-btn:hover {
+    background: #ffe4e6;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1100px) {
+
+    .fde-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .fleet-data-entry {
+        padding: 14px;
+    }
+
+    .fde-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .fde-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fde-field.full {
+        grid-column: auto;
+    }
+
+    .fde-tabs {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+    }
+
+    .fde-tab {
+        white-space: nowrap;
+    }
+
+    .fde-actions {
+        flex-direction: column;
+    }
+
+    .fde-btn {
+        width: 100%;
+    }
+
+    .fde-record-toolbar {
+        grid-template-columns: 1fr;
+    }
+
+}
