@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -10,860 +8,1211 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>LOGI-TECH | Dashboard</title>
+    <title>LOGIS-TECH Dashboard</title>
 
     <link
         rel="stylesheet"
-        href="../css/dashboard.css"
+        href="../css/dashboard.css?v=20261006"
     >
-
 </head>
 
 <body>
 
-    <div class="dashboard-container">
+<div class="dashboard-page">
 
+    <!-- =====================================================
+         DASHBOARD HEADER
+    ====================================================== -->
 
-        <!-- =================================================
-             DASHBOARD HEADER
-        ================================================== -->
+    <div class="dashboard-header">
 
-        <div class="dashboard-header">
+        <div class="dashboard-header-left">
 
-            <div>
-
-                <h1>
-                    Dashboard
-                </h1>
-
-                <p>
-                    LOGI-TECH System Overview
-                </p>
-
+            <div class="dashboard-eyebrow">
+                LOGIS-TECH SYSTEM
             </div>
 
+            <h1>
+                Dashboard
+            </h1>
 
-            <!-- DASHBOARD NAVIGATION -->
-
-            <div class="dashboard-tabs">
-
-                <button
-                    type="button"
-                    class="dashboard-tab active"
-                    onclick="showDashboardSection('summary', this)"
-                >
-                    SUMMARY
-                </button>
-
-                <button
-                    type="button"
-                    class="dashboard-tab"
-                    onclick="showDashboardSection('sales-order', this)"
-                >
-                    SALES ORDER
-                </button>
-
-                <button
-                    type="button"
-                    class="dashboard-tab"
-                    onclick="showDashboardSection('logistics', this)"
-                >
-                    LOGISTICS
-                </button>
-
-                <button
-                    type="button"
-                    class="dashboard-tab"
-                    onclick="showDashboardSection('finance', this)"
-                >
-                    FINANCE
-                </button>
-
-            </div>
+            <p>
+                Overview of sales, logistics, delivery and finance operations.
+            </p>
 
         </div>
 
 
-        <!-- =================================================
-             SUMMARY SECTION
-        ================================================== -->
+        <div class="dashboard-header-right">
 
-        <div
-            id="summarySection"
-            class="dashboard-section active"
-        >
+            <div class="dashboard-date-box">
 
-            <div class="summary-toolbar">
+                <span class="dashboard-date-label">
+                    TODAY
+                </span>
 
-                <div>
-
-                    <h2>
-                        Overall Summary
-                    </h2>
-
-                    <p>
-                        Sales Order and Delivery Summary
-                    </p>
-
-                </div>
-
-
-                <!-- SUMMARY PERIOD -->
-
-                <div class="period-control">
-
-                    <div class="period-label">
-
-                        <span class="period-text">
-                            PERIOD
-                        </span>
-
-                    </div>
-
-                    <div class="period-select-wrapper">
-
-                        <select
-                            id="summaryPeriod"
-                            class="summary-period-select"
-                        >
-
-                            <option value="overall">
-                                OVERALL
-                            </option>
-
-                            <option value="01">
-                                JANUARY
-                            </option>
-
-                            <option value="02">
-                                FEBRUARY
-                            </option>
-
-                            <option value="03">
-                                MARCH
-                            </option>
-
-                            <option value="04">
-                                APRIL
-                            </option>
-
-                            <option value="05">
-                                MAY
-                            </option>
-
-                            <option value="06">
-                                JUNE
-                            </option>
-
-                            <option value="07">
-                                JULY
-                            </option>
-
-                            <option value="08">
-                                AUGUST
-                            </option>
-
-                            <option value="09">
-                                SEPTEMBER
-                            </option>
-
-                            <option value="10">
-                                OCTOBER
-                            </option>
-
-                            <option value="11">
-                                NOVEMBER
-                            </option>
-
-                            <option value="12">
-                                DECEMBER
-                            </option>
-
-                        </select>
-
-                        <span class="select-arrow">
-                            ⌄
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- SUMMARY CARDS -->
-
-            <div class="summary-cards">
-
-
-                <!-- TOTAL SALES ORDER -->
-
-                <div class="summary-card">
-
-                    <div class="summary-card-title">
-                        Total Sales Order
-                    </div>
-
-                    <div
-                        class="summary-card-number"
-                        id="summaryTotalSO"
-                    >
-                        0
-                    </div>
-
-                    <div
-                        class="summary-card-amount"
-                        id="summaryTotalSOAmount"
-                    >
-                        ₱0.00
-                    </div>
-
-                </div>
-
-
-                <!-- TOTAL ACTIVE -->
-
-                <div class="summary-card">
-
-                    <div class="summary-card-title">
-                        Total Active
-                    </div>
-
-                    <div
-                        class="summary-card-number"
-                        id="summaryTotalActive"
-                    >
-                        0
-                    </div>
-
-                    <div
-                        class="summary-card-amount"
-                        id="summaryTotalActiveAmount"
-                    >
-                        ₱0.00
-                    </div>
-
-                </div>
-
-
-                <!-- TOTAL CANCELLED -->
-
-                <div class="summary-card">
-
-                    <div class="summary-card-title">
-                        Total Cancelled
-                    </div>
-
-                    <div
-                        class="summary-card-number"
-                        id="summaryTotalCancelled"
-                    >
-                        0
-                    </div>
-
-                    <div
-                        class="summary-card-amount"
-                        id="summaryTotalCancelledAmount"
-                    >
-                        ₱0.00
-                    </div>
-
-                </div>
-
-
-                <!-- TOTAL DELIVERED -->
-
-                <div class="summary-card">
-
-                    <div class="summary-card-title">
-                        Total Delivered
-                    </div>
-
-                    <div
-                        class="summary-card-number"
-                        id="summaryTotalDelivered"
-                    >
-                        0
-                    </div>
-
-                    <div
-                        class="summary-card-amount"
-                        id="summaryTotalDeliveredAmount"
-                    >
-                        ₱0.00
-                    </div>
-
-                </div>
-
-
-                <!-- TOTAL PARTIALLY DELIVERED -->
-
-                <div class="summary-card">
-
-                    <div class="summary-card-title">
-                        Total Partially Delivered
-                    </div>
-
-                    <div
-                        class="summary-card-number"
-                        id="summaryTotalPartial"
-                    >
-                        0
-                    </div>
-
-                    <div
-                        class="summary-card-amount"
-                        id="summaryTotalPartialAmount"
-                    >
-                        ₱0.00
-                    </div>
-
-                </div>
-
-            </div>
-
-
-            <!-- SUMMARY NOTE -->
-
-            <div class="summary-note">
-
-                <strong>
-                    Delivery Status:
+                <strong id="dashboardDate">
+                    -
                 </strong>
 
-                Delivered and Partially Delivered
-                will be calculated using the actual
-                Sales Order quantity versus Delivery Receipt quantity.
-
             </div>
 
-        </div>
 
+            <button
+                type="button"
+                class="dashboard-refresh-btn"
+                id="dashboardRefreshBtn"
+            >
 
-        <!-- =================================================
-             SALES ORDER SECTION
-        ================================================== -->
+                ↻
+                Refresh
 
-        <div
-            id="salesOrderSection"
-            class="dashboard-section"
-        >
-
-            <div class="section">
-
-
-                <!-- SALES ORDER HEADER -->
-
-                <div class="section-header">
-
-                    <div>
-
-                        <h2>
-                            Sales Order
-                        </h2>
-
-                        <p>
-                            Sales Order transaction overview
-                        </p>
-
-                    </div>
-
-
-                    <!-- SALES ORDER PERIOD -->
-
-                    <div class="period-control">
-
-                        <div class="period-label">
-
-                            <span class="period-text">
-                                PERIOD
-                            </span>
-
-                        </div>
-
-                        <div class="period-select-wrapper">
-
-                            <select
-                                id="salesOrderPeriod"
-                                class="summary-period-select"
-                            >
-
-                                <option value="overall">
-                                    OVERALL
-                                </option>
-
-                                <option value="01">
-                                    JANUARY
-                                </option>
-
-                                <option value="02">
-                                    FEBRUARY
-                                </option>
-
-                                <option value="03">
-                                    MARCH
-                                </option>
-
-                                <option value="04">
-                                    APRIL
-                                </option>
-
-                                <option value="05">
-                                    MAY
-                                </option>
-
-                                <option value="06">
-                                    JUNE
-                                </option>
-
-                                <option value="07">
-                                    JULY
-                                </option>
-
-                                <option value="08">
-                                    AUGUST
-                                </option>
-
-                                <option value="09">
-                                    SEPTEMBER
-                                </option>
-
-                                <option value="10">
-                                    OCTOBER
-                                </option>
-
-                                <option value="11">
-                                    NOVEMBER
-                                </option>
-
-                                <option value="12">
-                                    DECEMBER
-                                </option>
-
-                            </select>
-
-                            <span class="select-arrow">
-                                ⌄
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- SALES ORDER CARDS -->
-
-                <div class="summary-cards">
-
-
-                    <!-- TOTAL SALES ORDER -->
-
-                    <div
-                        class="summary-card sales-order-clickable"
-                        onclick="openSalesOrderPopup('all')"
-                    >
-
-                        <div class="summary-card-title">
-                            Total Sales Order
-                        </div>
-
-                        <div
-                            class="summary-card-number"
-                            id="salesDashboardTotal"
-                        >
-                            0
-                        </div>
-
-                        <div
-                            class="summary-card-amount"
-                            id="salesDashboardTotalAmount"
-                        >
-                            ₱0.00
-                        </div>
-
-                    </div>
-
-
-                    <!-- ACTIVE -->
-
-                    <div
-                        class="summary-card sales-order-clickable"
-                        onclick="openSalesOrderPopup('active')"
-                    >
-
-                        <div class="summary-card-title">
-                            Total Active
-                        </div>
-
-                        <div
-                            class="summary-card-number"
-                            id="salesDashboardActive"
-                        >
-                            0
-                        </div>
-
-                        <div
-                            class="summary-card-amount"
-                            id="salesDashboardActiveAmount"
-                        >
-                            ₱0.00
-                        </div>
-
-                    </div>
-
-
-                    <!-- CANCELLED -->
-
-                    <div
-                        class="summary-card sales-order-clickable"
-                        onclick="openSalesOrderPopup('cancelled')"
-                    >
-
-                        <div class="summary-card-title">
-                            Total Cancelled
-                        </div>
-
-                        <div
-                            class="summary-card-number"
-                            id="salesDashboardCancelled"
-                        >
-                            0
-                        </div>
-
-                        <div
-                            class="summary-card-amount"
-                            id="salesDashboardCancelledAmount"
-                        >
-                            ₱0.00
-                        </div>
-
-                    </div>
-
-
-                    <!-- DELIVERED -->
-
-                    <div
-                        class="summary-card sales-order-clickable"
-                        onclick="openSalesOrderPopup('delivered')"
-                    >
-
-                        <div class="summary-card-title">
-                            Total Delivered
-                        </div>
-
-                        <div
-                            class="summary-card-number"
-                            id="salesDashboardDelivered"
-                        >
-                            0
-                        </div>
-
-                        <div
-                            class="summary-card-amount"
-                            id="salesDashboardDeliveredAmount"
-                        >
-                            ₱0.00
-                        </div>
-
-                    </div>
-
-
-                    <!-- PARTIALLY DELIVERED -->
-
-                    <div
-                        class="summary-card sales-order-clickable"
-                        onclick="openSalesOrderPopup('partial')"
-                    >
-
-                        <div class="summary-card-title">
-                            Total Partially Delivered
-                        </div>
-
-                        <div
-                            class="summary-card-number"
-                            id="salesDashboardPartial"
-                        >
-                            0
-                        </div>
-
-                        <div
-                            class="summary-card-amount"
-                            id="salesDashboardPartialAmount"
-                        >
-                            ₱0.00
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <!-- SALES ORDER NOTE -->
-
-                <div class="summary-note">
-
-                    <strong>
-                        Sales Order:
-                    </strong>
-
-                    Click any summary card to view the
-                    corresponding Sales Order numbers and clients.
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             SALES ORDER POPUP
-        ================================================== -->
-
-        <div
-            id="salesOrderPopup"
-            class="sales-order-popup"
-            style="display:none;"
-        >
-
-            <div
-                class="sales-order-popup-overlay"
-                onclick="closeSalesOrderPopup()"
-            ></div>
-
-
-            <div class="sales-order-popup-box">
-
-                <div class="sales-order-popup-header">
-
-                    <h2 id="salesOrderPopupTitle">
-                        SALES ORDERS
-                    </h2>
-
-                    <button
-                        type="button"
-                        onclick="closeSalesOrderPopup()"
-                    >
-                        ×
-                    </button>
-
-                </div>
-
-
-                <div
-                    id="salesOrderPopupList"
-                    class="sales-order-popup-list"
-                >
-                </div>
-
-
-                <div class="sales-order-popup-footer">
-
-                    <button
-                        type="button"
-                        onclick="closeSalesOrderPopup()"
-                    >
-                        CLOSE
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             LOGISTICS SECTION
-        ================================================== -->
-
-        <div
-            id="logisticsSection"
-            class="dashboard-section"
-        >
-
-            <div class="section">
-
-                <div class="section-header">
-
-                    <div>
-
-                        <h2>
-                            Logistics
-                        </h2>
-
-                        <p>
-                            Logistics Dashboard
-                        </p>
-
-                    </div>
-
-
-                    <!-- LOGISTICS PERIOD -->
-
-                    <div class="period-control">
-
-                        <div class="period-label">
-
-                            <span class="period-text">
-                                PERIOD
-                            </span>
-
-                        </div>
-
-                        <div class="period-select-wrapper">
-
-                            <select
-                                id="logisticsPeriod"
-                                class="summary-period-select"
-                            >
-
-                                <option value="overall">
-                                    OVERALL
-                                </option>
-
-                                <option value="01">JANUARY</option>
-                                <option value="02">FEBRUARY</option>
-                                <option value="03">MARCH</option>
-                                <option value="04">APRIL</option>
-                                <option value="05">MAY</option>
-                                <option value="06">JUNE</option>
-                                <option value="07">JULY</option>
-                                <option value="08">AUGUST</option>
-                                <option value="09">SEPTEMBER</option>
-                                <option value="10">OCTOBER</option>
-                                <option value="11">NOVEMBER</option>
-                                <option value="12">DECEMBER</option>
-
-                            </select>
-
-                            <span class="select-arrow">
-                                ⌄
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="dashboard-placeholder">
-
-                    <h3>
-                        Logistics Dashboard
-                    </h3>
-
-                    <p>
-                        Delivery and logistics monitoring will be displayed here.
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             FINANCE SECTION
-        ================================================== -->
-
-        <div
-            id="financeSection"
-            class="dashboard-section"
-        >
-
-            <div class="section">
-
-                <div class="section-header">
-
-                    <div>
-
-                        <h2>
-                            Finance
-                        </h2>
-
-                        <p>
-                            Finance Dashboard
-                        </p>
-
-                    </div>
-
-
-                    <!-- FINANCE PERIOD -->
-
-                    <div class="period-control">
-
-                        <div class="period-label">
-
-                            <span class="period-text">
-                                PERIOD
-                            </span>
-
-                        </div>
-
-                        <div class="period-select-wrapper">
-
-                            <select
-                                id="financePeriod"
-                                class="summary-period-select"
-                            >
-
-                                <option value="overall">
-                                    OVERALL
-                                </option>
-
-                                <option value="01">JANUARY</option>
-                                <option value="02">FEBRUARY</option>
-                                <option value="03">MARCH</option>
-                                <option value="04">APRIL</option>
-                                <option value="05">MAY</option>
-                                <option value="06">JUNE</option>
-                                <option value="07">JULY</option>
-                                <option value="08">AUGUST</option>
-                                <option value="09">SEPTEMBER</option>
-                                <option value="10">OCTOBER</option>
-                                <option value="11">NOVEMBER</option>
-                                <option value="12">DECEMBER</option>
-
-                            </select>
-
-                            <span class="select-arrow">
-                                ⌄
-                            </span>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <div class="dashboard-placeholder">
-
-                    <h3>
-                        Finance Dashboard
-                    </h3>
-
-                    <p>
-                        Financial monitoring will be displayed here.
-                    </p>
-
-                </div>
-
-            </div>
+            </button>
 
         </div>
 
     </div>
 
 
-    <script src="../js/dashboard.js"></script>
+
+    <!-- =====================================================
+         SUMMARY CARDS
+    ====================================================== -->
+
+    <section class="dashboard-summary-grid">
+
+
+        <!-- TOTAL SALES ORDER -->
+
+        <div
+            class="dashboard-summary-card sales-card"
+            data-module="sales"
+        >
+
+            <div class="summary-card-top">
+
+                <div class="summary-card-icon">
+                    📄
+                </div>
+
+                <span class="summary-card-label">
+                    SALES ORDERS
+                </span>
+
+            </div>
+
+
+            <div
+                class="summary-card-value"
+                id="dashboardTotalSO"
+            >
+                0
+            </div>
+
+
+            <div class="summary-card-footer">
+
+                <span>
+                    Total recorded
+                </span>
+
+                <span
+                    id="dashboardSOThisMonth"
+                    class="summary-card-highlight"
+                >
+                    0 this month
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- ACTIVE DELIVERY -->
+
+        <div
+            class="dashboard-summary-card delivery-card"
+            data-module="delivery"
+        >
+
+            <div class="summary-card-top">
+
+                <div class="summary-card-icon">
+                    🚚
+                </div>
+
+                <span class="summary-card-label">
+                    ACTIVE DELIVERY
+                </span>
+
+            </div>
+
+
+            <div
+                class="summary-card-value"
+                id="dashboardActiveDelivery"
+            >
+                0
+            </div>
+
+
+            <div class="summary-card-footer">
+
+                <span>
+                    Current operations
+                </span>
+
+                <span
+                    id="dashboardDeliveredToday"
+                    class="summary-card-highlight"
+                >
+                    0 delivered today
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- PENDING INVOICE -->
+
+        <div
+            class="dashboard-summary-card invoice-card"
+            data-module="invoice"
+        >
+
+            <div class="summary-card-top">
+
+                <div class="summary-card-icon">
+                    🧾
+                </div>
+
+                <span class="summary-card-label">
+                    PENDING INVOICE
+                </span>
+
+            </div>
+
+
+            <div
+                class="summary-card-value"
+                id="dashboardPendingInvoice"
+            >
+                0
+            </div>
+
+
+            <div class="summary-card-footer">
+
+                <span>
+                    For billing
+                </span>
+
+                <span class="summary-card-highlight">
+                    Requires action
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- OUTSTANDING PAYMENT -->
+
+        <div
+            class="dashboard-summary-card payment-card"
+            data-module="payment"
+        >
+
+            <div class="summary-card-top">
+
+                <div class="summary-card-icon">
+                    💳
+                </div>
+
+                <span class="summary-card-label">
+                    OUTSTANDING PAYMENT
+                </span>
+
+            </div>
+
+
+            <div
+                class="summary-card-value currency-value"
+                id="dashboardOutstandingPayment"
+            >
+                ₱0.00
+            </div>
+
+
+            <div class="summary-card-footer">
+
+                <span>
+                    Remaining balance
+                </span>
+
+                <span
+                    id="dashboardPaymentCount"
+                    class="summary-card-highlight"
+                >
+                    0 accounts
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- DELAYED ORDERS -->
+
+        <div
+            class="dashboard-summary-card delayed-card"
+            data-module="delivery"
+        >
+
+            <div class="summary-card-top">
+
+                <div class="summary-card-icon">
+                    ⚠️
+                </div>
+
+                <span class="summary-card-label">
+                    DELAYED ORDERS
+                </span>
+
+            </div>
+
+
+            <div
+                class="summary-card-value"
+                id="dashboardDelayedOrders"
+            >
+                0
+            </div>
+
+
+            <div class="summary-card-footer">
+
+                <span>
+                    Needs attention
+                </span>
+
+                <span class="summary-card-highlight warning">
+                    Review required
+                </span>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- FLEET STATUS -->
+
+        <div
+            class="dashboard-summary-card fleet-card"
+            data-module="fleet"
+        >
+
+            <div class="summary-card-top">
+
+                <div class="summary-card-icon">
+                    🚛
+                </div>
+
+                <span class="summary-card-label">
+                    FLEET STATUS
+                </span>
+
+            </div>
+
+
+            <div
+                class="summary-card-value"
+                id="dashboardFleetActive"
+            >
+                0
+            </div>
+
+
+            <div class="summary-card-footer">
+
+                <span>
+                    Active vehicles
+                </span>
+
+                <span
+                    id="dashboardFleetMaintenance"
+                    class="summary-card-highlight"
+                >
+                    0 maintenance
+                </span>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         MAIN DASHBOARD GRID
+    ====================================================== -->
+
+    <section class="dashboard-main-grid">
+
+
+        <!-- =================================================
+             SALES ORDER PERFORMANCE
+        ================================================== -->
+
+        <div class="dashboard-panel dashboard-chart-panel">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <span class="panel-eyebrow">
+                        SALES ORDER
+                    </span>
+
+                    <h2>
+                        Sales Order Performance
+                    </h2>
+
+                </div>
+
+
+                <span
+                    class="panel-period"
+                    id="salesOrderPeriod"
+                >
+                    This Year
+                </span>
+
+            </div>
+
+
+            <div class="sales-performance-layout">
+
+                <div class="sales-performance-stats">
+
+                    <div class="mini-stat">
+
+                        <span>
+                            Total
+                        </span>
+
+                        <strong id="dashboardSOTotal">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="mini-stat">
+
+                        <span>
+                            Open
+                        </span>
+
+                        <strong id="dashboardSOOpen">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="mini-stat">
+
+                        <span>
+                            Completed
+                        </span>
+
+                        <strong id="dashboardSOCompleted">
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="mini-stat">
+
+                        <span>
+                            Cancelled
+                        </span>
+
+                        <strong id="dashboardSOCancelled">
+                            0
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-area">
+
+                    <div class="simple-bar-chart">
+
+                        <div class="bar-item">
+
+                            <span>
+                                Jan
+                            </span>
+
+                            <div class="bar-track">
+                                <div
+                                    class="bar-fill"
+                                    data-month="0"
+                                    style="width:0%"
+                                ></div>
+                            </div>
+
+                            <strong data-bar-value="0">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="bar-item">
+
+                            <span>
+                                Feb
+                            </span>
+
+                            <div class="bar-track">
+                                <div
+                                    class="bar-fill"
+                                    data-month="1"
+                                    style="width:0%"
+                                ></div>
+                            </div>
+
+                            <strong data-bar-value="1">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="bar-item">
+
+                            <span>
+                                Mar
+                            </span>
+
+                            <div class="bar-track">
+                                <div
+                                    class="bar-fill"
+                                    data-month="2"
+                                    style="width:0%"
+                                ></div>
+                            </div>
+
+                            <strong data-bar-value="2">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="bar-item">
+
+                            <span>
+                                Apr
+                            </span>
+
+                            <div class="bar-track">
+                                <div
+                                    class="bar-fill"
+                                    data-month="3"
+                                    style="width:0%"
+                                ></div>
+                            </div>
+
+                            <strong data-bar-value="3">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="bar-item">
+
+                            <span>
+                                May
+                            </span>
+
+                            <div class="bar-track">
+                                <div
+                                    class="bar-fill"
+                                    data-month="4"
+                                    style="width:0%"
+                                ></div>
+                            </div>
+
+                            <strong data-bar-value="4">
+                                0
+                            </strong>
+
+                        </div>
+
+
+                        <div class="bar-item">
+
+                            <span>
+                                Jun
+                            </span>
+
+                            <div class="bar-track">
+                                <div
+                                    class="bar-fill"
+                                    data-month="5"
+                                    style="width:0%"
+                                ></div>
+                            </div>
+
+                            <strong data-bar-value="5">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             DELIVERY PERFORMANCE
+        ================================================== -->
+
+        <div class="dashboard-panel">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <span class="panel-eyebrow">
+                        LOGISTICS
+                    </span>
+
+                    <h2>
+                        Delivery Performance
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="delivery-performance-content">
+
+
+                <div class="performance-score">
+
+                    <div
+                        class="performance-circle"
+                        id="deliveryPerformanceCircle"
+                    >
+
+                        <div>
+
+                            <strong
+                                id="dashboardOnTimeRate"
+                            >
+                                0%
+                            </strong>
+
+                            <span>
+                                On Time
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="performance-details">
+
+                    <div class="performance-row">
+
+                        <span>
+                            On Time
+                        </span>
+
+                        <strong
+                            id="dashboardOnTimeCount"
+                        >
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="performance-row">
+
+                        <span>
+                            Delayed
+                        </span>
+
+                        <strong
+                            id="dashboardDelayedCount"
+                            class="text-warning"
+                        >
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="performance-row">
+
+                        <span>
+                            Delivered
+                        </span>
+
+                        <strong
+                            id="dashboardDeliveredCount"
+                        >
+                            0
+                        </strong>
+
+                    </div>
+
+
+                    <div class="performance-row">
+
+                        <span>
+                            Avg. Lead Time
+                        </span>
+
+                        <strong
+                            id="dashboardLeadTime"
+                        >
+                            -
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             FINANCE SNAPSHOT
+        ================================================== -->
+
+        <div class="dashboard-panel finance-panel">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <span class="panel-eyebrow">
+                        FINANCE
+                    </span>
+
+                    <h2>
+                        Finance Snapshot
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div class="finance-list">
+
+                <div class="finance-row">
+
+                    <div>
+
+                        <span>
+                            Sales Order Value
+                        </span>
+
+                        <small>
+                            Total order value
+                        </small>
+
+                    </div>
+
+                    <strong id="dashboardSOValue">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="finance-row">
+
+                    <div>
+
+                        <span>
+                            Invoiced
+                        </span>
+
+                        <small>
+                            Total invoiced amount
+                        </small>
+
+                    </div>
+
+                    <strong id="dashboardInvoiced">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="finance-row">
+
+                    <div>
+
+                        <span>
+                            Paid
+                        </span>
+
+                        <small>
+                            Total collected
+                        </small>
+
+                    </div>
+
+                    <strong id="dashboardPaid">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="finance-row outstanding">
+
+                    <div>
+
+                        <span>
+                            Outstanding
+                        </span>
+
+                        <small>
+                            Remaining balance
+                        </small>
+
+                    </div>
+
+                    <strong id="dashboardFinanceOutstanding">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             FLEET STATUS
+        ================================================== -->
+
+        <div class="dashboard-panel fleet-panel">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <span class="panel-eyebrow">
+                        FLEET
+                    </span>
+
+                    <h2>
+                        Fleet Status
+                    </h2>
+
+                </div>
+
+
+                <span class="panel-period">
+                    Current
+                </span>
+
+            </div>
+
+
+            <div class="fleet-status-grid">
+
+                <div class="fleet-status-item active">
+
+                    <div class="fleet-status-icon">
+                        🚛
+                    </div>
+
+                    <strong id="fleetAvailable">
+                        0
+                    </strong>
+
+                    <span>
+                        Available
+                    </span>
+
+                </div>
+
+
+                <div class="fleet-status-item delivery">
+
+                    <div class="fleet-status-icon">
+                        🚚
+                    </div>
+
+                    <strong id="fleetOnDelivery">
+                        0
+                    </strong>
+
+                    <span>
+                        On Delivery
+                    </span>
+
+                </div>
+
+
+                <div class="fleet-status-item maintenance">
+
+                    <div class="fleet-status-icon">
+                        🔧
+                    </div>
+
+                    <strong id="fleetMaintenance">
+                        0
+                    </strong>
+
+                    <span>
+                        Maintenance
+                    </span>
+
+                </div>
+
+
+                <div class="fleet-status-item inactive">
+
+                    <div class="fleet-status-icon">
+                        ⏸️
+                    </div>
+
+                    <strong id="fleetInactive">
+                        0
+                    </strong>
+
+                    <span>
+                        Inactive
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         LOWER DASHBOARD
+    ====================================================== -->
+
+    <section class="dashboard-lower-grid">
+
+
+        <!-- =================================================
+             ATTENTION REQUIRED
+        ================================================== -->
+
+        <div class="dashboard-panel attention-panel">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <span class="panel-eyebrow">
+                        ACTION CENTER
+                    </span>
+
+                    <h2>
+                        Attention Required
+                    </h2>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="dashboardAttentionList"
+                class="attention-list"
+            >
+
+                <div class="empty-dashboard-state">
+
+                    <span>
+                        ✓
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            No critical items
+                        </strong>
+
+                        <p>
+                            Everything looks good.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             RECENT ACTIVITY
+        ================================================== -->
+
+        <div class="dashboard-panel activity-panel">
+
+            <div class="dashboard-panel-header">
+
+                <div>
+
+                    <span class="panel-eyebrow">
+                        SYSTEM
+                    </span>
+
+                    <h2>
+                        Recent Activity
+                    </h2>
+
+                </div>
+
+
+                <span
+                    class="activity-count"
+                    id="activityCount"
+                >
+                    0
+                </span>
+
+            </div>
+
+
+            <div
+                id="dashboardActivityList"
+                class="activity-list"
+            >
+
+                <div class="empty-dashboard-state">
+
+                    <span>
+                        —
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            No recent activity
+                        </strong>
+
+                        <p>
+                            New transactions will appear here.
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         QUICK ACTIONS
+    ====================================================== -->
+
+    <section class="quick-actions-section">
+
+        <div class="quick-actions-header">
+
+            <div>
+
+                <span class="panel-eyebrow">
+                    QUICK ACTIONS
+                </span>
+
+                <h2>
+                    Common Tasks
+                </h2>
+
+            </div>
+
+        </div>
+
+
+        <div class="quick-actions-grid">
+
+            <button
+                type="button"
+                class="quick-action-btn"
+                data-action="sales"
+            >
+
+                <span class="quick-action-icon">
+                    📄
+                </span>
+
+                <span>
+
+                    <strong>
+                        Sales Order
+                    </strong>
+
+                    <small>
+                        Create / view SO
+                    </small>
+
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="quick-action-btn"
+                data-action="delivery"
+            >
+
+                <span class="quick-action-icon">
+                    🚚
+                </span>
+
+                <span>
+
+                    <strong>
+                        Delivery
+                    </strong>
+
+                    <small>
+                        Manage deliveries
+                    </small>
+
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="quick-action-btn"
+                data-action="invoice"
+            >
+
+                <span class="quick-action-icon">
+                    🧾
+                </span>
+
+                <span>
+
+                    <strong>
+                        Invoice
+                    </strong>
+
+                    <small>
+                        Manage invoices
+                    </small>
+
+                </span>
+
+            </button>
+
+
+            <button
+                type="button"
+                class="quick-action-btn"
+                data-action="payment"
+            >
+
+                <span class="quick-action-icon">
+                    💳
+                </span>
+
+                <span>
+
+                    <strong>
+                        Payment
+                    </strong>
+
+                    <small>
+                        Record payment
+                    </small>
+
+                </span>
+
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================================
+         FOOTER
+    ====================================================== -->
+
+    <div class="dashboard-footer">
+
+        <span>
+            LOGIS-TECH SYSTEM
+        </span>
+
+        <span>
+            Operations Dashboard
+        </span>
+
+    </div>
+
+</div>
+
+
+<script
+    src="../js/dashboard.js?v=20261006"
+></script>
 
 </body>
-
 </html>
