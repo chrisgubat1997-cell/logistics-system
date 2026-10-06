@@ -1,13 +1,16 @@
-
 /* =========================================================
    LOGIS-TECH SYSTEM
    SALES ORDER MODULE
    Modern / Clean / Responsive / Fully Isolated
 
-   WORKFLOW:
-   UNPOSTED → POSTED → PARTIAL → COMPLETED
-                       ↘ CANCELLED
+   UPDATED:
+   - Multiple DR Tracking
+   - Multiple Invoice Tracking
+   - Multiple Payment Tracking
+   - Payment Status
+   - Payment Balance
    ========================================================= */
+
 
 /* =========================================================
    01. MODULE BASE
@@ -240,9 +243,6 @@
     font-weight: 750;
 }
 
-
-/* TOTAL */
-
 .sales-order-module .so-summary-card:not(
     .so-card-partial,
     .so-card-active,
@@ -253,9 +253,6 @@
     color: #2563eb;
 }
 
-
-/* PARTIAL */
-
 .sales-order-module .so-card-partial .so-summary-icon {
     background: #fff7ed;
     color: #ea580c;
@@ -264,9 +261,6 @@
 .sales-order-module .so-card-partial::after {
     background: rgba(234, 88, 12, 0.045);
 }
-
-
-/* ACTIVE */
 
 .sales-order-module .so-card-active .so-summary-icon {
     background: #ecfdf5;
@@ -277,9 +271,6 @@
     background: rgba(5, 150, 105, 0.045);
 }
 
-
-/* COMPLETED */
-
 .sales-order-module .so-card-completed .so-summary-icon {
     background: #eef2ff;
     color: #4f46e5;
@@ -288,9 +279,6 @@
 .sales-order-module .so-card-completed::after {
     background: rgba(79, 70, 229, 0.045);
 }
-
-
-/* CANCELLED */
 
 .sales-order-module .so-card-cancelled .so-summary-icon {
     background: #fef2f2;
@@ -363,9 +351,6 @@
     color: #9aa3b3;
 }
 
-
-/* FILTER */
-
 .sales-order-module .so-filter-group {
     height: 40px;
     display: flex;
@@ -392,9 +377,6 @@
     font-size: 12px;
     cursor: pointer;
 }
-
-
-/* REFRESH */
 
 .sales-order-module .so-refresh-btn {
     position: relative;
@@ -430,7 +412,7 @@
 
 
 /* =========================================================
-   07. SELECTION ACTION BAR
+   07. ACTION BAR
    ========================================================= */
 
 .sales-order-module .so-action-bar {
@@ -462,9 +444,6 @@
     min-width: 8px;
     border-radius: 50%;
     background: #cbd5e1;
-    transition:
-        background 0.2s ease,
-        box-shadow 0.2s ease;
 }
 
 .sales-order-module .so-status-dot.active {
@@ -527,8 +506,7 @@
         transform 0.18s ease,
         box-shadow 0.18s ease,
         background 0.18s ease,
-        border-color 0.18s ease,
-        opacity 0.18s ease;
+        border-color 0.18s ease;
 }
 
 .sales-order-module .so-btn:not(:disabled):hover {
@@ -629,7 +607,7 @@
 
 
 /* =========================================================
-   10. SALES ORDER TABLE
+   10. TABLE
    ========================================================= */
 
 .sales-order-module .table-container {
@@ -659,8 +637,13 @@
     border-collapse: collapse;
 }
 
+
+/* =========================================================
+   MAIN SO TABLE
+   ========================================================= */
+
 .sales-order-module #soTable {
-    min-width: 950px;
+    min-width: 1450px;
 }
 
 .sales-order-module #soTable th {
@@ -689,8 +672,7 @@
     cursor: pointer;
     transition:
         background 0.15s ease,
-        box-shadow 0.15s ease,
-        transform 0.15s ease;
+        box-shadow 0.15s ease;
 }
 
 .sales-order-module #soTable tbody tr:hover {
@@ -701,9 +683,6 @@
     border-bottom: 0;
 }
 
-
-/* SELECTED ROW */
-
 .sales-order-module #soTable tbody tr.selected {
     background: #eff6ff;
     box-shadow:
@@ -712,27 +691,74 @@
         inset 0 -1px 0 #dbeafe;
 }
 
-.sales-order-module #soTable tbody tr.selected td {
-    color: #334155;
-}
-
-.sales-order-module #soTable tbody tr.selected td:first-child {
-    color: #1d4ed8;
-}
-
-
-/* ACTIVE / LEGACY SUPPORT */
-
 .sales-order-module #soTable tbody tr.active {
     background: #eff6ff;
 }
 
-
-/* FIRST COLUMN */
-
 .sales-order-module #soTable td:first-child {
     color: #2563eb;
     font-weight: 750;
+}
+
+
+/* =========================================================
+   NEW — MAIN TABLE TRACKING CELLS
+   ========================================================= */
+
+.sales-order-module .so-table-multi-value {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    max-width: 180px;
+}
+
+.sales-order-module .so-table-record {
+    display: inline-flex;
+    align-items: center;
+    max-width: 180px;
+    padding: 4px 7px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 9px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sales-order-module .so-table-more {
+    color: #2563eb;
+    font-size: 9px;
+    font-weight: 800;
+}
+
+
+/* DR */
+
+.sales-order-module .so-dr-cell {
+    color: #475569;
+}
+
+.sales-order-module .so-dr-cell .so-table-record {
+    background: #f0fdf4;
+    border-color: #bbf7d0;
+    color: #047857;
+}
+
+
+/* INVOICE */
+
+.sales-order-module .so-invoice-cell {
+    color: #475569;
+}
+
+.sales-order-module .so-invoice-cell .so-table-record {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1d4ed8;
 }
 
 
@@ -753,48 +779,26 @@
     letter-spacing: 0.35px;
 }
 
-
-/* UNPOSTED */
-
 .sales-order-module .status-unposted {
     background: #f1f5f9;
     color: #64748b;
 }
 
-
-/* POSTED */
-
-.sales-order-module .status-posted {
-    background: #ecfdf5;
-    color: #047857;
-}
-
-
-/* ACTIVE / LEGACY */
-
+.sales-order-module .status-posted,
 .sales-order-module .status-active {
     background: #ecfdf5;
     color: #047857;
 }
-
-
-/* PARTIAL */
 
 .sales-order-module .status-partial {
     background: #fff7ed;
     color: #c2410c;
 }
 
-
-/* COMPLETED */
-
 .sales-order-module .status-completed {
     background: #eef2ff;
     color: #4338ca;
 }
-
-
-/* CANCELLED */
 
 .sales-order-module .status-cancelled {
     background: #fef2f2;
@@ -803,7 +807,40 @@
 
 
 /* =========================================================
-   12. EMPTY STATE
+   12. PAYMENT STATUS BADGES
+   ========================================================= */
+
+.sales-order-module .so-payment-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 70px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 9px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+}
+
+.sales-order-module .payment-paid {
+    background: #dcfce7;
+    color: #047857;
+}
+
+.sales-order-module .payment-partial {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.sales-order-module .payment-unpaid {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   13. EMPTY STATE
    ========================================================= */
 
 .sales-order-module .so-empty-state {
@@ -838,7 +875,7 @@
 
 
 /* =========================================================
-   13. DETAILS VIEW
+   14. DETAILS VIEW
    ========================================================= */
 
 .sales-order-module .so-details-view {
@@ -848,7 +885,7 @@
 
 
 /* =========================================================
-   14. DETAILS HEADER
+   15. DETAILS HEADER
    ========================================================= */
 
 .sales-order-module .so-details-header {
@@ -875,16 +912,11 @@
     color: #596477;
     font-size: 11px;
     font-weight: 700;
-    transition:
-        background 0.18s ease,
-        border-color 0.18s ease,
-        transform 0.18s ease;
 }
 
 .sales-order-module .so-back-btn:hover {
     background: #f6f8fb;
     border-color: #cbd5e1;
-    transform: translateX(-1px);
 }
 
 .sales-order-module .so-details-title {
@@ -939,7 +971,7 @@
 
 
 /* =========================================================
-   15. POSTING STATUS PANEL
+   16. POSTING STATUS PANEL
    ========================================================= */
 
 .sales-order-module .so-posting-status-panel {
@@ -953,17 +985,6 @@
     border: 1px solid #e2e8f0;
     border-radius: 13px;
     background: #f8fafc;
-    transition:
-        border-color 0.2s ease,
-        background 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.sales-order-module .so-posting-status-left {
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
 }
 
 .sales-order-module .so-posting-status-icon {
@@ -981,9 +1002,10 @@
 
 .sales-order-module .so-posting-status-content {
     min-width: 0;
+    flex: 1;
 }
 
-.sales-order-module .so-posting-status-label {
+.sales-order-module .so-posting-status-title {
     display: block;
     margin-bottom: 3px;
     color: #8a94a5;
@@ -1000,7 +1022,7 @@
 }
 
 .sales-order-module #soPostingStatusDescription {
-    margin-top: 3px;
+    margin: 3px 0 0;
     color: #7c8798;
     font-size: 10px;
     line-height: 1.4;
@@ -1033,23 +1055,6 @@
     font-weight: 750;
 }
 
-
-/* UNPOSTED STATE */
-
-.sales-order-module .so-posting-status-panel.status-panel-unposted {
-    border-color: #e2e8f0;
-    background: #f8fafc;
-}
-
-.sales-order-module .so-posting-status-panel.status-panel-unposted
-.so-posting-status-icon {
-    background: #e2e8f0;
-    color: #64748b;
-}
-
-
-/* POSTED STATE */
-
 .sales-order-module .so-posting-status-panel.status-panel-posted {
     border-color: #bbf7d0;
     background: #f0fdf4;
@@ -1068,7 +1073,406 @@
 
 
 /* =========================================================
-   16. DETAIL INFO CARDS
+   17. NEW
+   TRANSACTION TRACKING CONTAINER
+   ========================================================= */
+
+.sales-order-module .so-transaction-tracking {
+    width: 100%;
+    margin-bottom: 16px;
+    overflow: hidden;
+    border: 1px solid #dfe5ee;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.045);
+}
+
+
+/* HEADER */
+
+.sales-order-module .so-transaction-header {
+    min-height: 67px;
+    padding: 13px 17px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #edf0f4;
+    background: #fbfcfe;
+}
+
+.sales-order-module .so-transaction-header > div {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.sales-order-module .so-transaction-header h2 {
+    margin: 0;
+    color: #263144;
+    font-size: 14px;
+    font-weight: 750;
+}
+
+.sales-order-module .so-transaction-header p {
+    margin: 3px 0 0;
+    color: #8d97a7;
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   18. TRANSACTION SUMMARY
+   ========================================================= */
+
+.sales-order-module .so-transaction-summary-grid {
+    width: 100%;
+    padding: 14px 17px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.sales-order-module .so-transaction-card {
+    min-height: 76px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #e6ebf2;
+    border-radius: 10px;
+    background: #ffffff;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.sales-order-module .so-transaction-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(15, 23, 42, 0.06);
+}
+
+.sales-order-module .so-transaction-icon {
+    width: 37px;
+    height: 37px;
+    min-width: 37px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 15px;
+}
+
+.sales-order-module .so-transaction-card > div:last-child {
+    min-width: 0;
+}
+
+.sales-order-module .so-transaction-card span {
+    display: block;
+    margin-bottom: 3px;
+    color: #8993a4;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.55px;
+}
+
+.sales-order-module .so-transaction-card strong {
+    display: block;
+    overflow: hidden;
+    color: #263144;
+    font-size: 15px;
+    font-weight: 800;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sales-order-module .so-transaction-card small {
+    display: block;
+    margin-top: 2px;
+    color: #9aa3b1;
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+}
+
+
+/* DR */
+
+.sales-order-module .so-transaction-card:first-child
+.so-transaction-icon {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+
+/* INVOICE */
+
+.sales-order-module .so-transaction-card:nth-child(2)
+.so-transaction-icon {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+
+/* PAID */
+
+.sales-order-module .so-payment-paid {
+    border-color: #bbf7d0;
+    background: #f7fff9;
+}
+
+.sales-order-module .so-payment-paid
+.so-transaction-icon {
+    background: #dcfce7;
+    color: #047857;
+}
+
+.sales-order-module .so-payment-paid strong {
+    color: #047857;
+}
+
+
+/* BALANCE */
+
+.sales-order-module .so-payment-balance {
+    border-color: #fed7aa;
+    background: #fffaf5;
+}
+
+.sales-order-module .so-payment-balance
+.so-transaction-icon {
+    background: #ffedd5;
+    color: #ea580c;
+}
+
+.sales-order-module .so-payment-balance strong {
+    color: #c2410c;
+}
+
+
+/* =========================================================
+   19. PAYMENT STATUS PANEL
+   ========================================================= */
+
+.sales-order-module .so-payment-status-panel {
+    min-height: 52px;
+    padding: 9px 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    border-bottom: 1px solid #edf0f4;
+    background: #ffffff;
+}
+
+.sales-order-module .so-payment-status-label {
+    color: #657083;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.55px;
+}
+
+.sales-order-module .so-payment-status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 82px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: 0.45px;
+}
+
+.sales-order-module .so-payment-status-badge.paid {
+    background: #dcfce7;
+    color: #047857;
+}
+
+.sales-order-module .so-payment-status-badge.partial {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.sales-order-module .so-payment-status-badge.unpaid {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   20. TRACKING SECTION
+   ========================================================= */
+
+.sales-order-module .so-tracking-section {
+    width: 100%;
+    border-bottom: 1px solid #edf0f4;
+}
+
+.sales-order-module .so-tracking-section:last-child {
+    border-bottom: 0;
+}
+
+.sales-order-module .so-tracking-section-header {
+    min-height: 61px;
+    padding: 12px 17px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.sales-order-module .so-tracking-section-header h3 {
+    margin: 0;
+    color: #344054;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.sales-order-module .so-tracking-section-header p {
+    margin: 3px 0 0;
+    color: #929baa;
+    font-size: 9px;
+}
+
+.sales-order-module .so-record-count {
+    flex-shrink: 0;
+    padding: 5px 8px;
+    border-radius: 6px;
+    background: #f4f6f9;
+    color: #7d8797;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.45px;
+}
+
+
+/* =========================================================
+   21. TRACKING TABLES
+   ========================================================= */
+
+.sales-order-module .so-tracking-table {
+    width: 100%;
+    padding: 0 17px 14px;
+    overflow-x: auto;
+}
+
+.sales-order-module .so-tracking-table table {
+    min-width: 700px;
+    border: 1px solid #e7ebf1;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sales-order-module .so-tracking-table th {
+    height: 37px;
+    padding: 0 10px;
+    text-align: left;
+    white-space: nowrap;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e9f0;
+    color: #7c8798;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+}
+
+.sales-order-module .so-tracking-table td {
+    min-height: 42px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #edf0f4;
+    color: #4b5563;
+    font-size: 10px;
+    white-space: nowrap;
+}
+
+.sales-order-module .so-tracking-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.sales-order-module .so-tracking-table tbody tr:hover {
+    background: #fafcff;
+}
+
+.sales-order-module .so-tracking-table td:first-child {
+    color: #2563eb;
+    font-weight: 750;
+}
+
+
+/* NO RECORD */
+
+.sales-order-module .so-no-record {
+    height: 55px;
+    text-align: center !important;
+    color: #9aa3b1 !important;
+    font-size: 10px !important;
+    font-style: italic;
+    font-weight: 500 !important;
+}
+
+
+/* =========================================================
+   22. TRACKING STATUS
+   ========================================================= */
+
+.sales-order-module .so-tracking-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    padding: 5px 8px;
+    border-radius: 999px;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+}
+
+.sales-order-module .tracking-delivered {
+    background: #dcfce7;
+    color: #047857;
+}
+
+.sales-order-module .tracking-transit {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.sales-order-module .tracking-pending {
+    background: #fef3c7;
+    color: #a16207;
+}
+
+.sales-order-module .tracking-cancelled {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   23. INVOICE PAYMENT STATUS
+   ========================================================= */
+
+.sales-order-module .invoice-paid {
+    background: #dcfce7;
+    color: #047857;
+}
+
+.sales-order-module .invoice-partial {
+    background: #ffedd5;
+    color: #c2410c;
+}
+
+.sales-order-module .invoice-unpaid {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+
+/* =========================================================
+   24. DETAIL INFO CARDS
    ========================================================= */
 
 .sales-order-module .so-detail-info-grid {
@@ -1139,7 +1543,7 @@
 
 
 /* =========================================================
-   17. DETAIL SECTIONS
+   25. DETAIL SECTIONS
    ========================================================= */
 
 .sales-order-module .so-detail-section {
@@ -1197,7 +1601,7 @@
 
 
 /* =========================================================
-   18. FORM GRID
+   26. FORM GRID
    ========================================================= */
 
 .sales-order-module .so-detail-form {
@@ -1239,17 +1643,6 @@
     background: #ffffff;
     color: #364152;
     font-size: 12px;
-    transition:
-        border-color 0.18s ease,
-        box-shadow 0.18s ease,
-        background 0.18s ease;
-}
-
-.sales-order-module .form-group input:focus,
-.sales-order-module .form-group select:focus,
-.sales-order-module .form-group textarea:focus {
-    border-color: #93b4f5;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
 }
 
 .sales-order-module .form-group input:disabled,
@@ -1257,13 +1650,12 @@
 .sales-order-module .form-group textarea:disabled {
     background: #f8fafc;
     color: #596477;
-    cursor: default;
     opacity: 1;
 }
 
 
 /* =========================================================
-   19. ITEMS TABLE
+   27. ITEMS TABLE
    ========================================================= */
 
 .sales-order-module .so-items-table {
@@ -1302,7 +1694,7 @@
 
 
 /* =========================================================
-   20. DETAIL TOTALS
+   28. DETAIL TOTALS
    ========================================================= */
 
 .sales-order-module .detail-summary {
@@ -1352,11 +1744,6 @@
     font-size: 11px;
 }
 
-.sales-order-module .so-total-input:focus {
-    border-color: #93b4f5;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
-}
-
 .sales-order-module .vatable-check {
     display: inline-flex;
     align-items: center;
@@ -1391,7 +1778,7 @@
 
 
 /* =========================================================
-   21. FILE SECTION
+   29. FILE SECTION
    ========================================================= */
 
 .sales-order-module .so-file-list {
@@ -1414,11 +1801,6 @@
 .sales-order-module .no-files > span {
     font-size: 15px;
 }
-
-
-/* =========================================================
-   22. FILE ITEMS
-   ========================================================= */
 
 .sales-order-module .so-file-item {
     min-height: 57px;
@@ -1465,15 +1847,9 @@
     white-space: nowrap;
 }
 
-.sales-order-module .so-file-actions {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
 
 /* =========================================================
-   23. DETAILS ACTIONS
+   30. DETAILS ACTIONS
    ========================================================= */
 
 .sales-order-module .so-details-actions {
@@ -1496,14 +1872,13 @@
 
 
 /* =========================================================
-   24. UPDATE MODE ACTION BAR
+   31. UPDATE MODE
    ========================================================= */
 
 .sales-order-module #soUpdateActionBar {
     width: 100%;
     min-height: 62px;
     padding: 10px 13px;
-    margin-top: 0;
     margin-bottom: 24px;
     display: flex;
     align-items: center;
@@ -1512,32 +1887,40 @@
     border: 1px solid #bfdbfe;
     border-radius: 12px;
     background: #eff6ff;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.06);
 }
 
-.sales-order-module .so-update-mode-label {
+.sales-order-module .so-update-action-info {
     display: flex;
     align-items: center;
     gap: 9px;
-    color: #1d4ed8;
-    font-size: 11px;
-    font-weight: 800;
 }
 
-.sales-order-module .so-update-mode-label::before {
-    content: "✎";
-    width: 27px;
-    height: 27px;
+.sales-order-module .so-update-action-icon {
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 7px;
     background: #dbeafe;
     color: #2563eb;
-    font-size: 13px;
 }
 
-.sales-order-module .so-update-actions {
+.sales-order-module .so-update-action-info strong {
+    display: block;
+    color: #1d4ed8;
+    font-size: 10px;
+    font-weight: 800;
+}
+
+.sales-order-module .so-update-action-info small {
+    display: block;
+    margin-top: 2px;
+    color: #64748b;
+    font-size: 9px;
+}
+
+.sales-order-module .so-update-action-buttons {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -1545,7 +1928,7 @@
 
 
 /* =========================================================
-   25. POST BUTTON EMPHASIS
+   32. POST BUTTON
    ========================================================= */
 
 .sales-order-module #detailPostButton,
@@ -1576,10 +1959,11 @@
 
 
 /* =========================================================
-   26. ANIMATIONS
+   33. ANIMATIONS
    ========================================================= */
 
 @keyframes soFadeIn {
+
     from {
         opacity: 0;
         transform: translateY(5px);
@@ -1592,6 +1976,7 @@
 }
 
 @keyframes soDetailsIn {
+
     from {
         opacity: 0;
         transform: translateX(8px);
@@ -1605,7 +1990,7 @@
 
 
 /* =========================================================
-   27. RESPONSIVE — 1200px
+   34. RESPONSIVE — 1200px
    ========================================================= */
 
 @media (max-width: 1200px) {
@@ -1615,6 +2000,10 @@
     }
 
     .sales-order-module .so-detail-info-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sales-order-module .so-transaction-summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -1630,7 +2019,7 @@
 
 
 /* =========================================================
-   28. RESPONSIVE — 900px
+   35. RESPONSIVE — 900px
    ========================================================= */
 
 @media (max-width: 900px) {
@@ -1682,11 +2071,15 @@
         flex-wrap: wrap;
         gap: 15px 25px;
     }
+
+    .sales-order-module .so-transaction-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 
 /* =========================================================
-   29. RESPONSIVE — 650px
+   36. RESPONSIVE — 650px
    ========================================================= */
 
 @media (max-width: 650px) {
@@ -1735,15 +2128,6 @@
         flex: 1;
     }
 
-    .sales-order-module .so-selection-content {
-        width: 100%;
-    }
-
-    .sales-order-module .so-selection-meta {
-        max-width: 100%;
-        white-space: normal;
-    }
-
     .sales-order-module .so-table-header {
         align-items: flex-start;
         flex-direction: column;
@@ -1754,6 +2138,10 @@
     }
 
     .sales-order-module .so-detail-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sales-order-module .so-transaction-summary-grid {
         grid-template-columns: 1fr;
     }
 
@@ -1816,20 +2204,25 @@
         flex-direction: column;
     }
 
-    .sales-order-module .so-update-actions {
+    .sales-order-module .so-update-action-buttons {
         width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
     }
 
-    .sales-order-module .so-update-actions .so-btn {
+    .sales-order-module .so-update-action-buttons .so-btn {
         width: 100%;
+    }
+
+    .sales-order-module .so-tracking-section-header {
+        align-items: flex-start;
+        flex-direction: column;
     }
 }
 
 
 /* =========================================================
-   30. RESPONSIVE — 430px
+   37. RESPONSIVE — 430px
    ========================================================= */
 
 @media (max-width: 430px) {
@@ -1847,7 +2240,7 @@
         grid-template-columns: 1fr;
     }
 
-    .sales-order-module .so-update-actions {
+    .sales-order-module .so-update-action-buttons {
         grid-template-columns: 1fr;
     }
 
@@ -1866,11 +2259,21 @@
     .sales-order-module .so-total-value {
         font-size: 11px;
     }
+
+    .sales-order-module .so-payment-status-panel {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .sales-order-module .so-tracking-table {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
 }
 
 
 /* =========================================================
-   31. SCROLLBAR
+   38. SCROLLBAR
    ========================================================= */
 
 .sales-order-module ::-webkit-scrollbar {
