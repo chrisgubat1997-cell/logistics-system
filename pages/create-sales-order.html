@@ -208,32 +208,99 @@
                 </div>
 
 
-                <!-- =================================================
-                     CLIENT NAME
-                ================================================== -->
+                <!-- =====================================================
+     CUSTOMER MASTER
+===================================================== -->
 
-                <div class="form-group">
+<div class="form-group full">
 
-                    <label for="clientName">
-                        Client Name
-                        <span class="required">*</span>
-                    </label>
+    <label for="customerSelect">
 
-                    <div class="input-wrapper">
+        Customer
 
-                        <span class="input-icon">●</span>
+        <span class="required">*</span>
 
-                        <input
-                            type="text"
-                            id="clientName"
-                            placeholder="Select customer above"
-                            readonly
-                        >
+        <span class="customer-master-badge">
+            CUSTOMER MASTER
+        </span>
 
-                    </div>
+    </label>
 
-                </div>
 
+    <div class="customer-select-wrapper">
+
+        <span class="input-icon">
+            ●
+        </span>
+
+
+        <select
+            id="customerSelect"
+            required
+        >
+
+            <option value="">
+                Loading customers...
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div
+        class="customer-id-display"
+        id="customerIdDisplay"
+    >
+
+        <span class="customer-id-label">
+            Customer ID:
+        </span>
+
+        <span
+            class="customer-id-value"
+            id="customerIdValue"
+        >
+            —
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     CLIENT NAME
+===================================================== -->
+
+<div class="form-group">
+
+    <label for="clientName">
+
+        Client Name
+
+        <span class="required">*</span>
+
+    </label>
+
+
+    <div class="input-wrapper">
+
+        <span class="input-icon">
+            ●
+        </span>
+
+        <input
+            type="text"
+            id="clientName"
+            class="customer-autofill"
+            placeholder="Select customer first"
+            readonly
+        >
+
+    </div>
+
+</div>
 
                 <!-- =================================================
                      ATTENTION
