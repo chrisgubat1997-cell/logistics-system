@@ -2534,7 +2534,13 @@ function openCreateSO() {
    OPEN INSIDE SALES ORDER
 ========================================================= */
 
-let customerModuleLoaded = false;
+/*
+ * IMPORTANT:
+ * customerModuleLoaded is already declared
+ * in GLOBAL VARIABLES above.
+ *
+ * Do NOT declare it again here.
+ */
 
 let customerSavedEventBound = false;
 
@@ -3096,8 +3102,7 @@ function closeCustomerFromSalesOrder() {
         document.getElementById(
             "salesOrderPage"
         );
-
-
+   
     if (salesPage) {
 
         salesPage.scrollIntoView({
