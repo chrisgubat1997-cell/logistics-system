@@ -688,46 +688,19 @@
         </div>
 
 
+<!-- =================================================
+     PAYMENT MODULE
+================================================== -->
 
-        <!-- =================================================
-             PAYMENT
-        ================================================== -->
+<div
+    id="payment"
+    class="page"
+>
 
-        <div
-            id="payment"
-            class="page"
-        >
+    <div id="paymentModule"></div>
 
-            <div class="page-header">
+</div>
 
-                <div>
-
-                    <h1>
-                        Payment
-                    </h1>
-
-                    <p class="subtitle">
-                        Payment Monitoring
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <div class="section">
-
-                <h2>
-                    Payment Monitoring
-                </h2>
-
-                <p>
-                    Payment module will be displayed here.
-                </p>
-
-            </div>
-
-        </div>
 
 
 
@@ -949,7 +922,10 @@ let fleetAnalyticsModuleLoaded = false;
 
 let invoicingModuleLoaded = false;
 
+let paymentModuleLoaded = false;
+
 let systemSettingsModuleLoaded = false;
+
 
 
 
@@ -1095,6 +1071,19 @@ function showPage(pageId, button) {
         loadInvoicingModule();
 
     }
+
+
+/* =====================================================
+   PAYMENT
+===================================================== */
+
+if (
+    pageId === 'payment'
+) {
+
+    loadPaymentModule();
+
+}
 
 
     /* =====================================================
@@ -1972,6 +1961,277 @@ async function loadInvoicingModule() {
 
     console.log(
         'Invoicing module ready.'
+    );
+
+}
+
+/* =========================================================
+   LOAD PAYMENT MODULE
+========================================================= */
+
+async function loadPaymentModule() {
+
+    console.log(
+        '========================================'
+    );
+
+    console.log(
+        'Loading Payment module...'
+    );
+
+
+    const container =
+        document.getElementById(
+            'paymentModule'
+        );
+
+
+    /* =====================================================
+       CHECK CONTAINER
+    ===================================================== */
+
+    if (!container) {
+
+        console.error(
+            'ERROR: #paymentModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD PAYMENT HTML
+       ONLY ONCE
+    ===================================================== */
+
+    if (
+        !paymentModuleLoaded
+    ) {
+
+        try {
+
+            const paymentHTMLUrl =
+                new URL(
+                    'pages/payment.html',
+                    window.location.href
+                ).href;
+
+
+            console.log(
+                'Payment HTML URL:',
+                paymentHTMLUrl
+            );
+
+
+            const response =
+                await fetch(
+                    paymentHTMLUrl +
+                    '?v=' +
+                    Date.now(),
+                    {
+                        method: 'GET',
+                        cache: 'no-store'
+                    }
+                );
+
+
+            console.log(
+                'Payment HTML response:',
+                response.status,
+                response.statusText
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'HTTP ' +
+                    response.status +
+                    ' - ' +
+                    response.statusText
+                );
+
+            }
+
+
+            const html =
+                await response.text();
+
+
+            if (
+                !html ||
+                !html.trim()
+            ) {
+
+                throw new Error(
+                    'payment.html is empty.'
+                );
+
+            }
+
+
+            /* =================================================
+               INSERT PAYMENT HTML
+            ================================================= */
+
+            container.innerHTML =
+                html;
+
+
+            paymentModuleLoaded =
+                true;
+
+
+            console.log(
+                'Payment HTML loaded successfully.'
+            );
+
+        } catch (error) {
+
+            console.error(
+                '========================================'
+            );
+
+            console.error(
+                'PAYMENT HTML LOAD ERROR'
+            );
+
+            console.error(
+                error
+            );
+
+            console.error(
+                '========================================'
+            );
+
+
+            container.innerHTML = `
+
+                <div style="
+                    margin:20px;
+                    padding:25px;
+                    background:#ffffff;
+                    border:1px solid #f0c9c5;
+                    border-radius:12px;
+                    color:#7f1d1d;
+                    font-family:Segoe UI,Arial,sans-serif;
+                ">
+
+                    <div style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:10px;
+                    ">
+
+                        Failed to load Payment module.
+
+                    </div>
+
+
+                    <div style="
+                        font-size:12px;
+                        line-height:1.7;
+                    ">
+
+                        ${error.message}
+
+                    </div>
+
+
+                    <div style="
+                        margin-top:15px;
+                        padding:12px;
+                        background:#fff7f6;
+                        border-radius:8px;
+                        font-size:11px;
+                        line-height:1.7;
+                    ">
+
+                        <strong>Expected file:</strong><br>
+
+                        pages/payment.html
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            return;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LOAD PAYMENT JAVASCRIPT
+    ===================================================== */
+
+    try {
+
+        await loadScriptOnce(
+            'js/payment.js?v=20261006',
+            'data-payment-js'
+        );
+
+
+        console.log(
+            'Payment JavaScript loaded successfully.'
+        );
+
+
+        /* =================================================
+           INITIALIZE PAYMENT
+        ================================================= */
+
+        if (
+            typeof window.initializePayment ===
+            'function'
+        ) {
+
+            window.initializePayment();
+
+
+            console.log(
+                'Payment initialized successfully.'
+            );
+
+        } else {
+
+            console.warn(
+                'initializePayment() not found in js/payment.js'
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            '========================================'
+        );
+
+        console.error(
+            'PAYMENT JAVASCRIPT ERROR'
+        );
+
+        console.error(
+            error
+        );
+
+        console.error(
+            '========================================'
+        );
+
+    }
+
+
+    console.log(
+        'Payment module ready.'
     );
 
 }
