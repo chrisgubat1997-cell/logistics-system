@@ -1,92 +1,63 @@
-<!-- =====================================================
+<!-- =========================================================
      LOGIS-TECH SYSTEM
      SALES ORDER MODULE
      sales-order.html
      VERSION: 20261007-01
-===================================================== -->
+========================================================= -->
 
-<div
-    id="salesOrderPage"
-    class="sales-order-module"
->
+<div id="salesOrderPage" class="sales-order-module">
 
-
-    <!-- =================================================
+    <!-- =====================================================
          SALES ORDER LIST VIEW
-    ================================================== -->
+    ====================================================== -->
 
-    <div
-        id="salesOrderListView"
-        class="so-list-view"
-    >
+    <section id="salesOrderListView" class="sales-order-list-view">
 
         <!-- =================================================
-             HEADER
+             PAGE HEADER
         ================================================== -->
 
-        <div class="so-main-header">
+        <div class="so-page-header">
 
-            <div class="so-title-area">
+            <div class="so-page-title">
 
                 <div class="so-title-icon">
-                    📄
+                    <span>SO</span>
                 </div>
 
                 <div>
-
-                    <h1>
-                        Sales Order
-                    </h1>
-
+                    <h1>Sales Orders</h1>
                     <p>
-                        Manage and monitor customer Sales Orders
+                        Manage sales orders, deliveries, invoices,
+                        and payment transactions.
                     </p>
-
                 </div>
 
             </div>
-
 
             <div class="so-header-actions">
 
                 <button
                     type="button"
+                    class="so-secondary-button"
                     id="newCustomerButton"
-                    class="so-create-btn so-customer-btn"
-                    onclick="openNewCustomerFromSalesOrder()"
+                    onclick="openCustomerModule()"
                 >
-
-                    <span class="so-create-icon">
-                        +
-                    </span>
-
-                    <span>
-                        NEW CUSTOMER
-                    </span>
-
+                    + New Customer
                 </button>
-
 
                 <button
                     type="button"
-                    class="so-create-btn"
-                    onclick="openCreateSO()"
+                    class="so-primary-button"
+                    id="createSalesOrderButton"
+                    onclick="openCreateSalesOrder()"
                 >
-
-                    <span class="so-create-icon">
-                        +
-                    </span>
-
-                    <span>
-                        CREATE SALES ORDER
-                    </span>
-
+                    + Create Sales Order
                 </button>
 
             </div>
 
         </div>
-
 
 
         <!-- =================================================
@@ -95,128 +66,111 @@
 
         <div class="so-summary-grid">
 
-            <div
+            <button
+                type="button"
                 class="so-summary-card"
-                id="soTotalCard"
-                onclick="filterSOBySummary('ALL')"
+                data-summary-filter="all"
+                onclick="filterSOBySummary('all')"
             >
 
-                <div class="so-summary-icon">
-                    📋
+                <div class="so-summary-label">
+                    TOTAL SALES ORDERS
                 </div>
 
-                <div class="so-summary-content">
-
-                    <span class="so-summary-label">
-                        TOTAL SALES ORDER
-                    </span>
-
-                    <strong id="soTotalCount">
-                        0
-                    </strong>
-
+                <div
+                    class="so-summary-value"
+                    id="totalSOCount"
+                >
+                    0
                 </div>
 
-            </div>
+            </button>
 
 
-            <div
-                class="so-summary-card so-card-partial"
-                onclick="filterSOBySummary('PARTIAL')"
+            <button
+                type="button"
+                class="so-summary-card"
+                data-summary-filter="partial"
+                onclick="filterSOBySummary('partial')"
             >
 
-                <div class="so-summary-icon">
-                    ◐
+                <div class="so-summary-label">
+                    PARTIAL
                 </div>
 
-                <div class="so-summary-content">
-
-                    <span class="so-summary-label">
-                        PARTIAL
-                    </span>
-
-                    <strong id="soPartialCount">
-                        0
-                    </strong>
-
+                <div
+                    class="so-summary-value"
+                    id="partialSOCount"
+                >
+                    0
                 </div>
 
-            </div>
+            </button>
 
 
-            <div
-                class="so-summary-card so-card-active"
-                onclick="filterSOBySummary('ACTIVE')"
+            <button
+                type="button"
+                class="so-summary-card"
+                data-summary-filter="active"
+                onclick="filterSOBySummary('active')"
             >
 
-                <div class="so-summary-icon">
-                    ●
+                <div class="so-summary-label">
+                    ACTIVE
                 </div>
 
-                <div class="so-summary-content">
-
-                    <span class="so-summary-label">
-                        ACTIVE
-                    </span>
-
-                    <strong id="soActiveCount">
-                        0
-                    </strong>
-
+                <div
+                    class="so-summary-value"
+                    id="activeSOCount"
+                >
+                    0
                 </div>
 
-            </div>
+            </button>
 
 
-            <div
-                class="so-summary-card so-card-completed"
-                onclick="filterSOBySummary('COMPLETED')"
+            <button
+                type="button"
+                class="so-summary-card"
+                data-summary-filter="completed"
+                onclick="filterSOBySummary('completed')"
             >
 
-                <div class="so-summary-icon">
-                    ✓
+                <div class="so-summary-label">
+                    COMPLETED
                 </div>
 
-                <div class="so-summary-content">
-
-                    <span class="so-summary-label">
-                        COMPLETED
-                    </span>
-
-                    <strong id="soCompletedCount">
-                        0
-                    </strong>
-
+                <div
+                    class="so-summary-value"
+                    id="completedSOCount"
+                >
+                    0
                 </div>
 
-            </div>
+            </button>
 
 
-            <div
-                class="so-summary-card so-card-cancelled"
-                onclick="filterSOBySummary('CANCELLED')"
+            <button
+                type="button"
+                class="so-summary-card"
+                data-summary-filter="cancelled"
+                onclick="filterSOBySummary('cancelled')"
             >
 
-                <div class="so-summary-icon">
-                    ×
+                <div class="so-summary-label">
+                    CANCELLED
                 </div>
 
-                <div class="so-summary-content">
-
-                    <span class="so-summary-label">
-                        CANCELLED
-                    </span>
-
-                    <strong id="soCancelledCount">
-                        0
-                    </strong>
-
+                <div
+                    class="so-summary-value"
+                    id="cancelledSOCount"
+                >
+                    0
                 </div>
 
-            </div>
+            </button>
 
         </div>
-
 
 
         <!-- =================================================
@@ -225,23 +179,22 @@
 
         <div class="so-toolbar">
 
-            <div class="so-search-box">
+            <div class="so-search-wrapper">
 
-                <span class="so-search-icon">
-                    🔍
-                </span>
+                <span class="so-search-icon">⌕</span>
 
                 <input
                     type="text"
-                    id="soSearch"
-                    placeholder="Search SO number, client, project, PO, DR or invoice..."
-                    onkeyup="searchSO()"
+                    id="soSearchInput"
+                    class="so-search-input"
+                    placeholder="Search SO number, client, project, PO number..."
+                    autocomplete="off"
                 >
 
             </div>
 
 
-            <div class="so-filter-group">
+            <div class="so-filter-wrapper">
 
                 <label for="soStatusFilter">
                     Status
@@ -249,39 +202,19 @@
 
                 <select
                     id="soStatusFilter"
-                    onchange="filterSOList()"
+                    class="so-filter-select"
                 >
-
-                    <option value="ALL">
-                        All Status
-                    </option>
-
-                    <option value="UNPOSTED">
-                        Unposted
-                    </option>
-
-                    <option value="POSTED">
-                        Posted
-                    </option>
-
-                    <option value="PARTIAL">
-                        Partial
-                    </option>
-
-                    <option value="COMPLETED">
-                        Completed
-                    </option>
-
-                    <option value="CANCELLED">
-                        Cancelled
-                    </option>
-
+                    <option value="">All Status</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="PARTIAL">Partial</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
                 </select>
 
             </div>
 
 
-            <div class="so-filter-group">
+            <div class="so-filter-wrapper">
 
                 <label for="soPaymentFilter">
                     Payment
@@ -289,25 +222,12 @@
 
                 <select
                     id="soPaymentFilter"
-                    onchange="filterSOList()"
+                    class="so-filter-select"
                 >
-
-                    <option value="ALL">
-                        All Payment
-                    </option>
-
-                    <option value="PAID">
-                        Paid
-                    </option>
-
-                    <option value="PARTIAL">
-                        Partial
-                    </option>
-
-                    <option value="UNPAID">
-                        Unpaid
-                    </option>
-
+                    <option value="">All Payment</option>
+                    <option value="UNPAID">Unpaid</option>
+                    <option value="PARTIAL">Partial</option>
+                    <option value="PAID">Paid</option>
                 </select>
 
             </div>
@@ -315,74 +235,60 @@
 
             <button
                 type="button"
-                class="so-refresh-btn"
-                id="soRefreshBtn"
-                onclick="refreshSOList()"
-                title="Refresh Sales Orders"
-                aria-label="Refresh Sales Orders"
-            ></button>
+                id="refreshSOButton"
+                class="so-refresh-button"
+                onclick="loadSOList(true)"
+            >
+                ↻ Refresh
+            </button>
 
         </div>
 
 
-
         <!-- =================================================
-             ACTION BAR
+             SELECTION ACTION BAR
         ================================================== -->
 
-        <div class="so-action-bar">
+        <div
+            id="soSelectionActionBar"
+            class="so-selection-action-bar"
+        >
 
-            <div class="so-selection-status">
+            <div class="so-selection-info">
 
-                <span class="so-status-dot"></span>
-
-                <div
-                    id="soSelectionText"
-                    class="so-selection-content"
-                >
-
-                    <span class="so-selection-empty">
-                        No Sales Order selected
-                    </span>
-
-                </div>
+                <span id="soSelectionText">
+                    No sales order selected
+                </span>
 
             </div>
 
 
-            <div class="so-action-buttons">
+            <div class="so-selection-actions">
 
                 <button
                     type="button"
                     id="updateSOButton"
-                    class="so-btn so-btn-secondary"
+                    class="so-secondary-button"
                     onclick="updateSelectedSO()"
                     disabled
                 >
-
-                    ✏️
-                    UPDATE
-
+                    Edit / Update
                 </button>
 
 
                 <button
                     type="button"
                     id="cancelSOButton"
-                    class="so-btn so-btn-danger"
+                    class="so-danger-button"
                     onclick="cancelSelectedSO()"
                     disabled
                 >
-
-                    ✕
-                    CANCEL
-
+                    Cancel SO
                 </button>
 
             </div>
 
         </div>
-
 
 
         <!-- =================================================
@@ -391,95 +297,60 @@
 
         <div class="so-table-card">
 
-            <div class="so-table-header">
+            <div class="so-table-wrapper">
 
-                <div>
-
-                    <h2>
-                        Sales Order List
-                    </h2>
-
-                    <p>
-                        Click to select. Double-click a Sales Order
-                        to view complete details.
-                    </p>
-
-                </div>
-
-                <div class="so-table-hint">
-                    DOUBLE-CLICK TO VIEW
-                </div>
-
-            </div>
-
-
-            <div class="table-container so-modern-table">
-
-                <table id="soTable">
+                <table
+                    id="soTable"
+                    class="so-table"
+                >
 
                     <thead>
 
                         <tr>
 
-                            <th>
-                                SO NUMBER
-                            </th>
+                            <th>SO NUMBER</th>
 
-                            <th>
-                                DATE
-                            </th>
+                            <th>DATE</th>
 
-                            <th>
-                                CLIENT
-                            </th>
+                            <th>CLIENT</th>
 
-                            <th>
-                                SE
-                            </th>
+                            <th>SE</th>
 
-                            <th>
-                                PROJECT
-                            </th>
+                            <th>PROJECT</th>
 
-                            <th>
-                                PO NUMBER
-                            </th>
+                            <th>PO NUMBER</th>
 
-                            <th>
-                                TERMS
-                            </th>
+                            <th>TERMS</th>
 
-                            <th>
-                                GRAND TOTAL
-                            </th>
+                            <th>GRAND TOTAL</th>
 
-                            <th>
-                                DR NUMBER
-                            </th>
+                            <th>DR NUMBER</th>
 
-                            <th>
-                                INVOICE NUMBER
-                            </th>
+                            <th>INVOICE NUMBER</th>
 
-                            <th>
-                                PAYMENT
-                            </th>
+                            <th>PAYMENT</th>
 
-                            <th>
-                                STATUS
-                            </th>
+                            <th>STATUS</th>
 
                         </tr>
 
                     </thead>
 
 
-                    <tbody id="soTableBody"></tbody>
+                    <tbody id="soTableBody">
+
+                        <!-- SALES ORDERS WILL BE RENDERED HERE -->
+
+                    </tbody>
 
                 </table>
 
             </div>
 
+
+            <!-- =================================================
+                 EMPTY STATE
+            ================================================== -->
 
             <div
                 id="soEmptyState"
@@ -488,97 +359,51 @@
             >
 
                 <div class="so-empty-icon">
-                    📄
+                    SO
                 </div>
 
-                <h3>
-                    No Sales Orders Found
-                </h3>
+                <h3>No Sales Orders Found</h3>
 
                 <p>
-                    Create your first Sales Order to get started.
+                    There are no sales orders matching your
+                    current search or filter.
                 </p>
 
                 <button
                     type="button"
-                    class="so-create-btn small"
-                    onclick="openCreateSO()"
+                    class="so-primary-button"
+                    onclick="openCreateSalesOrder()"
                 >
-
-                    + CREATE SALES ORDER
-
+                    + Create Sales Order
                 </button>
 
             </div>
 
         </div>
 
-    </div>
-
+    </section>
 
 
     <!-- =====================================================
          CUSTOMER AREA
-    ===================================================== -->
+    ====================================================== -->
 
-    <div
+    <section
         id="customerArea"
-        class="so-customer-area"
+        class="customer-area"
         style="display:none;"
     >
 
-        <div class="so-customer-area-header">
+        <!-- Customer module will be loaded here -->
 
-            <div class="so-customer-title">
-
-                <div class="so-customer-icon">
-                    👥
-                </div>
-
-                <div>
-
-                    <h2>
-                        Customer Information
-                    </h2>
-
-                    <p>
-                        Register or update customer information
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <button
-                type="button"
-                id="closeCustomerButton"
-                class="so-customer-close-btn"
-                onclick="closeCustomerFromSalesOrder()"
-                title="Close Customer"
-            >
-
-                ✕
-
-            </button>
-
-        </div>
-
-
-        <div
-            id="customerFormContainer"
-            class="so-customer-form-container"
-        ></div>
-
-    </div>
-
+    </section>
 
 
     <!-- =====================================================
-         SALES ORDER DETAILS VIEW
-    ===================================================== -->
+         SALES ORDER DETAILS
+    ====================================================== -->
 
-    <div
+    <section
         id="soDetails"
         class="so-details-view"
         style="display:none;"
@@ -591,32 +416,25 @@
 
         <div class="so-details-header">
 
-            <button
-                type="button"
-                class="so-back-btn"
-                onclick="closeSODetails()"
-            >
-
-                ←
-                Back to Sales Orders
-
-            </button>
-
-
             <div class="so-details-title">
 
-                <div class="so-details-title-icon">
-                    📄
-                </div>
+                <button
+                    type="button"
+                    class="so-back-button"
+                    onclick="closeSODetails()"
+                >
+                    ← Back
+                </button>
+
 
                 <div>
 
-                    <span>
-                        SALES ORDER DETAILS
-                    </span>
+                    <div class="so-details-kicker">
+                        SALES ORDER
+                    </div>
 
-                    <h1 id="detailSONumberHeader">
-                        Sales Order
+                    <h1 id="detailSONumberDisplay">
+                        -
                     </h1>
 
                 </div>
@@ -624,15 +442,18 @@
             </div>
 
 
-            <div
-                id="detailStatusBadge"
-                class="so-detail-status"
-            >
-                UNPOSTED
+            <div class="so-details-header-right">
+
+                <span
+                    id="detailStatusBadge"
+                    class="so-status-badge"
+                >
+                    -
+                </span>
+
             </div>
 
         </div>
-
 
 
         <!-- =================================================
@@ -645,55 +466,272 @@
         >
 
             <div class="so-posting-status-icon">
-                🟡
+                ✓
             </div>
 
 
             <div class="so-posting-status-content">
 
-                <div class="so-posting-status-title">
-                    SALES ORDER STATUS
+                <div
+                    id="soPostingStatusText"
+                    class="so-posting-status-title"
+                >
+                    Not Posted
                 </div>
 
-                <strong id="soPostingStatusText">
-                    UNPOSTED
-                </strong>
-
-                <p id="soPostingStatusDescription">
-                    This Sales Order has not yet been posted.
-                    It is not available for Delivery / DR preparation.
-                </p>
+                <div
+                    id="soPostingStatusDescription"
+                    class="so-posting-status-description"
+                >
+                    This sales order has not yet been posted.
+                </div>
 
             </div>
 
 
-            <div
-                id="soPostingMeta"
-                class="so-posting-meta"
-            >
+            <div class="so-posting-meta">
 
-                <div class="so-posting-meta-item">
+                <div>
+                    <span>Posted By</span>
+                    <strong id="soPostedBy">-</strong>
+                </div>
 
-                    <span>
-                        POSTED BY
-                    </span>
+                <div>
+                    <span>Posted Date</span>
+                    <strong id="soPostedDate">-</strong>
+                </div>
 
-                    <strong id="soPostedBy">
-                        —
-                    </strong>
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             QUICK INFORMATION
+        ================================================== -->
+
+        <div class="so-detail-summary-grid">
+
+
+            <div class="so-detail-summary-card">
+
+                <div class="so-detail-summary-label">
+                    SO DATE
+                </div>
+
+                <div
+                    id="detailSODateDisplay"
+                    class="so-detail-summary-value"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="so-detail-summary-card">
+
+                <div class="so-detail-summary-label">
+                    CLIENT
+                </div>
+
+                <div
+                    id="detailClientDisplay"
+                    class="so-detail-summary-value"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="so-detail-summary-card">
+
+                <div class="so-detail-summary-label">
+                    PROJECT
+                </div>
+
+                <div
+                    id="detailProjectDisplay"
+                    class="so-detail-summary-value"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <div class="so-detail-summary-card">
+
+                <div class="so-detail-summary-label">
+                    GRAND TOTAL
+                </div>
+
+                <div
+                    id="detailGrandTotalDisplay"
+                    class="so-detail-summary-value"
+                >
+                    ₱0.00
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             TRANSACTION TRACKING SUMMARY
+        ================================================== -->
+
+        <div class="so-section">
+
+            <div class="so-section-header">
+
+                <div>
+
+                    <h2>
+                        Transaction Tracking
+                    </h2>
+
+                    <p>
+                        Delivery, invoice, and payment status
+                        linked to this Sales Order.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="so-transaction-summary-grid">
+
+
+                <!-- DR -->
+
+                <div class="so-transaction-summary-card">
+
+                    <div class="so-transaction-summary-icon">
+                        DR
+                    </div>
+
+                    <div>
+
+                        <div class="so-transaction-summary-label">
+                            DELIVERY RECEIPTS
+                        </div>
+
+                        <div
+                            id="detailDRCount"
+                            class="so-transaction-summary-value"
+                        >
+                            0
+                        </div>
+
+                    </div>
 
                 </div>
 
 
-                <div class="so-posting-meta-item">
+                <!-- INVOICE -->
 
-                    <span>
-                        POSTED DATE
-                    </span>
+                <div class="so-transaction-summary-card">
 
-                    <strong id="soPostedDate">
-                        —
-                    </strong>
+                    <div class="so-transaction-summary-icon">
+                        INV
+                    </div>
+
+                    <div>
+
+                        <div class="so-transaction-summary-label">
+                            INVOICES
+                        </div>
+
+                        <div
+                            id="detailInvoiceCount"
+                            class="so-transaction-summary-value"
+                        >
+                            0
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAID -->
+
+                <div class="so-transaction-summary-card">
+
+                    <div class="so-transaction-summary-icon">
+                        ₱
+                    </div>
+
+                    <div>
+
+                        <div class="so-transaction-summary-label">
+                            PAID AMOUNT
+                        </div>
+
+                        <div
+                            id="detailPaidAmount"
+                            class="so-transaction-summary-value"
+                        >
+                            ₱0.00
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- BALANCE -->
+
+                <div class="so-transaction-summary-card">
+
+                    <div class="so-transaction-summary-icon">
+                        BAL
+                    </div>
+
+                    <div>
+
+                        <div class="so-transaction-summary-label">
+                            PAYMENT BALANCE
+                        </div>
+
+                        <div
+                            id="detailPaymentBalance"
+                            class="so-transaction-summary-value"
+                        >
+                            ₱0.00
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- PAYMENT STATUS -->
+
+                <div class="so-transaction-summary-card">
+
+                    <div class="so-transaction-summary-icon">
+                        PAY
+                    </div>
+
+                    <div>
+
+                        <div class="so-transaction-summary-label">
+                            PAYMENT STATUS
+                        </div>
+
+                        <div
+                            id="detailPaymentStatus"
+                            class="so-transaction-summary-value"
+                        >
+                            UNPAID
+                        </div>
+
+                    </div>
 
                 </div>
 
@@ -702,227 +740,58 @@
         </div>
 
 
-
         <!-- =================================================
-             TRANSACTION TRACKING
+             DELIVERY RECEIPTS
         ================================================== -->
 
-        <div class="so-transaction-tracking">
+        <div class="so-section">
 
-            <div class="so-transaction-header">
+            <div class="so-section-header">
 
                 <div>
 
-                    <span class="so-section-number">
-                        TRACKING
-                    </span>
+                    <h2>
+                        Delivery Receipts
+                    </h2>
 
-                    <div>
-
-                        <h2>
-                            Sales Order Transaction Tracking
-                        </h2>
-
-                        <p>
-                            Delivery, invoice and payment monitoring
-                        </p>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-
-
-            <!-- SUMMARY -->
-
-            <div class="so-transaction-summary-grid">
-
-
-                <div class="so-transaction-card">
-
-                    <div class="so-transaction-icon">
-                        🚚
-                    </div>
-
-                    <div>
-
-                        <span>
-                            DELIVERY RECEIPTS
-                        </span>
-
-                        <strong id="detailDRCount">
-                            0
-                        </strong>
-
-                        <small>
-                            DR RECORDS
-                        </small>
-
-                    </div>
-
-                </div>
-
-
-                <div class="so-transaction-card">
-
-                    <div class="so-transaction-icon">
-                        🧾
-                    </div>
-
-                    <div>
-
-                        <span>
-                            INVOICES
-                        </span>
-
-                        <strong id="detailInvoiceCount">
-                            0
-                        </strong>
-
-                        <small>
-                            INVOICE RECORDS
-                        </small>
-
-                    </div>
+                    <p>
+                        All DRs linked to this Sales Order.
+                    </p>
 
                 </div>
 
 
                 <div
-                    class="so-transaction-card so-payment-paid"
+                    id="detailDRHeaderCount"
+                    class="so-section-count"
                 >
-
-                    <div class="so-transaction-icon">
-                        ✓
-                    </div>
-
-                    <div>
-
-                        <span>
-                            PAID
-                        </span>
-
-                        <strong id="detailPaidAmount">
-                            ₱0.00
-                        </strong>
-
-                        <small>
-                            TOTAL PAID
-                        </small>
-
-                    </div>
-
-                </div>
-
-
-                <div
-                    class="so-transaction-card so-payment-balance"
-                >
-
-                    <div class="so-transaction-icon">
-                        ₱
-                    </div>
-
-                    <div>
-
-                        <span>
-                            BALANCE
-                        </span>
-
-                        <strong id="detailPaymentBalance">
-                            ₱0.00
-                        </strong>
-
-                        <small>
-                            REMAINING BALANCE
-                        </small>
-
-                    </div>
-
+                    0
                 </div>
 
             </div>
 
 
+            <div class="so-linked-table-card">
 
-            <!-- PAYMENT STATUS -->
+                <div class="so-table-wrapper">
 
-            <div class="so-payment-status-panel">
-
-                <div class="so-payment-status-label">
-                    PAYMENT STATUS
-                </div>
-
-                <div
-                    id="detailPaymentStatus"
-                    class="so-payment-status-badge unpaid"
-                >
-                    UNPAID
-                </div>
-
-            </div>
-
-
-
-            <!-- =================================================
-                 DELIVERY RECEIPTS
-            ================================================== -->
-
-            <div class="so-tracking-section">
-
-                <div class="so-tracking-section-header">
-
-                    <div>
-
-                        <h3>
-                            🚚 Delivery Receipts
-                        </h3>
-
-                        <p>
-                            All DR numbers linked to this Sales Order
-                        </p>
-
-                    </div>
-
-                    <span
-                        id="detailDRHeaderCount"
-                        class="so-record-count"
-                    >
-                        0 RECORDS
-                    </span>
-
-                </div>
-
-
-                <div class="table-container so-tracking-table">
-
-                    <table>
+                    <table class="so-linked-table">
 
                         <thead>
 
                             <tr>
 
-                                <th>
-                                    DR NUMBER
-                                </th>
+                                <th>DR NUMBER</th>
 
-                                <th>
-                                    DATE TRANSFER
-                                </th>
+                                <th>DATE</th>
 
-                                <th>
-                                    DATE DELIVERED
-                                </th>
+                                <th>DATE TRANSFER</th>
 
-                                <th>
-                                    STATUS
-                                </th>
+                                <th>DATE DELIVERED</th>
 
-                                <th>
-                                    REMARKS
-                                </th>
+                                <th>STATUS</th>
+
+                                <th>AMOUNT</th>
 
                             </tr>
 
@@ -934,10 +803,10 @@
                             <tr>
 
                                 <td
-                                    colspan="5"
-                                    class="so-no-record"
+                                    colspan="6"
+                                    class="so-table-empty"
                                 >
-                                    No Delivery Receipt records.
+                                    No Delivery Receipts linked.
                                 </td>
 
                             </tr>
@@ -950,65 +819,59 @@
 
             </div>
 
+        </div>
 
 
-            <!-- =================================================
-                 INVOICES
-            ================================================== -->
+        <!-- =================================================
+             INVOICES
+        ================================================== -->
 
-            <div class="so-tracking-section">
+        <div class="so-section">
 
-                <div class="so-tracking-section-header">
+            <div class="so-section-header">
 
-                    <div>
+                <div>
 
-                        <h3>
-                            🧾 Invoices
-                        </h3>
+                    <h2>
+                        Invoices
+                    </h2>
 
-                        <p>
-                            All invoice numbers linked to this Sales Order
-                        </p>
-
-                    </div>
-
-                    <span
-                        id="detailInvoiceHeaderCount"
-                        class="so-record-count"
-                    >
-                        0 RECORDS
-                    </span>
+                    <p>
+                        All invoices linked to this Sales Order.
+                    </p>
 
                 </div>
 
 
-                <div class="table-container so-tracking-table">
+                <div
+                    id="detailInvoiceHeaderCount"
+                    class="so-section-count"
+                >
+                    0
+                </div>
 
-                    <table>
+            </div>
+
+
+            <div class="so-linked-table-card">
+
+                <div class="so-table-wrapper">
+
+                    <table class="so-linked-table">
 
                         <thead>
 
                             <tr>
 
-                                <th>
-                                    INVOICE NUMBER
-                                </th>
+                                <th>INVOICE NUMBER</th>
 
-                                <th>
-                                    INVOICE DATE
-                                </th>
+                                <th>DATE</th>
 
-                                <th>
-                                    AMOUNT
-                                </th>
+                                <th>DR NUMBER</th>
 
-                                <th>
-                                    DUE DATE
-                                </th>
+                                <th>AMOUNT</th>
 
-                                <th>
-                                    PAYMENT STATUS
-                                </th>
+                                <th>STATUS</th>
 
                             </tr>
 
@@ -1021,9 +884,9 @@
 
                                 <td
                                     colspan="5"
-                                    class="so-no-record"
+                                    class="so-table-empty"
                                 >
-                                    No Invoice records.
+                                    No invoices linked.
                                 </td>
 
                             </tr>
@@ -1036,65 +899,61 @@
 
             </div>
 
+        </div>
 
 
-            <!-- =================================================
-                 PAYMENT HISTORY
-            ================================================== -->
+        <!-- =================================================
+             PAYMENTS
+        ================================================== -->
 
-            <div class="so-tracking-section">
+        <div class="so-section">
 
-                <div class="so-tracking-section-header">
+            <div class="so-section-header">
 
-                    <div>
+                <div>
 
-                        <h3>
-                            💰 Payment History
-                        </h3>
+                    <h2>
+                        Payments
+                    </h2>
 
-                        <p>
-                            All payments recorded against this Sales Order
-                        </p>
-
-                    </div>
-
-                    <span
-                        id="detailPaymentHeaderCount"
-                        class="so-record-count"
-                    >
-                        0 RECORDS
-                    </span>
+                    <p>
+                        All payments linked to this Sales Order.
+                    </p>
 
                 </div>
 
 
-                <div class="table-container so-tracking-table">
+                <div
+                    id="detailPaymentHeaderCount"
+                    class="so-section-count"
+                >
+                    0
+                </div>
 
-                    <table>
+            </div>
+
+
+            <div class="so-linked-table-card">
+
+                <div class="so-table-wrapper">
+
+                    <table class="so-linked-table">
 
                         <thead>
 
                             <tr>
 
-                                <th>
-                                    PAYMENT DATE
-                                </th>
+                                <th>PAYMENT DATE</th>
 
-                                <th>
-                                    REFERENCE
-                                </th>
+                                <th>REFERENCE</th>
 
-                                <th>
-                                    AMOUNT
-                                </th>
+                                <th>INVOICE</th>
 
-                                <th>
-                                    METHOD
-                                </th>
+                                <th>AMOUNT</th>
 
-                                <th>
-                                    STATUS
-                                </th>
+                                <th>METHOD</th>
+
+                                <th>STATUS</th>
 
                             </tr>
 
@@ -1106,10 +965,10 @@
                             <tr>
 
                                 <td
-                                    colspan="5"
-                                    class="so-no-record"
+                                    colspan="6"
+                                    class="so-table-empty"
                                 >
-                                    No payment records.
+                                    No payments linked.
                                 </td>
 
                             </tr>
@@ -1125,142 +984,38 @@
         </div>
 
 
-
         <!-- =================================================
-             INFORMATION CARDS
-        ================================================== -->
-
-        <div class="so-detail-info-grid">
-
-
-            <div class="so-detail-info-card">
-
-                <div class="so-detail-card-icon">
-                    📋
-                </div>
-
-                <div>
-
-                    <span>
-                        ORDER DATE
-                    </span>
-
-                    <strong id="detailSODateDisplay">
-                        -
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="so-detail-info-card">
-
-                <div class="so-detail-card-icon">
-                    🏢
-                </div>
-
-                <div>
-
-                    <span>
-                        CLIENT
-                    </span>
-
-                    <strong id="detailClientDisplay">
-                        -
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div class="so-detail-info-card">
-
-                <div class="so-detail-card-icon">
-                    📁
-                </div>
-
-                <div>
-
-                    <span>
-                        PROJECT
-                    </span>
-
-                    <strong id="detailProjectDisplay">
-                        -
-                    </strong>
-
-                </div>
-
-            </div>
-
-
-            <div
-                class="so-detail-info-card so-detail-total-card"
-            >
-
-                <div class="so-detail-card-icon">
-                    ₱
-                </div>
-
-                <div>
-
-                    <span>
-                        GRAND TOTAL
-                    </span>
-
-                    <strong id="detailGrandTotalDisplay">
-                        ₱0.00
-                    </strong>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- =================================================
-             SECTION 01
              SALES ORDER INFORMATION
         ================================================== -->
 
-        <div class="so-detail-section">
+        <div class="so-section">
 
             <div class="so-section-header">
 
                 <div>
 
-                    <span class="so-section-number">
-                        01
-                    </span>
+                    <h2>
+                        Sales Order Information
+                    </h2>
 
-                    <div>
-
-                        <h2>
-                            Sales Order Information
-                        </h2>
-
-                        <p>
-                            Customer and order details
-                        </p>
-
-                    </div>
+                    <p>
+                        Customer and order information.
+                    </p>
 
                 </div>
 
             </div>
 
 
-            <div class="form-grid so-detail-form">
+            <div class="so-information-grid">
 
 
-                <div class="form-group">
+                <!-- SO DATE -->
 
-                    <label for="detailSODate">
-                        Date Creation
+                <div class="so-information-card">
+
+                    <label>
+                        SO Date
                     </label>
 
                     <input
@@ -1272,10 +1027,12 @@
                 </div>
 
 
-                <div class="form-group">
+                <!-- SO NUMBER -->
 
-                    <label for="detailSONumber">
-                        Sales Order Number
+                <div class="so-information-card">
+
+                    <label>
+                        SO Number
                     </label>
 
                     <input
@@ -1287,9 +1044,11 @@
                 </div>
 
 
-                <div class="form-group">
+                <!-- CLIENT -->
 
-                    <label for="detailClientName">
+                <div class="so-information-card">
+
+                    <label>
                         Client Name
                     </label>
 
@@ -1302,53 +1061,28 @@
                 </div>
 
 
-                <div class="form-group">
+                <!-- SALES ENGINEER -->
 
-                    <label for="detailSE">
-                        SE
+                <div class="so-information-card">
+
+                    <label>
+                        Sales Engineer
                     </label>
 
-                    <select
+                    <input
+                        type="text"
                         id="detailSE"
                         disabled
                     >
 
-                        <option value="">
-                            Select SE
-                        </option>
-
-                        <option value="JBG">
-                            JBG
-                        </option>
-
-                        <option value="MHT">
-                            MHT
-                        </option>
-
-                        <option value="HHF">
-                            HHF
-                        </option>
-
-                        <option value="IAF">
-                            IAF
-                        </option>
-
-                        <option value="GRF">
-                            GRF
-                        </option>
-
-                        <option value="KBO">
-                            KBO
-                        </option>
-
-                    </select>
-
                 </div>
 
 
-                <div class="form-group">
+                <!-- ATTENTION -->
 
-                    <label for="detailAttention">
+                <div class="so-information-card">
+
+                    <label>
                         Attention
                     </label>
 
@@ -1361,10 +1095,12 @@
                 </div>
 
 
-                <div class="form-group">
+                <!-- TIN -->
 
-                    <label for="detailTIN">
-                        TIN Number
+                <div class="so-information-card">
+
+                    <label>
+                        TIN
                     </label>
 
                     <input
@@ -1376,9 +1112,11 @@
                 </div>
 
 
-                <div class="form-group">
+                <!-- PO NUMBER -->
 
-                    <label for="detailPONumber">
+                <div class="so-information-card">
+
+                    <label>
                         PO Number
                     </label>
 
@@ -1391,10 +1129,12 @@
                 </div>
 
 
-                <div class="form-group">
+                <!-- TERMS -->
 
-                    <label for="detailTerms">
-                        Payment Terms
+                <div class="so-information-card">
+
+                    <label>
+                        Terms
                     </label>
 
                     <select
@@ -1410,19 +1150,19 @@
                             COD
                         </option>
 
-                        <option value="15 Days">
+                        <option value="15">
                             15 Days
                         </option>
 
-                        <option value="30 Days">
+                        <option value="30">
                             30 Days
                         </option>
 
-                        <option value="45 Days">
+                        <option value="45">
                             45 Days
                         </option>
 
-                        <option value="60 Days">
+                        <option value="60">
                             60 Days
                         </option>
 
@@ -1431,9 +1171,11 @@
                 </div>
 
 
-                <div class="form-group">
+                <!-- JOB ORDER -->
 
-                    <label for="detailJobOrder">
+                <div class="so-information-card">
+
+                    <label>
                         Job Order
                     </label>
 
@@ -1446,39 +1188,11 @@
                 </div>
 
 
-                <div class="form-group full">
+                <!-- PROJECT -->
 
-                    <label for="detailBillingAddress">
-                        Billing Address
-                    </label>
+                <div class="so-information-card so-information-card-wide">
 
-                    <input
-                        type="text"
-                        id="detailBillingAddress"
-                        disabled
-                    >
-
-                </div>
-
-
-                <div class="form-group full">
-
-                    <label for="detailDeliveryAddress">
-                        Delivery Address
-                    </label>
-
-                    <input
-                        type="text"
-                        id="detailDeliveryAddress"
-                        disabled
-                    >
-
-                </div>
-
-
-                <div class="form-group full">
-
-                    <label for="detailProject">
+                    <label>
                         Project
                     </label>
 
@@ -1490,264 +1204,140 @@
 
                 </div>
 
+
+                <!-- BILLING ADDRESS -->
+
+                <div class="so-information-card so-information-card-wide">
+
+                    <label>
+                        Billing Address
+                    </label>
+
+                    <textarea
+                        id="detailBillingAddress"
+                        rows="3"
+                        disabled
+                    ></textarea>
+
+                </div>
+
+
+                <!-- DELIVERY ADDRESS -->
+
+                <div class="so-information-card so-information-card-wide">
+
+                    <label>
+                        Delivery Address
+                    </label>
+
+                    <textarea
+                        id="detailDeliveryAddress"
+                        rows="3"
+                        disabled
+                    ></textarea>
+
+                </div>
+
             </div>
 
         </div>
 
 
-
         <!-- =================================================
-             SECTION 02
-             SALES ORDER ITEMS
+             ITEMS
         ================================================== -->
 
-        <div class="so-detail-section">
+        <div class="so-section">
 
             <div class="so-section-header">
 
                 <div>
 
-                    <span class="so-section-number">
-                        02
-                    </span>
+                    <h2>
+                        Sales Order Items
+                    </h2>
 
-                    <div>
-
-                        <h2>
-                            Sales Order Items
-                        </h2>
-
-                        <p>
-                            Products and order quantities
-                        </p>
-
-                    </div>
+                    <p>
+                        Items included in this Sales Order.
+                    </p>
 
                 </div>
 
 
                 <button
                     type="button"
-                    id="addDetailItemButton"
-                    class="so-btn so-btn-primary"
+                    id="detailAddItemButton"
+                    class="so-secondary-button"
                     onclick="addDetailItem()"
                     style="display:none;"
                 >
-
-                    + ADD ITEM
-
+                    + Add Item
                 </button>
 
             </div>
 
 
-            <div class="table-container so-items-table">
+            <div class="so-linked-table-card">
 
-                <table id="soDetailsItemsTable">
+                <div class="so-table-wrapper">
 
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                #
-                            </th>
-
-                            <th>
-                                ITEM NAME
-                            </th>
-
-                            <th>
-                                DESCRIPTION
-                            </th>
-
-                            <th>
-                                QTY
-                            </th>
-
-                            <th>
-                                UNIT
-                            </th>
-
-                            <th>
-                                UNIT PRICE
-                            </th>
-
-                            <th>
-                                TOTAL
-                            </th>
-
-                            <th>
-                                ACTION
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody id="detailItemsContainer">
-                    </tbody>
-
-                </table>
-
-            </div>
-
-
-            <div class="detail-summary">
-
-
-                <div class="so-total-row">
-
-                    <span class="so-total-label">
-                        Subtotal
-                    </span>
-
-                    <input
-                        type="number"
-                        id="detailSubtotal"
-                        class="so-total-input"
-                        value="0"
-                        disabled
-                        style="display:none;"
+                    <table
+                        id="soDetailsItemsTable"
+                        class="so-linked-table"
                     >
 
-                    <span
-                        class="so-total-value"
-                        id="detailSubtotalText"
-                    >
-                        ₱0.00
-                    </span>
+                        <thead>
 
-                </div>
+                            <tr>
 
+                                <th>
+                                    #
+                                </th>
 
-                <div class="so-total-row">
+                                <th>
+                                    ITEM CODE
+                                </th>
 
-                    <label
-                        class="so-total-label"
-                        for="detailDiscount"
-                    >
-                        Less Discount
-                    </label>
+                                <th>
+                                    DESCRIPTION
+                                </th>
 
-                    <input
-                        type="number"
-                        id="detailDiscount"
-                        class="so-total-input"
-                        min="0"
-                        step="0.01"
-                        value="0"
-                        disabled
-                        oninput="calculateDetailTotals()"
-                    >
+                                <th>
+                                    UNIT
+                                </th>
 
-                </div>
+                                <th>
+                                    QTY
+                                </th>
 
+                                <th>
+                                    UNIT PRICE
+                                </th>
 
-                <div class="so-total-row">
+                                <th>
+                                    DISCOUNT
+                                </th>
 
-                    <label class="so-total-label">
+                                <th>
+                                    AMOUNT
+                                </th>
 
-                        <span class="vatable-check">
+                                <th>
+                                    ACTION
+                                </th>
 
-                            <input
-                                type="checkbox"
-                                id="detailVatable"
-                                disabled
-                                onchange="calculateDetailTotals()"
-                            >
+                            </tr>
 
-                            Vatable
-
-                        </span>
-
-                    </label>
+                        </thead>
 
 
-                    <input
-                        type="number"
-                        id="detailVATAmount"
-                        value="0"
-                        disabled
-                        style="display:none;"
-                    >
+                        <tbody id="soDetailsItemsBody">
 
-                    <span
-                        class="so-total-value"
-                        id="detailVATText"
-                    >
-                        ₱0.00
-                    </span>
+                            <!-- ITEMS RENDERED BY JS -->
 
-                </div>
+                        </tbody>
 
-
-                <div class="so-total-row">
-
-                    <span class="so-total-label">
-                        VAT Rate
-                    </span>
-
-                    <input
-                        type="number"
-                        id="detailVATRate"
-                        value="12"
-                        disabled
-                        style="display:none;"
-                    >
-
-                    <span class="so-total-value">
-                        12%
-                    </span>
-
-                </div>
-
-
-                <div class="so-total-row">
-
-                    <span class="so-total-label">
-                        Vatable Amount
-                    </span>
-
-                    <input
-                        type="number"
-                        id="detailVatableAmount"
-                        value="0"
-                        disabled
-                        style="display:none;"
-                    >
-
-                    <span
-                        class="so-total-value"
-                        id="detailVatableText"
-                    >
-                        ₱0.00
-                    </span>
-
-                </div>
-
-
-                <div class="so-total-row grand-total-row">
-
-                    <span class="so-total-label">
-                        GRAND TOTAL
-                    </span>
-
-                    <input
-                        type="number"
-                        id="detailGrandTotal"
-                        value="0"
-                        disabled
-                        style="display:none;"
-                    >
-
-                    <span
-                        class="so-total-value"
-                        id="detailGrandTotalText"
-                    >
-                        ₱0.00
-                    </span>
+                    </table>
 
                 </div>
 
@@ -1756,33 +1346,100 @@
         </div>
 
 
-
         <!-- =================================================
-             SECTION 03
-             SO FILES
+             TOTALS
         ================================================== -->
 
-        <div class="so-detail-section">
+        <div class="so-totals-section">
+
+            <div class="so-totals-card">
+
+                <div class="so-total-row">
+
+                    <span>
+                        Subtotal
+                    </span>
+
+                    <strong id="detailSubtotal">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="so-total-row">
+
+                    <span>
+                        Discount
+                    </span>
+
+                    <strong id="detailDiscount">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="so-total-row">
+
+                    <span>
+                        Vatable Sales
+                    </span>
+
+                    <strong id="detailVatable">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="so-total-row">
+
+                    <span>
+                        VAT
+                    </span>
+
+                    <strong id="detailVAT">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+
+                <div class="so-total-row so-total-grand">
+
+                    <span>
+                        GRAND TOTAL
+                    </span>
+
+                    <strong id="detailGrandTotal">
+                        ₱0.00
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             FILES
+        ================================================== -->
+
+        <div class="so-section">
 
             <div class="so-section-header">
 
                 <div>
 
-                    <span class="so-section-number">
-                        03
-                    </span>
+                    <h2>
+                        Sales Order Files
+                    </h2>
 
-                    <div>
-
-                        <h2>
-                            SO Files
-                        </h2>
-
-                        <p>
-                            Attached PDF documents
-                        </p>
-
-                    </div>
+                    <p>
+                        PDF and other documents attached to this SO.
+                    </p>
 
                 </div>
 
@@ -1792,24 +1449,19 @@
                     <input
                         type="file"
                         id="detailSOFileInput"
-                        accept="application/pdf,.pdf"
-                        multiple
-                        hidden
-                        onchange="handleDetailSOFiles(event)"
+                        style="display:none;"
+                        accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls,.doc,.docx"
                     >
 
 
                     <button
                         type="button"
-                        id="addSOFileButton"
-                        class="so-btn so-btn-primary"
-                        onclick="selectDetailSOFiles()"
+                        id="detailAddFileButton"
+                        class="so-secondary-button"
+                        onclick="document.getElementById('detailSOFileInput').click()"
                         style="display:none;"
                     >
-
-                        📎
-                        ADD PDF
-
+                        + Add File
                     </button>
 
                 </div>
@@ -1822,20 +1474,13 @@
                 class="so-file-list"
             >
 
-                <div class="no-files">
-
-                    <span>
-                        📄
-                    </span>
-
-                    No PDF files attached.
-
+                <div class="so-file-empty">
+                    No files attached.
                 </div>
 
             </div>
 
         </div>
-
 
 
         <!-- =================================================
@@ -1846,92 +1491,59 @@
 
             <button
                 type="button"
-                class="so-btn so-btn-secondary"
-                onclick="closeSODetails()"
+                id="detailEmailSOButton"
+                class="so-secondary-button"
+                onclick="emailSelectedSO()"
             >
-
-                ←
-                BACK TO SO LIST
-
+                Email SO
             </button>
 
 
-            <div class="so-details-action-right">
+            <button
+                type="button"
+                id="detailCancelButton"
+                class="so-danger-button"
+                onclick="cancelSelectedSO()"
+            >
+                Cancel SO
+            </button>
 
 
-                <button
-                    type="button"
-                    id="detailEmailSOButton"
-                    class="so-btn so-btn-primary"
-                    onclick="emailSelectedSO()"
-                >
-
-                    ✉️
-                    EMAIL SO
-
-                </button>
+            <button
+                type="button"
+                id="detailEditButton"
+                class="so-secondary-button"
+                onclick="enableSOUpdate()"
+            >
+                Edit / Update
+            </button>
 
 
-                <button
-                    type="button"
-                    id="detailCancelButton"
-                    class="so-btn so-btn-danger"
-                    onclick="cancelSelectedSO()"
-                >
-
-                    ✕
-                    CANCEL SO
-
-                </button>
+            <button
+                type="button"
+                id="detailPostButton"
+                class="so-primary-button"
+                onclick="postSelectedSO()"
+            >
+                Post SO
+            </button>
 
 
-                <button
-                    type="button"
-                    id="enableSOUpdateButton"
-                    class="so-btn so-btn-secondary"
-                    onclick="enableSOUpdate()"
-                >
-
-                    ✏️
-                    UPDATE
-
-                </button>
-
-
-                <button
-                    type="button"
-                    id="detailPostButton"
-                    class="so-btn so-btn-success"
-                    onclick="postSelectedSO()"
-                >
-
-                    🟢
-                    POST SO
-
-                </button>
-
-
-                <button
-                    type="button"
-                    id="saveSOUpdateButton"
-                    class="so-btn so-btn-success"
-                    onclick="saveSOUpdate()"
-                    style="display:none;"
-                >
-
-                    ✓
-                    SAVE CHANGES
-
-                </button>
-
-            </div>
+            <button
+                type="button"
+                id="detailSaveButton"
+                class="so-primary-button"
+                onclick="saveSOUpdate()"
+                style="display:none;"
+            >
+                Save Changes
+            </button>
 
         </div>
 
 
-
         <!-- =================================================
-             UPDATE MODE ACTION BAR
+             UPDATE ACTION BAR
         ================================================== -->
 
         <div
@@ -1940,70 +1552,94 @@
             style="display:none;"
         >
 
-            <div class="so-update-action-info">
+            <div class="so-update-info">
 
-                <span class="so-update-action-icon">
-                    ✏️
+                <strong>
+                    UPDATE MODE
+                </strong>
+
+                <span>
+                    You are editing this Sales Order.
                 </span>
-
-                <div>
-
-                    <strong>
-                        UPDATE MODE
-                    </strong>
-
-                    <small>
-                        Review the Sales Order before saving or posting.
-                    </small>
-
-                </div>
 
             </div>
 
 
-            <div class="so-update-action-buttons">
+            <div class="so-update-actions">
 
                 <button
                     type="button"
-                    id="cancelSOEditButton"
-                    class="so-btn so-btn-secondary"
+                    id="soUpdateCancelButton"
+                    class="so-secondary-button"
                     onclick="cancelSOUpdateMode()"
                 >
-
-                    CANCEL EDIT
-
+                    Cancel Edit
                 </button>
 
 
                 <button
                     type="button"
                     id="soUpdateSaveButton"
-                    class="so-btn so-btn-success"
+                    class="so-primary-button"
                     onclick="saveSOUpdate()"
                 >
-
-                    ✓
-                    SAVE CHANGES
-
+                    Save Changes
                 </button>
 
 
                 <button
                     type="button"
                     id="soUpdatePostButton"
-                    class="so-btn so-btn-success"
+                    class="so-primary-button"
                     onclick="postSelectedSO()"
                 >
-
-                    🟢
-                    POST SO
-
+                    Save & Post
                 </button>
 
             </div>
 
         </div>
 
+
+    </section>
+
+</div>
+
+
+<!-- =========================================================
+     OPTIONAL LOADING OVERLAY
+========================================================= -->
+
+<div
+    id="salesOrderLoadingOverlay"
+    class="so-loading-overlay"
+    style="display:none;"
+>
+
+    <div class="so-loading-box">
+
+        <div class="so-loading-spinner"></div>
+
+        <div class="so-loading-text">
+            Loading Sales Order...
+        </div>
+
     </div>
 
 </div>
+
+
+<!-- =========================================================
+     SALES ORDER MODULE INITIALIZATION
+========================================================= -->
+
+<script>
+
+    /*
+     * The main sales-order.js is loaded by the
+     * LOGIS-TECH SYSTEM main application.
+     *
+     * Do not duplicate sales-order.js here.
+     */
+
+</script>
