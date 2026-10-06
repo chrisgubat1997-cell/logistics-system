@@ -75,6 +75,12 @@
 
     <link rel="stylesheet" href="css/payment.css?v=20261006">
 
+    <!-- =====================================================
+     REPORT CSS
+====================================================== -->
+
+<link rel="stylesheet" href="css/report.css?v=20261006">
+
 
     <!-- =====================================================
          SYSTEM SETTINGS CSS
@@ -708,32 +714,17 @@
 
 
         <!-- =================================================
-             REPORTS
-        ================================================== -->
+     REPORTS MODULE
+================================================= -->
 
-        <div
-            id="reports"
-            class="page"
-        >
+<div
+    id="reports"
+    class="page"
+>
 
-            <h1>
-                Reports
-            </h1>
+    <div id="reportModule"></div>
 
-
-            <div class="section">
-
-                <h2>
-                    Reports
-                </h2>
-
-                <p>
-                    SO, Delivery and DR Reports.
-                </p>
-
-            </div>
-
-        </div>
+</div>
 
 
 
@@ -927,6 +918,8 @@ let invoicingModuleLoaded = false;
 
 let paymentModuleLoaded = false;
 
+let reportModuleLoaded = false;
+
 let systemSettingsModuleLoaded = false;
 
 
@@ -1088,6 +1081,17 @@ if (
 
 }
 
+    /* =====================================================
+   REPORTS
+===================================================== */
+
+if (
+    pageId === 'reports'
+) {
+
+    loadReportModule();
+
+}
 
     /* =====================================================
        DR
@@ -2239,7 +2243,276 @@ async function loadPaymentModule() {
 
 }
 
+/* =========================================================
+   LOAD REPORT MODULE
+========================================================= */
 
+async function loadReportModule() {
+
+    console.log(
+        '========================================'
+    );
+
+    console.log(
+        'Loading Reports module...'
+    );
+
+
+    const container =
+        document.getElementById(
+            'reportModule'
+        );
+
+
+    /* =====================================================
+       CHECK CONTAINER
+    ===================================================== */
+
+    if (!container) {
+
+        console.error(
+            'ERROR: #reportModule not found.'
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       LOAD REPORT HTML ONLY ONCE
+    ===================================================== */
+
+    if (
+        !reportModuleLoaded
+    ) {
+
+        try {
+
+            const reportHTMLUrl =
+                new URL(
+                    'pages/report.html',
+                    window.location.href
+                ).href;
+
+
+            console.log(
+                'Report HTML URL:',
+                reportHTMLUrl
+            );
+
+
+            const response =
+                await fetch(
+                    reportHTMLUrl +
+                    '?v=' +
+                    Date.now(),
+                    {
+                        method: 'GET',
+                        cache: 'no-store'
+                    }
+                );
+
+
+            console.log(
+                'Report HTML response:',
+                response.status,
+                response.statusText
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'HTTP ' +
+                    response.status +
+                    ' - ' +
+                    response.statusText
+                );
+
+            }
+
+
+            const html =
+                await response.text();
+
+
+            if (
+                !html ||
+                !html.trim()
+            ) {
+
+                throw new Error(
+                    'report.html is empty.'
+                );
+
+            }
+
+
+            /* =================================================
+               INSERT REPORT HTML
+            ================================================= */
+
+            container.innerHTML =
+                html;
+
+
+            reportModuleLoaded =
+                true;
+
+
+            console.log(
+                'Reports HTML loaded successfully.'
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                '========================================'
+            );
+
+            console.error(
+                'REPORT HTML LOAD ERROR'
+            );
+
+            console.error(
+                error
+            );
+
+            console.error(
+                '========================================'
+            );
+
+
+            container.innerHTML = `
+
+                <div style="
+                    margin:20px;
+                    padding:25px;
+                    background:#ffffff;
+                    border:1px solid #f0c9c5;
+                    border-radius:12px;
+                    color:#7f1d1d;
+                    font-family:Segoe UI,Arial,sans-serif;
+                ">
+
+                    <div style="
+                        font-size:16px;
+                        font-weight:800;
+                        margin-bottom:10px;
+                    ">
+
+                        Failed to load Reports module.
+
+                    </div>
+
+
+                    <div style="
+                        font-size:12px;
+                        line-height:1.7;
+                    ">
+
+                        ${error.message}
+
+                    </div>
+
+
+                    <div style="
+                        margin-top:15px;
+                        padding:12px;
+                        background:#fff7f6;
+                        border-radius:8px;
+                        font-size:11px;
+                        line-height:1.7;
+                    ">
+
+                        <strong>Expected file:</strong><br>
+
+                        pages/report.html
+
+                    </div>
+
+                </div>
+
+            `;
+
+
+            return;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LOAD REPORT JAVASCRIPT
+    ===================================================== */
+
+    try {
+
+        await loadScriptOnce(
+            'js/report.js?v=20261006',
+            'data-report-js'
+        );
+
+
+        console.log(
+            'Report JavaScript loaded successfully.'
+        );
+
+
+        /* =================================================
+           INITIALIZE REPORT
+        ================================================= */
+
+        if (
+            typeof window.initializeReport ===
+            'function'
+        ) {
+
+            window.initializeReport();
+
+
+            console.log(
+                'Reports initialized successfully.'
+            );
+
+        } else {
+
+            console.warn(
+                'initializeReport() not found in js/report.js'
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            '========================================'
+        );
+
+        console.error(
+            'REPORT JAVASCRIPT ERROR'
+        );
+
+        console.error(
+            error
+        );
+
+        console.error(
+            '========================================'
+        );
+
+    }
+
+
+    console.log(
+        'Reports module ready.'
+    );
+
+}
 
 /* =========================================================
    LOAD SYSTEM SETTINGS MODULE
