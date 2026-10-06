@@ -2,6 +2,7 @@
    LOGIS-TECH SYSTEM
    SALES ORDER MODULE
    GOOGLE APPS SCRIPT API
+   VERSION: 20261006-02
 ========================================================= */
 
 
@@ -24,6 +25,34 @@ let selectedSO = null;
 let currentSO = null;
 
 let soDetailsEditMode = false;
+
+let salesOrdersLoaded = false;
+
+let customerModuleLoaded = false;
+
+
+/* =========================================================
+   SO DETAILS CACHE
+========================================================= */
+
+const soDetailsCache = {};
+
+
+/* =========================================================
+   API RETRY SETTINGS
+========================================================= */
+
+const API_MAX_RETRIES = 3;
+
+const API_RETRY_DELAY = 800;
+
+
+/* =========================================================
+   SO FILE CONFIG
+========================================================= */
+
+const SO_FILE_MAX_SIZE =
+    10 * 1024 * 1024;
 
 
 /* =========================================================
@@ -54,7 +83,8 @@ function isActiveSO(so) {
 
     return (
         status === "ACTIVE" ||
-        status === "OPEN"
+        status === "OPEN" ||
+        status === ""
     );
 
 }
@@ -98,7 +128,8 @@ function isCancelledSO(so) {
 
 
 /* =========================================================
-   UPDATE SALES ORDER SUMMARY CARDS
+   UPDATE SUMMARY CARDS
+   DATA COMES FROM GOOGLE SHEETS
 ========================================================= */
 
 function updateSOSummary() {
@@ -133,13 +164,13 @@ function updateSOSummary() {
     );
 
     setText(
-        "soActiveCount",
-        activeCount
+        "soPartialCount",
+        partialCount
     );
 
     setText(
-        "soPartialCount",
-        partialCount
+        "soActiveCount",
+        activeCount
     );
 
     setText(
@@ -154,43 +185,43 @@ function updateSOSummary() {
 
 
     console.log(
-        "SO SUMMARY:",
-        {
-            total: totalCount,
-            active: activeCount,
-            partial: partialCount,
-            completed: completedCount,
-            cancelled: cancelledCount
-        }
+        "================================="
+    );
+
+    console.log(
+        "LOGIS-TECH SO SUMMARY"
+    );
+
+    console.log(
+        "TOTAL:",
+        totalCount
+    );
+
+    console.log(
+        "ACTIVE:",
+        activeCount
+    );
+
+    console.log(
+        "PARTIAL:",
+        partialCount
+    );
+
+    console.log(
+        "COMPLETED:",
+        completedCount
+    );
+
+    console.log(
+        "CANCELLED:",
+        cancelledCount
+    );
+
+    console.log(
+        "================================="
     );
 
 }
-
-
-/* =========================================================
-   CACHE
-========================================================= */
-
-let salesOrdersLoaded = false;
-
-
-/*
- * Individual SO details cache
- *
- * Example:
- * soDetailsCache["SO-2026-0001"]
- */
-
-const soDetailsCache = {};
-
-
-/* =========================================================
-   API RETRY SETTINGS
-========================================================= */
-
-const API_MAX_RETRIES = 3;
-
-const API_RETRY_DELAY = 800;
 
 
 /* =========================================================
@@ -267,19 +298,7 @@ async function salesOrderAPI(
         );
 
 
-        console.log(
-            "LOGIS-TECH API RESPONSE:",
-            responseText
-        );
-
-
-        /*
-         * RETRY
-         */
-
-        if (
-            !response.ok
-        ) {
+        if (!response.ok) {
 
             const retryable =
                 [
@@ -300,12 +319,6 @@ async function salesOrderAPI(
                 retryCount <
                     API_MAX_RETRIES - 1
             ) {
-
-                console.warn(
-                    "API failed. Retrying...",
-                    response.status
-                );
-
 
                 await wait(
                     API_RETRY_DELAY *
@@ -330,10 +343,6 @@ async function salesOrderAPI(
         }
 
 
-        /*
-         * PARSE JSON
-         */
-
         let result;
 
 
@@ -356,11 +365,6 @@ async function salesOrderAPI(
                 retryCount <
                 API_MAX_RETRIES - 1
             ) {
-
-                console.warn(
-                    "Invalid API response. Retrying..."
-                );
-
 
                 await wait(
                     API_RETRY_DELAY *
@@ -400,11 +404,6 @@ async function salesOrderAPI(
             API_MAX_RETRIES - 1
         ) {
 
-            console.warn(
-                "Network/API error. Retrying..."
-            );
-
-
             await wait(
                 API_RETRY_DELAY *
                 (retryCount + 1)
@@ -437,6 +436,8 @@ async function salesOrderAPI(
 
 /* =========================================================
    LOAD SALES ORDERS
+   MAIN DATA SOURCE:
+   GOOGLE SHEETS -> APPS SCRIPT -> WEBSITE
 ========================================================= */
 
 async function loadSOList(
@@ -469,9 +470,9 @@ async function loadSOList(
             salesOrders
         );
 
+        renderRecentSalesOrders();
 
         updateSOSelectionUI();
-
 
         return;
 
@@ -479,7 +480,7 @@ async function loadSOList(
 
 
     /*
-     * LOADING DISPLAY
+     * LOADING
      */
 
     if (tbody) {
@@ -505,7 +506,7 @@ async function loadSOList(
 
 
     /*
-     * API REQUEST
+     * GET SALES ORDERS
      */
 
     const result =
@@ -520,10 +521,6 @@ async function loadSOList(
         result
     );
 
-
-    /*
-     * API FAILED
-     */
 
     if (
         !result ||
@@ -541,6 +538,7 @@ async function loadSOList(
                         style="
                             text-align:center;
                             color:red;
+                            padding:30px;
                         "
                     >
 
@@ -550,12 +548,10 @@ async function loadSOList(
 
                         <small>
 
-                            ${
-                                escapeHTML(
-                                    result?.message ||
-                                    "Unknown API error."
-                                )
-                            }
+                            ${escapeHTML(
+                                result?.message ||
+                                "Unknown API error."
+                            )}
 
                         </small>
 
@@ -568,11 +564,9 @@ async function loadSOList(
         }
 
 
-        console.error(
-            "Failed to load Sales Orders:",
-            result?.message
-        );
+        updateSOSummary();
 
+        renderRecentSalesOrders();
 
         return;
 
@@ -580,11 +574,7 @@ async function loadSOList(
 
 
     /*
-     * IMPORTANT:
-     *
-     * Assign API result FIRST.
-     *
-     * Old version rendered before assignment.
+     * GET DATA FROM APPS SCRIPT
      */
 
     salesOrders =
@@ -592,11 +582,15 @@ async function loadSOList(
             result.salesOrders
         )
             ? result.salesOrders
-            : [];
+            : Array.isArray(
+                result.data
+            )
+                ? result.data
+                : [];
 
 
     /*
-     * Mark as loaded
+     * MARK LOADED
      */
 
     salesOrdersLoaded =
@@ -604,20 +598,26 @@ async function loadSOList(
 
 
     /*
-     * Save each SO to details cache
+     * CACHE EACH SO
      */
 
     salesOrders.forEach(
         function(so) {
 
-            if (
-                so &&
-                so.soNumber
-            ) {
+            const soNumber =
+                getSOValue(
+                    so,
+                    "soNumber",
+                    "SO_NUMBER",
+                    "SO Number"
+                );
+
+
+            if (soNumber) {
 
                 soDetailsCache[
                     String(
-                        so.soNumber
+                        soNumber
                     )
                 ] = so;
 
@@ -628,14 +628,14 @@ async function loadSOList(
 
 
     /*
-     * Summary
+     * SUMMARY CARDS
      */
 
     updateSOSummary();
 
 
     /*
-     * Render list
+     * MAIN LIST
      */
 
     renderSOList(
@@ -644,11 +644,25 @@ async function loadSOList(
 
 
     /*
-     * Restore current selection if
-     * selected SO still exists.
+     * RECENT SALES ORDERS
+     */
+
+    renderRecentSalesOrders();
+
+
+    /*
+     * RESTORE SELECTION
      */
 
     if (selectedSO) {
+
+        const selectedNumber =
+            String(
+                selectedSO.soNumber ||
+                selectedSO.SO_NUMBER ||
+                ""
+            );
+
 
         const refreshedSelected =
             salesOrders.find(
@@ -656,11 +670,14 @@ async function loadSOList(
 
                     return (
                         String(
-                            so.soNumber || ""
+                            getSOValue(
+                                so,
+                                "soNumber",
+                                "SO_NUMBER",
+                                "SO Number"
+                            )
                         ) ===
-                        String(
-                            selectedSO.soNumber || ""
-                        )
+                        selectedNumber
                     );
 
                 }
@@ -677,11 +694,701 @@ async function loadSOList(
     }
 
 
+    updateSOSelectionUI();
+
+}
+
+
+/* =========================================================
+   RECENT SALES ORDERS
+========================================================= */
+
+function renderRecentSalesOrders() {
+
+    const container =
+        document.getElementById(
+            "recentSalesOrderList"
+        );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    if (
+        !Array.isArray(
+            salesOrders
+        ) ||
+        salesOrders.length === 0
+    ) {
+
+        container.innerHTML = `
+
+            <div class="so-recent-empty">
+
+                <div class="so-recent-empty-icon">
+                    ▤
+                </div>
+
+                <strong>
+                    No Sales Orders yet
+                </strong>
+
+                <span>
+                    Sales Orders from the database
+                    will appear here.
+                </span>
+
+            </div>
+
+        `;
+
+        return;
+
+    }
+
+
     /*
-     * Restore selection UI
+     * COPY ARRAY
+     * para hindi mabago ang main list
      */
 
+    const recent =
+        [...salesOrders]
+        .sort(
+            compareSalesOrderDate
+        )
+        .slice(
+            0,
+            5
+        );
+
+
+    container.innerHTML =
+        "";
+
+
+    recent.forEach(
+        function(so) {
+
+            const soNumber =
+                getSOValue(
+                    so,
+                    "soNumber",
+                    "SO_NUMBER",
+                    "SO Number"
+                );
+
+
+            const dateCreation =
+                getSOValue(
+                    so,
+                    "dateCreation",
+                    "DATE_CREATION",
+                    "DATE CREATED",
+                    "Date Creation"
+                );
+
+
+            const clientName =
+                getSOValue(
+                    so,
+                    "clientName",
+                    "CLIENT_NAME",
+                    "CLIENT NAME"
+                );
+
+
+            const project =
+                getSOValue(
+                    so,
+                    "project",
+                    "PROJECT"
+                );
+
+
+            const grandTotal =
+                getSOValue(
+                    so,
+                    "grandTotal",
+                    "GRAND_TOTAL",
+                    "GRAND TOTAL"
+                );
+
+
+            const status =
+                getSOStatus(so) ||
+                "ACTIVE";
+
+
+            let statusClass =
+                "status-active";
+
+            let statusLabel =
+                "ACTIVE";
+
+
+            if (
+                isPartialSO(so)
+            ) {
+
+                statusClass =
+                    "status-partial";
+
+                statusLabel =
+                    "PARTIAL";
+
+            }
+            else if (
+                isCompletedSO(so)
+            ) {
+
+                statusClass =
+                    "status-completed";
+
+                statusLabel =
+                    "COMPLETED";
+
+            }
+            else if (
+                isCancelledSO(so)
+            ) {
+
+                statusClass =
+                    "status-cancelled";
+
+                statusLabel =
+                    "CANCELLED";
+
+            }
+
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "so-recent-item";
+
+
+            item.dataset.soNumber =
+                soNumber;
+
+
+            item.innerHTML = `
+
+                <div class="so-recent-main">
+
+                    <div class="so-recent-number">
+
+                        ${escapeHTML(
+                            soNumber || "-"
+                        )}
+
+                    </div>
+
+
+                    <div class="so-recent-client">
+
+                        ${escapeHTML(
+                            clientName || "-"
+                        )}
+
+                    </div>
+
+
+                    <div class="so-recent-project">
+
+                        ${escapeHTML(
+                            project || "-"
+                        )}
+
+                    </div>
+
+                </div>
+
+
+                <div class="so-recent-middle">
+
+                    <div class="so-recent-date">
+
+                        ${escapeHTML(
+                            formatSODate(
+                                dateCreation
+                            )
+                        )}
+
+                    </div>
+
+
+                    <div class="so-recent-total">
+
+                        ₱${formatMoney(
+                            grandTotal
+                        )}
+
+                    </div>
+
+                </div>
+
+
+                <div class="so-recent-status">
+
+                    <span
+                        class="status-badge ${statusClass}"
+                    >
+
+                        <span class="status-dot"></span>
+
+                        ${escapeHTML(
+                            statusLabel
+                        )}
+
+                    </span>
+
+                </div>
+
+            `;
+
+
+            /*
+             * CLICK
+             */
+
+            item.addEventListener(
+                "click",
+                function() {
+
+                    selectSO(
+                        soNumber
+                    );
+
+
+                    /*
+                     * Highlight recent item
+                     */
+
+                    document
+                        .querySelectorAll(
+                            ".so-recent-item"
+                        )
+                        .forEach(
+                            function(row) {
+
+                                row.classList.remove(
+                                    "selected"
+                                );
+
+                            }
+                        );
+
+
+                    item.classList.add(
+                        "selected"
+                    );
+
+                }
+            );
+
+
+            /*
+             * DOUBLE CLICK
+             */
+
+            item.addEventListener(
+                "dblclick",
+                function() {
+
+                    openSODetails(
+                        soNumber
+                    );
+
+                }
+            );
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   RECENT SALES ORDER DATE SORT
+========================================================= */
+
+function compareSalesOrderDate(
+    a,
+    b
+) {
+
+    const dateA =
+        parseSODate(
+            getSOValue(
+                a,
+                "dateCreation",
+                "DATE_CREATION",
+                "DATE CREATED",
+                "Date Creation"
+            )
+        );
+
+
+    const dateB =
+        parseSODate(
+            getSOValue(
+                b,
+                "dateCreation",
+                "DATE_CREATION",
+                "DATE CREATED",
+                "Date Creation"
+            )
+        );
+
+
+    return (
+        dateB.getTime() -
+        dateA.getTime()
+    );
+
+}
+
+
+/* =========================================================
+   PARSE SO DATE
+========================================================= */
+
+function parseSODate(
+    value
+) {
+
+    if (!value) {
+
+        return new Date(0);
+
+    }
+
+
+    const date =
+        new Date(
+            value
+        );
+
+
+    if (
+        !Number.isNaN(
+            date.getTime()
+        )
+    ) {
+
+        return date;
+
+    }
+
+
+    /*
+     * MM/DD/YYYY
+     */
+
+    const parts =
+        String(
+            value
+        ).split(
+            "/"
+        );
+
+
+    if (
+        parts.length === 3
+    ) {
+
+        const month =
+            Number(
+                parts[0]
+            ) - 1;
+
+        const day =
+            Number(
+                parts[1]
+            );
+
+        const year =
+            Number(
+                parts[2]
+            );
+
+
+        const parsed =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+
+        if (
+            !Number.isNaN(
+                parsed.getTime()
+            )
+        ) {
+
+            return parsed;
+
+        }
+
+    }
+
+
+    return new Date(0);
+
+}
+
+
+/* =========================================================
+   FORMAT SO DATE
+========================================================= */
+
+function formatSODate(
+    value
+) {
+
+    if (!value) {
+        return "-";
+    }
+
+
+    const date =
+        parseSODate(
+            value
+        );
+
+
+    if (
+        date.getTime() === 0
+    ) {
+
+        return String(
+            value
+        );
+
+    }
+
+
+    return date.toLocaleDateString(
+        "en-PH",
+        {
+            year:
+                "numeric",
+
+            month:
+                "short",
+
+            day:
+                "2-digit"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   VIEW ALL SALES ORDERS
+========================================================= */
+
+function showAllSalesOrders() {
+
+    const listView =
+        document.getElementById(
+            "salesOrderListView"
+        );
+
+
+    const customerArea =
+        document.getElementById(
+            "customerArea"
+        );
+
+
+    if (customerArea) {
+
+        customerArea.style.display =
+            "none";
+
+    }
+
+
+    if (listView) {
+
+        listView.style.display =
+            "block";
+
+    }
+
+
+    /*
+     * Scroll to SO table
+     */
+
+    const table =
+        document.getElementById(
+            "soTable"
+        );
+
+
+    if (table) {
+
+        table.scrollIntoView({
+            behavior:
+                "smooth",
+
+            block:
+                "start"
+        });
+
+    }
+
+}
+
+
+/* =========================================================
+   SUMMARY CARD FILTER
+========================================================= */
+
+function filterSOBySummary(
+    type
+) {
+
+    const statusFilter =
+        document.getElementById(
+            "soStatusFilter"
+        );
+
+
+    /*
+     * ALL
+     */
+
+    if (
+        !type ||
+        type === "ALL"
+    ) {
+
+        if (statusFilter) {
+
+            statusFilter.value =
+                "ALL";
+
+        }
+
+        renderSOList(
+            salesOrders
+        );
+
+        updateSOSelectionUI();
+
+        return;
+
+    }
+
+
+    /*
+     * SET FILTER
+     */
+
+    if (statusFilter) {
+
+        statusFilter.value =
+            type;
+
+    }
+
+
+    /*
+     * FILTER
+     */
+
+    let filtered =
+        salesOrders;
+
+
+    if (
+        type === "ACTIVE"
+    ) {
+
+        filtered =
+            salesOrders.filter(
+                isActiveSO
+            );
+
+    }
+    else if (
+        type === "PARTIAL"
+    ) {
+
+        filtered =
+            salesOrders.filter(
+                isPartialSO
+            );
+
+    }
+    else if (
+        type === "COMPLETED"
+    ) {
+
+        filtered =
+            salesOrders.filter(
+                isCompletedSO
+            );
+
+    }
+    else if (
+        type === "CANCELLED"
+    ) {
+
+        filtered =
+            salesOrders.filter(
+                isCancelledSO
+            );
+
+    }
+
+
+    renderSOList(
+        filtered
+    );
+
+
     updateSOSelectionUI();
+
+
+    /*
+     * Scroll to list
+     */
+
+    const table =
+        document.getElementById(
+            "soTable"
+        );
+
+
+    if (table) {
+
+        table.scrollIntoView({
+            behavior:
+                "smooth",
+
+            block:
+                "start"
+        });
+
+    }
 
 }
 
@@ -690,7 +1397,9 @@ async function loadSOList(
    RENDER SALES ORDER LIST
 ========================================================= */
 
-function renderSOList(list) {
+function renderSOList(
+    list
+) {
 
     const tbody =
         document.getElementById(
@@ -709,7 +1418,8 @@ function renderSOList(list) {
     }
 
 
-    tbody.innerHTML = "";
+    tbody.innerHTML =
+        "";
 
 
     if (
@@ -759,40 +1469,86 @@ function renderSOList(list) {
     list.forEach(
         function(so) {
 
-            const row =
-                document.createElement(
-                    "tr"
+            const soNumber =
+                getSOValue(
+                    so,
+                    "soNumber",
+                    "SO_NUMBER",
+                    "SO Number"
                 );
 
 
-            row.dataset.soNumber =
-                so.soNumber || "";
+            const dateCreation =
+                getSOValue(
+                    so,
+                    "dateCreation",
+                    "DATE_CREATION",
+                    "DATE CREATED",
+                    "Date Creation"
+                );
 
 
-            /*
-             * STATUS
-             */
+            const clientName =
+                getSOValue(
+                    so,
+                    "clientName",
+                    "CLIENT_NAME",
+                    "CLIENT NAME"
+                );
+
+
+            const se =
+                getSOValue(
+                    so,
+                    "se",
+                    "SE",
+                    "SALES_ENGINEER"
+                );
+
+
+            const project =
+                getSOValue(
+                    so,
+                    "project",
+                    "PROJECT"
+                );
+
+
+            const poNumber =
+                getSOValue(
+                    so,
+                    "poNumber",
+                    "PO_NUMBER",
+                    "PO NUMBER"
+                );
+
+
+            const terms =
+                getSOValue(
+                    so,
+                    "terms",
+                    "TERMS"
+                );
+
+
+            const grandTotal =
+                getSOValue(
+                    so,
+                    "grandTotal",
+                    "GRAND_TOTAL",
+                    "GRAND TOTAL"
+                );
+
 
             let statusClass =
-                "status-open";
+                "status-active";
 
 
             let statusLabel =
-                so.status || "ACTIVE";
+                "ACTIVE";
 
 
             if (
-                isActiveSO(so)
-            ) {
-
-                statusClass =
-                    "status-active";
-
-                statusLabel =
-                    "ACTIVE";
-
-            }
-            else if (
                 isPartialSO(so)
             ) {
 
@@ -827,6 +1583,16 @@ function renderSOList(list) {
             }
 
 
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            row.dataset.soNumber =
+                soNumber || "";
+
+
             row.innerHTML = `
 
                 <td>
@@ -834,7 +1600,7 @@ function renderSOList(list) {
                     <strong class="so-number-cell">
 
                         ${escapeHTML(
-                            so.soNumber || ""
+                            soNumber || ""
                         )}
 
                     </strong>
@@ -845,7 +1611,7 @@ function renderSOList(list) {
                 <td>
 
                     ${escapeHTML(
-                        so.dateCreation || ""
+                        dateCreation || ""
                     )}
 
                 </td>
@@ -856,7 +1622,7 @@ function renderSOList(list) {
                     <span class="client-name-cell">
 
                         ${escapeHTML(
-                            so.clientName || ""
+                            clientName || ""
                         )}
 
                     </span>
@@ -867,7 +1633,7 @@ function renderSOList(list) {
                 <td>
 
                     ${escapeHTML(
-                        so.se || ""
+                        se || ""
                     )}
 
                 </td>
@@ -876,7 +1642,7 @@ function renderSOList(list) {
                 <td>
 
                     ${escapeHTML(
-                        so.project || ""
+                        project || ""
                     )}
 
                 </td>
@@ -885,7 +1651,7 @@ function renderSOList(list) {
                 <td>
 
                     ${escapeHTML(
-                        so.poNumber || ""
+                        poNumber || ""
                     )}
 
                 </td>
@@ -894,7 +1660,7 @@ function renderSOList(list) {
                 <td>
 
                     ${escapeHTML(
-                        so.terms || ""
+                        terms || ""
                     )}
 
                 </td>
@@ -903,7 +1669,7 @@ function renderSOList(list) {
                 <td class="so-amount-cell">
 
                     ${formatMoney(
-                        so.grandTotal
+                        grandTotal
                     )}
 
                 </td>
@@ -928,17 +1694,15 @@ function renderSOList(list) {
             `;
 
 
-            /*
-             * RESTORE SELECTED ROW
-             */
-
             if (
                 selectedSO &&
                 String(
-                    selectedSO.soNumber || ""
+                    selectedSO.soNumber ||
+                    selectedSO.SO_NUMBER ||
+                    ""
                 ) ===
                 String(
-                    so.soNumber || ""
+                    soNumber
                 )
             ) {
 
@@ -950,7 +1714,7 @@ function renderSOList(list) {
 
 
             /*
-             * SINGLE CLICK
+             * CLICK
              */
 
             row.addEventListener(
@@ -958,7 +1722,7 @@ function renderSOList(list) {
                 function() {
 
                     selectSO(
-                        so.soNumber
+                        soNumber
                     );
 
                 }
@@ -974,7 +1738,7 @@ function renderSOList(list) {
                 function() {
 
                     openSODetails(
-                        so.soNumber
+                        soNumber
                     );
 
                 }
@@ -992,10 +1756,12 @@ function renderSOList(list) {
 
 
 /* =========================================================
-   SELECT / DESELECT SALES ORDER
+   SELECT SALES ORDER
 ========================================================= */
 
-function selectSO(soNumber) {
+function selectSO(
+    soNumber
+) {
 
     const clickedSONumber =
         String(
@@ -1008,27 +1774,15 @@ function selectSO(soNumber) {
     }
 
 
-    /*
-     * =====================================================
-     * CHECK IF SAME SO IS ALREADY SELECTED
-     * =====================================================
-     */
-
     const currentlySelected =
         selectedSO &&
         String(
-            selectedSO.soNumber || ""
+            selectedSO.soNumber ||
+            selectedSO.SO_NUMBER ||
+            ""
         ).trim() ===
         clickedSONumber;
 
-
-    /*
-     * =====================================================
-     * CLICK SAME SO AGAIN
-     *
-     * Deselect
-     * =====================================================
-     */
 
     if (currentlySelected) {
 
@@ -1039,19 +1793,15 @@ function selectSO(soNumber) {
     }
 
 
-    /*
-     * =====================================================
-     * FIND SO
-     * =====================================================
-     */
-
     let so =
         salesOrders.find(
             function(item) {
 
                 return (
                     String(
-                        item.soNumber || ""
+                        item.soNumber ||
+                        item.SO_NUMBER ||
+                        ""
                     ).trim() ===
                     clickedSONumber
                 );
@@ -1059,10 +1809,6 @@ function selectSO(soNumber) {
             }
         );
 
-
-    /*
-     * TRY CACHE
-     */
 
     if (!so) {
 
@@ -1086,17 +1832,9 @@ function selectSO(soNumber) {
     }
 
 
-    /*
-     * SET SELECTED SO
-     */
-
     selectedSO =
         so;
 
-
-    /*
-     * HIGHLIGHT ROW
-     */
 
     document
         .querySelectorAll(
@@ -1130,17 +1868,13 @@ function selectSO(soNumber) {
     }
 
 
-    /*
-     * UPDATE TOP SELECTION AREA
-     */
-
     updateSOSelectionUI();
 
 }
 
 
 /* =========================================================
-   UPDATE TOP SO SELECTION UI
+   UPDATE TOP SELECTION UI
 ========================================================= */
 
 function updateSOSelectionUI() {
@@ -1172,12 +1906,6 @@ function updateSOSelectionUI() {
     const hasSelection =
         !!selectedSO;
 
-
-    /*
-     * =====================================================
-     * NO SELECTION
-     * =====================================================
-     */
 
     if (!hasSelection) {
 
@@ -1214,38 +1942,66 @@ function updateSOSelectionUI() {
         }
 
 
-        /*
-         * Remove selected row
-         */
-
-        document
-            .querySelectorAll(
-                "#soTableBody tr.selected"
-            )
-            .forEach(
-                function(row) {
-
-                    row.classList.remove(
-                        "selected"
-                    );
-
-                }
-            );
-
-
         return;
 
     }
 
 
-    /*
-     * =====================================================
-     * SELECTED
-     * =====================================================
-     */
-
     const so =
         selectedSO;
+
+
+    const soNumber =
+        getSOValue(
+            so,
+            "soNumber",
+            "SO_NUMBER",
+            "SO Number"
+        );
+
+
+    const clientName =
+        getSOValue(
+            so,
+            "clientName",
+            "CLIENT_NAME",
+            "CLIENT NAME"
+        );
+
+
+    const project =
+        getSOValue(
+            so,
+            "project",
+            "PROJECT"
+        );
+
+
+    const poNumber =
+        getSOValue(
+            so,
+            "poNumber",
+            "PO_NUMBER",
+            "PO NUMBER"
+        );
+
+
+    const se =
+        getSOValue(
+            so,
+            "se",
+            "SE",
+            "SALES_ENGINEER"
+        );
+
+
+    const grandTotal =
+        getSOValue(
+            so,
+            "grandTotal",
+            "GRAND_TOTAL",
+            "GRAND TOTAL"
+        );
 
 
     const status =
@@ -1294,24 +2050,7 @@ function updateSOSelectionUI() {
             "CANCELLED";
 
     }
-    else if (
-        status === "OPEN"
-    ) {
 
-        statusClass =
-            "selection-active";
-
-        statusLabel =
-            "ACTIVE";
-
-    }
-
-
-    /*
-     * =====================================================
-     * TOP SELECTION DETAILS
-     * =====================================================
-     */
 
     if (selectionText) {
 
@@ -1322,7 +2061,7 @@ function updateSOSelectionUI() {
                 <strong class="so-selection-number">
 
                     ${escapeHTML(
-                        so.soNumber || "-"
+                        soNumber || "-"
                     )}
 
                 </strong>
@@ -1334,7 +2073,7 @@ function updateSOSelectionUI() {
                 <span class="so-selection-client">
 
                     ${escapeHTML(
-                        so.clientName || "-"
+                        clientName || "-"
                     )}
 
                 </span>
@@ -1350,7 +2089,7 @@ function updateSOSelectionUI() {
 
                     <strong>
                         ${escapeHTML(
-                            so.project || "-"
+                            project || "-"
                         )}
                     </strong>
 
@@ -1363,7 +2102,7 @@ function updateSOSelectionUI() {
 
                     <strong>
                         ${escapeHTML(
-                            so.poNumber || "-"
+                            poNumber || "-"
                         )}
                     </strong>
 
@@ -1376,7 +2115,7 @@ function updateSOSelectionUI() {
 
                     <strong>
                         ${escapeHTML(
-                            so.se || "-"
+                            se || "-"
                         )}
                     </strong>
 
@@ -1389,7 +2128,7 @@ function updateSOSelectionUI() {
 
                     <strong>
                         ₱${formatMoney(
-                            so.grandTotal
+                            grandTotal
                         )}
                     </strong>
 
@@ -1413,10 +2152,6 @@ function updateSOSelectionUI() {
     }
 
 
-    /*
-     * STATUS DOT
-     */
-
     if (statusDot) {
 
         statusDot.classList.add(
@@ -1426,10 +2161,6 @@ function updateSOSelectionUI() {
     }
 
 
-    /*
-     * ENABLE UPDATE
-     */
-
     if (updateButton) {
 
         updateButton.disabled =
@@ -1437,10 +2168,6 @@ function updateSOSelectionUI() {
 
     }
 
-
-    /*
-     * ENABLE CANCEL
-     */
 
     if (cancelButton) {
 
@@ -1450,10 +2177,6 @@ function updateSOSelectionUI() {
     }
 
 
-    /*
-     * Make sure selected row is highlighted
-     */
-
     document
         .querySelectorAll(
             "#soTableBody tr"
@@ -1461,22 +2184,16 @@ function updateSOSelectionUI() {
         .forEach(
             function(row) {
 
-                const rowSONumber =
-                    String(
-                        row.dataset.soNumber || ""
-                    );
-
-
-                const selectedSONumber =
-                    String(
-                        so.soNumber || ""
-                    );
-
-
                 row.classList.toggle(
                     "selected",
-                    rowSONumber ===
-                    selectedSONumber
+                    String(
+                        row.dataset.soNumber ||
+                        ""
+                    ) ===
+                    String(
+                        soNumber ||
+                        ""
+                    )
                 );
 
             }
@@ -1486,31 +2203,14 @@ function updateSOSelectionUI() {
 
 
 /* =========================================================
-   CLEAR SALES ORDER SELECTION
+   CLEAR SELECTION
 ========================================================= */
 
 function clearSOSelection() {
 
-    /*
-     * Clear selected SO
-     */
-
     selectedSO =
         null;
 
-
-    /*
-     * IMPORTANT:
-     *
-     * Current SO is normally null while list
-     * is visible.
-     *
-     * Do NOT force-close details here.
-     */
-
-    /*
-     * Remove row highlight
-     */
 
     document
         .querySelectorAll(
@@ -1527,17 +2227,22 @@ function clearSOSelection() {
         );
 
 
-    /*
-     * Update top UI
-     */
+    document
+        .querySelectorAll(
+            ".so-recent-item"
+        )
+        .forEach(
+            function(row) {
+
+                row.classList.remove(
+                    "selected"
+                );
+
+            }
+        );
+
 
     updateSOSelectionUI();
-
-
-    /*
-     * Keep compatibility if old HTML
-     * still has selectedSOInfo.
-     */
 
     renderSelectedSOEmpty();
 
@@ -1545,29 +2250,12 @@ function clearSOSelection() {
 
 
 /* =========================================================
-   LEGACY / COMPATIBILITY PREVIEW
+   LEGACY PREVIEW
 ========================================================= */
 
-/*
- * The old bottom preview is no longer used
- * for the active selection.
- *
- * The main selection details are now shown
- * in #soSelectionText.
- *
- * This function is kept so old HTML / CSS
- * will not produce JavaScript errors.
- */
-
-function renderSelectedSOPreview(so) {
-
-    /*
-     * Intentionally do nothing.
-     *
-     * Selection display is now handled by:
-     *
-     * updateSOSelectionUI()
-     */
+function renderSelectedSOPreview(
+    so
+) {
 
     if (!so) {
         return;
@@ -1588,22 +2276,13 @@ function renderSelectedSOEmpty() {
         );
 
 
-    /*
-     * If the old bottom preview has already
-     * been removed from HTML, nothing happens.
-     */
-
     if (!preview) {
         return;
     }
 
 
-    /*
-     * Hide it instead of displaying another
-     * "No Sales Order Selected" panel.
-     */
-
-    preview.innerHTML = "";
+    preview.innerHTML =
+        "";
 
     preview.style.display =
         "none";
@@ -1612,12 +2291,228 @@ function renderSelectedSOEmpty() {
 
 
 /* =========================================================
-   SEARCH SALES ORDER
+   SEARCH
 ========================================================= */
 
 function searchSO() {
 
     filterSOList();
+
+}
+
+
+/* =========================================================
+   FILTER SALES ORDERS
+========================================================= */
+
+function filterSOList() {
+
+    const searchInput =
+        document.getElementById(
+            "soSearch"
+        );
+
+
+    const statusFilter =
+        document.getElementById(
+            "soStatusFilter"
+        );
+
+
+    const keyword =
+        String(
+            searchInput
+                ? searchInput.value
+                : ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    const selectedStatus =
+        String(
+            statusFilter
+                ? statusFilter.value
+                : "ALL"
+        )
+        .trim()
+        .toUpperCase();
+
+
+    let filtered =
+        salesOrders;
+
+
+    if (keyword) {
+
+        filtered =
+            filtered.filter(
+                function(so) {
+
+                    return [
+
+                        so.soNumber,
+                        so.SO_NUMBER,
+                        so.clientName,
+                        so.CLIENT_NAME,
+                        so.project,
+                        so.PROJECT,
+                        so.poNumber,
+                        so.PO_NUMBER,
+                        so.jobOrder,
+                        so.JOB_ORDER,
+                        so.se,
+                        so.SE,
+                        so.status,
+                        so.STATUS
+
+                    ]
+                    .join(" ")
+                    .toLowerCase()
+                    .includes(
+                        keyword
+                    );
+
+                }
+            );
+
+    }
+
+
+    if (
+        selectedStatus &&
+        selectedStatus !== "ALL"
+    ) {
+
+        filtered =
+            filtered.filter(
+                function(so) {
+
+                    if (
+                        selectedStatus ===
+                        "ACTIVE"
+                    ) {
+
+                        return isActiveSO(so);
+
+                    }
+
+
+                    if (
+                        selectedStatus ===
+                        "PARTIAL"
+                    ) {
+
+                        return isPartialSO(so);
+
+                    }
+
+
+                    if (
+                        selectedStatus ===
+                        "COMPLETED"
+                    ) {
+
+                        return isCompletedSO(so);
+
+                    }
+
+
+                    if (
+                        selectedStatus ===
+                        "CANCELLED"
+                    ) {
+
+                        return isCancelledSO(so);
+
+                    }
+
+
+                    return (
+                        getSOStatus(so) ===
+                        selectedStatus
+                    );
+
+                }
+            );
+
+    }
+
+
+    renderSOList(
+        filtered
+    );
+
+
+    updateSOSelectionUI();
+
+}
+
+
+/* =========================================================
+   REFRESH SO LIST
+========================================================= */
+
+async function refreshSOList() {
+
+    const button =
+        document.getElementById(
+            "soRefreshBtn"
+        );
+
+
+    if (button) {
+
+        button.classList.add(
+            "refreshing"
+        );
+
+        button.disabled =
+            true;
+
+    }
+
+
+    try {
+
+        salesOrdersLoaded =
+            false;
+
+
+        await loadSOList(
+            true
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Refresh Sales Order error:",
+            error
+        );
+
+
+    } finally {
+
+        if (button) {
+
+            button.disabled =
+                false;
+
+            setTimeout(
+                function() {
+
+                    button.classList.remove(
+                        "refreshing"
+                    );
+
+                },
+                300
+            );
+
+        }
+
+    }
 
 }
 
@@ -1635,7 +2530,556 @@ function openCreateSO() {
 
 
 /* =========================================================
-   OPEN SALES ORDER DETAILS
+   NEW CUSTOMER
+   OPEN INSIDE SALES ORDER
+========================================================= */
+
+async function openNewCustomerFromSalesOrder() {
+
+    console.log(
+        "Opening New Customer..."
+    );
+
+
+    const listView =
+        document.getElementById(
+            "salesOrderListView"
+        );
+
+
+    const customerArea =
+        document.getElementById(
+            "customerArea"
+        );
+
+
+    const container =
+        document.getElementById(
+            "customerFormContainer"
+        );
+
+
+    if (!customerArea) {
+
+        alert(
+            "Customer area not found in Sales Order HTML."
+        );
+
+        return;
+
+    }
+
+
+    if (!container) {
+
+        alert(
+            "Customer form container not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Hide SO list
+     */
+
+    if (listView) {
+
+        listView.style.display =
+            "none";
+
+    }
+
+
+    /*
+     * Show customer area
+     */
+
+    customerArea.style.display =
+        "block";
+
+
+    /*
+     * Loading
+     */
+
+    container.innerHTML = `
+
+        <div
+            style="
+                padding:40px;
+                text-align:center;
+            "
+        >
+
+            <div style="font-size:30px;">
+                ⏳
+            </div>
+
+            <strong>
+                Loading Customer Form...
+            </strong>
+
+            <div style="margin-top:8px;">
+                Please wait...
+            </div>
+
+        </div>
+
+    `;
+
+
+    try {
+
+        /*
+         * LOAD CSS
+         */
+
+        await loadCustomerCSS();
+
+
+        /*
+         * LOAD HTML
+         */
+
+        const response =
+            await fetch(
+                "pages/create-customer.html?v=20261006"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load create-customer.html"
+            );
+
+        }
+
+
+        const html =
+            await response.text();
+
+
+        /*
+         * Extract BODY content
+         */
+
+        const parser =
+            new DOMParser();
+
+
+        const doc =
+            parser.parseFromString(
+                html,
+                "text/html"
+            );
+
+
+        /*
+         * Remove script tags from HTML
+         * because we load JS separately
+         */
+
+        doc
+            .querySelectorAll(
+                "script"
+            )
+            .forEach(
+                function(script) {
+
+                    script.remove();
+
+                }
+            );
+
+
+        container.innerHTML =
+            doc.body
+                ? doc.body.innerHTML
+                : html;
+
+
+        /*
+         * LOAD CUSTOMER JS
+         */
+
+        await loadCustomerJS();
+
+
+        customerModuleLoaded =
+            true;
+
+
+        /*
+         * INITIALIZE CUSTOMER FORM
+         */
+
+        if (
+            typeof window.initializeCreateCustomer ===
+            "function"
+        ) {
+
+            await window.initializeCreateCustomer();
+
+        }
+        else if (
+            typeof window.initializeCustomerForm ===
+            "function"
+        ) {
+
+            await window.initializeCustomerForm();
+
+        }
+        else if (
+            typeof window.loadCustomerForm ===
+            "function"
+        ) {
+
+            await window.loadCustomerForm();
+
+        }
+
+
+        /*
+         * SCROLL TO FORM
+         */
+
+        customerArea.scrollIntoView({
+            behavior:
+                "smooth",
+
+            block:
+                "start"
+        });
+
+
+    } catch (error) {
+
+        console.error(
+            "NEW CUSTOMER ERROR:",
+            error
+        );
+
+
+        container.innerHTML = `
+
+            <div
+                style="
+                    padding:40px;
+                    text-align:center;
+                    color:#b42318;
+                "
+            >
+
+                <strong>
+                    Unable to load Customer Form.
+                </strong>
+
+                <br><br>
+
+                <small>
+                    ${escapeHTML(
+                        error.message
+                    )}
+                </small>
+
+                <br><br>
+
+                <button
+                    type="button"
+                    onclick="openNewCustomerFromSalesOrder()"
+                >
+                    TRY AGAIN
+                </button>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+
+/* =========================================================
+   CLOSE NEW CUSTOMER
+========================================================= */
+
+function closeCustomerFromSalesOrder() {
+
+    const customerArea =
+        document.getElementById(
+            "customerArea"
+        );
+
+
+    const listView =
+        document.getElementById(
+            "salesOrderListView"
+        );
+
+
+    if (customerArea) {
+
+        customerArea.style.display =
+            "none";
+
+    }
+
+
+    if (listView) {
+
+        listView.style.display =
+            "block";
+
+    }
+
+
+    /*
+     * REFRESH CUSTOMER DATA
+     *
+     * This is important if a new customer
+     * was just created.
+     */
+
+    refreshCustomerDataAfterSave();
+
+
+    /*
+     * Scroll top
+     */
+
+    const salesPage =
+        document.getElementById(
+            "salesOrderPage"
+        );
+
+
+    if (salesPage) {
+
+        salesPage.scrollIntoView({
+            behavior:
+                "smooth",
+
+            block:
+                "start"
+        });
+
+    }
+
+}
+
+
+/* =========================================================
+   CUSTOMER CSS LOADER
+========================================================= */
+
+function loadCustomerCSS() {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            const existing =
+                document.querySelector(
+                    'link[data-customer-css="true"]'
+                );
+
+
+            if (existing) {
+
+                resolve();
+
+                return;
+
+            }
+
+
+            const link =
+                document.createElement(
+                    "link"
+                );
+
+
+            link.rel =
+                "stylesheet";
+
+
+            link.href =
+                "css/create-customer.css?v=20261006";
+
+
+            link.dataset.customerCss =
+                "true";
+
+
+            link.onload =
+                function() {
+
+                    resolve();
+
+                };
+
+
+            link.onerror =
+                function() {
+
+                    reject(
+                        new Error(
+                            "Unable to load create-customer.css"
+                        )
+                    );
+
+                };
+
+
+            document.head.appendChild(
+                link
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CUSTOMER JS LOADER
+========================================================= */
+
+function loadCustomerJS() {
+
+    return new Promise(
+        function(resolve, reject) {
+
+            /*
+             * Already loaded
+             */
+
+            if (
+                document.querySelector(
+                    'script[data-customer-js="true"]'
+                )
+            ) {
+
+                resolve();
+
+                return;
+
+            }
+
+
+            const script =
+                document.createElement(
+                    "script"
+                );
+
+
+            script.src =
+                "js/create-customer.js?v=20261006";
+
+
+            script.dataset.customerJs =
+                "true";
+
+
+            script.onload =
+                function() {
+
+                    resolve();
+
+                };
+
+
+            script.onerror =
+                function() {
+
+                    reject(
+                        new Error(
+                            "Unable to load create-customer.js"
+                        )
+                    );
+
+                };
+
+
+            document.body.appendChild(
+                script
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   CUSTOMER SAVED EVENT
+========================================================= */
+
+function refreshCustomerDataAfterSave() {
+
+    /*
+     * Refresh Create SO customer dropdown
+     * if Create SO is opened later.
+     *
+     * create-sales-order.js owns the actual
+     * customer dropdown.
+     */
+
+    try {
+
+        if (
+            typeof window.loadCustomers ===
+            "function"
+        ) {
+
+            window.loadCustomers();
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Unable to refresh customer dropdown:",
+            error
+        );
+
+    }
+
+
+    /*
+     * If customer module has a reset function,
+     * call it safely.
+     */
+
+    try {
+
+        if (
+            typeof window.resetCreateCustomerForm ===
+            "function"
+        ) {
+
+            window.resetCreateCustomerForm();
+
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Customer form reset skipped:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   OPEN SO DETAILS
 ========================================================= */
 
 async function openSODetails(
@@ -1648,22 +3092,8 @@ async function openSODetails(
         );
 
 
-    console.log(
-        "Opening Sales Order details:",
-        soNumber
-    );
-
-
-    /*
-     * Show loading page
-     */
-
     showSODetailsLoading();
 
-
-    /*
-     * Always get complete SO data
-     */
 
     const result =
         await salesOrderAPI(
@@ -1695,15 +3125,10 @@ async function openSODetails(
 
         closeSODetails();
 
-
         return;
 
     }
 
-
-    /*
-     * Complete SO
-     */
 
     currentSO =
         result.so;
@@ -1713,31 +3138,14 @@ async function openSODetails(
         result.so;
 
 
-    /*
-     * Save complete data to cache
-     */
-
     soDetailsCache[
         cacheKey
     ] =
         result.so;
 
 
-    /*
-     * IMPORTANT:
-     *
-     * Restore top selection UI.
-     *
-     * This keeps UPDATE and CANCEL active
-     * after double click.
-     */
-
     updateSOSelectionUI();
 
-
-    /*
-     * Display details
-     */
 
     showSODetailsPage(
         result.so
@@ -1747,7 +3155,7 @@ async function openSODetails(
 
 
 /* =========================================================
-   SHOW SO DETAILS LOADING
+   SHOW DETAILS LOADING
 ========================================================= */
 
 function showSODetailsLoading() {
@@ -1764,10 +3172,6 @@ function showSODetailsLoading() {
         );
 
 
-    /*
-     * Hide list
-     */
-
     if (listView) {
 
         listView.style.display =
@@ -1775,10 +3179,6 @@ function showSODetailsLoading() {
 
     }
 
-
-    /*
-     * Show details
-     */
 
     if (detailsPage) {
 
@@ -1822,7 +3222,7 @@ function showSODetailsLoading() {
 
 
 /* =========================================================
-   SHOW SO DETAILS PAGE
+   SHOW DETAILS PAGE
 ========================================================= */
 
 function showSODetailsPage(
@@ -1841,10 +3241,6 @@ function showSODetailsPage(
         );
 
 
-    /*
-     * Hide list
-     */
-
     if (listView) {
 
         listView.style.display =
@@ -1852,10 +3248,6 @@ function showSODetailsPage(
 
     }
 
-
-    /*
-     * Show details
-     */
 
     if (detailsPage) {
 
@@ -1865,27 +3257,15 @@ function showSODetailsPage(
     }
 
 
-    /*
-     * Render complete details
-     */
-
     renderSODetails(
         so
     );
 
 
-    /*
-     * Load attached files
-     */
-
     loadSOFiles(
         so.soNumber
     );
 
-
-    /*
-     * Default view mode
-     */
 
     setDetailsEditMode(
         false
@@ -1979,20 +3359,14 @@ function renderSODetails(
     );
 
 
-    /*
-     * ITEMS
-     */
-
     renderSODetailItems(
-        Array.isArray(so.items)
+        Array.isArray(
+            so.items
+        )
             ? so.items
             : []
     );
 
-
-    /*
-     * TOTALS
-     */
 
     setText(
         "detailSubtotal",
@@ -2002,19 +3376,11 @@ function renderSODetails(
     );
 
 
-    /*
-     * DISCOUNT
-     */
-
     setValue(
         "detailDiscount",
         so.discount || 0
     );
 
-
-    /*
-     * VATABLE
-     */
 
     const vatableCheckbox =
         document.getElementById(
@@ -2051,7 +3417,7 @@ function renderSODetails(
 
 
 /* =========================================================
-   RENDER DETAIL ITEMS
+   DETAIL ITEMS
 ========================================================= */
 
 function renderSODetailItems(
@@ -2153,9 +3519,7 @@ function renderSODetailItems(
                             item.qty || 0
                         )}"
                         disabled
-                        oninput="
-                            calculateDetailTotals()
-                        "
+                        oninput="calculateDetailTotals()"
                     >
 
                 </td>
@@ -2184,9 +3548,7 @@ function renderSODetailItems(
                             item.amount || 0
                         )}"
                         disabled
-                        oninput="
-                            calculateDetailTotals()
-                        "
+                        oninput="calculateDetailTotals()"
                     >
 
                 </td>
@@ -2206,9 +3568,7 @@ function renderSODetailItems(
                     <button
                         type="button"
                         class="detail-delete-item"
-                        onclick="
-                            deleteDetailItem(this)
-                        "
+                        onclick="deleteDetailItem(this)"
                         style="display:none;"
                     >
 
@@ -2232,7 +3592,7 @@ function renderSODetailItems(
 
 
 /* =========================================================
-   DETAIL EDIT MODE
+   ENABLE SO UPDATE
 ========================================================= */
 
 function enableSOUpdate() {
@@ -2278,10 +3638,6 @@ function setDetailsEditMode(
     inputs.forEach(
         function(input) {
 
-            /*
-             * SO NUMBER always disabled
-             */
-
             if (
                 input.id ===
                 "detailSONumber"
@@ -2294,10 +3650,6 @@ function setDetailsEditMode(
 
             }
 
-
-            /*
-             * FILE INPUT remains usable
-             */
 
             if (
                 input.id ===
@@ -2319,10 +3671,6 @@ function setDetailsEditMode(
     );
 
 
-    /*
-     * DELETE ITEM BUTTONS
-     */
-
     document
         .querySelectorAll(
             ".detail-delete-item"
@@ -2338,10 +3686,6 @@ function setDetailsEditMode(
             }
         );
 
-
-    /*
-     * ADD ITEM BUTTON
-     */
 
     const addButton =
         document.getElementById(
@@ -2359,10 +3703,6 @@ function setDetailsEditMode(
     }
 
 
-    /*
-     * ADD FILE BUTTON
-     */
-
     const addFileButton =
         document.getElementById(
             "detailAddFileButton"
@@ -2376,10 +3716,6 @@ function setDetailsEditMode(
 
     }
 
-
-    /*
-     * SAVE BUTTON
-     */
 
     const saveButton =
         document.querySelector(
@@ -2464,9 +3800,7 @@ function addDetailItem() {
                 class="so-detail-qty"
                 value="1"
                 min="0"
-                oninput="
-                    calculateDetailTotals()
-                "
+                oninput="calculateDetailTotals()"
             >
 
         </td>
@@ -2491,9 +3825,7 @@ function addDetailItem() {
                 value="0"
                 min="0"
                 step="0.01"
-                oninput="
-                    calculateDetailTotals()
-                "
+                oninput="calculateDetailTotals()"
             >
 
         </td>
@@ -2511,9 +3843,7 @@ function addDetailItem() {
             <button
                 type="button"
                 class="detail-delete-item"
-                onclick="
-                    deleteDetailItem(this)
-                "
+                onclick="deleteDetailItem(this)"
             >
 
                 DELETE
@@ -2531,7 +3861,6 @@ function addDetailItem() {
 
 
     renumberDetailItems();
-
 
     calculateDetailTotals();
 
@@ -2566,7 +3895,6 @@ function deleteDetailItem(
 
     renumberDetailItems();
 
-
     calculateDetailTotals();
 
 }
@@ -2589,27 +3917,25 @@ function renumberDetailItems() {
     }
 
 
-    const rows =
-        tbody.querySelectorAll(
+    tbody
+        .querySelectorAll(
             "tr"
-        );
+        )
+        .forEach(
+            function(row, index) {
 
+                if (
+                    row.children[0]
+                ) {
 
-    rows.forEach(
-        function(row, index) {
+                    row.children[0]
+                        .textContent =
+                        index + 1;
 
-            if (
-                row.children[0]
-            ) {
-
-                row.children[0]
-                    .textContent =
-                    index + 1;
+                }
 
             }
-
-        }
-    );
+        );
 
 }
 
@@ -2635,80 +3961,74 @@ function calculateDetailTotals() {
         0;
 
 
-    const rows =
-        tbody.querySelectorAll(
+    tbody
+        .querySelectorAll(
             "tr"
-        );
+        )
+        .forEach(
+            function(row) {
 
-
-    rows.forEach(
-        function(row) {
-
-            const qtyInput =
-                row.querySelector(
-                    ".so-detail-qty"
-                );
-
-
-            const amountInput =
-                row.querySelector(
-                    ".so-detail-amount"
-                );
-
-
-            const totalCell =
-                row.querySelector(
-                    ".so-detail-total"
-                );
-
-
-            if (
-                !qtyInput ||
-                !amountInput
-            ) {
-
-                return;
-
-            }
-
-
-            const qty =
-                Number(
-                    qtyInput.value || 0
-                );
-
-
-            const amount =
-                Number(
-                    amountInput.value || 0
-                );
-
-
-            const total =
-                qty *
-                amount;
-
-
-            subtotal +=
-                total;
-
-
-            if (totalCell) {
-
-                totalCell.textContent =
-                    formatMoney(
-                        total
+                const qtyInput =
+                    row.querySelector(
+                        ".so-detail-qty"
                     );
 
+
+                const amountInput =
+                    row.querySelector(
+                        ".so-detail-amount"
+                    );
+
+
+                const totalCell =
+                    row.querySelector(
+                        ".so-detail-total"
+                    );
+
+
+                if (
+                    !qtyInput ||
+                    !amountInput
+                ) {
+
+                    return;
+
+                }
+
+
+                const qty =
+                    Number(
+                        qtyInput.value || 0
+                    );
+
+
+                const amount =
+                    Number(
+                        amountInput.value || 0
+                    );
+
+
+                const total =
+                    qty *
+                    amount;
+
+
+                subtotal +=
+                    total;
+
+
+                if (totalCell) {
+
+                    totalCell.textContent =
+                        formatMoney(
+                            total
+                        );
+
+                }
+
             }
+        );
 
-        }
-    );
-
-
-    /*
-     * DISCOUNT
-     */
 
     const discountInput =
         document.getElementById(
@@ -2743,13 +4063,9 @@ function calculateDetailTotals() {
         discount;
 
 
-    const vatRate =
-        0.12;
-
-
     const vatAmount =
         vatable *
-        vatRate;
+        0.12;
 
 
     const grandTotal =
@@ -2762,12 +4078,6 @@ function calculateDetailTotals() {
         formatMoney(
             subtotal
         )
-    );
-
-
-    setValue(
-        "detailDiscount",
-        discount
     );
 
 
@@ -2832,6 +4142,20 @@ async function saveSOUpdate() {
                 "detailDiscount"
             )?.value || 0
         );
+
+
+    if (
+        discount >
+        subtotal
+    ) {
+
+        alert(
+            "Discount cannot be greater than subtotal."
+        );
+
+        return;
+
+    }
 
 
     const vatable =
@@ -3008,10 +4332,6 @@ async function saveSOUpdate() {
         false;
 
 
-    /*
-     * Remove old cache
-     */
-
     delete soDetailsCache[
         String(
             currentSO.soNumber
@@ -3019,17 +4339,9 @@ async function saveSOUpdate() {
     ];
 
 
-    /*
-     * Save SO number before reload
-     */
-
     const updatedSONumber =
         currentSO.soNumber;
 
-
-    /*
-     * Force refresh
-     */
 
     salesOrdersLoaded =
         false;
@@ -3039,10 +4351,6 @@ async function saveSOUpdate() {
         true
     );
 
-
-    /*
-     * Reload updated details
-     */
 
     await openSODetails(
         updatedSONumber
@@ -3068,118 +4376,111 @@ function collectDetailItems() {
     }
 
 
-    const rows =
-        tbody.querySelectorAll(
-            "tr"
-        );
-
-
     const items =
         [];
 
 
-    rows.forEach(
-        function(row, index) {
+    tbody
+        .querySelectorAll(
+            "tr"
+        )
+        .forEach(
+            function(row, index) {
 
-            const itemNameInput =
-                row.querySelector(
-                    ".so-detail-item-name"
-                );
-
-
-            const descriptionInput =
-                row.querySelector(
-                    ".so-detail-description"
-                );
+                const itemNameInput =
+                    row.querySelector(
+                        ".so-detail-item-name"
+                    );
 
 
-            const qtyInput =
-                row.querySelector(
-                    ".so-detail-qty"
-                );
+                if (!itemNameInput) {
+                    return;
+                }
 
 
-            const unitInput =
-                row.querySelector(
-                    ".so-detail-unit"
-                );
+                const descriptionInput =
+                    row.querySelector(
+                        ".so-detail-description"
+                    );
 
 
-            const amountInput =
-                row.querySelector(
-                    ".so-detail-amount"
-                );
+                const qtyInput =
+                    row.querySelector(
+                        ".so-detail-qty"
+                    );
 
 
-            if (!itemNameInput) {
-                return;
+                const unitInput =
+                    row.querySelector(
+                        ".so-detail-unit"
+                    );
+
+
+                const amountInput =
+                    row.querySelector(
+                        ".so-detail-amount"
+                    );
+
+
+                const itemName =
+                    itemNameInput.value.trim();
+
+
+                const description =
+                    descriptionInput
+                        ? descriptionInput.value.trim()
+                        : "";
+
+
+                const qty =
+                    Number(
+                        qtyInput
+                            ? qtyInput.value
+                            : 0
+                    );
+
+
+                const unit =
+                    unitInput
+                        ? unitInput.value.trim()
+                        : "";
+
+
+                const amount =
+                    Number(
+                        amountInput
+                            ? amountInput.value
+                            : 0
+                    );
+
+
+                items.push({
+
+                    itemNumber:
+                        index + 1,
+
+                    itemName:
+                        itemName,
+
+                    description:
+                        description,
+
+                    qty:
+                        qty,
+
+                    unit:
+                        unit,
+
+                    amount:
+                        amount,
+
+                    total:
+                        qty * amount
+
+                });
+
             }
-
-
-            const itemName =
-                itemNameInput.value.trim();
-
-
-            const description =
-                descriptionInput
-                    ? descriptionInput.value.trim()
-                    : "";
-
-
-            const qty =
-                Number(
-                    qtyInput
-                        ? qtyInput.value
-                        : 0
-                );
-
-
-            const unit =
-                unitInput
-                    ? unitInput.value.trim()
-                    : "";
-
-
-            const amount =
-                Number(
-                    amountInput
-                        ? amountInput.value
-                        : 0
-                );
-
-
-            const total =
-                qty *
-                amount;
-
-
-            items.push({
-
-                itemNumber:
-                    index + 1,
-
-                itemName:
-                    itemName,
-
-                description:
-                    description,
-
-                qty:
-                    qty,
-
-                unit:
-                    unit,
-
-                amount:
-                    amount,
-
-                total:
-                    total
-
-            });
-
-        }
-    );
+        );
 
 
     return items;
@@ -3210,10 +4511,7 @@ async function cancelSelectedSO() {
 
 
     if (
-        String(
-            so.status
-        )
-        .toUpperCase() ===
+        getSOStatus(so) ===
         "CANCELLED"
     ) {
 
@@ -3269,10 +4567,6 @@ async function cancelSelectedSO() {
     );
 
 
-    /*
-     * Update local cache
-     */
-
     const cacheKey =
         String(
             so.soNumber
@@ -3316,10 +4610,6 @@ async function cancelSelectedSO() {
     }
 
 
-    /*
-     * Clear selection
-     */
-
     selectedSO =
         null;
 
@@ -3330,10 +4620,6 @@ async function cancelSelectedSO() {
 
     updateSOSelectionUI();
 
-
-    /*
-     * Force refresh
-     */
 
     salesOrdersLoaded =
         false;
@@ -3396,10 +4682,6 @@ function closeSODetails() {
         );
 
 
-    /*
-     * Hide details
-     */
-
     if (detailsPage) {
 
         detailsPage.style.display =
@@ -3407,10 +4689,6 @@ function closeSODetails() {
 
     }
 
-
-    /*
-     * Show list
-     */
 
     if (listView) {
 
@@ -3420,30 +4698,13 @@ function closeSODetails() {
     }
 
 
-    /*
-     * Reset edit mode
-     */
-
     soDetailsEditMode =
         false;
 
 
-    /*
-     * IMPORTANT:
-     *
-     * Do NOT clear selectedSO.
-     *
-     * User should return to the same
-     * selected SO.
-     */
-
     currentSO =
         null;
 
-
-    /*
-     * Restore selection UI
-     */
 
     updateSOSelectionUI();
 
@@ -3451,192 +4712,7 @@ function closeSODetails() {
 
 
 /* =========================================================
-   UTILITY FUNCTIONS
-========================================================= */
-
-function setValue(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (!element) {
-        return;
-    }
-
-
-    element.value =
-        value == null
-            ? ""
-            : value;
-
-}
-
-
-function getValue(
-    id
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (!element) {
-        return "";
-    }
-
-
-    return String(
-        element.value || ""
-    ).trim();
-
-}
-
-
-function setText(
-    id,
-    value
-) {
-
-    const element =
-        document.getElementById(
-            id
-        );
-
-
-    if (!element) {
-        return;
-    }
-
-
-    element.textContent =
-        value == null
-            ? ""
-            : value;
-
-}
-
-
-/* =========================================================
-   MONEY FORMAT
-========================================================= */
-
-function formatMoney(
-    value
-) {
-
-    const number =
-        Number(
-            value || 0
-        );
-
-
-    return number.toLocaleString(
-        "en-PH",
-        {
-            minimumFractionDigits:
-                2,
-
-            maximumFractionDigits:
-                2
-        }
-    );
-
-}
-
-
-/* =========================================================
-   HTML ESCAPE
-========================================================= */
-
-function escapeHTML(
-    value
-) {
-
-    return String(
-        value == null
-            ? ""
-            : value
-    )
-    .replace(
-        /&/g,
-        "&amp;"
-    )
-    .replace(
-        /</g,
-        "&lt;"
-    )
-    .replace(
-        />/g,
-        "&gt;"
-    )
-    .replace(
-        /"/g,
-        "&quot;"
-    )
-    .replace(
-        /'/g,
-        "&#039;"
-    );
-
-}
-
-
-function escapeAttribute(
-    value
-) {
-
-    return escapeHTML(
-        value
-    );
-
-}
-
-
-function cssEscape(
-    value
-) {
-
-    if (
-        window.CSS &&
-        typeof window.CSS.escape ===
-            "function"
-    ) {
-
-        return window.CSS.escape(
-            String(value)
-        );
-
-    }
-
-
-    return String(value)
-        .replace(
-            /([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
-            "\\$1"
-        );
-
-}
-
-
-/* =========================================================
    SO FILES
-   UPLOAD / VIEW / DELETE
-========================================================= */
-
-const SO_FILE_MAX_SIZE =
-    10 * 1024 * 1024;
-
-
-/* =========================================================
-   SELECT FILE
 ========================================================= */
 
 function selectDetailSOFiles() {
@@ -3668,7 +4744,7 @@ function selectDetailSOFiles() {
 
 
 /* =========================================================
-   HANDLE SELECTED FILES
+   HANDLE SO FILES
 ========================================================= */
 
 async function handleDetailSOFiles(
@@ -3703,10 +4779,6 @@ async function handleDetailSOFiles(
     }
 
 
-    /*
-     * Upload each PDF
-     */
-
     for (
         let i = 0;
         i < files.length;
@@ -3720,17 +4792,9 @@ async function handleDetailSOFiles(
     }
 
 
-    /*
-     * Clear input
-     */
-
     event.target.value =
         "";
 
-
-    /*
-     * Reload files
-     */
 
     await loadSOFiles(
         currentSO.soNumber
@@ -3740,7 +4804,7 @@ async function handleDetailSOFiles(
 
 
 /* =========================================================
-   UPLOAD ONE SO FILE
+   UPLOAD SO FILE
 ========================================================= */
 
 async function uploadDetailSOFile(
@@ -3752,12 +4816,9 @@ async function uploadDetailSOFile(
     }
 
 
-    /*
-     * PDF ONLY
-     */
-
     const isPDF =
-        file.type === "application/pdf" ||
+        file.type ===
+            "application/pdf" ||
         file.name
             .toLowerCase()
             .endsWith(".pdf");
@@ -3775,10 +4836,6 @@ async function uploadDetailSOFile(
     }
 
 
-    /*
-     * FILE SIZE
-     */
-
     if (
         file.size >
         SO_FILE_MAX_SIZE
@@ -3794,10 +4851,6 @@ async function uploadDetailSOFile(
 
     }
 
-
-    /*
-     * Upload button
-     */
 
     const addButton =
         document.getElementById(
@@ -3818,10 +4871,6 @@ async function uploadDetailSOFile(
 
     try {
 
-        /*
-         * Convert PDF to Base64
-         */
-
         const base64Data =
             await fileToBase64(
                 file
@@ -3834,10 +4883,6 @@ async function uploadDetailSOFile(
                 : base64Data;
 
 
-        /*
-         * Uploaded By
-         */
-
         const uploadedBy =
             currentSO.createdBy ||
             localStorage.getItem(
@@ -3848,10 +4893,6 @@ async function uploadDetailSOFile(
             ) ||
             "LOGIS-TECH USER";
 
-
-        /*
-         * API
-         */
 
         const result =
             await salesOrderAPI(
@@ -3922,6 +4963,7 @@ async function uploadDetailSOFile(
             error.message
         );
 
+
     } finally {
 
         if (addButton) {
@@ -3940,7 +4982,7 @@ async function uploadDetailSOFile(
 
 
 /* =========================================================
-   FILE TO BASE64
+   FILE BASE64
 ========================================================= */
 
 function fileToBase64(
@@ -4010,9 +5052,7 @@ async function loadSOFiles(
         container.innerHTML = `
 
             <div class="no-files">
-
                 No Sales Order selected.
-
             </div>
 
         `;
@@ -4025,9 +5065,7 @@ async function loadSOFiles(
     container.innerHTML = `
 
         <div class="no-files">
-
             Loading files...
-
         </div>
 
     `;
@@ -4041,12 +5079,6 @@ async function loadSOFiles(
                     soNumber
             }
         );
-
-
-    console.log(
-        "GET SO FILES RESULT:",
-        result
-    );
 
 
     if (
@@ -4083,16 +5115,12 @@ async function loadSOFiles(
     }
 
 
-    const files =
+    renderSOFiles(
         Array.isArray(
             result.files
         )
             ? result.files
-            : [];
-
-
-    renderSOFiles(
-        files
+            : []
     );
 
 }
@@ -4353,12 +5381,6 @@ async function deleteSOFile(
         );
 
 
-    console.log(
-        "DELETE SO FILE RESULT:",
-        result
-    );
-
-
     if (
         !result ||
         !result.success
@@ -4379,10 +5401,6 @@ async function deleteSOFile(
     );
 
 
-    /*
-     * Refresh file list
-     */
-
     if (currentSO) {
 
         await loadSOFiles(
@@ -4395,7 +5413,7 @@ async function deleteSOFile(
 
 
 /* =========================================================
-   FORMAT FILE SIZE
+   FILE SIZE
 ========================================================= */
 
 function formatFileSize(
@@ -4447,7 +5465,7 @@ function formatFileSize(
 
 
 /* =========================================================
-   FORMAT SO FILE DATE
+   SO FILE DATE
 ========================================================= */
 
 function formatSOFileDate(
@@ -4495,7 +5513,6 @@ function formatSOFileDate(
 
             minute:
                 "2-digit"
-
         }
     );
 
@@ -4504,7 +5521,6 @@ function formatSOFileDate(
 
 /* =========================================================
    EMAIL SALES ORDER
-   CREATE GMAIL DRAFT
 ========================================================= */
 
 async function emailSelectedSO() {
@@ -4524,42 +5540,6 @@ async function emailSelectedSO() {
 
     }
 
-
-    const soNumber =
-        String(
-            so.soNumber ||
-            ""
-        ).trim();
-
-
-    const clientName =
-        String(
-            so.clientName ||
-            ""
-        ).trim();
-
-
-    const project =
-        String(
-            so.project ||
-            ""
-        ).trim();
-
-
-    if (!soNumber) {
-
-        alert(
-            "Walang SO Number ang selected Sales Order."
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * RECIPIENT EMAIL
-     */
 
     const recipient =
         prompt(
@@ -4587,15 +5567,10 @@ async function emailSelectedSO() {
     }
 
 
-    /*
-     * CREATE GMAIL DRAFT
-     */
-
     try {
 
         alert(
-            "Creating Gmail draft...\n\n" +
-            "Please wait."
+            "Creating Gmail draft...\n\nPlease wait."
         );
 
 
@@ -4605,13 +5580,13 @@ async function emailSelectedSO() {
                 {
 
                     soNumber:
-                        soNumber,
+                        so.soNumber,
 
                     clientName:
-                        clientName,
+                        so.clientName,
 
                     project:
-                        project,
+                        so.project,
 
                     recipient:
                         email
@@ -4628,10 +5603,8 @@ async function emailSelectedSO() {
             alert(
                 "Hindi nagawa ang Gmail draft.\n\n" +
                 (
-                    result &&
-                    result.message
-                        ? result.message
-                        : "Unknown error."
+                    result?.message ||
+                    "Unknown error."
                 )
             );
 
@@ -4639,10 +5612,6 @@ async function emailSelectedSO() {
 
         }
 
-
-        /*
-         * SUCCESS
-         */
 
         alert(
             "GMAIL DRAFT CREATED SUCCESSFULLY!\n\n" +
@@ -4656,14 +5625,7 @@ async function emailSelectedSO() {
             "\n\nPDF Attached:\n" +
             result.fileName +
 
-            "\n\nBuksan ang Gmail → Drafts " +
-            "para i-check, i-edit at SEND."
-        );
-
-
-        console.log(
-            "EMAIL SO SUCCESS:",
-            result
+            "\n\nBuksan ang Gmail → Drafts."
         );
 
 
@@ -4676,7 +5638,7 @@ async function emailSelectedSO() {
 
 
         alert(
-            "Nagkaroon ng error habang gumagawa ng Gmail draft.\n\n" +
+            "Nagkaroon ng error.\n\n" +
             error.message
         );
 
@@ -4686,7 +5648,253 @@ async function emailSelectedSO() {
 
 
 /* =========================================================
-   INITIALIZE SALES ORDER MODULE
+   GENERIC VALUE READER
+========================================================= */
+
+function getSOValue(
+    object,
+    ...keys
+) {
+
+    if (!object) {
+        return "";
+    }
+
+
+    for (
+        let i = 0;
+        i < keys.length;
+        i++
+    ) {
+
+        const key =
+            keys[i];
+
+
+        if (
+            Object.prototype.hasOwnProperty.call(
+                object,
+                key
+            )
+        ) {
+
+            const value =
+                object[key];
+
+
+            if (
+                value !== null &&
+                value !== undefined
+            ) {
+
+                return value;
+
+            }
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =========================================================
+   SET VALUE
+========================================================= */
+
+function setValue(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.value =
+        value == null
+            ? ""
+            : value;
+
+}
+
+
+/* =========================================================
+   GET VALUE
+========================================================= */
+
+function getValue(
+    id
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+        return "";
+    }
+
+
+    return String(
+        element.value || ""
+    ).trim();
+
+}
+
+
+/* =========================================================
+   SET TEXT
+========================================================= */
+
+function setText(
+    id,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            id
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.textContent =
+        value == null
+            ? ""
+            : value;
+
+}
+
+
+/* =========================================================
+   MONEY
+========================================================= */
+
+function formatMoney(
+    value
+) {
+
+    const number =
+        Number(
+            value || 0
+        );
+
+
+    return number.toLocaleString(
+        "en-PH",
+        {
+            minimumFractionDigits:
+                2,
+
+            maximumFractionDigits:
+                2
+        }
+    );
+
+}
+
+
+/* =========================================================
+   HTML ESCAPE
+========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    return String(
+        value == null
+            ? ""
+            : value
+    )
+    .replace(
+        /&/g,
+        "&amp;"
+    )
+    .replace(
+        /</g,
+        "&lt;"
+    )
+    .replace(
+        />/g,
+        "&gt;"
+    )
+    .replace(
+        /"/g,
+        "&quot;"
+    )
+    .replace(
+        /'/g,
+        "&#039;"
+    );
+
+}
+
+
+/* =========================================================
+   ATTRIBUTE ESCAPE
+========================================================= */
+
+function escapeAttribute(
+    value
+) {
+
+    return escapeHTML(
+        value
+    );
+
+}
+
+
+/* =========================================================
+   CSS ESCAPE
+========================================================= */
+
+function cssEscape(
+    value
+) {
+
+    if (
+        window.CSS &&
+        typeof window.CSS.escape ===
+            "function"
+    ) {
+
+        return window.CSS.escape(
+            String(value)
+        );
+
+    }
+
+
+    return String(value)
+        .replace(
+            /([ !"#$%&'()*+,./:;<=>?@[\\\]^`{|}~])/g,
+            "\\$1"
+        );
+
+}
+
+
+/* =========================================================
+   INITIALIZE
 ========================================================= */
 
 document.addEventListener(
@@ -4694,225 +5902,20 @@ document.addEventListener(
     function() {
 
         console.log(
-            "LOGIS-TECH Sales Order module loaded."
+            "================================="
+        );
+
+        console.log(
+            "LOGIS-TECH SALES ORDER MODULE LOADED"
+        );
+
+        console.log(
+            "Google Sheets / Apps Script Database"
+        );
+
+        console.log(
+            "================================="
         );
 
     }
 );
-
-
-/* =========================================================
-   FILTER SALES ORDERS
-========================================================= */
-
-function filterSOList() {
-
-    const searchInput =
-        document.getElementById(
-            "soSearch"
-        );
-
-
-    const statusFilter =
-        document.getElementById(
-            "soStatusFilter"
-        );
-
-
-    const keyword =
-        String(
-            searchInput
-                ? searchInput.value
-                : ""
-        )
-        .trim()
-        .toLowerCase();
-
-
-    const selectedStatus =
-        String(
-            statusFilter
-                ? statusFilter.value
-                : "ALL"
-        )
-        .trim()
-        .toUpperCase();
-
-
-    let filtered =
-        salesOrders;
-
-
-    /*
-     * SEARCH
-     */
-
-    if (keyword) {
-
-        filtered =
-            filtered.filter(
-                function(so) {
-
-                    return [
-
-                        so.soNumber,
-                        so.clientName,
-                        so.project,
-                        so.poNumber,
-                        so.jobOrder,
-                        so.se,
-                        so.status
-
-                    ]
-                    .join(" ")
-                    .toLowerCase()
-                    .includes(
-                        keyword
-                    );
-
-                }
-            );
-
-    }
-
-
-    /*
-     * STATUS
-     */
-
-    if (
-        selectedStatus &&
-        selectedStatus !== "ALL"
-    ) {
-
-        filtered =
-            filtered.filter(
-                function(so) {
-
-                    const status =
-                        getSOStatus(so);
-
-
-                    if (
-                        selectedStatus ===
-                        "ACTIVE"
-                    ) {
-
-                        return isActiveSO(so);
-
-                    }
-
-
-                    if (
-                        selectedStatus ===
-                        "PARTIAL"
-                    ) {
-
-                        return isPartialSO(so);
-
-                    }
-
-
-                    if (
-                        selectedStatus ===
-                        "COMPLETED"
-                    ) {
-
-                        return isCompletedSO(so);
-
-                    }
-
-
-                    if (
-                        selectedStatus ===
-                        "CANCELLED"
-                    ) {
-
-                        return isCancelledSO(so);
-
-                    }
-
-
-                    return (
-                        status ===
-                        selectedStatus
-                    );
-
-                }
-            );
-
-    }
-
-
-    /*
-     * Render filtered list
-     */
-
-    renderSOList(
-        filtered
-    );
-
-
-    /*
-     * Restore selection UI
-     */
-
-    updateSOSelectionUI();
-
-}
-
-
-/* =========================================================
-   REFRESH SALES ORDER LIST
-========================================================= */
-
-async function refreshSOList() {
-
-    const button =
-        document.getElementById(
-            "soRefreshBtn"
-        );
-
-
-    if (button) {
-
-        button.classList.add(
-            "refreshing"
-        );
-
-    }
-
-
-    try {
-
-        await loadSOList(
-            true
-        );
-
-    } catch (error) {
-
-        console.error(
-            "Refresh Sales Order error:",
-            error
-        );
-
-    } finally {
-
-        setTimeout(
-            function() {
-
-                if (button) {
-
-                    button.classList.remove(
-                        "refreshing"
-                    );
-
-                }
-
-            },
-            300
-        );
-
-    }
-
-}
