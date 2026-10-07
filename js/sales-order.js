@@ -4565,54 +4565,227 @@
     }
 
 
-    /* =====================================================
-       CUSTOMER MODULE
-    ===================================================== */
+ /* =====================================================
+   OPEN CUSTOMER MODULE
+===================================================== */
 
-    function openCustomerModule() {
+async function openCustomerModule() {
 
-        if (
-            typeof window.openCustomerModuleFunction ===
-            "function"
-        ) {
+    console.log(
+        "================================="
+    );
 
-            window.openCustomerModuleFunction();
+    console.log(
+        "LOGIS-TECH: OPEN CUSTOMER MODULE"
+    );
 
-            return;
+    console.log(
+        "================================="
+    );
 
-        }
+
+    const customerArea =
+        document.getElementById(
+            "customerArea"
+        );
 
 
-        const customerArea =
+    if (!customerArea) {
+
+        console.error(
+            "Customer area not found."
+        );
+
+        return;
+
+    }
+
+
+    try {
+
+        /* =============================================
+           SHOW CUSTOMER AREA
+        ============================================= */
+
+        customerArea.style.display =
+            "block";
+
+
+        /* =============================================
+           HIDE SALES ORDER LIST
+        ============================================= */
+
+        const salesOrderListView =
             document.getElementById(
-                "customerArea"
+                "salesOrderListView"
             );
 
 
-        if (customerArea) {
+        if (salesOrderListView) {
 
-            customerArea.style.display =
-                "block";
-
-            customerArea.innerHTML = `
-
-                <div class="customer-placeholder">
-
-                    <h2>
-                        Customer Module
-                    </h2>
-
-                    <p>
-                        Customer module will be loaded here.
-                    </p>
-
-                </div>
-
-            `;
+            salesOrderListView.style.display =
+                "none";
 
         }
 
+
+        /* =============================================
+           HIDE SALES ORDER DETAILS
+        ============================================= */
+
+        const soDetails =
+            document.getElementById(
+                "soDetails"
+            );
+
+
+        if (soDetails) {
+
+            soDetails.style.display =
+                "none";
+
+        }
+
+
+        /* =============================================
+           LOADING
+        ============================================= */
+
+        customerArea.innerHTML = `
+
+            <div class="customer-loading">
+
+                <div class="customer-loading-spinner">
+                    ⟳
+                </div>
+
+                <div>
+                    Loading Customer Module...
+                </div>
+
+            </div>
+
+        `;
+
+
+        /* =============================================
+           LOAD CUSTOMER HTML
+        ============================================= */
+
+        const response =
+            await fetch(
+                "pages/create-customer.html?v=20261007"
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "Unable to load Customer module. HTTP " +
+                response.status
+            );
+
+        }
+
+
+        const html =
+            await response.text();
+
+
+        /* =============================================
+           INJECT CUSTOMER HTML
+        ============================================= */
+
+        customerArea.innerHTML =
+            html;
+
+
+        console.log(
+            "Customer HTML loaded."
+        );
+
+
+        /* =============================================
+           INITIALIZE CUSTOMER JAVASCRIPT
+        ============================================= */
+
+        if (
+            typeof window.initializeCustomerForm ===
+            "function"
+        ) {
+
+            window.initializeCustomerForm();
+
+            console.log(
+                "Customer form initialized."
+            );
+
+        } else {
+
+            /*
+             * create-customer.html contains a script tag,
+             * but scripts inserted through innerHTML do NOT
+             * automatically execute.
+             */
+
+            console.error(
+                "initializeCustomerForm() is not available."
+            );
+
+
+            throw new Error(
+                "Customer JavaScript is not loaded."
+            );
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "================================="
+        );
+
+        console.error(
+            "LOGIS-TECH CUSTOMER MODULE ERROR"
+        );
+
+        console.error(
+            error
+        );
+
+        console.error(
+            "================================="
+        );
+
+
+        customerArea.innerHTML = `
+
+            <div class="customer-module-error">
+
+                <h2>
+                    Unable to Load Customer Module
+                </h2>
+
+                <p>
+                    ${error.message}
+                </p>
+
+                <button
+                    type="button"
+                    class="so-secondary-button"
+                    onclick="closeCustomerFromSalesOrder()"
+                >
+                    ← Back to Sales Orders
+                </button>
+
+            </div>
+
+        `;
+
     }
+
+}
 
 
     /* =====================================================
