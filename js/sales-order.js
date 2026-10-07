@@ -4565,8 +4565,8 @@
     }
 
 
- /* =====================================================
-   OPEN CUSTOMER MODULE
+/* =====================================================
+   CUSTOMER MODULE
 ===================================================== */
 
 async function openCustomerModule() {
@@ -4605,7 +4605,7 @@ async function openCustomerModule() {
 
         /* =============================================
            SHOW CUSTOMER AREA
-        ============================================= */
+        ============================================== */
 
         customerArea.style.display =
             "block";
@@ -4613,7 +4613,7 @@ async function openCustomerModule() {
 
         /* =============================================
            HIDE SALES ORDER LIST
-        ============================================= */
+        ============================================== */
 
         const salesOrderListView =
             document.getElementById(
@@ -4631,7 +4631,7 @@ async function openCustomerModule() {
 
         /* =============================================
            HIDE SALES ORDER DETAILS
-        ============================================= */
+        ============================================== */
 
         const soDetails =
             document.getElementById(
@@ -4648,8 +4648,8 @@ async function openCustomerModule() {
 
 
         /* =============================================
-           LOADING
-        ============================================= */
+           SHOW LOADING
+        ============================================== */
 
         customerArea.innerHTML = `
 
@@ -4670,7 +4670,7 @@ async function openCustomerModule() {
 
         /* =============================================
            LOAD CUSTOMER HTML
-        ============================================= */
+        ============================================== */
 
         const response =
             await fetch(
@@ -4692,10 +4692,6 @@ async function openCustomerModule() {
             await response.text();
 
 
-        /* =============================================
-           INJECT CUSTOMER HTML
-        ============================================= */
-
         customerArea.innerHTML =
             html;
 
@@ -4706,39 +4702,48 @@ async function openCustomerModule() {
 
 
         /* =============================================
-           INITIALIZE CUSTOMER JAVASCRIPT
-        ============================================= */
+           LOAD CUSTOMER JAVASCRIPT
+        ============================================== */
+
+        await loadCustomerScript();
+
+
+        /* =============================================
+           INITIALIZE CUSTOMER FORM
+        ============================================== */
 
         if (
-            typeof window.initializeCustomerForm ===
+            typeof window.initializeCustomerForm !==
             "function"
         ) {
 
-            window.initializeCustomerForm();
-
-            console.log(
-                "Customer form initialized."
-            );
-
-        } else {
-
-            /*
-             * create-customer.html contains a script tag,
-             * but scripts inserted through innerHTML do NOT
-             * automatically execute.
-             */
-
-            console.error(
-                "initializeCustomerForm() is not available."
-            );
-
-
             throw new Error(
-                "Customer JavaScript is not loaded."
+                "initializeCustomerForm() is not available."
             );
 
         }
 
+
+        const initialized =
+            window.initializeCustomerForm();
+
+
+        if (!initialized) {
+
+            throw new Error(
+                "Unable to initialize Customer form."
+            );
+
+        }
+
+
+        customerModuleLoaded =
+            true;
+
+
+        console.log(
+            "Customer form initialized successfully."
+        );
 
     } catch (error) {
 
@@ -4768,7 +4773,10 @@ async function openCustomerModule() {
                 </h2>
 
                 <p>
-                    ${error.message}
+                    ${escapeHTML(
+                        error.message ||
+                        "Unknown error."
+                    )}
                 </p>
 
                 <button
@@ -4787,6 +4795,362 @@ async function openCustomerModule() {
 
 }
 
+
+/* =====================================================
+   LOAD CUSTOMER JAVASCRIPT
+===================================================== */
+
+function loadCustomerScript() {
+
+    return new Promise(
+        function (
+            resolve,
+            reject
+        ) {
+
+            /*
+             * Already available.
+             */
+
+            if (
+                typeof window.initializeCustomerForm ===
+                "function"
+            ) {
+
+                resolve();
+
+                return;
+
+            }
+
+
+            /*
+             * Check whether the script was already
+             * dynamically added to the page.
+             */
+
+            const existingScript =
+                document.querySelector(
+                    'script[data-customer-script="true"]'
+                );
+
+
+            if (existingScript) {
+
+                /*
+                 * If it is already loaded but the
+                 * function is still unavailable,
+                 * reject.
+                 */
+
+                if (
+                    existingScript.dataset.loaded ===
+                    "true"
+                ) {
+
+                    if (
+                        typeof window.initializeCustomerForm ===
+                        "function"
+                    ) {
+
+                        resolve();
+
+                    } else {
+
+                        reject(
+                            new Error(
+                                "Customer JavaScript loaded but initializeCustomerForm() was not found."
+                            )
+                        );
+
+                    }
+
+                    return;
+
+                }
+
+
+                existingScript.addEventListener(
+                    "load",
+                    function () {
+
+                        if (
+                            typeof window.initializeCustomerForm ===
+                            "function"
+                        ) {
+
+                            resolve();
+
+                        } else {
+
+                            reject(
+                                new Error(
+                                    "Customer JavaScript loaded but initializeCustomerForm() was not found."
+                                )
+                            );
+
+                        }
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
+
+                existingScript.addEventListener(
+                    "error",
+                    function () {
+
+                        reject(
+                            new Error(
+                                "Unable to load create-customer.js"
+                            )
+                        );
+
+                    },
+                    {
+                        once: true
+                    }
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+             * Dynamically load the reusable customer JS.
+             *
+             * Main index.html is at repository root,
+             * therefore:
+             *
+             * js/create-customer.js
+             *
+             * is the correct path.
+             */
+
+            const script =
+                document.createElement(
+                    "script"
+                );
+
+
+            script.src =
+                "js/create-customer.js?v=20261007-03";
+
+
+            script.dataset.customerScript =
+                "true";
+
+
+            script.onload =
+                function () {
+
+                    script.dataset.loaded =
+                        "true";
+
+
+                    if (
+                        typeof window.initializeCustomerForm ===
+                        "function"
+                    ) {
+
+                        resolve();
+
+                    } else {
+
+                        reject(
+                            new Error(
+                                "Customer JavaScript loaded but initializeCustomerForm() was not found."
+                            )
+                        );
+
+                    }
+
+                };
+
+
+            script.onerror =
+                function () {
+
+                    reject(
+                        new Error(
+                            "Unable to load create-customer.js"
+                        )
+                    );
+
+                };
+
+
+            document.body.appendChild(
+                script
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   CLOSE CUSTOMER MODULE
+===================================================== */
+
+function closeCustomerFromSalesOrder() {
+
+    console.log(
+        "Closing Customer Module..."
+    );
+
+
+    const customerArea =
+        document.getElementById(
+            "customerArea"
+        );
+
+
+    const salesOrderListView =
+        document.getElementById(
+            "salesOrderListView"
+        );
+
+
+    const soDetails =
+        document.getElementById(
+            "soDetails"
+        );
+
+
+    /*
+     * Hide customer module.
+     */
+
+    if (customerArea) {
+
+        customerArea.style.display =
+            "none";
+
+
+        /*
+         * Clear injected HTML.
+         *
+         * This is important because the next
+         * + New Customer click will inject
+         * a fresh form.
+         */
+
+        customerArea.innerHTML =
+            "";
+
+    }
+
+
+    /*
+     * Show Sales Order list again.
+     */
+
+    if (salesOrderListView) {
+
+        salesOrderListView.style.display =
+            "block";
+
+    }
+
+
+    /*
+     * Keep SO details hidden.
+     */
+
+    if (soDetails) {
+
+        soDetails.style.display =
+            "none";
+
+    }
+
+
+    /*
+     * Reset selection.
+     */
+
+    selectedSO =
+        null;
+
+
+    updateSOSelectionUI();
+
+
+    console.log(
+        "Customer Module closed."
+    );
+
+}
+
+
+/* =====================================================
+   CUSTOMER SAVED EVENT
+===================================================== */
+
+function handleCustomerSaved(
+    event
+) {
+
+    console.log(
+        "Customer saved:",
+        event?.detail || {}
+    );
+
+
+    /*
+     * Mark customer module as active/loaded.
+     */
+
+    customerModuleLoaded =
+        true;
+
+
+    /*
+     * The customer is already saved in
+     * Google Sheets through Main API.
+     *
+     * We intentionally DO NOT close the
+     * Customer form automatically.
+     *
+     * User can click DONE.
+     */
+
+}
+
+
+/* =====================================================
+   CUSTOMER CANCEL EVENT
+===================================================== */
+
+function handleCustomerFormCancel() {
+
+    console.log(
+        "Customer form cancelled."
+    );
+
+}
+
+
+/* =====================================================
+   CUSTOMER EVENTS
+===================================================== */
+
+window.addEventListener(
+    "customerSaved",
+    handleCustomerSaved
+);
+
+
+window.addEventListener(
+    "customerFormCancel",
+    handleCustomerFormCancel
+);
 
     /* =====================================================
        GENERIC HELPERS
