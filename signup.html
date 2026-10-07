@@ -2,13 +2,23 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>LOGI-TECH | Sign Up</title>
 
-    <link rel="stylesheet" href="css/login.css">
+    <link
+        rel="stylesheet"
+        href="css/login.css"
+    >
+
 </head>
+
 
 <body>
 
@@ -16,106 +26,213 @@
 
         <div class="login-card">
 
-            <!-- LOGO -->
+
+            <!-- =========================================
+                 LOGO
+            ========================================== -->
+
             <div class="logo-container">
-                <img src="assets/logo.png" alt="LOGI-TECH Logo">
+
+                <img
+                    src="assets/logo.png"
+                    alt="LOGI-TECH Logo"
+                >
+
             </div>
 
-            <!-- TITLE -->
-            <h1>CREATE ACCOUNT</h1>
+
+            <!-- =========================================
+                 TITLE
+            ========================================== -->
+
+            <h1>
+                CREATE ACCOUNT
+            </h1>
 
             <p class="subtitle">
                 Create your LOGI-TECH account
             </p>
 
-            <!-- SIGN UP FORM -->
-            <form id="signupForm">
+
+            <!-- =========================================
+                 SIGN UP FORM
+            ========================================== -->
+
+            <form
+                id="signupForm"
+                autocomplete="on"
+            >
+
 
                 <!-- FULL NAME -->
+
                 <div class="input-group">
-                    <label for="fullname">Full Name</label>
+
+                    <label for="fullname">
+                        Full Name
+                    </label>
 
                     <input
                         type="text"
                         id="fullname"
+                        name="fullname"
                         placeholder="Enter full name"
+                        autocomplete="name"
                         required
                     >
+
                 </div>
 
-                <!-- USERNAME -->
+
+                <!-- EMAIL -->
+
                 <div class="input-group">
-                    <label for="signupUsername">Username</label>
+
+                    <label for="signupEmail">
+                        Email
+                    </label>
+
+                    <input
+                        type="email"
+                        id="signupEmail"
+                        name="email"
+                        placeholder="Enter email address"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+
+                <!-- USERNAME -->
+
+                <div class="input-group">
+
+                    <label for="signupUsername">
+                        Username
+                    </label>
 
                     <input
                         type="text"
                         id="signupUsername"
+                        name="username"
                         placeholder="Create username"
+                        autocomplete="username"
                         required
                     >
+
                 </div>
 
+
                 <!-- PASSWORD -->
+
                 <div class="input-group">
-                    <label for="signupPassword">Password</label>
+
+                    <label for="signupPassword">
+                        Password
+                    </label>
 
                     <input
                         type="password"
                         id="signupPassword"
+                        name="password"
                         placeholder="Create password"
+                        autocomplete="new-password"
+                        minlength="6"
                         required
                     >
+
                 </div>
 
+
                 <!-- CONFIRM PASSWORD -->
+
                 <div class="input-group">
-                    <label for="confirmPassword">Confirm Password</label>
+
+                    <label for="confirmPassword">
+                        Confirm Password
+                    </label>
 
                     <input
                         type="password"
                         id="confirmPassword"
+                        name="confirmPassword"
                         placeholder="Confirm password"
+                        autocomplete="new-password"
+                        minlength="6"
                         required
                     >
+
                 </div>
 
+
+                <!-- ACCOUNT TYPE -->
+
                 <div class="input-group">
-    <label for="accountType">Account Type</label>
 
-    <select id="accountType" required>
+                    <label for="accountType">
+                        Account Type
+                    </label>
 
-        <option value="" selected disabled>
-            Select account type
-        </option>
+                    <select
+                        id="accountType"
+                        name="accountType"
+                        required
+                    >
 
-        <option value="SALES">
-            SALES
-        </option>
+                        <option
+                            value=""
+                            selected
+                            disabled
+                        >
+                            Select account type
+                        </option>
 
-        <option value="LOGISTICS">
-            LOGISTICS
-        </option>
+                        <option value="SALES">
+                            SALES
+                        </option>
 
-        <option value="FINANCE">
-            FINANCE
-        </option>
+                        <option value="LOGISTICS">
+                            LOGISTICS
+                        </option>
 
-    </select>
-</div>
+                        <option value="FINANCE">
+                            FINANCE
+                        </option>
+
+                    </select>
+
+                </div>
+
+
                 <!-- BUTTON -->
+
                 <button
                     type="submit"
+                    id="signupButton"
                     class="login-btn"
                 >
                     CREATE ACCOUNT
                 </button>
 
+
             </form>
 
-            <!-- MESSAGE -->
-            <p id="signupMessage"></p>
 
-            <!-- BACK TO LOGIN -->
+            <!-- =========================================
+                 MESSAGE
+            ========================================== -->
+
+            <p
+                id="signupMessage"
+                aria-live="polite"
+            ></p>
+
+
+            <!-- =========================================
+                 BACK TO LOGIN
+            ========================================== -->
+
             <div class="login-links">
 
                 <a href="login.html">
@@ -124,12 +241,18 @@
 
             </div>
 
+
         </div>
 
     </div>
 
-    <!-- JAVASCRIPT -->
+
+    <!-- =============================================
+         JAVASCRIPT
+    ============================================== -->
+
     <script src="js/signup.js"></script>
+
 
 </body>
 
