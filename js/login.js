@@ -1,32 +1,23 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
-   LOGIN JAVASCRIPT
+   LOGIN
+   login.js
+   VERSION: 20261007-01
 ========================================================= */
+
 
 document.addEventListener(
     "DOMContentLoaded",
     function () {
 
 
-        /* =====================================================
+        /* =================================================
            ELEMENTS
-        ===================================================== */
+        ================================================= */
 
         const loginForm =
             document.getElementById(
                 "loginForm"
-            );
-
-
-        const loginMessage =
-            document.getElementById(
-                "loginMessage"
-            );
-
-
-        const loginButton =
-            document.getElementById(
-                "loginButton"
             );
 
 
@@ -42,25 +33,21 @@ document.addEventListener(
             );
 
 
-        /* =====================================================
-           API URL
-        ===================================================== */
-
-        const API_URL =
-            "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
+        const loginButton =
+            document.getElementById(
+                "loginButton"
+            );
 
 
-        /* =====================================================
-           LOGIN STATE
-        ===================================================== */
-
-        let loginInProgress =
-            false;
+        const loginMessage =
+            document.getElementById(
+                "loginMessage"
+            );
 
 
-        /* =====================================================
-           CHECK LOGIN FORM
-        ===================================================== */
+        /* =================================================
+           CHECK ELEMENTS
+        ================================================= */
 
         if (!loginForm) {
 
@@ -73,571 +60,252 @@ document.addEventListener(
         }
 
 
-        /* =====================================================
-           CHECK REQUIRED ELEMENTS
-        ===================================================== */
+        /* =================================================
+           MAIN API
+        ================================================= */
 
-        if (
-            !loginMessage ||
-            !loginButton ||
-            !usernameInput ||
-            !passwordInput
-        ) {
+        const API_URL =
+            "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
-            console.error(
-                "LOGIS-TECH ERROR: Required login elements are missing."
-            );
 
-            return;
-
-        }
-
-
-        /* =====================================================
-           SHOW MESSAGE
-        ===================================================== */
-
-        function showMessage(
-            message,
-            color
-        ) {
-
-            loginMessage.textContent =
-                message;
-
-            loginMessage.style.color =
-                color;
-
-        }
-
-
-        /* =====================================================
-           RESET LOGIN BUTTON
-        ===================================================== */
-
-        function resetLoginButton() {
-
-            loginInProgress =
-                false;
-
-            loginButton.disabled =
-                false;
-
-            loginButton.textContent =
-                "LOGIN";
-
-        }
-
-
-        /* =====================================================
-           SEND LOGIN REQUEST
-        ===================================================== */
-
-        async function sendLoginRequest(
-            username,
-            password
-        ) {
-
-
-            /* =================================================
-               REQUEST TIMEOUT
-            ================================================= */
-
-            const controller =
-                new AbortController();
-
-
-            const timeoutId =
-                setTimeout(
-                    function () {
-
-                        controller.abort();
-
-                    },
-                    15000
-                );
-
-
-            try {
-
-
-                console.log(
-                    "===================================="
-                );
-
-                console.log(
-                    "LOGIS-TECH LOGIN REQUEST"
-                );
-
-                console.log(
-                    "Username:",
-                    username
-                );
-
-                console.log(
-                    "API URL:",
-                    API_URL
-                );
-
-                console.log(
-                    "===================================="
-                );
-
-
-                /* =================================================
-                   FETCH API
-                ================================================= */
-
-                const response =
-                    await fetch(
-                        API_URL,
-                        {
-
-                            method:
-                                "POST",
-
-                            headers:
-                                {
-                                    "Content-Type":
-                                        "text/plain;charset=utf-8"
-                                },
-
-                            body:
-                                JSON.stringify(
-                                    {
-
-                                        action:
-                                            "login",
-
-                                        data:
-                                            {
-
-                                                username:
-                                                    username,
-
-                                                password:
-                                                    password
-
-                                            }
-
-                                    }
-                                ),
-
-                            signal:
-                                controller.signal
-
-                        }
-                    );
-
-
-                /* =================================================
-                   GET RESPONSE AS TEXT
-                ================================================= */
-
-                const responseText =
-                    await response.text();
-
-
-                console.log(
-                    "LOGIN HTTP STATUS:",
-                    response.status
-                );
-
-
-                console.log(
-                    "LOGIN API RESPONSE:",
-                    responseText
-                );
-
-
-                /* =================================================
-                   HTTP ERROR
-                ================================================= */
-
-                if (
-                    !response.ok
-                ) {
-
-                    throw new Error(
-                        "HTTP " +
-                        response.status
-                    );
-
-                }
-
-
-                /* =================================================
-                   EMPTY RESPONSE
-                ================================================= */
-
-                if (
-                    !responseText
-                ) {
-
-                    throw new Error(
-                        "Empty response from LOGIS-TECH API."
-                    );
-
-                }
-
-
-                /* =================================================
-                   PARSE JSON
-                ================================================= */
-
-                let result;
-
-
-                try {
-
-                    result =
-                        JSON.parse(
-                            responseText
-                        );
-
-                }
-
-                catch (
-                    jsonError
-                ) {
-
-                    console.error(
-                        "INVALID JSON RESPONSE:",
-                        responseText
-                    );
-
-                    throw new Error(
-                        "Invalid JSON response from API."
-                    );
-
-                }
-
-
-                console.log(
-                    "PARSED LOGIN RESULT:",
-                    result
-                );
-
-
-                return result;
-
-
-            }
-
-            catch (
-                error
-            ) {
-
-
-                /* =================================================
-                   TIMEOUT ERROR
-                ================================================= */
-
-                if (
-                    error.name ===
-                    "AbortError"
-                ) {
-
-                    throw new Error(
-                        "API request timed out."
-                    );
-
-                }
-
-
-                throw error;
-
-
-            }
-
-            finally {
-
-                clearTimeout(
-                    timeoutId
-                );
-
-            }
-
-        }
-
-
-        /* =====================================================
-           LOGIN SUBMIT
-        ===================================================== */
+        /* =================================================
+           FORM SUBMIT
+        ================================================= */
 
         loginForm.addEventListener(
             "submit",
             async function (event) {
 
-
                 event.preventDefault();
 
 
-                /* =================================================
-                   PREVENT DOUBLE LOGIN
-                ================================================= */
-
-                if (
-                    loginInProgress
-                ) {
-
-                    return;
-
-                }
-
-
-                /* =================================================
-                   GET USERNAME
-                ================================================= */
+                /* =========================================
+                   GET VALUES
+                ========================================= */
 
                 const username =
-                    usernameInput.value
-                        .trim();
+                    usernameInput.value.trim();
 
-
-                /* =================================================
-                   GET PASSWORD
-                ================================================= */
 
                 const password =
                     passwordInput.value;
 
 
-                /* =================================================
-                   VALIDATE USERNAME
-                ================================================= */
+                /* =========================================
+                   VALIDATION
+                ========================================= */
 
-                if (
-                    !username
-                ) {
+                if (!username) {
 
                     showMessage(
                         "Please enter your username.",
-                        "#dc2626"
+                        "error"
                     );
+
 
                     usernameInput.focus();
 
+
                     return;
 
                 }
 
 
-                /* =================================================
-                   VALIDATE PASSWORD
-                ================================================= */
-
-                if (
-                    !password
-                ) {
+                if (!password) {
 
                     showMessage(
                         "Please enter your password.",
-                        "#dc2626"
+                        "error"
                     );
 
+
                     passwordInput.focus();
+
 
                     return;
 
                 }
 
 
-                /* =================================================
-                   START LOGIN
-                ================================================= */
-
-                loginInProgress =
-                    true;
-
-
-                loginButton.disabled =
-                    true;
-
-
-                loginButton.textContent =
-                    "LOGGING IN...";
-
+                /* =========================================
+                   LOADING
+                ========================================= */
 
                 showMessage(
-                    "Connecting to LOGIS-TECH...",
-                    "#2563eb"
+                    "Logging in...",
+                    "loading"
                 );
 
 
-                /* =================================================
-                   LOGIN ATTEMPTS
-                ================================================= */
+                if (loginButton) {
 
-                let result =
-                    null;
+                    loginButton.disabled =
+                        true;
 
 
-                let lastError =
-                    null;
+                    loginButton.dataset.oldText =
+                        loginButton.textContent;
+
+
+                    loginButton.textContent =
+                        "LOGGING IN...";
+
+                }
+
+
+                /* =========================================
+                   REQUEST
+                ========================================= */
+
+                const requestBody = {
+
+                    action:
+                        "login",
+
+                    data: {
+
+                        username:
+                            username,
+
+                        password:
+                            password
+
+                    }
+
+                };
 
 
                 try {
 
+                    const response =
+                        await fetch(
+                            API_URL,
+                            {
 
-                    /* =================================================
-                       TRY UP TO 3 TIMES
-                    ================================================= */
+                                method:
+                                    "POST",
 
-                    for (
-                        let attempt = 1;
-                        attempt <= 3;
-                        attempt++
-                    ) {
+                                headers: {
 
+                                    "Content-Type":
+                                        "text/plain;charset=utf-8"
 
-                        console.log(
-                            "LOGIN ATTEMPT:",
-                            attempt
-                        );
+                                },
 
-
-                        try {
-
-
-                            result =
-                                await sendLoginRequest(
-                                    username,
-                                    password
-                                );
-
-
-                            /* =========================================
-                               REQUEST COMPLETED
-                            ========================================== */
-
-                            break;
-
-
-                        }
-
-                        catch (
-                            error
-                        ) {
-
-
-                            lastError =
-                                error;
-
-
-                            console.warn(
-                                "LOGIN ATTEMPT " +
-                                attempt +
-                                " FAILED:",
-                                error
-                            );
-
-
-                            /* =========================================
-                               RETRY
-                            ========================================== */
-
-                            if (
-                                attempt < 3
-                            ) {
-
-                                showMessage(
-                                    "Connection issue. Retrying...",
-                                    "#2563eb"
-                                );
-
-
-                                await new Promise(
-                                    function (
-                                        resolve
-                                    ) {
-
-                                        setTimeout(
-                                            resolve,
-                                            1000
-                                        );
-
-                                    }
-                                );
+                                body:
+                                    JSON.stringify(
+                                        requestBody
+                                    )
 
                             }
-
-                        }
-
-                    }
+                        );
 
 
-                    /* =================================================
-                       ALL ATTEMPTS FAILED
-                    ================================================= */
+                    const responseText =
+                        await response.text();
 
-                    if (
-                        !result
-                    ) {
 
-                        throw (
-                            lastError ||
-                            new Error(
-                                "Unable to connect to API."
-                            )
+                    console.log(
+                        "LOGIN HTTP STATUS:",
+                        response.status
+                    );
+
+
+                    console.log(
+                        "LOGIN API RESPONSE:",
+                        responseText
+                    );
+
+
+                    /* =====================================
+                       HTTP ERROR
+                    ===================================== */
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "HTTP " +
+                            response.status
                         );
 
                     }
 
 
-                    console.log(
-                        "===================================="
-                    );
+                    if (!responseText) {
 
-                    console.log(
-                        "LOGIS-TECH LOGIN RESULT"
-                    );
+                        throw new Error(
+                            "Empty response from API."
+                        );
 
-                    console.log(
-                        result
-                    );
-
-                    console.log(
-                        "===================================="
-                    );
+                    }
 
 
-                    /* =================================================
+                    /* =====================================
+                       PARSE RESPONSE
+                    ===================================== */
+
+                    let result;
+
+
+                    try {
+
+                        result =
+                            JSON.parse(
+                                responseText
+                            );
+
+                    } catch (error) {
+
+                        console.error(
+                            "INVALID JSON:",
+                            responseText
+                        );
+
+
+                        throw new Error(
+                            "Invalid JSON response from API."
+                        );
+
+                    }
+
+
+                    /* =====================================
                        LOGIN SUCCESS
-                    ================================================= */
+                    ===================================== */
 
                     if (
-                        result.success ===
-                        true
+                        result &&
+                        result.success === true &&
+                        result.account
                     ) {
 
 
-                        showMessage(
-                            "Login successful!",
-                            "#16a34a"
-                        );
+                        const account =
+                            result.account;
 
 
-                        /* =============================================
-                           CLEAR OLD LOGIN DATA
-                        ============================================== */
+                        /* =================================
+                           CLEAR OLD SESSION
+                        ================================= */
 
                         localStorage.removeItem(
                             "logitechLoggedIn"
                         );
 
+
                         localStorage.removeItem(
                             "logitechUser"
                         );
+
 
                         localStorage.removeItem(
                             "logitechLoginTime"
                         );
 
 
-                        /* =============================================
-                           SAVE LOGIN STATUS
-                        ============================================== */
+                        /* =================================
+                           SAVE SESSION
+                        ================================= */
 
                         localStorage.setItem(
                             "logitechLoggedIn",
@@ -645,25 +313,13 @@ document.addEventListener(
                         );
 
 
-                        /* =============================================
-                           SAVE ACCOUNT DATA
-                           
-                           IMPORTANT:
-                           BACKEND RETURNS "account"
-                           NOT "user"
-                        ============================================== */
-
                         localStorage.setItem(
                             "logitechUser",
                             JSON.stringify(
-                                result.account || {}
+                                account
                             )
                         );
 
-
-                        /* =============================================
-                           SAVE LOGIN TIME
-                        ============================================== */
 
                         localStorage.setItem(
                             "logitechLoginTime",
@@ -671,28 +327,28 @@ document.addEventListener(
                         );
 
 
-                        console.log(
-                            "LOGIN SESSION SAVED:"
+                        /* =================================
+                           SUCCESS MESSAGE
+                        ================================= */
+
+                        showMessage(
+                            "Login successful!",
+                            "success"
                         );
 
-                        console.log(
-                            result.account
-                        );
 
-
-                        /* =============================================
-                           REDIRECT TO MAIN SYSTEM
-                        ============================================== */
+                        /* =================================
+                           REDIRECT
+                        ================================= */
 
                         setTimeout(
                             function () {
 
-                                window.location.replace(
-                                    "./index.html"
-                                );
+                                window.location.href =
+                                    "./index.html";
 
                             },
-                            300
+                            500
                         );
 
 
@@ -701,68 +357,137 @@ document.addEventListener(
                     }
 
 
-                    /* =================================================
+                    /* =====================================
                        LOGIN FAILED
-                    ================================================= */
+                    ===================================== */
+
+                    const errorMessage =
+                        (
+                            result &&
+                            (
+                                result.message ||
+                                result.error
+                            )
+                        ) ||
+                        "Invalid username or password.";
+
 
                     showMessage(
-                        result.message ||
-                        "Invalid username or password.",
-                        "#dc2626"
+                        errorMessage,
+                        "error"
                     );
 
 
-                    resetLoginButton();
+                    enableLoginButton();
 
 
-                }
-
-                catch (
-                    error
-                ) {
+                } catch (error) {
 
 
-                    /* =================================================
-                       LOG ERROR
-                    ================================================= */
+                    /* =====================================
+                       CONNECTION ERROR
+                    ===================================== */
 
                     console.error(
-                        "===================================="
+                        "========================================"
                     );
+
 
                     console.error(
                         "LOGIS-TECH LOGIN ERROR"
                     );
 
+
                     console.error(
                         error
                     );
 
-                    console.error(
-                        "API URL:",
-                        API_URL
-                    );
 
                     console.error(
-                        "===================================="
+                        "========================================"
                     );
 
-
-                    /* =================================================
-                       SHOW ERROR
-                    ================================================= */
 
                     showMessage(
                         "Unable to connect to LOGIS-TECH API. Please try again.",
-                        "#dc2626"
+                        "error"
                     );
 
 
-                    resetLoginButton();
+                    enableLoginButton();
 
                 }
 
-            });
+            }
+        );
+
+
+        /* =================================================
+           SHOW MESSAGE
+        ================================================= */
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+            if (!loginMessage) {
+
+                return;
+
+            }
+
+
+            loginMessage.textContent =
+                text;
+
+
+            if (type === "success") {
+
+                loginMessage.style.color =
+                    "#16a34a";
+
+            }
+
+            else if (type === "error") {
+
+                loginMessage.style.color =
+                    "#dc2626";
+
+            }
+
+            else {
+
+                loginMessage.style.color =
+                    "#2563eb";
+
+            }
+
+        }
+
+
+        /* =================================================
+           ENABLE LOGIN BUTTON
+        ================================================= */
+
+        function enableLoginButton() {
+
+            if (!loginButton) {
+
+                return;
+
+            }
+
+
+            loginButton.disabled =
+                false;
+
+
+            loginButton.textContent =
+                loginButton.dataset.oldText ||
+                "LOGIN";
+
+        }
 
 
     }
