@@ -1,235 +1,409 @@
-document.addEventListener("DOMContentLoaded", function () {
-
-    const signupForm =
-        document.getElementById("signupForm");
-
-    const message =
-        document.getElementById("signupMessage");
-
-    if (!signupForm) {
-        console.error("LOGIS-TECH ERROR: signupForm not found.");
-        return;
-    }
-
-    if (!message) {
-        console.error("LOGIS-TECH ERROR: signupMessage not found.");
-        return;
-    }
+/* =========================================================
+   LOGIS-TECH SYSTEM
+   SIGN UP
+   signup.js
+   VERSION: 20261007-01
+========================================================= */
 
 
-    /* =========================================
-       API URL
-    ========================================= */
-
-    const API_URL =
-        "https://script.google.com/macros/s/AKfycbwFZHUWgNSfSYiwEYkDncF1qja5A6RmNFyyZ4-Bm17gt_WuCYbtTYICEerGVhp9SYPedg/exec";
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
 
-    /* =========================================
-       FORM SUBMIT
-    ========================================= */
+        /* =================================================
+           ELEMENTS
+        ================================================= */
 
-    signupForm.addEventListener(
-        "submit",
-        async function (event) {
-
-            event.preventDefault();
-
-
-            /* =====================================
-               GET FORM ELEMENTS
-            ===================================== */
-
-            const fullNameInput =
-                document.getElementById("fullname");
-
-            const usernameInput =
-                document.getElementById("signupUsername");
-
-            const passwordInput =
-                document.getElementById("signupPassword");
-
-            const confirmPasswordInput =
-                document.getElementById("confirmPassword");
-
-            const accountTypeInput =
-                document.getElementById("accountType");
-
-
-            if (
-                !fullNameInput ||
-                !usernameInput ||
-                !passwordInput ||
-                !confirmPasswordInput ||
-                !accountTypeInput
-            ) {
-
-                console.error(
-                    "LOGIS-TECH ERROR: One or more signup fields are missing."
-                );
-
-                message.textContent =
-                    "Signup form is incomplete.";
-
-                message.style.color =
-                    "#dc2626";
-
-                return;
-            }
-
-
-            /* =====================================
-               GET VALUES
-            ===================================== */
-
-            const fullName =
-                fullNameInput.value.trim();
-
-            const username =
-                usernameInput.value.trim();
-
-            const password =
-                passwordInput.value;
-
-            const confirmPassword =
-                confirmPasswordInput.value;
-
-            const accountType =
-                accountTypeInput.value.trim();
-
-
-            console.log(
-                "SIGNUP VALUES:",
-                {
-                    fullName: fullName,
-                    username: username,
-                    accountType: accountType
-                }
+        const signupForm =
+            document.getElementById(
+                "signupForm"
             );
 
 
-            /* =====================================
-               VALIDATION
-            ===================================== */
-
-            if (!fullName) {
-
-                message.textContent =
-                    "Please enter your full name.";
-
-                message.style.color =
-                    "#dc2626";
-
-                fullNameInput.focus();
-
-                return;
-            }
+        const message =
+            document.getElementById(
+                "signupMessage"
+            );
 
 
-            if (!username) {
-
-                message.textContent =
-                    "Please enter a username.";
-
-                message.style.color =
-                    "#dc2626";
-
-                usernameInput.focus();
-
-                return;
-            }
+        const signupButton =
+            document.getElementById(
+                "signupButton"
+            );
 
 
-            if (!password) {
+        /* =================================================
+           VALIDATE FORM
+        ================================================= */
 
-                message.textContent =
-                    "Please enter a password.";
+        if (!signupForm) {
 
-                message.style.color =
-                    "#dc2626";
+            console.error(
+                "LOGIS-TECH ERROR: signupForm not found."
+            );
 
-                passwordInput.focus();
+            return;
 
-                return;
-            }
-
-
-            if (!confirmPassword) {
-
-                message.textContent =
-                    "Please confirm your password.";
-
-                message.style.color =
-                    "#dc2626";
-
-                confirmPasswordInput.focus();
-
-                return;
-            }
+        }
 
 
-            if (password !== confirmPassword) {
+        if (!message) {
 
-                message.textContent =
-                    "Passwords do not match.";
+            console.error(
+                "LOGIS-TECH ERROR: signupMessage not found."
+            );
 
-                message.style.color =
-                    "#dc2626";
+            return;
 
-                confirmPasswordInput.focus();
-
-                return;
-            }
+        }
 
 
-            if (!accountType) {
+        /* =================================================
+           MAIN API
+        ================================================= */
 
-                message.textContent =
-                    "Please select an account type.";
-
-                message.style.color =
-                    "#dc2626";
-
-                accountTypeInput.focus();
-
-                return;
-            }
+        const API_URL =
+            "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
 
-            /* =====================================
-               LOADING
-            ===================================== */
+        console.log(
+            "========================================"
+        );
 
-            message.textContent =
-                "Creating account...";
+        console.log(
+            "LOGIS-TECH SIGN UP"
+        );
 
-            message.style.color =
-                "#2563eb";
+        console.log(
+            "MAIN API:",
+            API_URL
+        );
+
+        console.log(
+            "========================================"
+        );
 
 
-            const submitButton =
-                signupForm.querySelector(
-                    'button[type="submit"]'
+        /* =================================================
+           FORM SUBMIT
+        ================================================= */
+
+        signupForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+
+                /* =========================================
+                   INPUTS
+                ========================================= */
+
+                const fullNameInput =
+                    document.getElementById(
+                        "fullname"
+                    );
+
+
+                const emailInput =
+                    document.getElementById(
+                        "signupEmail"
+                    );
+
+
+                const usernameInput =
+                    document.getElementById(
+                        "signupUsername"
+                    );
+
+
+                const passwordInput =
+                    document.getElementById(
+                        "signupPassword"
+                    );
+
+
+                const confirmPasswordInput =
+                    document.getElementById(
+                        "confirmPassword"
+                    );
+
+
+                const accountTypeInput =
+                    document.getElementById(
+                        "accountType"
+                    );
+
+
+                /* =========================================
+                   CHECK INPUTS
+                ========================================= */
+
+                if (
+                    !fullNameInput ||
+                    !emailInput ||
+                    !usernameInput ||
+                    !passwordInput ||
+                    !confirmPasswordInput ||
+                    !accountTypeInput
+                ) {
+
+                    console.error(
+                        "LOGIS-TECH ERROR: Signup field missing."
+                    );
+
+
+                    showMessage(
+                        "Signup form is incomplete.",
+                        "error"
+                    );
+
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                   GET VALUES
+                ========================================= */
+
+                const fullName =
+                    fullNameInput.value.trim();
+
+
+                const email =
+                    emailInput.value.trim();
+
+
+                const username =
+                    usernameInput.value.trim();
+
+
+                const password =
+                    passwordInput.value;
+
+
+                const confirmPassword =
+                    confirmPasswordInput.value;
+
+
+                const accountType =
+                    accountTypeInput.value
+                        .trim()
+                        .toUpperCase();
+
+
+                /* =========================================
+                   VALIDATION
+                ========================================= */
+
+                if (!fullName) {
+
+                    showMessage(
+                        "Please enter your full name.",
+                        "error"
+                    );
+
+
+                    fullNameInput.focus();
+
+
+                    return;
+
+                }
+
+
+                if (!email) {
+
+                    showMessage(
+                        "Please enter your email.",
+                        "error"
+                    );
+
+
+                    emailInput.focus();
+
+
+                    return;
+
+                }
+
+
+                if (!emailInput.checkValidity()) {
+
+                    showMessage(
+                        "Please enter a valid email address.",
+                        "error"
+                    );
+
+
+                    emailInput.focus();
+
+
+                    return;
+
+                }
+
+
+                if (!username) {
+
+                    showMessage(
+                        "Please enter a username.",
+                        "error"
+                    );
+
+
+                    usernameInput.focus();
+
+
+                    return;
+
+                }
+
+
+                if (!password) {
+
+                    showMessage(
+                        "Please enter a password.",
+                        "error"
+                    );
+
+
+                    passwordInput.focus();
+
+
+                    return;
+
+                }
+
+
+                if (password.length < 6) {
+
+                    showMessage(
+                        "Password must be at least 6 characters.",
+                        "error"
+                    );
+
+
+                    passwordInput.focus();
+
+
+                    return;
+
+                }
+
+
+                if (!confirmPassword) {
+
+                    showMessage(
+                        "Please confirm your password.",
+                        "error"
+                    );
+
+
+                    confirmPasswordInput.focus();
+
+
+                    return;
+
+                }
+
+
+                if (
+                    password !==
+                    confirmPassword
+                ) {
+
+                    showMessage(
+                        "Passwords do not match.",
+                        "error"
+                    );
+
+
+                    confirmPasswordInput.focus();
+
+
+                    return;
+
+                }
+
+
+                if (!accountType) {
+
+                    showMessage(
+                        "Please select an account type.",
+                        "error"
+                    );
+
+
+                    accountTypeInput.focus();
+
+
+                    return;
+
+                }
+
+
+                const allowedRoles = [
+
+                    "SALES",
+                    "LOGISTICS",
+                    "FINANCE"
+
+                ];
+
+
+                if (
+                    !allowedRoles.includes(
+                        accountType
+                    )
+                ) {
+
+                    showMessage(
+                        "Invalid account type.",
+                        "error"
+                    );
+
+
+                    accountTypeInput.focus();
+
+
+                    return;
+
+                }
+
+
+                /* =========================================
+                   LOADING
+                ========================================= */
+
+                showMessage(
+                    "Creating account...",
+                    "loading"
                 );
 
 
-            if (submitButton) {
+                if (signupButton) {
 
-                submitButton.disabled = true;
-
-                submitButton.dataset.oldText =
-                    submitButton.textContent;
-
-                submitButton.textContent =
-                    "CREATING ACCOUNT...";
-            }
+                    signupButton.disabled =
+                        true;
 
 
-            /* =====================================
-               API REQUEST
-            ===================================== */
+                    signupButton.dataset.oldText =
+                        signupButton.textContent;
 
-            try {
+
+                    signupButton.textContent =
+                        "CREATING ACCOUNT...";
+
+                }
+
+
+                /* =========================================
+                   REQUEST
+                ========================================= */
 
                 const requestBody = {
 
@@ -241,6 +415,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         fullName:
                             fullName,
 
+                        email:
+                            email,
+
                         username:
                             username,
 
@@ -249,207 +426,322 @@ document.addEventListener("DOMContentLoaded", function () {
 
                         accountType:
                             accountType
+
                     }
+
                 };
 
 
+                /* =========================================
+                   DEBUG REQUEST
+                ========================================= */
+
                 console.log(
                     "LOGIS-TECH SIGNUP REQUEST:",
-                    requestBody
-                );
+                    {
+                        action:
+                            requestBody.action,
 
+                        data: {
 
-                const response =
-                    await fetch(
-                        API_URL,
-                        {
-                            method: "POST",
+                            fullName:
+                                fullName,
 
-                            headers: {
-                                "Content-Type":
-                                    "text/plain;charset=utf-8"
-                            },
+                            email:
+                                email,
 
-                            body:
-                                JSON.stringify(
-                                    requestBody
-                                )
+                            username:
+                                username,
+
+                            accountType:
+                                accountType
+
                         }
-                    );
 
-
-                const responseText =
-                    await response.text();
-
-
-                console.log(
-                    "SIGNUP HTTP STATUS:",
-                    response.status
-                );
-
-                console.log(
-                    "SIGNUP API RESPONSE:",
-                    responseText
+                    }
                 );
 
 
-                if (!response.ok) {
-
-                    throw new Error(
-                        "HTTP " +
-                        response.status
-                    );
-                }
-
-
-                if (!responseText) {
-
-                    throw new Error(
-                        "Empty response from API."
-                    );
-                }
-
-
-                let result;
+                /* =========================================
+                   API CALL
+                ========================================= */
 
                 try {
 
-                    result =
-                        JSON.parse(
-                            responseText
+                    const response =
+                        await fetch(
+                            API_URL,
+                            {
+
+                                method:
+                                    "POST",
+
+                                headers: {
+
+                                    "Content-Type":
+                                        "text/plain;charset=utf-8"
+
+                                },
+
+                                body:
+                                    JSON.stringify(
+                                        requestBody
+                                    )
+
+                            }
                         );
 
-                } catch (jsonError) {
 
-                    console.error(
-                        "INVALID JSON RESPONSE:",
+                    const responseText =
+                        await response.text();
+
+
+                    console.log(
+                        "SIGNUP HTTP STATUS:",
+                        response.status
+                    );
+
+
+                    console.log(
+                        "SIGNUP API RESPONSE:",
                         responseText
                     );
 
-                    throw new Error(
-                        "Invalid JSON response from API."
-                    );
-                }
 
+                    /* =====================================
+                       HTTP ERROR
+                    ===================================== */
 
-                console.log(
-                    "LOGIS-TECH SIGNUP RESULT:",
-                    result
-                );
+                    if (!response.ok) {
 
+                        throw new Error(
+                            "HTTP " +
+                            response.status
+                        );
 
-                /* =================================
-                   SUCCESS
-                ================================= */
-
-                if (
-                    result &&
-                    result.success === true
-                ) {
-
-                    message.textContent =
-                        "Account created successfully!";
-
-                    message.style.color =
-                        "#16a34a";
-
-
-                    signupForm.reset();
-
-
-                    if (submitButton) {
-
-                        submitButton.disabled =
-                            true;
-
-                        submitButton.textContent =
-                            "ACCOUNT CREATED";
                     }
 
 
-                    setTimeout(
-                        function () {
+                    if (!responseText) {
 
-                            window.location.href =
-                                "login.html";
+                        throw new Error(
+                            "Empty response from API."
+                        );
 
-                        },
-                        1200
+                    }
+
+
+                    /* =====================================
+                       PARSE JSON
+                    ===================================== */
+
+                    let result;
+
+
+                    try {
+
+                        result =
+                            JSON.parse(
+                                responseText
+                            );
+
+                    } catch (jsonError) {
+
+                        console.error(
+                            "INVALID JSON RESPONSE:",
+                            responseText
+                        );
+
+
+                        throw new Error(
+                            "Invalid JSON response from API."
+                        );
+
+                    }
+
+
+                    console.log(
+                        "LOGIS-TECH SIGNUP RESULT:",
+                        result
                     );
 
 
-                    return;
-                }
+                    /* =====================================
+                       SUCCESS
+                    ===================================== */
 
-
-                /* =================================
-                   API ERROR
-                ================================= */
-
-                message.textContent =
-                    (
+                    if (
                         result &&
-                        result.message
-                    ) ||
-                    "Account was not created.";
+                        result.success === true
+                    ) {
+
+                        showMessage(
+                            "Account created successfully!",
+                            "success"
+                        );
+
+
+                        signupForm.reset();
+
+
+                        if (signupButton) {
+
+                            signupButton.disabled =
+                                true;
+
+
+                            signupButton.textContent =
+                                "ACCOUNT CREATED";
+
+                        }
+
+
+                        /* =================================
+                           REDIRECT LOGIN
+                        ================================= */
+
+                        setTimeout(
+                            function () {
+
+                                window.location.href =
+                                    "login.html";
+
+                            },
+                            1500
+                        );
+
+
+                        return;
+
+                    }
+
+
+                    /* =====================================
+                       API ERROR
+                    ===================================== */
+
+                    const apiMessage =
+                        (
+                            result &&
+                            (
+                                result.message ||
+                                result.error
+                            )
+                        ) ||
+                        "Account was not created.";
+
+
+                    showMessage(
+                        apiMessage,
+                        "error"
+                    );
+
+
+                    enableButton();
+
+                } catch (error) {
+
+
+                    /* =====================================
+                       ERROR
+                    ===================================== */
+
+                    console.error(
+                        "========================================"
+                    );
+
+
+                    console.error(
+                        "LOGIS-TECH SIGNUP ERROR"
+                    );
+
+
+                    console.error(
+                        error
+                    );
+
+
+                    console.error(
+                        "API URL:",
+                        API_URL
+                    );
+
+
+                    console.error(
+                        "========================================"
+                    );
+
+
+                    showMessage(
+                        "Unable to connect to LOGIS-TECH API. Please try again.",
+                        "error"
+                    );
+
+
+                    enableButton();
+
+                }
+
+            }
+        );
+
+
+        /* =================================================
+           MESSAGE FUNCTION
+        ================================================= */
+
+        function showMessage(
+            text,
+            type
+        ) {
+
+            message.textContent =
+                text;
+
+
+            if (type === "success") {
+
+                message.style.color =
+                    "#16a34a";
+
+            } else if (type === "error") {
 
                 message.style.color =
                     "#dc2626";
 
-
-                if (submitButton) {
-
-                    submitButton.disabled =
-                        false;
-
-                    submitButton.textContent =
-                        submitButton.dataset.oldText ||
-                        "SIGN UP";
-                }
-
-
-            } catch (error) {
-
-                console.error(
-                    "===================================="
-                );
-
-                console.error(
-                    "LOGIS-TECH SIGNUP ERROR"
-                );
-
-                console.error(error);
-
-                console.error(
-                    "API URL:",
-                    API_URL
-                );
-
-                console.error(
-                    "===================================="
-                );
-
-
-                message.textContent =
-                    "Unable to connect to LOGIS-TECH API. Please try again.";
+            } else {
 
                 message.style.color =
-                    "#dc2626";
-
-
-                if (submitButton) {
-
-                    submitButton.disabled =
-                        false;
-
-                    submitButton.textContent =
-                        submitButton.dataset.oldText ||
-                        "SIGN UP";
-                }
+                    "#2563eb";
 
             }
 
         }
-    );
 
-});
+
+        /* =================================================
+           ENABLE BUTTON
+        ================================================= */
+
+        function enableButton() {
+
+            if (!signupButton) {
+
+                return;
+
+            }
+
+
+            signupButton.disabled =
+                false;
+
+
+            signupButton.textContent =
+                signupButton.dataset.oldText ||
+                "CREATE ACCOUNT";
+
+        }
+
+
+    }
+);
