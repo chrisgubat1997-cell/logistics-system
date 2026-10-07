@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    CUSTOMER MANAGEMENT
    create-customer.js
-   VERSION: 20261006-02
+   VERSION: 20261007-03
 
    PURPOSE:
    - Create Customer
@@ -37,6 +37,15 @@
     let isSavingCustomer = false;
 
     let customerFormInitialized = false;
+
+    /*
+     * IMPORTANT:
+     * Keep reference to the actual form that was initialized.
+     *
+     * Sales Order removes/reinjects create-customer.html.
+     * Therefore a new form element is a NEW DOM object.
+     */
+    let initializedCustomerForm = null;
 
 
     /* =====================================================
@@ -150,8 +159,7 @@
 
 
         /*
-         * Important:
-         * If the HTML has not yet been injected,
+         * If HTML has not yet been injected,
          * do not mark the module initialized.
          */
 
@@ -167,11 +175,19 @@
 
 
         /*
-         * Prevent duplicate event listeners.
+         * IMPORTANT:
+         *
+         * If the same form is already initialized,
+         * do not duplicate event listeners.
+         *
+         * If Sales Order injected a NEW form,
+         * initializedCustomerForm !== form,
+         * so we initialize it again.
          */
 
         if (
-            customerFormInitialized
+            customerFormInitialized &&
+            initializedCustomerForm === form
         ) {
 
             console.log(
@@ -183,9 +199,21 @@
         }
 
 
+        /*
+         * New DOM form detected.
+         */
+
+        customerFormInitialized =
+            false;
+
+        initializedCustomerForm =
+            form;
+
+
         setupFormEvents();
 
         setupAddressEvents();
+
 
         customerFormInitialized =
             true;
@@ -719,6 +747,7 @@
         const generatedId =
             result.customerId ||
             customer.CUSTOMER_ID ||
+            customer.customerId ||
             getValue(
                 "customerId"
             );
@@ -726,11 +755,13 @@
 
         const createdAt =
             customer.CREATED_AT ||
+            customer.createdAt ||
             "";
 
 
         const updatedAt =
             customer.UPDATED_AT ||
+            customer.updatedAt ||
             "";
 
 
@@ -1081,6 +1112,7 @@
         setValue(
             "createdAt",
             customer.CREATED_AT ||
+            customer.createdAt ||
             ""
         );
 
@@ -1088,6 +1120,7 @@
         setValue(
             "updatedAt",
             customer.UPDATED_AT ||
+            customer.updatedAt ||
             ""
         );
 
@@ -1112,8 +1145,7 @@
     function handleCancel() {
 
         /*
-         * DO NOT use window.history.back()
-         * when embedded inside Sales Order.
+         * Notify parent module.
          */
 
         try {
@@ -1135,7 +1167,7 @@
 
 
         /*
-         * Standalone page only.
+         * Embedded inside Sales Order.
          */
 
         const salesOrderCustomerArea =
@@ -1373,10 +1405,14 @@
        DOM VALUE HELPERS
     ===================================================== */
 
-    function getValue(id) {
+    function getValue(
+        id
+    ) {
 
         const element =
-            getElement(id);
+            getElement(
+                id
+            );
 
 
         if (!element) {
@@ -1399,7 +1435,9 @@
     ) {
 
         const element =
-            getElement(id);
+            getElement(
+                id
+            );
 
 
         if (!element) {
@@ -1423,7 +1461,9 @@
     ) {
 
         const element =
-            getElement(id);
+            getElement(
+                id
+            );
 
 
         if (!element) {
@@ -1475,11 +1515,11 @@
 
     /*
      * IMPORTANT:
+     *
      * No automatic DOMContentLoaded initialization.
      *
-     * Sales Order loader will initialize the module
-     * AFTER the HTML has been injected.
+     * Sales Order loader initializes the module
+     * AFTER create-customer.html has been injected.
      */
-
 
 })();
