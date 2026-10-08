@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    CUSTOMER MANAGEMENT
    create-customer.js
-   VERSION: 20261007-03
+   VERSION: 20261008-01
 
    PURPOSE:
    - Create Customer
@@ -18,19 +18,6 @@
     "use strict";
 
 
-   const customerBackButton =
-    document.getElementById("customerBackButton");
-
-if (customerBackButton) {
-
-    customerBackButton.addEventListener("click", function () {
-
-        window.history.back();
-
-    });
-
-}
-   
     /* =====================================================
        CONFIGURATION
     ===================================================== */
@@ -1525,18 +1512,7 @@ if (customerBackButton) {
     window.customerAPI =
         customerAPI;
 
-const customerBackButton =
-    document.getElementById("customerBackButton");
 
-if (customerBackButton) {
-
-    customerBackButton.addEventListener("click", function () {
-
-        window.history.back();
-
-    });
-
-}
     /*
      * IMPORTANT:
      *
