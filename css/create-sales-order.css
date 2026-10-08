@@ -3408,33 +3408,32 @@ input[readonly] {
 .customer-autocomplete {
     position: relative;
     width: 100%;
-    z-index: 10000;
+    z-index: 999999;
 }
 
 
-/* SEARCH INPUT */
+/* =========================================================
+   SEARCH INPUT
+========================================================= */
 
 .customer-search-input {
     width: 100%;
     box-sizing: border-box;
     position: relative;
-    z-index: 10001;
+    z-index: 1000000;
 }
 
 
-/* DROPDOWN */
+/* =========================================================
+   CUSTOMER SUGGESTIONS DROPDOWN
+========================================================= */
 
 .customer-suggestions {
-    position: absolute;
+    position: fixed !important;
 
-    top: calc(100% + 4px);
+    display: none;
 
-    left: 0;
-    right: 0;
-
-    width: 100%;
-
-    background: #ffffff;
+    background: #ffffff !important;
 
     border: 1px solid #cfd6de;
 
@@ -3444,18 +3443,20 @@ input[readonly] {
 
     overflow-y: auto;
 
-    display: none;
+    box-sizing: border-box;
 
-    z-index: 999999;
+    z-index: 2147483647 !important;
 
     box-shadow:
-        0 10px 30px rgba(0, 0, 0, 0.18);
+        0 12px 30px rgba(0, 0, 0, 0.20);
 
-    box-sizing: border-box;
+    isolation: isolate;
 }
 
 
-/* EACH SUGGESTION */
+/* =========================================================
+   EACH SUGGESTION
+========================================================= */
 
 .customer-suggestion {
     position: relative;
@@ -3466,7 +3467,7 @@ input[readonly] {
 
     padding: 12px 15px;
 
-    background: #ffffff;
+    background: #ffffff !important;
 
     border-bottom: 1px solid #eeeeee;
 
@@ -3485,11 +3486,13 @@ input[readonly] {
 
 
 .customer-suggestion:hover {
-    background: #f1f5f9;
+    background: #f1f5f9 !important;
 }
 
 
-/* CUSTOMER ID */
+/* =========================================================
+   CUSTOMER ID
+========================================================= */
 
 .customer-suggestion-id {
     display: block;
@@ -3504,7 +3507,9 @@ input[readonly] {
 }
 
 
-/* CLIENT NAME */
+/* =========================================================
+   CLIENT NAME
+========================================================= */
 
 .customer-suggestion-name {
     display: block;
@@ -3525,12 +3530,14 @@ input[readonly] {
 }
 
 
-/* NO RESULT */
+/* =========================================================
+   NO RESULT
+========================================================= */
 
 .customer-no-result {
     padding: 14px 15px;
 
-    background: #ffffff;
+    background: #ffffff !important;
 
     color: #6b7280;
 
@@ -3540,10 +3547,13 @@ input[readonly] {
 }
 
 
-/* CUSTOMER ID DISPLAY */
+/* =========================================================
+   CUSTOMER ID DISPLAY
+========================================================= */
 
 .customer-id-display {
     position: relative;
+
     z-index: 1;
 
     margin-top: 7px;
@@ -3554,13 +3564,16 @@ input[readonly] {
     font-weight: 700;
 }
 
+
 /* =========================================================
-   ALLOW CUSTOMER DROPDOWN TO FLOAT ABOVE FORM
+   ALLOW CUSTOMER AREA TO FLOAT
 ========================================================= */
 
 .customer-select-wrapper {
     position: relative;
-    z-index: 10000;
+
+    z-index: 999999;
+
     overflow: visible !important;
 }
 
@@ -3576,5 +3589,10 @@ input[readonly] {
 
 
 .form-grid {
+    overflow: visible !important;
+}
+
+
+.form-group {
     overflow: visible !important;
 }
