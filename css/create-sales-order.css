@@ -3402,61 +3402,80 @@ input[readonly] {
 }
 
 /* =========================================================
-   CUSTOMER ID AUTOCOMPLETE
+   CUSTOMER AUTOCOMPLETE
 ========================================================= */
 
 .customer-autocomplete {
     position: relative;
     width: 100%;
+    z-index: 10000;
 }
 
+
+/* SEARCH INPUT */
 
 .customer-search-input {
     width: 100%;
     box-sizing: border-box;
+    position: relative;
+    z-index: 10001;
 }
 
+
+/* DROPDOWN */
 
 .customer-suggestions {
     position: absolute;
 
-    top: calc(100% + 2px);
+    top: calc(100% + 4px);
 
     left: 0;
-
     right: 0;
+
+    width: 100%;
 
     background: #ffffff;
 
-    border: 1px solid #d9dfe5;
+    border: 1px solid #cfd6de;
 
-    border-radius: 0 0 8px 8px;
+    border-radius: 8px;
 
-    max-height: 280px;
+    max-height: 300px;
 
     overflow-y: auto;
 
-    z-index: 9999;
-
     display: none;
 
+    z-index: 999999;
+
     box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.12);
+        0 10px 30px rgba(0, 0, 0, 0.18);
+
+    box-sizing: border-box;
 }
 
 
-.customer-suggestion {
-    padding: 11px 14px;
+/* EACH SUGGESTION */
 
-    cursor: pointer;
+.customer-suggestion {
+    position: relative;
+
+    display: block;
+
+    width: 100%;
+
+    padding: 12px 15px;
 
     background: #ffffff;
 
-    border-bottom:
-        1px solid #eeeeee;
+    border-bottom: 1px solid #eeeeee;
+
+    cursor: pointer;
+
+    box-sizing: border-box;
 
     transition:
-        background 0.15s ease;
+        background-color 0.15s ease;
 }
 
 
@@ -3466,25 +3485,37 @@ input[readonly] {
 
 
 .customer-suggestion:hover {
-    background: #f4f7fa;
+    background: #f1f5f9;
 }
 
 
+/* CUSTOMER ID */
+
 .customer-suggestion-id {
+    display: block;
+
     font-size: 14px;
 
     font-weight: 700;
 
     color: #1f2937;
+
+    line-height: 20px;
 }
 
 
+/* CLIENT NAME */
+
 .customer-suggestion-name {
-    margin-top: 3px;
+    display: block;
+
+    margin-top: 2px;
 
     font-size: 12px;
 
     color: #6b7280;
+
+    line-height: 18px;
 
     white-space: nowrap;
 
@@ -3494,22 +3525,56 @@ input[readonly] {
 }
 
 
+/* NO RESULT */
+
 .customer-no-result {
-    padding: 12px 14px;
+    padding: 14px 15px;
+
+    background: #ffffff;
+
+    color: #6b7280;
 
     font-size: 13px;
 
-    color: #777777;
-
-    background: #ffffff;
+    text-align: left;
 }
 
 
+/* CUSTOMER ID DISPLAY */
+
 .customer-id-display {
+    position: relative;
+    z-index: 1;
+
     margin-top: 7px;
 }
 
 
 .customer-id-value {
     font-weight: 700;
+}
+
+/* =========================================================
+   ALLOW CUSTOMER DROPDOWN TO FLOAT ABOVE FORM
+========================================================= */
+
+.customer-select-wrapper {
+    position: relative;
+    z-index: 10000;
+    overflow: visible !important;
+}
+
+
+.form-group.full {
+    overflow: visible !important;
+}
+
+
+.so-information-section {
+    overflow: visible !important;
+}
+
+
+.form-grid {
+    overflow: visible !important;
 }
