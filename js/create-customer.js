@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    CUSTOMER MANAGEMENT
    create-customer.js
-   VERSION: 20261008-01
+   VERSION: 20261008-02
 
    PURPOSE:
    - Create Customer
@@ -11,6 +11,8 @@
    - Customer Master API
    - Reusable Customer Module
    - Works standalone OR embedded inside Sales Order
+   - IndexedDB Cache
+   - Background Sync Compatible
 ========================================================= */
 
 (function () {
@@ -39,7 +41,6 @@
     let customerFormInitialized = false;
 
     /*
-     * IMPORTANT:
      * Keep reference to the actual form that was initialized.
      *
      * Sales Order removes/reinjects create-customer.html.
@@ -134,6 +135,306 @@
 
 
     /* =====================================================
+       CUSTOMER CACHE HELPERS
+    ===================================================== */
+
+    async function getCachedCustomers() {
+
+        if (
+            !window.LogisTechCache
+        ) {
+
+            return [];
+
+        }
+
+
+        try {
+
+            const customers =
+                await window.LogisTechCache.getAll(
+                    "customers"
+                );
+
+
+            if (
+                !Array.isArray(customers)
+            ) {
+
+                return [];
+
+            }
+
+
+            return customers;
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to read Customer cache:",
+                error
+            );
+
+
+            return [];
+
+        }
+
+    }
+
+
+    async function getCachedCustomer(
+        customerId
+    ) {
+
+        if (
+            !customerId ||
+            !window.LogisTechCache
+        ) {
+
+            return null;
+
+        }
+
+
+        try {
+
+            const customer =
+                await window.LogisTechCache.get(
+                    "customers",
+                    customerId
+                );
+
+
+            return customer || null;
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to read Customer from cache:",
+                error
+            );
+
+
+            return null;
+
+        }
+
+    }
+
+
+    async function saveCustomerToCache(
+        customer
+    ) {
+
+        if (
+            !customer ||
+            !window.LogisTechCache
+        ) {
+
+            return;
+
+        }
+
+
+        const customerId =
+            customer.CUSTOMER_ID ||
+            customer.customerId ||
+            customer.customer_id;
+
+
+        if (!customerId) {
+
+            console.warn(
+                "Customer cache skipped: Customer ID not found."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            /*
+             * The Cache Manager uses CUSTOMER_ID
+             * as the IndexedDB key.
+             */
+
+            const cacheRecord = {
+
+                ...customer,
+
+                CUSTOMER_ID:
+                    customerId,
+
+                customerId:
+                    customerId
+
+            };
+
+
+            await window.LogisTechCache.put(
+                "customers",
+                cacheRecord
+            );
+
+
+            console.log(
+                "LOGIS-TECH: Customer saved to local cache:",
+                customerId
+            );
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to save Customer to cache:",
+                error
+            );
+
+        }
+
+    }
+
+
+    async function refreshCustomerCacheFromAPI() {
+
+        if (
+            !window.LogisTechCache
+        ) {
+
+            return;
+
+        }
+
+
+        try {
+
+            const result =
+                await customerAPI(
+                    "getCustomers",
+                    {}
+                );
+
+
+            const customers =
+                normalizeCustomers(
+                    result
+                );
+
+
+            if (
+                customers.length > 0
+            ) {
+
+                await window.LogisTechCache.replaceAll(
+                    "customers",
+                    customers
+                );
+
+
+                console.log(
+                    "LOGIS-TECH: Customer cache synchronized:",
+                    customers.length
+                );
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                "Unable to refresh Customer cache:",
+                error
+            );
+
+        }
+
+    }
+
+
+    function normalizeCustomers(
+        result
+    ) {
+
+        if (
+            Array.isArray(result)
+        ) {
+
+            return result;
+
+        }
+
+
+        if (
+            result &&
+            Array.isArray(
+                result.records
+            )
+        ) {
+
+            return result.records;
+
+        }
+
+
+        if (
+            result &&
+            Array.isArray(
+                result.customers
+            )
+        ) {
+
+            return result.customers;
+
+        }
+
+
+        if (
+            result &&
+            result.data
+        ) {
+
+            if (
+                Array.isArray(
+                    result.data
+                )
+            ) {
+
+                return result.data;
+
+            }
+
+
+            if (
+                Array.isArray(
+                    result.data.records
+                )
+            ) {
+
+                return result.data.records;
+
+            }
+
+
+            if (
+                Array.isArray(
+                    result.data.customers
+                )
+            ) {
+
+                return result.data.customers;
+
+            }
+
+        }
+
+
+        return [];
+
+    }
+
+
+    /* =====================================================
        INITIALIZE CUSTOMER FORM
     ===================================================== */
 
@@ -145,6 +446,10 @@
 
         console.log(
             "LOGIS-TECH CUSTOMER FORM INITIALIZE"
+        );
+
+        console.log(
+            "VERSION: 20261008-02"
         );
 
         console.log(
@@ -175,14 +480,8 @@
 
 
         /*
-         * IMPORTANT:
-         *
          * If the same form is already initialized,
          * do not duplicate event listeners.
-         *
-         * If Sales Order injected a NEW form,
-         * initializedCustomerForm !== form,
-         * so we initialize it again.
          */
 
         if (
@@ -472,8 +771,9 @@
             }
 
 
-            handleCustomerSaveSuccess(
-                result
+            await handleCustomerSaveSuccess(
+                result,
+                data
             );
 
 
@@ -735,8 +1035,9 @@
        HANDLE SUCCESS
     ===================================================== */
 
-    function handleCustomerSaveSuccess(
-        result
+    async function handleCustomerSaveSuccess(
+        result,
+        submittedData = {}
     ) {
 
         const customer =
@@ -748,6 +1049,8 @@
             result.customerId ||
             customer.CUSTOMER_ID ||
             customer.customerId ||
+            submittedData.CUSTOMER_ID ||
+            submittedData.customerId ||
             getValue(
                 "customerId"
             );
@@ -756,12 +1059,16 @@
         const createdAt =
             customer.CREATED_AT ||
             customer.createdAt ||
+            submittedData.CREATED_AT ||
+            submittedData.createdAt ||
             "";
 
 
         const updatedAt =
             customer.UPDATED_AT ||
             customer.updatedAt ||
+            submittedData.UPDATED_AT ||
+            submittedData.updatedAt ||
             "";
 
 
@@ -800,6 +1107,60 @@
         }
 
 
+        /* =================================================
+           UPDATE LOCAL CUSTOMER CACHE
+        ================================================= */
+
+        const cacheCustomer = {
+
+            ...submittedData,
+
+            ...customer,
+
+            CUSTOMER_ID:
+                generatedId,
+
+            customerId:
+                generatedId,
+
+            CREATED_AT:
+                createdAt ||
+                customer.CREATED_AT ||
+                "",
+
+            createdAt:
+                createdAt ||
+                customer.createdAt ||
+                "",
+
+            UPDATED_AT:
+                updatedAt ||
+                customer.UPDATED_AT ||
+                "",
+
+            updatedAt:
+                updatedAt ||
+                customer.updatedAt ||
+                ""
+
+        };
+
+
+        if (
+            generatedId
+        ) {
+
+            await saveCustomerToCache(
+                cacheCustomer
+            );
+
+        }
+
+
+        /* =================================================
+           SHOW SUCCESS
+        ================================================= */
+
         showSuccessPanel();
 
 
@@ -810,9 +1171,9 @@
         );
 
 
-        /*
-         * Notify parent module.
-         */
+        /* =================================================
+           NOTIFY PARENT MODULE
+        ================================================= */
 
         try {
 
@@ -824,7 +1185,7 @@
                         detail: {
 
                             customer:
-                                customer,
+                                cacheCustomer,
 
                             customerId:
                                 generatedId,
@@ -844,6 +1205,30 @@
                 "customerSaved event failed:",
                 error
             );
+
+        }
+
+
+        /* =================================================
+           BACKGROUND SYNC
+        ================================================= */
+
+        if (
+            window.LogisTechSync
+        ) {
+
+            try {
+
+                await window.LogisTechSync.backgroundSync();
+
+            } catch (syncError) {
+
+                console.warn(
+                    "Customer background sync failed:",
+                    syncError
+                );
+
+            }
 
         }
 
@@ -953,18 +1338,65 @@
             );
 
 
-            const result =
-                await customerAPI(
-                    "getCustomer",
-                    {
-                        customerId:
-                            customerId
-                    }
+            let customer = null;
+
+
+            /* =================================================
+               1. TRY CACHE FIRST
+            ================================================= */
+
+            customer =
+                await getCachedCustomer(
+                    customerId
                 );
 
 
-            const customer =
-                result.customer;
+            if (customer) {
+
+                console.log(
+                    "LOGIS-TECH: Customer loaded from cache:",
+                    customerId
+                );
+
+            }
+
+
+            /* =================================================
+               2. FALLBACK TO API
+            ================================================= */
+
+            if (!customer) {
+
+                console.log(
+                    "LOGIS-TECH: Customer not found in cache. Loading from API..."
+                );
+
+
+                const result =
+                    await customerAPI(
+                        "getCustomer",
+                        {
+                            customerId:
+                                customerId
+                        }
+                    );
+
+
+                customer =
+                    result.customer;
+
+
+                if (
+                    customer
+                ) {
+
+                    await saveCustomerToCache(
+                        customer
+                    );
+
+                }
+
+            }
 
 
             if (!customer) {
@@ -1486,7 +1918,7 @@
     ===================================================== */
 
     window.initializeCustomerForm =
-    initializeCustomerForm;
+        initializeCustomerForm;
 
 
     window.editCustomer =
