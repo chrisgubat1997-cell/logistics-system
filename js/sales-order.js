@@ -4669,12 +4669,22 @@ async function openCustomerModule() {
 
 
         /* =============================================
+           LOAD CUSTOMER CSS
+        ============================================== */
+
+        await loadCustomerStyles();
+
+
+        /* =============================================
            LOAD CUSTOMER HTML
         ============================================== */
 
         const response =
             await fetch(
-                "pages/create-customer.html?v=20261007"
+                "pages/create-customer.html?v=20261008-01",
+                {
+                    cache: "no-store"
+                }
             );
 
 
@@ -4692,8 +4702,38 @@ async function openCustomerModule() {
             await response.text();
 
 
+        /* =============================================
+           PARSE CUSTOMER HTML
+           
+           IMPORTANT:
+           We only inject BODY content.
+           HEAD / LINK / SCRIPT are handled separately.
+        ============================================== */
+
+        const parser =
+            new DOMParser();
+
+
+        const customerDocument =
+            parser.parseFromString(
+                html,
+                "text/html"
+            );
+
+
+        if (
+            !customerDocument.body
+        ) {
+
+            throw new Error(
+                "Invalid Customer HTML structure."
+            );
+
+        }
+
+
         customerArea.innerHTML =
-            html;
+            customerDocument.body.innerHTML;
 
 
         console.log(
@@ -4736,6 +4776,17 @@ async function openCustomerModule() {
 
         }
 
+
+        /* =============================================
+           BIND BACK BUTTON
+        ============================================== */
+
+        bindCustomerBackButton();
+
+
+        /* =============================================
+           MARK MODULE AS LOADED
+        ============================================== */
 
         customerModuleLoaded =
             true;
@@ -4782,7 +4833,7 @@ async function openCustomerModule() {
                 <button
                     type="button"
                     class="so-secondary-button"
-                    onclick="closeCustomerFromSalesOrder()"
+                    id="customerModuleErrorBackButton"
                 >
                     ← Back to Sales Orders
                 </button>
@@ -4791,7 +4842,123 @@ async function openCustomerModule() {
 
         `;
 
+
+        const errorBackButton =
+            document.getElementById(
+                "customerModuleErrorBackButton"
+            );
+
+
+        if (errorBackButton) {
+
+            errorBackButton.addEventListener(
+                "click",
+                closeCustomerFromSalesOrder
+            );
+
+        }
+
     }
+
+}
+
+
+/* =====================================================
+   LOAD CUSTOMER CSS
+===================================================== */
+
+function loadCustomerStyles() {
+
+    return new Promise(
+        function (
+            resolve,
+            reject
+        ) {
+
+            const STYLE_ID =
+                "logistech-customer-css";
+
+
+            /*
+             * Already loaded.
+             */
+
+            const existingStyle =
+                document.getElementById(
+                    STYLE_ID
+                );
+
+
+            if (existingStyle) {
+
+                resolve();
+
+                return;
+
+            }
+
+
+            /*
+             * Create stylesheet.
+             */
+
+            const link =
+                document.createElement(
+                    "link"
+                );
+
+
+            link.id =
+                STYLE_ID;
+
+
+            link.rel =
+                "stylesheet";
+
+
+            /*
+             * IMPORTANT:
+             * index.html is at repository root.
+             *
+             * Therefore the correct path is:
+             *
+             * css/create-customer.css
+             */
+
+            link.href =
+                "css/create-customer.css?v=20261008-01";
+
+
+            link.onload =
+                function () {
+
+                    console.log(
+                        "Customer CSS loaded successfully."
+                    );
+
+                    resolve();
+
+                };
+
+
+            link.onerror =
+                function () {
+
+                    reject(
+                        new Error(
+                            "Unable to load create-customer.css"
+                        )
+                    );
+
+                };
+
+
+            document.head.appendChild(
+                link
+            );
+
+        }
+    );
 
 }
 
@@ -4825,8 +4992,7 @@ function loadCustomerScript() {
 
 
             /*
-             * Check whether the script was already
-             * dynamically added to the page.
+             * Check whether script already exists.
              */
 
             const existingScript =
@@ -4838,9 +5004,7 @@ function loadCustomerScript() {
             if (existingScript) {
 
                 /*
-                 * If it is already loaded but the
-                 * function is still unavailable,
-                 * reject.
+                 * Already loaded.
                  */
 
                 if (
@@ -4869,6 +5033,10 @@ function loadCustomerScript() {
 
                 }
 
+
+                /*
+                 * Currently loading.
+                 */
 
                 existingScript.addEventListener(
                     "load",
@@ -4921,14 +5089,7 @@ function loadCustomerScript() {
 
 
             /*
-             * Dynamically load the reusable customer JS.
-             *
-             * Main index.html is at repository root,
-             * therefore:
-             *
-             * js/create-customer.js
-             *
-             * is the correct path.
+             * Create Customer JS script.
              */
 
             const script =
@@ -4938,7 +5099,7 @@ function loadCustomerScript() {
 
 
             script.src =
-                "js/create-customer.js?v=20261007-03";
+                "js/create-customer.js?v=20261008-01";
 
 
             script.dataset.customerScript =
@@ -4950,6 +5111,11 @@ function loadCustomerScript() {
 
                     script.dataset.loaded =
                         "true";
+
+
+                    console.log(
+                        "Customer JS loaded successfully."
+                    );
 
 
                     if (
@@ -4995,6 +5161,69 @@ function loadCustomerScript() {
 
 
 /* =====================================================
+   CUSTOMER BACK BUTTON
+===================================================== */
+
+function bindCustomerBackButton() {
+
+    const backButton =
+        document.getElementById(
+            "customerBackButton"
+        );
+
+
+    if (!backButton) {
+
+        console.warn(
+            "Customer Back button not found."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Prevent duplicate event listeners.
+     */
+
+    if (
+        backButton.dataset.bound ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    backButton.dataset.bound =
+        "true";
+
+
+    backButton.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+
+            closeCustomerFromSalesOrder();
+
+        }
+    );
+
+
+    console.log(
+        "Customer Back button bound."
+    );
+
+}
+
+
+/* =====================================================
    CLOSE CUSTOMER MODULE
 ===================================================== */
 
@@ -5024,7 +5253,7 @@ function closeCustomerFromSalesOrder() {
 
 
     /*
-     * Hide customer module.
+     * Hide Customer module.
      */
 
     if (customerArea) {
@@ -5033,14 +5262,6 @@ function closeCustomerFromSalesOrder() {
             "none";
 
 
-        /*
-         * Clear injected HTML.
-         *
-         * This is important because the next
-         * + New Customer click will inject
-         * a fresh form.
-         */
-
         customerArea.innerHTML =
             "";
 
@@ -5048,7 +5269,7 @@ function closeCustomerFromSalesOrder() {
 
 
     /*
-     * Show Sales Order list again.
+     * Show Sales Order list.
      */
 
     if (salesOrderListView) {
@@ -5103,23 +5324,8 @@ function handleCustomerSaved(
     );
 
 
-    /*
-     * Mark customer module as active/loaded.
-     */
-
     customerModuleLoaded =
         true;
-
-
-    /*
-     * The customer is already saved in
-     * Google Sheets through Main API.
-     *
-     * We intentionally DO NOT close the
-     * Customer form automatically.
-     *
-     * User can click DONE.
-     */
 
 }
 
