@@ -409,22 +409,21 @@ function setupCustomerSearch() {
              */
 
             const matches =
-                soCustomers.filter(
-                    function(customer) {
+    soCustomers.filter(
+        function(customer) {
 
-                        const customerId =
-                            getCustomerField(
-                                customer,
-                                "CUSTOMER_ID"
-                            ).toLowerCase();
+            const customerId =
+                getCustomerField(
+                    customer,
+                    "CUSTOMER_ID"
+                ).toLowerCase();
 
+            return customerId.includes(
+                keyword
+            );
 
-                        return customerId.includes(
-                            keyword
-                        );
-
-                    }
-                );
+        }
+    );
 
 
             renderCustomerSuggestions(
