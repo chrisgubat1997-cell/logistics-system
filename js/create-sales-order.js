@@ -408,7 +408,7 @@ function setupCustomerSearch() {
              * CUSTOMER ID SEARCH ONLY
              */
 
-            const matches =
+           const matches =
     soCustomers.filter(
         function(customer) {
 
@@ -418,8 +418,15 @@ function setupCustomerSearch() {
                     "CUSTOMER_ID"
                 ).toLowerCase();
 
-            return customerId.includes(
-                keyword
+            const clientName =
+                getCustomerField(
+                    customer,
+                    "CLIENT_NAME"
+                ).toLowerCase();
+
+            return (
+                customerId.includes(keyword) ||
+                clientName.includes(keyword)
             );
 
         }
