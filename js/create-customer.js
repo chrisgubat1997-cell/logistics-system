@@ -1486,7 +1486,7 @@
     ===================================================== */
 
     window.initializeCustomerForm =
-        initializeCustomerForm;
+    initializeCustomerForm;
 
 
     window.editCustomer =
