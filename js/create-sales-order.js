@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    CREATE SALES ORDER
    GOOGLE APPS SCRIPT API
-   VERSION: 20261006-05
+   VERSION: 20261008-01
 ========================================================= */
 
 
@@ -26,11 +26,6 @@ let soCreateFiles = [];
 
 let isSavingSO = false;
 
-
-/* =========================================================
-   CUSTOMER MASTER
-========================================================= */
-
 let soCustomers = [];
 
 
@@ -42,27 +37,11 @@ async function createSOAPI(action, data = {}) {
 
     try {
 
-        console.log(
-            "================================="
-        );
-
-        console.log(
-            "CREATE SO API REQUEST"
-        );
-
-        console.log(
-            "ACTION:",
-            action
-        );
-
-        console.log(
-            "DATA:",
-            data
-        );
-
-        console.log(
-            "================================="
-        );
+        console.log("=================================");
+        console.log("CREATE SO API REQUEST");
+        console.log("ACTION:", action);
+        console.log("DATA:", data);
+        console.log("=================================");
 
 
         const response =
@@ -181,27 +160,17 @@ document.addEventListener(
     "DOMContentLoaded",
     function() {
 
-        console.log(
-            "================================="
-        );
-
-        console.log(
-            "LOGIS-TECH CREATE SALES ORDER"
-        );
-
-        console.log(
-            "VERSION: 20261006-05"
-        );
-
-        console.log(
-            "================================="
-        );
-
+        console.log("=================================");
+        console.log("LOGIS-TECH CREATE SALES ORDER");
+        console.log("VERSION: 20261008-01");
+        console.log("=================================");
 
         initializeCreateSO();
 
     }
 );
+
+
 /* =========================================================
    INITIALIZE CREATE SO
 ========================================================= */
@@ -212,15 +181,7 @@ async function initializeCreateSO() {
 
     generateSONumber();
 
-    /*
-     * Load Customer Master first.
-     */
     await loadCustomers();
-
-    /*
-     * Setup customer dropdown event.
-     */
-    setupCustomerSelection();
 
     setupCreateSOFileSection();
 
@@ -235,13 +196,19 @@ async function initializeCreateSO() {
 
 async function loadCustomers() {
 
-    const select =
+    const searchInput =
         document.getElementById(
             "customerSelect"
         );
 
 
-    if (!select) {
+    const suggestions =
+        document.getElementById(
+            "customerSuggestions"
+        );
+
+
+    if (!searchInput) {
 
         console.warn(
             "customerSelect not found."
@@ -252,18 +219,32 @@ async function loadCustomers() {
     }
 
 
-    select.innerHTML =
-        `
-        <option value="">
-            Loading customers...
-        </option>
-        `;
+    if (!suggestions) {
+
+        console.warn(
+            "customerSuggestions not found."
+        );
+
+        return;
+
+    }
+
+
+    searchInput.value =
+        "Loading customers...";
+
+    searchInput.disabled =
+        true;
 
 
     const result =
         await createSOAPI(
             "getCustomers"
         );
+
+
+    searchInput.disabled =
+        false;
 
 
     if (
@@ -277,12 +258,11 @@ async function loadCustomers() {
         );
 
 
-        select.innerHTML =
-            `
-            <option value="">
-                Unable to load customers
-            </option>
-            `;
+        searchInput.value =
+            "";
+
+        searchInput.placeholder =
+            "Unable to load customers";
 
         return;
 
@@ -309,73 +289,196 @@ async function loadCustomers() {
     );
 
 
-    select.innerHTML =
-        `
-        <option value="">
-            Select Customer
-        </option>
-        `;
+    searchInput.value =
+        "";
+
+    searchInput.placeholder =
+        "Search Customer ID...";
+
+
+    setupCustomerSearch();
+
+}
+
+
+/* =========================================================
+   CUSTOMER SEARCH
+========================================================= */
+
+function setupCustomerSearch() {
+
+    const searchInput =
+        document.getElementById(
+            "customerSelect"
+        );
+
+
+    const suggestions =
+        document.getElementById(
+            "customerSuggestions"
+        );
 
 
     if (
-        soCustomers.length === 0
+        !searchInput ||
+        !suggestions
     ) {
 
-        select.innerHTML =
-            `
-            <option value="">
-                No customers found
-            </option>
-            `;
+        console.warn(
+            "Customer search elements not found."
+        );
 
         return;
 
     }
 
 
-    soCustomers.forEach(
-        function(customer) {
+    /*
+     * Prevent duplicate event listeners.
+     */
 
-            const customerId =
-                getCustomerField(
-                    customer,
-                    "CUSTOMER_ID"
+    if (
+        searchInput.dataset.searchReady ===
+        "true"
+    ) {
+
+        return;
+
+    }
+
+
+    searchInput.dataset.searchReady =
+        "true";
+
+
+    /* =====================================================
+       SEARCH WHILE TYPING
+    ===================================================== */
+
+    searchInput.addEventListener(
+        "input",
+        function() {
+
+            const keyword =
+                this.value
+                    .trim()
+                    .toLowerCase();
+
+
+            const hiddenCustomerId =
+                document.getElementById(
+                    "customerId"
                 );
 
 
-            const clientName =
-                getCustomerField(
-                    customer,
-                    "CLIENT_NAME"
-                );
+            /*
+             * User is typing again.
+             * Clear previous selected customer.
+             */
+
+            if (hiddenCustomerId) {
+
+                hiddenCustomerId.value =
+                    "";
+
+            }
 
 
-            if (!customerId) {
+            /*
+             * Reset customer details.
+             */
+
+            clearCustomerDetailsOnly();
+
+
+            if (!keyword) {
+
+                suggestions.innerHTML =
+                    "";
+
+                suggestions.style.display =
+                    "none";
 
                 return;
 
             }
 
 
-            const option =
-                document.createElement(
-                    "option"
+            /*
+             * CUSTOMER ID SEARCH ONLY
+             */
+
+            const matches =
+                soCustomers.filter(
+                    function(customer) {
+
+                        const customerId =
+                            getCustomerField(
+                                customer,
+                                "CUSTOMER_ID"
+                            ).toLowerCase();
+
+
+                        return customerId.includes(
+                            keyword
+                        );
+
+                    }
                 );
 
 
-            option.value =
-                customerId;
-
-
-            option.textContent =
-                customerId +
-                " — " +
-                clientName;
-
-
-            select.appendChild(
-                option
+            renderCustomerSuggestions(
+                matches
             );
+
+        }
+    );
+
+
+    /* =====================================================
+       SHOW SUGGESTIONS ON FOCUS
+    ===================================================== */
+
+    searchInput.addEventListener(
+        "focus",
+        function() {
+
+            const keyword =
+                this.value
+                    .trim()
+                    .toLowerCase();
+
+
+            if (!keyword) {
+
+                renderCustomerSuggestions(
+                    soCustomers
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       HIDE SUGGESTIONS OUTSIDE
+    ===================================================== */
+
+    document.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                !event.target.closest(
+                    ".customer-autocomplete"
+                )
+            ) {
+
+                suggestions.style.display =
+                    "none";
+
+            }
 
         }
     );
@@ -384,33 +487,234 @@ async function loadCustomers() {
 
 
 /* =========================================================
-   CUSTOMER SELECTION EVENT
+   RENDER CUSTOMER SUGGESTIONS
 ========================================================= */
 
-function setupCustomerSelection() {
+function renderCustomerSuggestions(
+    customers
+) {
 
-    const select =
+    const suggestions =
         document.getElementById(
-            "customerSelect"
+            "customerSuggestions"
         );
 
 
-    if (!select) {
+    if (!suggestions) {
 
         return;
 
     }
 
 
-    select.addEventListener(
-        "change",
-        function() {
+    suggestions.innerHTML =
+        "";
 
-            handleCustomerSelection(
-                this.value
-            );
 
-        }
+    if (
+        !customers ||
+        customers.length === 0
+    ) {
+
+        suggestions.innerHTML = `
+
+            <div class="customer-no-result">
+
+                No Customer ID found.
+
+            </div>
+
+        `;
+
+
+        suggestions.style.display =
+            "block";
+
+
+        return;
+
+    }
+
+
+    customers
+        .slice(0, 20)
+        .forEach(
+            function(customer) {
+
+                const customerId =
+                    getCustomerField(
+                        customer,
+                        "CUSTOMER_ID"
+                    );
+
+
+                const clientName =
+                    getCustomerField(
+                        customer,
+                        "CLIENT_NAME"
+                    );
+
+
+                if (!customerId) {
+
+                    return;
+
+                }
+
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                item.className =
+                    "customer-suggestion";
+
+
+                item.innerHTML = `
+
+                    <div class="customer-suggestion-id">
+
+                        ${escapeHTML(
+                            customerId
+                        )}
+
+                    </div>
+
+                    <div class="customer-suggestion-name">
+
+                        ${escapeHTML(
+                            clientName
+                        )}
+
+                    </div>
+
+                `;
+
+
+                item.addEventListener(
+                    "click",
+                    function(event) {
+
+                        event.preventDefault();
+
+                        event.stopPropagation();
+
+                        selectCustomer(
+                            customer
+                        );
+
+                    }
+                );
+
+
+                suggestions.appendChild(
+                    item
+                );
+
+            }
+        );
+
+
+    suggestions.style.display =
+        "block";
+
+}
+
+
+/* =========================================================
+   SELECT CUSTOMER
+========================================================= */
+
+function selectCustomer(
+    customer
+) {
+
+    if (!customer) {
+
+        return;
+
+    }
+
+
+    const customerId =
+        getCustomerField(
+            customer,
+            "CUSTOMER_ID"
+        );
+
+
+    if (!customerId) {
+
+        return;
+
+    }
+
+
+    const searchInput =
+        document.getElementById(
+            "customerSelect"
+        );
+
+
+    const hiddenCustomerId =
+        document.getElementById(
+            "customerId"
+        );
+
+
+    const suggestions =
+        document.getElementById(
+            "customerSuggestions"
+        );
+
+
+    /*
+     * Display Customer ID.
+     */
+
+    if (searchInput) {
+
+        searchInput.value =
+            customerId;
+
+    }
+
+
+    /*
+     * Store Customer ID.
+     */
+
+    if (hiddenCustomerId) {
+
+        hiddenCustomerId.value =
+            customerId;
+
+    }
+
+
+    /*
+     * Hide suggestions.
+     */
+
+    if (suggestions) {
+
+        suggestions.innerHTML =
+            "";
+
+        suggestions.style.display =
+            "none";
+
+    }
+
+
+    /*
+     * Fill customer information.
+     */
+
+    handleCustomerSelection(
+        customerId
     );
 
 }
@@ -420,7 +724,9 @@ function setupCustomerSelection() {
    HANDLE CUSTOMER SELECTION
 ========================================================= */
 
-function handleCustomerSelection(customerId) {
+function handleCustomerSelection(
+    customerId
+) {
 
     const hiddenCustomerId =
         document.getElementById(
@@ -428,9 +734,9 @@ function handleCustomerSelection(customerId) {
         );
 
 
-    const customerIdDisplay =
+    const customerIdValue =
         document.getElementById(
-            "customerIdDisplay"
+            "customerIdValue"
         );
 
 
@@ -529,10 +835,9 @@ function handleCustomerSelection(customerId) {
     }
 
 
-    if (customerIdDisplay) {
+    if (customerIdValue) {
 
-        customerIdDisplay.textContent =
-            "Customer ID: " +
+        customerIdValue.textContent =
             customerId;
 
     }
@@ -590,8 +895,6 @@ function handleCustomerSelection(customerId) {
 
 /* =========================================================
    GET CUSTOMER FIELD
-   Supports uppercase database headers and
-   lowercase/camelCase responses.
 ========================================================= */
 
 function getCustomerField(
@@ -617,7 +920,9 @@ function getCustomerField(
             .replace(
                 /_([a-z])/g,
                 function(match, letter) {
+
                     return letter.toUpperCase();
+
                 }
             )
 
@@ -682,30 +987,10 @@ function setInputValue(
 
 
 /* =========================================================
-   CLEAR CUSTOMER FIELDS
+   CLEAR CUSTOMER DETAILS ONLY
 ========================================================= */
 
-function clearCustomerFields() {
-
-    setInputValue(
-        "customerId",
-        ""
-    );
-
-
-    const customerIdDisplay =
-        document.getElementById(
-            "customerIdDisplay"
-        );
-
-
-    if (customerIdDisplay) {
-
-        customerIdDisplay.textContent =
-            "Customer ID: —";
-
-    }
-
+function clearCustomerDetailsOnly() {
 
     setInputValue(
         "clientName",
@@ -747,6 +1032,51 @@ function clearCustomerFields() {
         "customerEmail",
         ""
     );
+
+
+    const customerIdValue =
+        document.getElementById(
+            "customerIdValue"
+        );
+
+
+    if (customerIdValue) {
+
+        customerIdValue.textContent =
+            "—";
+
+    }
+
+}
+
+
+/* =========================================================
+   CLEAR CUSTOMER FIELDS
+========================================================= */
+
+function clearCustomerFields() {
+
+    setInputValue(
+        "customerId",
+        ""
+    );
+
+
+    const customerIdValue =
+        document.getElementById(
+            "customerIdValue"
+        );
+
+
+    if (customerIdValue) {
+
+        customerIdValue.textContent =
+            "—";
+
+    }
+
+
+    clearCustomerDetailsOnly();
 
 }
 
@@ -871,7 +1201,6 @@ async function generateNextSONumber() {
 
         input.value =
             "";
-
 
         return;
 
@@ -1078,12 +1407,14 @@ function addSOItem() {
         </td>
 
         <td>
+
             <button
                 type="button"
                 onclick="deleteSOItem(this)"
             >
                 DELETE
             </button>
+
         </td>
 
     `;
@@ -1550,21 +1881,10 @@ function collectSOItems() {
 
 async function saveSO() {
 
-    console.log(
-        "================================="
-    );
-
-    console.log(
-        "SAVE SO FUNCTION VERSION:"
-    );
-
-    console.log(
-        "20261006-05"
-    );
-
-    console.log(
-        "================================="
-    );
+    console.log("=================================");
+    console.log("SAVE SO FUNCTION VERSION:");
+    console.log("20261008-01");
+    console.log("=================================");
 
 
     if (isSavingSO) {
@@ -1582,9 +1902,7 @@ async function saveSO() {
         true;
 
 
-    /* ==========================================
-       GET FORM VALUES
-    ========================================== */
+    /* GET FORM VALUES */
 
     const soNumber =
         getValue(
@@ -1676,9 +1994,7 @@ async function saveSO() {
         );
 
 
-    /* ==========================================
-       SO NUMBER VALIDATION
-    ========================================== */
+    /* SO NUMBER VALIDATION */
 
     if (
         !soNumber ||
@@ -1705,14 +2021,12 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       CUSTOMER VALIDATION
-    ========================================== */
+    /* CUSTOMER VALIDATION */
 
     if (!customerId) {
 
         alert(
-            "Please select a Customer."
+            "Please select a Customer ID."
         );
 
 
@@ -1730,9 +2044,7 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       CLIENT VALIDATION
-    ========================================== */
+    /* CLIENT VALIDATION */
 
     if (!clientName) {
 
@@ -1755,9 +2067,7 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       ITEMS
-    ========================================== */
+    /* ITEMS */
 
     const items =
         collectSOItems();
@@ -1850,9 +2160,7 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       TOTALS
-    ========================================== */
+    /* TOTALS */
 
     let subtotal =
         0;
@@ -1930,9 +2238,7 @@ async function saveSO() {
         vatAmount;
 
 
-    /* ==========================================
-       BUTTON STATE
-    ========================================== */
+    /* BUTTON STATE */
 
     const saveButton =
         document.querySelector(
@@ -1951,107 +2257,78 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       API DATA
-    ========================================== */
+    /* API DATA */
 
     const data = {
 
         soNumber:
             soNumber,
 
-
         dateCreation:
             dateCreation,
-
-
-        /* ======================================
-           CUSTOMER MASTER LINK
-        ====================================== */
 
         customerId:
             customerId,
 
-
         clientName:
             clientName,
-
 
         billingAddress:
             billingAddress,
 
-
         attention:
             attention,
-
 
         deliveryAddress:
             deliveryAddress,
 
-
         contactNumber:
             contactNumber,
-
 
         email:
             customerEmail,
 
-
         project:
             project,
-
 
         tin:
             tin,
 
-
         poNumber:
             poNumber,
-
 
         terms:
             terms,
 
-
         jobOrder:
             jobOrder,
-
 
         se:
             se,
 
-
         salesEngineer:
             se,
-
 
         subtotal:
             subtotal,
 
-
         discount:
             discount,
-
 
         vatable:
             vatable,
 
-
         vatRate:
             VAT_RATE,
-
 
         vatAmount:
             vatAmount,
 
-
         grandTotal:
             grandTotal,
 
-
         createdBy:
             getCurrentUser(),
-
 
         items:
             items
@@ -2060,51 +2337,12 @@ async function saveSO() {
 
 
     console.log(
-        "================================="
-    );
-
-    console.log(
-        "CREATING SALES ORDER"
-    );
-
-    console.log(
-        "SO NUMBER:",
-        soNumber
-    );
-
-    console.log(
-        "CUSTOMER ID:",
-        customerId
-    );
-
-    console.log(
-        "CLIENT:",
-        clientName
-    );
-
-    console.log(
-        "ITEM COUNT:",
-        items.length
-    );
-
-    console.log(
-        "GRAND TOTAL:",
-        grandTotal
-    );
-
-    console.log(
-        "FULL DATA:",
+        "CREATING SALES ORDER:",
         data
     );
 
-    console.log(
-        "================================="
-    );
 
-
-    /* ==========================================
-       CREATE SALES ORDER
-    ========================================== */
+    /* CREATE SALES ORDER */
 
     const result =
         await createSOAPI(
@@ -2113,9 +2351,7 @@ async function saveSO() {
         );
 
 
-    /* ==========================================
-       RESTORE BUTTON
-    ========================================== */
+    /* RESTORE BUTTON */
 
     if (saveButton) {
 
@@ -2123,14 +2359,12 @@ async function saveSO() {
             false;
 
         saveButton.textContent =
-            "SAVE";
+            "SAVE SALES ORDER";
 
     }
 
 
-    /* ==========================================
-       API ERROR
-    ========================================== */
+    /* API ERROR */
 
     if (
         !result ||
@@ -2166,9 +2400,7 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       GET BACKEND RESPONSE
-    ========================================== */
+    /* BACKEND RESPONSE */
 
     const createdSO =
         result.data ||
@@ -2202,46 +2434,41 @@ async function saveSO() {
 
 
     console.log(
-        "================================="
-    );
-
-    console.log(
         "SALES ORDER CREATED SUCCESSFULLY"
     );
+
 
     console.log(
         "SO NUMBER:",
         finalSONumber
     );
 
+
     console.log(
         "SO ID:",
         finalSOId
     );
+
 
     console.log(
         "CUSTOMER ID:",
         customerId
     );
 
+
     console.log(
         "FOLDER ID:",
         finalFolderId
     );
+
 
     console.log(
         "FOLDER URL:",
         finalFolderUrl
     );
 
-    console.log(
-        "================================="
-    );
 
-
-    /* ==========================================
-       VALIDATE RESPONSE
-    ========================================== */
+    /* VALIDATE RESPONSE */
 
     if (!finalSONumber) {
 
@@ -2259,9 +2486,9 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       UPLOAD SELECTED FILES
-    ========================================== */
+    /* =====================================================
+       UPLOAD FILES
+    ===================================================== */
 
     let uploadErrors =
         [];
@@ -2270,12 +2497,6 @@ async function saveSO() {
     if (
         soCreateFiles.length > 0
     ) {
-
-        console.log(
-            "FILES TO UPLOAD:",
-            soCreateFiles
-        );
-
 
         for (
             let i = 0;
@@ -2288,12 +2509,6 @@ async function saveSO() {
 
 
             try {
-
-                console.log(
-                    "START UPLOAD:",
-                    file.name
-                );
-
 
                 const base64Data =
                     await fileToBase64(
@@ -2331,37 +2546,11 @@ async function saveSO() {
                 };
 
 
-                console.log(
-                    "UPLOAD DATA:",
-                    {
-
-                        soNumber:
-                            uploadData.soNumber,
-
-                        soId:
-                            uploadData.soId,
-
-                        fileName:
-                            uploadData.fileName,
-
-                        mimeType:
-                            uploadData.mimeType
-
-                    }
-                );
-
-
                 const uploadResult =
                     await createSOAPI(
                         "uploadSOFile",
                         uploadData
                     );
-
-
-                console.log(
-                    "UPLOAD RESULT:",
-                    uploadResult
-                );
 
 
                 if (
@@ -2414,9 +2603,7 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       FINAL SUCCESS MESSAGE
-    ========================================== */
+    /* FINAL SUCCESS MESSAGE */
 
     if (
         uploadErrors.length > 0
@@ -2462,24 +2649,12 @@ async function saveSO() {
     }
 
 
-    /* ==========================================
-       CLEAR FORM
-    ========================================== */
-
     clearCreateSOForm();
 
-
-    /* ==========================================
-       RESET SAVING STATE
-    ========================================== */
 
     isSavingSO =
         false;
 
-
-    /* ==========================================
-       RETURN TO MAIN SYSTEM
-    ========================================== */
 
     window.location.href =
         "../index.html";
@@ -2636,11 +2811,6 @@ function clearCreateSOForm() {
     calculateSOTotals();
 
 
-    /*
-     * Generate a new preview number
-     * after reset.
-     */
-
     generateSONumber();
 
 }
@@ -2744,16 +2914,6 @@ function fileToBase64(file) {
                             return;
 
                         }
-
-
-                        console.log(
-                            "FILE CONVERTED TO BASE64:",
-                            file.name,
-                            "SIZE:",
-                            file.size,
-                            "BASE64 LENGTH:",
-                            base64Data.length
-                        );
 
 
                         resolve(
@@ -2943,12 +3103,13 @@ function renderCreateSOFiles() {
         soCreateFiles.length === 0
     ) {
 
-        container.innerHTML =
-            `
+        container.innerHTML = `
+
             <div class="no-files">
                 No files selected.
             </div>
-            `;
+
+        `;
 
         return;
 
@@ -3025,7 +3186,10 @@ function removeCreateSOFile(index) {
    SET TEXT
 ========================================================= */
 
-function setText(id, value) {
+function setText(
+    id,
+    value
+) {
 
     const element =
         document.getElementById(
@@ -3050,7 +3214,6 @@ function setText(id, value) {
 
 /* =========================================================
    GET VALUE
-   Supports INPUT / SELECT / TEXTAREA
 ========================================================= */
 
 function getValue(id) {
@@ -3068,9 +3231,6 @@ function getValue(id) {
     }
 
 
-    /*
-     * Form controls
-     */
     if (
         element.tagName === "INPUT" ||
         element.tagName === "SELECT" ||
@@ -3085,9 +3245,6 @@ function getValue(id) {
     }
 
 
-    /*
-     * Other elements
-     */
     return String(
         element.textContent ||
         ""
