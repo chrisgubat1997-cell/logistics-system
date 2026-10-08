@@ -4,197 +4,124 @@
    sales-order.js
    VERSION: 20261007-01
 ========================================================= */
-
 (function () {
-
     "use strict";
-
-
     /* =====================================================
        CONFIGURATION
     ===================================================== */
-
     const SALES_ORDER_API_URL =
         "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
-
     const CREATE_SALES_ORDER_PAGE =
         "pages/create-sales-order.html";
-
     const API_MAX_RETRIES = 3;
     const API_RETRY_DELAY = 800;
-
     const SO_FILE_MAX_SIZE =
         10 * 1024 * 1024;
-
     const VAT_RATE = 0.12;
-
-
     /* =====================================================
        STATE
     ===================================================== */
-
     let salesOrders = [];
-
 let customers = [];
 let customersLoaded = false;
-
 let selectedSO = null;
-
     let currentSO = null;
-
     let soDetailsEditMode = false;
-
     let salesOrdersLoaded = false;
-
     let customerModuleLoaded = false;
-
     const soDetailsCache = {};
-
-
     /* =====================================================
        INITIALIZE
     ===================================================== */
-
     function initializeSalesOrderModule() {
-
         console.log(
             "========================================"
         );
-
         console.log(
             "LOGIS-TECH SALES ORDER MODULE"
         );
-
         console.log(
             "VERSION: 20261007-01"
         );
-
         console.log(
             "========================================"
         );
-
-
         bindSalesOrderEvents();
-
 loadSOList();
-
 loadCustomerTable();
-
     }
-
-
     /* =====================================================
        EVENT BINDINGS
     ===================================================== */
-
     function bindSalesOrderEvents() {
-
         const searchInput =
             document.getElementById("soSearchInput");
-
         if (searchInput) {
-
             searchInput.addEventListener(
                 "input",
                 function () {
-
                     renderSOList();
-
                 }
             );
-
         }
-
-
         const statusFilter =
             document.getElementById("soStatusFilter");
-
         if (statusFilter) {
-
             statusFilter.addEventListener(
                 "change",
                 function () {
-
-                    renderSOList();
-
+                   renderSOList();
                 }
             );
-
         }
-
-
         const paymentFilter =
             document.getElementById("soPaymentFilter");
-
         if (paymentFilter) {
-
             paymentFilter.addEventListener(
                 "change",
                 function () {
-
                     renderSOList();
-
                 }
             );
-
         }
-
-
         const fileInput =
             document.getElementById("detailSOFileInput");
-
         if (fileInput) {
-
             fileInput.addEventListener(
                 "change",
                 handleDetailFileSelected
             );
-
         }
-
     }
-
-
     /* =====================================================
        API
     ===================================================== */
-
     async function salesOrderAPI(
         action,
         data = {},
         retryCount = 0
     ) {
-
         try {
-
             const response =
                 await fetch(
                     SALES_ORDER_API_URL,
                     {
                         method: "POST",
-
                         headers: {
                             "Content-Type":
                                 "text/plain;charset=utf-8"
                         },
-
                         body: JSON.stringify({
                             action: action,
                             data: data
                         })
                     }
                 );
-
-
             if (!response.ok) {
-
                 throw new Error(
                     "HTTP " + response.status
                 );
-
             }
-
-
             const text =
                 await response.text();
 
@@ -4469,112 +4396,56 @@ await openSODetails(
        FILES
     ===================================================== */
 
-    async function loadSOFiles(
-        data
-    ) {
+   async function loadSOFiles(data) {
+    const container = document.getElementById("detailSOFileList");
 
-        const container =
-            document.getElementById(
-                "detailSOFileList"
+    if (!container) return;
+
+    const documents =
+        data.documents ||
+        data.salesOrder?.documents ||
+        data.so?.documents ||
+        [];
+
+    container.innerHTML = "";
+
+    if (!documents.length) {
+        container.innerHTML =
+            `<div class="so-file-empty">No files attached.</div>`;
+        return;
+    }
+
+    documents.forEach(function (fileDocument) {
+        const name =
+            getSOValue(
+                fileDocument,
+                ["FILE_NAME", "fileName", "NAME", "name"]
+            ) || "File";
+
+        const url =
+            getSOValue(
+                fileDocument,
+                ["FILE_URL", "fileUrl", "URL", "url"]
             );
 
+        const item = document.createElement("div");
+        item.className = "so-file-item";
 
-        if (!container) {
-            return;
+        if (url) {
+            const link = document.createElement("a");
+            link.href = url;
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = name;
+
+            item.appendChild(link);
+        } else {
+            item.textContent = name;
         }
 
-
-        const documents =
-            data.documents ||
-            data.salesOrder?.documents ||
-            data.so?.documents ||
-            [];
-
-
-        container.innerHTML = "";
-
-
-        if (!documents.length) {
-
-            container.innerHTML = `
-
-                <div class="so-file-empty">
-                    No files attached.
-                </div>
-
-            `;
-
-            return;
-
-        }
-
-
-        documents.forEach(
-    function (fileDocument) {
-
-                const name =
-                    getSOValue(
-                        document,
-                        [
-                            "FILE_NAME",
-                            "fileName",
-                            "NAME",
-                            "name"
-                        ]
-                    ) || "File";
-
-
-                const url =
-                    getSOValue(
-                        document,
-                        [
-                            "FILE_URL",
-                            "fileUrl",
-                            "URL",
-                            "url"
-                        ]
-                    );
-
-
-                const item =
-                    document.createElement("div");
-
-                item.className =
-                    "so-file-item";
-
-
-                item.innerHTML = `
-
-                    <div class="so-file-name">
-                        ${escapeHTML(name)}
-                    </div>
-
-                    ${
-                        url
-                            ? `
-                                <a
-                                    href="${escapeAttribute(url)}"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="so-file-open"
-                                >
-                                    Open
-                                </a>
-                              `
-                            : ""
-                    }
-
-                `;
-
-
-                container.appendChild(
-                    item
-                );
-
-            }
-        );
-
-    }
+        container.appendChild(item);
+    });
+}
 
 
     /* =====================================================
@@ -5550,273 +5421,50 @@ function getFilteredCustomers() {
                 matchesSearch &&
                 matchesStatus
             );
-
         }
     );
-
 }
-
-   /* =========================================================
-   CUSTOMER TABLE SEARCH / FILTER
-========================================================= */
-
-function bindCustomerTableControls() {
-
-    const searchInput =
-        document.getElementById(
-            "customerSearchInput"
-        );
-
-    const statusFilter =
-        document.getElementById(
-            "customerStatusFilter"
-        );
-
-
-    if (searchInput) {
-
-        searchInput.oninput =
-            function () {
-
-                renderCustomerTable();
-
-            };
-
-    }
-
-
-    if (statusFilter) {
-
-        statusFilter.onchange =
-            function () {
-
-                renderCustomerTable();
-
-            };
-
-    }
-
-}
-
-
-/* =========================================================
-   GET FILTERED CUSTOMERS
-========================================================= */
-
-function getFilteredCustomers() {
-
-    const searchInput =
-        document.getElementById(
-            "customerSearchInput"
-        );
-
-    const statusFilter =
-        document.getElementById(
-            "customerStatusFilter"
-        );
-
-
-    const search =
-        searchInput
-            ? searchInput.value
-                .trim()
-                .toLowerCase()
-            : "";
-
-
-    const status =
-        statusFilter
-            ? statusFilter.value
-            : "ALL";
-
-
-    return customers.filter(
-        function (customer) {
-
-            const customerId =
-                getCustomerValue(
-                    customer,
-                    [
-                        "CUSTOMER_ID",
-                        "customerId",
-                        "CUSTOMERID",
-                        "ID",
-                        "id"
-                    ]
-                );
-
-
-            const clientName =
-                getCustomerValue(
-                    customer,
-                    [
-                        "CLIENT_NAME",
-                        "clientName",
-                        "CLIENT",
-                        "client"
-                    ]
-                );
-
-
-            const attention =
-                getCustomerValue(
-                    customer,
-                    [
-                        "ATTENTION",
-                        "attention"
-                    ]
-                );
-
-
-            const contact =
-                getCustomerValue(
-                    customer,
-                    [
-                        "CONTACT",
-                        "contact",
-                        "CONTACT_NUMBER",
-                        "contactNumber",
-                        "PHONE",
-                        "phone"
-                    ]
-                );
-
-
-            const email =
-                getCustomerValue(
-                    customer,
-                    [
-                        "EMAIL",
-                        "email",
-                        "EMAIL_ADDRESS",
-                        "emailAddress"
-                    ]
-                );
-
-
-            const customerStatus =
-                String(
-                    getCustomerValue(
-                        customer,
-                        [
-                            "STATUS",
-                            "status"
-                        ]
-                    ) || "ACTIVE"
-                )
-                    .trim()
-                    .toUpperCase();
-
-
-            const searchableText = [
-
-                customerId,
-                clientName,
-                attention,
-                contact,
-                email
-
-            ]
-                .map(function (value) {
-
-                    return String(
-                        value || ""
-                    ).toLowerCase();
-
-                })
-                .join(" ");
-
-
-            const matchesSearch =
-                !search ||
-                searchableText.includes(
-                    search
-                );
-
-
-            const matchesStatus =
-                status === "ALL" ||
-                customerStatus === status;
-
-
-            return (
-                matchesSearch &&
-                matchesStatus
-            );
-
-        }
-    );
-
-}
-   
 /* =====================================================
    CUSTOMER VALUE HELPER
 ===================================================== */
-
 function getCustomerValue(
     customer,
     keys
 ) {
-
     if (!customer) {
-
         return "";
-
     }
-
-
     for (
         let i = 0;
         i < keys.length;
         i++
     ) {
-
         const key =
             keys[i];
-
-
         if (
             customer[key] !== undefined &&
             customer[key] !== null
         ) {
-
             return customer[key];
-
         }
-
     }
-
-
     return "";
-
 }
-
-
 /* =====================================================
    CUSTOMER TABLE ERROR
 ===================================================== */
-
 function renderCustomerTableError(
     message
 ) {
-
     const tbody =
         document.getElementById(
             "customerTableBody"
         );
-
-
     if (!tbody) {
-
         return;
-
     }
-
-
     tbody.innerHTML = `
-
         <tr>
-
             <td
                 colspan="7"
                 class="customer-table-empty"
@@ -5826,80 +5474,49 @@ function renderCustomerTableError(
                     message || ""
                 )}
             </td>
-
-        </tr>
-
-        
-
+        </tr>    
     `;
-
-}
-
-   
+}  
 /* =====================================================
    CUSTOMER MODULE
 ===================================================== */
-
 async function openCustomerModule() {
-
     console.log(
         "================================="
     );
-
     console.log(
         "LOGIS-TECH: OPEN CUSTOMER MODULE"
     );
-
     console.log(
         "================================="
     );
-
-
     const customerArea =
         document.getElementById(
             "customerArea"
         );
-
-
     if (!customerArea) {
-
         console.error(
             "Customer area not found."
         );
-
         return;
-
     }
-
-
     try {
-
         /* =============================================
            SHOW CUSTOMER AREA
         ============================================== */
-
         customerArea.style.display =
             "block";
-
-
         /* =============================================
            HIDE SALES ORDER LIST
         ============================================== */
-
         const salesOrderListView =
             document.getElementById(
                 "salesOrderListView"
             );
-
-
         if (salesOrderListView) {
-
             salesOrderListView.style.display =
                 "none";
-
         }
-
-
         /* =============================================
            HIDE SALES ORDER DETAILS
         ============================================== */
@@ -5908,13 +5525,9 @@ async function openCustomerModule() {
             document.getElementById(
                 "soDetails"
             );
-
-
         if (soDetails) {
-
             soDetails.style.display =
                 "none";
-
         }
 
 
