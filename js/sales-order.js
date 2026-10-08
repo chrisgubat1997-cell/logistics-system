@@ -4058,11 +4058,30 @@ async function loadSOList(
             setDetailsEditMode(
                 false
             );
+await loadSOList(
+    true
+);
 
+            /* Update sync/cache version */
 
-            await loadSOList(
-                true
-            );
+if (
+    window.LogisTechSync
+) {
+
+    try {
+
+        await window.LogisTechSync.backgroundSync();
+
+    } catch (syncError) {
+
+        console.warn(
+            "Background sync after SO update failed:",
+            syncError
+        );
+
+    }
+
+}
 
 
             await openSODetails(
@@ -4237,8 +4256,30 @@ async function loadSOList(
 
 
             await loadSOList(
-                true
-            );
+    true
+);
+
+
+/* Update local cache */
+
+if (
+    window.LogisTechSync
+) {
+
+    try {
+
+        await window.LogisTechSync.backgroundSync();
+
+    } catch (syncError) {
+
+        console.warn(
+            "Background sync after SO cancellation failed:",
+            syncError
+        );
+
+    }
+
+}
 
 
             closeSODetails();
@@ -4366,13 +4407,35 @@ async function loadSOList(
 
 
             await loadSOList(
-                true
-            );
+    true
+);
 
 
-            await openSODetails(
-                soNumber
-            );
+/* Update local cache */
+
+if (
+    window.LogisTechSync
+) {
+
+    try {
+
+        await window.LogisTechSync.backgroundSync();
+
+    } catch (syncError) {
+
+        console.warn(
+            "Background sync after SO posting failed:",
+            syncError
+        );
+
+    }
+
+}
+
+
+await openSODetails(
+    soNumber
+);
 
 
         } catch (error) {
