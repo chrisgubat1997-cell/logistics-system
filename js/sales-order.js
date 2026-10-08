@@ -270,70 +270,265 @@
        LOAD SALES ORDERS
     ===================================================== */
 
-    async function loadSOList(
-        forceRefresh = false
-    ) {
+    /* =====================================================
+   LOAD SALES ORDERS
+   CACHE-FIRST VERSION
+===================================================== */
 
-        try {
+async function loadSOList(
+    forceRefresh = false
+) {
 
-            showLoading(true);
+    try {
 
-
-            if (
-                salesOrdersLoaded &&
-                !forceRefresh
-            ) {
-
-                renderSOList();
-
-                updateSOSummary();
-
-                return;
-
-            }
+        showLoading(true);
 
 
-            const result =
-                await salesOrderAPI(
-                    "getSalesOrders",
-                    {}
-                );
+        /* =================================================
+           1. ALREADY LOADED IN CURRENT SESSION
+        ================================================= */
 
-
-            salesOrders =
-                normalizeSalesOrders(
-                    result
-                );
-
-
-            salesOrdersLoaded = true;
-
+        if (
+            salesOrdersLoaded &&
+            !forceRefresh
+        ) {
 
             renderSOList();
 
             updateSOSummary();
 
-
-        } catch (error) {
-
-            console.error(
-                "Unable to load sales orders:",
-                error
-            );
-
-
-            showError(
-                "Unable to load Sales Orders.\n\n" +
-                error.message
-            );
-
-        } finally {
-
-            showLoading(false);
+            return;
 
         }
 
+
+        /* =================================================
+           2. TRY LOCAL INDEXEDDB CACHE FIRST
+        ================================================= */
+
+        if (
+            !forceRefresh &&
+            window.LogisTechCache
+        ) {
+
+            try {
+
+                const cachedSalesOrders =
+                    await window.LogisTechCache.getAll(
+                        "salesOrders"
+                    );
+
+
+                if (
+                    Array.isArray(
+                        cachedSalesOrders
+                    ) &&
+                    cachedSalesOrders.length > 0
+                ) {
+
+                    console.log(
+                        "LOGIS-TECH: Loading Sales Orders from local cache..."
+                    );
+
+
+                    salesOrders =
+                        normalizeSalesOrders(
+                            cachedSalesOrders
+                        );
+
+
+                    salesOrdersLoaded =
+                        true;
+
+
+                    renderSOList();
+
+                    updateSOSummary();
+
+
+                    console.log(
+                        "LOGIS-TECH: Sales Orders loaded from cache:",
+                        salesOrders.length
+                    );
+
+
+                    /*
+                     * IMPORTANT:
+                     * Do NOT wait for Google Sheets here.
+                     *
+                     * Background Sync Manager will check
+                     * whether the data has changed.
+                     */
+
+                    return;
+
+                }
+
+            } catch (cacheError) {
+
+                console.warn(
+                    "Sales Order cache unavailable. Falling back to API.",
+                    cacheError
+                );
+
+            }
+
+        }
+
+
+        /* =================================================
+           3. NO CACHE → LOAD FROM GOOGLE APPS SCRIPT
+        ================================================= */
+
+        console.log(
+            "LOGIS-TECH: No Sales Order cache found."
+        );
+
+        console.log(
+            "LOGIS-TECH: Loading Sales Orders from API..."
+        );
+
+
+        const result =
+            await salesOrderAPI(
+                "getSalesOrders",
+                {}
+            );
+
+
+        salesOrders =
+            normalizeSalesOrders(
+                result
+            );
+
+
+        salesOrdersLoaded =
+            true;
+
+
+        /* =================================================
+           4. SAVE API RESULT TO CACHE
+        ================================================= */
+
+        if (
+            window.LogisTechCache &&
+            salesOrders.length > 0
+        ) {
+
+            try {
+
+                await window.LogisTechCache.replaceAll(
+                    "salesOrders",
+                    salesOrders
+                );
+
+
+                console.log(
+                    "LOGIS-TECH: Sales Orders saved to local cache."
+                );
+
+            } catch (cacheError) {
+
+                console.warn(
+                    "Unable to save Sales Orders to cache:",
+                    cacheError
+                );
+
+            }
+
+        }
+
+
+        /* =================================================
+           5. DISPLAY
+        ================================================= */
+
+        renderSOList();
+
+        updateSOSummary();
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load sales orders:",
+            error
+        );
+
+
+        /*
+         * If API failed but cache exists,
+         * try showing cached data.
+         */
+
+        if (
+            window.LogisTechCache
+        ) {
+
+            try {
+
+                const cachedSalesOrders =
+                    await window.LogisTechCache.getAll(
+                        "salesOrders"
+                    );
+
+
+                if (
+                    Array.isArray(
+                        cachedSalesOrders
+                    ) &&
+                    cachedSalesOrders.length > 0
+                ) {
+
+                    salesOrders =
+                        normalizeSalesOrders(
+                            cachedSalesOrders
+                        );
+
+
+                    salesOrdersLoaded =
+                        true;
+
+
+                    renderSOList();
+
+                    updateSOSummary();
+
+
+                    console.warn(
+                        "LOGIS-TECH: Using cached Sales Orders because API is unavailable."
+                    );
+
+
+                    return;
+
+                }
+
+            } catch (cacheError) {
+
+                console.error(
+                    "Unable to read fallback cache:",
+                    cacheError
+                );
+
+            }
+
+        }
+
+
+        showError(
+            "Unable to load Sales Orders.\n\n" +
+            error.message
+        );
+
+
+    } finally {
+
+        showLoading(false);
+
     }
+
+}
 
 
     /* =====================================================
@@ -5330,6 +5525,92 @@ window.addEventListener(
     "customerFormCancel",
     handleCustomerFormCancel
 );
+
+   /* =====================================================
+   CACHE / SYNC EVENTS
+===================================================== */
+
+window.addEventListener(
+    "logistech:data-updated",
+    function (event) {
+
+        console.log(
+            "LOGIS-TECH: Background data update received.",
+            event?.detail || {}
+        );
+
+
+        /*
+         * Reload Sales Orders from IndexedDB
+         * without calling Google Sheets directly.
+         */
+
+        if (
+            window.LogisTechCache
+        ) {
+
+            window.LogisTechCache
+                .getAll("salesOrders")
+                .then(
+                    function (cachedSalesOrders) {
+
+                        if (
+                            !Array.isArray(
+                                cachedSalesOrders
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        if (
+                            !cachedSalesOrders.length
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        salesOrders =
+                            normalizeSalesOrders(
+                                cachedSalesOrders
+                            );
+
+
+                        salesOrdersLoaded =
+                            true;
+
+
+                        renderSOList();
+
+                        updateSOSummary();
+
+
+                        console.log(
+                            "LOGIS-TECH: Sales Order list updated from synchronized cache."
+                        );
+
+                    }
+                )
+                .catch(
+                    function (error) {
+
+                        console.error(
+                            "Unable to refresh Sales Order cache:",
+                            error
+                        );
+
+                    }
+                );
+
+        }
+
+    }
+);
+   
 
     /* =====================================================
        GENERIC HELPERS
