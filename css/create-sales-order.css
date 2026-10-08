@@ -3412,9 +3412,7 @@ input[readonly] {
 }
 
 
-/* =========================================================
-   SEARCH INPUT
-========================================================= */
+/* SEARCH INPUT */
 
 .customer-search-input {
     width: 100%;
@@ -3425,17 +3423,16 @@ input[readonly] {
 
 
 /* =========================================================
-   CUSTOMER SUGGESTIONS DROPDOWN
+   DROPDOWN OVERLAY
 ========================================================= */
 
 .customer-suggestions {
     position: absolute !important;
 
-    top: calc(100% + 4px);
-    left: 0;
-    right: 0;
+    top: calc(100% + 4px) !important;
+    left: 0 !important;
 
-    width: 100%;
+    width: 100% !important;
 
     background: #ffffff !important;
 
@@ -3478,9 +3475,6 @@ input[readonly] {
     cursor: pointer;
 
     box-sizing: border-box;
-
-    transition:
-        background-color 0.15s ease;
 }
 
 
@@ -3494,9 +3488,7 @@ input[readonly] {
 }
 
 
-/* =========================================================
-   CUSTOMER ID
-========================================================= */
+/* CUSTOMER ID */
 
 .customer-suggestion-id {
     display: block;
@@ -3511,9 +3503,7 @@ input[readonly] {
 }
 
 
-/* =========================================================
-   CLIENT NAME
-========================================================= */
+/* CLIENT NAME */
 
 .customer-suggestion-name {
     display: block;
@@ -3534,9 +3524,7 @@ input[readonly] {
 }
 
 
-/* =========================================================
-   NO RESULT
-========================================================= */
+/* NO RESULT */
 
 .customer-no-result {
     padding: 14px 15px;
@@ -3552,70 +3540,49 @@ input[readonly] {
 
 
 /* =========================================================
-   CUSTOMER ID DISPLAY
-========================================================= */
-
-.customer-id-display {
-    position: relative;
-
-    z-index: 1;
-
-    margin-top: 7px;
-}
-
-
-.customer-id-value {
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   ALLOW DROPDOWN TO OVERLAY LOWER FIELDS
+   IMPORTANT:
+   ALLOW DROPDOWN TO COVER EVERYTHING BELOW IT
 ========================================================= */
 
 .customer-select-wrapper {
-    position: relative;
-
-    z-index: 999999;
-
+    position: relative !important;
+    z-index: 999999 !important;
     overflow: visible !important;
 }
 
 
 .customer-autocomplete {
-    position: relative;
-
-    z-index: 999999;
-
+    position: relative !important;
+    z-index: 999999 !important;
     overflow: visible !important;
 }
 
 
-.form-group.full {
-    position: relative;
+/* CUSTOMER FORM GROUP MUST BE ABOVE
+   THE FORM GROUPS BELOW IT */
 
-    z-index: 999999;
-
+.form-group:has(#customerSelect) {
+    position: relative !important;
+    z-index: 999999 !important;
     overflow: visible !important;
 }
 
 
-.so-information-section {
+/* LOWER FIELDS STAY BELOW CUSTOMER DROPDOWN */
+
+.form-group:has(#clientName),
+.form-group:has(#billingAddress),
+.form-group:has(#deliveryAddress),
+.form-group:has(#attention) {
     position: relative;
-
-    z-index: 1000;
-
-    overflow: visible !important;
+    z-index: 1 !important;
 }
 
 
-.form-grid {
-    position: relative;
+/* ALLOW OVERFLOW */
 
-    overflow: visible !important;
-}
-
-
+.so-information-section,
+.form-grid,
 .form-group {
     overflow: visible !important;
 }
