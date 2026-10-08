@@ -18,6 +18,19 @@
     "use strict";
 
 
+   const customerBackButton =
+    document.getElementById("customerBackButton");
+
+if (customerBackButton) {
+
+    customerBackButton.addEventListener("click", function () {
+
+        window.history.back();
+
+    });
+
+}
+   
     /* =====================================================
        CONFIGURATION
     ===================================================== */
@@ -1512,7 +1525,18 @@
     window.customerAPI =
         customerAPI;
 
+const customerBackButton =
+    document.getElementById("customerBackButton");
 
+if (customerBackButton) {
+
+    customerBackButton.addEventListener("click", function () {
+
+        window.history.back();
+
+    });
+
+}
     /*
      * IMPORTANT:
      *
