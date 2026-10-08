@@ -390,19 +390,60 @@
 
             <div class="customer-table-header">
 
-                <div>
+    <div class="customer-table-title">
 
-                    <h2>
-                        Customers
-                    </h2>
+        <h2>
+            Customers
+        </h2>
 
-                    <p>
-                        Manage registered customers.
-                    </p>
+        <p>
+            Manage registered customers.
+        </p>
 
-                </div>
+    </div>
 
-            </div>
+
+    <div class="customer-table-controls">
+
+        <select
+            id="customerStatusFilter"
+            class="customer-status-filter"
+        >
+
+            <option value="ALL">
+                All Status
+            </option>
+
+            <option value="ACTIVE">
+                Active
+            </option>
+
+            <option value="INACTIVE">
+                Inactive
+            </option>
+
+        </select>
+
+
+        <div class="customer-search-wrapper">
+
+            <span class="customer-search-icon">
+                🔍
+            </span>
+
+            <input
+                type="text"
+                id="customerSearchInput"
+                class="customer-search-input"
+                placeholder="Search customer..."
+                autocomplete="off"
+            >
+
+        </div>
+
+    </div>
+
+</div>
 
 
             <div class="customer-table-wrapper">
