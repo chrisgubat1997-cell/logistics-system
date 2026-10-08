@@ -197,16 +197,27 @@
                         </span>
 
 
-                        <select
-                            id="customerSelect"
-                            required
-                        >
+                        <div class="customer-autocomplete">
 
-                            <option value="">
-                                Loading customers...
-                            </option>
+    <input
+        type="text"
+        id="customerSelect"
+        class="customer-search-input"
+        placeholder="Type Customer ID or Client Name..."
+        autocomplete="off"
+    >
 
-                        </select>
+    <input
+        type="hidden"
+        id="customerId"
+    >
+
+    <div
+        id="customerSuggestions"
+        class="customer-suggestions"
+    ></div>
+
+</div>
 
                     </div>
 
