@@ -5150,18 +5150,18 @@ function renderCustomerTable() {
 
 
     if (!tbody) {
-
         return;
-
     }
 
 
     tbody.innerHTML = "";
 
 
-    if (
-        !customers.length
-    ) {
+    const filteredCustomers =
+        getFilteredCustomers();
+
+
+    if (!filteredCustomers.length) {
 
         const row =
             document.createElement(
@@ -5186,12 +5186,14 @@ function renderCustomerTable() {
         );
 
 
+        bindCustomerTableControls();
+
         return;
 
     }
 
 
-    customers.forEach(
+    filteredCustomers.forEach(
         function (customer) {
 
             const row =
@@ -5310,6 +5312,7 @@ function renderCustomerTable() {
                 </td>
 
                 <td>
+
                     <span
                         class="customer-status-badge ${getStatusClass(status)}"
                     >
@@ -5317,6 +5320,7 @@ function renderCustomerTable() {
                             status
                         )}
                     </span>
+
                 </td>
 
                 <td>
@@ -5351,51 +5355,59 @@ function renderCustomerTable() {
                         event.stopPropagation();
 
 
-                        if (typeof window.editCustomer === "function") {
+                        if (
+                            typeof window.editCustomer ===
+                            "function"
+                        ) {
 
-    window.editCustomer(customerId);
+                            window.editCustomer(
+                                customerId
+                            );
 
-    return;
-}
+                            return;
 
-
-/*
- * Customer module is not loaded yet.
- * Load it first, then open the selected customer.
- */
-openCustomerModule()
-    .then(function () {
-
-        if (
-            typeof window.editCustomer !==
-            "function"
-        ) {
-
-            alert(
-                "Customer Edit module failed to load."
-            );
-
-            return;
-        }
+                        }
 
 
-        window.editCustomer(
-            customerId
-        );
+                        openCustomerModule()
+                            .then(
+                                function () {
 
-    })
-    .catch(function (error) {
+                                    if (
+                                        typeof window.editCustomer !==
+                                        "function"
+                                    ) {
 
-        console.error(
-            "Unable to open Customer Edit:",
-            error
-        );
+                                        alert(
+                                            "Customer Edit module failed to load."
+                                        );
 
-        alert(
-            "Unable to open Customer Edit module."
-        );
+                                        return;
 
-    });
+                                    }
+
+
+                                    window.editCustomer(
+                                        customerId
+                                    );
+
+                                }
+                            )
+                            .catch(
+                                function (error) {
+
+                                    console.error(
+                                        "Unable to open Customer Edit:",
+                                        error
+                                    );
+
+
+                                    alert(
+                                        "Unable to open Customer Edit module."
+                                    );
+
+                                }
+                            );
 
                     }
                 );
@@ -5409,6 +5421,9 @@ openCustomerModule()
 
         }
     );
+
+
+    bindCustomerTableControls();
 
 }
 
@@ -5492,6 +5507,8 @@ function renderCustomerTableError(
             </td>
 
         </tr>
+
+        
 
     `;
 
