@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    CUSTOMER MANAGEMENT
    create-customer.css
-   VERSION: 20261007-02
+   VERSION: 20261008-01
 ========================================================= */
 
 
@@ -35,6 +35,8 @@
         Arial,
         Helvetica,
         sans-serif;
+
+    -webkit-font-smoothing: antialiased;
 }
 
 
@@ -50,11 +52,11 @@
     gap: 20px;
 
     margin-bottom: 18px;
-    padding: 20px 22px;
+    padding: 18px 20px;
 
     background: #ffffff;
 
-    border: 1px solid #e3e8f1;
+    border: 1px solid #e1e7f0;
     border-radius: 12px;
 
     box-shadow:
@@ -62,15 +64,86 @@
 }
 
 
+/* =========================================================
+   HEADER LEFT
+========================================================= */
+
 .customer-header-left {
     display: flex;
     align-items: center;
 
     min-width: 0;
 
-    gap: 14px;
+    gap: 12px;
 }
 
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+.customer-back-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    min-height: 34px;
+
+    padding: 0 11px;
+
+    border: 1px solid #d8deea;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #475569;
+
+    font-family: inherit;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    line-height: 1;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease,
+        transform 0.12s ease,
+        box-shadow 0.15s ease;
+}
+
+
+.customer-back-button:hover {
+    background: #f5f8fc;
+
+    border-color: #c4cfdf;
+
+    color: #315ea8;
+
+    transform: translateX(-1px);
+
+    box-shadow:
+        0 2px 7px rgba(20, 35, 60, 0.07);
+}
+
+
+.customer-back-button:active {
+    transform: translateX(0);
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   CUSTOMER ICON
+========================================================= */
 
 .customer-icon {
     width: 46px;
@@ -82,13 +155,23 @@
     align-items: center;
     justify-content: center;
 
+    border: 1px solid #dce7f8;
     border-radius: 11px;
 
     background: #eef4ff;
 
+    color: #315ea8;
+
     font-size: 21px;
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
+
+/* =========================================================
+   HEADER TEXT
+========================================================= */
 
 .customer-header h1 {
     margin: 0 0 3px;
@@ -99,6 +182,8 @@
     font-weight: 700;
 
     line-height: 1.25;
+
+    letter-spacing: -0.15px;
 }
 
 
@@ -112,6 +197,10 @@
 }
 
 
+/* =========================================================
+   HEADER RIGHT
+========================================================= */
+
 .customer-header-right {
     display: flex;
     align-items: center;
@@ -119,6 +208,10 @@
     flex-shrink: 0;
 }
 
+
+/* =========================================================
+   MODE BADGE
+========================================================= */
 
 .customer-mode-badge {
     display: inline-flex;
@@ -140,6 +233,8 @@
     font-weight: 800;
 
     letter-spacing: 0.55px;
+
+    white-space: nowrap;
 }
 
 
@@ -163,7 +258,7 @@
 
     background: #ffffff;
 
-    border: 1px solid #e3e8f1;
+    border: 1px solid #e2e7ef;
     border-radius: 12px;
 
     box-shadow:
@@ -194,6 +289,8 @@
     font-weight: 700;
 
     line-height: 1.3;
+
+    letter-spacing: -0.05px;
 }
 
 
@@ -294,11 +391,7 @@
 
     color: #172033;
 
-    font-family:
-        "Segoe UI",
-        Arial,
-        Helvetica,
-        sans-serif;
+    font-family: inherit;
 
     font-size: 12.5px;
 
@@ -355,6 +448,8 @@
             196,
             0.09
         );
+
+    background: #ffffff;
 }
 
 
@@ -443,6 +538,10 @@
 }
 
 
+/* =========================================================
+   TEXT BUTTON
+========================================================= */
+
 .text-button {
     padding: 0;
 
@@ -462,7 +561,8 @@
     white-space: nowrap;
 
     transition:
-        color 0.15s ease;
+        color 0.15s ease,
+        opacity 0.15s ease;
 }
 
 
@@ -470,6 +570,11 @@
     color: #244e85;
 
     text-decoration: underline;
+}
+
+
+.text-button:active {
+    opacity: 0.75;
 }
 
 
@@ -589,7 +694,8 @@
         transform 0.12s ease,
         box-shadow 0.15s ease,
         background 0.15s ease,
-        border-color 0.15s ease;
+        border-color 0.15s ease,
+        color 0.15s ease;
 }
 
 
@@ -663,6 +769,8 @@
     background: #f7f9fc;
 
     border-color: #cbd3df;
+
+    color: #334155;
 }
 
 
@@ -683,6 +791,8 @@
     background: #e9edf3;
 
     border-color: #d5dbe4;
+
+    color: #334155;
 }
 
 
@@ -720,6 +830,10 @@
 }
 
 
+/* =========================================================
+   SUCCESS ICON
+========================================================= */
+
 .success-icon {
     width: 56px;
     height: 56px;
@@ -741,6 +855,10 @@
     font-weight: 700;
 }
 
+
+/* =========================================================
+   SUCCESS TEXT
+========================================================= */
 
 .customer-success-panel h2 {
     margin:
@@ -844,7 +962,6 @@
 
 /* =========================================================
    CUSTOMER MODULE LOADING
-   Used when loaded inside Sales Order
 ========================================================= */
 
 .customer-loading {
@@ -968,6 +1085,7 @@
 ========================================================= */
 
 .btn:focus-visible,
+.customer-back-button:focus-visible,
 .text-button:focus-visible,
 .form-group input:focus-visible,
 .form-group select:focus-visible,
@@ -985,7 +1103,7 @@
 
 
 /* =========================================================
-   RESPONSIVE
+   RESPONSIVE — TABLET
 ========================================================= */
 
 @media (max-width: 800px) {
@@ -1045,6 +1163,19 @@
 
     .customer-header-left {
         align-items: flex-start;
+
+        width: 100%;
+
+        gap: 9px;
+    }
+
+
+    .customer-back-button {
+        min-height: 32px;
+
+        padding: 0 9px;
+
+        font-size: 10.5px;
     }
 
 
@@ -1100,6 +1231,7 @@
 
     .generated-customer-id {
         width: 100%;
+
         min-width: 0;
     }
 
@@ -1115,6 +1247,62 @@
 
     .text-button {
         font-size: 10px;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+========================================================= */
+
+@media (max-width: 380px) {
+
+    .customer-page {
+        padding: 9px;
+    }
+
+
+    .customer-header,
+    .customer-section {
+        padding: 14px;
+    }
+
+
+    .customer-header-left {
+        flex-wrap: wrap;
+    }
+
+
+    .customer-back-button {
+        order: -1;
+    }
+
+
+    .customer-header h1 {
+        font-size: 17px;
+    }
+
+
+    .customer-header p {
+        font-size: 10.5px;
+    }
+
+
+    .customer-section {
+        margin-bottom: 12px;
+    }
+
+
+    .form-group input,
+    .form-group select {
+        height: 39px;
+    }
+
+
+    .customer-success-panel {
+        padding:
+            30px 18px;
     }
 
 }
