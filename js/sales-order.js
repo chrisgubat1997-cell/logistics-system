@@ -4510,7 +4510,7 @@ await openSODetails(
 
 
         documents.forEach(
-            function (document) {
+    function (fileDocument) {
 
                 const name =
                     getSOValue(
@@ -5427,7 +5427,200 @@ function renderCustomerTable() {
 
 }
 
+/* =========================================================
+   CUSTOMER TABLE SEARCH / FILTER
+========================================================= */
 
+function bindCustomerTableControls() {
+
+    const searchInput =
+        document.getElementById(
+            "customerSearchInput"
+        );
+
+    const statusFilter =
+        document.getElementById(
+            "customerStatusFilter"
+        );
+
+
+    if (searchInput) {
+
+        searchInput.oninput =
+            function () {
+
+                renderCustomerTable();
+
+            };
+
+    }
+
+
+    if (statusFilter) {
+
+        statusFilter.onchange =
+            function () {
+
+                renderCustomerTable();
+
+            };
+
+    }
+
+}
+
+
+/* =========================================================
+   GET FILTERED CUSTOMERS
+========================================================= */
+
+function getFilteredCustomers() {
+
+    const searchInput =
+        document.getElementById(
+            "customerSearchInput"
+        );
+
+    const statusFilter =
+        document.getElementById(
+            "customerStatusFilter"
+        );
+
+
+    const search =
+        searchInput
+            ? searchInput.value
+                .trim()
+                .toLowerCase()
+            : "";
+
+
+    const status =
+        statusFilter
+            ? statusFilter.value
+            : "ALL";
+
+
+    return customers.filter(
+        function (customer) {
+
+            const customerId =
+                getCustomerValue(
+                    customer,
+                    [
+                        "CUSTOMER_ID",
+                        "customerId",
+                        "CUSTOMERID",
+                        "ID",
+                        "id"
+                    ]
+                );
+
+
+            const clientName =
+                getCustomerValue(
+                    customer,
+                    [
+                        "CLIENT_NAME",
+                        "clientName",
+                        "CLIENT",
+                        "client"
+                    ]
+                );
+
+
+            const attention =
+                getCustomerValue(
+                    customer,
+                    [
+                        "ATTENTION",
+                        "attention"
+                    ]
+                );
+
+
+            const contact =
+                getCustomerValue(
+                    customer,
+                    [
+                        "CONTACT",
+                        "contact",
+                        "CONTACT_NUMBER",
+                        "contactNumber",
+                        "PHONE",
+                        "phone"
+                    ]
+                );
+
+
+            const email =
+                getCustomerValue(
+                    customer,
+                    [
+                        "EMAIL",
+                        "email",
+                        "EMAIL_ADDRESS",
+                        "emailAddress"
+                    ]
+                );
+
+
+            const customerStatus =
+                String(
+                    getCustomerValue(
+                        customer,
+                        [
+                            "STATUS",
+                            "status"
+                        ]
+                    ) || "ACTIVE"
+                )
+                    .trim()
+                    .toUpperCase();
+
+
+            const searchableText = [
+
+                customerId,
+                clientName,
+                attention,
+                contact,
+                email
+
+            ]
+                .map(
+                    function (value) {
+
+                        return String(
+                            value || ""
+                        ).toLowerCase();
+
+                    }
+                )
+                .join(" ");
+
+
+            const matchesSearch =
+                !search ||
+                searchableText.includes(
+                    search
+                );
+
+
+            const matchesStatus =
+                status === "ALL" ||
+                customerStatus === status;
+
+
+            return (
+                matchesSearch &&
+                matchesStatus
+            );
+
+        }
+    );
+
+}
 /* =====================================================
    CUSTOMER VALUE HELPER
 ===================================================== */
