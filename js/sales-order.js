@@ -4827,104 +4827,87 @@ await openSODetails(
 
     }
 
-/* =====================================================
-   CUSTOMER TABLE
-===================================================== */
+/* =========================================================
+   CUSTOMER TABLE - ULTRA FAST LOAD
+========================================================= */
 
 async function loadCustomerTable(
     forceRefresh = false
 ) {
 
+    /* -----------------------------------------------------
+       ALREADY LOADED
+    ----------------------------------------------------- */
+
+    if (
+        customersLoaded &&
+        !forceRefresh
+    ) {
+
+        renderCustomerTable();
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       1. LOAD FROM INDEXEDDB FIRST
+    ----------------------------------------------------- */
+
+    let cachedCustomers = [];
+
+    if (window.LogisTechCache) {
+
+        try {
+
+            cachedCustomers =
+                await window.LogisTechCache
+                    .getAll("customers");
+
+        } catch (error) {
+
+            console.warn(
+                "Customer cache read failed:",
+                error
+            );
+
+        }
+
+    }
+
+
+    /* -----------------------------------------------------
+       2. RENDER CACHE IMMEDIATELY
+    ----------------------------------------------------- */
+
+    if (
+        Array.isArray(
+            cachedCustomers
+        ) &&
+        cachedCustomers.length > 0
+    ) {
+
+        customers =
+            normalizeCustomers(
+                cachedCustomers
+            );
+
+        customersLoaded = true;
+
+        renderCustomerTable();
+
+        return;
+
+    }
+
+
+    /* -----------------------------------------------------
+       3. NO CACHE
+       LOAD FROM GOOGLE APPS SCRIPT
+    ----------------------------------------------------- */
+
     try {
-
-        /*
-         * 1. CURRENT SESSION
-         */
-
-        if (
-            customersLoaded &&
-            !forceRefresh
-        ) {
-
-            renderCustomerTable();
-
-            return;
-
-        }
-
-
-        /*
-         * 2. INDEXEDDB CACHE FIRST
-         */
-
-        if (
-            !forceRefresh &&
-            window.LogisTechCache
-        ) {
-
-            try {
-
-                const cachedCustomers =
-                    await window.LogisTechCache.getAll(
-                        "customers"
-                    );
-
-
-                if (
-                    Array.isArray(
-                        cachedCustomers
-                    ) &&
-                    cachedCustomers.length > 0
-                ) {
-
-                    console.log(
-                        "LOGIS-TECH: Loading Customers from local cache..."
-                    );
-
-
-                    customers =
-                        normalizeCustomers(
-                            cachedCustomers
-                        );
-
-
-                    customersLoaded =
-                        true;
-
-
-                    renderCustomerTable();
-
-
-                    console.log(
-                        "LOGIS-TECH: Customers loaded from cache:",
-                        customers.length
-                    );
-
-
-                    return;
-
-                }
-
-            } catch (cacheError) {
-
-                console.warn(
-                    "Customer cache unavailable. Falling back to API.",
-                    cacheError
-                );
-
-            }
-
-        }
-
-
-        /*
-         * 3. LOAD FROM GOOGLE APPS SCRIPT
-         */
-
-        console.log(
-            "LOGIS-TECH: Loading Customers from API..."
-        );
-
 
         const result =
             await salesOrderAPI(
@@ -4938,49 +4921,47 @@ async function loadCustomerTable(
                 result
             );
 
-
-        customersLoaded =
-            true;
+        customersLoaded = true;
 
 
-        /*
-         * 4. SAVE TO INDEXEDDB
-         */
+        renderCustomerTable();
+
+
+        /* -------------------------------------------------
+           4. SAVE TO CACHE IN BACKGROUND
+           DO NOT WAIT FOR IT
+        ------------------------------------------------- */
 
         if (
             window.LogisTechCache &&
-            customers.length > 0
+            customers.length
         ) {
 
-            try {
+            Promise.all(
+                customers.map(
+                    function (customer) {
 
-                await window.LogisTechCache.replaceAll(
-                    "customers",
-                    customers
-                );
+                        return window.LogisTechCache
+                            .put(
+                                "customers",
+                                customer
+                            )
+                            .catch(
+                                function (error) {
 
+                                    console.warn(
+                                        "Customer cache write failed:",
+                                        error
+                                    );
 
-                console.log(
-                    "LOGIS-TECH: Customers saved to local cache."
-                );
+                                }
+                            );
 
-            } catch (cacheError) {
-
-                console.warn(
-                    "Unable to save Customers to cache:",
-                    cacheError
-                );
-
-            }
+                    }
+                )
+            );
 
         }
-
-
-        /*
-         * 5. DISPLAY
-         */
-
-        renderCustomerTable();
 
 
     } catch (error) {
@@ -4991,59 +4972,13 @@ async function loadCustomerTable(
         );
 
 
-        /*
-         * FALLBACK TO CACHE
-         */
-
         if (
-            window.LogisTechCache
+            customers.length
         ) {
 
-            try {
+            renderCustomerTable();
 
-                const cachedCustomers =
-                    await window.LogisTechCache.getAll(
-                        "customers"
-                    );
-
-
-                if (
-                    Array.isArray(
-                        cachedCustomers
-                    ) &&
-                    cachedCustomers.length > 0
-                ) {
-
-                    customers =
-                        normalizeCustomers(
-                            cachedCustomers
-                        );
-
-
-                    customersLoaded =
-                        true;
-
-
-                    renderCustomerTable();
-
-
-                    console.warn(
-                        "LOGIS-TECH: Using cached Customers because API is unavailable."
-                    );
-
-
-                    return;
-
-                }
-
-            } catch (cacheError) {
-
-                console.error(
-                    "Unable to read Customer fallback cache:",
-                    cacheError
-                );
-
-            }
+            return;
 
         }
 
@@ -5055,7 +4990,6 @@ async function loadCustomerTable(
     }
 
 }
-
 
 /* =====================================================
    NORMALIZE CUSTOMERS
