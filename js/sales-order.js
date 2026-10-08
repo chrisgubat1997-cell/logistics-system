@@ -35,7 +35,10 @@
 
     let salesOrders = [];
 
-    let selectedSO = null;
+let customers = [];
+let customersLoaded = false;
+
+let selectedSO = null;
 
     let currentSO = null;
 
@@ -73,7 +76,9 @@
 
         bindSalesOrderEvents();
 
-        loadSOList();
+loadSOList();
+
+loadCustomerTable();
 
     }
 
@@ -4822,7 +4827,649 @@ await openSODetails(
 
     }
 
+/* =====================================================
+   CUSTOMER TABLE
+===================================================== */
 
+async function loadCustomerTable(
+    forceRefresh = false
+) {
+
+    try {
+
+        /*
+         * 1. CURRENT SESSION
+         */
+
+        if (
+            customersLoaded &&
+            !forceRefresh
+        ) {
+
+            renderCustomerTable();
+
+            return;
+
+        }
+
+
+        /*
+         * 2. INDEXEDDB CACHE FIRST
+         */
+
+        if (
+            !forceRefresh &&
+            window.LogisTechCache
+        ) {
+
+            try {
+
+                const cachedCustomers =
+                    await window.LogisTechCache.getAll(
+                        "customers"
+                    );
+
+
+                if (
+                    Array.isArray(
+                        cachedCustomers
+                    ) &&
+                    cachedCustomers.length > 0
+                ) {
+
+                    console.log(
+                        "LOGIS-TECH: Loading Customers from local cache..."
+                    );
+
+
+                    customers =
+                        normalizeCustomers(
+                            cachedCustomers
+                        );
+
+
+                    customersLoaded =
+                        true;
+
+
+                    renderCustomerTable();
+
+
+                    console.log(
+                        "LOGIS-TECH: Customers loaded from cache:",
+                        customers.length
+                    );
+
+
+                    return;
+
+                }
+
+            } catch (cacheError) {
+
+                console.warn(
+                    "Customer cache unavailable. Falling back to API.",
+                    cacheError
+                );
+
+            }
+
+        }
+
+
+        /*
+         * 3. LOAD FROM GOOGLE APPS SCRIPT
+         */
+
+        console.log(
+            "LOGIS-TECH: Loading Customers from API..."
+        );
+
+
+        const result =
+            await salesOrderAPI(
+                "getCustomers",
+                {}
+            );
+
+
+        customers =
+            normalizeCustomers(
+                result
+            );
+
+
+        customersLoaded =
+            true;
+
+
+        /*
+         * 4. SAVE TO INDEXEDDB
+         */
+
+        if (
+            window.LogisTechCache &&
+            customers.length > 0
+        ) {
+
+            try {
+
+                await window.LogisTechCache.replaceAll(
+                    "customers",
+                    customers
+                );
+
+
+                console.log(
+                    "LOGIS-TECH: Customers saved to local cache."
+                );
+
+            } catch (cacheError) {
+
+                console.warn(
+                    "Unable to save Customers to cache:",
+                    cacheError
+                );
+
+            }
+
+        }
+
+
+        /*
+         * 5. DISPLAY
+         */
+
+        renderCustomerTable();
+
+
+    } catch (error) {
+
+        console.error(
+            "Unable to load customers:",
+            error
+        );
+
+
+        /*
+         * FALLBACK TO CACHE
+         */
+
+        if (
+            window.LogisTechCache
+        ) {
+
+            try {
+
+                const cachedCustomers =
+                    await window.LogisTechCache.getAll(
+                        "customers"
+                    );
+
+
+                if (
+                    Array.isArray(
+                        cachedCustomers
+                    ) &&
+                    cachedCustomers.length > 0
+                ) {
+
+                    customers =
+                        normalizeCustomers(
+                            cachedCustomers
+                        );
+
+
+                    customersLoaded =
+                        true;
+
+
+                    renderCustomerTable();
+
+
+                    console.warn(
+                        "LOGIS-TECH: Using cached Customers because API is unavailable."
+                    );
+
+
+                    return;
+
+                }
+
+            } catch (cacheError) {
+
+                console.error(
+                    "Unable to read Customer fallback cache:",
+                    cacheError
+                );
+
+            }
+
+        }
+
+
+        renderCustomerTableError(
+            error.message
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   NORMALIZE CUSTOMERS
+===================================================== */
+
+function normalizeCustomers(
+    result
+) {
+
+    if (!result) {
+
+        return [];
+
+    }
+
+
+    if (
+        Array.isArray(result)
+    ) {
+
+        return result;
+
+    }
+
+
+    if (
+        Array.isArray(result.records)
+    ) {
+
+        return result.records;
+
+    }
+
+
+    if (
+        Array.isArray(result.customers)
+    ) {
+
+        return result.customers;
+
+    }
+
+
+    if (
+        Array.isArray(result.data)
+    ) {
+
+        return result.data;
+
+    }
+
+
+    if (
+        result.data &&
+        Array.isArray(
+            result.data.records
+        )
+    ) {
+
+        return result.data.records;
+
+    }
+
+
+    if (
+        result.data &&
+        Array.isArray(
+            result.data.customers
+        )
+    ) {
+
+        return result.data.customers;
+
+    }
+
+
+    return [];
+
+}
+
+
+/* =====================================================
+   RENDER CUSTOMER TABLE
+===================================================== */
+
+function renderCustomerTable() {
+
+    const tbody =
+        document.getElementById(
+            "customerTableBody"
+        );
+
+
+    if (!tbody) {
+
+        return;
+
+    }
+
+
+    tbody.innerHTML = "";
+
+
+    if (
+        !customers.length
+    ) {
+
+        const row =
+            document.createElement(
+                "tr"
+            );
+
+
+        row.innerHTML = `
+
+            <td
+                colspan="7"
+                class="customer-table-empty"
+            >
+                No customers found.
+            </td>
+
+        `;
+
+
+        tbody.appendChild(
+            row
+        );
+
+
+        return;
+
+    }
+
+
+    customers.forEach(
+        function (customer) {
+
+            const row =
+                document.createElement(
+                    "tr"
+                );
+
+
+            const customerId =
+                getCustomerValue(
+                    customer,
+                    [
+                        "CUSTOMER_ID",
+                        "customerId",
+                        "CUSTOMERID",
+                        "ID",
+                        "id"
+                    ]
+                );
+
+
+            const clientName =
+                getCustomerValue(
+                    customer,
+                    [
+                        "CLIENT_NAME",
+                        "clientName",
+                        "CLIENT",
+                        "client"
+                    ]
+                );
+
+
+            const attention =
+                getCustomerValue(
+                    customer,
+                    [
+                        "ATTENTION",
+                        "attention"
+                    ]
+                );
+
+
+            const contact =
+                getCustomerValue(
+                    customer,
+                    [
+                        "CONTACT",
+                        "contact",
+                        "CONTACT_NUMBER",
+                        "contactNumber",
+                        "PHONE",
+                        "phone"
+                    ]
+                );
+
+
+            const email =
+                getCustomerValue(
+                    customer,
+                    [
+                        "EMAIL",
+                        "email",
+                        "EMAIL_ADDRESS",
+                        "emailAddress"
+                    ]
+                );
+
+
+            const status =
+                getCustomerValue(
+                    customer,
+                    [
+                        "STATUS",
+                        "status"
+                    ]
+                ) || "ACTIVE";
+
+
+            row.dataset.customerId =
+                customerId;
+
+
+            row.innerHTML = `
+
+                <td>
+                    <strong>
+                        ${escapeHTML(
+                            customerId || "-"
+                        )}
+                    </strong>
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        clientName || "-"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        attention || "-"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        contact || "-"
+                    )}
+                </td>
+
+                <td>
+                    ${escapeHTML(
+                        email || "-"
+                    )}
+                </td>
+
+                <td>
+                    <span
+                        class="customer-status-badge ${getStatusClass(status)}"
+                    >
+                        ${escapeHTML(
+                            status
+                        )}
+                    </span>
+                </td>
+
+                <td>
+
+                    <button
+                        type="button"
+                        class="customer-edit-button"
+                        data-customer-id="${escapeAttribute(customerId)}"
+                    >
+                        EDIT
+                    </button>
+
+                </td>
+
+            `;
+
+
+            const editButton =
+                row.querySelector(
+                    ".customer-edit-button"
+                );
+
+
+            if (editButton) {
+
+                editButton.addEventListener(
+                    "click",
+                    function (event) {
+
+                        event.preventDefault();
+
+                        event.stopPropagation();
+
+
+                        if (
+                            typeof window.editCustomer !==
+                            "function"
+                        ) {
+
+                            alert(
+                                "Customer Edit module is not available yet."
+                            );
+
+                            return;
+
+                        }
+
+
+                        window.editCustomer(
+                            customerId
+                        );
+
+                    }
+                );
+
+            }
+
+
+            tbody.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   CUSTOMER VALUE HELPER
+===================================================== */
+
+function getCustomerValue(
+    customer,
+    keys
+) {
+
+    if (!customer) {
+
+        return "";
+
+    }
+
+
+    for (
+        let i = 0;
+        i < keys.length;
+        i++
+    ) {
+
+        const key =
+            keys[i];
+
+
+        if (
+            customer[key] !== undefined &&
+            customer[key] !== null
+        ) {
+
+            return customer[key];
+
+        }
+
+    }
+
+
+    return "";
+
+}
+
+
+/* =====================================================
+   CUSTOMER TABLE ERROR
+===================================================== */
+
+function renderCustomerTableError(
+    message
+) {
+
+    const tbody =
+        document.getElementById(
+            "customerTableBody"
+        );
+
+
+    if (!tbody) {
+
+        return;
+
+    }
+
+
+    tbody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="7"
+                class="customer-table-empty"
+            >
+                Unable to load customers.
+                ${escapeHTML(
+                    message || ""
+                )}
+            </td>
+
+        </tr>
+
+    `;
+
+}
+
+   
 /* =====================================================
    CUSTOMER MODULE
 ===================================================== */
@@ -5558,6 +6205,20 @@ function handleCustomerSaved(
     customerModuleLoaded =
         true;
 
+
+    /*
+     * Refresh Customer Table
+     *
+     * create-customer.js already saves
+     * the customer into IndexedDB.
+     */
+
+    customersLoaded =
+        false;
+
+
+    loadCustomerTable();
+
 }
 
 
@@ -5596,6 +6257,62 @@ window.addEventListener(
 window.addEventListener(
     "logistech:data-updated",
     function (event) {
+
+               /*
+         * Reload Customers from synchronized cache
+         */
+
+        if (
+            window.LogisTechCache
+        ) {
+
+            window.LogisTechCache
+                .getAll("customers")
+                .then(
+                    function (cachedCustomers) {
+
+                        if (
+                            !Array.isArray(
+                                cachedCustomers
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        customers =
+                            normalizeCustomers(
+                                cachedCustomers
+                            );
+
+
+                        customersLoaded =
+                            true;
+
+
+                        renderCustomerTable();
+
+
+                        console.log(
+                            "LOGIS-TECH: Customer Table updated from synchronized cache."
+                        );
+
+                    }
+                )
+                .catch(
+                    function (error) {
+
+                        console.error(
+                            "Unable to refresh Customer cache:",
+                            error
+                        );
+
+                    }
+                );
+
+        }
 
         console.log(
             "LOGIS-TECH: Background data update received.",
@@ -6238,6 +6955,12 @@ window.addEventListener(
 
     window.openCustomerModule =
         openCustomerModule;
+
+   window.loadCustomerTable =
+    loadCustomerTable;
+
+window.renderCustomerTable =
+    renderCustomerTable;
 
     window.emailSelectedSO =
         emailSelectedSO;
