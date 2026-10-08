@@ -3429,9 +3429,13 @@ input[readonly] {
 ========================================================= */
 
 .customer-suggestions {
-    position: fixed !important;
+    position: absolute !important;
 
-    display: none;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+
+    width: 100%;
 
     background: #ffffff !important;
 
@@ -3443,14 +3447,14 @@ input[readonly] {
 
     overflow-y: auto;
 
+    display: none;
+
     box-sizing: border-box;
 
     z-index: 2147483647 !important;
 
     box-shadow:
         0 12px 30px rgba(0, 0, 0, 0.20);
-
-    isolation: isolate;
 }
 
 
@@ -3566,7 +3570,7 @@ input[readonly] {
 
 
 /* =========================================================
-   ALLOW CUSTOMER AREA TO FLOAT
+   ALLOW DROPDOWN TO OVERLAY LOWER FIELDS
 ========================================================= */
 
 .customer-select-wrapper {
@@ -3578,17 +3582,36 @@ input[readonly] {
 }
 
 
+.customer-autocomplete {
+    position: relative;
+
+    z-index: 999999;
+
+    overflow: visible !important;
+}
+
+
 .form-group.full {
+    position: relative;
+
+    z-index: 999999;
+
     overflow: visible !important;
 }
 
 
 .so-information-section {
+    position: relative;
+
+    z-index: 1000;
+
     overflow: visible !important;
 }
 
 
 .form-grid {
+    position: relative;
+
     overflow: visible !important;
 }
 
