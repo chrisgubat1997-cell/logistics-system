@@ -4963,199 +4963,172 @@ function loadCustomerStyles() {
 }
 
 
-/* =====================================================
-   LOAD CUSTOMER JAVASCRIPT
-===================================================== */
+async function loadCustomerScript() {
 
-function loadCustomerScript() {
+    console.log("=================================");
+    console.log("LOGIS-TECH: LOAD CUSTOMER JS");
+    console.log("=================================");
 
-    return new Promise(
-        function (
-            resolve,
-            reject
+    const SCRIPT_ID =
+        "logistech-customer-js";
+
+    const SCRIPT_SRC =
+        "js/create-customer.js?v=20261008-02";
+
+
+    /*
+     * Already loaded?
+     */
+    const existingScript =
+        document.getElementById(SCRIPT_ID);
+
+
+    if (existingScript) {
+
+        console.log(
+            "Customer JS script tag already exists."
+        );
+
+
+        /*
+         * IMPORTANT:
+         * Give the browser a moment to finish
+         * executing the existing script.
+         */
+        await new Promise(function (resolve) {
+
+            setTimeout(resolve, 100);
+
+        });
+
+
+        if (
+            typeof window.initializeCustomerForm ===
+            "function"
         ) {
 
-            /*
-             * Already available.
-             */
+            console.log(
+                "Customer initialize function found."
+            );
+
+            return true;
+
+        }
+
+    }
+
+
+    /*
+     * Remove stale Customer JS script
+     * if one exists without the expected ID.
+     */
+    document
+        .querySelectorAll(
+            'script[src*="create-customer.js"]'
+        )
+        .forEach(function (script) {
 
             if (
-                typeof window.initializeCustomerForm ===
-                "function"
+                script.id !== SCRIPT_ID
             ) {
 
-                resolve();
-
-                return;
+                script.remove();
 
             }
 
+        });
 
-            /*
-             * Check whether script already exists.
-             */
 
-            const existingScript =
-                document.querySelector(
-                    'script[data-customer-script="true"]'
+    /*
+     * Create fresh script.
+     */
+    const script =
+        document.createElement("script");
+
+
+    script.id =
+        SCRIPT_ID;
+
+    script.src =
+        SCRIPT_SRC;
+
+
+    return new Promise(function (
+        resolve,
+        reject
+    ) {
+
+        script.onload =
+            function () {
+
+                console.log(
+                    "Customer JS file loaded."
                 );
 
 
-            if (existingScript) {
-
                 /*
-                 * Already loaded.
+                 * IMPORTANT:
+                 * Check the actual public API
+                 * after the script executes.
                  */
-
                 if (
-                    existingScript.dataset.loaded ===
-                    "true"
+                    typeof window.initializeCustomerForm !==
+                    "function"
                 ) {
 
-                    if (
-                        typeof window.initializeCustomerForm ===
-                        "function"
-                    ) {
+                    console.error(
+                        "Customer JS loaded, BUT initializeCustomerForm() was not registered."
+                    );
 
-                        resolve();
+                    console.error(
+                        "window.initializeCustomerForm =",
+                        window.initializeCustomerForm
+                    );
 
-                    } else {
 
-                        reject(
-                            new Error(
-                                "Customer JavaScript loaded but initializeCustomerForm() was not found."
-                            )
-                        );
-
-                    }
+                    reject(
+                        new Error(
+                            "Customer JavaScript loaded but initializeCustomerForm() was not found."
+                        )
+                    );
 
                     return;
 
                 }
 
 
-                /*
-                 * Currently loading.
-                 */
-
-                existingScript.addEventListener(
-                    "load",
-                    function () {
-
-                        if (
-                            typeof window.initializeCustomerForm ===
-                            "function"
-                        ) {
-
-                            resolve();
-
-                        } else {
-
-                            reject(
-                                new Error(
-                                    "Customer JavaScript loaded but initializeCustomerForm() was not found."
-                                )
-                            );
-
-                        }
-
-                    },
-                    {
-                        once: true
-                    }
+                console.log(
+                    "Customer initialize function found."
                 );
 
 
-                existingScript.addEventListener(
-                    "error",
-                    function () {
+                resolve(true);
 
-                        reject(
-                            new Error(
-                                "Unable to load create-customer.js"
-                            )
-                        );
+            };
 
-                    },
-                    {
-                        once: true
-                    }
+
+        script.onerror =
+            function () {
+
+                console.error(
+                    "Unable to load Customer JavaScript."
                 );
 
 
-                return;
-
-            }
-
-
-            /*
-             * Create Customer JS script.
-             */
-
-            const script =
-                document.createElement(
-                    "script"
+                reject(
+                    new Error(
+                        "Unable to load Customer JavaScript."
+                    )
                 );
 
-
-            script.src =
-                "js/create-customer.js?v=20261008-01";
+            };
 
 
-            script.dataset.customerScript =
-                "true";
+        document.body.appendChild(
+            script
+        );
 
-
-            script.onload =
-                function () {
-
-                    script.dataset.loaded =
-                        "true";
-
-
-                    console.log(
-                        "Customer JS loaded successfully."
-                    );
-
-
-                    if (
-                        typeof window.initializeCustomerForm ===
-                        "function"
-                    ) {
-
-                        resolve();
-
-                    } else {
-
-                        reject(
-                            new Error(
-                                "Customer JavaScript loaded but initializeCustomerForm() was not found."
-                            )
-                        );
-
-                    }
-
-                };
-
-
-            script.onerror =
-                function () {
-
-                    reject(
-                        new Error(
-                            "Unable to load create-customer.js"
-                        )
-                    );
-
-                };
-
-
-            document.body.appendChild(
-                script
-            );
-
-        }
-    );
+    });
 
 }
 
