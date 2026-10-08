@@ -5351,23 +5351,51 @@ function renderCustomerTable() {
                         event.stopPropagation();
 
 
-                        if (
-                            typeof window.editCustomer !==
-                            "function"
-                        ) {
+                        if (typeof window.editCustomer === "function") {
 
-                            alert(
-                                "Customer Edit module is not available yet."
-                            );
+    window.editCustomer(customerId);
 
-                            return;
-
-                        }
+    return;
+}
 
 
-                        window.editCustomer(
-                            customerId
-                        );
+/*
+ * Customer module is not loaded yet.
+ * Load it first, then open the selected customer.
+ */
+openCustomerModule()
+    .then(function () {
+
+        if (
+            typeof window.editCustomer !==
+            "function"
+        ) {
+
+            alert(
+                "Customer Edit module failed to load."
+            );
+
+            return;
+        }
+
+
+        window.editCustomer(
+            customerId
+        );
+
+    })
+    .catch(function (error) {
+
+        console.error(
+            "Unable to open Customer Edit:",
+            error
+        );
+
+        alert(
+            "Unable to open Customer Edit module."
+        );
+
+    });
 
                     }
                 );
