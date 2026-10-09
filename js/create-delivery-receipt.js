@@ -67,60 +67,41 @@ let isLoadingSalesOrders = false;
 let isSavingDR = false;
 
 
+
 /* =========================================================
    GOOGLE APPS SCRIPT API
 ========================================================= */
 
 async function callDeliveryAPI(action, data = null) {
-    if (
-        !DELIVERY_API_URL ||
-        DELIVERY_API_URL.includes(
-            "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec"
-        )
-    ) {
+    if (!DELIVERY_API_URL) {
         throw new Error(
-            "Ilagay muna ang existing Apps Script Web App URL sa DELIVERY_API_URL."
+            "Hindi naka-configure ang Apps Script Web App URL."
         );
     }
 
     const url = new URL(DELIVERY_API_URL);
+    let response;
 
     if (data === null) {
         url.searchParams.set("action", action);
 
-        const response = await fetch(url.toString(), {
+        response = await fetch(url.toString(), {
             method: "GET",
             redirect: "follow"
         });
-
-        if (!response.ok) {
-            throw new Error(
-                "API request failed: HTTP " + response.status
-            );
-        }
-
-        const result = await response.json();
-
-        if (result.success === false) {
-            throw new Error(
-                result.error || "API request failed."
-            );
-        }
-
-        return result;
+    } else {
+        response = await fetch(url.toString(), {
+            method: "POST",
+            redirect: "follow",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+                action: action,
+                data: data
+            })
+        });
     }
-
-    const response = await fetch(url.toString(), {
-        method: "POST",
-        redirect: "follow",
-        headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify({
-            action: action,
-            data: data
-        })
-    });
 
     if (!response.ok) {
         throw new Error(
@@ -128,11 +109,20 @@ async function callDeliveryAPI(action, data = null) {
         );
     }
 
-    const result = await response.json();
+    let result;
+
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error(
+            "Hindi valid JSON ang response ng Apps Script. " +
+            "Tingnan kung tama ang deployment at API response."
+        );
+    }
 
     if (result.success === false) {
         throw new Error(
-            result.error || "API request failed."
+            result.error || "Hindi matagumpay ang API request."
         );
     }
 
@@ -167,23 +157,6 @@ async function fetchSOTransactionDetails(soNumber) {
 
 
 /* =========================================================
-   GLOBAL STATE
-   ========================================================= */
-
-let selectedSO = null;
-
-let itemState = [];
-
-let currentDR = null;
-
-let savedDR = null;
-
-let currentStep = 1;
-
-let warningTimeout = null;
-
-
-/* =========================================================
    DOM HELPER
    ========================================================= */
 
@@ -198,12 +171,6 @@ function $(id) {
 
 document.addEventListener("DOMContentLoaded", initCreateDeliveryReceipt);
 
-
-
-document.addEventListener(
-    "DOMContentLoaded",
-    initCreateDeliveryReceipt
-);
 
 async function initCreateDeliveryReceipt() {
     console.log(
@@ -4107,50 +4074,15 @@ function hideSalesOrderSuggestions() {
 }
 
 
+
 /* =========================================================
-   STORAGE - DELIVERY RECEIPTS
-   ========================================================= */
+   DELIVERY RECEIPTS - GOOGLE SHEETS CACHE
+========================================================= */
 
 function readDeliveryReceipts() {
-
-    try {
-
-        const stored =
-            localStorage.getItem(
-                DR_STORAGE_KEY
-            );
-
-        if (!stored) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(stored);
-
-
-        if (
-            Array.isArray(parsed)
-        ) {
-
-            return parsed;
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Unable to read Delivery Receipts:",
-            error
-        );
-
-    }
-
-
-    return [];
-
+    return Array.isArray(deliveryReceiptsCache)
+        ? deliveryReceiptsCache
+        : [];
 }
 
 
