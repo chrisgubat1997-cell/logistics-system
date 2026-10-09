@@ -67,41 +67,60 @@ let isLoadingSalesOrders = false;
 let isSavingDR = false;
 
 
-
 /* =========================================================
    GOOGLE APPS SCRIPT API
 ========================================================= */
 
 async function callDeliveryAPI(action, data = null) {
-    if (!DELIVERY_API_URL) {
+    if (
+        !DELIVERY_API_URL ||
+        DELIVERY_API_URL.includes(
+            "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec"
+        )
+    ) {
         throw new Error(
-            "Hindi naka-configure ang Apps Script Web App URL."
+            "Ilagay muna ang existing Apps Script Web App URL sa DELIVERY_API_URL."
         );
     }
 
     const url = new URL(DELIVERY_API_URL);
-    let response;
 
     if (data === null) {
         url.searchParams.set("action", action);
 
-        response = await fetch(url.toString(), {
+        const response = await fetch(url.toString(), {
             method: "GET",
             redirect: "follow"
         });
-    } else {
-        response = await fetch(url.toString(), {
-            method: "POST",
-            redirect: "follow",
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
-            body: JSON.stringify({
-                action: action,
-                data: data
-            })
-        });
+
+        if (!response.ok) {
+            throw new Error(
+                "API request failed: HTTP " + response.status
+            );
+        }
+
+        const result = await response.json();
+
+        if (result.success === false) {
+            throw new Error(
+                result.error || "API request failed."
+            );
+        }
+
+        return result;
     }
+
+    const response = await fetch(url.toString(), {
+        method: "POST",
+        redirect: "follow",
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+            action: action,
+            data: data
+        })
+    });
 
     if (!response.ok) {
         throw new Error(
@@ -109,25 +128,17 @@ async function callDeliveryAPI(action, data = null) {
         );
     }
 
-    let result;
-
-    try {
-        result = await response.json();
-    } catch (error) {
-        throw new Error(
-            "Hindi valid JSON ang response ng Apps Script. " +
-            "Tingnan kung tama ang deployment at API response."
-        );
-    }
+    const result = await response.json();
 
     if (result.success === false) {
         throw new Error(
-            result.error || "Hindi matagumpay ang API request."
+            result.error || "API request failed."
         );
     }
 
     return result;
 }
+
 
 
 async function fetchSOTransactionDetails(soNumber) {
@@ -138,7 +149,9 @@ async function fetchSOTransactionDetails(soNumber) {
 
     if (!response || response.success !== true) {
         throw new Error(
-            response?.message || "Unable to load Sales Order details."
+            response?.message ||
+            response?.error ||
+            "Unable to load Sales Order details."
         );
     }
 
@@ -149,11 +162,40 @@ async function fetchSOTransactionDetails(soNumber) {
         response.data?.so;
 
     if (!salesOrder) {
-        throw new Error("Sales Order details were not returned by the API.");
+        throw new Error(
+            "Hindi ibinalik ng API ang Sales Order details."
+        );
     }
 
-    return salesOrder;
+    // Items may be at the root or inside the Sales Order object.
+    const rawItems =
+        response.items ||
+        response.data?.items ||
+        salesOrder.items ||
+        [];
+
+    return {
+        ...salesOrder,
+        items: normalizeItems(rawItems)
+    };
 }
+
+
+/* =========================================================
+   GLOBAL STATE
+   ========================================================= */
+
+let selectedSO = null;
+
+let itemState = [];
+
+let currentDR = null;
+
+let savedDR = null;
+
+let currentStep = 1;
+
+let warningTimeout = null;
 
 
 /* =========================================================
@@ -171,6 +213,12 @@ function $(id) {
 
 document.addEventListener("DOMContentLoaded", initCreateDeliveryReceipt);
 
+
+
+document.addEventListener(
+    "DOMContentLoaded",
+    initCreateDeliveryReceipt
+);
 
 async function initCreateDeliveryReceipt() {
     console.log(
@@ -524,20 +572,11 @@ function setupDate() {
    ========================================================= */
 
 function generateAndDisplayDRNumber() {
-
-    const drNumber =
-        generateDRNumber();
-
-    const element =
-        $("drNumber");
+    const element = $("drNumber");
 
     if (element) {
-
-        element.textContent =
-            drNumber;
-
+        element.textContent = "GENERATED ON SAVE";
     }
-
 }
 
 
@@ -546,52 +585,8 @@ function generateAndDisplayDRNumber() {
    ========================================================= */
 
 function generateDRNumber() {
-
-    const year =
-        new Date().getFullYear();
-
-    const records =
-        readDeliveryReceipts();
-
-    let highestNumber = 0;
-
-    records.forEach(
-        function(dr) {
-
-            const number =
-                String(
-                    dr.drNumber || ""
-                );
-
-            const pattern =
-                new RegExp(
-                    `^DR-${year}-(\\d+)$`
-                );
-
-            const match =
-                number.match(pattern);
-
-            if (match) {
-
-                highestNumber =
-                    Math.max(
-                        highestNumber,
-                        Number(match[1])
-                    );
-
-            }
-
-        }
-    );
-
-    const nextNumber =
-        highestNumber + 1;
-
-    return (
-        `DR-${year}-` +
-        String(nextNumber).padStart(5, "0")
-    );
-
+    // The server generates the official DR number.
+    return "GENERATED ON SAVE";
 }
 
 
@@ -823,97 +818,86 @@ function normalizeSalesOrder(so) {
    NORMALIZE ITEMS
    ========================================================= */
 
+
 function normalizeItems(items) {
-
     if (!Array.isArray(items)) {
-
         return [];
-
     }
 
+    return items.map(function (item, index) {
+        item = item || {};
 
-    return items.map(
-        function(item, index) {
+        const itemId = String(
+            item.SO_ITEM_ID ||
+            item.soItemId ||
+            item.ITEM_ID ||
+            item.itemId ||
+            item.id ||
+            ""
+        ).trim();
 
-            item = item || {};
+        const itemNumber = String(
+            item.ITEM_NUMBER ||
+            item.ITEM_NO ||
+            item.ITEM_CODE ||
+            item.itemNumber ||
+            item.itemNo ||
+            item.itemCode ||
+            (index + 1)
+        ).trim();
 
+        const itemName = String(
+            item.ITEM_NAME ||
+            item.PRODUCT_NAME ||
+            item.NAME ||
+            item.itemName ||
+            item.productName ||
+            item.name ||
+            ""
+        );
 
-            const itemNumber =
-                item.itemNumber ||
-                item.itemNo ||
-                item.itemCode ||
-                item.code ||
-                item.sku ||
-                item.partNumber ||
-                String(index + 1);
+        const itemDescription = String(
+            item.ITEM_DESCRIPTION ||
+            item.DESCRIPTION ||
+            item.DETAILS ||
+            item.itemDescription ||
+            item.description ||
+            ""
+        );
 
+        const totalOrder = toNumber(
+            item.SO_QTY ??
+            item.TOTAL_ORDER ??
+            item.ORDER_QTY ??
+            item.ORDERED_QTY ??
+            item.QUANTITY ??
+            item.QTY ??
+            item.ITEM_QTY ??
+            item.totalOrder ??
+            item.orderQty ??
+            item.quantity ??
+            0
+        );
 
-            const itemName =
-                item.itemName ||
-                item.name ||
-                item.productName ||
-                item.product ||
-                "";
+        const unit = String(
+            item.UNIT ||
+            item.UOM ||
+            item.unit ||
+            item.uom ||
+            ""
+        );
 
-
-            const itemDescription =
-                item.itemDescription ||
-                item.description ||
-                item.desc ||
-                item.details ||
-                "";
-
-
-            const totalOrder =
-                toNumber(
-                    item.totalOrder ??
-                    item.orderQty ??
-                    item.orderedQty ??
-                    item.quantity ??
-                    item.qty ??
-                    item.soQty ??
-                    item.totalQty ??
-                    0
-                );
-
-
-            const unit =
-                item.unit ||
-                item.uom ||
-                item.UOM ||
-                "";
-
-
-            return {
-
-                id:
-                    item.id ||
-                    item.itemId ||
-                    itemNumber,
-
-                itemNumber:
-                    String(itemNumber),
-
-                itemName:
-                    String(itemName),
-
-                itemDescription:
-                    String(itemDescription),
-
-                totalOrder:
-                    totalOrder,
-
-                unit:
-                    String(unit),
-
-                original:
-                    item
-
-            };
-
-        }
-    );
-
+        return {
+            id: itemId,
+            soItemId: itemId,
+            itemNumber: itemNumber,
+            itemName: itemName,
+            itemDescription: itemDescription,
+            totalOrder: totalOrder,
+            unit: unit,
+            original: item
+        };
+    });
 }
 
 
@@ -1088,181 +1072,170 @@ function showSalesOrderSuggestions(query) {
    SELECT SALES ORDER
    ========================================================= */
 
-function selectSalesOrder(so) {
 
-    selectedSO =
-        normalizeSalesOrder(so);
+async function selectSalesOrder(so) {
+    if (isLoadingSalesOrders) {
+        return;
+    }
 
+    const selected = normalizeSalesOrder(so);
 
-    /*
-     * SAVE SELECTED SO
-     */
+    if (!selected.soNumber) {
+        showWarning(
+            "Invalid Sales Order",
+            "Walang Sales Order Number ang napiling record."
+        );
+        return;
+    }
+
+    isLoadingSalesOrders = true;
 
     try {
+        selectedSO = null;
+        itemState = [];
 
-        localStorage.setItem(
-            SELECTED_SO_KEY,
-            JSON.stringify(selectedSO)
+        showWarningLoading(false);
+
+        const details = await fetchSOTransactionDetails(
+            selected.soNumber
         );
 
-    } catch (error) {
+        selectedSO = {
+            ...normalizeSalesOrder(details),
+            items: normalizeItems(details.items),
+            original: details
+        };
 
-        console.warn(
-            "Unable to save selected SO:",
-            error
-        );
+        if (!selectedSO.items.length) {
+            showWarning(
+                "No Sales Order Items",
+                "Walang items na nakuha para sa " +
+                selectedSO.soNumber +
+                ". Pakisuri ang SALES_ORDER_ITEMS sheet at ang SO_ITEM_ID/SO_NUMBER linkage."
+            );
+            return;
+        }
 
-    }
+        try {
+            localStorage.setItem(
+                SELECTED_SO_KEY,
+                JSON.stringify({
+                    soNumber: selectedSO.soNumber
+                })
+            );
+        } catch (error) {
+            console.warn(
+                "Unable to save selected SO reference:",
+                error
+            );
+        }
 
+        const searchInput = $("salesOrderSearch");
+        if (searchInput) {
+            searchInput.value = selectedSO.soNumber;
+        }
 
-    /*
-     * SEARCH BOX
-     */
+        const clearButton = $("clearSalesOrderSearch");
+        if (clearButton) {
+            clearButton.classList.remove("hidden");
+        }
 
-    const searchInput =
-        $("salesOrderSearch");
+        hideSalesOrderSuggestions();
 
-    if (searchInput) {
+        buildItemState();
+        fillSalesOrderDetails();
 
-        searchInput.value =
-            selectedSO.soNumber || "";
+        showElement("selectedSOIndicator");
+        showElement("soInformationSection");
+        showElement("deliveryDetailsSection");
+        showElement("itemPickingSection");
+        showElement("prepareActions");
 
-    }
+        currentDR = null;
+        savedDR = null;
 
+        currentStep = 1;
+        updateWorkflow(1);
 
-    const clearButton =
-        $("clearSalesOrderSearch");
-
-    if (clearButton) {
-
-        clearButton.classList.remove(
-            "hidden"
-        );
-
-    }
-
-
-    hideSalesOrderSuggestions();
-
-
-    /*
-     * BUILD ITEM STATE
-     */
-
-    buildItemState();
-
-
-    /*
-     * FILL SO DETAILS
-     */
-
-    fillSalesOrderDetails();
-
-
-    /*
-     * SHOW SECTIONS
-     */
-
-    showElement(
-        "selectedSOIndicator"
-    );
-
-    showElement(
-        "soInformationSection"
-    );
-
-    showElement(
-        "deliveryDetailsSection"
-    );
-
-    showElement(
-        "itemPickingSection"
-    );
-
-    showElement(
-        "prepareActions"
-    );
-
-
-    /*
-     * WORKFLOW
-     */
-
-    currentStep = 1;
-
-    updateWorkflow(1);
-
-
-    /*
-     * SCROLL TO SO DETAILS
-     */
-
-    setTimeout(
-        function() {
-
-            const section =
-                $("soInformationSection");
+        window.setTimeout(function () {
+            const section = $("soInformationSection");
 
             if (section) {
-
                 section.scrollIntoView({
                     behavior: "smooth",
                     block: "start"
                 });
-
             }
+        }, 100);
 
-        },
-        100
-    );
+    } catch (error) {
+        console.error(
+            "Unable to select Sales Order:",
+            error
+        );
 
+        showWarning(
+            "Sales Order Loading Error",
+            error.message ||
+            "Hindi ma-load ang SO items mula sa Google Sheets."
+        );
+
+    } finally {
+        isLoadingSalesOrders = false;
+    }
 }
 
 
-/* =========================================================
-   LOAD SELECTED SO FROM PREVIOUS PAGE
-   ========================================================= */
-
-function loadSelectedSalesOrder() {
-
+async function loadSelectedSalesOrder() {
     try {
-
-        const stored =
-            localStorage.getItem(
-                SELECTED_SO_KEY
-            );
+        const stored = localStorage.getItem(
+            SELECTED_SO_KEY
+        );
 
         if (!stored) {
             return;
         }
 
+        const parsed = JSON.parse(stored);
 
-        const parsed =
-            JSON.parse(stored);
+        if (parsed && typeof parsed === "object") {
+            const soNumber =
+                parsed.soNumber ||
+                parsed.SO_NUMBER ||
+                "";
 
+            if (!soNumber) {
+                return;
+            }
 
-        if (
-            parsed &&
-            typeof parsed === "object"
-        ) {
-
-            selectSalesOrder(
-                parsed
+            const matchingSO = getSalesOrders().find(
+                function (so) {
+                    return normalizeText(so.soNumber) ===
+                        normalizeText(soNumber);
+                }
             );
 
+            await selectSalesOrder(
+                matchingSO || { soNumber: soNumber }
+            );
         }
 
     } catch (error) {
-
         console.error(
             "Unable to load selected Sales Order:",
             error
         );
-
     }
-
 }
 
+
+function showWarningLoading(show) {
+    const searchInput = $("salesOrderSearch");
+
+    if (searchInput) {
+        searchInput.disabled = Boolean(show);
+    }
+}
 
 /* =========================================================
    FILL SALES ORDER DETAILS
@@ -1437,96 +1410,48 @@ function getEditedSalesOrderDetails() {
    BUILD ITEM STATE
    ========================================================= */
 
+
 function buildItemState() {
-
     if (!selectedSO) {
-
         itemState = [];
-
+        renderItemsTable();
         return;
-
     }
 
+    const items = Array.isArray(selectedSO.items)
+        ? selectedSO.items
+        : [];
 
-    const items =
-        selectedSO.items || [];
+    itemState = items.map(function (item, index) {
+        const previousDelivered =
+            getPreviouslyDeliveredQty(selectedSO, item);
 
+        const totalOrder = toNumber(item.totalOrder);
 
-    itemState =
-        items.map(
-            function(item, index) {
-
-                const previousDelivered =
-                    getPreviouslyDeliveredQty(
-                        selectedSO,
-                        item
-                    );
-
-
-                const totalOrder =
-                    toNumber(
-                        item.totalOrder
-                    );
-
-
-                const balance =
-                    Math.max(
-                        totalOrder -
-                        previousDelivered,
-                        0
-                    );
-
-
-                return {
-
-                    index:
-
-                        index,
-
-                    id:
-                        item.id,
-
-                    itemNumber:
-                        item.itemNumber,
-
-                    itemName:
-                        item.itemName,
-
-                    itemDescription:
-                        item.itemDescription,
-
-                    unit:
-                        item.unit,
-
-                    totalOrder:
-                        totalOrder,
-
-                    totalDelivered:
-                        previousDelivered,
-
-                    balance:
-                        balance,
-
-                    pickQty:
-                        0,
-
-                    remarks:
-                        "",
-
-                    checked:
-                        false,
-
-                    error:
-                        ""
-
-                };
-
-            }
+        const balance = Math.max(
+            totalOrder - previousDelivered,
+            0
         );
 
+        return {
+            index: index,
+            id: item.id,
+            soItemId: item.soItemId || item.id,
+            itemNumber: item.itemNumber,
+            itemName: item.itemName,
+            itemDescription: item.itemDescription,
+            unit: item.unit,
+            totalOrder: totalOrder,
+            totalDelivered: previousDelivered,
+            balance: balance,
+            pickQty: 0,
+            remarks: "",
+            checked: false,
+            error: ""
+        };
+    });
 
     renderItemsTable();
-
 }
 
 
@@ -1534,91 +1459,121 @@ function buildItemState() {
    PREVIOUS DELIVERED QTY
    ========================================================= */
 
-function getPreviouslyDeliveredQty(
-    salesOrder,
-    currentItem
-) {
 
-    const records =
-        readDeliveryReceipts();
+function getPreviouslyDeliveredQty(salesOrder, currentItem) {
+    const records = readDeliveryReceipts();
 
+    const targetSO = normalizeText(
+        salesOrder?.soNumber ||
+        salesOrder?.SO_NUMBER
+    );
 
-    if (!records.length) {
+    if (!targetSO) {
         return 0;
     }
 
-
     let totalDelivered = 0;
 
+    records.forEach(function (dr) {
+        if (!dr) {
+            return;
+        }
 
-    records.forEach(
-        function(dr) {
+        const drSO = normalizeText(
+            dr.SO_NUMBER ||
+            dr.soNumber ||
+            dr.salesOrderNumber
+        );
 
-            if (!dr) {
+        if (drSO !== targetSO) {
+            return;
+        }
+
+        const status = normalizeText(
+            dr.STATUS || dr.status || ""
+        );
+
+        if (
+            status === "cancelled" ||
+            status === "canceled" ||
+            status === "void" ||
+            status === "deleted"
+        ) {
+            return;
+        }
+
+        const items = Array.isArray(dr.items)
+            ? dr.items
+            : [];
+
+        items.forEach(function (savedItem) {
+            if (!sameItem(savedItem, currentItem)) {
                 return;
             }
 
-
-            const drSO =
-                normalizeText(
-                    dr.soNumber
-                );
-
-            const selectedSO =
-                normalizeText(
-                    salesOrder.soNumber
-                );
-
-
-            if (
-                !drSO ||
-                !selectedSO ||
-                drSO !== selectedSO
-            ) {
-
-                return;
-
-            }
-
-
-            const items =
-                Array.isArray(dr.items)
-                ? dr.items
-                : [];
-
-
-            items.forEach(
-                function(item) {
-
-                    if (
-                        sameItem(
-                            item,
-                            currentItem
-                        )
-                    ) {
-
-                        const qty =
-                            toNumber(
-                                item.pickQty ??
-                                item.pickedQty ??
-                                item.deliveredQty ??
-                                item.qty ??
-                                0
-                            );
-
-                        totalDelivered += qty;
-
-                    }
-
-                }
+            // DELIVERED_QTY is the quantity delivered by this DR.
+            // PICK_QTY is a fallback for compatible older records.
+            const qty = toNumber(
+                savedItem.DELIVERED_QTY ??
+                savedItem.deliveredQty ??
+                savedItem.PICK_QTY ??
+                savedItem.pickQty ??
+                savedItem.pickedQty ??
+                0
             );
 
-        }
-    );
-
+            totalDelivered += Math.max(qty, 0);
+        });
+    });
 
     return totalDelivered;
+}
 
+
+function sameItem(savedItem, currentItem) {
+    if (!savedItem || !currentItem) {
+        return false;
+    }
+
+    const currentId = normalizeText(
+        currentItem.soItemId ||
+        currentItem.id ||
+        currentItem.SO_ITEM_ID
+    );
+
+    const savedId = normalizeText(
+        savedItem.SO_ITEM_ID ||
+        savedItem.soItemId ||
+        savedItem.ITEM_ID ||
+        savedItem.itemId ||
+        savedItem.id
+    );
+
+    if (currentId && savedId && currentId === savedId) {
+        return true;
+    }
+
+    const currentNumber = normalizeText(
+        currentItem.itemNumber ||
+        currentItem.ITEM_NUMBER
+    );
+
+    const savedNumber = normalizeText(
+        savedItem.ITEM_NUMBER ||
+        savedItem.itemNumber ||
+        savedItem.ITEM_NO ||
+        savedItem.itemNo
+    );
+
+    if (
+        currentNumber &&
+        savedNumber &&
+        currentNumber === savedNumber
+    ) {
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -2663,51 +2618,24 @@ function buildCurrentDeliveryReceipt() {
                 function(item) {
 
                     return {
+    id: item.id,
+    soItemId: item.soItemId || item.id || "",
 
-                        id:
-                            item.id,
+    itemNumber: item.itemNumber,
+    itemName: item.itemName,
+    itemDescription: item.itemDescription,
+    description: item.itemDescription || item.itemName || "",
 
-                        itemNumber:
-                            item.itemNumber,
+    unit: item.unit,
+    totalOrder: item.totalOrder,
+    soQty: item.totalOrder,
 
-                        itemName:
-                            item.itemName,
+    totalDelivered: item.totalDelivered,
+    balance: item.balance,
 
-                        itemDescription:
-                            item.itemDescription,
-
-                        description:
-                            item.itemDescription ||
-                            item.itemName ||
-                            "",
-
-                        unit:
-                            item.unit,
-
-                        totalOrder:
-                            item.totalOrder,
-
-                        soQty:
-                            item.totalOrder,
-
-                        totalDelivered:
-                            item.totalDelivered,
-
-                        deliveredQty:
-                            item.totalDelivered,
-
-                        balance:
-                            item.balance,
-
-                        pickQty:
-                            toNumber(
-                                item.pickQty
-                            ),
-
-                        remarks:
-                            item.remarks || ""
-
-                    };
+    pickQty: toNumber(item.pickQty),
+    remarks: item.remarks || ""
+};
 
                 }
             );
@@ -3236,23 +3164,25 @@ async function saveDeliveryReceipt() {
 
     try {
         const payload = {
-            soNumber: currentDR.soNumber,
-            dateOfTransfer: currentDR.dateOfTransfer,
-            deliveryAddress: currentDR.deliveryAddress,
-            username:
-                localStorage.getItem("logitechUser") || "",
-            items: currentDR.items.map(function (item) {
-                return {
-                    soItemId:
-                        item.soItemId ||
-                        item.id ||
-                        "",
-                    itemNumber: item.itemNumber || "",
-                    pickQty: Number(item.pickQty),
-                    remarks: item.remarks || ""
-                };
-            })
+    soNumber: currentDR.soNumber,
+    dateOfTransfer: currentDR.dateOfTransfer,
+    deliveryAddress: currentDR.deliveryAddress,
+    username: localStorage.getItem("logitechUser") || "",
+    items: currentDR.items.map(function (item) {
+        if (!item.soItemId && !item.id) {
+            throw new Error(
+                "May item na walang SO_ITEM_ID. Hindi ito ligtas i-save."
+            );
+        }
+
+        return {
+            soItemId: item.soItemId || item.id,
+            itemNumber: item.itemNumber || "",
+            pickQty: Number(item.pickQty),
+            remarks: item.remarks || ""
         };
+    })
+};
 
         const result = await callDeliveryAPI(
             "createDeliveryReceipt",
@@ -4074,15 +4004,50 @@ function hideSalesOrderSuggestions() {
 }
 
 
-
 /* =========================================================
-   DELIVERY RECEIPTS - GOOGLE SHEETS CACHE
-========================================================= */
+   STORAGE - DELIVERY RECEIPTS
+   ========================================================= */
 
 function readDeliveryReceipts() {
-    return Array.isArray(deliveryReceiptsCache)
-        ? deliveryReceiptsCache
-        : [];
+
+    try {
+
+        const stored =
+            localStorage.getItem(
+                DR_STORAGE_KEY
+            );
+
+        if (!stored) {
+
+            return [];
+
+        }
+
+
+        const parsed =
+            JSON.parse(stored);
+
+
+        if (
+            Array.isArray(parsed)
+        ) {
+
+            return parsed;
+
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Unable to read Delivery Receipts:",
+            error
+        );
+
+    }
+
+
+    return [];
+
 }
 
 
@@ -4091,22 +4056,10 @@ function readDeliveryReceipts() {
    ========================================================= */
 
 function getCurrentDRNumber() {
+    const element = $("drNumber");
 
-    const element =
-        $("drNumber");
-
-    if (
-        element &&
-        element.textContent.trim()
-    ) {
-
-        return element.textContent.trim();
-
-    }
-
-
-    return generateDRNumber();
-
+    return element?.textContent?.trim() ||
+        "GENERATED ON SAVE";
 }
 
 
