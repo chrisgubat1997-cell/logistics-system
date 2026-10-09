@@ -31,14 +31,113 @@
    ========================================================= */
 
 
-/* =========================================================
-   STORAGE KEYS
-   ========================================================= */
 
-const SELECTED_SO_KEY = "logitechSelectedDeliverySO";
-const SALES_ORDER_STORAGE_KEY = "logitechSalesOrders";
-const DR_STORAGE_KEY = "logitechDeliveryReceipts";
-const RETURN_MODULE_KEY = "logitechReturnModule";
+/* =========================================================
+   LOGIS-TECH SYSTEM
+   CREATE DELIVERY RECEIPT
+   GOOGLE APPS SCRIPT API
+   VERSION: 20261009-02
+========================================================= */
+
+const DELIVERY_API_URL =
+    "PASTE_YOUR_EXISTING_APPS_SCRIPT_WEB_APP_URL_HERE";
+
+const SELECTED_SO_KEY =
+    "logitechSelectedDeliverySO";
+
+const RETURN_MODULE_KEY =
+    "logitechReturnModule";
+
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+
+let selectedSO = null;
+let itemState = [];
+let currentDR = null;
+let savedDR = null;
+let currentStep = 1;
+let warningTimeout = null;
+
+let salesOrdersCache = [];
+let deliveryReceiptsCache = [];
+
+let isLoadingSalesOrders = false;
+let isSavingDR = false;
+
+
+/* =========================================================
+   GOOGLE APPS SCRIPT API
+========================================================= */
+
+async function callDeliveryAPI(action, data = null) {
+    if (
+        !DELIVERY_API_URL ||
+        DELIVERY_API_URL.includes(
+            "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec"
+        )
+    ) {
+        throw new Error(
+            "Ilagay muna ang existing Apps Script Web App URL sa DELIVERY_API_URL."
+        );
+    }
+
+    const url = new URL(DELIVERY_API_URL);
+
+    if (data === null) {
+        url.searchParams.set("action", action);
+
+        const response = await fetch(url.toString(), {
+            method: "GET",
+            redirect: "follow"
+        });
+
+        if (!response.ok) {
+            throw new Error(
+                "API request failed: HTTP " + response.status
+            );
+        }
+
+        const result = await response.json();
+
+        if (result.success === false) {
+            throw new Error(
+                result.error || "API request failed."
+            );
+        }
+
+        return result;
+    }
+
+    const response = await fetch(url.toString(), {
+        method: "POST",
+        redirect: "follow",
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+            action: action,
+            data: data
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(
+            "API request failed: HTTP " + response.status
+        );
+    }
+
+    const result = await response.json();
+
+    if (result.success === false) {
+        throw new Error(
+            result.error || "API request failed."
+        );
+    }
+
+    return result;
+}
 
 
 /* =========================================================
@@ -74,24 +173,68 @@ function $(id) {
 document.addEventListener("DOMContentLoaded", initCreateDeliveryReceipt);
 
 
-function initCreateDeliveryReceipt() {
 
+document.addEventListener(
+    "DOMContentLoaded",
+    initCreateDeliveryReceipt
+);
+
+async function initCreateDeliveryReceipt() {
     console.log(
-        "LOGIS-TECH SYSTEM - Create Delivery Receipt initialized."
+        "LOGIS-TECH Create Delivery Receipt - API mode"
     );
 
     setupButtons();
-
     setupSalesOrderSearch();
-
     setupDate();
-
-    generateAndDisplayDRNumber();
-
-    loadSelectedSalesOrder();
-
     updateWorkflow(1);
 
+    try {
+        isLoadingSalesOrders = true;
+
+        const [soResult, drResult] = await Promise.all([
+            callDeliveryAPI("getSalesOrders"),
+            callDeliveryAPI("getDeliveryReceipts")
+        ]);
+
+        salesOrdersCache =
+            soResult.salesOrders ||
+            soResult.data ||
+            soResult.records ||
+            [];
+
+        deliveryReceiptsCache =
+            drResult.deliveryReceipts ||
+            drResult.records ||
+            [];
+
+        console.log(
+            "Sales Orders loaded:",
+            salesOrdersCache.length
+        );
+
+        console.log(
+            "Delivery Receipts loaded:",
+            deliveryReceiptsCache.length
+        );
+
+        await loadSelectedSalesOrder();
+
+    } catch (error) {
+        console.error(
+            "Unable to initialize Delivery Receipt:",
+            error
+        );
+
+        showWarning(
+            "Database Connection Error",
+            error.message ||
+            "Hindi ma-load ang Sales Orders at Delivery Receipts mula sa Google Sheets."
+        );
+
+    } finally {
+        isLoadingSalesOrders = false;
+    }
 }
 
 
@@ -586,99 +729,10 @@ function setupSalesOrderSearch() {
 }
 
 
-/* =========================================================
-   LOAD SALES ORDERS
-   ========================================================= */
-
 function getSalesOrders() {
-
-    let records = [];
-
-    try {
-
-        const stored =
-            localStorage.getItem(
-                SALES_ORDER_STORAGE_KEY
-            );
-
-        if (stored) {
-
-            const parsed =
-                JSON.parse(stored);
-
-            if (Array.isArray(parsed)) {
-
-                records = parsed;
-
-            }
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Unable to read Sales Orders:",
-            error
-        );
-
-    }
-
-
-    /*
-     * SUPPORT OTHER POSSIBLE STORAGE KEYS
-     */
-
-    if (!records.length) {
-
-        const alternativeKeys = [
-            "logitechSOList",
-            "logitechSalesOrderList",
-            "salesOrders",
-            "salesOrderData"
-        ];
-
-        for (
-            const key of alternativeKeys
-        ) {
-
-            try {
-
-                const stored =
-                    localStorage.getItem(key);
-
-                if (!stored) {
-                    continue;
-                }
-
-                const parsed =
-                    JSON.parse(stored);
-
-                if (Array.isArray(parsed)) {
-
-                    records = parsed;
-
-                    break;
-
-                }
-
-            } catch (error) {
-
-                console.warn(
-                    "Unable to read:",
-                    key
-                );
-
-            }
-
-        }
-
-    }
-
-
-    return records.map(
-        normalizeSalesOrder
-    );
-
+    return salesOrdersCache.map(function (so) {
+        return normalizeSalesOrder(so);
+    });
 }
 
 
@@ -686,113 +740,89 @@ function getSalesOrders() {
    NORMALIZE SALES ORDER
    ========================================================= */
 
-function normalizeSalesOrder(so) {
 
+function normalizeSalesOrder(so) {
     so = so || {};
 
-    const normalized = {
-
+    return {
         id:
-            so.id ||
+            so.SO_ID ||
             so.soId ||
-            so.salesOrderId ||
+            so.id ||
             "",
 
         soNumber:
+            so.SO_NUMBER ||
             so.soNumber ||
             so.salesOrderNumber ||
-            so.salesOrder ||
-            so.soNo ||
-            so.SO ||
             "",
 
         dateCreation:
+            so.DATE_CREATION ||
             so.dateCreation ||
-            so.creationDate ||
-            so.dateCreated ||
-            so.soDate ||
-            so.date ||
             "",
 
         clientName:
+            so.CLIENT_NAME ||
             so.clientName ||
-            so.client ||
-            so.customerName ||
-            so.customer ||
             "",
 
         salesEngineer:
+            so.SALES_ENGINEER ||
             so.salesEngineer ||
             so.SE ||
-            so.se ||
             "",
 
         attention:
+            so.ATTENTION ||
             so.attention ||
-            so.contactPerson ||
             "",
 
         tinNumber:
-            so.tinNumber ||
             so.TIN ||
-            so.tin ||
+            so.tinNumber ||
             "",
 
         poNumber:
+            so.PO_NUMBER ||
             so.poNumber ||
-            so.PO ||
-            so.po ||
             "",
 
         paymentTerms:
+            so.TERMS ||
+            so.PAYMENT_TERMS ||
             so.paymentTerms ||
-            so.terms ||
-            so.payment ||
             "",
 
         jobOrder:
+            so.JOB_ORDER ||
             so.jobOrder ||
-            so.JO ||
-            so.jo ||
             "",
 
         billingAddress:
+            so.BILLING_ADDRESS ||
             so.billingAddress ||
-            so.billAddress ||
             "",
 
         project:
+            so.PROJECT ||
             so.project ||
-            so.projectName ||
             "",
 
         deliveryAddress:
+            so.DELIVERY_ADDRESS ||
             so.deliveryAddress ||
-            so.address ||
-            so.shipTo ||
             "",
 
         status:
+            so.STATUS ||
             so.status ||
-            "ACTIVE",
+            "",
 
-        items:
-            normalizeItems(
-                so.items ||
-                so.orderItems ||
-                so.products ||
-                so.lineItems ||
-                []
-            ),
+        items: [],
 
-        original:
-            so
-
+        original: so
     };
-
-
-    return normalized;
-
 }
 
 
@@ -3153,164 +3183,140 @@ function backToPrepare() {
    SAVE DELIVERY RECEIPT
    ========================================================= */
 
-function saveDeliveryReceipt() {
+
+async function saveDeliveryReceipt() {
+    if (isSavingDR) return;
 
     if (!currentDR) {
-
         showWarning(
             "Nothing to Save",
-            "There is no prepared Delivery Receipt to save."
+            "Walang nakahandang Delivery Receipt."
         );
-
         return;
-
     }
 
-
-    /*
-     * FINAL VALIDATION
-     */
-
-    if (
-        !currentDR.soNumber
-    ) {
-
+    if (!currentDR.soNumber || !currentDR.dateOfTransfer) {
         showWarning(
-            "Sales Order Required",
-            "Sales Order information is missing."
+            "Required Information",
+            "Kailangan ang Sales Order at Date of Transfer."
         );
-
         return;
-
     }
 
-
-    if (
-        !currentDR.dateOfTransfer
-    ) {
-
-        showWarning(
-            "Date of Transfer Required",
-            "Please enter the Date of Transfer."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !currentDR.deliveryAddress
-    ) {
-
-        showWarning(
-            "Delivery Address Required",
-            "Please enter the Delivery Address."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        !Array.isArray(
-            currentDR.items
-        ) ||
-        !currentDR.items.length
-    ) {
-
+    if (!currentDR.items || !currentDR.items.length) {
         showWarning(
             "No Delivery Items",
-            "Please select at least one item."
+            "Pumili muna ng kahit isang item."
         );
-
         return;
-
     }
 
-
-    /*
-     * CHECK QUANTITIES AGAIN
-     */
-
-    for (
-        const item of currentDR.items
-    ) {
-
+    for (const item of currentDR.items) {
         if (
-            toNumber(item.pickQty) <= 0
+            !Number.isFinite(Number(item.pickQty)) ||
+            Number(item.pickQty) <= 0
         ) {
-
             showWarning(
                 "Invalid Pick Quantity",
-                `Item ${item.itemNumber} must have a Pick Qty greater than 0.`
+                "Ang Pick Qty ng bawat item ay dapat higit sa zero."
             );
-
             return;
-
         }
 
-
-        if (
-            toNumber(item.pickQty) >
-            toNumber(item.balance)
-        ) {
-
+        if (Number(item.pickQty) > Number(item.balance)) {
             showWarning(
                 "Pick Quantity Exceeded",
-                `Item ${item.itemNumber}: Pick Qty cannot exceed Balance.`
+                "Hindi maaaring lumampas ang Pick Qty sa available balance."
             );
-
             return;
-
         }
-
     }
 
+    const saveButton = $("saveDeliveryReceiptButton");
 
-    /*
-     * GENERATE FINAL DR NUMBER
-     */
+    isSavingDR = true;
 
-    currentDR.drNumber =
-        generateDRNumber();
-
-
-    currentDR.status =
-        "SAVED";
-
-
-    currentDR.savedAt =
-        new Date().toISOString();
-
-
-    /*
-     * READ EXISTING
-     */
-
-    const records =
-        readDeliveryReceipts();
-
-
-    /*
-     * SAVE
-     */
-
-    records.unshift(
-        currentDR
-    );
-
+    if (saveButton) {
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving...";
+    }
 
     try {
+        const payload = {
+            soNumber: currentDR.soNumber,
+            dateOfTransfer: currentDR.dateOfTransfer,
+            deliveryAddress: currentDR.deliveryAddress,
+            username:
+                localStorage.getItem("logitechUser") || "",
+            items: currentDR.items.map(function (item) {
+                return {
+                    soItemId:
+                        item.soItemId ||
+                        item.id ||
+                        "",
+                    itemNumber: item.itemNumber || "",
+                    pickQty: Number(item.pickQty),
+                    remarks: item.remarks || ""
+                };
+            })
+        };
 
-        localStorage.setItem(
-            DR_STORAGE_KEY,
-            JSON.stringify(records)
+        const result = await callDeliveryAPI(
+            "createDeliveryReceipt",
+            payload
         );
 
-    } catch (error) {
+        if (!result.success || !result.drNumber) {
+            throw new Error(
+                result.error ||
+                "Hindi natanggap ang valid DR number mula sa server."
+            );
+        }
 
+        savedDR = {
+            ...currentDR,
+            drNumber: result.drNumber,
+            drId: result.drId || "",
+            status: "SAVED",
+            savedAt: new Date().toISOString()
+        };
+
+        currentDR = savedDR;
+
+        // Refresh saved records from Google Sheets.
+        const drResult = await callDeliveryAPI(
+            "getDeliveryReceipts"
+        );
+
+        deliveryReceiptsCache =
+            drResult.deliveryReceipts ||
+            drResult.records ||
+            [];
+
+        renderCompleted(savedDR);
+
+        hideElement("prepareView");
+        hideElement("reviewView");
+        showElement("completedView");
+
+        try {
+            localStorage.removeItem(SELECTED_SO_KEY);
+        } catch (error) {
+            console.warn(
+                "Unable to clear selected Sales Order.",
+                error
+            );
+        }
+
+        currentStep = 3;
+        updateWorkflow(3);
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+
+    } catch (error) {
         console.error(
             "Unable to save Delivery Receipt:",
             error
@@ -3318,79 +3324,18 @@ function saveDeliveryReceipt() {
 
         showWarning(
             "Save Failed",
-            "The Delivery Receipt could not be saved to local storage."
+            error.message ||
+            "Hindi na-save ang Delivery Receipt sa Google Sheets."
         );
 
-        return;
+    } finally {
+        isSavingDR = false;
 
+        if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.textContent = "Save Delivery Receipt";
+        }
     }
-
-
-    /*
-     * SAVED STATE
-     */
-
-    savedDR =
-        currentDR;
-
-
-    /*
-     * CLEAR SELECTED SO
-     */
-
-    try {
-
-        localStorage.removeItem(
-            SELECTED_SO_KEY
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "Unable to clear selected SO."
-        );
-
-    }
-
-
-    /*
-     * COMPLETED VIEW
-     */
-
-    renderCompleted(
-        savedDR
-    );
-
-
-    hideElement(
-        "prepareView"
-    );
-
-    hideElement(
-        "reviewView"
-    );
-
-    showElement(
-        "completedView"
-    );
-
-
-    currentStep = 3;
-
-    updateWorkflow(3);
-
-
-    window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-    });
-
-
-    console.log(
-        "Delivery Receipt saved:",
-        savedDR
-    );
-
 }
 
 
