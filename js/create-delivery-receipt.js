@@ -181,22 +181,6 @@ async function fetchSOTransactionDetails(soNumber) {
 }
 
 
-/* =========================================================
-   GLOBAL STATE
-   ========================================================= */
-
-let selectedSO = null;
-
-let itemState = [];
-
-let currentDR = null;
-
-let savedDR = null;
-
-let currentStep = 1;
-
-let warningTimeout = null;
-
 
 /* =========================================================
    DOM HELPER
