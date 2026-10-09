@@ -2177,3 +2177,29 @@
     }
 
 }
+
+
+/* =========================================================
+   DYNAMIC DELIVERY TABLE STATES
+========================================================= */
+
+.delivery-table tbody .empty-state {
+    padding: 28px 18px;
+    color: #6b7280;
+    text-align: center;
+    font-size: 12px;
+    background: #fafbfc;
+}
+
+.delivery-table tbody tr.selected {
+    background: #eff6ff;
+}
+
+.delivery-table tbody tr.selected td {
+    border-bottom-color: #bfdbfe;
+}
+
+.delivery-table tbody .dr-row:focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: -2px;
+}
