@@ -1511,60 +1511,78 @@ function buildItemState() {
    PREVIOUS DELIVERED QTY
 ========================================================= */
 
+
 function getPreviouslyDeliveredQty(salesOrder, currentItem) {
+    const records = Array.isArray(deliveryReceiptsCache)
+        ? deliveryReceiptsCache
+        : [];
 
-    const records = readDeliveryReceipts();
-
-    const targetSO = normalizeText(
+    const targetSO = String(
         salesOrder?.soNumber ||
         salesOrder?.SO_NUMBER ||
-        salesOrder?.so_number
-    );
+        ""
+    ).trim().toUpperCase();
 
-    if (!targetSO || !Array.isArray(records)) {
+    const targetItemId = String(
+        currentItem?.soItemId ||
+        currentItem?.id ||
+        currentItem?.SO_ITEM_ID ||
+        currentItem?.original?.SO_ITEM_ID ||
+        ""
+    ).trim().toUpperCase();
+
+    if (!targetSO || !targetItemId) {
         return 0;
     }
 
     let totalDelivered = 0;
 
     records.forEach(function (dr) {
-
         if (!dr) return;
 
-        const drSO = normalizeText(
+        const drSO = String(
             dr.SO_NUMBER ||
             dr.soNumber ||
             dr.salesOrderNumber ||
-            dr.so_number
-        );
+            ""
+        ).trim().toUpperCase();
+
+        const status = String(
+            dr.STATUS ||
+            dr.status ||
+            ""
+        ).trim().toLowerCase();
 
         if (drSO !== targetSO) return;
 
-        const status = normalizeText(
-            dr.STATUS || dr.status || ""
-        );
-
         if (
-            ["cancelled", "canceled", "void", "deleted"].includes(status)
+            ["cancelled", "canceled", "void", "deleted"]
+                .includes(status)
         ) {
             return;
         }
 
-        // Accept common response property names.
-        const items =
-            Array.isArray(dr.items) ? dr.items :
-            Array.isArray(dr.ITEMS) ? dr.ITEMS :
-            Array.isArray(dr.deliveryReceiptItems) ? dr.deliveryReceiptItems :
-            Array.isArray(dr.DELIVERY_RECEIPT_ITEMS) ? dr.DELIVERY_RECEIPT_ITEMS :
-            [];
+        const items = Array.isArray(dr.items)
+            ? dr.items
+            : Array.isArray(dr.ITEMS)
+                ? dr.ITEMS
+                : [];
 
         items.forEach(function (savedItem) {
+            if (!savedItem) return;
 
-            if (!sameItem(savedItem, currentItem)) {
-                return;
-            }
+            const savedItemId = String(
+                savedItem.SO_ITEM_ID ||
+                savedItem.soItemId ||
+                savedItem.ITEM_ID ||
+                savedItem.itemId ||
+                savedItem.id ||
+                ""
+            ).trim().toUpperCase();
 
-            const qty = toNumber(
+            if (savedItemId !== targetItemId) return;
+
+            const qty = Number(
                 savedItem.DELIVERED_QTY ??
                 savedItem.deliveredQty ??
                 savedItem.PICK_QTY ??
@@ -1573,10 +1591,10 @@ function getPreviouslyDeliveredQty(salesOrder, currentItem) {
                 0
             );
 
-            totalDelivered += Math.max(0, qty);
-
+            if (Number.isFinite(qty) && qty > 0) {
+                totalDelivered += qty;
+            }
         });
-
     });
 
     return totalDelivered;
