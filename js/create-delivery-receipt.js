@@ -140,6 +140,32 @@ async function callDeliveryAPI(action, data = null) {
 }
 
 
+async function fetchSOTransactionDetails(soNumber) {
+    const response = await callDeliveryAPI(
+        "getSOTransactionDetails",
+        { soNumber: soNumber }
+    );
+
+    if (!response || response.success !== true) {
+        throw new Error(
+            response?.message || "Unable to load Sales Order details."
+        );
+    }
+
+    const salesOrder =
+        response.salesOrder ||
+        response.so ||
+        response.data?.salesOrder ||
+        response.data?.so;
+
+    if (!salesOrder) {
+        throw new Error("Sales Order details were not returned by the API.");
+    }
+
+    return salesOrder;
+}
+
+
 /* =========================================================
    GLOBAL STATE
    ========================================================= */
