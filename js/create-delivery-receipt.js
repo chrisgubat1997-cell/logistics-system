@@ -4057,47 +4057,17 @@ function hideSalesOrderSuggestions() {
 }
 
 
+
 /* =========================================================
    STORAGE - DELIVERY RECEIPTS
-   ========================================================= */
+   Read records loaded from Google Sheets API
+========================================================= */
 
 function readDeliveryReceipts() {
 
-    try {
-
-        const stored =
-            localStorage.getItem(
-                DR_STORAGE_KEY
-            );
-
-        if (!stored) {
-
-            return [];
-
-        }
-
-
-        const parsed =
-            JSON.parse(stored);
-
-
-        if (
-            Array.isArray(parsed)
-        ) {
-
-            return parsed;
-
-        }
-
-    } catch (error) {
-
-        console.error(
-            "Unable to read Delivery Receipts:",
-            error
-        );
-
+    if (Array.isArray(deliveryReceiptsCache)) {
+        return deliveryReceiptsCache;
     }
-
 
     return [];
 
