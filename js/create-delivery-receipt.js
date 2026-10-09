@@ -59,12 +59,11 @@ let currentDR = null;
 let savedDR = null;
 let currentStep = 1;
 let warningTimeout = null;
-
 let salesOrdersCache = [];
 let deliveryReceiptsCache = [];
-
 let isLoadingSalesOrders = false;
 let isSavingDR = false;
+let isLoadingSOSelection = false;
 
 
 /* =========================================================
@@ -1050,13 +1049,14 @@ function showSalesOrderSuggestions(query) {
 }
 
 
-/* =========================================================
-   SELECT SALES ORDER
-   ========================================================= */
 
+/* =========================================================
+   SELECT SALES ORDER - FASTER LOADING
+========================================================= */
 
 async function selectSalesOrder(so) {
-    if (isLoadingSalesOrders) {
+
+    if (isLoadingSOSelection) {
         return;
     }
 
@@ -1070,61 +1070,37 @@ async function selectSalesOrder(so) {
         return;
     }
 
-    isLoadingSalesOrders = true;
+    isLoadingSOSelection = true;
 
     try {
-        selectedSO = null;
-        itemState = [];
 
-        showWarningLoading(false);
-
-        const details = await fetchSOTransactionDetails(
-            selected.soNumber
-        );
-
+        // 1. SHOW CACHED SALES ORDER HEADER IMMEDIATELY
         selectedSO = {
-            ...normalizeSalesOrder(details),
-            items: normalizeItems(details.items),
-            original: details
+            ...selected,
+            items: [],
+            original: so
         };
 
-        if (!selectedSO.items.length) {
-            showWarning(
-                "No Sales Order Items",
-                "Walang items na nakuha para sa " +
-                selectedSO.soNumber +
-                ". Pakisuri ang SALES_ORDER_ITEMS sheet at ang SO_ITEM_ID/SO_NUMBER linkage."
-            );
-            return;
-        }
-
-        try {
-            localStorage.setItem(
-                SELECTED_SO_KEY,
-                JSON.stringify({
-                    soNumber: selectedSO.soNumber
-                })
-            );
-        } catch (error) {
-            console.warn(
-                "Unable to save selected SO reference:",
-                error
-            );
-        }
+        itemState = [];
+        currentDR = null;
+        savedDR = null;
+        currentStep = 1;
 
         const searchInput = $("salesOrderSearch");
+
         if (searchInput) {
             searchInput.value = selectedSO.soNumber;
         }
 
         const clearButton = $("clearSalesOrderSearch");
+
         if (clearButton) {
             clearButton.classList.remove("hidden");
         }
 
         hideSalesOrderSuggestions();
 
-        buildItemState();
+        // Show customer and delivery information first
         fillSalesOrderDetails();
 
         showElement("selectedSOIndicator");
@@ -1133,13 +1109,97 @@ async function selectSalesOrder(so) {
         showElement("itemPickingSection");
         showElement("prepareActions");
 
-        currentDR = null;
-        savedDR = null;
+        updateWorkflow(1);
+
+        // 2. FETCH FULL SALES ORDER DETAILS
+        const details = await fetchSOTransactionDetails(
+            selected.soNumber
+        );
+
+        // 3. MERGE DETAILS WITHOUT LOSING CACHED HEADER DATA
+        const detailedSO = normalizeSalesOrder(details);
+
+        const mergedSO = {
+            ...selectedSO
+        };
+
+        Object.keys(detailedSO).forEach(function (key) {
+
+            const value = detailedSO[key];
+
+            if (
+                value !== undefined &&
+                value !== null &&
+                value !== ""
+            ) {
+                mergedSO[key] = value;
+            }
+
+        });
+
+        mergedSO.items = normalizeItems(
+            details.items || []
+        );
+
+        mergedSO.original = details;
+
+        selectedSO = mergedSO;
+
+        // Save selected SO reference
+        try {
+
+            localStorage.setItem(
+                SELECTED_SO_KEY,
+                JSON.stringify({
+                    soNumber: selectedSO.soNumber
+                })
+            );
+
+        } catch (storageError) {
+
+            console.warn(
+                "Unable to save selected SO reference:",
+                storageError
+            );
+
+        }
+
+        // 4. BUILD ITEMS AFTER DETAILS ARE LOADED
+        if (!selectedSO.items.length) {
+
+            buildItemState();
+            fillSalesOrderDetails();
+
+            showWarning(
+                "No Sales Order Items",
+                "Walang items na nakuha para sa " +
+                selectedSO.soNumber +
+                ". Pakisuri ang SALES_ORDER_ITEMS sheet at ang SO_ITEM_ID/SO_NUMBER linkage."
+            );
+
+            return;
+        }
+
+        buildItemState();
+
+        // Refresh all fields using complete details
+        fillSalesOrderDetails();
 
         currentStep = 1;
         updateWorkflow(1);
 
+        console.log(
+            "Sales Order selected:",
+            selectedSO.soNumber
+        );
+
+        console.log(
+            "Sales Order items loaded:",
+            selectedSO.items.length
+        );
+
         window.setTimeout(function () {
+
             const section = $("soInformationSection");
 
             if (section) {
@@ -1148,9 +1208,11 @@ async function selectSalesOrder(so) {
                     block: "start"
                 });
             }
+
         }, 100);
 
     } catch (error) {
+
         console.error(
             "Unable to select Sales Order:",
             error
@@ -1163,8 +1225,15 @@ async function selectSalesOrder(so) {
         );
 
     } finally {
-        isLoadingSalesOrders = false;
+
+        isLoadingSOSelection = false;
+
+        if (typeof showWarningLoading === "function") {
+            showWarningLoading(false);
+        }
+
     }
+
 }
 
 
