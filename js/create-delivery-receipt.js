@@ -40,7 +40,7 @@
 ========================================================= */
 
 const DELIVERY_API_URL =
-    "PASTE_YOUR_EXISTING_APPS_SCRIPT_WEB_APP_URL_HERE";
+    "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
 const SELECTED_SO_KEY =
     "logitechSelectedDeliverySO";
