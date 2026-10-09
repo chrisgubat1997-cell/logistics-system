@@ -72,14 +72,16 @@ let isSavingDR = false;
 ========================================================= */
 
 async function callDeliveryAPI(action, data = null) {
+
     if (
         !DELIVERY_API_URL ||
-        DELIVERY_API_URL.includes(
-            "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec"
-        )
+        !DELIVERY_API_URL.startsWith(
+            "https://script.google.com/macros/s/"
+        ) ||
+        !DELIVERY_API_URL.endsWith("/exec")
     ) {
         throw new Error(
-            "Ilagay muna ang existing Apps Script Web App URL sa DELIVERY_API_URL."
+            "Invalid Apps Script Web App URL. Check DELIVERY_API_URL."
         );
     }
 
@@ -87,40 +89,27 @@ async function callDeliveryAPI(action, data = null) {
 
     if (data === null) {
         url.searchParams.set("action", action);
-
-        const response = await fetch(url.toString(), {
-            method: "GET",
-            redirect: "follow"
-        });
-
-        if (!response.ok) {
-            throw new Error(
-                "API request failed: HTTP " + response.status
-            );
-        }
-
-        const result = await response.json();
-
-        if (result.success === false) {
-            throw new Error(
-                result.error || "API request failed."
-            );
-        }
-
-        return result;
     }
 
-    const response = await fetch(url.toString(), {
-        method: "POST",
-        redirect: "follow",
-        headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-        },
-        body: JSON.stringify({
-            action: action,
-            data: data
-        })
-    });
+    const response = await fetch(
+        data === null ? url.toString() : DELIVERY_API_URL,
+        data === null
+            ? {
+                method: "GET",
+                redirect: "follow"
+            }
+            : {
+                method: "POST",
+                redirect: "follow",
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8"
+                },
+                body: JSON.stringify({
+                    action: action,
+                    data: data
+                })
+            }
+    );
 
     if (!response.ok) {
         throw new Error(
@@ -128,16 +117,25 @@ async function callDeliveryAPI(action, data = null) {
         );
     }
 
-    const result = await response.json();
+    let result;
+
+    try {
+        result = await response.json();
+    } catch (error) {
+        throw new Error(
+            "Hindi valid JSON ang response ng Apps Script. I-check ang deployment at access permissions."
+        );
+    }
 
     if (result.success === false) {
         throw new Error(
-            result.error || "API request failed."
+            result.error || result.message || "API request failed."
         );
     }
 
     return result;
 }
+
 
 
 
