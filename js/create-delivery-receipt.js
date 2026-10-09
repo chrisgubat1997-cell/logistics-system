@@ -1506,64 +1506,64 @@ function buildItemState() {
 }
 
 
+
 /* =========================================================
    PREVIOUS DELIVERED QTY
-   ========================================================= */
-
+========================================================= */
 
 function getPreviouslyDeliveredQty(salesOrder, currentItem) {
+
     const records = readDeliveryReceipts();
 
     const targetSO = normalizeText(
         salesOrder?.soNumber ||
-        salesOrder?.SO_NUMBER
+        salesOrder?.SO_NUMBER ||
+        salesOrder?.so_number
     );
 
-    if (!targetSO) {
+    if (!targetSO || !Array.isArray(records)) {
         return 0;
     }
 
     let totalDelivered = 0;
 
     records.forEach(function (dr) {
-        if (!dr) {
-            return;
-        }
+
+        if (!dr) return;
 
         const drSO = normalizeText(
             dr.SO_NUMBER ||
             dr.soNumber ||
-            dr.salesOrderNumber
+            dr.salesOrderNumber ||
+            dr.so_number
         );
 
-        if (drSO !== targetSO) {
-            return;
-        }
+        if (drSO !== targetSO) return;
 
         const status = normalizeText(
             dr.STATUS || dr.status || ""
         );
 
         if (
-            status === "cancelled" ||
-            status === "canceled" ||
-            status === "void" ||
-            status === "deleted"
+            ["cancelled", "canceled", "void", "deleted"].includes(status)
         ) {
             return;
         }
 
-        const items = Array.isArray(dr.items)
-            ? dr.items
-            : [];
+        // Accept common response property names.
+        const items =
+            Array.isArray(dr.items) ? dr.items :
+            Array.isArray(dr.ITEMS) ? dr.ITEMS :
+            Array.isArray(dr.deliveryReceiptItems) ? dr.deliveryReceiptItems :
+            Array.isArray(dr.DELIVERY_RECEIPT_ITEMS) ? dr.DELIVERY_RECEIPT_ITEMS :
+            [];
 
         items.forEach(function (savedItem) {
+
             if (!sameItem(savedItem, currentItem)) {
                 return;
             }
 
-            // DELIVERED_QTY is the quantity delivered by this DR.
-            // PICK_QTY is a fallback for compatible older records.
             const qty = toNumber(
                 savedItem.DELIVERED_QTY ??
                 savedItem.deliveredQty ??
@@ -1573,8 +1573,10 @@ function getPreviouslyDeliveredQty(salesOrder, currentItem) {
                 0
             );
 
-            totalDelivered += Math.max(qty, 0);
+            totalDelivered += Math.max(0, qty);
+
         });
+
     });
 
     return totalDelivered;
