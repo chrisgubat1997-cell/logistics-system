@@ -1076,6 +1076,137 @@ function openDRDetails(row) {
     }
 }
 
+   
+function renderDRDetails(dr, items) {
+    const detailsView = document.getElementById("drDetailsView");
+
+    if (!detailsView || !dr) return;
+
+    // Kunin ang items mula sa napiling DR
+    items = Array.isArray(items) ? items : getDRItems(dr);
+
+    const tbody = detailsView.querySelector("#activeDRItemsBody");
+    const totalElement = detailsView.querySelector("#activeDRTotal");
+
+    if (!tbody) {
+        console.error("Hindi makita ang activeDRItemsBody.");
+        return;
+    }
+
+    if (items.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state">
+                    Walang items na naka-save sa Delivery Receipt na ito.
+                </td>
+            </tr>
+        `;
+
+        if (totalElement) {
+            totalElement.textContent = formatMoney(0);
+        }
+
+        return;
+    }
+
+    let total = 0;
+
+    tbody.innerHTML = items.map(function (item, index) {
+        const itemNumber = getValue(
+            item,
+            ["ITEM_NUMBER", "itemNumber"],
+            index + 1
+        );
+
+        const itemName = getValue(
+            item,
+            ["ITEM_NAME", "itemName"],
+            "—"
+        );
+
+        const description = getValue(
+            item,
+            ["ITEM_DESCRIPTION", "DESCRIPTION", "description"],
+            "—"
+        );
+
+        const qty = toNumber(getValue(
+            item,
+            ["PICK_QTY", "DELIVERED_QTY", "pickQty", "deliveredQty"],
+            0
+        ));
+
+        const unit = getValue(
+            item,
+            ["UNIT", "unit"],
+            "—"
+        );
+
+        const savedAmount = getValue(
+            item,
+            ["DR_AMOUNT", "LINE_TOTAL", "TOTAL_AMOUNT", "drAmount", "lineTotal"],
+            null
+        );
+
+        const soNumber = getSONumber(dr);
+
+        const matchingSO = salesOrdersCache.find(function (so) {
+            return getSONumber(so) === soNumber;
+        });
+
+        const soItems = matchingSO ? getSOItems(matchingSO) : [];
+
+        const soItemId = String(getValue(
+            item,
+            ["SO_ITEM_ID", "soItemId"],
+            ""
+        ));
+
+        const matchingSOItem = soItems.find(function (soItem) {
+            return String(getValue(
+                soItem,
+                ["SO_ITEM_ID", "soItemId", "ITEM_ID", "itemId"],
+                ""
+            )) === soItemId;
+        });
+
+        const unitAmount = matchingSOItem
+            ? getSOItemUnitAmount(matchingSOItem)
+            : null;
+
+        const lineTotal = savedAmount !== null && savedAmount !== ""
+            ? toNumber(savedAmount)
+            : unitAmount !== null
+                ? qty * unitAmount
+                : null;
+
+        if (lineTotal !== null) {
+            total += lineTotal;
+        }
+
+        return `
+            <tr>
+                <td>${escapeHTML(itemNumber)}</td>
+                <td><strong>${escapeHTML(itemName)}</strong></td>
+                <td>${escapeHTML(description)}</td>
+                <td class="text-center">${qty}</td>
+                <td>${escapeHTML(unit)}</td>
+                <td class="amount">
+                    ${unitAmount === null ? "—" : formatMoney(unitAmount)}
+                </td>
+                <td class="amount">
+                    ${lineTotal === null ? "—" : formatMoney(lineTotal)}
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+    if (totalElement) {
+        totalElement.textContent = formatMoney(total);
+    }
+}
+
+   
     /* =====================================================
        VIEW NAVIGATION
     ===================================================== */
