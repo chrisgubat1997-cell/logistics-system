@@ -1061,7 +1061,8 @@ function openDRDetails(row) {
     const items = getDRItems(activeDR);
 
     console.log("Active Delivery Receipt:", activeDR);
-    console.log("Active DR Items:", items);
+  console.log("ACTIVE DR FULL DATA:", JSON.stringify(activeDR, null, 2));
+console.log("ACTIVE DR ITEMS FULL DATA:", JSON.stringify(items, null, 2));
 
     // I-render ang items gamit ang existing display function,
     // kung mayroon na nito sa delivery.js.
