@@ -1510,7 +1510,6 @@ function renderDRDetails(dr, items) {
         setupBackButtons();
         setupActionButtons();
         setupSearchAndFilters();
-
         await loadDeliveryData();
 
         console.log("Delivery Module READY.");
