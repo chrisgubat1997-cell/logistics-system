@@ -1555,7 +1555,9 @@
 
             <div class="table-wrapper">
 
-                <table class="delivery-table items-table">
+                <table
+    id="activeDRItemsTable"
+    class="delivery-table items-table">
 
                     <thead>
 
@@ -1573,33 +1575,13 @@
 
                     </thead>
 
-                    <tbody>
-
-                        <tr>
-
-                            <td>1</td>
-                            <td>Cable Tray</td>
-                            <td>Cable Tray Assembly</td>
-                            <td class="text-center">10</td>
-                            <td>ASSY</td>
-                            <td class="amount">₱1,500.00</td>
-                            <td class="amount">₱15,000.00</td>
-
-                        </tr>
-
-                        <tr>
-
-                            <td>2</td>
-                            <td>Cable Ladder</td>
-                            <td>Cable Ladder Assembly</td>
-                            <td class="text-center">6</td>
-                            <td>ASSY</td>
-                            <td class="amount">₱1,500.00</td>
-                            <td class="amount">₱9,000.00</td>
-
-                        </tr>
-
-                    </tbody>
+<tbody id="activeDRItemsBody">
+    <tr>
+        <td colspan="7" class="empty-state">
+            Select a Delivery Receipt to view its items.
+        </td>
+    </tr>
+</tbody>
 
                 </table>
 
@@ -1611,9 +1593,7 @@
                     <span>DR TOTAL</span>
                 </div>
 
-                <strong>
-                    ₱24,000.00
-                </strong>
+                <strong id="activeDRTotal">₱0.00</strong>
 
             </div>
 
