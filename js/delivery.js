@@ -1013,35 +1013,68 @@
         });
     }
 
-    function openDRDetails(row) {
-        const listView = document.getElementById("deliveryListView");
-        const detailsView = document.getElementById("drDetailsView");
+function openDRDetails(row) {
+    const listView = document.getElementById("deliveryListView");
+    const detailsView = document.getElementById("drDetailsView");
 
-        if (!detailsView) return;
+    if (!detailsView || !row) return;
 
-        if (listView) {
-            listView.style.display = "none";
-        }
+    const drNumber = row.dataset.drNumber || "";
 
-        detailsView.style.display = "block";
+    // Hanapin ang eksaktong active DR record
+    const activeDR = deliveryReceiptsCache.find(function (dr) {
+        return getDRNumber(dr) === drNumber;
+    });
 
-        const drNumber = row.dataset.drNumber || "";
-
-        const title = detailsView.querySelector(
-            "[data-dr-title]"
-        ) || detailsView.querySelector(
-            ".delivery-details-header h1"
-        );
-
-        if (title) {
-            title.textContent = drNumber;
-        }
-
-        /*
-         * The existing details/preview layouts are retained.
-         * Their individual fields are not rebuilt by this list update.
-         */
+    if (!activeDR) {
+        alert("Unable to find the selected Delivery Receipt.");
+        return;
     }
+
+    // I-save ang napiling DR
+    selectedDRRecord = activeDR;
+
+    localStorage.setItem(
+        SELECTED_DR_STORAGE_KEY,
+        JSON.stringify({
+            drNumber: drNumber,
+            selectedAt: new Date().toISOString()
+        })
+    );
+
+    // Ipakita ang details view
+    if (listView) {
+        listView.style.display = "none";
+    }
+
+    detailsView.style.display = "block";
+
+    // I-display ang DR Number
+    const title = detailsView.querySelector("[data-dr-title]") ||
+        detailsView.querySelector(".delivery-details-header h1");
+
+    if (title) {
+        title.textContent = drNumber;
+    }
+
+    // Kunin ang items na naka-save sa mismong DR
+    const items = getDRItems(activeDR);
+
+    console.log("Active Delivery Receipt:", activeDR);
+    console.log("Active DR Items:", items);
+
+    // I-render ang items gamit ang existing display function,
+    // kung mayroon na nito sa delivery.js.
+    if (typeof renderDRDetails === "function") {
+        renderDRDetails(activeDR, items);
+    } else {
+        console.warn(
+            "renderDRDetails() is not yet defined. " +
+            "The active DR was selected, but its item table " +
+            "still needs a rendering function."
+        );
+    }
+}
 
     /* =====================================================
        VIEW NAVIGATION
