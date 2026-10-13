@@ -36,7 +36,7 @@ h1{text-align:center;font-size:clamp(27px,4.2vw,48px);letter-spacing:3px;margin:
 select,button{font:700 14px Arial,sans-serif}select{width:100%;padding:12px;background:#190a0c;color:#fff0ce;border:1px solid #b77a3e;border-radius:6px}
 .spin{padding:14px 8px;border:2px solid #fff0a2;border-radius:7px;color:#4b1115;font-weight:900;letter-spacing:2px;background:linear-gradient(#fff0a4,#e6a637 55%,#ad5a20);box-shadow:0 4px #6b281a,0 0 20px #ffc65335;cursor:pointer}.spin:active{transform:translateY(2px);box-shadow:0 2px #6b281a}.spin:disabled{opacity:.45;cursor:not-allowed}
 .secondary{padding:11px 8px;background:#3d171b;border:1px solid #b77a3e;border-radius:6px;color:#f7dfae;cursor:pointer}
-.message{min-height:35px;text-align:center;padding:13px 5px 5px;color:#ffe49a;font:700 13px Arial,sans-serif}
+.message{min-height:35px;text-align:center;padding:13px 5px 5px;color:#ffe49a;font:700 13px Arial,sans-serif}.message.jackpot{font-size:clamp(16px,3vw,25px);color:#fff5a7;text-shadow:0 0 8px #ffcf39,0 0 22px #ff7d00;animation:jackpotPulse .45s ease-in-out infinite alternate}.jackpot-mode .cabinet{animation:cabinetFlash .28s ease-in-out 8}.jackpot-mode .symbol{animation:winnerGlow .5s ease-in-out 6 alternate;z-index:2}@keyframes jackpotPulse{to{transform:scale(1.04);filter:brightness(1.35)}}@keyframes cabinetFlash{50%{box-shadow:0 0 0 4px #fff0a2,0 0 38px #ffbd32, inset 0 0 45px #ffe36a66}}@keyframes winnerGlow{to{transform:scale(1.06);box-shadow:0 0 25px #ffda52,inset 0 0 18px #fff}}.odds-note{text-align:center;font:10px Arial,sans-serif;letter-spacing:.5px;color:#f1c58d;margin-top:8px}
 .bottom{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin-top:8px}
 .panel{border:1px solid #8e592e;background:#230e12;border-radius:8px;padding:13px}.panel h2{margin:0 0 10px;font:800 11px Arial,sans-serif;color:#ffe1a0;letter-spacing:1.5px;text-transform:uppercase}
 .history{display:grid;gap:7px;font:11px Arial,sans-serif;color:#e7d0aa}.entry{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #58302a;padding-bottom:6px}.win{color:#b5f6a7}.loss{color:#e5a6a6}
@@ -64,10 +64,10 @@ select,button{font:700 14px Arial,sans-serif}select{width:100%;padding:12px;back
   <button class="spin" id="spinButton" type="button">▶ SPIN</button>
   <button class="secondary" id="resetButton" type="button">↻ RESET DEMO</button>
  </section>
- <div class="message" id="message" role="status">Ready. Press SPIN to try the demo.</div>
+ <div class="message" id="message" role="status">Ready. Press SPIN to try the demo.</div><div class="odds-note">DEMO WIN SETTING: APPROX. 1 WINNING SPIN PER 2,000 SPINS · NOT REAL-MONEY PLAY</div>
  <section class="bottom">
   <div class="panel"><h2>Recent rounds</h2><div class="history" id="history">No rounds played yet.</div></div>
-  <div class="panel rules"><h2>Demo feature guide</h2><b>Golden Cards:</b> high card symbols may appear gold on reels 2–4.<br><b>Wild:</b> substitutes for regular card symbols in this demo.<br><b>Combo multiplier:</b> demo sequence ×1, ×2, ×3, ×5; free spins use ×2, ×4, ×6, ×10.<br><b>Scatter:</b> 3 or more ⭐ symbols may award 10 demo free spins.<br><br>All outcomes are simulated locally. Credits have no cash value. This is an original fan-style practice interface, not the official JILI Super Ace game or its exact certified math.</section>
+  <div class="panel rules"><h2>Demo feature guide</h2><b>Golden Cards:</b> high card symbols may appear gold on reels 2–4.<br><b>Wild:</b> substitutes for regular card symbols in this demo.<br><b>Combo multiplier:</b> demo sequence ×1, ×2, ×3, ×5; free spins use ×2, ×4, ×6, ×10.<br><b>Scatter:</b> 3 or more ⭐ symbols may award 10 demo free spins.<br><br>All outcomes are simulated locally. This demo is deliberately configured for about a 1-in-2,000 chance of a winning spin. Credits have no cash value. This is an original fan-style practice interface, not the official JILI Super Ace game or its exact certified math.</section>
  </section>
 </main>
 <script>
@@ -131,9 +131,15 @@ select,button{font:700 14px Arial,sans-serif}select{width:100%;padding:12px;back
   if(!isFree&&balance<bet){$("message").textContent="Not enough demo credits. Press RESET DEMO.";return;}
   busy=true;if(isFree)freeSpins--;else balance-=bet;lastWin=0;update();$("message").textContent="Reels spinning…";
   const reels=[...document.querySelectorAll(".symbol")];reels.forEach(el=>el.classList.add("spinning"));
-  let ticks=0;const timer=setInterval(()=>{renderBoard(newGrid(),true);ticks++;if(ticks>=8){clearInterval(timer);current=newGrid();renderBoard(current,false);
-   const result=score(current,bet,isFree);lastWin=result.win;balance+=lastWin;spins++;
-   if(result.scatters>=3){freeSpins+=10;$("message").textContent="★ SCATTER FEATURE! +10 demo free spins!";}else if(lastWin>0){$("message").textContent="WIN! "+money(lastWin)+" demo credits added · "+result.combo+" combo(s).";}else{$("message").textContent=isFree?"Free spin complete — no match this round.":"No match this round. Demo only — try again if you wish.";}
+  document.body.classList.remove("jackpot-mode");$("message").classList.remove("jackpot");
+  let ticks=0;const timer=setInterval(()=>{renderBoard(newGrid(),true);ticks++;if(ticks>=8){clearInterval(timer);current=newGrid();
+   // Controlled practice odds: only about 1 in 2,000 spins can pay a win.
+   const winningSpin=Math.random()<(1/2000);
+   if(winningSpin){current[0][0]={id:"A",label:"A",kind:"high",weight:1};current[1][0]={id:"A",label:"A",kind:"high",weight:1};current[2][0]={id:"A",label:"A",kind:"high",weight:1};}
+   renderBoard(current,false);
+   const result=winningSpin?score(current,bet,isFree):{win:0,scatters:0,combo:0};lastWin=winningSpin?Math.max(result.win,bet*20):0;balance+=lastWin;spins++;
+   if(winningSpin){document.body.classList.add("jackpot-mode");$("message").classList.add("jackpot");$("message").textContent="✦ ACE WIN! +"+money(lastWin)+" DEMO CREDITS! ✦";if(result.scatters>=3){freeSpins+=10;$("message").textContent+=" +10 FREE SPINS";}}
+   else{$("multiplier").textContent="×1";$("message").textContent=isFree?"Free spin complete — no win this round.":"No win this round. Demo odds are set to about 1 in 2,000.";}
    logRound(current.map(col=>col.map(s=>s.id==="S"?"★":s.label).join("")).join(" | "),lastWin,bet);busy=false;update();
   }},100);
  });
