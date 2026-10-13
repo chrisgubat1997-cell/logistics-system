@@ -2123,3 +2123,11 @@ REDUCED MOTION
 .invoice-type-option strong {
     color: var(--primary);
 }
+
+/* MULTI-DR PICKER */
+.selected-dr-list { display:flex; flex-wrap:wrap; gap:6px; margin-top:7px; }
+.selected-dr-list[hidden] { display:none; }
+.selected-dr-chip { display:inline-flex; align-items:center; gap:7px; max-width:100%; padding:5px 7px 5px 10px; border:1px solid var(--primary); border-radius:7px; background:var(--primary-soft); color:var(--primary); font-size:10px; font-weight:800; }
+.selected-dr-chip > span { overflow-wrap:anywhere; }
+.selected-dr-remove { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border:0; border-radius:5px; background:#fff; color:#b42318; font-size:16px; line-height:1; cursor:pointer; }
+.selected-dr-remove:hover { background:#fee2e2; }
