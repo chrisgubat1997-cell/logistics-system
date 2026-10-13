@@ -113,6 +113,9 @@ let currentInvoice = null;
 
 let isSaving = false;
 
+let salesOrderRecords = [];
+let salesOrderSuggestionIndex = -1;
+
 
 /* =====================================================
    DOM
@@ -145,6 +148,8 @@ async function initializeCreateInvoice() {
 
     await syncInvoiceNumberFromDatabase();
 
+    await loadSalesOrdersFromDatabase();
+    bindSalesOrderPicker();
     loadSalesOrderFromUrl();
 
 }
@@ -177,6 +182,13 @@ function bindEvents() {
         "click",
         goBackToInvoicing
     );
+
+
+    /* ---------------------------------------------
+       SALES ORDER SUGGESTIONS
+    --------------------------------------------- */
+
+    bindSalesOrderPicker();
 
 
     /* ---------------------------------------------
@@ -1894,71 +1906,189 @@ function printInvoice() {
    LOAD SALES ORDER FROM URL
 ====================================================== */
 
-function loadSalesOrderFromUrl() {
+async function loadSalesOrdersFromDatabase() {
+    const input = $("soNo");
+    const suggestionBox = $("soSuggestions");
+    if (input) input.placeholder = "Search or select Sales Order No.";
 
-    const params =
-        new URLSearchParams(
-            window.location.search
+    try {
+        const result = await invoiceAPI("getSalesOrders");
+        const records = Array.isArray(result.salesOrders)
+            ? result.salesOrders
+            : (Array.isArray(result.records) ? result.records
+            : (Array.isArray(result.data) ? result.data : []));
+
+        salesOrderRecords = records.filter(so =>
+            String(getObjectValue(so, ["STATUS", "status"]) || "")
+                .trim().toUpperCase() !== "CANCELLED"
         );
 
+        if (!salesOrderRecords.length) {
+            console.warn("[CREATE INVOICE] No Sales Orders returned by the database API.");
+        }
+        if (input && input.value.trim()) {
+            renderSalesOrderSuggestions(input.value);
+        }
+    } catch (error) {
+        console.warn("[CREATE INVOICE] Could not load Sales Orders from database; trying local cache.", error);
+        salesOrderRecords = getStoredSalesOrders();
+    }
+}
 
-    const soNo =
-        params.get("so");
+function bindSalesOrderPicker() {
+    const input = $("soNo");
+    if (!input || input.dataset.suggestionBound === "true") return;
+    input.dataset.suggestionBound = "true";
+    input.setAttribute("autocomplete", "off");
 
+    input.addEventListener("input", () => {
+        salesOrderSuggestionIndex = -1;
+        renderSalesOrderSuggestions(input.value);
+    });
 
-    if (!soNo) return;
+    input.addEventListener("focus", () => {
+        renderSalesOrderSuggestions(input.value);
+    });
 
+    input.addEventListener("keydown", event => {
+        const box = $("soSuggestions");
+        const options = box ? Array.from(box.querySelectorAll("[data-so-index]")) : [];
+        if (!options.length) {
+            if (event.key === "ArrowDown") renderSalesOrderSuggestions(input.value);
+            return;
+        }
 
-    setValue(
-        "soNo",
-        soNo
-    );
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            salesOrderSuggestionIndex = Math.min(salesOrderSuggestionIndex + 1, options.length - 1);
+            updateSalesOrderSuggestionFocus(options);
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            salesOrderSuggestionIndex = Math.max(salesOrderSuggestionIndex - 1, 0);
+            updateSalesOrderSuggestionFocus(options);
+        } else if (event.key === "Enter" && salesOrderSuggestionIndex >= 0) {
+            event.preventDefault();
+            options[salesOrderSuggestionIndex].click();
+        } else if (event.key === "Escape") {
+            hideSalesOrderSuggestions();
+        }
+    });
 
+    document.addEventListener("click", event => {
+        const wrapper = $("soPickerWrap");
+        if (wrapper && !wrapper.contains(event.target)) hideSalesOrderSuggestions();
+    });
+}
 
-    const salesOrders =
-        getStoredSalesOrders();
+function updateSalesOrderSuggestionFocus(options) {
+    options.forEach((option, index) => {
+        option.classList.toggle("is-active", index === salesOrderSuggestionIndex);
+        if (index === salesOrderSuggestionIndex) option.scrollIntoView({ block: "nearest" });
+    });
+}
 
+function hideSalesOrderSuggestions() {
+    const box = $("soSuggestions");
+    if (box) {
+        box.hidden = true;
+        box.innerHTML = "";
+    }
+}
 
-    const salesOrder =
-        salesOrders.find(
-            so =>
-                String(
-                    getObjectValue(
-                        so,
-                        [
-                            "soNo",
-                            "salesOrderNo",
-                            "salesOrder",
-                            "SO",
-                            "soNumber"
-                        ]
-                    ) || ""
-                )
-                .trim()
-                .toLowerCase()
-                ===
-                String(soNo)
-                    .trim()
-                    .toLowerCase()
-        );
+function renderSalesOrderSuggestions(query) {
+    const box = $("soSuggestions");
+    if (!box) return;
 
+    const normalizedQuery = String(query || "").trim().toLowerCase();
+    const results = salesOrderRecords.filter(so => {
+        const number = String(getObjectValue(so, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo", "salesOrder", "SO"]) || "");
+        const client = String(getObjectValue(so, ["CLIENT_NAME", "clientName", "client", "customerName"]) || "");
+        const project = String(getObjectValue(so, ["PROJECT", "project", "projectName"]) || "");
+        return !normalizedQuery || (number + " " + client + " " + project).toLowerCase().includes(normalizedQuery);
+    }).slice(0, 10);
 
-    if (!salesOrder) {
+    box.innerHTML = "";
+    salesOrderSuggestionIndex = -1;
 
-        console.log(
-            "[CREATE INVOICE] SO not found in localStorage:",
-            soNo
-        );
-
+    if (!results.length) {
+        if (normalizedQuery) {
+            const empty = document.createElement("div");
+            empty.className = "so-suggestion-empty";
+            empty.textContent = salesOrderRecords.length
+                ? "No matching Sales Order found."
+                : "No Sales Orders loaded. Check the database connection.";
+            box.appendChild(empty);
+            box.hidden = false;
+        } else {
+            box.hidden = true;
+        }
         return;
-
     }
 
+    results.forEach((so, index) => {
+        const number = getObjectValue(so, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo", "salesOrder", "SO"]) || "—";
+        const client = getObjectValue(so, ["CLIENT_NAME", "clientName", "client", "customerName"]) || "Client not specified";
+        const project = getObjectValue(so, ["PROJECT", "project", "projectName"]) || "Project not specified";
+        const status = getObjectValue(so, ["STATUS", "status"]) || "—";
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "so-suggestion-option";
+        option.dataset.soIndex = String(index);
+        option.innerHTML = "";
 
-    populateFromSalesOrder(
-        salesOrder
+        const primary = document.createElement("strong");
+        primary.textContent = String(number);
+        const secondary = document.createElement("span");
+        secondary.textContent = String(client) + " · " + String(project);
+        const badge = document.createElement("small");
+        badge.textContent = String(status);
+        option.append(primary, secondary, badge);
+
+        option.addEventListener("mousedown", event => event.preventDefault());
+        option.addEventListener("click", () => {
+            inputSetSalesOrder(String(number), so);
+        });
+        box.appendChild(option);
+    });
+
+    box.hidden = false;
+
+    function inputSetSalesOrder(number, salesOrder) {
+        setValue("soNo", number);
+        hideSalesOrderSuggestions();
+        populateFromSalesOrder(salesOrder);
+    }
+}
+
+function loadSalesOrderFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const soNo = params.get("so");
+    if (!soNo) return;
+
+    setValue("soNo", soNo);
+    const salesOrder = findSalesOrderByNumber(soNo);
+    if (salesOrder) {
+        populateFromSalesOrder(salesOrder);
+        return;
+    }
+
+    // The URL may be opened before the API has returned or the SO may
+    // not be in the browser cache. Refresh once from the database.
+    loadSalesOrdersFromDatabase().then(() => {
+        const found = findSalesOrderByNumber(soNo);
+        if (found) populateFromSalesOrder(found);
+    });
+}
+
+function findSalesOrderByNumber(soNo) {
+    const target = String(soNo || "").trim().toLowerCase();
+    return salesOrderRecords.find(so =>
+        String(getObjectValue(so, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo", "salesOrder", "SO"]) || "")
+            .trim().toLowerCase() === target
+    ) || getStoredSalesOrders().find(so =>
+        String(getObjectValue(so, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo", "salesOrder", "SO"]) || "")
+            .trim().toLowerCase() === target
     );
-
 }
 
 
@@ -1974,6 +2104,7 @@ function populateFromSalesOrder(
         getObjectValue(
             salesOrder,
             [
+                "CLIENT_NAME",
                 "clientName",
                 "client",
                 "customerName",
@@ -1986,6 +2117,7 @@ function populateFromSalesOrder(
         getObjectValue(
             salesOrder,
             [
+                "BILLING_ADDRESS",
                 "billingAddress",
                 "billTo",
                 "billing"
@@ -1997,6 +2129,7 @@ function populateFromSalesOrder(
         getObjectValue(
             salesOrder,
             [
+                "PROJECT",
                 "project",
                 "projectName"
             ]
@@ -2007,6 +2140,7 @@ function populateFromSalesOrder(
         getObjectValue(
             salesOrder,
             [
+                "PO_NUMBER",
                 "poNo",
                 "poNumber",
                 "PO",
@@ -2019,9 +2153,9 @@ function populateFromSalesOrder(
         getObjectValue(
             salesOrder,
             [
+                "TIN",
                 "tinNo",
                 "tin",
-                "TIN",
                 "tinNumber"
             ]
         );
@@ -2031,6 +2165,8 @@ function populateFromSalesOrder(
         getObjectValue(
             salesOrder,
             [
+                "TERMS",
+                "PAYMENT_TERMS",
                 "terms",
                 "paymentTerms"
             ]
@@ -2041,6 +2177,7 @@ function populateFromSalesOrder(
         getObjectValue(
             salesOrder,
             [
+                "SALES_ENGINEER",
                 "se",
                 "salesEngineer"
             ]
@@ -2115,6 +2252,7 @@ function populateFromSalesOrder(
         getObjectValue(
             salesOrder,
             [
+                "ITEMS",
                 "items",
                 "lineItems",
                 "orderItems",
@@ -2166,6 +2304,8 @@ function normalizeSalesOrderItem(
             getObjectValue(
                 item,
                 [
+                    "ITEM_NO",
+                    "ITEM_NUMBER",
                     "itemNo",
                     "itemNumber",
                     "number",
@@ -2177,6 +2317,8 @@ function normalizeSalesOrderItem(
             getObjectValue(
                 item,
                 [
+                    "DESCRIPTION",
+                    "ITEM_NAME",
                     "description",
                     "itemDescription",
                     "itemName",
@@ -2188,6 +2330,8 @@ function normalizeSalesOrderItem(
             getObjectValue(
                 item,
                 [
+                    "QTY",
+                    "QUANTITY",
                     "qtyInvoice",
                     "qty",
                     "quantity",
@@ -2199,8 +2343,9 @@ function normalizeSalesOrderItem(
             getObjectValue(
                 item,
                 [
-                    "unit",
-                    "uom"
+                    "UNIT",
+                    "uom",
+                    "unit"
                 ]
             ) || "",
 
@@ -2208,6 +2353,8 @@ function normalizeSalesOrderItem(
             getObjectValue(
                 item,
                 [
+                    "UNIT_PRICE",
+                    "AMOUNT",
                     "unitPrice",
                     "price",
                     "sellingPrice"
