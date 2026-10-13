@@ -2519,7 +2519,12 @@ async function populateFromSalesOrder(
             const itemNo = String(getObjectValue(rawItem, ["ITEM_NO", "ITEM_NUMBER", "ITEM_NUMBER", "itemNo", "itemNumber", "number", "code"]) || normalized.itemNo || "");
             const itemName = String(getObjectValue(rawItem, ["ITEM_NAME", "itemName", "ITEM", "name", "DESCRIPTION", "description"]) || normalized.itemName || normalized.description || "");
             const soQty = toNumber(getObjectValue(rawItem, ["QTY", "QUANTITY", "SO_QTY", "QTY_SO", "ORDER_QTY", "QTY_ORDERED", "qty", "quantity", "soQty"]) || normalized.qtyInvoice);
-            const unitAmount = toNumber(getObjectValue(rawItem, ["UNIT_AMOUNT", "UNIT_PRICE", "AMOUNT", "unitAmount", "unitPrice", "price"]));
+            const unitAmount = toNumber(getObjectValue(rawItem, [
+                "UNIT_AMOUNT", "UNIT AMOUNT",
+                "UNIT_PRICE", "UNIT PRICE",
+                "AMOUNT", "Amount", "amount",
+                "unitAmount", "unitPrice", "price", "sellingPrice"
+            ]));
             const invoicedQty = getPreviouslyInvoicedQty(getValue("soNo"), itemNo);
             return {
                 id: Date.now() + Math.random(),
@@ -2560,7 +2565,12 @@ function normalizeSalesOrderItem(item) {
         description: String(itemName),
         qtyInvoice: toNumber(getObjectValue(item, ["QTY_DELIVERED", "QTY_DR", "DELIVERED_QTY", "deliveredQty", "pickQty", "PICK_QTY", "QTY_INVOICE", "QTY", "QUANTITY", "qtyInvoice", "qty", "quantity", "totalDelivered", "totalOrder"]) || 0),
         unit: getObjectValue(item, ["UNIT", "UOM", "uom", "unit"]) || "",
-        unitPrice: toNumber(getObjectValue(item, ["UNIT_AMOUNT", "UNIT_PRICE", "AMOUNT", "unitAmount", "unitPrice", "price", "sellingPrice"]) || 0)
+        unitPrice: toNumber(getObjectValue(item, [
+            "UNIT_AMOUNT", "UNIT AMOUNT",
+            "UNIT_PRICE", "UNIT PRICE",
+            "AMOUNT", "Amount", "amount",
+            "unitAmount", "unitPrice", "price", "sellingPrice"
+        ]) || 0)
     };
 }
 
@@ -2745,18 +2755,14 @@ function getObjectValue(
     keys
 ) {
 
-    if (!object) return "";
+    if (!object || typeof object !== "object") return "";
 
 
-    for (
-        const key of keys
-    ) {
+    // First prefer the exact field names supplied by the API.
+    for (const key of keys) {
 
         if (
-            Object.prototype.hasOwnProperty.call(
-                object,
-                key
-            )
+            Object.prototype.hasOwnProperty.call(object, key)
             &&
             object[key] !== null
             &&
@@ -2766,6 +2772,45 @@ function getObjectValue(
         ) {
 
             return object[key];
+
+        }
+
+    }
+
+
+    // Google Sheets headers can be returned as "Amount", "AMOUNT",
+    // "Unit Amount", or "UNIT_AMOUNT". Match normalized names so the
+    // invoice does not lose the per-item price because of header casing.
+    const normalizeFieldName = value =>
+        String(value)
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "");
+
+
+    const normalizedKeys = new Set(
+        keys.map(normalizeFieldName)
+    );
+
+
+    for (const actualKey of Object.keys(object)) {
+
+        if (!normalizedKeys.has(normalizeFieldName(actualKey))) {
+            continue;
+        }
+
+
+        const value = object[actualKey];
+
+
+        if (
+            value !== null
+            &&
+            value !== undefined
+            &&
+            value !== ""
+        ) {
+
+            return value;
 
         }
 
