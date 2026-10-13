@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOGIS-TECH GAME — Demo</title>
+<style>
+:root{color-scheme:dark;--bg:#100d22;--panel:#1c1636;--panel2:#261d49;--gold:#ffd166;--pink:#ff4fa3;--cyan:#63e6ff;--text:#f8f5ff;--muted:#b9b0d8}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#39205d 0%,#17102e 45%,#0c0a19 100%);font-family:Arial,Helvetica,sans-serif;color:var(--text);padding:22px}
+.game-shell{max-width:1100px;margin:0 auto}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.brand{font-size:13px;letter-spacing:2px;color:var(--cyan);font-weight:800}
+.demo-tag{border:1px solid #6d5c98;background:#241a43;border-radius:99px;padding:8px 12px;font-size:12px;color:#e6ddff}
+h1{margin:5px 0;font-size:clamp(28px,4vw,44px);text-align:center;letter-spacing:1px;text-shadow:0 0 22px #b14dff}
+.subtitle{text-align:center;color:var(--muted);margin:0 0 22px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.stat,.machine,.controls,.history{border:1px solid #4b3a77;background:linear-gradient(145deg,rgba(43,31,77,.96),rgba(22,17,43,.96));border-radius:18px;box-shadow:0 12px 32px #07050f66}
+.stat{padding:15px;text-align:center}.stat-label{font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}.stat-value{font-size:clamp(20px,3vw,28px);font-weight:800;margin-top:7px;color:var(--gold)}
+.machine{padding:clamp(12px,3vw,26px);position:relative;overflow:hidden}
+.machine:before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--pink),var(--gold),var(--cyan))}
+.reels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(5px,1.5vw,12px);padding:12px;background:#0c0919;border:2px solid #7e5bc0;border-radius:14px;box-shadow:inset 0 0 22px #000}
+.reel{height:clamp(76px,13vw,125px);display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff8ff,#d7c8ff);border-radius:10px;font-size:clamp(30px,6vw,58px);box-shadow:inset 0 0 14px #6b438e;transition:transform .12s}
+.reel.spinning{animation:bounce .12s linear infinite}
+@keyframes bounce{50%{transform:translateY(4px)}}
+.machine-caption{text-align:center;color:var(--muted);font-size:12px;margin-top:12px}
+.controls{margin-top:15px;padding:18px;display:grid;grid-template-columns:1fr 1.5fr 1fr;align-items:center;gap:15px}
+.control-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
+select,button{font:inherit}
+select{width:100%;background:#100c20;color:white;border:1px solid #6e5a9a;border-radius:10px;padding:12px}
+.spin{border:0;border-radius:12px;padding:15px 20px;background:linear-gradient(100deg,#ff4fa3,#b75cff,#5b8cff);color:white;font-size:18px;font-weight:900;letter-spacing:1px;cursor:pointer;box-shadow:0 5px 0 #4b246d,0 0 22px #b14dff55}
+.spin:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.5)}
+.secondary{border:1px solid #6e5a9a;border-radius:10px;background:#251b43;color:#e9e0ff;padding:11px 13px;cursor:pointer}
+.message{min-height:28px;text-align:center;padding:14px 8px 2px;font-weight:700;color:var(--gold)}
+.bottom{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:15px}
+.history{padding:16px}.history h2{font-size:15px;margin:0 0 12px}.history-list{font-size:12px;color:var(--muted);display:grid;gap:8px}.history-entry{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #40345f;padding-bottom:7px}.win{color:#7df7b0}.loss{color:#ff9eae}
+.rules{padding:16px;border:1px solid #4b3a77;border-radius:18px;background:#1b1532;color:var(--muted);font-size:12px;line-height:1.7}.rules strong{color:#f8f5ff}
+@media(max-width:650px){body{padding:12px}.stats{gap:7px}.stat{padding:10px 5px}.controls{grid-template-columns:1fr 1fr}.spin{grid-column:1/-1;grid-row:2}.bottom{grid-template-columns:1fr}.reels{padding:7px}.machine{padding:12px}}
+</style>
+</head>
+<body>
+<main class="game-shell">
+  <div class="topline"><div class="brand">LOGIS-TECH SYSTEM / ARCADE</div><div class="demo-tag">DEMO MODE · NO REAL MONEY</div></div>
+  <h1>✨ SCATTER SPIN ✨</h1>
+  <p class="subtitle">Sariling practice slot game · Demo credits lang · Walang cash-in o cash-out</p>
+  <section class="stats">
+    <div class="stat"><div class="stat-label">Demo Balance</div><div class="stat-value" id="balance">₱10,000</div></div>
+    <div class="stat"><div class="stat-label">Last Win</div><div class="stat-value" id="lastWin">₱0</div></div>
+    <div class="stat"><div class="stat-label">Total Spins</div><div class="stat-value" id="spinCount">0</div></div>
+  </section>
+  <section class="machine">
+    <div class="reels" id="reels" aria-label="Slot reels">
+      <div class="reel">💎</div><div class="reel">🍒</div><div class="reel">⭐</div><div class="reel">🔔</div><div class="reel">🪙</div>
+    </div>
+    <div class="machine-caption">Match symbols to win demo credits · ⭐ is the Scatter symbol</div>
+  </section>
+  <section class="controls">
+    <div><label class="control-label" for="bet">Bet per spin</label><select id="bet"><option value="10">₱10</option><option value="25">₱25</option><option value="50" selected>₱50</option><option value="100">₱100</option><option value="250">₱250</option><option value="500">₱500</option></select></div>
+    <button class="spin" id="spinButton" type="button">▶ SPIN</button>
+    <button class="secondary" id="resetButton" type="button">↻ Reset Demo</button>
+  </section>
+  <div class="message" id="message" role="status">Ready? Press SPIN to play.</div>
+  <section class="bottom">
+    <div class="history"><h2>Recent Spins</h2><div class="history-list" id="history"><div>Wala pang spins. Subukan ang demo!</div></div></div>
+    <div class="rules"><strong>Demo payout rules</strong><br>⭐ 3 or more Scatter = 5× bet<br>💎 3 matching symbols = 4× bet<br>🍒 3 matching symbols = 3× bet<br>🔔 or 🪙 3 matching symbols = 2× bet<br><br><strong>Paalala:</strong> This is a locally simulated demo for entertainment and UI testing only. Credits are fictional, have no monetary value, and cannot be purchased or withdrawn.</div>
+  </section>
+</main>
+<script>
+(function(){
+  const symbols=["🍒","💎","⭐","🔔","🪙","🍀","7️⃣","👑"];
+  let balance=10000, spins=0, lastWin=0, busy=false, history=[];
+  const $=id=>document.getElementById(id);
+  const money=value=>"₱"+Number(value).toLocaleString("en-PH",{maximumFractionDigits:2});
+  function renderStats(){$("balance").textContent=money(balance);$("lastWin").textContent=money(lastWin);$("spinCount").textContent=String(spins);$("spinButton").disabled=busy||balance<Number($("bet").value);}
+  function renderHistory(){
+    const host=$("history");
+    host.innerHTML="";
+    if(!history.length){host.innerHTML="<div>Wala pang spins. Subukan ang demo!</div>";return;}
+    history.forEach(entry=>{
+      const row=document.createElement("div");row.className="history-entry";
+      const left=document.createElement("span");left.textContent=entry.symbols.join(" ");
+      const right=document.createElement("strong");right.className=entry.win>0?"win":"loss";right.textContent=entry.win>0?"+"+money(entry.win):"-"+money(entry.bet);
+      row.append(left,right);host.appendChild(row);
+    });
+  }
+  function payout(result,bet){
+    const scatters=result.filter(s=>s==="⭐").length;
+    if(scatters>=3)return bet*5;
+    const counts={};result.forEach(s=>counts[s]=(counts[s]||0)+1);
+    if(Object.values(counts).some(n=>n>=3)){
+      const match=Object.keys(counts).find(s=>counts[s]>=3);
+      if(match==="💎")return bet*4;
+      if(match==="🍒")return bet*3;
+      return bet*2;
+    }
+    return 0;
+  }
+  $("spinButton").addEventListener("click",()=>{
+    if(busy)return;
+    const bet=Number($("bet").value);
+    if(balance<bet){$("message").textContent="Kulang ang demo credits. Pindutin ang Reset Demo.";return;}
+    busy=true;balance-=bet;lastWin=0;renderStats();$("message").textContent="Spinning...";
+    const reels=[...document.querySelectorAll(".reel")];reels.forEach(el=>el.classList.add("spinning"));
+    let ticks=0;
+    const timer=setInterval(()=>{
+      reels.forEach(el=>el.textContent=symbols[Math.floor(Math.random()*symbols.length)]);
+      ticks++;
+      if(ticks>=9){
+        clearInterval(timer);const result=reels.map(el=>symbols[Math.floor(Math.random()*symbols.length)]);
+        reels.forEach((el,i)=>{el.textContent=result[i];el.classList.remove("spinning");});
+        lastWin=payout(result,bet);balance+=lastWin;spins++;busy=false;
+        $("message").textContent=lastWin>0?"🎉 WIN! Nadagdag ang "+money(lastWin)+" demo credits.":"No match this time. Try again sa demo!";
+        history.unshift({symbols:result,win:lastWin,bet});history=history.slice(0,6);
+        renderHistory();renderStats();
+      }
+    },85);
+  });
+  $("bet").addEventListener("change",renderStats);
+  $("resetButton").addEventListener("click",()=>{if(busy)return;balance=10000;spins=0;lastWin=0;history=[];$("message").textContent="Demo reset! Ready to spin.";document.querySelectorAll(".reel").forEach(el=>el.textContent=symbols[Math.floor(Math.random()*symbols.length)]);renderHistory();renderStats();});
+  renderStats();
+})();
+</script>
+</body>
+</html>
