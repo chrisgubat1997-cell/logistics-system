@@ -868,16 +868,26 @@ function normalizeItems(items) {
             ""
         );
 
-        // UNIT_PRICE is the per-unit price; do not use TOTAL (line total).
-        const unitPrice = toNumber(
-            item.UNIT_PRICE ??
-            item.unitPrice ??
-            item.UNIT_AMOUNT ??
-            item.unitAmount ??
-            item.AMOUNT ??
-            item.amount ??
-            0
-        );
+        // Read the per-unit amount from the available Sales Order field names.
+        // Skip blank fields so an empty UNIT_PRICE does not hide AMOUNT.
+        const unitPriceRaw = [
+            item.UNIT_PRICE,
+            item.unitPrice,
+            item.UNIT_AMOUNT,
+            item.unitAmount,
+            item.ITEM_AMOUNT,
+            item.itemAmount,
+            item.AMOUNT,
+            item.amount,
+            item.PRICE,
+            item.price
+        ].find(function (value) {
+            return value !== undefined &&
+                value !== null &&
+                String(value).trim() !== "";
+        });
+
+        const unitPrice = toNumber(unitPriceRaw ?? 0);
 
         return {
             id: itemId,
@@ -1965,7 +1975,7 @@ function renderItemsTable() {
                         ${
                             item.balance <= 0
                             ? "disabled"
-                            : "disabled"
+                            : ""
                         }
                     >
 
