@@ -1254,7 +1254,6 @@ function validateInvoice() {
 
 
     const soNumber = getValue("soNo");
-    const drNumber = getValue("drNo");
 
     if (!soNumber) {
         return {
@@ -1263,10 +1262,17 @@ function validateInvoice() {
         };
     }
 
-    if (!drNumber) {
+    if (selectedInvoiceType === "DELIVERY_RECEIPT" && !selectedDeliveryReceipts.length) {
         return {
             valid: false,
-            message: "Please select a Delivery Receipt or an invoice type."
+            message: "Please select at least one actual Delivery Receipt for a DR Invoice."
+        };
+    }
+
+    if (!["DELIVERY_RECEIPT", "ADVANCE", "DOWN_PAYMENT", "FULL_PAYMENT"].includes(selectedInvoiceType)) {
+        return {
+            valid: false,
+            message: "Please select an invoice type."
         };
     }
 
@@ -2087,6 +2093,30 @@ function rebuildInvoiceItemsFromSelectedDRs() {
         invoiceItems = invoiceItems.filter(item => item.isManual);
         renderItems();
         updateCalculations();
+        return;
+    }
+
+    // Advance invoices can be issued before delivery, using the original SO items.
+    if (selectedInvoiceType === "ADVANCE" && selectedDeliveryReceipts.length === 0) {
+        const previousItems = invoiceItems.slice();
+        invoiceItems = salesOrderBaseItems.map(base => {
+            const itemKey = String(base.sourceItemNo || base.itemNo || "").trim().toLowerCase();
+            const prior = previousItems.find(item =>
+                String(item.sourceItemNo || item.itemNo || "").trim().toLowerCase() === itemKey
+            );
+            const balance = Math.max(0, toNumber(base.soQty) - toNumber(base.invoicedQty));
+            return Object.assign({}, base, {
+                id: prior ? prior.id : (Date.now() + Math.random()),
+                qtyInvoice: balance,
+                checked: prior ? prior.checked !== false : true,
+                remarks: prior ? prior.remarks || "" : "",
+                sourceSONo: getValue("soNo"),
+                isManual: false
+            });
+        });
+        renderItems();
+        updateCalculations();
+        renderSelectedDeliveryReceiptChips();
         return;
     }
 
