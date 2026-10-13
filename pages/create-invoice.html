@@ -8,7 +8,7 @@
  
 <title>Create Invoice | LOGIS-TECH SYSTEM</title>
 
-<link rel="stylesheet" href="../css/create-invoice.css?v=20261006-02">
+<link rel="stylesheet" href="../css/create-invoice.css?v=20261013-03">
  
 
 </head>
@@ -165,11 +165,17 @@
                     Sales Order No.
                 </label>
 
-                <input
-                    type="text"
-                    id="soNo"
-                    placeholder="Enter SO number"
-                >
+                <div class="so-picker-wrap" id="soPickerWrap">
+                    <input
+                        type="text"
+                        id="soNo"
+                        placeholder="Search or select Sales Order No."
+                        autocomplete="off"
+                        aria-autocomplete="list"
+                        aria-controls="soSuggestions"
+                    >
+                    <div class="so-suggestions" id="soSuggestions" role="listbox" hidden></div>
+                </div>
 
             </div>
 
@@ -1278,7 +1284,7 @@
 
 </div>
 
-<script src="../js/create-invoice.js?v=20261013-02"></script>
+<script src="../js/create-invoice.js?v=20261013-03"></script>
 
 </body>
 </html>
