@@ -26,6 +26,29 @@ function getInvoices(payload) {
   return { success: true, invoices: records, records: records, count: records.length };
 }
 
+function getSalesOrderItems(payload) {
+  payload = payload || {};
+  const soNumber = String(payload.soNumber || payload.SO_NUMBER || "").trim();
+  const soId = String(payload.soId || payload.SO_ID || "").trim();
+  if (!soNumber && !soId) {
+    return { success: false, message: "Sales Order Number or ID is required." };
+  }
+
+  const so = soNumber
+    ? findRecord(CONFIG.SHEETS.SALES_ORDERS, "SO_NUMBER", soNumber)
+    : findRecord(CONFIG.SHEETS.SALES_ORDERS, "SO_ID", soId);
+  const targetSoId = soId || (so ? String(so.SO_ID || "") : "");
+
+  const items = getAllRecords(CONFIG.SHEETS.SO_ITEMS).filter(item => {
+    const itemSoNumber = String(item.SO_NUMBER || item.soNumber || "").trim();
+    const itemSoId = String(item.SO_ID || item.soId || "").trim();
+    return (soNumber && itemSoNumber === soNumber) ||
+      (targetSoId && itemSoId === targetSoId);
+  });
+
+  return { success: true, items: items, salesOrderItems: items, count: items.length };
+}
+
 function getInvoice(payload) {
   payload = payload || {};
   const no = String(payload.invoiceNo || payload.INVOICE_NO || "").trim();
