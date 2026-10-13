@@ -431,7 +431,7 @@ async function syncInvoiceNumberFromDatabase() {
                 invoice.invoiceNo ||
                 ""
             );
-            const match = number.match(/INV-\\d{4}-(\\d+)/);
+            const match = number.match(/INV-\d{4}-(\d+)/);
             if (match) highest = Math.max(highest, Number(match[1]));
         });
 
