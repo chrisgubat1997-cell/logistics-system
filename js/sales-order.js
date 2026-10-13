@@ -2126,7 +2126,7 @@ async function loadSOList(
                 <tr>
 
                     <td
-                        colspan="9"
+                        colspan="7"
                         class="so-table-empty"
                     >
                         No items found.
@@ -2148,13 +2148,15 @@ async function loadSOList(
                     document.createElement("tr");
 
 
-                const itemCode =
+                const itemName =
                     getSOValue(
                         item,
                         [
-                            "ITEM_CODE",
-                            "itemCode",
-                            "CODE"
+                            "ITEM_NAME",
+                            "itemName",
+                            "item_name",
+                            "ITEM NAME",
+                            "NAME"
                         ]
                     ) || "";
 
@@ -2165,7 +2167,8 @@ async function loadSOList(
                         [
                             "DESCRIPTION",
                             "description",
-                            "ITEM_DESCRIPTION"
+                            "ITEM_DESCRIPTION",
+                            "itemDescription"
                         ]
                     ) || "";
 
@@ -2176,7 +2179,8 @@ async function loadSOList(
                         [
                             "UNIT",
                             "unit",
-                            "UOM"
+                            "UOM",
+                            "uom"
                         ]
                     ) || "";
 
@@ -2186,52 +2190,29 @@ async function loadSOList(
                         getSOValue(
                             item,
                             [
+                                "QTY",
+                                "qty",
                                 "QUANTITY",
-                                "quantity",
-                                "QTY"
+                                "quantity"
                             ]
                         )
                     );
 
 
+                // Sales Order entry saves the per-piece price as amount.
                 const unitPrice =
                     toNumber(
                         getSOValue(
                             item,
                             [
                                 "UNIT_PRICE",
-                                "unitPrice"
-                            ]
-                        )
-                    );
-
-
-                const discount =
-                    toNumber(
-                        getSOValue(
-                            item,
-                            [
-                                "DISCOUNT",
-                                "discount"
-                            ]
-                        )
-                    );
-
-
-                const amount =
-                    toNumber(
-                        getSOValue(
-                            item,
-                            [
+                                "unitPrice",
                                 "AMOUNT",
                                 "amount",
-                                "TOTAL"
+                                "PRICE",
+                                "price"
                             ]
                         )
-                    ) ||
-                    (
-                        quantity *
-                        unitPrice
                     );
 
 
@@ -2245,8 +2226,8 @@ async function loadSOList(
                         <input
                             type="text"
                             class="detail-item-input"
-                            data-field="ITEM_CODE"
-                            value="${escapeAttribute(itemCode)}"
+                            data-field="ITEM_NAME"
+                            value="${escapeAttribute(itemName)}"
                             disabled
                         >
                     </td>
@@ -2296,22 +2277,6 @@ async function loadSOList(
                     </td>
 
                     <td>
-                        <input
-                            type="number"
-                            class="detail-item-input detail-item-discount"
-                            data-field="DISCOUNT"
-                            value="${discount}"
-                            min="0"
-                            step="0.01"
-                            disabled
-                        >
-                    </td>
-
-                    <td class="detail-item-amount">
-                        ${formatCurrency(amount)}
-                    </td>
-
-                    <td>
 
                         <button
                             type="button"
@@ -2336,7 +2301,6 @@ async function loadSOList(
         bindDetailItemCalculations();
 
     }
-
 
     /* =====================================================
        BIND ITEM CALCULATIONS
@@ -3356,7 +3320,7 @@ async function loadSOList(
                 <input
                     type="text"
                     class="detail-item-input"
-                    data-field="ITEM_CODE"
+                    data-field="ITEM_NAME"
                     value=""
                 >
             </td>
@@ -3399,21 +3363,6 @@ async function loadSOList(
                     min="0"
                     step="0.01"
                 >
-            </td>
-
-            <td>
-                <input
-                    type="number"
-                    class="detail-item-input detail-item-discount"
-                    data-field="DISCOUNT"
-                    value="0"
-                    min="0"
-                    step="0.01"
-                >
-            </td>
-
-            <td class="detail-item-amount">
-                ${formatCurrency(0)}
             </td>
 
             <td>
