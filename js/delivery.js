@@ -1199,25 +1199,54 @@ function renderDRDetails(dr, items) {
         activeDRInfoAttention: getValue(dr, ["ATTENTION", "attention"], "—")
     };
 
-    Object.entries(headerFields).forEach(function ([id, value]) {
-        const element = document.getElementById(id);
-        if (element) element.textContent = String(value ?? "—");
-    });
+    
+Object.entries(headerFields).forEach(function ([id, value]) {
+    const element = document.getElementById(id);
 
-    const dateElement = document.getElementById("activeDRInfoDate");
-    if (dateElement) {
-        const rawDate = getDRDate(dr);
-        const date = rawDate ? new Date(rawDate) : null;
+    if (!element) return;
 
-        dateElement.value =
-            date && !Number.isNaN(date.getTime())
-                ? [
+    const finalValue = String(value ?? "—");
+
+    if (
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLTextAreaElement ||
+        element instanceof HTMLSelectElement
+    ) {
+        element.value = finalValue;
+    } else {
+        element.textContent = finalValue;
+    }
+});
+
+
+    
+const dateElement = document.getElementById("activeDRInfoDate");
+
+if (dateElement) {
+    const rawDate = getDRDate(dr);
+    let dateValue = "";
+
+    if (rawDate) {
+        const match = String(rawDate).match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+        if (match) {
+            dateValue = `${match[1]}-${match[2]}-${match[3]}`;
+        } else {
+            const date = new Date(rawDate);
+
+            if (!Number.isNaN(date.getTime())) {
+                dateValue = [
                     date.getFullYear(),
                     String(date.getMonth() + 1).padStart(2, "0"),
                     String(date.getDate()).padStart(2, "0")
-                ].join("-")
-                : "";
+                ].join("-");
+            }
+        }
     }
+
+    dateElement.value = dateValue;
+}
+
 
     const addressElement = document.getElementById("activeDRInfoAddress");
     if (addressElement) {
