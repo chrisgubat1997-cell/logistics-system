@@ -213,7 +213,8 @@ async function loadSOList(
 
     try {
 
-        showLoading(true);
+        // Keep loading feedback inside the Sales Order table.
+        // Do not show the full-page "Loading Sales Order..." overlay.
 
 
         /* =================================================
