@@ -1180,32 +1180,39 @@ function renderDRDetails(dr, items) {
         return;
     }
 
-    // Ipakita ang DR header information.
-    const headerFields = {
-        activeDRHeaderNumber: getDRNumber(dr),
-        activeDRHeaderStatus: getDRStatus(dr),
-        activeDRStatusTitle: "Delivery Receipt Details",
-        activeDRStatusMessage: "Details loaded from the database.",
-        activeDRStatusValue: getDRStatus(dr),
-        activeDRCardNumber: getDRNumber(dr),
-        activeDRCardSONumber: getSONumber(dr),
-        activeDRCardClient: getClientName(dr),
-        activeDRInfoNumber: getDRNumber(dr),
-        activeDRInfoSONumber: getSONumber(dr),
-        activeDRInfoClient: getClientName(dr),
-        activeDRInfoPONumber: getPONumber(dr),
-        activeDRInfoTerms: getValue(dr, ["PAYMENT_TERMS", "paymentTerms"], "—"),
-        activeDRInfoProject: getProject(dr),
-        activeDRInfoAttention: getValue(dr, ["ATTENTION", "attention"], "—")
-    };
-
     
+const headerFields = {
+    activeDRHeaderNumber: getDRNumber(dr),
+    activeDRHeaderStatus: getDRStatus(dr),
+    activeDRStatusTitle: "Delivery Receipt Details",
+    activeDRStatusMessage: "Details loaded from the database.",
+    activeDRStatusValue: getDRStatus(dr),
+    activeDRCardNumber: getDRNumber(dr),
+    activeDRCardSONumber: getSONumber(dr),
+    activeDRCardClient: getClientName(dr),
+
+    activeDRInfoNumber: getDRNumber(dr),
+    activeDRInfoSONumber: getSONumber(dr),
+    activeDRInfoClient: getClientName(dr),
+    activeDRInfoPONumber: getPONumber(dr),
+    activeDRInfoTerms: getValue(
+        dr, ["PAYMENT_TERMS", "paymentTerms"], ""
+    ),
+    activeDRInfoProject: getProject(dr),
+    activeDRInfoAttention: getValue(
+        dr, ["ATTENTION", "attention"], ""
+    )
+};
+
 Object.entries(headerFields).forEach(function ([id, value]) {
     const element = document.getElementById(id);
 
-    if (!element) return;
+    if (!element) {
+        console.warn("DR field not found:", id);
+        return;
+    }
 
-    const finalValue = String(value ?? "—");
+    const finalValue = String(value ?? "");
 
     if (
         element instanceof HTMLInputElement ||
@@ -1214,9 +1221,12 @@ Object.entries(headerFields).forEach(function ([id, value]) {
     ) {
         element.value = finalValue;
     } else {
-        element.textContent = finalValue;
+        element.textContent = finalValue || "—";
     }
+
+    console.log("DR field updated:", id, finalValue);
 });
+
 
 
     
