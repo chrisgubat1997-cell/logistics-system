@@ -114,7 +114,9 @@ let currentInvoice = null;
 let isSaving = false;
 
 let salesOrderRecords = [];
+let deliveryReceiptRecords = [];
 let salesOrderSuggestionIndex = -1;
+let deliverySuggestionIndex = -1;
 
 
 /* =====================================================
@@ -148,8 +150,12 @@ async function initializeCreateInvoice() {
 
     await syncInvoiceNumberFromDatabase();
 
-    await loadSalesOrdersFromDatabase();
+    await Promise.all([
+        loadSalesOrdersFromDatabase(),
+        loadDeliveryReceiptsFromDatabase()
+    ]);
     bindSalesOrderPicker();
+    bindDeliveryReceiptPicker();
     loadSalesOrderFromUrl();
 
 }
@@ -1906,32 +1912,41 @@ function printInvoice() {
    LOAD SALES ORDER FROM URL
 ====================================================== */
 
+async function invoiceGetRecords(action, keys) {
+    const url = INVOICE_API_URL + "?action=" + encodeURIComponent(action) + "&_=" + Date.now();
+    const response = await fetch(url, { method: "GET", cache: "no-store", redirect: "follow" });
+    if (!response.ok) throw new Error(action + " failed. HTTP " + response.status);
+    const result = await response.json();
+    if (!result || result.success === false) {
+        throw new Error(result && (result.message || result.error) || action + " failed.");
+    }
+    for (const key of keys) {
+        if (Array.isArray(result[key])) return result[key];
+    }
+    return [];
+}
+
 async function loadSalesOrdersFromDatabase() {
     const input = $("soNo");
-    const suggestionBox = $("soSuggestions");
     if (input) input.placeholder = "Search or select Sales Order No.";
-
     try {
-        const result = await invoiceAPI("getSalesOrders");
-        const records = Array.isArray(result.salesOrders)
-            ? result.salesOrders
-            : (Array.isArray(result.records) ? result.records
-            : (Array.isArray(result.data) ? result.data : []));
-
-        salesOrderRecords = records.filter(so =>
-            String(getObjectValue(so, ["STATUS", "status"]) || "")
-                .trim().toUpperCase() !== "CANCELLED"
-        );
-
-        if (!salesOrderRecords.length) {
-            console.warn("[CREATE INVOICE] No Sales Orders returned by the database API.");
-        }
-        if (input && input.value.trim()) {
-            renderSalesOrderSuggestions(input.value);
-        }
+        salesOrderRecords = (await invoiceGetRecords("getSalesOrders", ["salesOrders", "records", "data"]))
+            .filter(so => String(getObjectValue(so, ["STATUS", "status"]) || "").trim().toUpperCase() !== "CANCELLED");
+        console.log("[CREATE INVOICE] Sales Orders loaded from database:", salesOrderRecords.length);
     } catch (error) {
-        console.warn("[CREATE INVOICE] Could not load Sales Orders from database; trying local cache.", error);
+        console.error("[CREATE INVOICE] Failed to load Sales Orders from database:", error);
         salesOrderRecords = getStoredSalesOrders();
+    }
+    if (input && input.value.trim()) renderSalesOrderSuggestions(input.value);
+}
+
+async function loadDeliveryReceiptsFromDatabase() {
+    try {
+        deliveryReceiptRecords = await invoiceGetRecords("getDeliveryReceipts", ["deliveryReceipts", "records", "data"]);
+        console.log("[CREATE INVOICE] Delivery Receipts loaded from database:", deliveryReceiptRecords.length);
+    } catch (error) {
+        console.error("[CREATE INVOICE] Failed to load Delivery Receipts from database:", error);
+        deliveryReceiptRecords = [];
     }
 }
 
@@ -1978,6 +1993,120 @@ function bindSalesOrderPicker() {
         const wrapper = $("soPickerWrap");
         if (wrapper && !wrapper.contains(event.target)) hideSalesOrderSuggestions();
     });
+}
+
+function bindDeliveryReceiptPicker() {
+    const input = $("drNo");
+    if (!input || input.dataset.suggestionBound === "true") return;
+    input.dataset.suggestionBound = "true";
+    input.setAttribute("autocomplete", "off");
+    input.readOnly = true;
+    input.placeholder = "Select Sales Order first";
+
+    input.addEventListener("focus", () => renderDeliveryReceiptSuggestions(input.value));
+    input.addEventListener("click", () => renderDeliveryReceiptSuggestions(input.value));
+    input.addEventListener("keydown", event => {
+        const box = $("drSuggestions");
+        const options = box ? Array.from(box.querySelectorAll("[data-dr-index]")) : [];
+        if (!options.length) return;
+        if (event.key === "ArrowDown") {
+            event.preventDefault();
+            deliverySuggestionIndex = Math.min(deliverySuggestionIndex + 1, options.length - 1);
+            updateDeliveryReceiptSuggestionFocus(options);
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            deliverySuggestionIndex = Math.max(deliverySuggestionIndex - 1, 0);
+            updateDeliveryReceiptSuggestionFocus(options);
+        } else if (event.key === "Enter" && deliverySuggestionIndex >= 0) {
+            event.preventDefault();
+            options[deliverySuggestionIndex].click();
+        } else if (event.key === "Escape") hideDeliveryReceiptSuggestions();
+    });
+    document.addEventListener("click", event => {
+        const wrapper = $("drPickerWrap");
+        if (wrapper && !wrapper.contains(event.target)) hideDeliveryReceiptSuggestions();
+    });
+}
+
+function updateDeliveryReceiptSuggestionFocus(options) {
+    options.forEach((option, index) => {
+        option.classList.toggle("is-active", index === deliverySuggestionIndex);
+        if (index === deliverySuggestionIndex) option.scrollIntoView({ block: "nearest" });
+    });
+}
+
+function hideDeliveryReceiptSuggestions() {
+    const box = $("drSuggestions");
+    if (box) {
+        box.hidden = true;
+        box.innerHTML = "";
+    }
+}
+
+function renderDeliveryReceiptSuggestions() {
+    const box = $("drSuggestions");
+    const input = $("drNo");
+    if (!box || !input) return;
+    const soNumber = getValue("soNo").toLowerCase();
+    if (!soNumber) {
+        box.innerHTML = '<div class="so-suggestion-empty">Select a Sales Order first.</div>';
+        box.hidden = false;
+        return;
+    }
+
+    const results = deliveryReceiptRecords.filter(dr => {
+        const linkedSO = String(getObjectValue(dr, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo"]) || "").trim().toLowerCase();
+        const drNo = String(getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo"]) || "").trim();
+        const status = String(getObjectValue(dr, ["STATUS", "status"]) || "").trim().toUpperCase();
+        return linkedSO === soNumber && drNo && status !== "CANCELLED";
+    });
+
+    box.innerHTML = "";
+    deliverySuggestionIndex = -1;
+    if (!results.length) {
+        const empty = document.createElement("div");
+        empty.className = "so-suggestion-empty";
+        empty.textContent = "No active Delivery Receipt found for this Sales Order.";
+        box.appendChild(empty);
+        box.hidden = false;
+        return;
+    }
+
+    results.forEach((dr, index) => {
+        const number = getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo"]) || "—";
+        const date = getObjectValue(dr, ["DATE_DELIVERED", "DATE_OF_TRANSFER", "DR_DATE", "drDate", "date"]) || "";
+        const status = getObjectValue(dr, ["STATUS", "status"]) || "—";
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "so-suggestion-option";
+        option.dataset.drIndex = String(index);
+        const primary = document.createElement("strong");
+        primary.textContent = String(number);
+        const secondary = document.createElement("span");
+        secondary.textContent = (date ? String(date) + " · " : "") + "Sales Order " + getValue("soNo");
+        const badge = document.createElement("small");
+        badge.textContent = String(status);
+        option.append(primary, secondary, badge);
+        option.addEventListener("mousedown", event => event.preventDefault());
+        option.addEventListener("click", () => {
+            setValue("drNo", number);
+            hideDeliveryReceiptSuggestions();
+            populateFromDeliveryReceipt(dr);
+        });
+        box.appendChild(option);
+    });
+    box.hidden = false;
+}
+
+function populateFromDeliveryReceipt(dr) {
+    const drItems = getObjectValue(dr, ["ITEMS", "items", "DR_ITEMS", "drItems", "lineItems"]);
+    if (!Array.isArray(drItems) || !drItems.length) {
+        console.warn("[CREATE INVOICE] Selected DR has no embedded items in API response.");
+        return;
+    }
+    invoiceItems = [];
+    drItems.forEach(item => addItem(normalizeSalesOrderItem(item)));
+    updateCalculations();
 }
 
 function updateSalesOrderSuggestionFocus(options) {
@@ -2055,7 +2184,14 @@ function renderSalesOrderSuggestions(query) {
 
     function inputSetSalesOrder(number, salesOrder) {
         setValue("soNo", number);
+        setValue("drNo", "");
+        const drInput = $("drNo");
+        if (drInput) {
+            drInput.readOnly = false;
+            drInput.placeholder = "Select Delivery Receipt";
+        }
         hideSalesOrderSuggestions();
+        hideDeliveryReceiptSuggestions();
         populateFromSalesOrder(salesOrder);
     }
 }
@@ -2066,6 +2202,11 @@ function loadSalesOrderFromUrl() {
     if (!soNo) return;
 
     setValue("soNo", soNo);
+    const drInput = $("drNo");
+    if (drInput) {
+        drInput.readOnly = false;
+        drInput.placeholder = "Select Delivery Receipt";
+    }
     const salesOrder = findSalesOrderByNumber(soNo);
     if (salesOrder) {
         populateFromSalesOrder(salesOrder);
