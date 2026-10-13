@@ -876,6 +876,8 @@ function normalizeItems(items) {
             item.unitPrice,
             item.UNIT_AMOUNT,
             item.unitAmount,
+            item.ITEM_AMOUNT,
+            item.itemAmount,
             item.PRICE_PER_UNIT,
             item.pricePerUnit,
             item.PRICE,
@@ -1238,6 +1240,26 @@ async function selectSalesOrder(so) {
         console.log(
             "Sales Order items loaded:",
             selectedSO.items.length
+        );
+
+        // Temporary diagnostic: confirm the price fields returned by Apps Script.
+        console.log(
+            "DR SO item price check:",
+            selectedSO.items.map(function (item) {
+                return {
+                    itemNumber: item.itemNumber,
+                    qty: item.totalOrder,
+                    unitPrice: item.unitPrice,
+                    sourcePriceFields: {
+                        UNIT_PRICE: item.original?.UNIT_PRICE,
+                        UNIT_AMOUNT: item.original?.UNIT_AMOUNT,
+                        PRICE_PER_UNIT: item.original?.PRICE_PER_UNIT,
+                        ITEM_AMOUNT: item.original?.ITEM_AMOUNT,
+                        AMOUNT: item.original?.AMOUNT,
+                        TOTAL: item.original?.TOTAL
+                    }
+                };
+            })
         );
 
         window.setTimeout(function () {
