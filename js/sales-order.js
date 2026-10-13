@@ -2292,7 +2292,10 @@ async function loadSOList(
 
 
     /* =====================================================
-       function bindDetailItemCalculations() {
+       BIND ITEM CALCULATIONS
+    ===================================================== */
+
+    function bindDetailItemCalculations() {
 
         document
             .querySelectorAll(
@@ -3372,7 +3375,10 @@ async function loadSOList(
 
 
     /* =====================================================
-       function deleteDetailItem(
+       DELETE ITEM
+    ===================================================== */
+
+    function deleteDetailItem(
         button
     ) {
 
