@@ -115,6 +115,7 @@ let isSaving = false;
 
 let salesOrderRecords = [];
 let deliveryReceiptRecords = [];
+let invoiceHistoryRecords = [];
 let selectedDeliveryReceipts = [];
 let salesOrderBaseItems = [];
 let salesOrderSuggestionIndex = -1;
@@ -155,7 +156,8 @@ async function initializeCreateInvoice() {
 
     await Promise.all([
         loadSalesOrdersFromDatabase(),
-        loadDeliveryReceiptsFromDatabase()
+        loadDeliveryReceiptsFromDatabase(),
+        loadInvoiceHistoryFromDatabase()
     ]);
     bindSalesOrderPicker();
     bindDeliveryReceiptPicker();
@@ -472,53 +474,35 @@ async function syncInvoiceNumberFromDatabase() {
 ====================================================== */
 
 function addItem(data = {}) {
+    const defaultLabel = selectedInvoiceType === "FULL_PAYMENT"
+        ? "Full Payment"
+        : selectedInvoiceType === "DOWN_PAYMENT"
+            ? "Down payment"
+            : "";
 
     const item = {
-
-        id:
-            Date.now()
-            +
-            Math.random(),
-
-        itemNo:
-            data.itemNo ||
-            "",
-
-        description:
-            data.description ||
-            data.itemName ||
-            data.itemDescription ||
-            "",
-
-        qtyInvoice:
-            toNumber(
-                data.qtyInvoice ??
-                data.qty ??
-                data.quantity ??
-                0
-            ),
-
-        unit:
-            data.unit ||
-            data.uom ||
-            "",
-
-        unitPrice:
-            toNumber(
-                data.unitPrice ??
-                data.price ??
-                0
-            )
-
+        id: Date.now() + Math.random(),
+        itemNo: String(data.itemNo || ""),
+        itemName: String(data.itemName || data.ITEM_NAME || data.description || defaultLabel || ""),
+        description: String(data.itemName || data.ITEM_NAME || data.description || defaultLabel || ""),
+        soQty: toNumber(data.soQty ?? data.qtySO ?? data.qty ?? 0),
+        invoicedQty: toNumber(data.invoicedQty ?? 0),
+        balance: toNumber(data.balance ?? data.soQty ?? data.qty ?? 0),
+        qtyInvoice: toNumber(data.pickQty ?? data.qtyInvoice ?? data.quantity ?? 0),
+        unit: String(data.unit || data.uom || ""),
+        unitPrice: toNumber(data.unitAmount ?? data.unitPrice ?? data.price ?? 0),
+        remarks: String(data.remarks || ""),
+        checked: data.checked !== false,
+        sourceDRNo: data.sourceDRNo || "",
+        sourceDRNumbers: data.sourceDRNumbers || [],
+        sourceItemNo: String(data.sourceItemNo || data.itemNo || ""),
+        sourceSONo: data.sourceSONo || "",
+        isManual: Boolean(data.isManual)
     };
 
-
     invoiceItems.push(item);
-
     renderItems();
-
     updateCalculations();
-
 }
 
 
@@ -546,141 +530,37 @@ function removeItem(id) {
 ====================================================== */
 
 function renderItems() {
-
-    const body =
-        $("invoiceItemsBody");
-
-    const empty =
-        $("emptyItemsMessage");
-
+    const body = $("invoiceItemsBody");
+    const empty = $("emptyItemsMessage");
     if (!body) return;
 
-
     body.innerHTML = "";
-
-
     if (!invoiceItems.length) {
-
-        if (empty) {
-            empty.style.display =
-                "flex";
-        }
-
+        if (empty) empty.style.display = "flex";
         return;
-
     }
+    if (empty) empty.style.display = "none";
 
-
-    if (empty) {
-        empty.style.display =
-            "none";
-    }
-
-
-    invoiceItems.forEach(
-        (item, index) => {
-
-            const tr =
-                document.createElement("tr");
-
-
-            tr.innerHTML = `
-
-                <td>
-                    <input
-                        type="text"
-                        class="item-input"
-                        data-field="itemNo"
-                        data-id="${item.id}"
-                        value="${escapeAttribute(item.itemNo)}"
-                        placeholder="Item No."
-                    >
-                </td>
-
-                <td>
-                    <input
-                        type="text"
-                        class="item-input"
-                        data-field="description"
-                        data-id="${item.id}"
-                        value="${escapeAttribute(item.description)}"
-                        placeholder="Description"
-                    >
-                </td>
-
-                <td>
-                    <input
-                        type="number"
-                        class="item-input number"
-                        data-field="qtyInvoice"
-                        data-id="${item.id}"
-                        value="${item.qtyInvoice || ""}"
-                        min="0"
-                        step="any"
-                        placeholder="0"
-                    >
-                </td>
-
-                <td>
-                    <input
-                        type="text"
-                        class="item-input"
-                        data-field="unit"
-                        data-id="${item.id}"
-                        value="${escapeAttribute(item.unit)}"
-                        placeholder="Unit"
-                    >
-                </td>
-
-                <td>
-                    <input
-                        type="number"
-                        class="item-input number"
-                        data-field="unitPrice"
-                        data-id="${item.id}"
-                        value="${item.unitPrice || ""}"
-                        min="0"
-                        step="0.01"
-                        placeholder="0.00"
-                    >
-                </td>
-
-                <td>
-                    <span
-                        class="item-total"
-                        data-total-id="${item.id}"
-                    >
-                        ${formatCurrency(
-                            item.qtyInvoice *
-                            item.unitPrice
-                        )}
-                    </span>
-                </td>
-
-                <td>
-                    <button
-                        type="button"
-                        class="remove-item-btn"
-                        data-remove-id="${item.id}"
-                        title="Remove item"
-                    >
-                        ×
-                    </button>
-                </td>
-
-            `;
-
-
-            body.appendChild(tr);
-
-        }
-    );
-
-
+    invoiceItems.forEach(item => {
+        const invoiceAmount = toNumber(item.qtyInvoice) * toNumber(item.unitPrice);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="check-col"><input type="checkbox" class="item-check" data-field="checked" data-id="${item.id}" ${item.checked ? "checked" : ""} aria-label="Include item"></td>
+            <td><input type="text" class="item-input" data-field="itemNo" data-id="${item.id}" value="${escapeAttribute(item.itemNo)}" placeholder="—" ${item.sourceSONo || item.sourceDRNo ? "readonly" : ""}></td>
+            <td><input type="text" class="item-input" data-field="itemName" data-id="${item.id}" value="${escapeAttribute(item.itemName || item.description)}" placeholder="Item name" ${!item.isManual ? "readonly" : ""}></td>
+            <td><span class="item-metric">${formatNumber(item.soQty)}</span></td>
+            <td><span class="item-metric">${formatNumber(item.invoicedQty)}</span></td>
+            <td><span class="item-metric">${formatNumber(item.balance)}</span></td>
+            <td><span class="item-metric money">${formatCurrency(item.unitPrice)}</span></td>
+            <td><span class="item-total" data-total-id="${item.id}">${formatCurrency(invoiceAmount)}</span></td>
+            <td><input type="number" class="item-input number" data-field="qtyInvoice" data-id="${item.id}" value="${item.qtyInvoice || ""}" min="0" max="${item.balance || undefined}" step="any" placeholder="Pick qty"></td>
+            <td><input type="text" class="item-input" data-field="remarks" data-id="${item.id}" value="${escapeAttribute(item.remarks || "")}" placeholder="Remarks"></td>
+            <td><button type="button" class="remove-item-btn" data-remove-id="${item.id}" title="Remove item">×</button></td>
+        `;
+        body.appendChild(tr);
+    });
     bindItemEvents();
-
 }
-
 
 /* =====================================================
    ITEM EVENTS
@@ -754,26 +634,16 @@ function handleItemInput(event) {
     if (!item) return;
 
 
-    if (
-        field === "qtyInvoice" ||
-        field === "unitPrice"
-    ) {
-
-        item[field] =
-            toNumber(
-                input.value
-            );
-
+    if (field === "checked") {
+        item.checked = input.checked;
+    } else if (field === "qtyInvoice" || field === "unitPrice") {
+        item[field] = toNumber(input.value);
     } else {
-
-        item[field] =
-            input.value;
-
+        item[field] = input.value;
+        if (field === "itemName") item.description = input.value;
     }
 
-
     updateItemTotal(id);
-
     updateCalculations();
 
 }
@@ -1956,6 +1826,41 @@ async function loadDeliveryReceiptsFromDatabase() {
     }
 }
 
+async function loadInvoiceHistoryFromDatabase() {
+    try {
+        invoiceHistoryRecords = await invoiceGetRecords("getInvoices", ["invoices", "records", "data"]);
+        console.log("[CREATE INVOICE] Invoice history loaded from database:", invoiceHistoryRecords.length);
+    } catch (error) {
+        console.warn("[CREATE INVOICE] Could not load invoice history for invoiced quantities:", error);
+        invoiceHistoryRecords = [];
+    }
+}
+
+function getPreviouslyInvoicedQty(soNumber, itemNo) {
+    const targetSO = String(soNumber || "").trim().toLowerCase();
+    const targetItem = String(itemNo || "").trim().toLowerCase();
+    if (!targetSO || !targetItem) return 0;
+
+    return invoiceHistoryRecords.reduce((sum, invoice) => {
+        const status = String(getObjectValue(invoice, ["STATUS", "status"]) || "").trim().toUpperCase();
+        if (status === "CANCELLED" || status === "VOID") return sum;
+
+        const invoiceSO = String(getObjectValue(invoice, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo"]) || "").trim().toLowerCase();
+        if (invoiceSO !== targetSO) return sum;
+
+        const items = getObjectValue(invoice, ["ITEMS", "items", "INVOICE_ITEMS", "invoiceItems", "lineItems"]);
+        if (!Array.isArray(items)) return sum;
+
+        const itemQty = items.reduce((itemSum, row) => {
+            const rowNo = String(getObjectValue(row, ["ITEM_NO", "ITEM_NUMBER", "itemNo", "itemNumber"]) || "").trim().toLowerCase();
+            if (rowNo !== targetItem) return itemSum;
+            return itemSum + toNumber(getObjectValue(row, ["QTY_INVOICE", "qtyInvoice", "PICK_QTY", "pickQty", "QTY", "qty"]));
+        }, 0);
+        return sum + itemQty;
+    }, 0);
+}
+
+
 function bindSalesOrderPicker() {
     const input = $("soNo");
     if (!input || input.dataset.suggestionBound === "true") return;
@@ -2135,7 +2040,13 @@ function renderDeliveryReceiptSuggestions() {
             setValue("drNo", type.label);
             selectedDeliveryReceipts = [];
             renderSelectedDeliveryReceiptChips();
-            rebuildInvoiceItemsFromSelectedDRs();
+            if (type.value === "DOWN_PAYMENT" || type.value === "FULL_PAYMENT") {
+                invoiceItems = [];
+                renderItems();
+                updateCalculations();
+            } else {
+                rebuildInvoiceItemsFromSelectedDRs();
+            }
             hideDeliveryReceiptSuggestions();
         });
         box.appendChild(option);
@@ -2196,83 +2107,99 @@ function renderSelectedDeliveryReceiptChips() {
 }
 
 function rebuildInvoiceItemsFromSelectedDRs() {
-    const manualItems = invoiceItems.filter(item =>
-        !item.sourceDRNo &&
-        !item.sourceSONo &&
-        (String(item.description || "").trim() ||
-         String(item.itemNo || "").trim() ||
-         toNumber(item.qtyInvoice) > 0 ||
-         toNumber(item.unitPrice) > 0)
-    );
+    if (selectedInvoiceType === "DOWN_PAYMENT" || selectedInvoiceType === "FULL_PAYMENT") {
+        invoiceItems = invoiceItems.filter(item => item.isManual);
+        renderItems();
+        updateCalculations();
+        return;
+    }
 
-    // Consolidate partial deliveries by the original Sales Order item number.
-    // Example: Item 1 delivered as 10 pcs on DR-001 and 10 pcs on DR-002
-    // becomes one invoice line: Item 1, Qty 20.
+    const manualItems = invoiceItems.filter(item => item.isManual && !item.sourceDRNo);
     const groupedItems = new Map();
+    const soNumber = getValue("soNo");
 
-    selectedDeliveryReceipts.forEach(dr => {
-        const drNo = getDRPickerNumber(dr);
-        const items = getObjectValue(dr, ["ITEMS", "items", "DR_ITEMS", "drItems", "lineItems"]);
-        if (!Array.isArray(items)) return;
+    if (selectedDeliveryReceipts.length) {
+        selectedDeliveryReceipts.forEach(dr => {
+            const drNo = getDRPickerNumber(dr);
+            const items = getObjectValue(dr, ["ITEMS", "items", "DR_ITEMS", "drItems", "lineItems"]);
+            if (!Array.isArray(items)) return;
 
-        items.forEach(rawItem => {
-            const normalized = normalizeSalesOrderItem(rawItem);
-            const sourceItemNo = String(normalized.itemNo || "").trim();
-            const description = String(normalized.description || "").trim();
-            const unit = String(normalized.unit || "").trim();
-            const unitPrice = toNumber(normalized.unitPrice);
-            const qty = toNumber(normalized.qtyInvoice);
+            items.forEach(rawItem => {
+                const normalized = normalizeSalesOrderItem(rawItem);
+                const sourceItemNo = String(normalized.itemNo || "").trim();
+                const itemName = String(normalized.itemName || normalized.description || "").trim();
+                const unit = String(normalized.unit || "").trim();
+                const unitPrice = toNumber(normalized.unitPrice);
+                const qty = toNumber(normalized.qtyInvoice);
+                const key = sourceItemNo ? "ITEM:" + sourceItemNo.toLowerCase() : "DETAIL:" + [itemName.toLowerCase(), unit.toLowerCase(), unitPrice].join("|");
 
-            // Item number is the primary key; description/unit are fallback
-            // identifiers only when a DR item has no original item number.
-            const key = sourceItemNo
-                ? "ITEM:" + sourceItemNo.toLowerCase()
-                : "DETAIL:" + [description.toLowerCase(), unit.toLowerCase(), unitPrice].join("|");
-
-            if (!groupedItems.has(key)) {
-                groupedItems.set(key, {
-                    id: Date.now() + Math.random(),
-                    itemNo: sourceItemNo,
-                    description,
-                    qtyInvoice: 0,
-                    unit,
-                    unitPrice,
-                    sourceDRNo: drNo,
-                    sourceItemNo,
-                    sourceDRNumbers: []
-                });
-            }
-
-            const invoiceItem = groupedItems.get(key);
-            invoiceItem.qtyInvoice += qty;
-
-            if (!invoiceItem.description && description) invoiceItem.description = description;
-            if (!invoiceItem.unit && unit) invoiceItem.unit = unit;
-            if ((!invoiceItem.unitPrice || invoiceItem.unitPrice === 0) && unitPrice) {
-                invoiceItem.unitPrice = unitPrice;
-            }
-            if (!invoiceItem.sourceDRNumbers.includes(drNo)) {
-                invoiceItem.sourceDRNumbers.push(drNo);
-            }
+                if (!groupedItems.has(key)) {
+                    const soQty = getSOItemQty(sourceItemNo);
+                    const invoicedQty = getPreviouslyInvoicedQty(soNumber, sourceItemNo);
+                    groupedItems.set(key, {
+                        id: Date.now() + Math.random(),
+                        itemNo: sourceItemNo,
+                        itemName,
+                        description: itemName,
+                        soQty,
+                        invoicedQty,
+                        balance: Math.max(0, soQty - invoicedQty),
+                        qtyInvoice: 0,
+                        unit,
+                        unitPrice,
+                        remarks: "",
+                        checked: true,
+                        sourceDRNo: drNo,
+                        sourceDRNumbers: [],
+                        sourceItemNo,
+                        sourceSONo: soNumber,
+                        isManual: false
+                    });
+                }
+                const row = groupedItems.get(key);
+                row.qtyInvoice += qty;
+                if (!row.itemName && itemName) {
+                    row.itemName = itemName;
+                    row.description = itemName;
+                }
+                if (!row.unit && unit) row.unit = unit;
+                if (!row.unitPrice && unitPrice) row.unitPrice = unitPrice;
+                if (!row.sourceDRNumbers.includes(drNo)) row.sourceDRNumbers.push(drNo);
+            });
         });
-    });
 
-    const drItems = Array.from(groupedItems.values()).sort((a, b) =>
-        a.sourceItemNo.localeCompare(b.sourceItemNo, undefined, { numeric: true, sensitivity: "base" })
-    );
+        invoiceItems = Array.from(groupedItems.values()).sort((a, b) =>
+            a.itemNo.localeCompare(b.itemNo, undefined, { numeric: true, sensitivity: "base" })
+        ).concat(manualItems);
+    } else {
+        invoiceItems = salesOrderBaseItems.map(item => {
+            const soQty = toNumber(item.soQty);
+            const invoicedQty = getPreviouslyInvoicedQty(soNumber, item.itemNo);
+            const balance = Math.max(0, soQty - invoicedQty);
+            return {
+                ...item,
+                id: Date.now() + Math.random(),
+                invoicedQty,
+                balance,
+                qtyInvoice: selectedInvoiceType === "ADVANCE" ? balance : 0,
+                checked: true,
+                sourceSONo: soNumber,
+                sourceDRNo: ""
+            };
+        }).concat(manualItems);
+    }
 
-    invoiceItems = selectedDeliveryReceipts.length
-        ? drItems.concat(manualItems)
-        : salesOrderBaseItems.map(item => ({ ...item, id: Date.now() + Math.random() })).concat(manualItems);
-
-    // Keep the original SO item number for DR-derived rows. Do not renumber
-    // each partial delivery as a separate invoice item.
     renderItems();
     updateCalculations();
-
-    if (selectedDeliveryReceipts.length && !drItems.length) {
+    if (selectedDeliveryReceipts.length && !invoiceItems.some(item => item.sourceDRNo)) {
         console.warn("[CREATE INVOICE] Selected DR records have no embedded item details in the API response.");
     }
+}
+
+function getSOItemQty(itemNo) {
+    const target = String(itemNo || "").trim().toLowerCase();
+    const match = salesOrderBaseItems.find(item => String(item.itemNo || "").trim().toLowerCase() === target);
+    return match ? toNumber(match.soQty) : 0;
 }
 
 function populateFromDeliveryReceipt(dr) {
@@ -2570,43 +2497,39 @@ function populateFromSalesOrder(
      * Try to load SO items.
      */
 
-    const items =
-        getObjectValue(
-            salesOrder,
-            [
-                "ITEMS",
-                "items",
-                "lineItems",
-                "orderItems",
-                "products"
-            ]
-        );
-
-
+    const items = getObjectValue(salesOrder, ["ITEMS", "items", "lineItems", "orderItems", "products"]);
     invoiceItems = [];
     salesOrderBaseItems = [];
 
-    if (
-        Array.isArray(items)
-        &&
-        items.length
-    ) {
-
-        items.forEach(item => {
-            addItem(normalizeSalesOrderItem(item));
-            invoiceItems[invoiceItems.length - 1].sourceSONo = getValue("soNo");
+    if (Array.isArray(items) && items.length) {
+        salesOrderBaseItems = items.map(rawItem => {
+            const normalized = normalizeSalesOrderItem(rawItem);
+            const itemName = String(getObjectValue(rawItem, ["ITEM_NAME", "itemName", "ITEM", "name", "DESCRIPTION", "description"]) || normalized.itemName || normalized.description || "");
+            const soQty = toNumber(getObjectValue(rawItem, ["QTY", "QUANTITY", "qty", "quantity", "SO_QTY", "soQty"]) || normalized.qtyInvoice);
+            const unitAmount = toNumber(getObjectValue(rawItem, ["AMOUNT", "UNIT_AMOUNT", "UNIT_PRICE", "unitAmount", "unitPrice", "price"]));
+            const invoicedQty = getPreviouslyInvoicedQty(getValue("soNo"), normalized.itemNo);
+            return {
+                id: Date.now() + Math.random(),
+                itemNo: String(normalized.itemNo || ""),
+                itemName,
+                description: itemName,
+                soQty,
+                invoicedQty,
+                balance: Math.max(0, soQty - invoicedQty),
+                qtyInvoice: 0,
+                unit: String(normalized.unit || ""),
+                unitPrice: unitAmount,
+                remarks: "",
+                checked: true,
+                sourceSONo: getValue("soNo"),
+                sourceItemNo: String(normalized.itemNo || ""),
+                isManual: false
+            };
         });
-
-        salesOrderBaseItems = invoiceItems.map(item => ({
-            ...item,
-            id: Date.now() + Math.random(),
-            sourceSONo: getValue("soNo")
-        }));
-    } else {
-        salesOrderBaseItems = [];
+        invoiceItems = salesOrderBaseItems.map(item => ({ ...item, id: Date.now() + Math.random() }));
     }
 
-    updateCalculations();
+    rebuildInvoiceItemsFromSelectedDRs();;
 
 }
 
@@ -2615,85 +2538,17 @@ function populateFromSalesOrder(
    NORMALIZE SO ITEM
 ====================================================== */
 
-function normalizeSalesOrderItem(
-    item
-) {
-
+function normalizeSalesOrderItem(item) {
+    const itemName = getObjectValue(item, ["ITEM_NAME", "itemName", "ITEM", "name", "DESCRIPTION", "description", "itemDescription"]) || "";
     return {
-
-        itemNo:
-            getObjectValue(
-                item,
-                [
-                    "ITEM_NO",
-                    "ITEM_NUMBER",
-                    "itemNo",
-                    "itemNumber",
-                    "number",
-                    "code"
-                ]
-            ) || "",
-
-        description:
-            getObjectValue(
-                item,
-                [
-                    "DESCRIPTION",
-                    "ITEM_NAME",
-                    "description",
-                    "itemDescription",
-                    "itemName",
-                    "name"
-                ]
-            ) || "",
-
-        qtyInvoice:
-            getObjectValue(
-                item,
-                [
-                    "QTY_DELIVERED",
-                    "QTY_DR",
-                    "DELIVERED_QTY",
-                    "deliveredQty",
-                    "pickQty",
-                    "PICK_QTY",
-                    "QTY",
-                    "QUANTITY",
-                    "qtyInvoice",
-                    "qty",
-                    "quantity",
-                    "totalDelivered",
-                    "totalOrder"
-                ]
-            ) || 0,
-
-        unit:
-            getObjectValue(
-                item,
-                [
-                    "UNIT",
-                    "uom",
-                    "unit"
-                ]
-            ) || "",
-
-        unitPrice:
-            getObjectValue(
-                item,
-                [
-                    "UNIT_PRICE",
-                    "PRICE",
-                    "AMOUNT",
-                    "unitPrice",
-                    "price",
-                    "sellingPrice"
-                ]
-            ) || 0
-
+        itemNo: getObjectValue(item, ["ITEM_NO", "ITEM_NUMBER", "itemNo", "itemNumber", "number", "code"]) || "",
+        itemName: String(itemName),
+        description: String(itemName),
+        qtyInvoice: toNumber(getObjectValue(item, ["QTY_DELIVERED", "QTY_DR", "DELIVERED_QTY", "deliveredQty", "pickQty", "PICK_QTY", "QTY", "QUANTITY", "qtyInvoice", "qty", "quantity", "totalDelivered", "totalOrder"]) || 0),
+        unit: getObjectValue(item, ["UNIT", "uom", "unit"]) || "",
+        unitPrice: toNumber(getObjectValue(item, ["UNIT_AMOUNT", "UNIT_PRICE", "AMOUNT", "unitAmount", "unitPrice", "price", "sellingPrice"]) || 0)
     };
-
 }
-
 
 /* =====================================================
    STORAGE HELPERS
