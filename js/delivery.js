@@ -1162,6 +1162,20 @@ function renderDRDetails(dr, items) {
     const tbody = detailsView.querySelector("#activeDRItemsBody");
     const totalElement = detailsView.querySelector("#activeDRTotal");
 
+   console.log(
+    "DR ITEMS FULL:",
+    JSON.stringify(items, null, 2)
+);
+
+console.log(
+    "DR DETAILS VIEW:",
+    detailsView
+);
+
+console.log(
+    "DR TABLE BODY:",
+    tbody
+);
     if (!tbody) {
         console.error("Hindi makita ang activeDRItemsBody.");
         return;
