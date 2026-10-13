@@ -449,7 +449,7 @@ async function syncInvoiceNumberFromDatabase() {
          * records are not accidentally reused. The server remains
          * the source of truth for saving.
          */
-        const allRecords = serverRecords.concat(getStoredInvoices());
+        const allRecords = serverRecords;
         const year = new Date().getFullYear();
         let highest = 0;
 
@@ -1172,38 +1172,20 @@ async function saveInvoice() {
             updatedAt: saved.UPDATED_AT || saved.updatedAt || new Date().toISOString()
         });
 
-        /*
-         * Keep a local cache for compatibility with older UI pieces.
-         * The database save above must succeed first.
-         */
-        const invoices = getStoredInvoices();
-        const existingIndex = invoices.findIndex(item =>
-            String(item.invoiceNo || item.INVOICE_NO || "") ===
-            String(savedInvoice.invoiceNo || "")
-        );
-
-        if (existingIndex >= 0) {
-            invoices[existingIndex] = savedInvoice;
-        } else {
-            invoices.unshift(savedInvoice);
-        }
-
-        try {
-            localStorage.setItem(
-                INVOICE_STORAGE_KEY,
-                JSON.stringify(invoices)
-            );
-        } catch (cacheError) {
-            console.warn("[CREATE INVOICE] Database save succeeded, but local cache could not be updated.", cacheError);
-        }
+        // Google Sheets is the source of truth. Do not save invoice records to LocalStorage.
 
         currentInvoice = savedInvoice;
         savedSuccessfully = true;
 
         alert(
-            result.message ||
-            "Invoice saved to the LOGIS-TECH database."
+            "INVOICE CREATED SUCCESSFULLY!\n\n" +
+            "Invoice No.: " + (savedInvoice.invoiceNo || "—") +
+            "\nSales Order: " + (savedInvoice.soNo || "—") +
+            "\n\nReturning to the Invoice module."
         );
+
+        // Return to the main system and automatically open the Invoice module.
+        window.location.assign("../index.html?openModule=invoice");
 
     } catch (error) {
         console.error("[CREATE INVOICE] Database save error:", error);
