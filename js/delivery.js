@@ -1152,6 +1152,7 @@ console.log(
 
 
 
+
 function renderDRDetails(dr, items) {
     const detailsView = document.getElementById("drDetailsView");
 
@@ -1162,29 +1163,60 @@ function renderDRDetails(dr, items) {
     const tbody = detailsView.querySelector("#activeDRItemsBody");
     const totalElement = detailsView.querySelector("#activeDRTotal");
 
-   console.log(
-    "DR ITEMS FULL:",
-    JSON.stringify(items, null, 2)
-);
-
-console.log(
-    "DR DETAILS VIEW:",
-    detailsView
-);
-
-console.log(
-    "DR TABLE BODY:",
-    tbody
-);
     if (!tbody) {
         console.error("Hindi makita ang activeDRItemsBody.");
         return;
     }
 
-    console.log("Rendering DR header:", dr);
-    console.log("Rendering DR items:", items);
+    // Ipakita ang DR header information.
+    const headerFields = {
+        activeDRHeaderNumber: getDRNumber(dr),
+        activeDRHeaderStatus: getDRStatus(dr),
+        activeDRStatusTitle: "Delivery Receipt Details",
+        activeDRStatusMessage: "Details loaded from the database.",
+        activeDRStatusValue: getDRStatus(dr),
+        activeDRCardNumber: getDRNumber(dr),
+        activeDRCardSONumber: getSONumber(dr),
+        activeDRCardClient: getClientName(dr),
+        activeDRInfoNumber: getDRNumber(dr),
+        activeDRInfoSONumber: getSONumber(dr),
+        activeDRInfoClient: getClientName(dr),
+        activeDRInfoPONumber: getPONumber(dr),
+        activeDRInfoTerms: getValue(dr, ["PAYMENT_TERMS", "paymentTerms"], "—"),
+        activeDRInfoProject: getProject(dr),
+        activeDRInfoAttention: getValue(dr, ["ATTENTION", "attention"], "—")
+    };
 
-    if (items.length === 0) {
+    Object.entries(headerFields).forEach(function ([id, value]) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = String(value ?? "—");
+    });
+
+    const dateElement = document.getElementById("activeDRInfoDate");
+    if (dateElement) {
+        const rawDate = getDRDate(dr);
+        const date = rawDate ? new Date(rawDate) : null;
+
+        dateElement.value =
+            date && !Number.isNaN(date.getTime())
+                ? [
+                    date.getFullYear(),
+                    String(date.getMonth() + 1).padStart(2, "0"),
+                    String(date.getDate()).padStart(2, "0")
+                ].join("-")
+                : "";
+    }
+
+    const addressElement = document.getElementById("activeDRInfoAddress");
+    if (addressElement) {
+        addressElement.value = getValue(
+            dr,
+            ["DELIVERY_ADDRESS", "deliveryAddress"],
+            ""
+        );
+    }
+
+    if (!items.length) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="empty-state">
@@ -1193,9 +1225,10 @@ console.log(
             </tr>
         `;
 
-        if (totalElement) {
-            totalElement.textContent = formatMoney(0);
-        }
+        if (totalElement) totalElement.textContent = formatMoney(0);
+
+        const cardTotal = document.getElementById("activeDRCardTotal");
+        if (cardTotal) cardTotal.textContent = formatMoney(0);
 
         return;
     }
@@ -1214,31 +1247,46 @@ console.log(
     tbody.innerHTML = items.map(function (item, index) {
         const itemNumber = getValue(
             item,
-            ["ITEM_NUMBER", "itemNumber"],
+            ["ITEM_NUMBER", "itemNumber", "ITEM_NO", "itemNo"],
             index + 1
         );
 
         const itemName = getValue(
             item,
-            ["ITEM_NAME", "itemName"],
+            ["ITEM_NAME", "itemName", "NAME", "name"],
             "—"
         );
 
         const description = getValue(
             item,
-            ["ITEM_DESCRIPTION", "DESCRIPTION", "description"],
+            [
+                "ITEM_DESCRIPTION",
+                "DESCRIPTION",
+                "description",
+                "ITEM_DESC",
+                "itemDescription"
+            ],
             "—"
         );
 
         const qty = toNumber(getValue(
             item,
-            ["PICK_QTY", "DELIVERED_QTY", "pickQty", "deliveredQty"],
+            [
+                "PICK_QTY",
+                "pickQty",
+                "DELIVERED_QTY",
+                "deliveredQty",
+                "QTY",
+                "qty",
+                "QUANTITY",
+                "quantity"
+            ],
             0
         ));
 
         const unit = getValue(
             item,
-            ["UNIT", "unit"],
+            ["UNIT", "unit", "UOM", "uom"],
             "—"
         );
 
@@ -1270,13 +1318,15 @@ console.log(
                 "TOTAL_AMOUNT",
                 "AMOUNT",
                 "drAmount",
-                "lineTotal"
+                "lineTotal",
+                "TOTAL",
+                "total"
             ],
             null
         );
 
         const lineTotal =
-            savedAmount !== null && savedAmount !== ""
+            savedAmount !== null
                 ? toNumber(savedAmount)
                 : unitAmount !== null
                     ? qty * unitAmount
@@ -1304,12 +1354,21 @@ console.log(
         `;
     }).join("");
 
+    const totalText = hasAmount ? formatMoney(total) : "—";
+
     if (totalElement) {
-        totalElement.textContent = hasAmount
-            ? formatMoney(total)
-            : "—";
+        totalElement.textContent = totalText;
     }
+
+    const cardTotal = document.getElementById("activeDRCardTotal");
+    if (cardTotal) {
+        cardTotal.textContent = totalText;
+    }
+
+    console.log("DR TABLE ROW COUNT:", tbody.querySelectorAll("tr").length);
+    console.log("DR TABLE BODY HTML AFTER:", tbody.innerHTML);
 }
+
 
    
     /* =====================================================
