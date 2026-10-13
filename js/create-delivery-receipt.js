@@ -868,17 +868,28 @@ function normalizeItems(items) {
             ""
         );
 
+        // UNIT_PRICE is the per-unit price; do not use TOTAL (line total).
+        const unitPrice = toNumber(
+            item.UNIT_PRICE ??
+            item.unitPrice ??
+            item.UNIT_AMOUNT ??
+            item.unitAmount ??
+            item.AMOUNT ??
+            item.amount ??
+            0
+        );
+
         return {
-    id: itemId,
-    soItemId: itemId,
-    itemNumber: itemNumber,
-    itemName: itemName,
-    itemDescription: itemDescription,
-    totalOrder: totalOrder,
-    unit: unit,
-    unitPrice: unitPrice,
-    original: item
-};
+            id: itemId,
+            soItemId: itemId,
+            itemNumber: itemNumber,
+            itemName: itemName,
+            itemDescription: itemDescription,
+            totalOrder: totalOrder,
+            unit: unit,
+            unitPrice: unitPrice,
+            original: item
+        };
     });
 }
 
@@ -4202,9 +4213,18 @@ function setValue(
         return;
     }
 
-    element.value =
-        value ??
-        "";
+    let normalizedValue = value ?? "";
+
+    // HTML date inputs accept YYYY-MM-DD, not a full ISO date-time.
+    if (
+        element.type === "date" &&
+        normalizedValue !== "" &&
+        typeof normalizedValue === "string"
+    ) {
+        normalizedValue = normalizedValue.slice(0, 10);
+    }
+
+    element.value = normalizedValue;
 
 }
 
