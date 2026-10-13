@@ -1,6 +1,8 @@
 /* ADD THESE CASES inside the existing routeRequest(action, payload) switch in Code.gs.
    Keep all existing cases. Place these before default: */
 
+case "getSalesOrderItems":
+  return getSalesOrderItems(payload);
 case "getInvoices":
   return getInvoices(payload);
 case "getInvoice":
@@ -26,3 +28,5 @@ case "createPayment":
 
    GET action=getInvoices|getInvoice|getPayments|getPayment with query parameters is supported too.
 */
+
+/* GET action=getSalesOrderItems&soNumber=SO-YYYY-#### returns the original SO_ITEMS rows. */
