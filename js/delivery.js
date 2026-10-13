@@ -1012,69 +1012,133 @@
         });
     }
 
-function openDRDetails(row) {
+
+async function openDRDetails(row) {
     const listView = document.getElementById("deliveryListView");
     const detailsView = document.getElementById("drDetailsView");
 
     if (!detailsView || !row) return;
 
-    const drNumber = row.dataset.drNumber || "";
+    const drNumber = String(
+        row.dataset.drNumber || ""
+    ).trim();
 
-    // Hanapin ang eksaktong active DR record
-    const activeDR = deliveryReceiptsCache.find(function (dr) {
-        return getDRNumber(dr) === drNumber;
-    });
-
-    if (!activeDR) {
-        alert("Unable to find the selected Delivery Receipt.");
+    if (!drNumber) {
+        alert("Missing Delivery Receipt number.");
         return;
     }
 
-    // I-save ang napiling DR
-    selectedDRRecord = activeDR;
+    const tbody = detailsView.querySelector("#activeDRItemsBody");
 
-    localStorage.setItem(
-        SELECTED_DR_STORAGE_KEY,
-        JSON.stringify({
-            drNumber: drNumber,
-            selectedAt: new Date().toISOString()
-        })
-    );
-
-    // Ipakita ang details view
+    // Ipakita ang details view habang kinukuha ang latest database data.
     if (listView) {
         listView.style.display = "none";
     }
 
     detailsView.style.display = "block";
 
-    // I-display ang DR Number
-    const title = detailsView.querySelector("[data-dr-title]") ||
+    const title =
+        detailsView.querySelector("[data-dr-title]") ||
         detailsView.querySelector(".delivery-details-header h1");
 
     if (title) {
         title.textContent = drNumber;
     }
 
-    // Kunin ang items na naka-save sa mismong DR
-    const items = getDRItems(activeDR);
+    if (tbody) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="empty-state">
+                    Loading latest Delivery Receipt data from database...
+                </td>
+            </tr>
+        `;
+    }
 
-    console.log("Active Delivery Receipt:", activeDR);
-  console.log("ACTIVE DR FULL DATA:", JSON.stringify(activeDR, null, 2));
-console.log("ACTIVE DR ITEMS FULL DATA:", JSON.stringify(items, null, 2));
+    try {
+        // Kumuha ng fresh records mula sa Google Sheets API.
+        const result = await callDeliveryAPI("getDeliveryReceipts");
 
-    // I-render ang items gamit ang existing display function,
-    // kung mayroon na nito sa delivery.js.
-    if (typeof renderDRDetails === "function") {
+        const databaseDRs = extractRecords(result, [
+            "deliveryReceipts",
+            "records",
+            "data"
+        ]);
+
+        // Hanapin ang eksaktong DR sa bagong database response.
+        const activeDR = databaseDRs.find(function (dr) {
+            return getDRNumber(dr) === drNumber;
+        });
+
+        if (!activeDR) {
+            throw new Error(
+                "Delivery Receipt " + drNumber +
+                " was not found in the database."
+            );
+        }
+
+        // Palitan ang lumang cache record ng bagong database record.
+        deliveryReceiptsCache = deliveryReceiptsCache.filter(
+            function (dr) {
+                return getDRNumber(dr) !== drNumber;
+            }
+        );
+
+        deliveryReceiptsCache.push(activeDR);
+
+        // I-update ang selected record mula sa database.
+        selectedDRRecord = activeDR;
+
+        // LocalStorage ay selection reference lamang, hindi data source.
+        localStorage.setItem(
+            SELECTED_DR_STORAGE_KEY,
+            JSON.stringify({
+                drNumber: drNumber,
+                selectedAt: new Date().toISOString()
+            })
+        );
+
+        // Kunin ang DR items na kasama sa API response.
+        const items = getDRItems(activeDR);
+
+        console.log(
+            "DR loaded from database:",
+            drNumber,
+            activeDR
+        );
+
+        console.log(
+            "DR items loaded from database:",
+            items
+        );
+
+        // I-render ang pinakabagong data.
         renderDRDetails(activeDR, items);
-    } else {
-        console.warn(
-            "renderDRDetails() is not yet defined. " +
-            "The active DR was selected, but its item table " +
-            "still needs a rendering function."
+
+    } catch (error) {
+        console.error(
+            "Failed to load DR details from database:",
+            error
+        );
+
+        if (tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="empty-state">
+                        Unable to load the latest DR data from database.
+                        Please return to the list and try again.
+                    </td>
+                </tr>
+            `;
+        }
+
+        alert(
+            "Hindi makuha ang latest Delivery Receipt data mula sa database.\n\n" +
+            error.message
         );
     }
 }
+
 
    
 function renderDRDetails(dr, items) {
