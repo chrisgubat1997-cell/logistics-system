@@ -1023,10 +1023,13 @@ function collectInvoiceData() {
                 "soNo"
             ),
 
+        // Only send a DR number when an actual Delivery Receipt was selected.
+        // For Down Payment / Full Payment / Advance invoices, the DR picker displays
+        // the invoice-type label, which must never be sent as a DR number.
         drNo:
-            getValue(
-                "drNo"
-            ),
+            selectedInvoiceType === "DELIVERY_RECEIPT"
+                ? selectedDeliveryReceipts.map(getDRPickerNumber).filter(Boolean).join(", ")
+                : "",
 
         invoiceType:
             selectedInvoiceType,
