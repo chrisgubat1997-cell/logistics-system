@@ -1744,8 +1744,8 @@ async function saveSO() {
     /* GET FORM VALUES */
 
     const soNumber =
-        getValue(
-            "soNumber"
+        String(
+            getValue("soNumber") || ""
         ).trim();
 
 
