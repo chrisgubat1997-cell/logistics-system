@@ -77,9 +77,13 @@ function createInvoice(payload) {
   lock.waitLock(30000);
   try {
     const soNumber = String(payload.soNumber || payload.soNo || payload.SO_NUMBER || "").trim();
-    const drNumber = String(payload.drNumber || payload.drNo || payload.DR_NUMBER || "").trim();
+    const invoiceType = String(payload.invoiceType || payload.INVOICE_TYPE || "DELIVERY_RECEIPT").trim().toUpperCase();
+    const rawDrNumber = String(payload.drNumber || payload.drNo || payload.DR_NUMBER || "").trim();
+    const drNumbers = rawDrNumber.split(",").map(value => value.trim()).filter(Boolean);
     if (!soNumber) throw new Error("Sales Order Number is required.");
-    if (!drNumber) throw new Error("Delivery Receipt Number is required.");
+    if (invoiceType === "DELIVERY_RECEIPT" && !drNumbers.length) {
+      throw new Error("Select at least one Delivery Receipt for a DR Invoice.");
+    }
     const requestedItems = Array.isArray(payload.items) ? payload.items : [];
     if (!requestedItems.length) throw new Error("At least one invoice item is required.");
 
@@ -87,10 +91,22 @@ function createInvoice(payload) {
     if (!so) throw new Error("Sales Order not found: " + soNumber);
     if (String(so.STATUS || "").toUpperCase() === "CANCELLED") throw new Error("Cannot invoice a cancelled Sales Order.");
 
-    const dr = findRecord(CONFIG.SHEETS.DELIVERY_RECEIPTS, "DR_NUMBER", drNumber);
-    if (!dr) throw new Error("Delivery Receipt not found: " + drNumber);
-    if (String(dr.SO_NUMBER || "") !== soNumber) throw new Error("The selected DR does not belong to this Sales Order.");
-    if (String(dr.STATUS || "").toUpperCase() === "CANCELLED") throw new Error("Cannot invoice a cancelled Delivery Receipt.");
+    // Non-DR invoice types (Down Payment, Full Payment, Advance) do not require a DR.
+    const drRecords = invoiceType === "DELIVERY_RECEIPT"
+      ? drNumbers.map(number => {
+          const record = findRecord(CONFIG.SHEETS.DELIVERY_RECEIPTS, "DR_NUMBER", number);
+          if (!record) throw new Error("Delivery Receipt not found: " + number);
+          if (String(record.SO_NUMBER || "") !== soNumber) {
+            throw new Error("The selected DR does not belong to this Sales Order: " + number);
+          }
+          if (String(record.STATUS || "").toUpperCase() === "CANCELLED") {
+            throw new Error("Cannot invoice a cancelled Delivery Receipt: " + number);
+          }
+          return record;
+        })
+      : [];
+    const drNumber = drNumbers.join(", ");
+    const drId = drRecords.map(record => String(record.DR_ID || "")).filter(Boolean).join(", ");
 
     _finValidateInvoicePaymentRequirement_(so);
 
@@ -135,7 +151,8 @@ function createInvoice(payload) {
       INVOICE_ID: invoiceId, INVOICE_NO: invoiceNo,
       INVOICE_DATE: payload.invoiceDate || payload.INVOICE_DATE || now,
       SI_NO: String(payload.siNo || payload.SI_NO || ""),
-      SO_ID: so.SO_ID || "", SO_NUMBER: soNumber, DR_ID: dr.DR_ID || "", DR_NUMBER: drNumber,
+      SO_ID: so.SO_ID || "", SO_NUMBER: soNumber, DR_ID: drId, DR_NUMBER: drNumber,
+      INVOICE_TYPE: invoiceType,
       PO_NUMBER: String(payload.poNo || payload.PO_NUMBER || so.PO_NUMBER || ""),
       TERMS: String(payload.terms || payload.TERMS || so.TERMS || so.PAYMENT_TERMS || ""),
       SALES_ENGINEER: String(payload.se || payload.salesEngineer || payload.SALES_ENGINEER || so.SALES_ENGINEER || ""),
