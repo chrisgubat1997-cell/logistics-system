@@ -868,17 +868,16 @@ function normalizeItems(items) {
             ""
         );
 
-        // Read the per-unit amount from the available Sales Order field names.
-        // Skip blank fields so an empty UNIT_PRICE does not hide AMOUNT.
+        // UNIT_PRICE / PRICE_PER_UNIT are per-unit values in SO_ITEMS.
+        // AMOUNT may be the whole line amount, so only use it as a fallback
+        // after dividing by the ordered quantity.
         const unitPriceRaw = [
             item.UNIT_PRICE,
             item.unitPrice,
             item.UNIT_AMOUNT,
             item.unitAmount,
-            item.ITEM_AMOUNT,
-            item.itemAmount,
-            item.AMOUNT,
-            item.amount,
+            item.PRICE_PER_UNIT,
+            item.pricePerUnit,
             item.PRICE,
             item.price
         ].find(function (value) {
@@ -887,7 +886,28 @@ function normalizeItems(items) {
                 String(value).trim() !== "";
         });
 
-        const unitPrice = toNumber(unitPriceRaw ?? 0);
+        const lineAmountRaw = [
+            item.AMOUNT,
+            item.amount,
+            item.TOTAL,
+            item.total,
+            item.LINE_TOTAL,
+            item.lineTotal,
+            item.TOTAL_AMOUNT,
+            item.totalAmount
+        ].find(function (value) {
+            return value !== undefined &&
+                value !== null &&
+                String(value).trim() !== "";
+        });
+
+        const unitPrice = unitPriceRaw !== undefined
+            ? toNumber(unitPriceRaw)
+            : (
+                totalOrder > 0
+                    ? toNumber(lineAmountRaw ?? 0) / totalOrder
+                    : 0
+            );
 
         return {
             id: itemId,
@@ -1500,7 +1520,7 @@ function buildItemState() {
             getPreviouslyDeliveredQty(selectedSO, item);
 
         const totalOrder = toNumber(item.totalOrder);
-const unitPrice = toNumber(item.unitPrice);
+        const unitPrice = toNumber(item.unitPrice);
 
         const balance = Math.max(
             totalOrder - previousDelivered,
@@ -1515,8 +1535,8 @@ const unitPrice = toNumber(item.unitPrice);
             itemName: item.itemName,
             itemDescription: item.itemDescription,
             unit: item.unit,
-              unitPrice: unitPrice,
-             drAmount: 0,
+            unitPrice: unitPrice,
+            drAmount: 0,
             totalOrder: totalOrder,
             totalDelivered: previousDelivered,
             balance: balance,
@@ -2092,6 +2112,14 @@ function setupItemEvents() {
                     } else {
 
                         item.pickQty = 0;
+                        item.drAmount = 0;
+
+                        const amountCell = document.querySelector(
+                            `[data-dr-amount-index="${index}"]`
+                        );
+                        if (amountCell) {
+                            amountCell.textContent = formatCurrency(0);
+                        }
 
                         item.remarks = "";
 
@@ -2748,6 +2776,10 @@ function buildCurrentDeliveryReceipt() {
     description: item.itemDescription || item.itemName || "",
 
     unit: item.unit,
+    unitPrice: toNumber(item.unitPrice),
+    drAmount: Math.round(
+        (toNumber(item.pickQty) * toNumber(item.unitPrice) + Number.EPSILON) * 100
+    ) / 100,
     totalOrder: item.totalOrder,
     soQty: item.totalOrder,
 
@@ -2930,6 +2962,15 @@ function renderReview(dr) {
         formatNumber(total)
     );
 
+    const totalDRAmount = dr.items.reduce(function (sum, item) {
+        return sum + toNumber(item.drAmount);
+    }, 0);
+
+    setText(
+        "reviewTotalAmount",
+        formatCurrency(totalDRAmount)
+    );
+
 
     /*
      * ITEMS
@@ -3011,6 +3052,13 @@ function renderReview(dr) {
                     )}
                 </td>
 
+                <td>
+                    ${formatCurrency(item.unitPrice)}
+                </td>
+
+                <td>
+                    ${formatCurrency(item.drAmount)}
+                </td>
 
                 <td>
 
