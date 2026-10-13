@@ -1494,6 +1494,8 @@ const unitPrice = toNumber(item.unitPrice);
             itemName: item.itemName,
             itemDescription: item.itemDescription,
             unit: item.unit,
+              unitPrice: unitPrice,
+             drAmount: 0,
             totalOrder: totalOrder,
             totalDelivered: previousDelivered,
             balance: balance,
