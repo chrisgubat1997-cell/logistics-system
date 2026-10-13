@@ -179,8 +179,6 @@ async function initializeCreateSO() {
 
     setCreateSODate();
 
-    generateSONumber();
-
     await loadCustomers();
 
     setupCreateSOFileSection();
@@ -1146,181 +1144,16 @@ function setCreateSODate() {
    GENERATE SO NUMBER
 ========================================================= */
 
-function generateSONumber() {
-
-    const input =
-        document.getElementById(
-            "soNumber"
-        );
-
-
-    if (!input) {
-
-        return;
-
-    }
-
-
-    generateNextSONumber();
-
-}
-
-
 /* =========================================================
-   GENERATE NEXT SO NUMBER
+   SO NUMBER
+   Manual entry only. No automatic numbering.
 ========================================================= */
 
-async function generateNextSONumber() {
-
-    const input =
-        document.getElementById(
-            "soNumber"
-        );
-
-
-    if (!input) {
-
-        return;
-
+function generateSONumber() {
+    const input = document.getElementById("soNumber");
+    if (input) {
+        input.value = "";
     }
-
-
-    input.value =
-        "Generating...";
-
-
-    const result =
-        await createSOAPI(
-            "getSalesOrders"
-        );
-
-
-    if (
-        !result ||
-        !result.success
-    ) {
-
-        console.warn(
-            "Unable to load existing Sales Orders."
-        );
-
-
-        input.value =
-            "";
-
-        return;
-
-    }
-
-
-    const orders =
-        Array.isArray(
-            result.salesOrders
-        )
-            ? result.salesOrders
-            : (
-                Array.isArray(
-                    result.data
-                )
-                    ? result.data
-                    : []
-            );
-
-
-    const year =
-        new Date()
-            .getFullYear();
-
-
-    let highestNumber =
-        0;
-
-
-    orders.forEach(
-        function(so) {
-
-            const number =
-                String(
-
-                    so.SO_NUMBER ||
-
-                    so.soNumber ||
-
-                    so.SALES_ORDER_NUMBER ||
-
-                    so.salesOrderNumber ||
-
-                    ""
-
-                ).trim();
-
-
-            const pattern =
-                new RegExp(
-                    "^SO-" +
-                    year +
-                    "-(\\d+)$"
-                );
-
-
-            const match =
-                number.match(
-                    pattern
-                );
-
-
-            if (!match) {
-
-                return;
-
-            }
-
-
-            const value =
-                Number(
-                    match[1]
-                );
-
-
-            if (
-                Number.isFinite(value) &&
-                value > highestNumber
-            ) {
-
-                highestNumber =
-                    value;
-
-            }
-
-        }
-    );
-
-
-    const nextNumber =
-        highestNumber + 1;
-
-
-    const generatedNumber =
-        "SO-" +
-        year +
-        "-" +
-        String(
-            nextNumber
-        ).padStart(
-            4,
-            "0"
-        );
-
-
-    input.value =
-        generatedNumber;
-
-
-    console.log(
-        "NEXT SO NUMBER:",
-        generatedNumber
-    );
-
 }
 
 
@@ -1913,7 +1746,7 @@ async function saveSO() {
     const soNumber =
         getValue(
             "soNumber"
-        );
+        ).trim();
 
 
     const dateCreation =
@@ -2003,13 +1836,11 @@ async function saveSO() {
     /* SO NUMBER VALIDATION */
 
     if (
-        !soNumber ||
-        soNumber === "Generating..."
+        !soNumber
     ) {
 
         alert(
-            "SO Number is required.\n\n" +
-            "Please wait for the SO Number to finish generating."
+            "SO Number is required.\n\nPlease manually enter the Sales Order Number."
         );
 
 
@@ -2815,9 +2646,6 @@ function clearCreateSOForm() {
 
 
     calculateSOTotals();
-
-
-    generateSONumber();
 
 }
 
