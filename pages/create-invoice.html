@@ -186,11 +186,17 @@
                     Delivery Receipt No.
                 </label>
 
-                <input
-                    type="text"
-                    id="drNo"
-                    placeholder="Enter DR number"
-                >
+                <div class="so-picker-wrap" id="drPickerWrap">
+                    <input
+                        type="text"
+                        id="drNo"
+                        placeholder="Select Sales Order first"
+                        autocomplete="off"
+                        aria-autocomplete="list"
+                        aria-controls="drSuggestions"
+                    >
+                    <div class="so-suggestions" id="drSuggestions" role="listbox" hidden></div>
+                </div>
 
             </div>
 
