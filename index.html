@@ -235,23 +235,7 @@
             📊 Reports
 
         </button>
-
-
-        <!-- =================================================
-             GAME
-        ================================================== -->
-
-        <button
-            class="menu-btn"
-            onclick="showPage('game', this)"
-        >
-
-            🎮 GAME
-
-        </button>
-
-
-        <!-- =================================================
+<!-- =================================================
              SETTINGS
         ================================================== -->
 
@@ -923,28 +907,7 @@
             </div>
 
         </div>
-
-
-
-        <!-- =================================================
-             GAME DEMO MODULE
-        ================================================== -->
-
-        <div
-            id="game"
-            class="page"
-        >
-
-            <iframe
-                src="pages/game.html?v=20261013-04"
-                title="Scatter Spin Demo Game"
-                style="width:100%;height:calc(100vh - 145px);min-height:680px;border:0;border-radius:12px;background:#100d22;"
-            ></iframe>
-
-        </div>
-
-
-        <!-- =================================================
+<!-- =================================================
              SYSTEM SETTINGS MODULE
         ================================================== -->
 
@@ -1046,17 +1009,7 @@ function showPage(pageId, button) {
     page.classList.add(
         'active'
     );
-
-    // Replay the game's intro whenever the GAME page is opened.
-    if (pageId === 'game') {
-        const gameFrame = page.querySelector('iframe');
-        if (gameFrame && gameFrame.contentWindow) {
-            gameFrame.contentWindow.postMessage('LOGIS_GAME_INTRO', '*');
-        }
-    }
-
-
-    /* =====================================================
+/* =====================================================
        SIDEBAR ACTIVE BUTTON
     ===================================================== */
 
