@@ -1101,6 +1101,18 @@ async function openDRDetails(row) {
         // Kunin ang DR items na kasama sa API response.
         const items = getDRItems(activeDR);
 
+       
+console.log(
+    "DR ITEM FULL JSON:",
+    JSON.stringify(items[0] || {}, null, 2)
+);
+
+console.log(
+    "DR ITEM FIELD NAMES:",
+    Object.keys(items[0] || {})
+);
+
+
         
 console.log(
     "DR ITEM FULL DATA:",
