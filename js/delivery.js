@@ -1108,6 +1108,22 @@ console.log(
 );
 
 console.log(
+    "DR ITEM COUNT:",
+    items.length
+);
+
+console.log(
+    "DR ITEMS TABLE:",
+    document.querySelector("#activeDRItemsBody")
+);
+
+       
+console.log(
+    "DR ITEM FULL JSON:",
+    JSON.stringify(items[0] || {}, null, 2)
+);
+
+console.log(
     "DR ITEM FIELD NAMES:",
     Object.keys(items[0] || {})
 );
