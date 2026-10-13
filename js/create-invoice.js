@@ -116,6 +116,7 @@ let isSaving = false;
 let salesOrderRecords = [];
 let deliveryReceiptRecords = [];
 let selectedDeliveryReceipts = [];
+let salesOrderBaseItems = [];
 let salesOrderSuggestionIndex = -1;
 let deliverySuggestionIndex = -1;
 let selectedInvoiceType = "DELIVERY_RECEIPT";
@@ -2197,6 +2198,7 @@ function renderSelectedDeliveryReceiptChips() {
 function rebuildInvoiceItemsFromSelectedDRs() {
     const manualItems = invoiceItems.filter(item =>
         !item.sourceDRNo &&
+        !item.sourceSONo &&
         (String(item.description || "").trim() ||
          String(item.itemNo || "").trim() ||
          toNumber(item.qtyInvoice) > 0 ||
@@ -2228,7 +2230,9 @@ function rebuildInvoiceItemsFromSelectedDRs() {
         a.sourceDRNo.localeCompare(b.sourceDRNo, undefined, { numeric: true, sensitivity: "base" })
     );
 
-    invoiceItems = drItems.concat(manualItems);
+    invoiceItems = selectedDeliveryReceipts.length
+        ? drItems.concat(manualItems)
+        : salesOrderBaseItems.map(item => ({ ...item, id: Date.now() + Math.random() })).concat(manualItems);
     invoiceItems.forEach((item, index) => {
         item.itemNo = String(index + 1);
     });
@@ -2552,24 +2556,22 @@ function populateFromSalesOrder(
         &&
         items.length
     ) {
-
         invoiceItems = [];
+        salesOrderBaseItems = [];
 
+        items.forEach(item => {
+            addItem(normalizeSalesOrderItem(item));
+            invoiceItems[invoiceItems.length - 1].sourceSONo = getValue("soNo");
+        });
 
-        items.forEach(
-            item => {
-
-                addItem(
-                    normalizeSalesOrderItem(
-                        item
-                    )
-                );
-
-            }
-        );
-
+        salesOrderBaseItems = invoiceItems.map(item => ({
+            ...item,
+            id: Date.now() + Math.random(),
+            sourceSONo: getValue("soNo")
+        }));
+    } else {
+        salesOrderBaseItems = [];
     }
-
 
     updateCalculations();
 
