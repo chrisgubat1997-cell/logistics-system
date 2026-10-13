@@ -869,15 +869,16 @@ function normalizeItems(items) {
         );
 
         return {
-            id: itemId,
-            soItemId: itemId,
-            itemNumber: itemNumber,
-            itemName: itemName,
-            itemDescription: itemDescription,
-            totalOrder: totalOrder,
-            unit: unit,
-            original: item
-        };
+    id: itemId,
+    soItemId: itemId,
+    itemNumber: itemNumber,
+    itemName: itemName,
+    itemDescription: itemDescription,
+    totalOrder: totalOrder,
+    unit: unit,
+    unitPrice: unitPrice,
+    original: item
+};
     });
 }
 
@@ -1478,6 +1479,8 @@ function buildItemState() {
             getPreviouslyDeliveredQty(selectedSO, item);
 
         const totalOrder = toNumber(item.totalOrder);
+       unitPrice: toNumber(item.unitPrice),
+drAmount: 0,
 
         const balance = Math.max(
             totalOrder - previousDelivered,
@@ -1926,6 +1929,16 @@ function renderItemsTable() {
 
                 </td>
 
+<td class="qty-column unit-amount-column">
+    ${formatCurrency(item.unitPrice)}
+</td>
+
+<td
+    class="qty-column dr-amount-column"
+    data-dr-amount-index="${index}"
+>
+    ${formatCurrency(item.drAmount)}
+</td>
 
                 <td class="pick-qty-column">
 
@@ -2154,6 +2167,23 @@ function setupItemEvents() {
 
                 }
             );
+
+           item.drAmount = Math.round(
+    (
+        item.pickQty * item.unitPrice +
+        Number.EPSILON
+    ) * 100
+) / 100;
+
+const amountCell = document.querySelector(
+    `[data-dr-amount-index="${index}"]`
+);
+
+if (amountCell) {
+    amountCell.textContent = formatCurrency(
+        item.drAmount
+    );
+}
 
 
             input.addEventListener(
@@ -4210,6 +4240,16 @@ function focusElement(id) {
 
 }
 
+
+function formatCurrency(value) {
+    return "₱" + toNumber(value).toLocaleString(
+        "en-PH",
+        {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
+    );
+}
 
 /* =========================================================
    FORMAT NUMBER
