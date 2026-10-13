@@ -2093,3 +2093,33 @@ REDUCED MOTION
     color: var(--muted);
     font-size: 11px;
 }
+
+
+/* =========================================================
+   AUTOCOMPLETE LAYERING — KEEP PICKERS ABOVE ALL CARDS
+========================================================= */
+.invoice-card:has(#soSuggestions:not([hidden])),
+.invoice-card:has(#drSuggestions:not([hidden])) {
+    position: relative;
+    z-index: 500;
+}
+.so-picker-wrap {
+    position: relative;
+    z-index: 501;
+}
+.so-suggestions {
+    z-index: 9999;
+    max-height: min(360px, 55vh);
+}
+.so-suggestion-section-label {
+    margin: 7px 4px 4px;
+    padding: 9px 8px 5px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .7px;
+}
+.invoice-type-option strong {
+    color: var(--primary);
+}
