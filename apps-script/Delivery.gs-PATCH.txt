@@ -1,0 +1,14 @@
+/* DELIVERY.GS PATCH — add this immediately after the CANCELLED Sales Order check
+   inside createDeliveryReceipt(payload), after const so = findRecord(...).
+   Do not add a duplicate payment check elsewhere. */
+
+if (typeof validateDeliveryPaymentTerms_ === "function") {
+  validateDeliveryPaymentTerms_(so);
+}
+
+/* This enforces:
+   - COD: dispatch can proceed with no prepayment.
+   - 50% DP / 50% COD: confirmed/received DP must reach 50% of SO total.
+   - Full advance: confirmed/received payments must cover the SO total.
+   The function only counts PAYMENT_STATUS = RECEIVED, PAID, CONFIRMED, COMPLETED, POSTED.
+*/
