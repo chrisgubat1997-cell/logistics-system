@@ -2217,6 +2217,7 @@ function renderSalesOrderSuggestions(query) {
     box.hidden = false;
 
     function inputSetSalesOrder(number, salesOrder) {
+        selectedInvoiceType = "DELIVERY_RECEIPT";
         setValue("soNo", number);
         setValue("drNo", "");
         const drInput = $("drNo");
