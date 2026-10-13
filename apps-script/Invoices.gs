@@ -39,7 +39,12 @@ function getSalesOrderItems(payload) {
     : findRecord(CONFIG.SHEETS.SALES_ORDERS, "SO_ID", soId);
   const targetSoId = soId || (so ? String(so.SO_ID || "") : "");
 
-  const items = getAllRecords(CONFIG.SHEETS.SO_ITEMS).filter(item => {
+  // Some deployed Config.gs versions do not define SO_ITEMS in CONFIG.SHEETS.
+  // The database tab is named SO_ITEMS, so use that as a safe fallback.
+  const soItemsSheetName =
+    (CONFIG.SHEETS && (CONFIG.SHEETS.SO_ITEMS || CONFIG.SHEETS.SALES_ORDER_ITEMS)) ||
+    "SO_ITEMS";
+  const items = getAllRecords(soItemsSheetName).filter(item => {
     const itemSoNumber = String(item.SO_NUMBER || item.soNumber || "").trim();
     const itemSoId = String(item.SO_ID || item.soId || "").trim();
     return (soNumber && itemSoNumber === soNumber) ||
