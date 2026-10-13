@@ -2401,16 +2401,19 @@ async function populateFromSalesOrder(
         );
 
 
-    const terms =
-        getObjectValue(
-            salesOrder,
-            [
-                "TERMS",
-                "PAYMENT_TERMS",
-                "terms",
-                "paymentTerms"
-            ]
-        );
+    // Terms are inherited from the selected Sales Order.
+    // Support the field names used by the database and older SO records.
+    const terms = String(
+        getObjectValue(salesOrder, [
+            "TERMS",
+            "PAYMENT_TERMS",
+            "PAYMENT TERMS",
+            "paymentTerms",
+            "terms",
+            "TERMS_OF_PAYMENT",
+            "TERMS OF PAYMENT"
+        ]) ?? ""
+    ).trim();
 
 
     const se =
@@ -2465,12 +2468,8 @@ async function populateFromSalesOrder(
 
 
     if (terms) {
-
-        setSelectValue(
-            "terms",
-            terms
-        );
-
+        // Match the Sales Order's terms to the invoice field, ignoring case/spacing.
+        setSelectValue("terms", terms);
     }
 
 
