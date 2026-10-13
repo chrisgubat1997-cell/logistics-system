@@ -31,6 +31,96 @@
 const INVOICE_STORAGE_KEY = "logitechInvoices";
 const SALES_ORDER_STORAGE_KEY = "logitechSalesOrders";
 
+const INVOICE_API_URL =
+    "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+
+async function fetchInvoicesFromDatabase() {
+    try {
+        const response = await fetch(INVOICE_API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify({
+                action: "getInvoices",
+                data: {}
+            })
+        });
+
+        const responseText = await response.text();
+        let result;
+
+        try {
+            result = JSON.parse(responseText);
+        } catch (error) {
+            throw new Error("Invalid response from Invoice API.");
+        }
+
+        if (!response.ok || !result || result.success === false) {
+            throw new Error(
+                result && (result.message || result.error)
+                    ? (result.message || result.error)
+                    : "Could not load invoices from database."
+            );
+        }
+
+        const records = Array.isArray(result.invoices)
+            ? result.invoices
+            : (Array.isArray(result.records) ? result.records : []);
+
+        invoiceRecords = records.map(record => {
+            const rawItems = Array.isArray(record.ITEMS)
+                ? record.ITEMS
+                : (Array.isArray(record.items) ? record.items : []);
+
+            return {
+                invoiceId: record.INVOICE_ID || "",
+                invoiceNo: record.INVOICE_NO || "",
+                invoiceDate: record.INVOICE_DATE || "",
+                siNo: record.SI_NO || "",
+                soNo: record.SO_NUMBER || "",
+                drNo: record.DR_NUMBER || "",
+                poNo: record.PO_NUMBER || "",
+                terms: record.TERMS || "",
+                se: record.SALES_ENGINEER || "",
+                client: record.CLIENT_NAME || "",
+                clientName: record.CLIENT_NAME || "",
+                billingAddress: record.BILLING_ADDRESS || "",
+                tinNo: record.TIN || "",
+                project: record.PROJECT || "",
+                ewtType: record.EWT_TYPE || "",
+                ewtRate: record.EWT_RATE || 0,
+                ewtAmount: record.EWT_AMOUNT || 0,
+                totalSales: record.TOTAL_SALES || 0,
+                netOfVat: record.NET_OF_VAT || 0,
+                vat: record.VAT || 0,
+                amountDue: record.AMOUNT_DUE || 0,
+                finalAmountDue: record.FINAL_AMOUNT_DUE || 0,
+                status: record.STATUS || "",
+                createdAt: record.CREATED_AT || "",
+                items: rawItems.map(item => ({
+                    itemNo: item.ITEM_NO || "",
+                    description: item.DESCRIPTION || "",
+                    qtyInvoice: item.QTY_INVOICE || 0,
+                    unit: item.UNIT || "",
+                    unitPrice: item.UNIT_PRICE || 0,
+                    totalAmount: item.TOTAL_AMOUNT || 0
+                })),
+                _source: "DATABASE"
+            };
+        });
+
+        return true;
+    } catch (error) {
+        console.error(
+            "LOGIS-TECH: Could not load invoices from database; retaining local cache.",
+            error
+        );
+        return false;
+    }
+}
+
+
 
 /* =========================================================
    MODULE STATE
@@ -135,6 +225,17 @@ function initializeInvoicing() {
     renderRecentSalesOrders();
 
     invoicingInitialized = true;
+
+    /*
+     * Refresh invoice records from Google Sheets in the background.
+     * If the API is unavailable, the existing local cache remains visible.
+     */
+    fetchInvoicesFromDatabase().then(function (loaded) {
+        if (loaded) {
+            renderInvoiceSummary();
+            renderRecentInvoices();
+        }
+    });
 
 
     console.log(
@@ -357,7 +458,7 @@ function openCreateInvoicePage() {
    REFRESH INVOICING
 ========================================================= */
 
-function refreshInvoicing() {
+async function refreshInvoicing() {
 
     const refreshButton =
         document.getElementById(
@@ -365,9 +466,11 @@ function refreshInvoicing() {
         );
 
 
-    /* Reload LocalStorage data */
+    /* Load the local cache first, then refresh from Google Sheets. */
 
     loadInvoicingData();
+
+    await fetchInvoicesFromDatabase();
 
 
     /* Re-render everything */
