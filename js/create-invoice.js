@@ -45,6 +45,50 @@ const INVOICE_STORAGE_KEY =
 const SALES_ORDER_STORAGE_KEY =
     "logitechSalesOrders";
 
+/* =====================================================
+   GOOGLE APPS SCRIPT API
+====================================================== */
+
+const INVOICE_API_URL =
+    "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+
+async function invoiceAPI(action, data = {}) {
+    const response = await fetch(INVOICE_API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+            action: action,
+            data: data
+        })
+    });
+
+    const responseText = await response.text();
+    let result;
+
+    try {
+        result = JSON.parse(responseText);
+    } catch (error) {
+        console.error("[CREATE INVOICE] Invalid API response:", responseText);
+        throw new Error("Invalid server response. Please try again.");
+    }
+
+    if (!response.ok) {
+        throw new Error("Invoice API request failed (HTTP " + response.status + ").");
+    }
+
+    if (!result || result.success === false) {
+        throw new Error(
+            result && (result.message || result.error)
+                ? (result.message || result.error)
+                : "Unable to save invoice to the database."
+        );
+    }
+
+    return result;
+}
+
 
 /* =====================================================
    CONSTANTS
@@ -1175,104 +1219,98 @@ function collectInvoiceData() {
    SAVE
 ====================================================== */
 
-function saveInvoice() {
+async function saveInvoice() {
 
     if (isSaving) return;
 
-
-    const validation =
-        validateInvoice();
-
+    const validation = validateInvoice();
 
     if (!validation.valid) {
-
-        alert(
-            validation.message
-        );
-
+        alert(validation.message);
         return;
-
     }
 
-
-    const invoice =
-        collectInvoiceData();
-
-
-    const invoices =
-        getStoredInvoices();
-
-
-    /*
-     * Prevent duplicate invoice number.
-     */
-
-    const existingIndex =
-        invoices.findIndex(
-            item =>
-                item.invoiceNo ===
-                invoice.invoiceNo
-        );
-
-
-    if (
-        existingIndex >= 0
-    ) {
-
-        invoice.updatedAt =
-            new Date().toISOString();
-
-        invoices[
-            existingIndex
-        ] = invoice;
-
-    } else {
-
-        invoices.unshift(
-            invoice
-        );
-
-    }
-
+    const invoice = collectInvoiceData();
 
     isSaving = true;
 
+    const saveButtons = document.querySelectorAll(
+        "#saveInvoiceBtn, #bottomSaveBtn"
+    );
+    saveButtons.forEach(button => {
+        button.disabled = true;
+        button.dataset.originalText = button.textContent;
+        button.textContent = "Saving...";
+    });
 
     try {
+        /*
+         * Save to Google Sheets through Apps Script.
+         * Do not treat browser LocalStorage as the primary database.
+         */
+        const result = await invoiceAPI("createInvoice", invoice);
+        const saved = result.invoice || {};
 
-        localStorage.setItem(
-            INVOICE_STORAGE_KEY,
-            JSON.stringify(
-                invoices
-            )
+        const savedInvoice = Object.assign({}, invoice, {
+            invoiceId: saved.INVOICE_ID || saved.invoiceId || "",
+            invoiceNo: saved.INVOICE_NO || saved.invoiceNo || invoice.invoiceNo,
+            invoiceDate: saved.INVOICE_DATE || saved.invoiceDate || invoice.invoiceDate,
+            soNo: saved.SO_NUMBER || saved.soNo || invoice.soNo,
+            drNo: saved.DR_NUMBER || saved.drNo || invoice.drNo,
+            status: saved.STATUS || saved.status || invoice.status,
+            createdAt: saved.CREATED_AT || saved.createdAt || invoice.createdAt,
+            updatedAt: saved.UPDATED_AT || saved.updatedAt || new Date().toISOString()
+        });
+
+        /*
+         * Keep a local cache for compatibility with older UI pieces.
+         * The database save above must succeed first.
+         */
+        const invoices = getStoredInvoices();
+        const existingIndex = invoices.findIndex(item =>
+            String(item.invoiceNo || item.INVOICE_NO || "") ===
+            String(savedInvoice.invoiceNo || "")
         );
 
+        if (existingIndex >= 0) {
+            invoices[existingIndex] = savedInvoice;
+        } else {
+            invoices.unshift(savedInvoice);
+        }
 
-        currentInvoice =
-            invoice;
+        try {
+            localStorage.setItem(
+                INVOICE_STORAGE_KEY,
+                JSON.stringify(invoices)
+            );
+        } catch (cacheError) {
+            console.warn("[CREATE INVOICE] Database save succeeded, but local cache could not be updated.", cacheError);
+        }
 
-
+        currentInvoice = savedInvoice;
         showSavedState();
 
+        alert(
+            result.message ||
+            "Invoice saved to the LOGIS-TECH database."
+        );
 
     } catch (error) {
-
-        console.error(
-            "[CREATE INVOICE] Save error:",
-            error
-        );
-
-
+        console.error("[CREATE INVOICE] Database save error:", error);
         alert(
-            "Unable to save invoice. Please check your browser storage."
+            "Invoice was NOT confirmed saved.\n\n" +
+            (error.message || "Please check your connection and try again.")
         );
-
     } finally {
-
         isSaving = false;
-
+        saveButtons.forEach(button => {
+            button.disabled = false;
+            if (button.dataset.originalText) {
+                button.textContent = button.dataset.originalText;
+                delete button.dataset.originalText;
+            }
+        });
     }
-
 }
 
 
@@ -1299,6 +1337,24 @@ function validateInvoice() {
 
         };
 
+    }
+
+
+    const soNumber = getValue("soNo");
+    const drNumber = getValue("drNo");
+
+    if (!soNumber) {
+        return {
+            valid: false,
+            message: "Please select or enter the Sales Order Number."
+        };
+    }
+
+    if (!drNumber) {
+        return {
+            valid: false,
+            message: "Please enter the Delivery Receipt Number."
+        };
     }
 
 
