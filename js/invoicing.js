@@ -92,6 +92,8 @@ async function fetchInvoicesFromDatabase() {
                 ewtRate: record.EWT_RATE || 0,
                 ewtAmount: record.EWT_AMOUNT || 0,
                 totalSales: record.TOTAL_SALES || 0,
+                totalAmount: record.TOTAL_SALES || record.AMOUNT_DUE || record.FINAL_AMOUNT_DUE || 0,
+                amount: record.AMOUNT_DUE || record.FINAL_AMOUNT_DUE || record.TOTAL_SALES || 0,
                 netOfVat: record.NET_OF_VAT || 0,
                 vat: record.VAT || 0,
                 amountDue: record.AMOUNT_DUE || 0,
