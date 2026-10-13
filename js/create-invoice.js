@@ -132,22 +132,18 @@ document.addEventListener(
 );
 
 
-function initializeCreateInvoice() {
+async function initializeCreateInvoice() {
 
     console.log(
         "[CREATE INVOICE] Initializing..."
     );
 
-
     setDefaultInvoiceDate();
-
-    generateInvoiceNumber();
-
     bindEvents();
-
     addItem();
-
     updateCalculations();
+
+    await syncInvoiceNumberFromDatabase();
 
     loadSalesOrderFromUrl();
 
@@ -403,6 +399,50 @@ function generateInvoiceNumber() {
     input.value =
         `INV-${year}-${String(nextNumber).padStart(4, "0")}`;
 
+}
+
+
+/* =====================================================
+   SYNC NEXT INVOICE NUMBER FROM DATABASE
+====================================================== */
+
+async function syncInvoiceNumberFromDatabase() {
+    const input = $("invoiceNo");
+    if (!input) return;
+
+    try {
+        const result = await invoiceAPI("getInvoices");
+        const serverRecords = Array.isArray(result.invoices)
+            ? result.invoices
+            : (Array.isArray(result.records) ? result.records : []);
+
+        /*
+         * Include browser-cached invoice numbers so legacy local
+         * records are not accidentally reused. The server remains
+         * the source of truth for saving.
+         */
+        const allRecords = serverRecords.concat(getStoredInvoices());
+        const year = new Date().getFullYear();
+        let highest = 0;
+
+        allRecords.forEach(invoice => {
+            const number = String(
+                invoice.INVOICE_NO ||
+                invoice.invoiceNo ||
+                ""
+            );
+            const match = number.match(/INV-\\d{4}-(\\d+)/);
+            if (match) highest = Math.max(highest, Number(match[1]));
+        });
+
+        input.value = `INV-${year}-${String(highest + 1).padStart(4, "0")}`;
+    } catch (error) {
+        console.warn(
+            "[CREATE INVOICE] Could not retrieve invoice numbers from database; using cached records.",
+            error
+        );
+        generateInvoiceNumber();
+    }
 }
 
 
@@ -1233,6 +1273,7 @@ async function saveInvoice() {
     const invoice = collectInvoiceData();
 
     isSaving = true;
+    let savedSuccessfully = false;
 
     const saveButtons = document.querySelectorAll(
         "#saveInvoiceBtn, #bottomSaveBtn"
@@ -1288,7 +1329,7 @@ async function saveInvoice() {
         }
 
         currentInvoice = savedInvoice;
-        showSavedState();
+        savedSuccessfully = true;
 
         alert(
             result.message ||
@@ -1310,6 +1351,9 @@ async function saveInvoice() {
                 delete button.dataset.originalText;
             }
         });
+        if (savedSuccessfully) {
+            showSavedState();
+        }
     }
 }
 
