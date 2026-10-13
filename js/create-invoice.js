@@ -1760,8 +1760,9 @@ function printInvoice() {
    LOAD SALES ORDER FROM URL
 ====================================================== */
 
-async function invoiceGetRecords(action, keys) {
-    const url = INVOICE_API_URL + "?action=" + encodeURIComponent(action) + "&_=" + Date.now();
+async function invoiceGetRecords(action, keys, params = {}) {
+    const query = new URLSearchParams({ action, ...params, _: String(Date.now()) });
+    const url = INVOICE_API_URL + "?" + query.toString();
     const response = await fetch(url, { method: "GET", cache: "no-store", redirect: "follow" });
     if (!response.ok) throw new Error(action + " failed. HTTP " + response.status);
     const result = await response.json();
@@ -2099,14 +2100,17 @@ function rebuildInvoiceItemsFromSelectedDRs() {
             items.forEach(rawItem => {
                 const normalized = normalizeSalesOrderItem(rawItem);
                 const sourceItemNo = String(normalized.itemNo || "").trim();
-                const itemName = String(normalized.itemName || normalized.description || "").trim();
-                const unit = String(normalized.unit || "").trim();
-                const unitPrice = toNumber(normalized.unitPrice);
+                const soItem = salesOrderBaseItems.find(item =>
+                    String(item.itemNo || "").trim().toLowerCase() === sourceItemNo.toLowerCase()
+                );
+                const itemName = String((soItem && soItem.itemName) || normalized.itemName || normalized.description || "").trim();
+                const unit = String((soItem && soItem.unit) || normalized.unit || "").trim();
+                const unitPrice = toNumber((soItem && soItem.unitPrice) || normalized.unitPrice);
                 const qty = toNumber(normalized.qtyInvoice);
                 const key = sourceItemNo ? "ITEM:" + sourceItemNo.toLowerCase() : "DETAIL:" + [itemName.toLowerCase(), unit.toLowerCase(), unitPrice].join("|");
 
                 if (!groupedItems.has(key)) {
-                    const soQty = getSOItemQty(sourceItemNo);
+                    const soQty = soItem ? toNumber(soItem.soQty) : getSOItemQty(sourceItemNo);
                     const invoicedQty = getPreviouslyInvoicedQty(soNumber, sourceItemNo);
                     groupedItems.set(key, {
                         id: Date.now() + Math.random(),
@@ -2317,7 +2321,7 @@ function findSalesOrderByNumber(soNo) {
    POPULATE SALES ORDER
 ====================================================== */
 
-function populateFromSalesOrder(
+async function populateFromSalesOrder(
     salesOrder
 ) {
 
@@ -2466,42 +2470,65 @@ function populateFromSalesOrder(
 
 
     /*
-     * Try to load SO items.
+     * Load the original SO line items. The list endpoint may return
+     * headers only, so fall back to the dedicated SO_ITEMS endpoint.
      */
-
-    const items = getObjectValue(salesOrder, ["ITEMS", "items", "lineItems", "orderItems", "products"]);
+    let items = getObjectValue(salesOrder, ["ITEMS", "items", "SO_ITEMS", "soItems", "lineItems", "orderItems", "products"]);
     invoiceItems = [];
     salesOrderBaseItems = [];
+
+    if (!Array.isArray(items) || !items.length) {
+        // Legacy browser cache may contain the original SO line items.
+        const cachedSO = getStoredSalesOrders().find(row =>
+            String(getObjectValue(row, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo", "SO"]) || "").trim().toLowerCase()
+            === getValue("soNo").trim().toLowerCase()
+        );
+        const cachedItems = getObjectValue(cachedSO, ["ITEMS", "items", "SO_ITEMS", "soItems", "lineItems", "orderItems", "products"]);
+        if (Array.isArray(cachedItems) && cachedItems.length) items = cachedItems;
+    }
+
+    if (!Array.isArray(items) || !items.length) {
+        try {
+            items = await invoiceGetRecords("getSalesOrderItems", ["items", "salesOrderItems", "records", "data"], {
+                soNumber: getValue("soNo")
+            });
+        } catch (error) {
+            console.error("[CREATE INVOICE] Could not load SO item details:", error);
+            items = [];
+        }
+    }
 
     if (Array.isArray(items) && items.length) {
         salesOrderBaseItems = items.map(rawItem => {
             const normalized = normalizeSalesOrderItem(rawItem);
+            const itemNo = String(getObjectValue(rawItem, ["ITEM_NO", "ITEM_NUMBER", "ITEM_NUMBER", "itemNo", "itemNumber", "number", "code"]) || normalized.itemNo || "");
             const itemName = String(getObjectValue(rawItem, ["ITEM_NAME", "itemName", "ITEM", "name", "DESCRIPTION", "description"]) || normalized.itemName || normalized.description || "");
-            const soQty = toNumber(getObjectValue(rawItem, ["QTY", "QUANTITY", "qty", "quantity", "SO_QTY", "soQty"]) || normalized.qtyInvoice);
-            const unitAmount = toNumber(getObjectValue(rawItem, ["AMOUNT", "UNIT_AMOUNT", "UNIT_PRICE", "unitAmount", "unitPrice", "price"]));
-            const invoicedQty = getPreviouslyInvoicedQty(getValue("soNo"), normalized.itemNo);
+            const soQty = toNumber(getObjectValue(rawItem, ["QTY", "QUANTITY", "SO_QTY", "QTY_SO", "ORDER_QTY", "QTY_ORDERED", "qty", "quantity", "soQty"]) || normalized.qtyInvoice);
+            const unitAmount = toNumber(getObjectValue(rawItem, ["UNIT_AMOUNT", "UNIT_PRICE", "AMOUNT", "unitAmount", "unitPrice", "price"]));
+            const invoicedQty = getPreviouslyInvoicedQty(getValue("soNo"), itemNo);
             return {
                 id: Date.now() + Math.random(),
-                itemNo: String(normalized.itemNo || ""),
+                itemNo,
                 itemName,
                 description: itemName,
                 soQty,
                 invoicedQty,
                 balance: Math.max(0, soQty - invoicedQty),
                 qtyInvoice: 0,
-                unit: String(normalized.unit || ""),
+                unit: String(getObjectValue(rawItem, ["UNIT", "UOM", "unit", "uom"]) || normalized.unit || ""),
                 unitPrice: unitAmount,
                 remarks: "",
                 checked: true,
                 sourceSONo: getValue("soNo"),
-                sourceItemNo: String(normalized.itemNo || ""),
+                sourceItemNo: itemNo,
                 isManual: false
             };
         });
-        invoiceItems = salesOrderBaseItems.map(item => ({ ...item, id: Date.now() + Math.random() }));
+    } else {
+        console.warn("[CREATE INVOICE] No Sales Order line items were returned for " + getValue("soNo"));
     }
 
-    rebuildInvoiceItemsFromSelectedDRs();;
+    rebuildInvoiceItemsFromSelectedDRs();
 
 }
 
@@ -2513,11 +2540,11 @@ function populateFromSalesOrder(
 function normalizeSalesOrderItem(item) {
     const itemName = getObjectValue(item, ["ITEM_NAME", "itemName", "ITEM", "name", "DESCRIPTION", "description", "itemDescription"]) || "";
     return {
-        itemNo: getObjectValue(item, ["ITEM_NO", "ITEM_NUMBER", "itemNo", "itemNumber", "number", "code"]) || "",
+        itemNo: getObjectValue(item, ["ITEM_NO", "ITEM_NUMBER", "ITEM_NUMBER", "itemNo", "itemNumber", "number", "code"]) || "",
         itemName: String(itemName),
         description: String(itemName),
-        qtyInvoice: toNumber(getObjectValue(item, ["QTY_DELIVERED", "QTY_DR", "DELIVERED_QTY", "deliveredQty", "pickQty", "PICK_QTY", "QTY", "QUANTITY", "qtyInvoice", "qty", "quantity", "totalDelivered", "totalOrder"]) || 0),
-        unit: getObjectValue(item, ["UNIT", "uom", "unit"]) || "",
+        qtyInvoice: toNumber(getObjectValue(item, ["QTY_DELIVERED", "QTY_DR", "DELIVERED_QTY", "deliveredQty", "pickQty", "PICK_QTY", "QTY_INVOICE", "QTY", "QUANTITY", "qtyInvoice", "qty", "quantity", "totalDelivered", "totalOrder"]) || 0),
+        unit: getObjectValue(item, ["UNIT", "UOM", "uom", "unit"]) || "",
         unitPrice: toNumber(getObjectValue(item, ["UNIT_AMOUNT", "UNIT_PRICE", "AMOUNT", "unitAmount", "unitPrice", "price", "sellingPrice"]) || 0)
     };
 }
