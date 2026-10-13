@@ -2519,10 +2519,12 @@ async function populateFromSalesOrder(
             const itemNo = String(getObjectValue(rawItem, ["ITEM_NO", "ITEM_NUMBER", "ITEM_NUMBER", "itemNo", "itemNumber", "number", "code"]) || normalized.itemNo || "");
             const itemName = String(getObjectValue(rawItem, ["ITEM_NAME", "itemName", "ITEM", "name", "DESCRIPTION", "description"]) || normalized.itemName || normalized.description || "");
             const soQty = toNumber(getObjectValue(rawItem, ["QTY", "QUANTITY", "SO_QTY", "QTY_SO", "ORDER_QTY", "QTY_ORDERED", "qty", "quantity", "soQty"]) || normalized.qtyInvoice);
+            // SALES_ORDER_ITEMS: AMOUNT (Column I) is the saved per-unit price.
+            // Prioritize AMOUNT over UNIT_PRICE (Column H).
             const unitAmount = toNumber(getObjectValue(rawItem, [
+                "AMOUNT", "Amount", "amount",
                 "UNIT_AMOUNT", "UNIT AMOUNT",
                 "UNIT_PRICE", "UNIT PRICE",
-                "AMOUNT", "Amount", "amount",
                 "unitAmount", "unitPrice", "price", "sellingPrice"
             ]));
             const invoicedQty = getPreviouslyInvoicedQty(getValue("soNo"), itemNo);
@@ -2565,10 +2567,11 @@ function normalizeSalesOrderItem(item) {
         description: String(itemName),
         qtyInvoice: toNumber(getObjectValue(item, ["QTY_DELIVERED", "QTY_DR", "DELIVERED_QTY", "deliveredQty", "pickQty", "PICK_QTY", "QTY_INVOICE", "QTY", "QUANTITY", "qtyInvoice", "qty", "quantity", "totalDelivered", "totalOrder"]) || 0),
         unit: getObjectValue(item, ["UNIT", "UOM", "uom", "unit"]) || "",
+        // AMOUNT is the authoritative per-unit price in SALES_ORDER_ITEMS.
         unitPrice: toNumber(getObjectValue(item, [
+            "AMOUNT", "Amount", "amount",
             "UNIT_AMOUNT", "UNIT AMOUNT",
             "UNIT_PRICE", "UNIT PRICE",
-            "AMOUNT", "Amount", "amount",
             "unitAmount", "unitPrice", "price", "sellingPrice"
         ]) || 0)
     };
