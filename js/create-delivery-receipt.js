@@ -192,10 +192,6 @@ function $(id) {
    INITIALIZATION
    ========================================================= */
 
-document.addEventListener("DOMContentLoaded", initCreateDeliveryReceipt);
-
-
-
 document.addEventListener(
     "DOMContentLoaded",
     initCreateDeliveryReceipt
@@ -240,7 +236,8 @@ async function initCreateDeliveryReceipt() {
             deliveryReceiptsCache.length
         );
 
-        await loadSelectedSalesOrder();
+        // Do not auto-restore a previously selected SO.
+        // Show SO details only after the user manually selects an SO.
 
     } catch (error) {
         console.error(
