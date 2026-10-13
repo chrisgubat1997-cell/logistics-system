@@ -2204,40 +2204,72 @@ function rebuildInvoiceItemsFromSelectedDRs() {
          toNumber(item.qtyInvoice) > 0 ||
          toNumber(item.unitPrice) > 0)
     );
-    const drItems = [];
+
+    // Consolidate partial deliveries by the original Sales Order item number.
+    // Example: Item 1 delivered as 10 pcs on DR-001 and 10 pcs on DR-002
+    // becomes one invoice line: Item 1, Qty 20.
+    const groupedItems = new Map();
 
     selectedDeliveryReceipts.forEach(dr => {
         const drNo = getDRPickerNumber(dr);
         const items = getObjectValue(dr, ["ITEMS", "items", "DR_ITEMS", "drItems", "lineItems"]);
         if (!Array.isArray(items)) return;
+
         items.forEach(rawItem => {
             const normalized = normalizeSalesOrderItem(rawItem);
-            drItems.push({
-                id: Date.now() + Math.random(),
-                itemNo: "",
-                description: String(normalized.description || ""),
-                qtyInvoice: toNumber(normalized.qtyInvoice),
-                unit: String(normalized.unit || ""),
-                unitPrice: toNumber(normalized.unitPrice),
-                sourceDRNo: drNo,
-                sourceItemNo: String(normalized.itemNo || "")
-            });
+            const sourceItemNo = String(normalized.itemNo || "").trim();
+            const description = String(normalized.description || "").trim();
+            const unit = String(normalized.unit || "").trim();
+            const unitPrice = toNumber(normalized.unitPrice);
+            const qty = toNumber(normalized.qtyInvoice);
+
+            // Item number is the primary key; description/unit are fallback
+            // identifiers only when a DR item has no original item number.
+            const key = sourceItemNo
+                ? "ITEM:" + sourceItemNo.toLowerCase()
+                : "DETAIL:" + [description.toLowerCase(), unit.toLowerCase(), unitPrice].join("|");
+
+            if (!groupedItems.has(key)) {
+                groupedItems.set(key, {
+                    id: Date.now() + Math.random(),
+                    itemNo: sourceItemNo,
+                    description,
+                    qtyInvoice: 0,
+                    unit,
+                    unitPrice,
+                    sourceDRNo: drNo,
+                    sourceItemNo,
+                    sourceDRNumbers: []
+                });
+            }
+
+            const invoiceItem = groupedItems.get(key);
+            invoiceItem.qtyInvoice += qty;
+
+            if (!invoiceItem.description && description) invoiceItem.description = description;
+            if (!invoiceItem.unit && unit) invoiceItem.unit = unit;
+            if ((!invoiceItem.unitPrice || invoiceItem.unitPrice === 0) && unitPrice) {
+                invoiceItem.unitPrice = unitPrice;
+            }
+            if (!invoiceItem.sourceDRNumbers.includes(drNo)) {
+                invoiceItem.sourceDRNumbers.push(drNo);
+            }
         });
     });
 
-    drItems.sort((a, b) =>
-        a.sourceItemNo.localeCompare(b.sourceItemNo, undefined, { numeric: true, sensitivity: "base" }) ||
-        a.sourceDRNo.localeCompare(b.sourceDRNo, undefined, { numeric: true, sensitivity: "base" })
+    const drItems = Array.from(groupedItems.values()).sort((a, b) =>
+        a.sourceItemNo.localeCompare(b.sourceItemNo, undefined, { numeric: true, sensitivity: "base" })
     );
 
     invoiceItems = selectedDeliveryReceipts.length
         ? drItems.concat(manualItems)
         : salesOrderBaseItems.map(item => ({ ...item, id: Date.now() + Math.random() })).concat(manualItems);
-    invoiceItems.forEach((item, index) => {
-        item.itemNo = String(index + 1);
-    });
+
+    // Keep the original SO item number for DR-derived rows. Do not renumber
+    // each partial delivery as a separate invoice item.
     renderItems();
     updateCalculations();
+
     if (selectedDeliveryReceipts.length && !drItems.length) {
         console.warn("[CREATE INVOICE] Selected DR records have no embedded item details in the API response.");
     }
@@ -2622,11 +2654,15 @@ function normalizeSalesOrderItem(
                     "QTY_DELIVERED",
                     "QTY_DR",
                     "DELIVERED_QTY",
+                    "deliveredQty",
+                    "pickQty",
+                    "PICK_QTY",
                     "QTY",
                     "QUANTITY",
                     "qtyInvoice",
                     "qty",
                     "quantity",
+                    "totalDelivered",
                     "totalOrder"
                 ]
             ) || 0,
