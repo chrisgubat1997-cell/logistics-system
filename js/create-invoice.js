@@ -117,6 +117,7 @@ let salesOrderRecords = [];
 let deliveryReceiptRecords = [];
 let salesOrderSuggestionIndex = -1;
 let deliverySuggestionIndex = -1;
+let selectedInvoiceType = "DELIVERY_RECEIPT";
 
 
 /* =====================================================
@@ -1165,6 +1166,9 @@ function collectInvoiceData() {
                 "drNo"
             ),
 
+        invoiceType:
+            selectedInvoiceType,
+
         poNo:
             getValue(
                 "poNo"
@@ -1415,7 +1419,7 @@ function validateInvoice() {
     if (!drNumber) {
         return {
             valid: false,
-            message: "Please enter the Delivery Receipt Number."
+            message: "Please select a Delivery Receipt or an invoice type."
         };
     }
 
@@ -2055,31 +2059,30 @@ function renderDeliveryReceiptSuggestions() {
     }
 
     const results = deliveryReceiptRecords.filter(dr => {
-        const linkedSO = String(getObjectValue(dr, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo"]) || "").trim().toLowerCase();
-        const drNo = String(getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo"]) || "").trim();
+        const linkedSO = String(getObjectValue(dr, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo", "salesOrderNumber"]) || "").trim().toLowerCase();
+        const drNo = String(getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo", "deliveryReceiptNumber"]) || "").trim();
         const status = String(getObjectValue(dr, ["STATUS", "status"]) || "").trim().toUpperCase();
         return linkedSO === soNumber && drNo && status !== "CANCELLED";
     });
 
     box.innerHTML = "";
     deliverySuggestionIndex = -1;
+
     if (!results.length) {
         const empty = document.createElement("div");
         empty.className = "so-suggestion-empty";
-        empty.textContent = "No active Delivery Receipt found for this Sales Order.";
+        empty.textContent = "No active Delivery Receipt found. Choose an invoice type below.";
         box.appendChild(empty);
-        box.hidden = false;
-        return;
     }
 
-    results.forEach((dr, index) => {
-        const number = getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo"]) || "—";
+    results.forEach(dr => {
+        const number = getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo", "deliveryReceiptNumber"]) || "—";
         const date = getObjectValue(dr, ["DATE_DELIVERED", "DATE_OF_TRANSFER", "DR_DATE", "drDate", "date"]) || "";
         const status = getObjectValue(dr, ["STATUS", "status"]) || "—";
         const option = document.createElement("button");
         option.type = "button";
         option.className = "so-suggestion-option";
-        option.dataset.drIndex = String(index);
+        option.dataset.drIndex = String(box.querySelectorAll("[data-dr-index]").length);
         const primary = document.createElement("strong");
         primary.textContent = String(number);
         const secondary = document.createElement("span");
@@ -2089,16 +2092,47 @@ function renderDeliveryReceiptSuggestions() {
         option.append(primary, secondary, badge);
         option.addEventListener("mousedown", event => event.preventDefault());
         option.addEventListener("click", () => {
+            selectedInvoiceType = "DELIVERY_RECEIPT";
             setValue("drNo", number);
             hideDeliveryReceiptSuggestions();
             populateFromDeliveryReceipt(dr);
         });
         box.appendChild(option);
     });
+
+    const divider = document.createElement("div");
+    divider.className = "so-suggestion-section-label";
+    divider.textContent = "OTHER INVOICE TYPES";
+    box.appendChild(divider);
+
+    [
+        { value: "DOWN_PAYMENT", label: "Down Payment Invoice", detail: "Invoice for the down payment" },
+        { value: "FULL_PAYMENT", label: "Full Payment Invoice", detail: "Invoice for the full payment" },
+        { value: "ADVANCE", label: "Advance Invoice", detail: "Invoice issued in advance" }
+    ].forEach(type => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "so-suggestion-option invoice-type-option";
+        option.dataset.invoiceType = type.value;
+        const primary = document.createElement("strong");
+        primary.textContent = type.label;
+        const secondary = document.createElement("span");
+        secondary.textContent = type.detail;
+        option.append(primary, secondary);
+        option.addEventListener("mousedown", event => event.preventDefault());
+        option.addEventListener("click", () => {
+            selectedInvoiceType = type.value;
+            setValue("drNo", type.label);
+            hideDeliveryReceiptSuggestions();
+        });
+        box.appendChild(option);
+    });
+
     box.hidden = false;
 }
 
 function populateFromDeliveryReceipt(dr) {
+    selectedInvoiceType = "DELIVERY_RECEIPT";
     const drItems = getObjectValue(dr, ["ITEMS", "items", "DR_ITEMS", "drItems", "lineItems"]);
     if (!Array.isArray(drItems) || !drItems.length) {
         console.warn("[CREATE INVOICE] Selected DR has no embedded items in API response.");
