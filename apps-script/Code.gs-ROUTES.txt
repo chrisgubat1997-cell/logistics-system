@@ -1,0 +1,28 @@
+/* ADD THESE CASES inside the existing routeRequest(action, payload) switch in Code.gs.
+   Keep all existing cases. Place these before default: */
+
+case "getInvoices":
+  return getInvoices(payload);
+case "getInvoice":
+  return getInvoice(payload);
+case "createInvoice":
+  return createInvoice(payload);
+case "getPayments":
+  return getPayments(payload);
+case "getPayment":
+  return getPayment(payload);
+case "createPayment":
+  return createPayment(payload);
+
+/* Frontend request shape:
+   POST { action: "createInvoice", data: { invoiceNo, invoiceDate, siNo, soNumber/soNo,
+       drNumber/drNo, poNo, terms, se, clientName, billingAddress, tinNo, project,
+       ewtType, ewtRate, ewtAmount, totalSales, netOfVat, vat, amountDue,
+       finalAmountDue, status, createdBy, items: [{itemNo,description,qtyInvoice,unit,unitPrice,totalAmount}] } }
+
+   POST { action: "createPayment", data: { paymentNo, paymentDate, soNumber/soNo,
+       invoiceNo, siNo, drNo, paymentMethod, paymentStatus, currentPayment,
+       receiptType, receiptNo, referenceNo, remarks, createdBy } }
+
+   GET action=getInvoices|getInvoice|getPayments|getPayment with query parameters is supported too.
+*/
