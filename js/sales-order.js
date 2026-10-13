@@ -1541,37 +1541,9 @@ async function loadSOList(
                 {},
 
             items:
-                (
-                    Array.isArray(result.items) &&
-                    result.items.length
-                )
-                    ? result.items
-                    : (
-                        Array.isArray(result.data?.items) &&
-                        result.data.items.length
-                    )
-                        ? result.data.items
-                        : (
-                            Array.isArray(result.salesOrder?.items) &&
-                            result.salesOrder.items.length
-                        )
-                            ? result.salesOrder.items
-                            : (
-                                Array.isArray(result.so?.items) &&
-                                result.so.items.length
-                            )
-                                ? result.so.items
-                                : (
-                                    Array.isArray(result.data?.salesOrder?.items) &&
-                                    result.data.salesOrder.items.length
-                                )
-                                    ? result.data.salesOrder.items
-                                    : (
-                                        Array.isArray(result.data?.so?.items) &&
-                                        result.data.so.items.length
-                                    )
-                                        ? result.data.so.items
-                                        : [],
+                result.items ||
+                result.data?.items ||
+                [],
 
             deliveries:
                 result.deliveries ||
@@ -2147,14 +2119,14 @@ async function loadSOList(
         tbody.innerHTML = "";
 
 
-        if (!Array.isArray(items) || !items.length) {
+        if (!items.length) {
 
             tbody.innerHTML = `
 
                 <tr>
 
                     <td
-                        colspan="6"
+                        colspan="9"
                         class="so-table-empty"
                     >
                         No items found.
@@ -2170,40 +2142,36 @@ async function loadSOList(
 
 
         items.forEach(
-            function (item) {
+            function (item, index) {
 
                 const row =
                     document.createElement("tr");
 
 
-                const itemName =
-                    getSOItemValue(
+                const itemCode =
+                    getSOValue(
                         item,
                         [
-                            "ITEM_NAME",
-                            "ITEM NAME",
-                            "ITEMNAME",
-                            "itemName",
-                            "NAME",
-                            "name"
+                            "ITEM_CODE",
+                            "itemCode",
+                            "CODE"
                         ]
                     ) || "";
 
 
                 const description =
-                    getSOItemValue(
+                    getSOValue(
                         item,
                         [
                             "DESCRIPTION",
                             "description",
-                            "ITEM_DESCRIPTION",
-                            "ITEM DESCRIPTION"
+                            "ITEM_DESCRIPTION"
                         ]
                     ) || "";
 
 
                 const unit =
-                    getSOItemValue(
+                    getSOValue(
                         item,
                         [
                             "UNIT",
@@ -2218,10 +2186,9 @@ async function loadSOList(
                         getSOValue(
                             item,
                             [
-                                "QTY",
                                 "QUANTITY",
                                 "quantity",
-                                "qty"
+                                "QTY"
                             ]
                         )
                     );
@@ -2233,22 +2200,53 @@ async function loadSOList(
                             item,
                             [
                                 "UNIT_PRICE",
-                                "UNIT PRICE",
-                                "unitPrice",
-                                "AMOUNT"
+                                "unitPrice"
                             ]
                         )
+                    );
+
+
+                const discount =
+                    toNumber(
+                        getSOValue(
+                            item,
+                            [
+                                "DISCOUNT",
+                                "discount"
+                            ]
+                        )
+                    );
+
+
+                const amount =
+                    toNumber(
+                        getSOValue(
+                            item,
+                            [
+                                "AMOUNT",
+                                "amount",
+                                "TOTAL"
+                            ]
+                        )
+                    ) ||
+                    (
+                        quantity *
+                        unitPrice
                     );
 
 
                 row.innerHTML = `
 
                     <td>
+                        ${index + 1}
+                    </td>
+
+                    <td>
                         <input
                             type="text"
                             class="detail-item-input"
-                            data-field="ITEM_NAME"
-                            value="${escapeAttribute(itemName)}"
+                            data-field="ITEM_CODE"
+                            value="${escapeAttribute(itemCode)}"
                             disabled
                         >
                     </td>
@@ -2295,6 +2293,22 @@ async function loadSOList(
                             step="0.01"
                             disabled
                         >
+                    </td>
+
+                    <td>
+                        <input
+                            type="number"
+                            class="detail-item-input detail-item-discount"
+                            data-field="DISCOUNT"
+                            value="${discount}"
+                            min="0"
+                            step="0.01"
+                            disabled
+                        >
+                    </td>
+
+                    <td class="detail-item-amount">
+                        ${formatCurrency(amount)}
                     </td>
 
                     <td>
@@ -3165,17 +3179,6 @@ async function loadSOList(
         }
 
 
-        const detailsActions =
-            document.querySelector(
-                ".so-details-actions"
-            );
-
-        if (detailsActions) {
-            detailsActions.style.display =
-                enabled ? "none" : "flex";
-        }
-
-
         const actionBar =
             document.getElementById(
                 "soUpdateActionBar"
@@ -3339,15 +3342,22 @@ async function loadSOList(
             document.createElement("tr");
 
 
+        const index =
+            tbody.children.length + 1;
+
+
         row.innerHTML = `
+
+            <td>
+                ${index}
+            </td>
 
             <td>
                 <input
                     type="text"
                     class="detail-item-input"
-                    data-field="ITEM_NAME"
+                    data-field="ITEM_CODE"
                     value=""
-                    placeholder="Item name"
                 >
             </td>
 
@@ -3357,7 +3367,6 @@ async function loadSOList(
                     class="detail-item-input"
                     data-field="DESCRIPTION"
                     value=""
-                    placeholder="Description"
                 >
             </td>
 
@@ -3367,7 +3376,6 @@ async function loadSOList(
                     class="detail-item-input"
                     data-field="UNIT"
                     value=""
-                    placeholder="Pcs / Assy / Meter"
                 >
             </td>
 
@@ -3391,6 +3399,21 @@ async function loadSOList(
                     min="0"
                     step="0.01"
                 >
+            </td>
+
+            <td>
+                <input
+                    type="number"
+                    class="detail-item-input detail-item-discount"
+                    data-field="DISCOUNT"
+                    value="0"
+                    min="0"
+                    step="0.01"
+                >
+            </td>
+
+            <td class="detail-item-amount">
+                ${formatCurrency(0)}
             </td>
 
             <td>
@@ -3437,6 +3460,8 @@ async function loadSOList(
 
         row.remove();
 
+
+        renumberDetailItems();
 
         calculateDetailTotals();
 
@@ -3491,25 +3516,7 @@ async function loadSOList(
 
         let subtotal = 0;
 
-        const currentSalesOrder =
-            currentSO
-                ? (
-                    currentSO.salesOrder ||
-                    currentSO.so ||
-                    {}
-                )
-                : {};
-
-        const discount =
-            toNumber(
-                getSOValue(
-                    currentSalesOrder,
-                    [
-                        "DISCOUNT",
-                        "discount"
-                    ]
-                )
-            );
+        let discount = 0;
 
 
         rows.forEach(
@@ -3524,6 +3531,12 @@ async function loadSOList(
                 const priceInput =
                     row.querySelector(
                         ".detail-item-price"
+                    );
+
+
+                const discountInput =
+                    row.querySelector(
+                        ".detail-item-discount"
                     );
 
 
@@ -3544,11 +3557,44 @@ async function loadSOList(
                     );
 
 
+                const itemDiscount =
+                    toNumber(
+                        discountInput?.value
+                    );
+
+
                 const gross =
                     qty * price;
 
 
+                const amount =
+                    Math.max(
+                        gross -
+                        itemDiscount,
+                        0
+                    );
+
+
                 subtotal += gross;
+
+                discount +=
+                    itemDiscount;
+
+
+                const amountCell =
+                    row.querySelector(
+                        ".detail-item-amount"
+                    );
+
+
+                if (amountCell) {
+
+                    amountCell.textContent =
+                        formatCurrency(
+                            amount
+                        );
+
+                }
 
             }
         );
@@ -3674,36 +3720,30 @@ async function loadSOList(
                     );
 
 
-                item.ITEM_NAME =
-                    String(
-                        item.ITEM_NAME ||
-                        ""
-                    ).trim();
+                const discount =
+                    toNumber(
+                        item.DISCOUNT
+                    );
+
 
                 item.QUANTITY =
-                    qty;
-
-                item.QTY =
                     qty;
 
                 item.UNIT_PRICE =
                     price;
 
-                // Retain legacy numeric fields for the existing Apps Script schema.
+                item.DISCOUNT =
+                    discount;
+
                 item.AMOUNT =
-                    qty * price;
-
-                item.TOTAL =
-                    qty * price;
-
-
-                if (
-                    !item.ITEM_NAME &&
-                    !item.DESCRIPTION &&
-                    !item.UNIT
-                ) {
-                    return;
-                }
+                    Math.max(
+                        (
+                            qty *
+                            price
+                        ) -
+                        discount,
+                        0
+                    );
 
 
                 items.push(
@@ -3720,7 +3760,10 @@ async function loadSOList(
 
 
     /* =====================================================
-       async function saveSOUpdate() {
+       SAVE SO UPDATE
+    ===================================================== */
+
+    async function saveSOUpdate() {
 
         if (!currentSO) {
 
@@ -3795,14 +3838,16 @@ async function loadSOList(
 
 
         const discount =
-            toNumber(
-                getSOValue(
-                    so,
-                    [
-                        "DISCOUNT",
-                        "discount"
-                    ]
-                )
+            items.reduce(
+                function (total, item) {
+
+                    return total +
+                        toNumber(
+                            item.DISCOUNT
+                        );
+
+                },
+                0
             );
 
 
@@ -6326,46 +6371,6 @@ window.addEventListener(
     }
 );
    
-
-    /* =====================================================
-       SALES ORDER ITEM FIELD HELPER
-       Supports legacy sheet header variations.
-    ===================================================== */
-
-    function getSOItemValue(item, keys) {
-
-        const directValue = getSOValue(item, keys);
-
-        if (directValue !== "") {
-            return directValue;
-        }
-
-        if (!item || typeof item !== "object") {
-            return "";
-        }
-
-        const normalizedKeys = keys.map(function (key) {
-            return String(key).replace(/[^a-z0-9]/gi, "").toUpperCase();
-        });
-
-        const itemKeys = Object.keys(item);
-
-        for (let i = 0; i < itemKeys.length; i++) {
-            const normalizedItemKey = String(itemKeys[i])
-                .replace(/[^a-z0-9]/gi, "")
-                .toUpperCase();
-
-            if (normalizedKeys.indexOf(normalizedItemKey) !== -1) {
-                const value = item[itemKeys[i]];
-                if (value !== undefined && value !== null) {
-                    return value;
-                }
-            }
-        }
-
-        return "";
-    }
-
 
     /* =====================================================
        GENERIC HELPERS
