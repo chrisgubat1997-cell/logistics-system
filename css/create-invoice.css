@@ -2131,3 +2131,56 @@ REDUCED MOTION
 .selected-dr-chip > span { overflow-wrap:anywhere; }
 .selected-dr-remove { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border:0; border-radius:5px; background:#fff; color:#b42318; font-size:16px; line-height:1; cursor:pointer; }
 .selected-dr-remove:hover { background:#fee2e2; }
+
+
+/* Invoice item grid: selection, SO quantities, invoiced balance and pick quantity */
+.items-table {
+    min-width: 1500px;
+}
+.items-table th,
+.items-table td {
+    padding-left: 7px;
+    padding-right: 7px;
+}
+.items-table .check-col {
+    width: 62px;
+    text-align: center;
+}
+.items-table .item-no-col {
+    width: 90px;
+}
+.items-table .description-col {
+    width: 230px;
+}
+.items-table .qty-col {
+    width: 95px;
+}
+.items-table .price-col {
+    width: 125px;
+}
+.items-table .amount-col {
+    width: 145px;
+}
+.items-table .remarks-col {
+    width: 180px;
+}
+.item-check {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+}
+.item-metric {
+    display: block;
+    color: var(--text);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+}
+.item-metric.money {
+    font-weight: 800;
+}
+.items-table input[readonly] {
+    background: #f8fafc;
+    color: var(--text);
+}
