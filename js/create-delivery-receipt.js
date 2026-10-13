@@ -1479,8 +1479,7 @@ function buildItemState() {
             getPreviouslyDeliveredQty(selectedSO, item);
 
         const totalOrder = toNumber(item.totalOrder);
-       unitPrice: toNumber(item.unitPrice),
-drAmount: 0,
+const unitPrice = toNumber(item.unitPrice);
 
         const balance = Math.max(
             totalOrder - previousDelivered,
