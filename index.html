@@ -1418,6 +1418,18 @@ async function loadSalesOrderModule() {
 
         }
 
+        // Render the Customer table after its HTML has been injected.
+        // The module script can initialize before this table exists,
+        // so call it again now to display cached data immediately.
+        if (
+            typeof loadCustomerTable ===
+            'function'
+        ) {
+
+            loadCustomerTable();
+
+        }
+
 
     } catch (error) {
 
@@ -3284,7 +3296,7 @@ document.addEventListener(
 <script
     <script src="js/cache-manager.js?v=20261008"></script>
 <script src="js/sync-manager.js?v=20261008"></script>
-<script src="js/sales-order.js?v=20261006"></script>
+<script src="js/sales-order.js?v=20261013-01"></script>
 ></script>
 
 
