@@ -3,121 +3,143 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LOGIS-TECH GAME — Demo</title>
+<title>LOGIS-TECH ACE CASCADE — Demo</title>
 <style>
-:root{color-scheme:dark;--bg:#100d22;--panel:#1c1636;--panel2:#261d49;--gold:#ffd166;--pink:#ff4fa3;--cyan:#63e6ff;--text:#f8f5ff;--muted:#b9b0d8}
+:root{color-scheme:dark;--gold:#f9d779;--gold2:#b67c2b;--ink:#170d0c;--red:#7c181e;--cream:#fff0cf;--muted:#d9c9a4}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;background:radial-gradient(ellipse at top,#39205d 0%,#17102e 45%,#0c0a19 100%);font-family:Arial,Helvetica,sans-serif;color:var(--text);padding:22px}
-.game-shell{max-width:1100px;margin:0 auto}
-.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
-.brand{font-size:13px;letter-spacing:2px;color:var(--cyan);font-weight:800}
-.demo-tag{border:1px solid #6d5c98;background:#241a43;border-radius:99px;padding:8px 12px;font-size:12px;color:#e6ddff}
-h1{margin:5px 0;font-size:clamp(28px,4vw,44px);text-align:center;letter-spacing:1px;text-shadow:0 0 22px #b14dff}
-.subtitle{text-align:center;color:var(--muted);margin:0 0 22px;font-size:14px}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:16px}
-.stat,.machine,.controls,.history{border:1px solid #4b3a77;background:linear-gradient(145deg,rgba(43,31,77,.96),rgba(22,17,43,.96));border-radius:18px;box-shadow:0 12px 32px #07050f66}
-.stat{padding:15px;text-align:center}.stat-label{font-size:11px;letter-spacing:1px;color:var(--muted);text-transform:uppercase}.stat-value{font-size:clamp(20px,3vw,28px);font-weight:800;margin-top:7px;color:var(--gold)}
-.machine{padding:clamp(12px,3vw,26px);position:relative;overflow:hidden}
-.machine:before{content:"";position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,var(--pink),var(--gold),var(--cyan))}
-.reels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(5px,1.5vw,12px);padding:12px;background:#0c0919;border:2px solid #7e5bc0;border-radius:14px;box-shadow:inset 0 0 22px #000}
-.reel{height:clamp(76px,13vw,125px);display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff8ff,#d7c8ff);border-radius:10px;font-size:clamp(30px,6vw,58px);box-shadow:inset 0 0 14px #6b438e;transition:transform .12s}
-.reel.spinning{animation:bounce .12s linear infinite}
-@keyframes bounce{50%{transform:translateY(4px)}}
-.machine-caption{text-align:center;color:var(--muted);font-size:12px;margin-top:12px}
-.controls{margin-top:15px;padding:18px;display:grid;grid-template-columns:1fr 1.5fr 1fr;align-items:center;gap:15px}
-.control-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px}
-select,button{font:inherit}
-select{width:100%;background:#100c20;color:white;border:1px solid #6e5a9a;border-radius:10px;padding:12px}
-.spin{border:0;border-radius:12px;padding:15px 20px;background:linear-gradient(100deg,#ff4fa3,#b75cff,#5b8cff);color:white;font-size:18px;font-weight:900;letter-spacing:1px;cursor:pointer;box-shadow:0 5px 0 #4b246d,0 0 22px #b14dff55}
-.spin:hover{filter:brightness(1.12)}button:disabled{opacity:.45;cursor:not-allowed;filter:grayscale(.5)}
-.secondary{border:1px solid #6e5a9a;border-radius:10px;background:#251b43;color:#e9e0ff;padding:11px 13px;cursor:pointer}
-.message{min-height:28px;text-align:center;padding:14px 8px 2px;font-weight:700;color:var(--gold)}
-.bottom{display:grid;grid-template-columns:1.3fr 1fr;gap:14px;margin-top:15px}
-.history{padding:16px}.history h2{font-size:15px;margin:0 0 12px}.history-list{font-size:12px;color:var(--muted);display:grid;gap:8px}.history-entry{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #40345f;padding-bottom:7px}.win{color:#7df7b0}.loss{color:#ff9eae}
-.rules{padding:16px;border:1px solid #4b3a77;border-radius:18px;background:#1b1532;color:var(--muted);font-size:12px;line-height:1.7}.rules strong{color:#f8f5ff}
-@media(max-width:650px){body{padding:12px}.stats{gap:7px}.stat{padding:10px 5px}.controls{grid-template-columns:1fr 1fr}.spin{grid-column:1/-1;grid-row:2}.bottom{grid-template-columns:1fr}.reels{padding:7px}.machine{padding:12px}}
+body{margin:0;min-height:100vh;padding:clamp(8px,2vw,24px);font-family:Georgia,'Times New Roman',serif;color:#fff5dd;background:radial-gradient(ellipse at 50% 0%,#8e2b25 0%,#401316 37%,#140b0d 100%)}
+.shell{max-width:1120px;margin:auto}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.logo{font:900 12px Arial,sans-serif;letter-spacing:2px;color:var(--gold)}
+.demo{font:700 10px Arial,sans-serif;letter-spacing:1px;border:1px solid #d4aa58;color:#ffe6a4;border-radius:99px;padding:8px 12px;background:#351315}
+h1{text-align:center;font-size:clamp(27px,4.2vw,48px);letter-spacing:3px;margin:4px 0 2px;color:#ffe7a0;text-shadow:0 3px #6a191a,0 0 24px #ffb12d66}
+.sub{text-align:center;color:#e9c8a2;font:11px Arial,sans-serif;letter-spacing:2px;margin:0 0 17px}
+.status{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.stat{border:1px solid #b7823b;border-radius:8px;background:linear-gradient(180deg,#552022,#2c1115);padding:10px;text-align:center;box-shadow:inset 0 1px #ffe6a044}
+.label{font:10px Arial,sans-serif;color:#e9c58a;letter-spacing:1px;text-transform:uppercase}.value{font:800 clamp(16px,2.4vw,25px) Arial,sans-serif;color:#ffe8a4;margin-top:5px}
+.cabinet{border:3px ridge #dfb75c;border-radius:13px;padding:clamp(8px,2vw,20px);background:linear-gradient(145deg,#5b191c,#260e13 60%,#6c2721);box-shadow:0 0 0 3px #3a1012,0 12px 36px #0009,inset 0 0 30px #f5b13b20}
+.cabinet-head{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:12px;color:#ffe7a0;font:800 12px Arial,sans-serif;letter-spacing:2px}
+.multiplier{border:1px solid #ffd66c;border-radius:99px;background:linear-gradient(#fff0ad,#a95c19);color:#521317;padding:7px 13px;font-weight:900;font-size:15px;box-shadow:0 0 14px #ffcd4d55}
+.board{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(4px,1vw,9px);padding:8px;background:linear-gradient(180deg,#190a0d,#321014);border:2px solid #c18b42;border-radius:8px;box-shadow:inset 0 0 22px #000}
+.reel{display:grid;grid-template-rows:repeat(4,minmax(48px,1fr));gap:clamp(4px,1vw,8px)}
+.symbol{min-height:clamp(48px,8.2vw,88px);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:2px;border:1px solid #e2bd77;border-radius:5px;background:linear-gradient(145deg,#fff5d9,#d8b779);color:#5b191d;box-shadow:inset 0 0 0 2px #fff7df55,0 2px 3px #0008;position:relative;overflow:hidden;font:900 clamp(22px,4vw,42px Georgia,serif);text-shadow:0 1px #fff}
+.symbol.red{color:#a21d28}.symbol.black{color:#242027}.symbol.high{background:linear-gradient(145deg,#fff2ba,#dba53f);border-color:#fff0a2}.symbol.golden{background:linear-gradient(145deg,#fff7c8,#f3bc3d 45%,#b36b15);border:2px solid #fff0a1;box-shadow:0 0 13px #ffd65b88,inset 0 0 10px #fff}
+.symbol.scatter{background:radial-gradient(circle,#fff2b8,#c52d2c 70%);color:#fff2b5;border:2px solid #ffdc7b;text-shadow:0 2px #6c1016;animation:glow 1.5s ease-in-out infinite alternate}
+.symbol.wild{background:linear-gradient(135deg,#ffe8a3,#b27a35);color:#4a1518;border:2px solid #fff0a0}
+.symbol small{font:900 8px Arial,sans-serif;letter-spacing:1px}
+@keyframes glow{to{box-shadow:0 0 17px #ffd34f}}
+.symbol.spinning{animation:flip .12s linear infinite}
+@keyframes flip{50%{transform:scaleY(.2);filter:brightness(1.5)}}
+.cabinet-foot{text-align:center;color:#edcf9e;font:10px Arial,sans-serif;letter-spacing:1px;margin-top:10px}
+.controls{display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:12px;align-items:end;margin-top:12px;border:1px solid #985d35;background:#240e12;padding:13px;border-radius:9px}
+.control label{display:block;color:#e9c58a;font:10px Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:7px}
+select,button{font:700 14px Arial,sans-serif}select{width:100%;padding:12px;background:#190a0c;color:#fff0ce;border:1px solid #b77a3e;border-radius:6px}
+.spin{padding:14px 8px;border:2px solid #fff0a2;border-radius:7px;color:#4b1115;font-weight:900;letter-spacing:2px;background:linear-gradient(#fff0a4,#e6a637 55%,#ad5a20);box-shadow:0 4px #6b281a,0 0 20px #ffc65335;cursor:pointer}.spin:active{transform:translateY(2px);box-shadow:0 2px #6b281a}.spin:disabled{opacity:.45;cursor:not-allowed}
+.secondary{padding:11px 8px;background:#3d171b;border:1px solid #b77a3e;border-radius:6px;color:#f7dfae;cursor:pointer}
+.message{min-height:35px;text-align:center;padding:13px 5px 5px;color:#ffe49a;font:700 13px Arial,sans-serif}
+.bottom{display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin-top:8px}
+.panel{border:1px solid #8e592e;background:#230e12;border-radius:8px;padding:13px}.panel h2{margin:0 0 10px;font:800 11px Arial,sans-serif;color:#ffe1a0;letter-spacing:1.5px;text-transform:uppercase}
+.history{display:grid;gap:7px;font:11px Arial,sans-serif;color:#e7d0aa}.entry{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #58302a;padding-bottom:6px}.win{color:#b5f6a7}.loss{color:#e5a6a6}
+.rules{font:11px/1.65 Arial,sans-serif;color:#ddc6a2}.rules b{color:#ffe8ad}
+@media(max-width:600px){.status{grid-template-columns:repeat(2,minmax(0,1fr))}.controls{grid-template-columns:1fr 1fr}.spin{grid-column:1/-1;grid-row:2}.bottom{grid-template-columns:1fr}.symbol small{font-size:7px}.cabinet-head{font-size:10px}}
 </style>
 </head>
 <body>
-<main class="game-shell">
-  <div class="topline"><div class="brand">LOGIS-TECH SYSTEM / ARCADE</div><div class="demo-tag">DEMO MODE · NO REAL MONEY</div></div>
-  <h1>✨ SCATTER SPIN ✨</h1>
-  <p class="subtitle">Sariling practice slot game · Demo credits lang · Walang cash-in o cash-out</p>
-  <section class="stats">
-    <div class="stat"><div class="stat-label">Demo Balance</div><div class="stat-value" id="balance">₱10,000</div></div>
-    <div class="stat"><div class="stat-label">Last Win</div><div class="stat-value" id="lastWin">₱0</div></div>
-    <div class="stat"><div class="stat-label">Total Spins</div><div class="stat-value" id="spinCount">0</div></div>
-  </section>
-  <section class="machine">
-    <div class="reels" id="reels" aria-label="Slot reels">
-      <div class="reel">💎</div><div class="reel">🍒</div><div class="reel">⭐</div><div class="reel">🔔</div><div class="reel">🪙</div>
-    </div>
-    <div class="machine-caption">Match symbols to win demo credits · ⭐ is the Scatter symbol</div>
-  </section>
-  <section class="controls">
-    <div><label class="control-label" for="bet">Bet per spin</label><select id="bet"><option value="10">₱10</option><option value="25">₱25</option><option value="50" selected>₱50</option><option value="100">₱100</option><option value="250">₱250</option><option value="500">₱500</option></select></div>
-    <button class="spin" id="spinButton" type="button">▶ SPIN</button>
-    <button class="secondary" id="resetButton" type="button">↻ Reset Demo</button>
-  </section>
-  <div class="message" id="message" role="status">Ready? Press SPIN to play.</div>
-  <section class="bottom">
-    <div class="history"><h2>Recent Spins</h2><div class="history-list" id="history"><div>Wala pang spins. Subukan ang demo!</div></div></div>
-    <div class="rules"><strong>Demo payout rules</strong><br>⭐ 3 or more Scatter = 5× bet<br>💎 3 matching symbols = 4× bet<br>🍒 3 matching symbols = 3× bet<br>🔔 or 🪙 3 matching symbols = 2× bet<br><br><strong>Paalala:</strong> This is a locally simulated demo for entertainment and UI testing only. Credits are fictional, have no monetary value, and cannot be purchased or withdrawn.</div>
-  </section>
+<main class="shell">
+ <div class="top"><div class="logo">LOGIS-TECH SYSTEM · ARCADE</div><div class="demo">PRACTICE DEMO · FICTIONAL CREDITS ONLY</div></div>
+ <h1>ACE CASCADE</h1><p class="sub">CARD-STYLE SLOT DEMO · NOT AN OFFICIAL JILI GAME</p>
+ <section class="status">
+  <div class="stat"><div class="label">Demo Credits</div><div class="value" id="balance">10,000</div></div>
+  <div class="stat"><div class="label">Last Win</div><div class="value" id="lastWin">0</div></div>
+  <div class="stat"><div class="label">Free Spins</div><div class="value" id="freeSpins">0</div></div>
+  <div class="stat"><div class="label">Total Spins</div><div class="value" id="spinCount">0</div></div>
+ </section>
+ <section class="cabinet">
+  <div class="cabinet-head"><span>✦</span><span id="modeLabel">MAIN GAME</span><span class="multiplier" id="multiplier">×1</span><span>✦</span></div>
+  <div class="board" id="board" aria-label="5 reels by 4 rows of demo symbols"></div>
+  <div class="cabinet-foot">5 REELS · 4 ROWS · GOLDEN CARDS · WILD · SCATTER FEATURE</div>
+ </section>
+ <section class="controls">
+  <div class="control"><label for="bet">Demo bet per spin</label><select id="bet"><option value="10">10 credits</option><option value="25">25 credits</option><option value="50" selected>50 credits</option><option value="100">100 credits</option><option value="250">250 credits</option><option value="500">500 credits</option></select></div>
+  <button class="spin" id="spinButton" type="button">▶ SPIN</button>
+  <button class="secondary" id="resetButton" type="button">↻ RESET DEMO</button>
+ </section>
+ <div class="message" id="message" role="status">Ready. Press SPIN to try the demo.</div>
+ <section class="bottom">
+  <div class="panel"><h2>Recent rounds</h2><div class="history" id="history">No rounds played yet.</div></div>
+  <div class="panel rules"><h2>Demo feature guide</h2><b>Golden Cards:</b> high card symbols may appear gold on reels 2–4.<br><b>Wild:</b> substitutes for regular card symbols in this demo.<br><b>Combo multiplier:</b> demo sequence ×1, ×2, ×3, ×5; free spins use ×2, ×4, ×6, ×10.<br><b>Scatter:</b> 3 or more ⭐ symbols may award 10 demo free spins.<br><br>All outcomes are simulated locally. Credits have no cash value. This is an original fan-style practice interface, not the official JILI Super Ace game or its exact certified math.</section>
+ </section>
 </main>
 <script>
 (function(){
-  const symbols=["🍒","💎","⭐","🔔","🪙","🍀","7️⃣","👑"];
-  let balance=10000, spins=0, lastWin=0, busy=false, history=[];
-  const $=id=>document.getElementById(id);
-  const money=value=>"₱"+Number(value).toLocaleString("en-PH",{maximumFractionDigits:2});
-  function renderStats(){$("balance").textContent=money(balance);$("lastWin").textContent=money(lastWin);$("spinCount").textContent=String(spins);$("spinButton").disabled=busy||balance<Number($("bet").value);}
-  function renderHistory(){
-    const host=$("history");
-    host.innerHTML="";
-    if(!history.length){host.innerHTML="<div>Wala pang spins. Subukan ang demo!</div>";return;}
-    history.forEach(entry=>{
-      const row=document.createElement("div");row.className="history-entry";
-      const left=document.createElement("span");left.textContent=entry.symbols.join(" ");
-      const right=document.createElement("strong");right.className=entry.win>0?"win":"loss";right.textContent=entry.win>0?"+"+money(entry.win):"-"+money(entry.bet);
-      row.append(left,right);host.appendChild(row);
-    });
+ "use strict";
+ const symbols=[
+  {id:"A",label:"A",kind:"high",weight:9},{id:"K",label:"K",kind:"high",weight:10},
+  {id:"Q",label:"Q",kind:"high",weight:11},{id:"J",label:"J",kind:"high",weight:12},
+  {id:"10",label:"10",kind:"black",weight:13},{id:"9",label:"9",kind:"red",weight:14},
+  {id:"W",label:"JOKER",kind:"wild",weight:3},{id:"S",label:"SCATTER",kind:"scatter",weight:2}
+ ];
+ const $=id=>document.getElementById(id);
+ let balance=10000,spins=0,lastWin=0,freeSpins=0,busy=false,history=[],current=[];
+ const money=n=>Number(n).toLocaleString("en-PH",{maximumFractionDigits:2});
+ function pick(){let total=symbols.reduce((s,x)=>s+x.weight,0),r=Math.random()*total;for(const x of symbols){r-=x.weight;if(r<=0)return x;}return symbols[0];}
+ function makeSymbol(sym,reelIndex){
+  const golden=reelIndex>=1&&reelIndex<=3&&["A","K","Q","J"].includes(sym.id)&&Math.random()<.18;
+  return {...sym,golden};
+ }
+ function renderBoard(grid,animate){
+  const board=$("board");board.innerHTML="";
+  for(let c=0;c<5;c++){const reel=document.createElement("div");reel.className="reel";
+   for(let r=0;r<4;r++){const s=grid[c][r],cell=document.createElement("div");cell.className="symbol "+s.kind+(s.golden?" golden":"")+(animate?" spinning":"");
+    if(s.id==="S"){cell.className+=" scatter";cell.textContent="★";const small=document.createElement("small");small.textContent="SCATTER";cell.appendChild(small);}
+    else if(s.id==="W"){cell.textContent="♛";const small=document.createElement("small");small.textContent="WILD";cell.appendChild(small);}
+    else {cell.textContent=s.label;if(s.golden){const small=document.createElement("small");small.textContent="GOLD";cell.appendChild(small);}}
+    reel.appendChild(cell);
+   }board.appendChild(reel);
   }
-  function payout(result,bet){
-    const scatters=result.filter(s=>s==="⭐").length;
-    if(scatters>=3)return bet*5;
-    const counts={};result.forEach(s=>counts[s]=(counts[s]||0)+1);
-    if(Object.values(counts).some(n=>n>=3)){
-      const match=Object.keys(counts).find(s=>counts[s]>=3);
-      if(match==="💎")return bet*4;
-      if(match==="🍒")return bet*3;
-      return bet*2;
-    }
-    return 0;
+ }
+ function newGrid(){return Array.from({length:5},(_,c)=>Array.from({length:4},()=>makeSymbol(pick(),c)));}
+ function update(){
+  $("balance").textContent=money(balance);$("lastWin").textContent=money(lastWin);$("freeSpins").textContent=String(freeSpins);$("spinCount").textContent=String(spins);
+  $("spinButton").disabled=busy||(freeSpins===0&&balance<Number($("bet").value));
+  $("modeLabel").textContent=freeSpins>0?"FREE GAME":"MAIN GAME";
+ }
+ function logRound(text,win,bet){
+  history.unshift({text,win,bet});history=history.slice(0,6);const host=$("history");host.innerHTML="";
+  history.forEach(h=>{const row=document.createElement("div");row.className="entry";const l=document.createElement("span");l.textContent=h.text;const v=document.createElement("strong");v.className=h.win>0?"win":"loss";v.textContent=h.win>0?"+"+money(h.win):"-"+money(h.bet);row.append(l,v);host.append(row);});
+ }
+ function score(grid,bet,isFree){
+  const scatterCount=grid.flat().filter(s=>s.id==="S").length;
+  let total=0,combo=0,work=grid.map(col=>col.map(s=>({...s})));
+  const mults=isFree?[2,4,6,10]:[1,2,3,5];
+  for(let step=0;step<4;step++){
+   const winners=new Set();
+   for(const sym of symbols.filter(s=>!["S","W"].includes(s.id))){
+    let ways=1,cols=[];
+    for(let c=0;c<5;c++){const rows=[];for(let r=0;r<4;r++)if(work[c][r].id===sym.id||work[c][r].id==="W")rows.push(r);if(!rows.length)break;ways*=rows.length;cols.push({c,rows});}
+    if(cols.length>=3){const hits=cols.reduce((n,x)=>n+x.rows.length,0);cols.forEach(x=>x.rows.forEach(r=>winners.add(x.c*4+r)));const base=({A:2,K:1.8,Q:1.6,J:1.4,"10":1.2,"9":1})[sym.id]||1;total+=Math.round(bet*.08*ways*base*mults[Math.min(combo,mults.length-1)]);combo++;}
+   }
+   if(!winners.size)break;
+   for(const ix of winners){const c=Math.floor(ix/4),r=ix%4;work[c][r]=makeSymbol({id:"W",label:"JOKER",kind:"wild",weight:1},c);}
+   // This lightweight demo cascade re-evaluates the grid with transformed wild symbols.
   }
-  $("spinButton").addEventListener("click",()=>{
-    if(busy)return;
-    const bet=Number($("bet").value);
-    if(balance<bet){$("message").textContent="Kulang ang demo credits. Pindutin ang Reset Demo.";return;}
-    busy=true;balance-=bet;lastWin=0;renderStats();$("message").textContent="Spinning...";
-    const reels=[...document.querySelectorAll(".reel")];reels.forEach(el=>el.classList.add("spinning"));
-    let ticks=0;
-    const timer=setInterval(()=>{
-      reels.forEach(el=>el.textContent=symbols[Math.floor(Math.random()*symbols.length)]);
-      ticks++;
-      if(ticks>=9){
-        clearInterval(timer);const result=reels.map(el=>symbols[Math.floor(Math.random()*symbols.length)]);
-        reels.forEach((el,i)=>{el.textContent=result[i];el.classList.remove("spinning");});
-        lastWin=payout(result,bet);balance+=lastWin;spins++;busy=false;
-        $("message").textContent=lastWin>0?"🎉 WIN! Nadagdag ang "+money(lastWin)+" demo credits.":"No match this time. Try again sa demo!";
-        history.unshift({symbols:result,win:lastWin,bet});history=history.slice(0,6);
-        renderHistory();renderStats();
-      }
-    },85);
-  });
-  $("bet").addEventListener("change",renderStats);
-  $("resetButton").addEventListener("click",()=>{if(busy)return;balance=10000;spins=0;lastWin=0;history=[];$("message").textContent="Demo reset! Ready to spin.";document.querySelectorAll(".reel").forEach(el=>el.textContent=symbols[Math.floor(Math.random()*symbols.length)]);renderHistory();renderStats();});
-  renderStats();
+  $("multiplier").textContent="×"+(combo?mults[Math.min(combo-1,mults.length-1)]:1);
+  return {win:total,scatters:scatterCount,combo};
+ }
+ $("spinButton").addEventListener("click",()=>{
+  if(busy)return;const bet=Number($("bet").value),isFree=freeSpins>0;
+  if(!isFree&&balance<bet){$("message").textContent="Not enough demo credits. Press RESET DEMO.";return;}
+  busy=true;if(isFree)freeSpins--;else balance-=bet;lastWin=0;update();$("message").textContent="Reels spinning…";
+  const reels=[...document.querySelectorAll(".symbol")];reels.forEach(el=>el.classList.add("spinning"));
+  let ticks=0;const timer=setInterval(()=>{renderBoard(newGrid(),true);ticks++;if(ticks>=8){clearInterval(timer);current=newGrid();renderBoard(current,false);
+   const result=score(current,bet,isFree);lastWin=result.win;balance+=lastWin;spins++;
+   if(result.scatters>=3){freeSpins+=10;$("message").textContent="★ SCATTER FEATURE! +10 demo free spins!";}else if(lastWin>0){$("message").textContent="WIN! "+money(lastWin)+" demo credits added · "+result.combo+" combo(s).";}else{$("message").textContent=isFree?"Free spin complete — no match this round.":"No match this round. Demo only — try again if you wish.";}
+   logRound(current.map(col=>col.map(s=>s.id==="S"?"★":s.label).join("")).join(" | "),lastWin,bet);busy=false;update();
+  }},100);
+ });
+ $("bet").addEventListener("change",update);
+ $("resetButton").addEventListener("click",()=>{if(busy)return;balance=10000;spins=0;lastWin=0;freeSpins=0;history=[];current=newGrid();renderBoard(current,false);$("history").textContent="No rounds played yet.";$("message").textContent="Demo reset. Ready to spin."; $("multiplier").textContent="×1";update();});
+ current=newGrid();renderBoard(current,false);update();
 })();
 </script>
 </body>
