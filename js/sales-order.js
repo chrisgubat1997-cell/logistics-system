@@ -1571,7 +1571,7 @@ async function loadSOList(
                                         result.data.so.items.length
                                     )
                                         ? result.data.so.items
-                                        : [];
+                                        : [],
 
             deliveries:
                 result.deliveries ||
