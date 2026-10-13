@@ -113,9 +113,10 @@ async function fetchInvoicesFromDatabase() {
         return true;
     } catch (error) {
         console.error(
-            "LOGIS-TECH: Could not load invoices from database; retaining local cache.",
+            "LOGIS-TECH: Could not load invoices from database. Local invoice records will not be displayed.",
             error
         );
+        invoiceRecords = [];
         return false;
     }
 }
@@ -176,8 +177,8 @@ function getLocalStorageArray(key) {
 
 function loadInvoicingData() {
 
-    invoiceRecords =
-        getLocalStorageArray(INVOICE_STORAGE_KEY);
+    // Invoice history must come only from the Google Sheets database.
+    invoiceRecords = [];
 
     salesOrderRecords =
         getLocalStorageArray(SALES_ORDER_STORAGE_KEY);
@@ -226,15 +227,10 @@ function initializeInvoicing() {
 
     invoicingInitialized = true;
 
-    /*
-     * Refresh invoice records from Google Sheets in the background.
-     * If the API is unavailable, the existing local cache remains visible.
-     */
-    fetchInvoicesFromDatabase().then(function (loaded) {
-        if (loaded) {
-            renderInvoiceSummary();
-            renderRecentInvoices();
-        }
+    // Invoice history is loaded only from Google Sheets.
+    fetchInvoicesFromDatabase().then(function () {
+        renderInvoiceSummary();
+        renderRecentInvoices();
     });
 
 
@@ -250,6 +246,30 @@ function initializeInvoicing() {
 ========================================================= */
 
 function bindInvoicingEvents() {
+
+    // Close the recent-invoice preview using the Close/X button or overlay.
+    const invoicePreviewModal = document.getElementById("invoicePreviewModal");
+    const closePreviewBtn = document.getElementById("closePreviewBtn");
+    const previewOverlay = document.getElementById("previewOverlay");
+
+    if (closePreviewBtn && closePreviewBtn.dataset.closeBound !== "true") {
+        closePreviewBtn.dataset.closeBound = "true";
+        closePreviewBtn.addEventListener("click", closeExistingInvoicePreview);
+    }
+
+    if (previewOverlay && previewOverlay.dataset.closeBound !== "true") {
+        previewOverlay.dataset.closeBound = "true";
+        previewOverlay.addEventListener("click", closeExistingInvoicePreview);
+    }
+
+    if (invoicePreviewModal && invoicePreviewModal.dataset.escapeBound !== "true") {
+        invoicePreviewModal.dataset.escapeBound = "true";
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && !invoicePreviewModal.hidden) {
+                closeExistingInvoicePreview();
+            }
+        });
+    }
 
 
     /* =====================================================
@@ -1777,6 +1797,20 @@ function bindInvoiceViewButtons() {
 
 
 /* =========================================================
+   CLOSE EXISTING INVOICE PREVIEW
+========================================================= */
+
+function closeExistingInvoicePreview() {
+    const modal = document.getElementById("invoicePreviewModal");
+    if (!modal) return;
+    modal.classList.remove("active");
+    modal.hidden = true;
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+}
+
+
+/* =========================================================
    OPEN EXISTING INVOICE PREVIEW
 ========================================================= */
 
@@ -1937,6 +1971,9 @@ function openInvoicePreview(invoice) {
 
 
     modal.hidden = false;
+    modal.classList.add("active");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
 
 }
 
