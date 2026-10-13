@@ -1399,6 +1399,17 @@ async function loadSalesOrderModule() {
         container.innerHTML =
             html;
 
+        // Start Customer rendering immediately after its table exists.
+        // Cached Customer data can appear while Sales Orders are loading.
+        if (
+            typeof loadCustomerTable ===
+            'function'
+        ) {
+
+            loadCustomerTable();
+
+        }
+
 
         salesModuleLoaded =
             true;
@@ -1415,18 +1426,6 @@ async function loadSalesOrderModule() {
         ) {
 
             await loadSOList();
-
-        }
-
-        // Render the Customer table after its HTML has been injected.
-        // The module script can initialize before this table exists,
-        // so call it again now to display cached data immediately.
-        if (
-            typeof loadCustomerTable ===
-            'function'
-        ) {
-
-            loadCustomerTable();
 
         }
 
