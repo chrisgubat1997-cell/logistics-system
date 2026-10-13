@@ -209,7 +209,12 @@ function bindEvents() {
     $("addItemBtn")?.addEventListener(
         "click",
         () => {
-            addItem();
+            const itemName = selectedInvoiceType === "FULL_PAYMENT"
+                ? "Full Payment"
+                : selectedInvoiceType === "DOWN_PAYMENT"
+                    ? "Down payment"
+                    : "";
+            addItem({ isManual: true, itemName, qtyInvoice: 1, checked: true });
         }
     );
 
@@ -569,18 +574,16 @@ function renderItems() {
 function bindItemEvents() {
 
     document
-        .querySelectorAll(
-            ".item-input"
-        )
+        .querySelectorAll(".item-input")
         .forEach(input => {
-
-            input.addEventListener(
-                "input",
-                handleItemInput
-            );
-
+            input.addEventListener("input", handleItemInput);
         });
 
+    document
+        .querySelectorAll(".item-check")
+        .forEach(input => {
+            input.addEventListener("change", handleItemInput);
+        });
 
     document
         .querySelectorAll(
@@ -694,21 +697,8 @@ function calculateInvoice() {
     const totalSales =
         invoiceItems.reduce(
             (sum, item) => {
-
-                return (
-                    sum
-                    +
-                    (
-                        toNumber(
-                            item.qtyInvoice
-                        )
-                        *
-                        toNumber(
-                            item.unitPrice
-                        )
-                    )
-                );
-
+                if (item.checked === false) return sum;
+                return sum + (toNumber(item.qtyInvoice) * toNumber(item.unitPrice));
             },
             0
         );
@@ -1083,39 +1073,21 @@ function collectInvoiceData() {
             totals.ewtRate,
 
         items:
-            invoiceItems.map(
-                item => ({
-
-                    itemNo:
-                        item.itemNo,
-
-                    description:
-                        item.description,
-
-                    qtyInvoice:
-                        toNumber(
-                            item.qtyInvoice
-                        ),
-
-                    unit:
-                        item.unit,
-
-                    unitPrice:
-                        toNumber(
-                            item.unitPrice
-                        ),
-
-                    totalAmount:
-                        toNumber(
-                            item.qtyInvoice
-                        )
-                        *
-                        toNumber(
-                            item.unitPrice
-                        )
-
-                })
-            ),
+            invoiceItems.filter(item => item.checked !== false).map(item => ({
+                itemNo: item.itemNo,
+                itemName: item.itemName || item.description,
+                description: item.itemName || item.description,
+                soQty: toNumber(item.soQty),
+                invoicedQty: toNumber(item.invoicedQty),
+                balance: toNumber(item.balance),
+                qtyInvoice: toNumber(item.qtyInvoice),
+                pickQty: toNumber(item.qtyInvoice),
+                unit: item.unit,
+                unitAmount: toNumber(item.unitPrice),
+                unitPrice: toNumber(item.unitPrice),
+                remarks: item.remarks || "",
+                totalAmount: toNumber(item.qtyInvoice) * toNumber(item.unitPrice)
+            })),
 
         totalSales:
             totals.totalSales,
