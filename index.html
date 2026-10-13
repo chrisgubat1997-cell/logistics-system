@@ -3259,6 +3259,19 @@ document.addEventListener(
 
         loadUserAccount();
 
+        // When returning from a successful invoice save, open the Invoice module automatically.
+        const startupParams = new URLSearchParams(window.location.search);
+        if (startupParams.get("openModule") === "invoice") {
+            const invoiceButton = document.querySelector('.menu-btn[onclick*="showPage(\'invoice\'"]');
+            if (invoiceButton) {
+                showPage("invoice", invoiceButton);
+            }
+            startupParams.delete("openModule");
+            const remainingQuery = startupParams.toString();
+            const cleanUrl = window.location.pathname + (remainingQuery ? "?" + remainingQuery : "") + window.location.hash;
+            window.history.replaceState({}, document.title, cleanUrl);
+        }
+
 
         /* =================================================
            DR DATE
