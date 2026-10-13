@@ -115,6 +115,7 @@ let isSaving = false;
 
 let salesOrderRecords = [];
 let deliveryReceiptRecords = [];
+let selectedDeliveryReceipts = [];
 let salesOrderSuggestionIndex = -1;
 let deliverySuggestionIndex = -1;
 let selectedInvoiceType = "DELIVERY_RECEIPT";
@@ -2051,9 +2052,15 @@ function renderDeliveryReceiptSuggestions() {
     const box = $("drSuggestions");
     const input = $("drNo");
     if (!box || !input) return;
-    const soNumber = getValue("soNo").toLowerCase();
+    const soNumber = getValue("soNo").trim().toLowerCase();
+    box.innerHTML = "";
+    deliverySuggestionIndex = -1;
+
     if (!soNumber) {
-        box.innerHTML = '<div class="so-suggestion-empty">Select a Sales Order first.</div>';
+        const empty = document.createElement("div");
+        empty.className = "so-suggestion-empty";
+        empty.textContent = "Select a Sales Order first.";
+        box.appendChild(empty);
         box.hidden = false;
         return;
     }
@@ -2065,37 +2072,39 @@ function renderDeliveryReceiptSuggestions() {
         return linkedSO === soNumber && drNo && status !== "CANCELLED";
     });
 
-    box.innerHTML = "";
-    deliverySuggestionIndex = -1;
-
     if (!results.length) {
         const empty = document.createElement("div");
         empty.className = "so-suggestion-empty";
-        empty.textContent = "No active Delivery Receipt found. Choose an invoice type below.";
+        empty.textContent = "No active DR found for this Sales Order. You can still choose an invoice type below.";
         box.appendChild(empty);
     }
 
     results.forEach(dr => {
-        const number = getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo", "deliveryReceiptNumber"]) || "—";
+        const number = getDRPickerNumber(dr);
+        const alreadySelected = selectedDeliveryReceipts.some(selected => getDRPickerNumber(selected).toLowerCase() === number.toLowerCase());
         const date = getObjectValue(dr, ["DATE_DELIVERED", "DATE_OF_TRANSFER", "DR_DATE", "drDate", "date"]) || "";
         const status = getObjectValue(dr, ["STATUS", "status"]) || "—";
         const option = document.createElement("button");
         option.type = "button";
-        option.className = "so-suggestion-option";
+        option.className = "so-suggestion-option" + (alreadySelected ? " is-active" : "");
         option.dataset.drIndex = String(box.querySelectorAll("[data-dr-index]").length);
         const primary = document.createElement("strong");
-        primary.textContent = String(number);
+        primary.textContent = (alreadySelected ? "✓ " : "") + number;
         const secondary = document.createElement("span");
         secondary.textContent = (date ? String(date) + " · " : "") + "Sales Order " + getValue("soNo");
         const badge = document.createElement("small");
-        badge.textContent = String(status);
+        badge.textContent = alreadySelected ? "SELECTED" : String(status);
         option.append(primary, secondary, badge);
         option.addEventListener("mousedown", event => event.preventDefault());
         option.addEventListener("click", () => {
             selectedInvoiceType = "DELIVERY_RECEIPT";
-            setValue("drNo", number);
-            hideDeliveryReceiptSuggestions();
-            populateFromDeliveryReceipt(dr);
+            if (alreadySelected) {
+                selectedDeliveryReceipts = selectedDeliveryReceipts.filter(selected => getDRPickerNumber(selected).toLowerCase() !== number.toLowerCase());
+            } else {
+                selectedDeliveryReceipts.push(dr);
+            }
+            syncSelectedDeliveryReceipts();
+            renderDeliveryReceiptSuggestions();
         });
         box.appendChild(option);
     });
@@ -2123,6 +2132,9 @@ function renderDeliveryReceiptSuggestions() {
         option.addEventListener("click", () => {
             selectedInvoiceType = type.value;
             setValue("drNo", type.label);
+            selectedDeliveryReceipts = [];
+            renderSelectedDeliveryReceiptChips();
+            rebuildInvoiceItemsFromSelectedDRs();
             hideDeliveryReceiptSuggestions();
         });
         box.appendChild(option);
@@ -2131,16 +2143,107 @@ function renderDeliveryReceiptSuggestions() {
     box.hidden = false;
 }
 
-function populateFromDeliveryReceipt(dr) {
-    selectedInvoiceType = "DELIVERY_RECEIPT";
-    const drItems = getObjectValue(dr, ["ITEMS", "items", "DR_ITEMS", "drItems", "lineItems"]);
-    if (!Array.isArray(drItems) || !drItems.length) {
-        console.warn("[CREATE INVOICE] Selected DR has no embedded items in API response.");
-        return;
+function getDRPickerNumber(dr) {
+    return String(getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo", "deliveryReceiptNumber"]) || "").trim();
+}
+
+function syncSelectedDeliveryReceipts() {
+    const input = $("drNo");
+    if (selectedDeliveryReceipts.length) {
+        selectedInvoiceType = "DELIVERY_RECEIPT";
+        if (input) input.value = selectedDeliveryReceipts.map(getDRPickerNumber).join(", ");
+    } else if (input && selectedInvoiceType === "DELIVERY_RECEIPT") {
+        input.value = "";
     }
-    invoiceItems = [];
-    drItems.forEach(item => addItem(normalizeSalesOrderItem(item)));
+    renderSelectedDeliveryReceiptChips();
+    rebuildInvoiceItemsFromSelectedDRs();
+}
+
+function renderSelectedDeliveryReceiptChips() {
+    const wrapper = $("drPickerWrap");
+    if (!wrapper) return;
+    let list = $("selectedDrList");
+    if (!list) {
+        list = document.createElement("div");
+        list.id = "selectedDrList";
+        list.className = "selected-dr-list";
+        const suggestions = $("drSuggestions");
+        wrapper.insertBefore(list, suggestions || null);
+    }
+    list.innerHTML = "";
+    selectedDeliveryReceipts.forEach(dr => {
+        const number = getDRPickerNumber(dr);
+        const chip = document.createElement("span");
+        chip.className = "selected-dr-chip";
+        const label = document.createElement("span");
+        label.textContent = number;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "selected-dr-remove";
+        remove.textContent = "×";
+        remove.title = "Remove " + number;
+        remove.setAttribute("aria-label", "Remove DR " + number);
+        remove.addEventListener("click", () => {
+            selectedDeliveryReceipts = selectedDeliveryReceipts.filter(selected => getDRPickerNumber(selected).toLowerCase() !== number.toLowerCase());
+            syncSelectedDeliveryReceipts();
+            if ($("drSuggestions") && !$("drSuggestions").hidden) renderDeliveryReceiptSuggestions();
+        });
+        chip.append(label, remove);
+        list.appendChild(chip);
+    });
+    list.hidden = selectedDeliveryReceipts.length === 0;
+}
+
+function rebuildInvoiceItemsFromSelectedDRs() {
+    const manualItems = invoiceItems.filter(item =>
+        !item.sourceDRNo &&
+        (String(item.description || "").trim() ||
+         String(item.itemNo || "").trim() ||
+         toNumber(item.qtyInvoice) > 0 ||
+         toNumber(item.unitPrice) > 0)
+    );
+    const drItems = [];
+
+    selectedDeliveryReceipts.forEach(dr => {
+        const drNo = getDRPickerNumber(dr);
+        const items = getObjectValue(dr, ["ITEMS", "items", "DR_ITEMS", "drItems", "lineItems"]);
+        if (!Array.isArray(items)) return;
+        items.forEach(rawItem => {
+            const normalized = normalizeSalesOrderItem(rawItem);
+            drItems.push({
+                id: Date.now() + Math.random(),
+                itemNo: "",
+                description: String(normalized.description || ""),
+                qtyInvoice: toNumber(normalized.qtyInvoice),
+                unit: String(normalized.unit || ""),
+                unitPrice: toNumber(normalized.unitPrice),
+                sourceDRNo: drNo,
+                sourceItemNo: String(normalized.itemNo || "")
+            });
+        });
+    });
+
+    drItems.sort((a, b) =>
+        a.sourceItemNo.localeCompare(b.sourceItemNo, undefined, { numeric: true, sensitivity: "base" }) ||
+        a.sourceDRNo.localeCompare(b.sourceDRNo, undefined, { numeric: true, sensitivity: "base" })
+    );
+
+    invoiceItems = drItems.concat(manualItems);
+    invoiceItems.forEach((item, index) => {
+        item.itemNo = String(index + 1);
+    });
+    renderItems();
     updateCalculations();
+    if (selectedDeliveryReceipts.length && !drItems.length) {
+        console.warn("[CREATE INVOICE] Selected DR records have no embedded item details in the API response.");
+    }
+}
+
+function populateFromDeliveryReceipt(dr) {
+    if (!selectedDeliveryReceipts.some(selected => getDRPickerNumber(selected) === getDRPickerNumber(dr))) {
+        selectedDeliveryReceipts.push(dr);
+    }
+    syncSelectedDeliveryReceipts();
 }
 
 function updateSalesOrderSuggestionFocus(options) {
@@ -2218,8 +2321,11 @@ function renderSalesOrderSuggestions(query) {
 
     function inputSetSalesOrder(number, salesOrder) {
         selectedInvoiceType = "DELIVERY_RECEIPT";
+        selectedDeliveryReceipts = [];
         setValue("soNo", number);
         setValue("drNo", "");
+        renderSelectedDeliveryReceiptChips();
+        rebuildInvoiceItemsFromSelectedDRs();
         const drInput = $("drNo");
         if (drInput) {
             drInput.readOnly = false;
@@ -2236,7 +2342,11 @@ function loadSalesOrderFromUrl() {
     const soNo = params.get("so");
     if (!soNo) return;
 
+    selectedDeliveryReceipts = [];
     setValue("soNo", soNo);
+    setValue("drNo", "");
+    renderSelectedDeliveryReceiptChips();
+    rebuildInvoiceItemsFromSelectedDRs();
     const drInput = $("drNo");
     if (drInput) {
         drInput.readOnly = false;
@@ -2506,6 +2616,9 @@ function normalizeSalesOrderItem(
             getObjectValue(
                 item,
                 [
+                    "QTY_DELIVERED",
+                    "QTY_DR",
+                    "DELIVERED_QTY",
                     "QTY",
                     "QUANTITY",
                     "qtyInvoice",
@@ -2530,6 +2643,7 @@ function normalizeSalesOrderItem(
                 item,
                 [
                     "UNIT_PRICE",
+                    "PRICE",
                     "AMOUNT",
                     "unitPrice",
                     "price",
