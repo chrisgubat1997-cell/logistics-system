@@ -1140,13 +1140,12 @@ async function openDRDetails(row) {
 }
 
 
-   
+
 function renderDRDetails(dr, items) {
     const detailsView = document.getElementById("drDetailsView");
 
     if (!detailsView || !dr) return;
 
-    // Kunin ang items mula sa napiling DR
     items = Array.isArray(items) ? items : getDRItems(dr);
 
     const tbody = detailsView.querySelector("#activeDRItemsBody");
@@ -1156,6 +1155,9 @@ function renderDRDetails(dr, items) {
         console.error("Hindi makita ang activeDRItemsBody.");
         return;
     }
+
+    console.log("Rendering DR header:", dr);
+    console.log("Rendering DR items:", items);
 
     if (items.length === 0) {
         tbody.innerHTML = `
@@ -1173,7 +1175,16 @@ function renderDRDetails(dr, items) {
         return;
     }
 
+    const soNumber = getSONumber(dr);
+
+    const matchingSO = salesOrdersCache.find(function (so) {
+        return getSONumber(so) === soNumber;
+    });
+
+    const soItems = matchingSO ? getSOItems(matchingSO) : [];
+
     let total = 0;
+    let hasAmount = false;
 
     tbody.innerHTML = items.map(function (item, index) {
         const itemNumber = getValue(
@@ -1206,46 +1217,49 @@ function renderDRDetails(dr, items) {
             "—"
         );
 
-        const savedAmount = getValue(
-            item,
-            ["DR_AMOUNT", "LINE_TOTAL", "TOTAL_AMOUNT", "drAmount", "lineTotal"],
-            null
-        );
-
-        const soNumber = getSONumber(dr);
-
-        const matchingSO = salesOrdersCache.find(function (so) {
-            return getSONumber(so) === soNumber;
-        });
-
-        const soItems = matchingSO ? getSOItems(matchingSO) : [];
-
         const soItemId = String(getValue(
             item,
             ["SO_ITEM_ID", "soItemId"],
             ""
-        ));
+        )).trim();
 
         const matchingSOItem = soItems.find(function (soItem) {
-            return String(getValue(
+            const candidateId = String(getValue(
                 soItem,
                 ["SO_ITEM_ID", "soItemId", "ITEM_ID", "itemId"],
                 ""
-            )) === soItemId;
+            )).trim();
+
+            return candidateId !== "" && candidateId === soItemId;
         });
 
         const unitAmount = matchingSOItem
             ? getSOItemUnitAmount(matchingSOItem)
             : null;
 
-        const lineTotal = savedAmount !== null && savedAmount !== ""
-            ? toNumber(savedAmount)
-            : unitAmount !== null
-                ? qty * unitAmount
-                : null;
+        const savedAmount = getValue(
+            item,
+            [
+                "DR_AMOUNT",
+                "LINE_TOTAL",
+                "TOTAL_AMOUNT",
+                "AMOUNT",
+                "drAmount",
+                "lineTotal"
+            ],
+            null
+        );
+
+        const lineTotal =
+            savedAmount !== null && savedAmount !== ""
+                ? toNumber(savedAmount)
+                : unitAmount !== null
+                    ? qty * unitAmount
+                    : null;
 
         if (lineTotal !== null) {
             total += lineTotal;
+            hasAmount = true;
         }
 
         return `
@@ -1266,7 +1280,9 @@ function renderDRDetails(dr, items) {
     }).join("");
 
     if (totalElement) {
-        totalElement.textContent = formatMoney(total);
+        totalElement.textContent = hasAmount
+            ? formatMoney(total)
+            : "—";
     }
 }
 
