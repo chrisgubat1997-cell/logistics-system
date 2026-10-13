@@ -2168,6 +2168,23 @@ function setupItemEvents() {
                         ? qty
                         : 0;
 
+                    item.drAmount = Math.round(
+                        (
+                            item.pickQty * item.unitPrice +
+                            Number.EPSILON
+                        ) * 100
+                    ) / 100;
+
+                    const amountCell = document.querySelector(
+                        `[data-dr-amount-index="${index}"]`
+                    );
+
+                    if (amountCell) {
+                        amountCell.textContent = formatCurrency(
+                            item.drAmount
+                        );
+                    }
+
 
                     validatePickQty(
                         index,
@@ -2179,25 +2196,6 @@ function setupItemEvents() {
 
                 }
             );
-
-           item.drAmount = Math.round(
-    (
-        item.pickQty * item.unitPrice +
-        Number.EPSILON
-    ) * 100
-) / 100;
-
-const amountCell = document.querySelector(
-    `[data-dr-amount-index="${index}"]`
-);
-
-if (amountCell) {
-    amountCell.textContent = formatCurrency(
-        item.drAmount
-    );
-}
-
-
             input.addEventListener(
                 "blur",
                 function() {
