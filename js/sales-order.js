@@ -1541,9 +1541,37 @@ async function loadSOList(
                 {},
 
             items:
-                result.items ||
-                result.data?.items ||
-                [],
+                (
+                    Array.isArray(result.items) &&
+                    result.items.length
+                )
+                    ? result.items
+                    : (
+                        Array.isArray(result.data?.items) &&
+                        result.data.items.length
+                    )
+                        ? result.data.items
+                        : (
+                            Array.isArray(result.salesOrder?.items) &&
+                            result.salesOrder.items.length
+                        )
+                            ? result.salesOrder.items
+                            : (
+                                Array.isArray(result.so?.items) &&
+                                result.so.items.length
+                            )
+                                ? result.so.items
+                                : (
+                                    Array.isArray(result.data?.salesOrder?.items) &&
+                                    result.data.salesOrder.items.length
+                                )
+                                    ? result.data.salesOrder.items
+                                    : (
+                                        Array.isArray(result.data?.so?.items) &&
+                                        result.data.so.items.length
+                                    )
+                                        ? result.data.so.items
+                                        : [];
 
             deliveries:
                 result.deliveries ||
@@ -2149,10 +2177,12 @@ async function loadSOList(
 
 
                 const itemName =
-                    getSOValue(
+                    getSOItemValue(
                         item,
                         [
                             "ITEM_NAME",
+                            "ITEM NAME",
+                            "ITEMNAME",
                             "itemName",
                             "NAME",
                             "name"
@@ -2161,18 +2191,19 @@ async function loadSOList(
 
 
                 const description =
-                    getSOValue(
+                    getSOItemValue(
                         item,
                         [
                             "DESCRIPTION",
                             "description",
-                            "ITEM_DESCRIPTION"
+                            "ITEM_DESCRIPTION",
+                            "ITEM DESCRIPTION"
                         ]
                     ) || "";
 
 
                 const unit =
-                    getSOValue(
+                    getSOItemValue(
                         item,
                         [
                             "UNIT",
@@ -2202,7 +2233,9 @@ async function loadSOList(
                             item,
                             [
                                 "UNIT_PRICE",
-                                "unitPrice"
+                                "UNIT PRICE",
+                                "unitPrice",
+                                "AMOUNT"
                             ]
                         )
                     );
@@ -3129,6 +3162,17 @@ async function loadSOList(
                     ? "inline-flex"
                     : "none";
 
+        }
+
+
+        const detailsActions =
+            document.querySelector(
+                ".so-details-actions"
+            );
+
+        if (detailsActions) {
+            detailsActions.style.display =
+                enabled ? "none" : "flex";
         }
 
 
@@ -6282,6 +6326,46 @@ window.addEventListener(
     }
 );
    
+
+    /* =====================================================
+       SALES ORDER ITEM FIELD HELPER
+       Supports legacy sheet header variations.
+    ===================================================== */
+
+    function getSOItemValue(item, keys) {
+
+        const directValue = getSOValue(item, keys);
+
+        if (directValue !== "") {
+            return directValue;
+        }
+
+        if (!item || typeof item !== "object") {
+            return "";
+        }
+
+        const normalizedKeys = keys.map(function (key) {
+            return String(key).replace(/[^a-z0-9]/gi, "").toUpperCase();
+        });
+
+        const itemKeys = Object.keys(item);
+
+        for (let i = 0; i < itemKeys.length; i++) {
+            const normalizedItemKey = String(itemKeys[i])
+                .replace(/[^a-z0-9]/gi, "")
+                .toUpperCase();
+
+            if (normalizedKeys.indexOf(normalizedItemKey) !== -1) {
+                const value = item[itemKeys[i]];
+                if (value !== undefined && value !== null) {
+                    return value;
+                }
+            }
+        }
+
+        return "";
+    }
+
 
     /* =====================================================
        GENERIC HELPERS
