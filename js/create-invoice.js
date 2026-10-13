@@ -2551,13 +2551,14 @@ function populateFromSalesOrder(
         );
 
 
+    invoiceItems = [];
+    salesOrderBaseItems = [];
+
     if (
         Array.isArray(items)
         &&
         items.length
     ) {
-        invoiceItems = [];
-        salesOrderBaseItems = [];
 
         items.forEach(item => {
             addItem(normalizeSalesOrderItem(item));
