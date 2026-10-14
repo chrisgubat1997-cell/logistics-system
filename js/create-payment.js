@@ -1119,76 +1119,101 @@ function calculateRequiredDP(
     terms,
     so
 ) {
+    /*
+       Required DP is based on the multiplier assigned to the
+       exact Sales Order Terms. Terms without a multiplier have
+       no required DP amount (0). This is used by Create Payment.
+    */
+    const termKey = String(terms || "").replace(/\s+/g, " ").trim().toUpperCase();
+    const requiredDPMultipliers = {
+        "COD": 0.5,
+        "50% DP, 50% UPON DELIVERY": 0.5,
+        "30% DP, 70% UPON DELIVERY": 0.3,
+        "30% DP BAL 30 DAYS PDC": 0.3,
+        "20% DP, 70% UPON DELIVERY": 0.2,
+        "30 DAYS PDC": 0,
+        "60 DAYS PDC": 0,
+        "30 DAYS": 0,
+        "60 DAYS": 0,
+        "15 DAYS PDC": 0,
+        "50% DP, 50% 15 DAYS PDC UPON DELIVERY": 0.5,
+        "50% DP, 50% 30 DAYS PDC UPON DELIVERY": 0.5,
+        "50% DP, 50% 60 DAYS PDC UPON DELIVERY": 0.5,
+        "7 DAYS UPI": 0,
+        "CASH": 0,
+        "60 DAYS UPI TO FINANCE": 0,
+        "30% DP BAL. PROGRESS BILLING": 0.3,
+        "30 DAYS UPI": 0,
+        "50% DP, 30DAYS UPI": 0.5,
+        "15 DAYS": 0,
+        "15 DAYS UPI": 0,
+        "20% D.P.BAL COD": 0.2,
+        "30% D.P.,BAL. 15 DAYS PDC": 0.3,
+        "30% D.P.,BAL. 30DAYS": 0.3,
+        "30% DOWNPAYMENT, 70% BAL WITHIN 30 DAYS BASED ON PROGRESS BILLING": 0.3,
+        "45 DAYS PDC": 0,
+        "30% DP, 70% 30 DAYS PDC": 0.3,
+        "20% DP, 70% UPON DELIVERY": 0.2,
+        "PAID": 0,
+        "30% DP, BALANCE 30 DAYS PDC UPON DELIVERY (STAGGERED DELIVERY)": 0.3,
+        "15 DAYS UPON DELIVERY": 0,
+        "50% DP, 50% 30 DAYS": 0.5,
+        "30% DP, 70% 30 DAYS UPI": 0.3,
+        "45 DAYS": 0,
+        "FULL PAYMENT": 0,
+        "30% 15 DAYS, 70% 30 DAYS": 0,
+        "30% DP, 60% UPON DEL. 10% RETENTION": 0.3,
+        "50% DP, BAL. 30 DAYS UPI": 0.5,
+        "50% CASH, 50% POSTED CHECK BEFORE DELIVERY": 0.5,
+        "30% DP, BAL 30 DAYS PDC": 0.3,
+        "50% DP, 50% UPON ACCEPTANCE": 0.5,
+        "30% DP, BAL COD": 0.3,
+        "10% DP, BALANCE PB, 10% RETENTION": 0.1,
+        "45 DAYS UPI": 0,
+        "30% DP, 70% 30 DAYS": 0.3,
+        "15 DAYS UPON RECEIPT OF S.I": 0,
+        "7 DAYS UPON COMPLETION": 0,
+        "10% DP, BALANCE UPON DELIVERY": 0.1,
+        "30% DP, 70% 7 DAYS": 0.3,
+        "7 DAYS UD": 0,
+        "30% DP, 70% 30 DAYS PDC": 0.3,
+        "40% DP, 60% UPON DELIVERY": 0.4,
+        "30% DP, BAL. 15 DAYS PDC": 0.3,
+        "30% DP, BAL. 7 DAYS UPI": 0.3,
+        "30% DP, 70% 30 DAYS PROGRESS BILLING": 0.3,
+        "20% DP, BAL. FULL PAYMENT CHECK UPON DELIVERY": 0.2,
+        "30% DP, 40% UPON DELIVERY, 30% PDC 30DAYS": 0.3
+    };
+
+    if (Object.prototype.hasOwnProperty.call(requiredDPMultipliers, termKey)) {
+        return Math.max(0, Math.min(parseMoney(total), parseMoney(total) * requiredDPMultipliers[termKey]));
+    }
 
     /*
-       First try explicit DP fields from SO.
+       Legacy fallback for terms not listed in the current
+       Sales Order terms dropdown.
     */
-
     const explicitDPFields = [
-
-        so.requiredDP,
-
-        so.requiredDp,
-
-        so.downPayment,
-
-        so.downpayment,
-
-        so.dpAmount,
-
-        so.depositAmount,
-
-        so.requiredDownPayment
-
+        so && so.requiredDP,
+        so && so.requiredDp,
+        so && so.downPayment,
+        so && so.downpayment,
+        so && so.dpAmount,
+        so && so.depositAmount,
+        so && so.requiredDownPayment
     ];
 
-
-    for (
-        let i = 0;
-        i < explicitDPFields.length;
-        i++
-    ) {
-
-        const value =
-            parseMoney(
-                explicitDPFields[i]
-            );
-
-        if (value > 0) {
-
-            return Math.min(
-                total,
-                value
-            );
-
-        }
-
+    for (let i = 0; i < explicitDPFields.length; i++) {
+        const value = parseMoney(explicitDPFields[i]);
+        if (value > 0) return Math.min(parseMoney(total), value);
     }
 
-
-    /*
-       If there is no explicit DP amount,
-       calculate from payment terms.
-    */
-
-    const percentage =
-        extractPercentage(
-            terms
-        );
-
-
+    const percentage = extractPercentage(terms);
     if (percentage > 0) {
-
-        return Math.min(
-            total,
-            total * percentage
-        );
-
+        return Math.min(parseMoney(total), parseMoney(total) * percentage);
     }
-
 
     return 0;
-
 }
 
 
