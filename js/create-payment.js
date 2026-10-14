@@ -1844,7 +1844,18 @@ function updatePaymentSummary() {
 
 
     setValue("paymentRemainingBalanceInput", formatCurrency(remaining));
-    const paymentOver = Math.max(0, currentPayment - Math.max(0, currentSalesOrderTotal - currentPreviousPaid));
+    const paymentOver = Math.max(
+        0,
+        currentPayment -
+        Math.max(0, currentSalesOrderTotal - currentPreviousPaid)
+    );
+
+    // Preview excess payment as Customer Credit in the right summary card.
+    setText(
+        "paymentCreditAmountDisplay",
+        formatCurrency(paymentOver)
+    );
+
     setValue("paymentOverInput", formatCurrency(paymentOver));
 
 
