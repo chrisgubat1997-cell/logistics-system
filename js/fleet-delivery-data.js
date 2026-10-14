@@ -1175,8 +1175,10 @@ async function saveMaintenanceRecord() {
                 defect: request.description,
                 lastCompletion: request.lastCompletion || "",
                 targetDate: targetDate || "",
-                estimatedCost: Number.isFinite(estimatedCost) ? estimatedCost : 0,
-                cost: Number.isFinite(estimatedCost) ? estimatedCost : 0,
+                // Estimated cost belongs to the whole maintenance request.
+                // Store it once so analytics does not multiply the same estimate by item count.
+                estimatedCost: i === 0 && Number.isFinite(estimatedCost) ? estimatedCost : 0,
+                cost: i === 0 && Number.isFinite(estimatedCost) ? estimatedCost : 0,
                 repair: "",
                 idleDays: 0,
                 status: status || "Pending",
