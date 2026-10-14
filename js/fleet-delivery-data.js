@@ -1260,7 +1260,7 @@ function addMaintenanceRequestRow(details) {
     const descriptionInput = row.querySelector(".fde-maint-request-description");
     if (descriptionInput) descriptionInput.addEventListener("input", function() { updateMaintenanceClassification(row); updateMaintenanceLastCompletion(row); });
     updateMaintenanceClassification(row);
-    if (!(details && details.id && details.lastCompletion)) updateMaintenanceLastCompletion(row);
+    updateMaintenanceLastCompletion(row);
     refreshMaintenanceRequestRemoveButtons();
 }
 
