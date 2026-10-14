@@ -333,6 +333,7 @@ function getFleetCurrentUser() {
         if (typeof user === "string") return user;
         return String(
             user.name ||
+            user.fullname ||
             user.fullName ||
             user.username ||
             user.email ||
