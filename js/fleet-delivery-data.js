@@ -2067,22 +2067,52 @@ function createRecordTableRow(
    RECORD DATE
 ========================================================= */
 
-function getRecordDate(
-    record
-) {
-
-    return (
+function getRecordDate(record) {
+    const rawDate =
         record.date ||
         record.dateTransfer ||
-        record.createdAt
-            ? formatDate(
-                record.date ||
-                record.dateTransfer ||
-                record.createdAt
-            )
-            : "-"
-    );
+        record.createdAt;
 
+    return rawDate ? formatFleetRecordDate(rawDate) : "-";
+}
+
+/* Use a module-specific date formatter so payment.js's global formatDate()
+   cannot accidentally receive a string and throw a TypeError. */
+function formatFleetRecordDate(value) {
+    if (!value) return "-";
+
+    let date;
+
+    if (value instanceof Date) {
+        date = value;
+    } else if (typeof value === "number") {
+        date = new Date(value);
+    } else {
+        const textValue = String(value).trim();
+        if (!textValue) return "-";
+
+        // Parse date-only values as local calendar dates to avoid timezone shifts.
+        const dateOnly = textValue.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (dateOnly) {
+            date = new Date(
+                Number(dateOnly[1]),
+                Number(dateOnly[2]) - 1,
+                Number(dateOnly[3])
+            );
+        } else {
+            date = new Date(textValue);
+        }
+    }
+
+    if (Number.isNaN(date.getTime())) {
+        return escapeHTML(String(value));
+    }
+
+    return date.toLocaleDateString("en-PH", {
+        year: "numeric",
+        month: "short",
+        day: "2-digit"
+    });
 }
 
 
