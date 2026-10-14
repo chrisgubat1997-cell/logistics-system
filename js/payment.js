@@ -122,7 +122,9 @@ function initializePayment() {
         'LOGIS-TECH Payment Module initialized.'
     );
 
-    populatePaymentYears();
+    if (typeof window.populatePaymentYears === 'function') {
+        window.populatePaymentYears();
+    }
 
     bindPaymentEvents();
 
@@ -2833,6 +2835,9 @@ if (
    GLOBAL EXPORTS
    For index.html / dynamic module
 ========================================================= */
+
+window.populatePaymentYears =
+    populatePaymentYears;
 
 window.initializePayment =
     initializePayment;
