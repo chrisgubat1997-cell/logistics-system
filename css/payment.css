@@ -1339,3 +1339,20 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Payment detail and outstanding SO modals */
+.payment-detail-modal,.outstanding-so-modal{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;padding:20px}
+.payment-detail-modal.is-open,.outstanding-so-modal.is-open{display:flex}
+.payment-detail-backdrop,.outstanding-so-backdrop{position:absolute;inset:0;background:rgba(16,24,40,.55)}
+.payment-detail-panel,.outstanding-so-panel{position:relative;z-index:1;width:min(100%,950px);max-height:min(88vh,850px);overflow:auto;padding:22px;background:#fff;border-radius:14px;box-shadow:0 24px 70px rgba(16,24,40,.28)}
+.payment-detail-summary{grid-template-columns:1.2fr 1fr 1fr}
+.payment-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.payment-detail-grid>div{min-width:0;padding:12px 14px;border:1px solid #e5eaf0;border-radius:9px;background:#fff}
+.payment-detail-grid span{display:block;margin-bottom:6px;color:#7a8798;font-size:10px;font-weight:700;text-transform:uppercase}
+.payment-detail-grid strong{display:block;overflow-wrap:anywhere;color:#263247;font-size:12px}
+.payment-detail-full{grid-column:1/-1}
+.outstanding-balance-value{color:#ad4a18!important;font-weight:800}
+.outstanding-delivery-status{display:inline-flex;align-items:center;padding:5px 8px;border-radius:20px;font-size:9px;font-weight:800;white-space:nowrap}
+.outstanding-delivery-full{color:#176534;background:#edf7f1}.outstanding-delivery-partial{color:#456c9d;background:#eef3fa}.outstanding-delivery-none{color:#ad711d;background:#fff5e7}
+.outstanding-so-row{cursor:pointer}.outstanding-so-row:hover{background:#f8fafc}.payment-search-box.is-visible{display:block;margin-bottom:12px}
+@media(max-width:700px){.payment-detail-modal,.outstanding-so-modal{padding:10px}.payment-detail-panel,.outstanding-so-panel{padding:15px}.payment-detail-summary,.payment-detail-grid{grid-template-columns:1fr}.payment-detail-full{grid-column:auto}}
