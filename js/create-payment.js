@@ -471,7 +471,7 @@ function bindCreatePaymentEvents() {
         soSearchInput.addEventListener("input",handleSOSearchInput);
         soSearchInput.addEventListener("focus",handleSOSearchInput);
         soSearchInput.addEventListener("keydown",handleSOSearchKeyboard);
-        document.addEventListener("click",function(event){const wrap=document.querySelector(".create-payment-so-search-wrap");if(wrap&&!wrap.contains(event.target))hideSOSuggestions();});
+        document.addEventListener("click",function(event){const wrap=document.querySelector(".create-payment-so-search");if(wrap&&!wrap.contains(event.target))hideSOSuggestions();});
     }
     if(referenceInput)referenceInput.addEventListener("input",updatePaymentSummary);
 
@@ -511,8 +511,8 @@ async function paymentAPI(action, data = {}) {
 async function loadPaymentDataFromDatabase() {
     try {
         const results=await Promise.all([paymentAPI("getSalesOrders",{}),paymentAPI("getPayments",{})]);
-        const soRows=Array.isArray(results[0].salesOrders)?results[0].salesOrders:(Array.isArray(results[0].records)?results[0].records:[]);
-        const paymentRows=Array.isArray(results[1].payments)?results[1].payments:(Array.isArray(results[1].records)?results[1].records:[]);
+        const soRows=Array.isArray(results[0].salesOrders)?results[0].salesOrders:(Array.isArray(results[0].records)?results[0].records:(Array.isArray(results[0].data)?results[0].data:[]));
+        const paymentRows=Array.isArray(results[1].payments)?results[1].payments:(Array.isArray(results[1].records)?results[1].records:(Array.isArray(results[1].data)?results[1].data:[]));
         databaseSalesOrders=soRows.map(function(row){return Object.assign({},row,{
             soNo:row.SO_NUMBER||row.soNo||row.salesOrderNo||"",poNo:row.PO_NUMBER||row.poNo||row.poNumber||"",
             client:row.CLIENT_NAME||row.client||row.clientName||"",project:row.PROJECT||row.project||"",
@@ -1986,21 +1986,92 @@ function updateStatusBadge(
    SAVE PAYMENT
    ========================================================= */
 
-async function savePayment(){
-    const validation=validatePayment();if(!validation.valid){alert(validation.message);return;}
-    const paymentNo=getValue("paymentNo"),paymentDate=getValue("paymentDate"),paymentMethod=getValue("paymentMethod");
-    const soNo=getValue("paymentSONo"),receiptType=getValue("paymentReceiptType"),receiptNo=getValue("paymentReceiptNo");
-    const referenceNo=getValue("paymentReferenceNo"),client=getValue("paymentClient"),project=getValue("paymentProject");
-    const billingAddress=getValue("paymentBillingAddress"),currentPayment=getNumericInput("paymentCurrentAmountInput");
-    try{
-        const result=await paymentAPI("createPayment",{paymentNo:paymentNo,paymentDate:paymentDate,paymentMethod:paymentMethod,soNumber:soNo,
-            clientName:client,project:project,billingAddress:billingAddress,currentPayment:currentPayment,receiptType:receiptType,
-            receiptNo:receiptNo,referenceNo:referenceNo,remarks:getValue("paymentRemarks"),createdBy:localStorage.getItem("logitechUser")||""});
-        if(!result||result.success!==true)throw new Error(result&&(result.message||result.error)||"Payment could not be saved.");
-        localStorage.setItem("logitechLastPayment",JSON.stringify(result.payment||{}));
-        alert("Payment saved to Google Sheets database.\n\nPayment No.: "+((result.payment&&result.payment.PAYMENT_NO)||paymentNo)+"\nSO No.: "+soNo+"\nAmount: "+formatCurrency(currentPayment));
-        window.location.href="../index.html";
-    }catch(error){console.error("Create Payment API error:",error);alert("Payment was not saved.\n\n"+(error.message||"Please try again."));}
+async function savePayment() {
+    const validation = validatePayment();
+    if (!validation.valid) {
+        alert(validation.message);
+        return;
+    }
+
+    if (!paymentDataLoaded) {
+        const connected = await loadPaymentDataFromDatabase();
+        if (!connected) {
+            alert("Hindi makakonekta sa Google Sheets database. Walang na-save na payment. Pakisubukan ulit.");
+            return;
+        }
+    }
+
+    const saveButtons = [
+        document.getElementById("savePaymentBtn"),
+        document.getElementById("bottomSavePaymentBtn")
+    ].filter(Boolean);
+
+    if (saveButtons.some(function(button) { return button.disabled; })) return;
+
+    saveButtons.forEach(function(button) {
+        button.disabled = true;
+        button.dataset.originalText = button.textContent;
+        button.textContent = "SAVING...";
+    });
+
+    const paymentNo = getValue("paymentNo");
+    const paymentDate = getValue("paymentDate");
+    const paymentMethod = getValue("paymentMethod");
+    const soNo = getSalesOrderNumber(selectedSalesOrder) || getValue("paymentSONo");
+    const client = getSalesOrderClient(selectedSalesOrder) || getValue("paymentClient");
+    const project = getSalesOrderProject(selectedSalesOrder) || getValue("paymentProject");
+    const billingAddress = getSalesOrderBillingAddress(selectedSalesOrder) || getValue("paymentBillingAddress");
+    const currentPayment = getNumericInput("paymentCurrentAmountInput");
+
+    const payload = {
+        paymentNo: paymentNo,
+        paymentDate: paymentDate,
+        paymentMethod: paymentMethod,
+        soNumber: soNo,
+        clientName: client,
+        project: project,
+        billingAddress: billingAddress,
+        currentPayment: currentPayment,
+        receiptType: getValue("paymentReceiptType"),
+        receiptNo: getValue("paymentReceiptNo"),
+        referenceNo: getValue("paymentReferenceNo"),
+        remarks: getValue("paymentRemarks"),
+        createdBy: localStorage.getItem("logitechUser") || ""
+    };
+
+    try {
+        const result = await paymentAPI("createPayment", payload);
+        if (!result || result.success !== true) {
+            throw new Error((result && (result.message || result.error)) || "Payment could not be saved.");
+        }
+
+        const savedPayment = result.payment || result.record || result.data || {};
+        localStorage.setItem("logitechLastPayment", JSON.stringify(savedPayment));
+
+        // Refresh the database records so the next payment uses current totals and sequence.
+        await loadPaymentDataFromDatabase();
+
+        alert(
+            "Payment successfully saved to the Google Sheets database.\n\n" +
+            "Payment No.: " + (savedPayment.PAYMENT_NO || savedPayment.paymentNo || paymentNo) + "\n" +
+            "SO No.: " + soNo + "\n" +
+            "Amount: " + formatCurrency(currentPayment)
+        );
+
+        window.location.href = "../index.html";
+    } catch (error) {
+        console.error("Create Payment API error:", error);
+        alert(
+            "Payment was NOT saved.\n\n" +
+            (error.message || "Hindi makumpleto ang pag-save. Pakisubukan ulit.")
+        );
+    } finally {
+        saveButtons.forEach(function(button) {
+            button.disabled = false;
+            button.textContent = button.dataset.originalText || "SAVE PAYMENT";
+            delete button.dataset.originalText;
+        });
+    }
 }
 
 
