@@ -43,6 +43,7 @@ const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMD
 let databaseSalesOrders = [];
 let databasePayments = [];
 let databaseDeliveryReceipts = [];
+let deliveryDataLoaded = false;
 let paymentDataLoaded = false;
 
 const SALES_ORDER_STORAGE_KEYS = [
@@ -528,12 +529,10 @@ async function loadPaymentDataFromDatabase() {
     try {
         const results = await Promise.all([
             paymentAPI("getSalesOrders", {}),
-            paymentAPI("getPayments", {}),
-            paymentAPIGet("getDeliveryReceipts")
+            paymentAPI("getPayments", {})
         ]);
         const soRows = Array.isArray(results[0].salesOrders) ? results[0].salesOrders : (Array.isArray(results[0].records) ? results[0].records : (Array.isArray(results[0].data) ? results[0].data : []));
         const paymentRows = Array.isArray(results[1].payments) ? results[1].payments : (Array.isArray(results[1].records) ? results[1].records : (Array.isArray(results[1].data) ? results[1].data : []));
-        const drRows = Array.isArray(results[2].deliveryReceipts) ? results[2].deliveryReceipts : (Array.isArray(results[2].records) ? results[2].records : (Array.isArray(results[2].data) ? results[2].data : []));
         databaseSalesOrders = soRows.map(function(row) { return Object.assign({}, row, {
             soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || "", poNo: row.PO_NUMBER || row.poNo || row.poNumber || "",
             client: row.CLIENT_NAME || row.client || row.clientName || "", project: row.PROJECT || row.project || "",
@@ -542,22 +541,32 @@ async function loadPaymentDataFromDatabase() {
             terms: row.TERMS || row.PAYMENT_TERMS || row.terms || "", status: row.STATUS || row.status || ""
         }); });
         databasePayments = paymentRows.map(function(row) { return Object.assign({}, row, {
-            soNo: row.SO_NUMBER || row.soNo || "", currentPayment: row.CURRENT_PAYMENT ?? row.currentPayment ?? row.amount ?? 0,
+            soNo: row.SO_NUMBER || row.soNo || "", currentPayment: row.SO_APPLIED_AMOUNT ?? row.soAppliedAmount ?? row.CURRENT_PAYMENT ?? row.currentPayment ?? row.amount ?? 0,
             status: row.PAYMENT_STATUS || row.status || "RECEIVED"
         }); });
-        databaseDeliveryReceipts = drRows;
+        try {
+            const drResult = await paymentAPIGet("getDeliveryReceipts");
+            databaseDeliveryReceipts = Array.isArray(drResult.deliveryReceipts) ? drResult.deliveryReceipts : (Array.isArray(drResult.records) ? drResult.records : (Array.isArray(drResult.data) ? drResult.data : []));
+            deliveryDataLoaded = true;
+        } catch (deliveryError) {
+            databaseDeliveryReceipts = [];
+            deliveryDataLoaded = false;
+            console.warn("Delivery Receipt records are not available; payment records will still load.", deliveryError);
+        }
         paymentDataLoaded = true;
         renderUnpaidPaymentSOTable();
+        renderSelectedSOPaymentTransactions(selectedSalesOrder ? getSalesOrderNumber(selectedSalesOrder) : getValue("paymentSONo"));
         return true;
     } catch(error) {
-        console.error("Could not load payment data from database:", error);
+        console.error("Could not load payment and sales order data from database:", error);
         paymentDataLoaded = false;
         const tbody = document.getElementById("unpaidPaymentSOTableBody");
-        if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="create-payment-unpaid-empty">Unable to load unpaid Sales Orders or delivery status from the database. Please refresh.</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="create-payment-unpaid-empty">Unable to load Sales Orders and payment transactions from the database. Please refresh.</td></tr>';
+        const historyBody = document.getElementById("selectedSOPaymentHistoryBody");
+        if (historyBody) historyBody.innerHTML = '<tr><td colspan="7" class="create-payment-unpaid-empty">Unable to load payment transactions from the database.</td></tr>';
         return false;
     }
 }
-
 function paymentSOKey(value) { return String(value || "").trim().toLowerCase(); }
 
 function getPaymentAppliedForSO(soNumber) {
@@ -595,6 +604,7 @@ function paymentDeliveryStatus(so) {
         const status = String(dr.STATUS || dr.status || "").trim().toUpperCase().replace(/[ _-]+/g, "_");
         return paymentSOKey(ref) === paymentSOKey(soNo) && !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(status);
     });
+    if (!deliveryDataLoaded) return "STATUS UNAVAILABLE";
     if (!matching.length) return "UNDELIVERED";
     const delivered = matching.filter(function(dr) {
         const status = String(dr.STATUS || dr.status || "").trim().toUpperCase().replace(/[ _-]+/g, "_");
@@ -673,7 +683,7 @@ function renderSelectedSOPaymentTransactions(soNumber) {
 function getSalesOrderDateForPayment(so) { return so.DATE_CREATION || so.SO_DATE || so.DATE || so.date || so.createdAt || so.CREATED_AT || ""; }
 function formatPaymentSODate(value) { if (!value) return "—"; const date = new Date(value); return isNaN(date.getTime()) ? String(value) : date.toLocaleDateString("en-PH"); }
 function formatPaymentCurrency(value) { return "₱" + parseMoney(value).toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2}); }
-function paymentDeliveryStatusClass(status) { return status === "FULLY DELIVERED" ? "is-fully-delivered" : status === "PARTIALLY DELIVERED" ? "is-partially-delivered" : "is-undelivered"; }
+function paymentDeliveryStatusClass(status) { return status === "FULLY DELIVERED" ? "is-fully-delivered" : status === "PARTIALLY DELIVERED" ? "is-partially-delivered" : status === "STATUS UNAVAILABLE" ? "is-status-unavailable" : "is-undelivered"; }
 
 function getSalesOrderPONumber(so){return String(so.PO_NUMBER||so.poNo||so.poNumber||"").trim();}
 function handleSOSearchInput(){
