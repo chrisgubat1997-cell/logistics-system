@@ -46,6 +46,8 @@ let paymentInitialized = false;
 
 let paymentRecords = [];
 let paymentSalesOrders = [];
+let customerCreditRecords = [];
+let customerCreditTransactions = [];
 
 let filteredPaymentRecords = [];
 let filteredPaymentSalesOrders = [];
@@ -68,6 +70,20 @@ const SALES_ORDER_STORAGE_KEYS = [
     'logisTechSalesOrders',
     'salesOrders',
     'salesOrderRecords'
+];
+
+const CUSTOMER_CREDIT_STORAGE_KEYS = [
+    'logitechCustomerCredits',
+    'logisTechCustomerCredits',
+    'customerCredits',
+    'CUSTOMER_CREDITS'
+];
+
+const CUSTOMER_CREDIT_TRANSACTION_STORAGE_KEYS = [
+    'logitechCustomerCreditTransactions',
+    'logisTechCustomerCreditTransactions',
+    'customerCreditTransactions',
+    'CUSTOMER_CREDIT_TRANSACTIONS'
 ];
 
 
@@ -223,108 +239,47 @@ function bindPaymentEvents() {
 
 
     /* -----------------------------------------------------
-       SALES ORDER SEARCH TOGGLE
+       CUSTOMER CREDIT SEARCH
     ----------------------------------------------------- */
-
-    const soSearchToggle =
-        document.getElementById(
-            'salesOrderPaymentSearchToggleBtn'
-        );
-
-    if (soSearchToggle) {
-
-        soSearchToggle.addEventListener(
-            'click',
-            function () {
-
-                const box =
-                    document.getElementById(
-                        'salesOrderPaymentSearchBox'
-                    );
-
-                if (!box) return;
-
-                box.classList.toggle(
-                    'active'
-                );
-
-                if (
-                    box.classList.contains(
-                        'active'
-                    )
-                ) {
-
-                    const input =
-                        document.getElementById(
-                            'salesOrderPaymentSearchInput'
-                        );
-
-                    if (input) {
-                        input.focus();
-                    }
-
-                }
-
+    const creditSearchToggle = document.getElementById('customerCreditSearchToggleBtn');
+    if (creditSearchToggle) {
+        creditSearchToggle.addEventListener('click', function () {
+            const box = document.getElementById('customerCreditSearchBox');
+            if (!box) return;
+            box.classList.toggle('active');
+            if (box.classList.contains('active')) {
+                const input = document.getElementById('customerCreditSearchInput');
+                if (input) input.focus();
             }
-        );
-
+        });
     }
 
+    const creditSearchInput = document.getElementById('customerCreditSearchInput');
+    if (creditSearchInput) creditSearchInput.addEventListener('input', renderCustomerCreditTable);
 
-    /* -----------------------------------------------------
-       SALES ORDER SEARCH
-    ----------------------------------------------------- */
-
-    const soSearchInput =
-        document.getElementById(
-            'salesOrderPaymentSearchInput'
-        );
-
-    if (soSearchInput) {
-
-        soSearchInput.addEventListener(
-            'input',
-            renderSalesOrderTable
-        );
-
-    }
-
-
-    /* -----------------------------------------------------
-       CLEAR SALES ORDER SEARCH
-    ----------------------------------------------------- */
-
-    const soSearchClear =
-        document.getElementById(
-            'salesOrderPaymentSearchClearBtn'
-        );
-
-    if (soSearchClear) {
-
-        soSearchClear.addEventListener(
-            'click',
-            function () {
-
-                const input =
-                    document.getElementById(
-                        'salesOrderPaymentSearchInput'
-                    );
-
-                if (input) {
-
-                    input.value = '';
-
-                    renderSalesOrderTable();
-
-                    input.focus();
-
-                }
-
+    const creditSearchClear = document.getElementById('customerCreditSearchClearBtn');
+    if (creditSearchClear) {
+        creditSearchClear.addEventListener('click', function () {
+            const input = document.getElementById('customerCreditSearchInput');
+            if (input) {
+                input.value = '';
+                renderCustomerCreditTable();
+                input.focus();
             }
-        );
-
+        });
     }
 
+    const closeCreditModalBtn = document.getElementById('closeCustomerCreditModalBtn');
+    if (closeCreditModalBtn) closeCreditModalBtn.addEventListener('click', closeCustomerCreditModal);
+
+    const creditModal = document.getElementById('customerCreditModal');
+    if (creditModal) {
+        creditModal.addEventListener('click', function (event) {
+            if (event.target && event.target.dataset.closeCreditModal === 'true') {
+                closeCustomerCreditModal();
+            }
+        });
+    }
 
     /* -----------------------------------------------------
        MONTH FILTER
@@ -412,7 +367,7 @@ function bindPaymentEvents() {
 
     const refreshSOBtn =
         document.getElementById(
-            'refreshPaymentSOBtn'
+            'refreshCustomerCreditBtn'
         );
 
     if (refreshSOBtn) {
@@ -446,6 +401,9 @@ function loadPaymentData() {
         getStoredArray(
             SALES_ORDER_STORAGE_KEYS
         );
+
+    customerCreditRecords = getStoredArray(CUSTOMER_CREDIT_STORAGE_KEYS);
+    customerCreditTransactions = getStoredArray(CUSTOMER_CREDIT_TRANSACTION_STORAGE_KEYS);
 
     console.log(
         'Payment records:',
@@ -717,7 +675,7 @@ function applyPaymentFilters() {
 
     renderPaymentTable();
 
-    renderSalesOrderTable();
+    renderCustomerCreditTable();
 
 }
 
@@ -1299,6 +1257,251 @@ function createPaymentRow(
 
 }
 
+
+/* =========================================================
+   CUSTOMER CREDIT TABLE + DETAILS
+========================================================= */
+
+function creditField(record, fields) {
+    for (const field of fields) {
+        const value = record && record[field];
+        if (value !== undefined && value !== null && value !== '') return value;
+    }
+    return '';
+}
+
+function getCreditCustomerId(record) {
+    return String(creditField(record, ['CUSTOMER_ID', 'customerId', 'customerID', 'customer_id', 'id']) || '');
+}
+
+function getCreditCustomerName(record) {
+    return String(creditField(record, ['CLIENT_NAME', 'clientName', 'client', 'CUSTOMER_NAME', 'customerName', 'customer', 'name']) || 'Unknown Customer');
+}
+
+function getCreditAmount(record) {
+    return toNumber(creditField(record, ['AVAILABLE_CREDIT', 'availableCredit', 'available_credit', 'CREDIT_BALANCE', 'creditBalance', 'BALANCE', 'balance', 'AVAILABLE_BALANCE', 'availableBalance']));
+}
+
+function getCreditDate(record) {
+    return creditField(record, ['TXN_DATE', 'CREDIT_DATE', 'UPDATED_AT', 'updatedAt', 'CREATED_AT', 'createdAt', 'PAYMENT_DATE', 'paymentDate', 'DATE', 'date']);
+}
+
+function getCreditCustomerKey(record) {
+    return getCreditCustomerId(record).trim().toLowerCase() || getCreditCustomerName(record).trim().toLowerCase();
+}
+
+function buildCustomerCreditRows() {
+    const map = new Map();
+
+    // Prefer the customer credit balance records when available.
+    customerCreditRecords.forEach(function (record) {
+        const key = getCreditCustomerKey(record);
+        if (!key) return;
+        const balance = getCreditAmount(record);
+        const existing = map.get(key) || {
+            customerId: getCreditCustomerId(record),
+            customerName: getCreditCustomerName(record),
+            availableCredit: 0,
+            lastCreditDate: getCreditDate(record),
+            source: record
+        };
+        existing.customerId = existing.customerId || getCreditCustomerId(record);
+        existing.customerName = getCreditCustomerName(record) || existing.customerName;
+        existing.availableCredit = balance;
+        existing.lastCreditDate = getCreditDate(record) || existing.lastCreditDate;
+        existing.source = record;
+        map.set(key, existing);
+    });
+
+    // If no balance cache is present, derive balances from saved payment records.
+    // This uses the credit columns, never the full cash payment amount.
+    if (!map.size) {
+        paymentRecords.forEach(function (payment) {
+            const customerId = String(creditField(payment, ['CUSTOMER_ID', 'customerId', 'customerID', 'customer_id']) || '');
+            const customerName = getCreditCustomerName(payment);
+            const key = customerId.trim().toLowerCase() || customerName.trim().toLowerCase();
+            if (!key || key === 'unknown customer') return;
+
+            const addedRaw = creditField(payment, ['CREDIT_ADDED', 'creditAdded', 'credit_added']);
+            const appliedRaw = creditField(payment, ['CREDIT_APPLIED', 'creditApplied', 'credit_applied']);
+            const added = toNumber(addedRaw);
+            const applied = toNumber(appliedRaw);
+            if (added <= 0 && applied <= 0) return;
+
+            const row = map.get(key) || {
+                customerId: customerId,
+                customerName: customerName,
+                availableCredit: 0,
+                lastCreditDate: getPaymentDate(payment),
+                source: payment
+            };
+            row.customerId = row.customerId || customerId;
+            row.customerName = customerName || row.customerName;
+            row.availableCredit += added - applied;
+            const paymentDate = getPaymentDate(payment);
+            if (paymentDate && (!row.lastCreditDate || getDateTime(paymentDate) > getDateTime(row.lastCreditDate))) {
+                row.lastCreditDate = paymentDate;
+            }
+            map.set(key, row);
+        });
+    }
+
+    return Array.from(map.values())
+        .map(function (row) {
+            row.availableCredit = Math.max(0, Math.round((row.availableCredit + Number.EPSILON) * 100) / 100);
+            return row;
+        })
+        .filter(function (row) { return row.availableCredit > 0; })
+        .sort(function (a, b) { return a.customerName.localeCompare(b.customerName); });
+}
+
+function renderCustomerCreditTable() {
+    const tbody = document.getElementById('customerCreditBody');
+    if (!tbody) return;
+
+    const input = document.getElementById('customerCreditSearchInput');
+    const search = input ? input.value.trim().toLowerCase() : '';
+    let records = buildCustomerCreditRows();
+
+    if (search) {
+        records = records.filter(function (row) {
+            return (row.customerId + ' ' + row.customerName).toLowerCase().includes(search);
+        });
+    }
+
+    if (!records.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="payment-empty-state">No customers with available credit found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = records.map(function (row) {
+        const key = row.customerId || row.customerName;
+        const date = row.lastCreditDate instanceof Date
+            ? formatDate(row.lastCreditDate)
+            : (row.lastCreditDate ? formatDate(parseDateValue(row.lastCreditDate)) : '—');
+        return `
+            <tr class="customer-credit-row" data-credit-customer="${escapeAttribute(key)}" title="Double-click to view customer credit details">
+                <td>${escapeHTML(row.customerId || '—')}</td>
+                <td>${escapeHTML(row.customerName)}</td>
+                <td class="payment-amount-cell customer-credit-amount">${escapeHTML(formatCurrency(row.availableCredit))}</td>
+                <td>${escapeHTML(date || '—')}</td>
+                <td><button type="button" class="payment-action-btn" onclick="viewCustomerCredit('${escapeAttribute(key)}')">VIEW</button></td>
+            </tr>
+        `;
+    }).join('');
+
+    tbody.querySelectorAll('.customer-credit-row').forEach(function (rowElement) {
+        rowElement.addEventListener('dblclick', function () {
+            viewCustomerCredit(rowElement.getAttribute('data-credit-customer') || '');
+        });
+    });
+}
+
+function parseDateValue(value) {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function viewCustomerCredit(customerKey) {
+    const row = buildCustomerCreditRows().find(function (item) {
+        return (item.customerId || item.customerName) === customerKey;
+    });
+    if (!row) {
+        alert('Customer credit record not found.');
+        return;
+    }
+
+    const modal = document.getElementById('customerCreditModal');
+    if (!modal) return;
+
+    const setText = function (id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    };
+
+    setText('customerCreditModalTitle', 'Customer Credit Details');
+    setText('customerCreditModalSubtitle', 'Available credit and recorded credit transactions');
+    setText('customerCreditDetailName', row.customerName || '—');
+    setText('customerCreditDetailId', row.customerId || '—');
+    setText('customerCreditDetailBalance', formatCurrency(row.availableCredit));
+
+    const matchingTransactions = customerCreditTransactions.filter(function (txn) {
+        const txnKey = getCreditCustomerKey(txn);
+        return txnKey && txnKey === getCreditCustomerKey({
+            CUSTOMER_ID: row.customerId,
+            CLIENT_NAME: row.customerName
+        });
+    });
+
+    let transactions = matchingTransactions.map(function (txn) {
+        return {
+            date: creditField(txn, ['TXN_DATE', 'DATE', 'date', 'CREATED_AT', 'createdAt']),
+            type: creditField(txn, ['TXN_TYPE', 'transactionType', 'type']) || 'CREDIT',
+            reference: creditField(txn, ['REFERENCE_NO', 'PAYMENT_NO', 'paymentNo', 'referenceNo']) || '—',
+            so: creditField(txn, ['SO_NUMBER', 'soNumber', 'soNo']) || '—',
+            amount: toNumber(creditField(txn, ['AMOUNT', 'amount', 'CREDIT_AMOUNT', 'creditAmount'])),
+            remarks: creditField(txn, ['REMARKS', 'remarks', 'NOTES', 'notes']) || '—'
+        };
+    });
+
+    if (!transactions.length) {
+        transactions = paymentRecords.filter(function (payment) {
+            const paymentKey = getCreditCustomerKey(payment);
+            const rowKey = getCreditCustomerKey({ CUSTOMER_ID: row.customerId, CLIENT_NAME: row.customerName });
+            const added = toNumber(creditField(payment, ['CREDIT_ADDED', 'creditAdded', 'credit_added']));
+            const applied = toNumber(creditField(payment, ['CREDIT_APPLIED', 'creditApplied', 'credit_applied']));
+            return paymentKey === rowKey && (added > 0 || applied > 0);
+        }).map(function (payment) {
+            const added = toNumber(creditField(payment, ['CREDIT_ADDED', 'creditAdded', 'credit_added']));
+            const applied = toNumber(creditField(payment, ['CREDIT_APPLIED', 'creditApplied', 'credit_applied']));
+            return {
+                date: getPaymentDate(payment),
+                type: added > 0 ? 'CREDIT ADDED' : 'CREDIT APPLIED',
+                reference: getPaymentNo(payment),
+                so: getSONo(payment),
+                amount: added > 0 ? added : applied,
+                remarks: creditField(payment, ['REMARKS', 'remarks']) || (added > 0 ? 'Overpayment credit' : 'Credit applied to SO')
+            };
+        });
+    }
+
+    const txnBody = document.getElementById('customerCreditTransactionsBody');
+    if (txnBody) {
+        if (!transactions.length) {
+            txnBody.innerHTML = '<tr><td colspan="6" class="payment-empty-state">No credit transaction details are available in the loaded records.</td></tr>';
+        } else {
+            transactions.sort(function (a, b) {
+                return getDateTime(parseDateValue(b.date)) - getDateTime(parseDateValue(a.date));
+            });
+            txnBody.innerHTML = transactions.map(function (txn) {
+                const parsedDate = parseDateValue(txn.date);
+                const date = parsedDate ? formatDate(parsedDate) : (txn.date || '—');
+                return `<tr>
+                    <td>${escapeHTML(date)}</td>
+                    <td>${escapeHTML(txn.type)}</td>
+                    <td>${escapeHTML(txn.reference)}</td>
+                    <td>${escapeHTML(txn.so)}</td>
+                    <td class="payment-amount-cell">${escapeHTML(formatCurrency(txn.amount))}</td>
+                    <td>${escapeHTML(txn.remarks)}</td>
+                </tr>`;
+            }).join('');
+        }
+    }
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeCustomerCreditModal() {
+    const modal = document.getElementById('customerCreditModal');
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
+window.viewCustomerCredit = viewCustomerCredit;
 
 /* =========================================================
    RENDER SALES ORDER TABLE
