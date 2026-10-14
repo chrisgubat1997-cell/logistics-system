@@ -48,6 +48,7 @@ let paymentRecords = [];
 let paymentSalesOrders = [];
 let customerCreditRecords = [];
 let customerCreditTransactions = [];
+let paymentDeliveryReceipts = [];
 
 let filteredPaymentRecords = [];
 let filteredPaymentSalesOrders = [];
@@ -292,6 +293,18 @@ function bindPaymentEvents() {
     const closeCreditModalBtn = document.getElementById('closeCustomerCreditModalBtn');
     if (closeCreditModalBtn) closeCreditModalBtn.addEventListener('click', closeCustomerCreditModal);
 
+    const closePaymentModalBtn = document.getElementById('closePaymentDetailModalBtn');
+    if (closePaymentModalBtn) closePaymentModalBtn.addEventListener('click', closePaymentDetailModal);
+    const paymentModal = document.getElementById('paymentDetailModal');
+    if (paymentModal) paymentModal.addEventListener('click', function (event) { if (event.target && event.target.dataset.closePaymentModal === 'true') closePaymentDetailModal(); });
+    const closeOutstandingModalBtn = document.getElementById('closeOutstandingSOModalBtn');
+    if (closeOutstandingModalBtn) closeOutstandingModalBtn.addEventListener('click', closeOutstandingSOModal);
+    const outstandingModal = document.getElementById('outstandingSOModal');
+    if (outstandingModal) outstandingModal.addEventListener('click', function (event) { if (event.target && event.target.dataset.closeOutstandingModal === 'true') closeOutstandingSOModal(); });
+    const outstandingSearch = document.getElementById('outstandingSOSearchInput');
+    if (outstandingSearch) outstandingSearch.addEventListener('input', renderOutstandingSOTable);
+    const outstandingRefresh = document.getElementById('refreshOutstandingSOBtn');
+    if (outstandingRefresh) outstandingRefresh.addEventListener('click', loadPaymentData);
     const creditModal = document.getElementById('customerCreditModal');
     if (creditModal) {
         creditModal.addEventListener('click', function (event) {
@@ -415,6 +428,7 @@ async function loadPaymentData() {
     if (refreshButton) refreshButton.disabled = true;
     try {
         const results = await Promise.all([paymentDashboardAPI('getPayments'), paymentDashboardAPI('getSalesOrders')]);
+        try { const drResult = await paymentDashboardAPI('getDeliveryReceipts'); paymentDeliveryReceipts = paymentDashboardRows(drResult, ['deliveryReceipts','deliveries','receipts']); } catch (drError) { console.warn('Delivery receipts unavailable for delivery status.', drError); paymentDeliveryReceipts = []; }
         paymentRecords = paymentDashboardRows(results[0], ['payments']).map(function (row) {
             return Object.assign({}, row, {
                 paymentNo: row.PAYMENT_NO || row.PAYMENT_ID || row.paymentNo || row.paymentNumber || '',
@@ -720,7 +734,7 @@ function applyPaymentFilters() {
     */
 
     renderPaymentTable();
-
+    renderOutstandingSOTable();
     renderCustomerCreditTable();
 
 }
@@ -1183,17 +1197,8 @@ function renderPaymentTable() {
         );
 
 
-    tbody.innerHTML =
-        records.map(
-            function (payment) {
-
-                return createPaymentRow(
-                    payment
-                );
-
-            }
-        ).join('');
-
+    tbody.innerHTML = records.map(function (payment) { return createPaymentRow(payment); }).join('');
+    tbody.querySelectorAll('.recent-payment-row').forEach(function(row){row.addEventListener('dblclick',function(event){if(event.target&&event.target.closest('button'))return;viewPaymentRecord(row.getAttribute('data-payment-no')||'');});});
 }
 
 
@@ -1244,7 +1249,7 @@ function createPaymentRow(
 
 
     return `
-        <tr>
+        <tr class="recent-payment-row" data-payment-no="${escapeAttribute(paymentNo)}" title="Double-click to view payment details">
 
             <td>
                 ${escapeHTML(paymentNo)}
@@ -1786,68 +1791,100 @@ function createSalesOrderRow(
    VIEW PAYMENT
 ========================================================= */
 
-function viewPaymentRecord(
-    paymentNo
-) {
-
-    const payment =
-        paymentRecords.find(
-            function (record) {
-
-                return (
-                    getPaymentNo(record) ===
-                    paymentNo
-                );
-
-            }
-        );
-
-
-    if (!payment) {
-
-        alert(
-            'Payment record not found.'
-        );
-
-        return;
-
-    }
-
-
-    /*
-       Temporary view behavior.
-       We can replace this later with
-       a proper Payment Details modal.
-    */
-
-    const amount =
-        formatCurrency(
-            getPaymentAmount(payment)
-        );
-
-
-    alert(
-        'Payment No.: ' +
-        paymentNo +
-        '\n\n' +
-        'Invoice No.: ' +
-        getInvoiceNo(payment) +
-        '\n' +
-        'SO No.: ' +
-        getSONo(payment) +
-        '\n' +
-        'Client: ' +
-        getClientName(payment) +
-        '\n' +
-        'Amount: ' +
-        amount +
-        '\n' +
-        'Status: ' +
-        getPaymentStatus(payment)
-    );
-
+function viewPaymentRecord(paymentNo) {
+    const payment = paymentRecords.find(function (record) { return getPaymentNo(record) === paymentNo; });
+    if (!payment) { console.warn('Payment record not found:', paymentNo); return; }
+    const setText = function (id, value) { const el = document.getElementById(id); if (el) el.textContent = value || '—'; };
+    setText('paymentDetailModalTitle', 'Payment Details');
+    setText('paymentDetailModalSubtitle', 'Saved payment transaction from the LOGIS-TECH database');
+    setText('paymentDetailNo', getPaymentNo(payment));
+    setText('paymentDetailDate', getPaymentDate(payment) ? formatDate(getPaymentDate(payment)) : '—');
+    setText('paymentDetailClient', getClientName(payment)); setText('paymentDetailSO', getSONo(payment));
+    setText('paymentDetailInvoice', getInvoiceNo(payment)); setText('paymentDetailSI', getSINo(payment));
+    setText('paymentDetailProject', getProjectName(payment));
+    setText('paymentDetailMethod', creditField(payment, ['PAYMENT_METHOD','paymentMethod','method']) || '—');
+    setText('paymentDetailReceipt', creditField(payment, ['RECEIPT_NO','receiptNo','receiptNumber']) || '—');
+    setText('paymentDetailReference', creditField(payment, ['REFERENCE_NO','referenceNo','referenceNumber']) || '—');
+    setText('paymentDetailAmount', formatCurrency(getPaymentAmount(payment)));
+    setText('paymentDetailStatus', getPaymentStatus(payment));
+    setText('paymentDetailRemarks', creditField(payment, ['REMARKS','remarks','NOTES','notes']) || '—');
+    const modal = document.getElementById('paymentDetailModal');
+    if (modal) { modal.classList.add('is-open'); modal.setAttribute('aria-hidden','false'); }
 }
-
+function closePaymentDetailModal() {
+    const modal = document.getElementById('paymentDetailModal'); if (!modal) return;
+    modal.classList.remove('is-open'); modal.setAttribute('aria-hidden','true');
+}
+window.viewPaymentRecord = viewPaymentRecord;
+function normalizePaymentSOKey(value) { return String(value || '').trim().toUpperCase().replace(/[\s-]+/g,''); }
+function getOutstandingSOPaid(soNo) {
+    const key = normalizePaymentSOKey(soNo);
+    return paymentRecords.reduce(function (sum,p) {
+        if (normalizePaymentSOKey(getSONo(p)) !== key) return sum;
+        const st = String(getPaymentStatus(p)||'').trim().toUpperCase();
+        if (['CANCELLED','CANCELED','VOID','VOIDED','REJECTED'].includes(st)) return sum;
+        const applied = creditField(p,['SO_APPLIED_AMOUNT','soAppliedAmount','SO_AMOUNT_APPLIED','soAmountApplied']);
+        return sum + toNumber(applied !== '' ? applied : getPaymentAmount(p));
+    },0);
+}
+function getOutstandingSODeliveryStatus(so) {
+    const explicit = String(creditField(so,['DELIVERY_STATUS','DELIVERY_PROGRESS','deliveryStatus','deliveryProgress'])||'').trim().toUpperCase().replace(/[ _-]+/g,' ');
+    if (explicit.includes('FULLY DELIVERED') || explicit === 'COMPLETED DELIVERY') return 'FULLY DELIVERED';
+    if (explicit.includes('PARTIALLY DELIVERED') || explicit === 'PARTIAL DELIVERY') return 'PARTIALLY DELIVERED';
+    const soKey = normalizePaymentSOKey(getSONo(so));
+    const drs = paymentDeliveryReceipts.filter(function(dr) {
+        const ref = creditField(dr,['SO_NUMBER','SO_NO','SALES_ORDER_NO','soNumber','soNo','salesOrderNo','salesOrderNumber']);
+        const st = String(creditField(dr,['STATUS','DR_STATUS','status','drStatus'])||'').trim().toUpperCase().replace(/[ _-]+/g,'_');
+        return normalizePaymentSOKey(ref) === soKey && !['CANCELLED','CANCELED','VOID','VOIDED'].includes(st);
+    });
+    if (!drs.length) return 'UNDELIVERED';
+    const delivered = drs.filter(function(dr) {
+        const st = String(creditField(dr,['STATUS','DR_STATUS','status','drStatus'])||'').trim().toUpperCase().replace(/[ _-]+/g,'_');
+        return !!creditField(dr,['DATE_DELIVERED','DELIVERED_DATE','DATE_DELIVERY','dateDelivered','deliveredDate']) || ['COMPLETED','DELIVERED','FULLY_DELIVERED','FOR_INVOICE','FOR_BILLING'].includes(st);
+    });
+    if (!delivered.length) return 'UNDELIVERED';
+    const soItems = Array.isArray(so.items) ? so.items : (Array.isArray(so.ITEMS) ? so.ITEMS : (Array.isArray(so.SO_ITEMS) ? so.SO_ITEMS : []));
+    const itemsOf = function(dr) { return Array.isArray(dr.items) ? dr.items : (Array.isArray(dr.ITEMS) ? dr.ITEMS : (Array.isArray(dr.DR_ITEMS) ? dr.DR_ITEMS : [])); };
+    const ordered = soItems.reduce(function(sum,it){return sum+toNumber(creditField(it,['QTY','QUANTITY','ORDER_QTY','ORDERED_QTY','qty','quantity']));},0);
+    if (ordered > 0) {
+        const qty = delivered.reduce(function(sum,dr){return sum+itemsOf(dr).reduce(function(a,it){return a+toNumber(creditField(it,['DELIVERED_QTY','QTY_DELIVERED','QUANTITY_DELIVERED','QTY','QUANTITY','qty','quantity']));},0);},0);
+        return qty >= ordered - 0.0001 ? 'FULLY DELIVERED' : (qty > 0 ? 'PARTIALLY DELIVERED' : 'UNDELIVERED');
+    }
+    return delivered.length === drs.length ? 'FULLY DELIVERED' : 'PARTIALLY DELIVERED';
+}
+function getOutstandingSORows(search) {
+    const q = String(search||'').trim().toLowerCase();
+    return paymentSalesOrders.map(function(so) {
+        const no=getSONo(so), total=getSalesOrderTotal(so), paid=getOutstandingSOPaid(no);
+        return {so:so,soNo:no,total:total,paid:paid,balance:Math.max(0,total-paid),delivery:getOutstandingSODeliveryStatus(so)};
+    }).filter(function(r) {
+        const st=String(creditField(r.so,['STATUS','status'])||'').trim().toUpperCase();
+        const hay=[r.soNo,getClientName(r.so),getProjectName(r.so),r.delivery].join(' ').toLowerCase();
+        return r.soNo && r.balance>0.005 && !['CANCELLED','CANCELED','VOID','VOIDED'].includes(st) && (!q||hay.includes(q));
+    }).sort(function(a,b){return b.balance-a.balance;});
+}
+function renderOutstandingSOTable() {
+    const body=document.getElementById('outstandingSOTableBody'); if(!body)return;
+    const input=document.getElementById('outstandingSOSearchInput');
+    const rows=getOutstandingSORows(input?input.value:'');
+    if(!rows.length){body.innerHTML='<tr><td colspan="8" class="payment-empty-state">No unpaid Sales Orders or outstanding balances found.</td></tr>';return;}
+    body.innerHTML=rows.map(function(r,i){
+        const cl=r.delivery==='FULLY DELIVERED'?'outstanding-delivery-full':r.delivery==='PARTIALLY DELIVERED'?'outstanding-delivery-partial':'outstanding-delivery-none';
+        return '<tr class="outstanding-so-row" data-outstanding-index="'+i+'" title="Double-click to view Sales Order balance details"><td>'+escapeHTML(r.soNo)+'</td><td>'+escapeHTML(getClientName(r.so))+'</td><td>'+escapeHTML(getProjectName(r.so))+'</td><td class="payment-amount-cell">'+escapeHTML(formatCurrency(r.total))+'</td><td class="payment-amount-cell">'+escapeHTML(formatCurrency(r.paid))+'</td><td class="payment-amount-cell outstanding-balance-value">'+escapeHTML(formatCurrency(r.balance))+'</td><td><span class="outstanding-delivery-status '+cl+'">'+escapeHTML(r.delivery)+'</span></td><td><button type="button" class="payment-action-btn" onclick="viewOutstandingSO('+i+')">VIEW</button></td></tr>';
+    }).join('');
+    body.querySelectorAll('.outstanding-so-row').forEach(function(tr){tr.addEventListener('dblclick',function(ev){if(ev.target&&ev.target.closest('button'))return;viewOutstandingSO(Number(tr.getAttribute('data-outstanding-index')));});});
+}
+function viewOutstandingSO(index) {
+    const input=document.getElementById('outstandingSOSearchInput');
+    const r=getOutstandingSORows(input?input.value:'')[index]; if(!r)return;
+    const set=function(id,val){const el=document.getElementById(id);if(el)el.textContent=val||'—';};
+    set('outstandingSOModalTitle',r.soNo+' — Outstanding Balance');set('outstandingSODetailClient',getClientName(r.so));
+    set('outstandingSODetailProject',getProjectName(r.so));set('outstandingSODetailTotal',formatCurrency(r.total));
+    set('outstandingSODetailPaid',formatCurrency(r.paid));set('outstandingSODetailBalance',formatCurrency(r.balance));set('outstandingSODetailDelivery',r.delivery);
+    const modal=document.getElementById('outstandingSOModal');if(modal){modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');}
+}
+function closeOutstandingSOModal(){const modal=document.getElementById('outstandingSOModal');if(!modal)return;modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');}
+window.viewOutstandingSO=viewOutstandingSO;
 
 /* =========================================================
    VIEW SALES ORDER PAYMENT
