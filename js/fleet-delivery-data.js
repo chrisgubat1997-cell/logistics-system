@@ -31,23 +31,8 @@ const FLEET_DELIVERY_DATA_VERSION = 2;
    VEHICLES
 ========================================================= */
 
-const FDE_VEHICLES = [
-    "TBO710",
-    "TBO711",
-    "TBO712",
-    "TBO713",
-    "TBO714",
-    "TBO715",
-    "TBO716",
-    "TBO717",
-    "TBO718",
-    "TBO719",
-    "TBO720",
-    "TBO721",
-    "TBO722",
-    "TBO723",
-    "TBO724"
-];
+// Vehicle options are loaded from the VEHICLES sheet through getFleetAnalyticsData.
+const FDE_VEHICLES = [];
 
 
 /* =========================================================
@@ -236,7 +221,49 @@ async function loadFleetDeliveryData() {
         })
     };
 
+    populateFleetVehicleDropdowns();
     updateStorageStatus(true, "Google Sheets connected");
+}
+
+function populateFleetVehicleDropdowns() {
+    const selectors = [
+        { id: "fde-tripVehicle", placeholder: "Select Vehicle" },
+        { id: "fde-fuelVehicle", placeholder: "Select Vehicle" },
+        { id: "fde-maintenanceVehicle", placeholder: "Select Vehicle" }
+    ];
+    const vehicles = (fdeData.vehicles || []).filter(function(vehicle) {
+        const code = String(vehicle.VEHICLE_CODE || vehicle.vehicleCode || vehicle.code || "").trim();
+        const status = String(vehicle.STATUS || vehicle.status || "").trim().toUpperCase();
+        return code && (!status || status === "ACTIVE");
+    }).sort(function(a, b) {
+        return String(a.PLATE_NUMBER || a.PLATE_NO || "").localeCompare(String(b.PLATE_NUMBER || b.PLATE_NO || ""));
+    });
+
+    selectors.forEach(function(config) {
+        const select = document.getElementById(config.id);
+        if (!select) return;
+        const previousValue = select.value;
+        select.innerHTML = "";
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = config.placeholder;
+        select.appendChild(placeholder);
+
+        vehicles.forEach(function(vehicle) {
+            const code = String(vehicle.VEHICLE_CODE || vehicle.vehicleCode || vehicle.code || "").trim();
+            const plate = String(vehicle.PLATE_NUMBER || vehicle.PLATE_NO || vehicle.LICENSE_PLATE || vehicle.PLATE || vehicle.plateNumber || vehicle.plateNo || "").trim();
+            const option = document.createElement("option");
+            option.value = code;
+            option.textContent = plate ? plate + " — " + code : code;
+            select.appendChild(option);
+        });
+
+        if (previousValue && Array.from(select.options).some(function(option) { return option.value === previousValue; })) {
+            select.value = previousValue;
+        }
+    });
+
+    fillMaintenancePlateNumber();
 }
 
 function fleetTodayForInput() {
