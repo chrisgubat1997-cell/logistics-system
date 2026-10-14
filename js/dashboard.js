@@ -1,7 +1,7 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
    DASHBOARD JAVASCRIPT
-   VERSION: 20261006
+   VERSION: 20261014-01
 
    PURPOSE:
    - Dashboard summary
@@ -13,14 +13,17 @@
    - Recent activity
 
    CURRENT DATA SOURCE:
-   LocalStorage / TEST MODE
-
-   FUTURE:
-   Google Apps Script / Google Sheets API
+   Google Apps Script API / Google Sheets
+   LocalStorage is used only as a fallback when the API is unavailable
    ========================================================= */
 
 (function () {
     "use strict";
+
+    const DASHBOARD_API_URL =
+        "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+
+    let lastDashboardData = null;
 
     /* =====================================================
        STORAGE KEYS
@@ -145,7 +148,7 @@
        REFRESH DASHBOARD
        ===================================================== */
 
-    function refreshDashboard(showLoading) {
+    async function refreshDashboard(showLoading) {
 
         const refreshButton =
             document.getElementById("dashboardRefreshBtn");
@@ -155,99 +158,161 @@
             refreshButton.textContent = "Refreshing...";
         }
 
+        try {
+            const data = await collectDashboardData();
+            lastDashboardData = data;
 
-        requestAnimationFrame(function () {
+            updateSummaryCards(data);
+            updateSalesOrderPerformance(data);
+            updateDeliveryPerformance(data);
+            updateFinanceSnapshot(data);
+            updateFleetStatus(data);
+            updateAttentionRequired(data);
+            updateRecentActivity(data);
 
-            try {
-
-                const data = collectDashboardData();
-
-                updateSummaryCards(data);
-                updateSalesOrderPerformance(data);
-                updateDeliveryPerformance(data);
-                updateFinanceSnapshot(data);
-                updateFleetStatus(data);
-                updateAttentionRequired(data);
-                updateRecentActivity(data);
-
-            } catch (error) {
-
-                console.error(
-                    "LOGIS-TECH Dashboard Error:",
-                    error
-                );
-
-            }
-
-
+        } catch (error) {
+            console.error("LOGIS-TECH Dashboard Error:", error);
+            showDashboardDataError();
+        } finally {
             if (showLoading && refreshButton) {
-
-                setTimeout(function () {
-
-                    refreshButton.classList.remove(
-                        "is-loading"
-                    );
-
-                    refreshButton.textContent =
-                        "Refresh";
-
-                }, 350);
-
+                refreshButton.classList.remove("is-loading");
+                refreshButton.textContent = "Refresh";
             }
-
-        });
-
+        }
     }
 
 
     /* =====================================================
-       COLLECT DATA
-       ===================================================== */
+       COLLECT DATA FROM GOOGLE APPS SCRIPT
+    ===================================================== */
 
-    function collectDashboardData() {
+    async function collectDashboardData() {
+
+        const actions = [
+            ["salesOrders", "getSalesOrders"],
+            ["deliveryReceipts", "getDeliveryReceipts"],
+            ["invoices", "getInvoices"],
+            ["payments", "getPayments"]
+        ];
+
+        const results = await Promise.all(
+            actions.map(async function (entry) {
+                try {
+                    const response = await fetch(DASHBOARD_API_URL, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "text/plain;charset=utf-8"
+                        },
+                        body: JSON.stringify({
+                            action: entry[1],
+                            data: {}
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("HTTP " + response.status);
+                    }
+
+                    const result = await response.json();
+
+                    if (result && result.success === false) {
+                        throw new Error(result.error || (entry[1] + " failed"));
+                    }
+
+                    return [entry[0], normalizeDashboardRecords(result)];
+                } catch (error) {
+                    console.warn("Dashboard API request failed:", entry[1], error);
+                    return [entry[0], null];
+                }
+            })
+        );
+
+        const apiData = {};
+        results.forEach(function (entry) {
+            apiData[entry[0]] = entry[1];
+        });
 
         const salesOrders =
-            readStorageArray(
-                STORAGE_KEYS.salesOrders
-            );
-
-        const deliveries =
-            readStorageArray(
-                STORAGE_KEYS.deliveries
-            );
+            apiData.salesOrders !== null
+                ? apiData.salesOrders
+                : readStorageArray(STORAGE_KEYS.salesOrders);
 
         const deliveryReceipts =
-            readStorageArray(
-                STORAGE_KEYS.deliveryReceipts
-            );
+            apiData.deliveryReceipts !== null
+                ? apiData.deliveryReceipts
+                : readStorageArray(STORAGE_KEYS.deliveryReceipts);
 
         const invoices =
-            readStorageArray(
-                STORAGE_KEYS.invoices
-            );
+            apiData.invoices !== null
+                ? apiData.invoices
+                : readStorageArray(STORAGE_KEYS.invoices);
 
         const payments =
-            readStorageArray(
-                STORAGE_KEYS.payments
-            );
+            apiData.payments !== null
+                ? apiData.payments
+                : readStorageArray(STORAGE_KEYS.payments);
 
+        // The current API exposes delivery receipts rather than a separate
+        // getDeliveries action. Use those records for delivery dashboard metrics.
+        const deliveries =
+            deliveryReceipts.length
+                ? deliveryReceipts
+                : readStorageArray(STORAGE_KEYS.deliveries);
+
+        // Fleet records currently have no dedicated list action in the main router.
         const fleet =
-            readStorageArray(
-                STORAGE_KEYS.fleet
-            );
-
+            readStorageArray(STORAGE_KEYS.fleet);
 
         return {
-
-            salesOrders,
-            deliveries,
-            deliveryReceipts,
-            invoices,
-            payments,
-            fleet
-
+            salesOrders: salesOrders,
+            deliveries: deliveries,
+            deliveryReceipts: deliveryReceipts,
+            invoices: invoices,
+            payments: payments,
+            fleet: fleet
         };
+    }
 
+
+    function normalizeDashboardRecords(result) {
+        if (Array.isArray(result)) {
+            return result;
+        }
+
+        if (!result || typeof result !== "object") {
+            return [];
+        }
+
+        if (Array.isArray(result.records)) {
+            return result.records;
+        }
+
+        if (Array.isArray(result.data)) {
+            return result.data;
+        }
+
+        if (result.data && Array.isArray(result.data.records)) {
+            return result.data.records;
+        }
+
+        // A successful API response without a records array is treated as
+        // an empty result, not as stale LocalStorage data.
+        if (result.success === true) {
+            return [];
+        }
+
+        throw new Error("Unrecognized dashboard API response.");
+    }
+
+
+    function showDashboardDataError() {
+        const activityList =
+            document.getElementById("dashboardActivityList");
+
+        if (activityList) {
+            activityList.innerHTML =
+                '<div class="empty-dashboard-state"><span>!</span><div><strong>Unable to load live data</strong><p>Please refresh or check the Apps Script API.</p></div></div>';
+        }
     }
 
 
@@ -510,9 +575,9 @@
 
 
         const salesOrders =
-            readStorageArray(
-                STORAGE_KEYS.salesOrders
-            );
+            lastDashboardData
+                ? lastDashboardData.salesOrders
+                : readStorageArray(STORAGE_KEYS.salesOrders);
 
 
         const chartData =
