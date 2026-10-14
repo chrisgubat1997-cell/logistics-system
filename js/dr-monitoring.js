@@ -13,7 +13,11 @@ async function refreshDRMonitoring(){
   const pending=active.filter(r=>{const s=String(drField(r,"STATUS","status")).toUpperCase();return !drDate(drField(r,"DATE_DELIVERED","dateDelivered"))&&!["DELIVERED","COMPLETED","CLOSED"].includes(s);});
   const overdue=pending.filter(r=>{const due=drDate(drField(r,"COMMITTED_DATE","committedDate"));return due&&new Date(due.getFullYear(),due.getMonth(),due.getDate())<today;});
   setElementText("totalDR",formatNumber(active.length));
-  setElementText("monthlyDR",formatNumber(active.filter(r=>{const d=drDate(drField(r,"DATE_TRANSFER","dateTransfer"));return d&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();}).length));
+  const filters=window.getAnalyticsFilters?window.getAnalyticsFilters():{year:"ALL",month:"ALL"};
+  const monthlyCount=(filters.month&&filters.month!=="ALL")
+   ? active.length
+   : active.filter(r=>{const d=drDate(drField(r,"DATE_TRANSFER","dateTransfer"));return d&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth()&&(!filters.year||filters.year==="ALL"||d.getFullYear()===Number(filters.year));}).length;
+  setElementText("monthlyDR",formatNumber(monthlyCount));
   setElementText("pendingDR",formatNumber(pending.length));setElementText("overdueDR",formatNumber(overdue.length));
   setElementText("preparedDR",formatNumber(active.filter(r=>/PREPARED|PREPARING|SAVED|DRAFT/.test(String(drField(r,"STATUS","status")).toUpperCase())).length));
   setElementText("releasedDR",formatNumber(active.filter(r=>/RELEASED|ONGOING|IN.?TRANSIT/.test(String(drField(r,"STATUS","status")).toUpperCase())).length));
