@@ -2353,13 +2353,14 @@ async function editMaintenanceRequest(id) {
     const group = (fdeData.maintenance || []).filter(function(item) { return String(item.requestNo || "") === String(requestNo); });
     if (!group.length) { alert("Walang repair items na makita para sa " + requestNo + "."); return; }
     if (!confirm("Buksan ang " + requestNo + " para i-update at magdagdag ng repair items?")) return;
+    const base = group[0];
     fdeMaintenanceEditingRequestNo = requestNo;
-    setValue("fde-maintenanceNo", requestNo); setValue("fde-requestedBy", selected.requestedBy || "");
-    setValue("fde-maintenanceDate", selected.date || ""); setValue("fde-maintenanceVehicle", selected.vehicle || "");
-    setValue("fde-maintenancePlate", selected.plateNumber || ""); setValue("fde-maintenanceDepartment", selected.department || "");
-    setValue("fde-maintenanceOdometer", selected.odometer || ""); setValue("fde-maintenanceTargetDate", selected.targetDate || "");
-    setValue("fde-maintenanceCost", selected.estimatedCost || selected.cost || "");
-    document.querySelectorAll('input[name="fde-maintenanceClass"]').forEach(function(input) { input.checked = (selected.classifications || []).includes(input.value); });
+    setValue("fde-maintenanceNo", requestNo); setValue("fde-requestedBy", base.requestedBy || "");
+    setValue("fde-maintenanceDate", base.date || ""); setValue("fde-maintenanceVehicle", base.vehicle || "");
+    setValue("fde-maintenancePlate", base.plateNumber || ""); setValue("fde-maintenanceDepartment", base.department || "");
+    setValue("fde-maintenanceOdometer", base.odometer || ""); setValue("fde-maintenanceTargetDate", base.targetDate || "");
+    setValue("fde-maintenanceCost", base.estimatedCost || base.cost || "");
+    document.querySelectorAll('input[name="fde-maintenanceClass"]').forEach(function(input) { input.checked = (base.classifications || []).includes(input.value); });
     const body = document.getElementById("fde-maintenanceRequestRows");
     if (body) { body.innerHTML = ""; group.forEach(function(item) { addMaintenanceRequestRow({ id: item.id, description: item.description || "", serviceClassification: item.serviceClassification || "", lastCompletion: item.lastCompletion || "", status: item.status || "Pending" }); }); }
     fillMaintenancePlateNumber();
@@ -2368,28 +2369,30 @@ async function editMaintenanceRequest(id) {
     const sectionTab = document.querySelector('.fde-tab[data-section="maintenance"]'); if (sectionTab) sectionTab.click();
     const form = document.getElementById("fde-maintenance-section"); if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
 }
+
 async function updateMaintenanceRequestStatus(id, status) {
     if (!id || !["Completed", "Cancelled"].includes(status)) return;
-    const record = (fdeData.maintenance || []).find(function(item) {
-        return String(item.id) === String(id);
-    });
-    if (!record) {
-        alert("Hindi makita ang maintenance request. I-refresh ang page at subukan ulit.");
-        return;
+    const record = (fdeData.maintenance || []).find(function(item) { return String(item.id) === String(id); });
+    if (!record) { alert("Hindi makita ang maintenance request. I-refresh ang page at subukan ulit."); return; }
+    const description = record.description || "maintenance repair";
+    let actualCompletionDate = record.actualCompletionDate || "";
+    let cancellationReason = record.cancellationReason || "";
+    if (status === "Cancelled") {
+        const reason = prompt("Ilagay ang dahilan ng cancellation:", cancellationReason);
+        if (reason === null) return;
+        cancellationReason = reason.trim();
+        if (!cancellationReason) { alert("Kailangan ang cancellation reason."); return; }
     }
-    const description = record.description || "maintenance request";
-    if (status === "Cancelled" && !confirm("I-cancel ang request na ito?\n" + description)) return;
-    if (status === "Completed" && !confirm("Mark as completed ang request na ito?\n" + description)) return;
-    const updated = Object.assign({}, record, { status: status, updatedAt: new Date().toISOString() });
+    if (status === "Completed") {
+        if (!confirm("Mark as completed ang repair na ito?\n" + description)) return;
+        actualCompletionDate = fleetTodayForInput();
+    } else if (!confirm("I-cancel ang repair na ito?\n" + description)) return;
+    const updated = Object.assign({}, record, { status: status, actualCompletionDate: actualCompletionDate, cancellationReason: cancellationReason, updatedAt: new Date().toISOString() });
     try {
         await persistFleetRecord("maintenance", updated);
-        alert(status === "Cancelled" ? "Maintenance request cancelled." : "Maintenance request marked as completed.");
-    } catch (error) {
-        console.error("Maintenance status update failed:", error);
-        alert("Hindi na-update ang status. " + error.message);
-    }
+        alert(status === "Cancelled" ? "Maintenance repair cancelled." : "Maintenance repair marked as completed.");
+    } catch (error) { console.error("Maintenance status update failed:", error); alert("Hindi na-update ang status. " + error.message); }
 }
-
 
 async function deleteFleetRecord(
     type,
