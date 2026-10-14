@@ -251,7 +251,7 @@ function bindInvoicingEvents() {
 
     // Close the recent-invoice preview using the Close/X button or overlay.
     const invoicePreviewModal = document.getElementById("invoicePreviewModal");
-    const closePreviewBtn = document.getElementById("closePreviewBtn");
+    const closePreviewBtn = document.getElementById("closeInvoicePreviewModal");
     const previewOverlay = document.getElementById("previewOverlay");
 
     if (closePreviewBtn && closePreviewBtn.dataset.closeBound !== "true") {
