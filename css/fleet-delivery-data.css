@@ -588,32 +588,44 @@
 }
 .fde-maint-request-row {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(160px, 1fr) minmax(140px, 1fr) auto;
+    grid-template-columns: minmax(250px, 2fr) minmax(135px, 1fr) minmax(165px, 1.15fr) minmax(135px, 1fr) auto;
     gap: 12px;
-    align-items: end;
-    padding: 12px;
+    align-items: start;
+    padding: 14px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     background: #f8fafc;
 }
+.fde-maint-request-row .fde-field { display: flex; flex-direction: column; min-width: 0; }
 .fde-maint-request-row .fde-field label {
+    display: flex;
+    align-items: flex-start;
+    min-height: 28px;
+    margin-bottom: 7px;
     font-size: 10px;
+    line-height: 1.35;
 }
-.fde-maint-request-row .fde-maint-remove-request {
-    min-width: 90px;
-    margin-bottom: 0;
+.fde-maint-request-row .fde-field input,
+.fde-maint-request-row .fde-field select { min-width: 0; min-height: 40px; height: 40px; }
+.fde-maint-request-row .fde-maint-suggestion-help {
+    display: block;
+    min-height: 30px;
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.4;
 }
-.fde-maint-request-row .fde-maint-remove-request:disabled {
-    opacity: .45;
-    cursor: not-allowed;
+.fde-maint-request-row .fde-maint-remove-request { min-width: 90px; margin-top: 35px; margin-bottom: 0; white-space: nowrap; }
+.fde-maint-request-row .fde-maint-remove-request:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 1150px) {
+    .fde-maint-request-row { grid-template-columns: minmax(220px, 2fr) minmax(130px, 1fr); }
+    .fde-maint-request-row .fde-maint-remove-request { margin-top: 0; }
 }
 @media (max-width: 760px) {
-    .fde-maint-request-row {
-        grid-template-columns: 1fr;
-    }
-    .fde-maint-request-header {
-        align-items: flex-start;
-    }
+    .fde-maint-request-row { grid-template-columns: 1fr; }
+    .fde-maint-request-row .fde-field label { min-height: 0; }
+    .fde-maint-request-row .fde-maint-remove-request { margin-top: 0; }
+    .fde-maint-request-header { align-items: flex-start; }
 }
 
 
