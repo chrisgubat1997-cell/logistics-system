@@ -541,7 +541,7 @@ async function loadPaymentDataFromDatabase() {
             terms: row.TERMS || row.PAYMENT_TERMS || row.terms || "", status: row.STATUS || row.status || ""
         }); });
         databasePayments = paymentRows.map(function(row) { return Object.assign({}, row, {
-            soNo: row.SO_NUMBER || row.soNo || "", currentPayment: row.SO_APPLIED_AMOUNT ?? row.soAppliedAmount ?? row.CURRENT_PAYMENT ?? row.currentPayment ?? row.amount ?? 0,
+            soNo: row.SO_NUMBER || row.soNo || "", currentPayment: row.CURRENT_PAYMENT ?? row.currentPayment ?? row.amount ?? 0,
             status: row.PAYMENT_STATUS || row.status || "RECEIVED"
         }); });
         try {
@@ -673,7 +673,7 @@ function renderSelectedSOPaymentTransactions(soNumber) {
     });
     if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="create-payment-unpaid-empty">No saved payment transactions found for this Sales Order.</td></tr>'; return; }
     tbody.innerHTML = rows.map(function(payment) {
-        const amount = payment.SO_APPLIED_AMOUNT ?? payment.soAppliedAmount ?? payment.CURRENT_PAYMENT ?? payment.currentPayment ?? payment.AMOUNT ?? payment.amount ?? 0;
+        const amount = payment.CURRENT_PAYMENT ?? payment.currentPayment ?? payment.AMOUNT ?? payment.amount ?? payment.SO_APPLIED_AMOUNT ?? payment.soAppliedAmount ?? 0;
         const date = payment.PAYMENT_DATE || payment.paymentDate || payment.date || "";
         const status = String(payment.PAYMENT_STATUS || payment.paymentStatus || payment.status || "—").toUpperCase();
         return '<tr><td>'+escapePaymentHTML(payment.PAYMENT_NO || payment.paymentNo || payment.PAYMENT_ID || "—")+'</td><td>'+escapePaymentHTML(formatPaymentSODate(date))+'</td><td>'+escapePaymentHTML(payment.PAYMENT_METHOD || payment.paymentMethod || "—")+'</td><td>'+escapePaymentHTML(payment.RECEIPT_NO || payment.receiptNo || "—")+'</td><td>'+escapePaymentHTML(payment.REFERENCE_NO || payment.referenceNo || "—")+'</td><td class="create-payment-unpaid-balance">'+escapePaymentHTML(formatPaymentCurrency(amount))+'</td><td>'+escapePaymentHTML(status)+'</td></tr>';
