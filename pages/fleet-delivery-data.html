@@ -174,118 +174,49 @@
 
 
             <div class="fde-field">
-
-                <label for="fde-startKm">
-                    Start KM
-                </label>
-
-                <input
-                    type="number"
-                    id="fde-startKm"
-                    min="0"
-                    step="0.01"
-                    placeholder="0">
-
-            </div>
-
-
-            <div class="fde-field">
-
-                <label for="fde-endKm">
-                    End KM
-                </label>
-
-                <input
-                    type="number"
-                    id="fde-endKm"
-                    min="0"
-                    step="0.01"
-                    placeholder="0">
-
-            </div>
-
-
-            <div class="fde-field">
-
-                <label for="fde-totalKm">
-                    Total KM
-                </label>
-
-                <input
-                    type="number"
-                    id="fde-totalKm"
-                    readonly
-                    placeholder="Auto calculated">
-
-            </div>
-
-
-            <div class="fde-field">
-
-                <label for="fde-tripStatus">
-                    Status
-                </label>
-
+                <label for="fde-tripStatus">Status</label>
                 <select id="fde-tripStatus">
-
-                    <option value="Completed">
-                        Completed
-                    </option>
-
-                    <option value="Pending">
-                        Pending
-                    </option>
-
-                    <option value="Cancelled">
-                        Cancelled
-                    </option>
-
+                    <option value="Completed">Completed</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Cancelled">Cancelled</option>
                 </select>
-
             </div>
-
-
             <div class="fde-field">
-
-                <label for="fde-origin">
-                    Origin
-                </label>
-
-                <input
-                    type="text"
-                    id="fde-origin"
-                    placeholder="Origin">
-
+                <label for="fde-totalKm">Total KM</label>
+                <input type="number" id="fde-totalKm" readonly placeholder="Auto calculated">
             </div>
-
-
-            <div class="fde-field">
-
-                <label for="fde-destination">
-                    Destination
-                </label>
-
-                <input
-                    type="text"
-                    id="fde-destination"
-                    placeholder="Destination">
-
-            </div>
-
-
             <div class="fde-field full">
-
-                <label for="fde-purpose">
-                    Purpose
-                </label>
-
-                <input
-                    type="text"
-                    id="fde-purpose"
-                    placeholder="Trip purpose">
-
+                <div class="fde-route-heading">
+                    <div>
+                        <label>Trip Route &amp; Kilometer Log</label>
+                        <p class="fde-route-help">Origin + Start KM → each destination + KM + purpose → return to Origin + End KM.</p>
+                    </div>
+                    <button type="button" class="fde-btn secondary" id="fde-addTripStopBtn">＋ Add Trip / Destination</button>
+                </div>
+                <div class="fde-route-table-wrap">
+                    <table class="fde-route-table">
+                        <thead><tr><th>ROUTE / LOCATION</th><th>ODOMETER (KM)</th><th>PURPOSE</th><th></th></tr></thead>
+                        <tbody id="fde-routeRows">
+                            <tr class="fde-route-row fde-route-start">
+                                <td><span class="fde-route-badge">START</span><input type="text" id="fde-origin" placeholder="Origin / Starting point"></td>
+                                <td><input type="number" id="fde-startKm" min="0" step="0.01" placeholder="Start KM"></td>
+                                <td><span class="fde-route-muted">Starting point</span></td><td></td>
+                            </tr>
+                            <tr class="fde-route-row fde-route-stop" data-stop-index="0">
+                                <td><span class="fde-route-badge">STOP 1</span><input type="text" class="fde-stop-destination" placeholder="Destination"></td>
+                                <td><input type="number" class="fde-stop-km" min="0" step="0.01" placeholder="KM upon arrival"></td>
+                                <td><input type="text" class="fde-stop-purpose" placeholder="Purpose of this trip"></td>
+                                <td><button type="button" class="fde-remove-stop" title="Remove destination" disabled>×</button></td>
+                            </tr>
+                            <tr class="fde-route-row fde-route-return">
+                                <td><span class="fde-route-badge">RETURN</span><input type="text" id="fde-returnOrigin" placeholder="Return to origin" readonly></td>
+                                <td><input type="number" id="fde-endKm" min="0" step="0.01" placeholder="End KM"></td>
+                                <td><span class="fde-route-muted">Return to origin</span></td><td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-
 
             <div class="fde-field full">
 
