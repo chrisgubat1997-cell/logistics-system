@@ -1785,6 +1785,26 @@ function initializeFleetRecords() {
 
     }
 
+    const monitorSearch = document.getElementById("fde-maintMonitorSearch");
+    const monitorStatus = document.getElementById("fde-maintMonitorStatus");
+    if (monitorSearch && monitorSearch.dataset.bound !== "true") {
+        monitorSearch.addEventListener("input", renderMaintenanceMonitoring);
+        monitorSearch.dataset.bound = "true";
+    }
+    if (monitorStatus && monitorStatus.dataset.bound !== "true") {
+        monitorStatus.addEventListener("change", renderMaintenanceMonitoring);
+        monitorStatus.dataset.bound = "true";
+    }
+
+    const monitorBody = document.getElementById("fde-maintMonitorTableBody");
+    if (monitorBody && monitorBody.dataset.maintenanceEditBound !== "true") {
+        monitorBody.dataset.maintenanceEditBound = "true";
+        monitorBody.addEventListener("click", function(event) {
+            const button = event.target.closest("[data-maintenance-edit]");
+            if (button) editMaintenanceRequest(button.getAttribute("data-maintenance-edit"));
+        });
+    }
+
     const tbody = document.getElementById("fde-recordTableBody");
     if (tbody && tbody.dataset.maintenanceEditBound !== "true") {
         tbody.dataset.maintenanceEditBound = "true";
@@ -1851,11 +1871,108 @@ function getAllFleetRecords() {
 }
 
 
+
+/* =========================================================
+   MAINTENANCE MONITORING
+========================================================= */
+function renderMaintenanceMonitoring() {
+    const tbody = document.getElementById("fde-maintMonitorTableBody");
+    if (!tbody) return;
+
+    const maintenance = Array.isArray(fdeData.maintenance) ? fdeData.maintenance.slice() : [];
+    const today = fleetTodayForInput();
+    const statusOf = function(record) {
+        return String(record.status || "Pending").trim().toLowerCase();
+    };
+    const isClosed = function(record) {
+        return ["completed", "cancelled"].includes(statusOf(record));
+    };
+    const isOverdue = function(record) {
+        return !isClosed(record) && Boolean(record.targetDate) && record.targetDate < today;
+    };
+
+    const pendingCount = maintenance.filter(function(record) { return statusOf(record) === "pending"; }).length;
+    const inProgressCount = maintenance.filter(function(record) { return statusOf(record) === "in progress"; }).length;
+    const overdueCount = maintenance.filter(isOverdue).length;
+    const completedCount = maintenance.filter(function(record) { return statusOf(record) === "completed"; }).length;
+    const openCost = maintenance.filter(function(record) { return !isClosed(record); }).reduce(function(total, record) {
+        return total + Number(record.estimatedCost || record.cost || 0);
+    }, 0);
+
+    const setText = function(id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    };
+    setText("fde-maintPendingCount", pendingCount);
+    setText("fde-maintInProgressCount", inProgressCount);
+    setText("fde-maintOverdueCount", overdueCount);
+    setText("fde-maintCompletedCount", completedCount);
+    setText("fde-maintOpenCost", "₱" + openCost.toLocaleString("en-PH", {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+
+    const searchInput = document.getElementById("fde-maintMonitorSearch");
+    const statusFilter = document.getElementById("fde-maintMonitorStatus");
+    const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+    const filter = statusFilter ? statusFilter.value : "all";
+
+    let visible = maintenance.filter(function(record) {
+        if (filter === "overdue" && !isOverdue(record)) return false;
+        if (filter !== "all" && filter !== "overdue" && statusOf(record) !== filter) return false;
+        if (!query) return true;
+        const vehicle = (fdeData.vehicles || []).find(function(item) {
+            return String(item.VEHICLE_CODE || item.vehicleCode || item.code || "").trim() === String(record.vehicle || "").trim();
+        });
+        const plate = vehicle ? (vehicle.PLATE_NUMBER || vehicle.PLATE_NO || vehicle.LICENSE_PLATE || vehicle.PLATE || vehicle.plateNumber || vehicle.plateNo || "") : (record.plateNumber || "");
+        return [record.requestNo, record.vehicle, plate, record.description, record.defect, record.repair, record.department, record.status]
+            .some(function(value) { return String(value || "").toLowerCase().includes(query); });
+    });
+
+    visible.sort(function(a, b) {
+        const dateA = String(a.targetDate || "9999-12-31");
+        const dateB = String(b.targetDate || "9999-12-31");
+        return dateA.localeCompare(dateB) || String(b.date || "").localeCompare(String(a.date || ""));
+    });
+
+    if (!visible.length) {
+        tbody.innerHTML = '<tr><td colspan="8" class="fde-empty">No matching maintenance requests.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = visible.map(function(record) {
+        const vehicle = (fdeData.vehicles || []).find(function(item) {
+            return String(item.VEHICLE_CODE || item.vehicleCode || item.code || "").trim() === String(record.vehicle || "").trim();
+        });
+        const plate = vehicle ? (vehicle.PLATE_NUMBER || vehicle.PLATE_NO || vehicle.LICENSE_PLATE || vehicle.PLATE || vehicle.plateNumber || vehicle.plateNo || "") : (record.plateNumber || "");
+        const model = vehicle ? (vehicle.MODEL || vehicle.VEHICLE_TYPE || vehicle.BRAND || "") : "";
+        const vehicleLabel = [plate, model].filter(Boolean).join(" - ") || record.vehicle || "-";
+        const status = statusOf(record);
+        const overdue = isOverdue(record);
+        const displayStatus = overdue ? "Overdue" : (record.status || "Pending");
+        const statusClass = overdue ? "overdue" : status.replace(/[^a-z]+/g, "-");
+        const cost = Number(record.estimatedCost || record.cost || 0);
+        const actions = status === "completed" || status === "cancelled"
+            ? '<span class="fde-maint-monitor-terminal">No action</span>'
+            : '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\'' + escapeHTML(record.id) + '\', \'Completed\')">Mark Completed</button>' +
+              '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\'' + escapeHTML(record.id) + '\', \'Cancelled\')">Cancel</button>';
+        return '<tr>' +
+            '<td>' + escapeHTML(record.requestNo || "-") + '</td>' +
+            '<td>' + escapeHTML(record.date || "-") + '</td>' +
+            '<td>' + escapeHTML(vehicleLabel) + '</td>' +
+            '<td>' + escapeHTML(record.description || record.defect || record.repair || "-") + '</td>' +
+            '<td>₱' + cost.toLocaleString("en-PH", {minimumFractionDigits: 2, maximumFractionDigits: 2}) + '</td>' +
+            '<td>' + escapeHTML(record.targetDate || "-") + '</td>' +
+            '<td><span class="fde-maint-monitor-status ' + escapeHTML(statusClass) + '">' + escapeHTML(displayStatus) + '</span></td>' +
+            '<td><div class="fde-record-actions"><button type="button" class="fde-btn secondary" data-maintenance-edit="' + escapeHTML(record.id) + '">Update / Add Repair</button>' + actions + '</div></td>' +
+            '</tr>';
+    }).join("");
+}
+
 /* =========================================================
    RENDER RECORDS
 ========================================================= */
 
 function renderFleetDeliveryRecords() {
+
+    renderMaintenanceMonitoring();
 
     const tbody =
         document.getElementById(
