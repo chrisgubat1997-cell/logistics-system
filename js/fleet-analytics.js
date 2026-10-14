@@ -46,6 +46,8 @@ function initializeFleetAnalytics() {
 
     setupFilters();
 
+    populateAnalyticsVehicleFilter();
+
     activateSection(
         window.FleetAnalytics.currentSection
     );
@@ -334,6 +336,46 @@ function activateSection(section) {
         selected.id
     );
 
+}
+
+
+/* =========================================================
+   LOAD VEHICLES FROM DATABASE
+========================================================= */
+
+async function populateAnalyticsVehicleFilter() {
+    const select = document.getElementById("vehicleFilter");
+    if (!select) return;
+    const previousValue = select.value || window.FleetAnalytics.filters.vehicle || "ALL";
+    const apiUrl = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+
+    try {
+        const response = await fetch(apiUrl + "?action=getFleetAnalyticsData&_=" + Date.now(), { method: "GET", cache: "no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const result = await response.json();
+        if (!result || result.success === false) throw new Error((result && (result.message || result.error)) || "Vehicle data could not be loaded.");
+        const vehicles = Array.isArray(result.vehicles) ? result.vehicles : [];
+        select.innerHTML = '<option value="ALL">All Vehicle</option>';
+        vehicles.filter(function(vehicle) {
+            const code = String(vehicle.VEHICLE_CODE || vehicle.vehicleCode || vehicle.code || "").trim();
+            const status = String(vehicle.STATUS || vehicle.status || "").trim().toUpperCase();
+            return code && (!status || status === "ACTIVE");
+        }).sort(function(a, b) {
+            return String(a.PLATE_NUMBER || a.PLATE_NO || "").localeCompare(String(b.PLATE_NUMBER || b.PLATE_NO || ""));
+        }).forEach(function(vehicle) {
+            const code = String(vehicle.VEHICLE_CODE || vehicle.vehicleCode || vehicle.code || "").trim();
+            const plate = String(vehicle.PLATE_NUMBER || vehicle.PLATE_NO || vehicle.LICENSE_PLATE || vehicle.PLATE || vehicle.plateNumber || vehicle.plateNo || "").trim();
+            const option = document.createElement("option");
+            option.value = code;
+            option.textContent = plate ? plate + " — " + code : code;
+            select.appendChild(option);
+        });
+        select.value = Array.from(select.options).some(function(option) { return option.value === previousValue; }) ? previousValue : "ALL";
+        window.FleetAnalytics.filters.vehicle = select.value;
+        if (typeof handleFilterChange === "function") handleFilterChange();
+    } catch (error) {
+        console.error("Could not load Vehicle filter from VEHICLES sheet:", error);
+    }
 }
 
 
