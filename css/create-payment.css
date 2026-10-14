@@ -777,3 +777,14 @@ body {
     }
 
 }
+
+
+/* SALES ORDER SUGGESTION DROPDOWN */
+.create-payment-so-search-wrap { position: relative; }
+.create-payment-so-suggestions { position:absolute; z-index:1000; top:calc(100% + 4px); left:0; right:0; max-height:340px; overflow-y:auto; border:1px solid #d6deea; border-radius:10px; background:#fff; box-shadow:0 14px 32px rgba(15,23,42,.18); }
+.create-payment-so-suggestions[hidden] { display:none !important; }
+.create-payment-so-suggestion { width:100%; display:flex; flex-direction:column; align-items:flex-start; gap:4px; padding:12px 14px; border:0; border-bottom:1px solid #edf0f5; background:#fff; color:#263247; text-align:left; cursor:pointer; }
+.create-payment-so-suggestion:hover,.create-payment-so-suggestion:focus { outline:none; background:#f0f6ff; }
+.create-payment-so-suggestion-main { font-weight:800; font-size:13px; }
+.create-payment-so-suggestion-meta,.create-payment-so-suggestion-project { color:#697586; font-size:12px; }
+.create-payment-so-suggestion-empty { padding:14px; color:#697586; font-size:13px; }
