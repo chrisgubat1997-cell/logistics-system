@@ -1949,10 +1949,11 @@ function renderMaintenanceMonitoring() {
         const displayStatus = overdue ? "Overdue" : (record.status || "Pending");
         const statusClass = overdue ? "overdue" : status.replace(/[^a-z]+/g, "-");
         const cost = Number(record.estimatedCost || record.cost || 0);
-        const actions = status === "completed" || status === "cancelled"
-            ? '<span class="fde-maint-monitor-terminal">No action</span>'
-            : '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\'' + escapeHTML(record.id) + '\', \'Completed\')">Mark Completed</button>' +
-              '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\'' + escapeHTML(record.id) + '\', \'Cancelled\')">Cancel</button>';
+        const terminal = status === "completed" || status === "cancelled";
+        const actions =
+            '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\\'' + escapeHTML(record.id) + '\\', \\'In Progress\\')"' + (terminal || status === "in progress" ? " disabled" : "") + '>Start Repair</button>' +
+            '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\\'' + escapeHTML(record.id) + '\\', \\'Completed\\')"' + (terminal ? " disabled" : "") + '>Mark Completed</button>' +
+            '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\\'' + escapeHTML(record.id) + '\\', \\'Cancelled\\')"' + (terminal ? " disabled" : "") + '>Cancel</button>';
         return '<tr>' +
             '<td>' + escapeHTML(record.requestNo || "-") + '</td>' +
             '<td>' + escapeHTML(record.date || "-") + '</td>' +
@@ -2618,7 +2619,7 @@ async function editMaintenanceRequest(id) {
 }
 
 async function updateMaintenanceRequestStatus(id, status) {
-    if (!id || !["Completed", "Cancelled"].includes(status)) return;
+    if (!id || !["In Progress", "Completed", "Cancelled"].includes(status)) return;
     const record = (fdeData.maintenance || []).find(function(item) { return String(item.id) === String(id); });
     if (!record) { alert("Hindi makita ang maintenance request. I-refresh ang page at subukan ulit."); return; }
     const description = record.description || "maintenance repair";
@@ -2633,11 +2634,13 @@ async function updateMaintenanceRequestStatus(id, status) {
     if (status === "Completed") {
         if (!confirm("Mark as completed ang repair na ito?\n" + description)) return;
         actualCompletionDate = fleetTodayForInput();
+    } else if (status === "In Progress") {
+        if (!confirm("Simulan ang repair na ito?\n" + description)) return;
     } else if (!confirm("I-cancel ang repair na ito?\n" + description)) return;
     const updated = Object.assign({}, record, { status: status, actualCompletionDate: actualCompletionDate, cancellationReason: cancellationReason, updatedAt: new Date().toISOString() });
     try {
         await persistFleetRecord("maintenance", updated);
-        alert(status === "Cancelled" ? "Maintenance repair cancelled." : "Maintenance repair marked as completed.");
+        alert(status === "Cancelled" ? "Maintenance repair cancelled." : (status === "In Progress" ? "Maintenance status updated to In Progress." : "Maintenance repair marked as completed."));
     } catch (error) { console.error("Maintenance status update failed:", error); alert("Hindi na-update ang status. " + error.message); }
 }
 
