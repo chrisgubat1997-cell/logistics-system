@@ -12,7 +12,7 @@
 
     <link
         rel="stylesheet"
-        href="../css/create-payment.css?v=20261014-02"
+        href="../css/create-payment.css?v=20261014-07"
     >
 </head>
 
@@ -191,6 +191,28 @@
                                 </div>
                             </div>
                         </div>
+
+
+
+                        <!-- UNPAID SALES ORDERS FOR PAYMENT PREPARATION -->
+                        <section class="create-payment-unpaid-section" aria-labelledby="unpaidPaymentSOHeading">
+                            <div class="create-payment-unpaid-header">
+                                <div>
+                                    <h2 id="unpaidPaymentSOHeading">Unpaid Sales Orders</h2>
+                                    <p>Select an SO with remaining balance. Delivery status is shown separately from payment status.</p>
+                                </div>
+                                <button type="button" class="create-payment-btn create-payment-btn-secondary" id="refreshUnpaidPaymentSOBtn">REFRESH</button>
+                            </div>
+                            <div class="create-payment-unpaid-table-wrap">
+                                <table class="create-payment-unpaid-table">
+                                    <thead><tr>
+                                        <th>SO NO.</th><th>CLIENT</th><th>PROJECT</th><th>SO DATE</th>
+                                        <th>SO TOTAL</th><th>TOTAL PAID</th><th>UNPAID BALANCE</th><th>DELIVERY STATUS</th><th>ACTION</th>
+                                    </tr></thead>
+                                    <tbody id="unpaidPaymentSOTableBody"><tr><td colspan="9" class="create-payment-unpaid-empty">Loading unpaid Sales Orders from database...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </section>
 
                         <!-- Hidden compatibility fields used by the payment JavaScript -->
                         <input type="hidden" id="paymentClient" name="paymentClient">
@@ -616,7 +638,7 @@
 </main>
 
 
-<script src="../js/create-payment.js?v=20261014-06"></script>
+<script src="../js/create-payment.js?v=20261014-07"></script>
 
 </body>
 </html>
