@@ -507,6 +507,15 @@ function cancelPayment() {
 
 
 /* GOOGLE SHEETS API + SALES ORDER AUTOCOMPLETE */
+async function paymentAPIGet(action) {
+    const response = await fetch(PAYMENT_API_URL + "?action=" + encodeURIComponent(action) + "&_=" + Date.now(), { method: "GET", cache: "no-store", redirect: "follow" });
+    const raw = await response.text();
+    let result;
+    try { result = JSON.parse(raw); } catch (error) { throw new Error("Invalid response from LOGIS-TECH database."); }
+    if (!response.ok || !result || result.success === false) throw new Error(result && (result.message || result.error) || (action + " failed."));
+    return result;
+}
+
 async function paymentAPI(action, data = {}) {
     const response = await fetch(PAYMENT_API_URL, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({action:action,data:data}) });
     const raw = await response.text();
@@ -520,7 +529,7 @@ async function loadPaymentDataFromDatabase() {
         const results = await Promise.all([
             paymentAPI("getSalesOrders", {}),
             paymentAPI("getPayments", {}),
-            paymentAPI("getDeliveryReceipts", {})
+            paymentAPIGet("getDeliveryReceipts")
         ]);
         const soRows = Array.isArray(results[0].salesOrders) ? results[0].salesOrders : (Array.isArray(results[0].records) ? results[0].records : (Array.isArray(results[0].data) ? results[0].data : []));
         const paymentRows = Array.isArray(results[1].payments) ? results[1].payments : (Array.isArray(results[1].records) ? results[1].records : (Array.isArray(results[1].data) ? results[1].data : []));
