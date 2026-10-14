@@ -233,7 +233,9 @@ function getFleetVehicleId_(vehicleCode) {
   const match = vehicles.find(function(v) {
     return String(v.VEHICLE_CODE || "").trim().toUpperCase() === vehicleCode.toUpperCase();
   });
-  return match ? (match.VEHICLE_ID || "") : "";
+  // VEHICLES master may still be unpopulated. Use the selected vehicle code
+  // as a temporary stable identifier instead of saving VEHICLE_ID as blank.
+  return match ? (match.VEHICLE_ID || match.VEHICLE_CODE || vehicleCode) : vehicleCode;
 }
 
 /**
