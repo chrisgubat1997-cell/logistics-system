@@ -1132,7 +1132,6 @@ async function saveMaintenanceRecord() {
     const odometer = numberValue("fde-maintenanceOdometer");
     const targetDate = getValue("fde-maintenanceTargetDate");
     const estimatedCost = numberValue("fde-maintenanceCost");
-    const status = getValue("fde-maintenanceStatus");
     const classifications = Array.from(document.querySelectorAll('input[name="fde-maintenanceClass"]:checked')).map(function(input) { return input.value; });
     const requests = getMaintenanceRequestDetails();
 
@@ -1181,7 +1180,7 @@ async function saveMaintenanceRecord() {
                 cost: i === 0 && Number.isFinite(estimatedCost) ? estimatedCost : 0,
                 repair: "",
                 idleDays: 0,
-                status: status || "Pending",
+                status: request.status || "Pending",
                 remarks: "",
                 createdAt: now,
                 updatedAt: now
@@ -1223,10 +1222,12 @@ function addMaintenanceRequestRow(details) {
     row.className = "fde-maint-request-row";
     row.innerHTML = '<div class="fde-field"><label>Description of Service / Request</label><input type="text" class="fde-maint-request-description" placeholder="Search or describe requested repair"></div>' +
         '<div class="fde-field"><label>Last Completion of This Issue</label><input type="date" class="fde-maint-request-last-completion"></div>' +
-        '<button type="button" class="fde-btn secondary fde-maint-remove-request" title="Remove request">Remove</button>';
+        '<div class="fde-field"><label>Request Status</label><select class="fde-maint-request-status"><option value="Pending">Pending</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option></select></div>' +
+        '<button type="button" class="fde-btn secondary fde-maint-remove-request" title="Remove unsaved request">Remove</button>';
     if (details) {
         row.querySelector(".fde-maint-request-description").value = details.description || "";
         row.querySelector(".fde-maint-request-last-completion").value = details.lastCompletion || "";
+        row.querySelector(".fde-maint-request-status").value = details.status || "Pending";
     }
     body.appendChild(row);
     refreshMaintenanceRequestRemoveButtons();
@@ -1244,7 +1245,8 @@ function getMaintenanceRequestDetails() {
     return Array.from(document.querySelectorAll("#fde-maintenanceRequestRows .fde-maint-request-row")).map(function(row) {
         return {
             description: row.querySelector(".fde-maint-request-description").value.trim(),
-            lastCompletion: row.querySelector(".fde-maint-request-last-completion").value
+            lastCompletion: row.querySelector(".fde-maint-request-last-completion").value,
+            status: row.querySelector(".fde-maint-request-status").value || "Pending"
         };
     }).filter(function(item) { return item.description || item.lastCompletion; });
 }
@@ -1726,31 +1728,6 @@ function getAllFleetRecords() {
     );
 
 
-    fdeData.deliveries.forEach(
-        function(record) {
-
-            records.push({
-                ...record,
-                recordType:
-                    "delivery"
-            });
-
-        }
-    );
-
-
-    fdeData.dr.forEach(
-        function(record) {
-
-            records.push({
-                ...record,
-                recordType:
-                    "dr"
-            });
-
-        }
-    );
-
 
     return records;
 
@@ -1984,6 +1961,11 @@ function createRecordTableRow(
             )
         );
 
+    const currentStatus = String(record.status || "").toLowerCase();
+    const maintenanceActions = record.recordType === "maintenance"
+        ? '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\'' + escapeHTML(record.id) + '\', \'Completed\')"' + (currentStatus === "completed" || currentStatus === "cancelled" ? " disabled" : "") + '>Mark Completed</button>' +
+          '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\'' + escapeHTML(record.id) + '\', \'Cancelled\')"' + (currentStatus === "cancelled" ? " disabled" : "") + '>Cancel Request</button>'
+        : "";
 
     return `
 
@@ -2022,19 +2004,10 @@ function createRecordTableRow(
             </td>
 
             <td>
-
-                <button
-                    type="button"
-                    class="fde-delete-btn"
-                    onclick="deleteFleetRecord(
-                        '${record.recordType}',
-                        '${record.id}'
-                    )">
-
-                    Delete
-
-                </button>
-
+                <div class="fde-record-actions">
+                    ${maintenanceActions}
+                    <button type="button" class="fde-delete-btn" onclick="deleteFleetRecord('${record.recordType}', '${record.id}')">Delete</button>
+                </div>
             </td>
 
         </tr>
@@ -2354,6 +2327,29 @@ function getRecordStatus(
    DELETE RECORD
 ========================================================= */
 
+async function updateMaintenanceRequestStatus(id, status) {
+    if (!id || !["Completed", "Cancelled"].includes(status)) return;
+    const record = (fdeData.maintenance || []).find(function(item) {
+        return String(item.id) === String(id);
+    });
+    if (!record) {
+        alert("Hindi makita ang maintenance request. I-refresh ang page at subukan ulit.");
+        return;
+    }
+    const description = record.description || "maintenance request";
+    if (status === "Cancelled" && !confirm("I-cancel ang request na ito?\n" + description)) return;
+    if (status === "Completed" && !confirm("Mark as completed ang request na ito?\n" + description)) return;
+    const updated = Object.assign({}, record, { status: status, updatedAt: new Date().toISOString() });
+    try {
+        await persistFleetRecord("maintenance", updated);
+        alert(status === "Cancelled" ? "Maintenance request cancelled." : "Maintenance request marked as completed.");
+    } catch (error) {
+        console.error("Maintenance status update failed:", error);
+        alert("Hindi na-update ang status. " + error.message);
+    }
+}
+
+
 async function deleteFleetRecord(
     type,
     id
@@ -2535,7 +2531,6 @@ function clearMaintenanceForm() {
     setValue("fde-maintenanceOdometer", "");
     setValue("fde-maintenanceTargetDate", "");
     setValue("fde-maintenanceCost", "");
-    setValue("fde-maintenanceStatus", "Pending");
     document.querySelectorAll('input[name="fde-maintenanceClass"]').forEach(function(input) { input.checked = false; });
     const body = document.getElementById("fde-maintenanceRequestRows");
     if (body) {
