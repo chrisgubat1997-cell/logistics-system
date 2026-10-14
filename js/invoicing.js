@@ -483,56 +483,56 @@ function openCreateInvoicePage() {
 async function refreshInvoicing() {
 
     const refreshButton =
-        document.getElementById(
-            "refreshInvoiceBtn"
-        );
+        document.getElementById("refreshInvoiceBtn");
 
-
-    /* Load the local cache first, then refresh from Google Sheets. */
-
-    loadInvoicingData();
-
-    await fetchInvoicesFromDatabase();
-
-
-    /* Re-render everything */
-
-    renderInvoiceSummary();
-
-    renderRecentInvoices();
-
-    renderRecentSalesOrders();
-
-
-    /* Clear searches */
-
-    clearInvoiceSearch(false);
-
-    clearSalesOrderSearch(false);
-
-
-    /* Button animation */
-
-    if (refreshButton) {
-
-        refreshButton.classList.add(
-            "is-refreshing"
-        );
-
-        setTimeout(() => {
-
-            refreshButton.classList.remove(
-                "is-refreshing"
-            );
-
-        }, 500);
-
+    if (refreshButton && refreshButton.disabled) {
+        return;
     }
 
+    if (refreshButton) {
+        refreshButton.disabled = true;
+        refreshButton.classList.add("is-refreshing");
+        refreshButton.setAttribute("aria-busy", "true");
+    }
 
-    console.log(
-        "LOGIS-TECH: Invoicing data refreshed."
-    );
+    try {
+
+        /*
+         * Refresh the module's data only.
+         * Do not reload the browser page or navigate away.
+         */
+        salesOrderRecords =
+            getLocalStorageArray(SALES_ORDER_STORAGE_KEY);
+
+        await fetchInvoicesFromDatabase();
+
+        renderInvoiceSummary();
+        renderRecentInvoices();
+        renderRecentSalesOrders();
+
+        clearInvoiceSearch(false);
+        clearSalesOrderSearch(false);
+
+        console.log(
+            "LOGIS-TECH: Invoice tables refreshed without reloading the page."
+        );
+
+    } catch (error) {
+
+        console.error(
+            "LOGIS-TECH: Failed to refresh invoice tables.",
+            error
+        );
+
+    } finally {
+
+        if (refreshButton) {
+            refreshButton.disabled = false;
+            refreshButton.classList.remove("is-refreshing");
+            refreshButton.removeAttribute("aria-busy");
+        }
+
+    }
 
 }
 
