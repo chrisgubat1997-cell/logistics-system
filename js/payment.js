@@ -445,7 +445,9 @@ async function loadPaymentData() {
             customerCreditRecords = [];
             customerCreditTransactions = [];
         }
-        populatePaymentYears();
+        if (typeof window.populatePaymentYears === 'function') {
+            window.populatePaymentYears();
+        }
         applyPaymentFilters();
         console.log('Payment data loaded from Google Sheets:', paymentRecords.length, 'payments;', paymentSalesOrders.length, 'sales orders.');
     } catch (error) {
