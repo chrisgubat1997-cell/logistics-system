@@ -70,6 +70,7 @@ function saveFleetRecord(payload) {
       ORIGIN: record.origin || "",
       DESTINATION: record.destination || "",
       PURPOSE: record.purpose || "",
+      ROUTE_DETAILS: JSON.stringify(Array.isArray(record.routeDetails) ? record.routeDetails : []),
       STATUS: record.status || "Completed",
       REMARKS: record.remarks || "",
       CREATED_BY: record.createdBy || "",
@@ -143,6 +144,9 @@ function saveFleetRecord(payload) {
     throw new Error("Unsupported Fleet record type: " + type);
   }
 
+  if (type === "tripTicket") {
+    fleetEnsureHeader_(sheetName, "ROUTE_DETAILS");
+  }
   const saved = fleetUpsertSheetRecord_(sheetName, idColumn, values, type);
   return {
     success: true,
@@ -199,6 +203,15 @@ function deleteFleetRecord(payload) {
 }
 
 /* ----------------------- Helpers ----------------------- */
+
+function fleetEnsureHeader_(sheetName, headerName) {
+  const sheet = fleetGetSheet_(sheetName);
+  const lastColumn = Math.max(sheet.getLastColumn(), 1);
+  const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0].map(function(v) { return String(v).trim(); });
+  if (headers.indexOf(headerName) === -1) {
+    sheet.getRange(1, lastColumn + 1).setValue(headerName);
+  }
+}
 
 function fleetGetSheet_(sheetName) {
   const ss = SpreadsheetApp.openById(CONFIG.DATABASE_SPREADSHEET_ID);
