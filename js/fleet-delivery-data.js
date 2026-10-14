@@ -146,6 +146,7 @@ async function loadFleetDeliveryData() {
                 origin: r.ORIGIN || "",
                 destination: r.DESTINATION || "",
                 purpose: r.PURPOSE || "",
+                routeDetails: parseFleetRouteDetails(r.ROUTE_DETAILS),
                 remarks: r.REMARKS || "",
                 status: r.STATUS || "",
                 createdAt: r.CREATED_AT || "",
@@ -469,174 +470,95 @@ function activateFleetSection(
 ========================================================= */
 
 function initializeFleetCalculations() {
-
-    const startKm =
-        document.getElementById(
-            "fde-startKm"
-        );
-
-
-    const endKm =
-        document.getElementById(
-            "fde-endKm"
-        );
-
-
-    const totalKm =
-        document.getElementById(
-            "fde-totalKm"
-        );
-
-
-    if (
-        startKm &&
-        endKm &&
-        totalKm
-    ) {
-
-        const calculateKM =
-            function() {
-
-                const start =
-                    parseFloat(
-                        startKm.value
-                    ) || 0;
-
-
-                const end =
-                    parseFloat(
-                        endKm.value
-                    ) || 0;
-
-
-                if (
-                    end >= start &&
-                    end > 0
-                ) {
-
-                    totalKm.value =
-                        (
-                            end -
-                            start
-                        ).toFixed(2);
-
-                } else {
-
-                    totalKm.value = "";
-
-                }
-
-            };
-
-
-        startKm.addEventListener(
-            "input",
-            calculateKM
-        );
-
-
-        endKm.addEventListener(
-            "input",
-            calculateKM
-        );
-
+    ["fde-startKm", "fde-endKm"].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", calculateFleetTripKM);
+    });
+    const origin = document.getElementById("fde-origin");
+    const ret = document.getElementById("fde-returnOrigin");
+    if (origin && ret) {
+        ret.value = origin.value;
+        origin.addEventListener("input", function() { ret.value = origin.value; });
     }
-
-
-    /* =====================================================
-       DELIVERY LEAD TIME
-    ====================================================== */
-
-    const dateTransfer =
-        document.getElementById(
-            "fde-dateTransfer"
-        );
-
-
-    const actualDate =
-        document.getElementById(
-            "fde-actualDate"
-        );
-
-
-    const leadTime =
-        document.getElementById(
-            "fde-leadTime"
-        );
-
-
-    if (
-        dateTransfer &&
-        actualDate &&
-        leadTime
-    ) {
-
-        const calculateLeadTime =
-            function() {
-
-                if (
-                    !dateTransfer.value ||
-                    !actualDate.value
-                ) {
-
-                    leadTime.value = "";
-
-                    return;
-
-                }
-
-
-                const start =
-                    new Date(
-                        dateTransfer.value
-                    );
-
-
-                const end =
-                    new Date(
-                        actualDate.value
-                    );
-
-
-                const difference =
-                    end.getTime() -
-                    start.getTime();
-
-
-                const days =
-                    Math.round(
-                        difference /
-                        (1000 * 60 * 60 * 24)
-                    );
-
-
-                leadTime.value =
-                    days >= 0
-                        ? days
-                        : "";
-
-            };
-
-
-        dateTransfer.addEventListener(
-            "change",
-            calculateLeadTime
-        );
-
-
-        actualDate.addEventListener(
-            "change",
-            calculateLeadTime
-        );
-
+    const dateTransfer = document.getElementById("fde-dateTransfer");
+    const actualDate = document.getElementById("fde-actualDate");
+    const leadTime = document.getElementById("fde-leadTime");
+    if (dateTransfer && actualDate && leadTime) {
+        const calcLead = function() {
+            if (!dateTransfer.value || !actualDate.value) { leadTime.value = ""; return; }
+            leadTime.value = Math.max(0, Math.round((new Date(actualDate.value) - new Date(dateTransfer.value)) / 86400000));
+        };
+        dateTransfer.addEventListener("change", calcLead);
+        actualDate.addEventListener("change", calcLead);
     }
-
+    calculateFleetTripKM();
 }
 
+function addFleetTripStop(details) {
+    const body = document.getElementById("fde-routeRows");
+    const returnRow = body && body.querySelector(".fde-route-return");
+    if (!body || !returnRow) return;
+    const row = document.createElement("tr");
+    row.className = "fde-route-row fde-route-stop";
+    row.innerHTML = '<td><span class="fde-route-badge">STOP</span><input type="text" class="fde-stop-destination" placeholder="Destination"></td>' +
+        '<td><input type="number" class="fde-stop-km" min="0" step="0.01" placeholder="KM upon arrival"></td>' +
+        '<td><input type="text" class="fde-stop-purpose" placeholder="Purpose of this trip"></td>' +
+        '<td><button type="button" class="fde-remove-stop" title="Remove destination">×</button></td>';
+    if (details) {
+        row.querySelector(".fde-stop-destination").value = details.destination || "";
+        row.querySelector(".fde-stop-km").value = details.km == null ? "" : details.km;
+        row.querySelector(".fde-stop-purpose").value = details.purpose || "";
+    }
+    body.insertBefore(row, returnRow);
+    renumberFleetTripStops();
+    calculateFleetTripKM();
+}
 
-/* =========================================================
-   BUTTONS
-========================================================= */
+function renumberFleetTripStops() {
+    const rows = Array.from(document.querySelectorAll("#fde-routeRows .fde-route-stop"));
+    rows.forEach(function(row, index) {
+        row.dataset.stopIndex = String(index);
+        const badge = row.querySelector(".fde-route-badge");
+        const remove = row.querySelector(".fde-remove-stop");
+        if (badge) badge.textContent = "STOP " + (index + 1);
+        if (remove) remove.disabled = rows.length <= 1;
+    });
+}
+
+function getFleetTripRouteDetails() {
+    return Array.from(document.querySelectorAll("#fde-routeRows .fde-route-stop")).map(function(row) {
+        const kmValue = row.querySelector(".fde-stop-km").value;
+        return {
+            destination: (row.querySelector(".fde-stop-destination").value || "").trim(),
+            km: kmValue === "" ? "" : Number(kmValue),
+            purpose: (row.querySelector(".fde-stop-purpose").value || "").trim()
+        };
+    }).filter(function(stop) { return stop.destination || stop.km !== "" || stop.purpose; });
+}
+
+function calculateFleetTripKM() {
+    const startEl = document.getElementById("fde-startKm");
+    const endEl = document.getElementById("fde-endKm");
+    const total = document.getElementById("fde-totalKm");
+    if (!startEl || !endEl || !total) return;
+    const start = Number(startEl.value || 0);
+    const end = Number(endEl.value || 0);
+    total.value = end >= start && end > 0 ? (end - start).toFixed(2) : "";
+    let previous = start;
+    document.querySelectorAll("#fde-routeRows .fde-stop-km").forEach(function(input) {
+        const value = input.value === "" ? null : Number(input.value);
+        input.setCustomValidity(value !== null && value < previous ? "KM must not be lower than the previous odometer reading." : "");
+        if (value !== null) previous = value;
+    });
+}
+
+function parseFleetRouteDetails(value) {
+    if (!value) return [];
+    try {
+        const parsed = typeof value === "string" ? JSON.parse(value) : value;
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) { return []; }
+}
 
 function initializeFleetButtons() {
 
@@ -667,14 +589,29 @@ function initializeFleetButtons() {
 
 
     if (clearTrip) {
-
-        clearTrip.addEventListener(
-            "click",
-            clearTripTicketForm
-        );
-
+        clearTrip.addEventListener("click", clearTripTicketForm);
     }
-
+    const addTripStop = document.getElementById("fde-addTripStopBtn");
+    if (addTripStop) addTripStop.addEventListener("click", function() { addFleetTripStop(); });
+    const routeRows = document.getElementById("fde-routeRows");
+    if (routeRows) {
+        routeRows.addEventListener("click", function(event) {
+            const removeButton = event.target.closest(".fde-remove-stop");
+            if (removeButton) {
+                const row = removeButton.closest(".fde-route-stop");
+                if (row) row.remove();
+                renumberFleetTripStops();
+                calculateFleetTripKM();
+            }
+        });
+        routeRows.addEventListener("input", function(event) {
+            if (event.target.matches("#fde-origin")) {
+                const ret = document.getElementById("fde-returnOrigin");
+                if (ret) ret.value = event.target.value;
+            }
+            if (event.target.matches("#fde-startKm, #fde-endKm, .fde-stop-km")) calculateFleetTripKM();
+        });
+    }
 
     /* =====================================================
        FUEL
@@ -874,22 +811,13 @@ async function saveTripTicket() {
         );
 
 
-    const origin =
-        getValue(
-            "fde-origin"
-        );
-
-
-    const destination =
-        getValue(
-            "fde-destination"
-        );
-
-
-    const purpose =
-        getValue(
-            "fde-purpose"
-        );
+    const origin = getValue("fde-origin");
+    const returnOrigin = getValue("fde-returnOrigin");
+    const routeDetails = getFleetTripRouteDetails();
+    const destination = routeDetails.map(function(stop) {
+        return stop.destination + (stop.km !== "" ? " (KM " + stop.km + ")" : "");
+    }).join(" → ");
+    const purpose = routeDetails.map(function(stop) { return stop.purpose; }).filter(Boolean).join(" | ");
 
 
     const remarks =
@@ -935,14 +863,22 @@ async function saveTripTicket() {
 
 
     if (endKm < startKm) {
-
-        alert(
-            "End KM cannot be lower than Start KM."
-        );
-
+        alert("End KM cannot be lower than Start KM.");
         return;
-
     }
+    if (!origin) { alert("Please enter the starting Origin."); return; }
+    if (!returnOrigin || returnOrigin.trim().toLowerCase() !== origin.trim().toLowerCase()) {
+        alert("The return location must match the starting Origin."); return;
+    }
+    if (!routeDetails.length || routeDetails.some(function(stop) { return !stop.destination || stop.km === ""; })) {
+        alert("Please complete each destination and its KM reading."); return;
+    }
+    let previousKm = startKm;
+    for (const stop of routeDetails) {
+        if (Number(stop.km) < previousKm) { alert("Each destination KM must be equal to or greater than the previous odometer reading."); return; }
+        previousKm = Number(stop.km);
+    }
+    if (endKm < previousKm) { alert("End KM must be equal to or greater than the last destination KM."); return; }
 
 
     // Auto-number trip sequence per vehicle per trip date.
@@ -1014,6 +950,9 @@ async function saveTripTicket() {
 
         purpose:
             purpose,
+
+        routeDetails:
+            routeDetails,
 
         remarks:
             remarks,
@@ -2514,15 +2453,21 @@ function clearTripTicketForm() {
         ""
     );
 
-    setValue(
-        "fde-destination",
-        ""
-    );
-
-    setValue(
-        "fde-purpose",
-        ""
-    );
+    setValue("fde-returnOrigin", "");
+    const routeRows = document.getElementById("fde-routeRows");
+    if (routeRows) {
+        routeRows.querySelectorAll(".fde-route-stop").forEach(function(row, index) {
+            if (index > 0) row.remove();
+        });
+        const firstStop = routeRows.querySelector(".fde-route-stop");
+        if (firstStop) {
+            firstStop.querySelector(".fde-stop-destination").value = "";
+            firstStop.querySelector(".fde-stop-km").value = "";
+            firstStop.querySelector(".fde-stop-purpose").value = "";
+        }
+    }
+    renumberFleetTripStops();
+    calculateFleetTripKM();
 
     setValue(
         "fde-tripRemarks",
