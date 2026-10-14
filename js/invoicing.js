@@ -2733,7 +2733,7 @@ function openInvoiceEditModal(invoice) {
                         <div class="form-group"><label>TIN</label><input id="editInvoiceTin"></div>
                         <div class="form-group"><label>EWT Type</label>
                             <select id="editInvoiceEwtType">
-                                <option value="">None</option>
+                                <option value="NONE">None</option>
                                 <option value="SUPPLY">SUPPLY</option>
                                 <option value="EWORKS">EWORKS</option>
                             </select>
