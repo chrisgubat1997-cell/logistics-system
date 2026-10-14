@@ -513,181 +513,94 @@
 
 
     <!-- =====================================================
-         RECENT SALES ORDER
+         CUSTOMER CREDIT
          ===================================================== -->
 
     <section class="payment-section">
 
-
-        <!-- =================================================
-             SECTION HEADER
-        ================================================= -->
-
         <div class="payment-section-header">
-
             <div class="payment-section-title-area">
-
-                <h2 class="payment-section-title">
-                    Recent Sales Order
-                </h2>
-
-                <p class="payment-section-subtitle">
-                    Sales orders available for payment monitoring
-                </p>
-
+                <h2 class="payment-section-title">Customer Credit</h2>
+                <p class="payment-section-subtitle">Customers with available credit from overpayments</p>
             </div>
-
 
             <div class="payment-section-actions">
-
-
-                <!-- SEARCH -->
-                <button
-                    type="button"
-                    class="payment-tool-button"
-                    id="salesOrderPaymentSearchToggleBtn"
-                    title="Search Sales Order"
-                >
-                    🔍
-                </button>
-
-
-                <!-- REFRESH -->
-                <button
-                    type="button"
-                    class="payment-tool-button"
-                    id="refreshPaymentSOBtn"
-                    title="Refresh Sales Order"
-                >
-                    ↻
-                </button>
-
+                <button type="button" class="payment-tool-button" id="customerCreditSearchToggleBtn" title="Search Customer Credit">🔍</button>
+                <button type="button" class="payment-tool-button" id="refreshCustomerCreditBtn" title="Refresh Customer Credit">↻</button>
             </div>
-
         </div>
 
-
-
-        <!-- =================================================
-             SALES ORDER SEARCH
-        ================================================= -->
-
-        <div
-            class="payment-search-box"
-            id="salesOrderPaymentSearchBox"
-            style="display:none;"
-        >
-
+        <div class="payment-search-box" id="customerCreditSearchBox" style="display:none;">
             <div class="payment-search-inner">
-
-                <span class="payment-search-icon">
-                    🔍
-                </span>
-
-
-                <input
-                    type="text"
-                    id="salesOrderPaymentSearchInput"
-                    class="payment-search-input"
-                    placeholder="Search SO no., client, project, invoice no..."
-                    autocomplete="off"
-                >
-
-
-                <button
-                    type="button"
-                    id="salesOrderPaymentSearchClearBtn"
-                    class="payment-search-clear"
-                    title="Clear Search"
-                >
-                    ×
-                </button>
-
+                <span class="payment-search-icon">🔍</span>
+                <input type="text" id="customerCreditSearchInput" class="payment-search-input" placeholder="Search customer name or customer ID..." autocomplete="off">
+                <button type="button" id="customerCreditSearchClearBtn" class="payment-search-clear" title="Clear Search">×</button>
             </div>
-
         </div>
-
-
-
-        <!-- =================================================
-             SALES ORDER TABLE
-        ================================================= -->
 
         <div class="payment-table-wrapper">
-
             <table class="payment-table">
-
                 <thead>
-
                     <tr>
-
-                        <th>
-                            SO NO.
-                        </th>
-
-                        <th>
-                            CLIENT
-                        </th>
-
-                        <th>
-                            PROJECT
-                        </th>
-
-                        <th>
-                            DATE
-                        </th>
-
-                        <th>
-                            INVOICE NO.
-                        </th>
-
-                        <th class="payment-amount-column">
-                            TOTAL
-                        </th>
-
-                        <th class="payment-amount-column">
-                            PAID
-                        </th>
-
-                        <th class="payment-amount-column">
-                            BALANCE
-                        </th>
-
-                        <th>
-                            STATUS
-                        </th>
-
-                        <th>
-                            ACTION
-                        </th>
-
+                        <th>CUSTOMER ID</th>
+                        <th>CUSTOMER</th>
+                        <th class="payment-amount-column">AVAILABLE CREDIT</th>
+                        <th>LAST CREDIT DATE</th>
+                        <th>ACTION</th>
                     </tr>
-
                 </thead>
-
-
-                <tbody id="recentPaymentSalesOrderBody">
-
+                <tbody id="customerCreditBody">
                     <tr>
-
-                        <td
-                            colspan="10"
-                            class="payment-empty-state"
-                        >
-
-                            No Sales Order records found.
-
-                        </td>
-
+                        <td colspan="5" class="payment-empty-state">No customer credit records found.</td>
                     </tr>
-
                 </tbody>
-
             </table>
-
         </div>
-
     </section>
 
+    <div class="customer-credit-modal" id="customerCreditModal" aria-hidden="true">
+        <div class="customer-credit-modal-backdrop" data-close-credit-modal="true"></div>
+        <section class="customer-credit-modal-panel" role="dialog" aria-modal="true" aria-labelledby="customerCreditModalTitle">
+            <div class="customer-credit-modal-header">
+                <div>
+                    <h2 id="customerCreditModalTitle">Customer Credit Details</h2>
+                    <p id="customerCreditModalSubtitle">Customer credit balance and transaction history</p>
+                </div>
+                <button type="button" class="customer-credit-modal-close" id="closeCustomerCreditModalBtn" aria-label="Close">×</button>
+            </div>
+            <div class="customer-credit-modal-summary">
+                <div>
+                    <span>Customer</span>
+                    <strong id="customerCreditDetailName">—</strong>
+                </div>
+                <div>
+                    <span>Customer ID</span>
+                    <strong id="customerCreditDetailId">—</strong>
+                </div>
+                <div class="customer-credit-modal-balance">
+                    <span>Available Credit</span>
+                    <strong id="customerCreditDetailBalance">₱0.00</strong>
+                </div>
+            </div>
+            <h3 class="customer-credit-history-title">Credit Transactions</h3>
+            <div class="payment-table-wrapper customer-credit-history-wrapper">
+                <table class="payment-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>TYPE</th>
+                            <th>REFERENCE / PAYMENT NO.</th>
+                            <th>SO NO.</th>
+                            <th class="payment-amount-column">AMOUNT</th>
+                            <th>REMARKS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customerCreditTransactionsBody">
+                        <tr><td colspan="6" class="payment-empty-state">No credit transactions found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
 
 </div>
