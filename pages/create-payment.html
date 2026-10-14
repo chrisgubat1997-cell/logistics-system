@@ -127,8 +127,10 @@
                                         type="text"
                                         id="paymentSONo"
                                         name="paymentSONo"
-                                        placeholder="Enter SO No. e.g. SO-2026-0001"
+                                        placeholder="Search Client Name, PO No., or SO No."
                                         autocomplete="off"
+                                        aria-autocomplete="list"
+                                        aria-controls="paymentSOSuggestions"
                                     >
 
                                     <button
@@ -138,6 +140,8 @@
                                     >
                                         CHECK SO
                                     </button>
+
+                                    <div id="paymentSOSuggestions" class="create-payment-so-suggestions" role="listbox" hidden></div>
 
                                 </div>
 
@@ -633,8 +637,7 @@
                                 <div class="create-payment-field">
 
                                     <label for="paymentReferenceNo">
-                                        REFERENCE NO.
-                                        <span>OPTIONAL</span>
+                                        REFERENCE NO. <span>REQUIRED</span>
                                     </label>
 
                                     <input
@@ -642,6 +645,7 @@
                                         id="paymentReferenceNo"
                                         name="paymentReferenceNo"
                                         placeholder="Bank / Cheque / Transaction No."
+                                        required
                                     >
 
                                 </div>
@@ -1129,7 +1133,7 @@
 </main>
 
 
-<script src="../js/create-payment.js?v=20261006"></script>
+<script src="../js/create-payment.js?v=20261014-01"></script>
 
 </body>
 </html>
