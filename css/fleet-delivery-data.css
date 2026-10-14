@@ -588,7 +588,7 @@
 }
 .fde-maint-request-row {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) auto;
+    grid-template-columns: minmax(0, 2fr) minmax(160px, 1fr) minmax(140px, 1fr) auto;
     gap: 12px;
     align-items: end;
     padding: 12px;
@@ -614,4 +614,22 @@
     .fde-maint-request-header {
         align-items: flex-start;
     }
+}
+
+
+/* Maintenance status actions in the saved-records table */
+.fde-record-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+.fde-record-actions .fde-btn,
+.fde-record-actions .fde-delete-btn {
+    margin: 0;
+    white-space: nowrap;
+}
+.fde-record-actions button:disabled {
+    opacity: .45;
+    cursor: not-allowed;
 }
