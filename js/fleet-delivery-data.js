@@ -192,6 +192,7 @@ async function loadFleetDeliveryData() {
                 department: r.DEPARTMENT || "",
                 odometer: Number(r.ODOMETER || 0),
                 classifications: String(r.CLASSIFICATIONS || r.MAINTENANCE_TYPE || "").split(",").map(function(v) { return v.trim(); }).filter(Boolean),
+                serviceClassification: r.SERVICE_CLASSIFICATION || r.SERVICE_CATEGORY || "",
                 description: r.REQUEST_DESCRIPTION || r.DEFECT || "",
                 lastCompletion: fdeDateForInput(r.LAST_COMPLETION_DATE),
                 targetDate: fdeDateForInput(r.TARGET_COMPLETION_DATE),
@@ -1170,6 +1171,7 @@ async function saveMaintenanceRecord() {
                 odometer: Number.isFinite(odometer) ? odometer : 0,
                 classifications: classifications,
                 maintenanceType: classifications.join(", "),
+                serviceClassification: request.serviceClassification || "",
                 description: request.description,
                 defect: request.description,
                 lastCompletion: request.lastCompletion || "",
@@ -1215,12 +1217,41 @@ function generateMaintenanceRequestNo() {
     return "MNT-" + String(highest + 1).padStart(4, "0");
 }
 
+/* Searchable service catalog; exact service matches auto-fill the category. */
+const FDE_MAINTENANCE_CATALOG = {"Engine_Related":["Change Oil","Replace Oil Filter","Replace Air Filter","Cleaning Air Filter","Replace Fuel Filter","Spark Plug Replacement","Timing Belt / Serpentine Belt Replacement","Engine Tune-up / Overhaul","EGR & Throttle Body Repair","Injector O-Ring Replacement","Injector Seal Replacement","CAV / Fuel Filter Replacement","Engine Preventive Maintenance (EPM)","Chamber Alignment","Change Gear Oil","Change Engine Oil"],"Tire_Wheel":["Change Tire","Vulcanizing / Patch","Tire Rotation","Wheel Alignment","Wheel Balancing","Wheel Bearing Replacement","Hub Assembly Replacement","Wheel Cylinder Replacement","Wheel Break Check-Up","Wheel Stud Repair/Replacement","Tire Pressure Check","Spare Tire / Tire Valve Replacement"],"Brake_System":["Brake Pad Replacement","Brake Shoe Replacement","Brake Disc / Rotor Resurfacing or Replacement","Brake Fluid Replacement","Brake Pad/Shoe Adjustment","Brake Cleaning","Hand Brake Replacement / Hand Brake Repair","Rotor Disc Replacement","Brake Caliper Repair","Brake Master Cylinder Repair/Replacement","Brake Hose Replacement"],"Fluids_Lubrication":["Coolant Flush / Refill","Transmission Fluid Change","Power Steering Fluid Refill / Change","Differential Oil Change","Greasing (Chassis / Joints)","Change Oil (Fully Synthetic)","Brake Fluid Top-Up","Hydraulic Fluid Replacement"],"Electrical_System":["Battery Replacement","Alternator Check / Repair","Starter Motor Check / Repair","Lights (Headlight, Signal, Brake Light) Replacement","Wiring / Fuse Repair","Install LED Light (Back / Fog / Auxiliary)","Replace LED Light","Wiring for Accessories Light","Switch Installation / Repair","Fuse Replacement (if caused by overload)","Odometer Panel Installation","Ignition Switch Replacement (or Repair)","Horn Repair/Replacement","Battery Terminal Cleaning/Replacement","Charging System Inspection"],"Suspension_Steering":["Shock Absorber Repair/Replacement","Ball Joint Replacement","Tie Rod / Rack End Repair","Bushing Replacement","Power Steering Pump Repair","Kingpin Repair","Replace Idler Arm","End Repair (assuming Tie Rod End Repair)","Upper Ball Joint Repair","Lower Ball Joint Repair","Inner CV Joint Replacement","Leaf Spring Repair/Replacement","Steering Rack Repair/Replacement","Stabilizer Link Replacement"],"Body_Others":["Painting / Rust Proofing","Door / Window Mechanism Repair","Underchassis Inspection","Emission Test","General Preventive Maintenance Service (PMS)","Replacement of Back & Front Seat Cover","Wiper Repair / Wiper Blade Replacement","Replacement of Upholstery Cover","Installation of Accessories","Replace Center Post","Tint Installation (Windshield & Windows)","Upholstery repair","Steering wheel Repair/Replace/Install","Side Mirror Replacement","Door Lock Repair/Replacement","Seat Belt Repair/Replacement"],"Aircon_Cooling":["Aircon Cleaning / Preventive Maintenance","Freon Recharge","Aircon Leak Repair (hoses, pipes, seals)","Compressor Repair / Replacement","Condenser Repair / Replacement","Evaporator Cleaning / Replacement","Blower Motor Repair / Replacement","Radiator Service (flush, repair, replacement)","Thermostat Replacement","Auxiliary Fan Replacement / Auxiliary Fan Repair","Cabin Filter Replacement / Cabin Filter Cleaning","Replace Expansion Valve","Radiator Cap Replacement","Water Pump Repair/Replacement"],"Transmission / Drivetrain":["Clutch Replacement","Clutch Disc Replacement","Release Bearing Replacement","Flywheel Resurfacing","Gearbox Repair / Overhaul","Propeller Cross Joint Repair / U-Joint Replacement","Transmission Mount Replacement","Differential Repair/Inspection","Drive Shaft Repair/Replacement"],"Fuel_System":["Fuel Pump Check / Replacement","Fuel Tank Cleaning/Repair","Fuel Line / Hose Replacement","Fuel Injector Cleaning","Fuel Leak Inspection/Repair"],"Exhaust_Emission":["Muffler Repair/Replacement","Exhaust Pipe Repair/Replacement","Exhaust Leak Inspection/Repair","Smoke Emission Troubleshooting"],"Safety_Inspection":["Pre-Trip Safety Inspection","Vehicle Roadworthiness Inspection","Emergency Equipment Check","Fire Extinguisher Inspection/Replacement"]};
+let fdeMaintenanceDatalistSequence = 0;
+function findMaintenanceCatalogMatch(description) {
+ const normalized = String(description || "").trim().toLowerCase();
+ if (!normalized) return null;
+ for (const category of Object.keys(FDE_MAINTENANCE_CATALOG)) {
+  const match = FDE_MAINTENANCE_CATALOG[category].find(function(item) { return item.toLowerCase() === normalized; });
+  if (match) return { category: category, description: match };
+ }
+ return null;
+}
+function updateMaintenanceClassification(row) {
+ if (!row) return;
+ const input = row.querySelector(".fde-maint-request-description");
+ const output = row.querySelector(".fde-maint-request-classification");
+ if (!input || !output) return;
+ const match = findMaintenanceCatalogMatch(input.value);
+ output.value = match ? match.category : "";
+ output.title = match ? "Detected classification: " + match.category : "Choose a suggested service to fill classification automatically.";
+}
+
 function addMaintenanceRequestRow(details) {
     const body = document.getElementById("fde-maintenanceRequestRows");
     if (!body) return;
     const row = document.createElement("div");
     row.className = "fde-maint-request-row";
-    row.innerHTML = '<div class="fde-field"><label>Description of Service / Request</label><input type="text" class="fde-maint-request-description" placeholder="Search or describe requested repair"></div>' +
+    const datalistId = "fde-maint-service-options-" + (++fdeMaintenanceDatalistSequence);
+    const options = Object.keys(FDE_MAINTENANCE_CATALOG).map(function(category) {
+        return FDE_MAINTENANCE_CATALOG[category].map(function(service) {
+            return '<option value="' + escapeHTML(service) + '">' + escapeHTML(category) + '</option>';
+        }).join("");
+    }).join("");
+    row.innerHTML = '<div class="fde-field"><label>Description of Service / Request</label><input type="text" class="fde-maint-request-description" list="' + datalistId + '" placeholder="Type to search service or repair"><datalist id="' + datalistId + '">' + options + '</datalist><small class="fde-maint-suggestion-help">Type to see matching service suggestions; custom text is also allowed.</small></div>' +
+        '<div class="fde-field"><label>Classification</label><input type="text" class="fde-maint-request-classification" placeholder="Auto-detected" readonly></div>' +
         '<div class="fde-field"><label>Last Completion of This Issue</label><input type="date" class="fde-maint-request-last-completion"></div>' +
         '<div class="fde-field"><label>Request Status</label><select class="fde-maint-request-status"><option value="Pending">Pending</option><option value="Completed">Completed</option><option value="Cancelled">Cancelled</option></select></div>' +
         '<button type="button" class="fde-btn secondary fde-maint-remove-request" title="Remove unsaved request">Remove</button>';
@@ -1230,6 +1261,9 @@ function addMaintenanceRequestRow(details) {
         row.querySelector(".fde-maint-request-status").value = details.status || "Pending";
     }
     body.appendChild(row);
+    const descriptionInput = row.querySelector(".fde-maint-request-description");
+    if (descriptionInput) descriptionInput.addEventListener("input", function() { updateMaintenanceClassification(row); });
+    updateMaintenanceClassification(row);
     refreshMaintenanceRequestRemoveButtons();
 }
 
@@ -1245,6 +1279,7 @@ function getMaintenanceRequestDetails() {
     return Array.from(document.querySelectorAll("#fde-maintenanceRequestRows .fde-maint-request-row")).map(function(row) {
         return {
             description: row.querySelector(".fde-maint-request-description").value.trim(),
+            serviceClassification: row.querySelector(".fde-maint-request-classification").value || "",
             lastCompletion: row.querySelector(".fde-maint-request-last-completion").value,
             status: row.querySelector(".fde-maint-request-status").value || "Pending"
         };
