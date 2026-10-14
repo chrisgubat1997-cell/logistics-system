@@ -443,7 +443,7 @@ async function loadPaymentData() {
             return Object.assign({}, row, {
                 soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || '', client: row.CLIENT_NAME || row.client || row.clientName || '',
                 project: row.PROJECT || row.project || '', date: row.DATE_CREATION || row.SO_DATE || row.date || row.createdAt || '',
-                total: row.GRAND_TOTAL ?? row.SO_TOTAL ?? row.TOTAL_AMOUNT ?? row.total ?? row.grandTotal ?? 0,
+                total: row.GRAND_TOTAL ?? row.SO_TOTAL ?? row.TOTAL_AMOUNT ?? row.TOTAL ?? row.AMOUNT ?? row.total ?? row.grandTotal ?? 0,
                 status: row.STATUS || row.status || ''
             });
         });
