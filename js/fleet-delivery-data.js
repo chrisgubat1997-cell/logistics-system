@@ -21,11 +21,10 @@
    STORAGE
 ========================================================= */
 
-const FLEET_DELIVERY_STORAGE_KEY =
-    "logisTechFleetDeliveryData";
+const FLEET_DELIVERY_API_URL =
+    "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
-
-const FLEET_DELIVERY_DATA_VERSION = 1;
+const FLEET_DELIVERY_DATA_VERSION = 2;
 
 
 /* =========================================================
@@ -71,7 +70,7 @@ let fdeData = {
    INITIALIZE
 ========================================================= */
 
-function initializeFleetDataEntry() {
+async function initializeFleetDataEntry() {
 
     console.log(
         "========================================"
@@ -82,7 +81,13 @@ function initializeFleetDataEntry() {
     );
 
 
-    loadFleetDeliveryData();
+    try {
+        await loadFleetDeliveryData();
+    } catch (error) {
+        console.error("Fleet Data Entry API load failed:", error);
+        updateStorageStatus(false, "API connection failed");
+        alert("Hindi ma-load ang Fleet Data Entry mula sa Google Sheets. Pakisuri ang Apps Script API at deployment.");
+    }
 
     initializeFleetTabs();
 
@@ -114,49 +119,131 @@ function initializeFleetDataEntry() {
    LOAD DATA
 ========================================================= */
 
-function loadFleetDeliveryData() {
+async function loadFleetDeliveryData() {
+    const result = await fleetDeliveryAPI("getFleetAnalyticsData");
+    const vehicles = Array.isArray(result.vehicles) ? result.vehicles : [];
+    const trips = Array.isArray(result.tripTickets) ? result.tripTickets : [];
+    const fuel = Array.isArray(result.fuelTransactions) ? result.fuelTransactions : [];
+    const maintenance = Array.isArray(result.maintenance) ? result.maintenance : [];
+    const monitoring = Array.isArray(result.drMonitoring) ? result.drMonitoring : [];
 
-    try {
+    fdeData = {
+        version: FLEET_DELIVERY_DATA_VERSION,
+        vehicles: vehicles,
+        tripTickets: trips.map(function(r) {
+            return {
+                id: r.TRIP_ID || "",
+                type: "tripTicket",
+                tripTicketNo: r.TRIP_TICKET_NO || "",
+                date: fdeDateForInput(r.TRIP_DATE),
+                vehicle: r.VEHICLE_CODE || "",
+                driver: r.DRIVER_NAME || "",
+                startKm: Number(r.START_KM || 0),
+                endKm: Number(r.END_KM || 0),
+                totalKm: Number(r.TOTAL_KM || 0),
+                origin: r.ORIGIN || "",
+                destination: r.DESTINATION || "",
+                purpose: r.PURPOSE || "",
+                remarks: r.REMARKS || "",
+                status: r.STATUS || "",
+                createdAt: r.CREATED_AT || "",
+                updatedAt: r.UPDATED_AT || ""
+            };
+        }),
+        fuel: fuel.map(function(r) {
+            return {
+                id: r.FUEL_ID || "",
+                type: "fuel",
+                date: fdeDateForInput(r.FUEL_DATE),
+                vehicle: r.VEHICLE_CODE || "",
+                tripTicketNo: r.TRIP_TICKET_NO || "",
+                station: r.FUEL_STATION || "",
+                liters: Number(r.LITERS || 0),
+                amount: Number(r.AMOUNT || 0),
+                odometer: Number(r.ODOMETER || 0),
+                fuelReceiptNo: r.FUEL_RECEIPT_NO || "",
+                remarks: r.REMARKS || "",
+                createdAt: r.CREATED_AT || "",
+                updatedAt: r.UPDATED_AT || ""
+            };
+        }),
+        maintenance: maintenance.map(function(r) {
+            return {
+                id: r.MAINTENANCE_ID || "",
+                type: "maintenance",
+                date: fdeDateForInput(r.MAINTENANCE_DATE),
+                vehicle: r.VEHICLE_CODE || "",
+                maintenanceType: r.MAINTENANCE_TYPE || "",
+                defect: r.DEFECT || "",
+                repair: r.REPAIR_ACTION || "",
+                cost: Number(r.COST || 0),
+                idleDays: Number(r.IDLE_DAYS || 0),
+                status: r.STATUS || "",
+                remarks: r.REMARKS || "",
+                createdAt: r.CREATED_AT || "",
+                updatedAt: r.UPDATED_AT || ""
+            };
+        }),
+        deliveries: [],
+        dr: monitoring.map(function(r) {
+            return {
+                id: r.DR_MONITORING_ID || "",
+                type: "dr",
+                drNumber: r.DR_NUMBER || "",
+                deliveryNo: r.DR_NUMBER || "",
+                soNumber: r.SO_NUMBER || "",
+                client: r.CLIENT_NAME || "",
+                project: r.PROJECT || "",
+                vehicle: r.VEHICLE_CODE || "",
+                dateTransfer: fdeDateForInput(r.DATE_TRANSFER),
+                committedDate: fdeDateForInput(r.COMMITTED_DATE),
+                dateDelivered: fdeDateForInput(r.DATE_DELIVERED),
+                status: r.STATUS || "",
+                delaySource: r.DELAY_SOURCE || "",
+                delayReason: r.DELAY_REASON || "",
+                remarks: r.REMARKS || "",
+                createdAt: r.CREATED_AT || "",
+                updatedAt: r.UPDATED_AT || ""
+            };
+        })
+    };
 
-        const saved =
-            localStorage.getItem(
-                FLEET_DELIVERY_STORAGE_KEY
-            );
+    updateStorageStatus(true, "Google Sheets connected");
+}
 
+function fdeDateForInput(value) {
+    if (!value) return "";
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return String(value).slice(0, 10);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+}
 
-        if (!saved) {
-
-            fdeData = createEmptyFleetData();
-
-            saveFleetDeliveryData();
-
-            return;
-
-        }
-
-
-        const parsed =
-            JSON.parse(saved);
-
-
-        fdeData = normalizeFleetData(
-            parsed
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Failed to load Fleet & Delivery data:",
-            error
-        );
-
-
-        fdeData =
-            createEmptyFleetData();
-
+async function fleetDeliveryAPI(action, data) {
+    const options = {
+        method: "GET",
+        cache: "no-store",
+        redirect: "follow"
+    };
+    let url = FLEET_DELIVERY_API_URL + "?action=" + encodeURIComponent(action) + "&_=" + Date.now();
+    if (data !== undefined) {
+        options.method = "POST";
+        options.headers = { "Content-Type": "text/plain;charset=utf-8" };
+        options.body = JSON.stringify({ action: action, data: data });
+        url = FLEET_DELIVERY_API_URL;
     }
-
+    const response = await fetch(url, options);
+    if (!response.ok) throw new Error("HTTP " + response.status);
+    const raw = await response.text();
+    let result;
+    try { result = JSON.parse(raw); }
+    catch (e) { throw new Error("Invalid API response: " + raw.slice(0, 250)); }
+    if (!result || result.success === false) {
+        throw new Error((result && (result.message || result.error)) || "API request failed.");
+    }
+    return result;
 }
 
 
@@ -237,33 +324,18 @@ function normalizeFleetData(data) {
 ========================================================= */
 
 function saveFleetDeliveryData() {
+    console.warn("Fleet data is stored in Google Sheets; use persistFleetRecord() to save records.");
+    return false;
+}
 
-    try {
-
-        localStorage.setItem(
-            FLEET_DELIVERY_STORAGE_KEY,
-            JSON.stringify(fdeData)
-        );
-
-
-        updateStorageStatus();
-
-
-        return true;
-
-
-    } catch (error) {
-
-        console.error(
-            "Failed to save Fleet & Delivery data:",
-            error
-        );
-
-
-        return false;
-
-    }
-
+async function persistFleetRecord(recordType, record) {
+    const result = await fleetDeliveryAPI("saveFleetRecord", {
+        recordType: recordType,
+        record: record
+    });
+    await loadFleetDeliveryData();
+    renderFleetDeliveryRecords();
+    return result;
 }
 
 
@@ -271,29 +343,12 @@ function saveFleetDeliveryData() {
    STORAGE STATUS
 ========================================================= */
 
-function updateStorageStatus() {
-
-    const status =
-        document.querySelector(
-            ".fde-storage-status"
-        );
-
-
-    if (!status) {
-        return;
-    }
-
-
-    status.innerHTML = `
-
-        <span class="fde-status-dot"></span>
-
-        <span>
-            Local Data Saved
-        </span>
-
-    `;
-
+function updateStorageStatus(connected, message) {
+    const status = document.querySelector(".fde-storage-status");
+    if (!status) return;
+    const label = message || (connected ? "Google Sheets connected" : "Google Sheets not connected");
+    status.innerHTML = '<span class="fde-status-dot"></span><span>' + escapeHTML(label) + '</span>';
+    status.classList.toggle("fde-storage-error", connected === false);
 }
 
 
@@ -744,7 +799,7 @@ function initializeFleetButtons() {
    SAVE TRIP TICKET
 ========================================================= */
 
-function saveTripTicket() {
+async function saveTripTicket() {
 
     const tripTicketNo =
         getValue(
@@ -918,21 +973,14 @@ function saveTripTicket() {
     };
 
 
-    fdeData.tripTickets.push(
-        record
-    );
-
-
-    saveFleetDeliveryData();
-
-    renderFleetDeliveryRecords();
-
-    clearTripTicketForm();
-
-
-    alert(
-        "Trip Ticket saved successfully."
-    );
+        try {
+        await persistFleetRecord("tripTicket", record);
+        clearTripTicketForm();
+        alert("Trip Ticket saved successfully to Google Sheets.");
+    } catch (error) {
+        console.error("Trip Ticket save failed:", error);
+        alert("Hindi na-save ang Trip Ticket. " + error.message);
+    }
 
 }
 
@@ -941,7 +989,7 @@ function saveTripTicket() {
    SAVE FUEL
 ========================================================= */
 
-function saveFuelRecord() {
+async function saveFuelRecord() {
 
     const date =
         getValue(
@@ -1083,21 +1131,14 @@ function saveFuelRecord() {
     };
 
 
-    fdeData.fuel.push(
-        record
-    );
-
-
-    saveFleetDeliveryData();
-
-    renderFleetDeliveryRecords();
-
-    clearFuelForm();
-
-
-    alert(
-        "Fuel record saved successfully."
-    );
+        try {
+        await persistFleetRecord("fuel", record);
+        clearFuelForm();
+        alert("Fuel record saved successfully to Google Sheets.");
+    } catch (error) {
+        console.error("Fuel save failed:", error);
+        alert("Hindi na-save ang Fuel record. " + error.message);
+    }
 
 }
 
@@ -1106,7 +1147,7 @@ function saveFuelRecord() {
    SAVE MAINTENANCE
 ========================================================= */
 
-function saveMaintenanceRecord() {
+async function saveMaintenanceRecord() {
 
     const date =
         getValue(
@@ -1234,21 +1275,14 @@ function saveMaintenanceRecord() {
     };
 
 
-    fdeData.maintenance.push(
-        record
-    );
-
-
-    saveFleetDeliveryData();
-
-    renderFleetDeliveryRecords();
-
-    clearMaintenanceForm();
-
-
-    alert(
-        "Maintenance record saved successfully."
-    );
+        try {
+        await persistFleetRecord("maintenance", record);
+        clearMaintenanceForm();
+        alert("Maintenance record saved successfully to Google Sheets.");
+    } catch (error) {
+        console.error("Maintenance save failed:", error);
+        alert("Hindi na-save ang Maintenance record. " + error.message);
+    }
 
 }
 
@@ -1257,7 +1291,7 @@ function saveMaintenanceRecord() {
    SAVE DELIVERY
 ========================================================= */
 
-function saveDeliveryRecord() {
+async function saveDeliveryRecord() {
 
     const deliveryNo =
         getValue(
@@ -1429,21 +1463,14 @@ function saveDeliveryRecord() {
     };
 
 
-    fdeData.deliveries.push(
-        record
-    );
-
-
-    saveFleetDeliveryData();
-
-    renderFleetDeliveryRecords();
-
-    clearDeliveryForm();
-
-
-    alert(
-        "Delivery record saved successfully."
-    );
+        try {
+        await persistFleetRecord("delivery", record);
+        clearDeliveryForm();
+        alert("Delivery monitoring record saved successfully to Google Sheets.");
+    } catch (error) {
+        console.error("Delivery save failed:", error);
+        alert("Hindi na-save ang Delivery record. " + error.message);
+    }
 
 }
 
@@ -1452,7 +1479,7 @@ function saveDeliveryRecord() {
    SAVE DR
 ========================================================= */
 
-function saveDRRecord() {
+async function saveDRRecord() {
 
     const drNumber =
         getValue(
@@ -1603,21 +1630,14 @@ function saveDRRecord() {
     };
 
 
-    fdeData.dr.push(
-        record
-    );
-
-
-    saveFleetDeliveryData();
-
-    renderFleetDeliveryRecords();
-
-    clearDRForm();
-
-
-    alert(
-        "DR record saved successfully."
-    );
+        try {
+        await persistFleetRecord("dr", record);
+        clearDRForm();
+        alert("DR Monitoring record saved successfully to Google Sheets.");
+    } catch (error) {
+        console.error("DR save failed:", error);
+        alert("Hindi na-save ang DR record. " + error.message);
+    }
 
 }
 
@@ -2338,7 +2358,7 @@ function getRecordStatus(
    DELETE RECORD
 ========================================================= */
 
-function deleteFleetRecord(
+async function deleteFleetRecord(
     type,
     id
 ) {
@@ -2359,76 +2379,19 @@ function deleteFleetRecord(
     }
 
 
-    let targetArray;
-
-
-    if (type === "tripTicket") {
-
-        targetArray =
-            fdeData.tripTickets;
-
-    } else if (type === "fuel") {
-
-        targetArray =
-            fdeData.fuel;
-
-    } else if (type === "maintenance") {
-
-        targetArray =
-            fdeData.maintenance;
-
-    } else if (type === "delivery") {
-
-        targetArray =
-            fdeData.deliveries;
-
-    } else if (type === "dr") {
-
-        targetArray =
-            fdeData.dr;
-
-    } else {
-
-        return;
-
+    try {
+        await fleetDeliveryAPI("deleteFleetRecord", {
+            recordType: type,
+            id: id
+        });
+        await loadFleetDeliveryData();
+        renderFleetDeliveryRecords();
+        alert("Record deleted successfully from Google Sheets.");
+    } catch (error) {
+        console.error("Fleet record delete failed:", error);
+        alert("Hindi na-delete ang record. " + error.message);
     }
 
-
-    const index =
-        targetArray.findIndex(
-            function(record) {
-
-                return record.id === id;
-
-            }
-        );
-
-
-    if (index === -1) {
-
-        alert(
-            "Record not found."
-        );
-
-        return;
-
-    }
-
-
-    targetArray.splice(
-        index,
-        1
-    );
-
-
-    saveFleetDeliveryData();
-
-    renderFleetDeliveryRecords();
-
-
-    alert(
-        "Record deleted successfully."
-    );
 
 }
 
