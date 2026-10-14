@@ -254,7 +254,22 @@ function populateFleetVehicleDropdowns() {
             const plate = String(vehicle.PLATE_NUMBER || vehicle.PLATE_NO || vehicle.LICENSE_PLATE || vehicle.PLATE || vehicle.plateNumber || vehicle.plateNo || "").trim();
             const option = document.createElement("option");
             option.value = code;
-            option.textContent = plate ? plate + " — " + code : code;
+            const description = String(vehicle.MODEL || vehicle.VEHICLE_TYPE || vehicle.BRAND || vehicle.model || vehicle.vehicleType || vehicle.brand || "").trim();
+            const knownDescriptions = {
+                "AHA3536": "Mirage",
+                "DBH4666": "Vios Green",
+                "DBH4932": "Vios Red",
+                "NAD2535": "Toyota Innova",
+                "NBD8038": "Nissan Navarra",
+                "NES4915": "Hilux White",
+                "NET9068": "Isuzu Dropside",
+                "NET9077": "Isuzu MUV",
+                "NEX4060": "MUV (L300)",
+                "TBO710": "Isuzu Dropside",
+                "NLC2072": "Isuzu QLR"
+            };
+            const displayDescription = description || knownDescriptions[plate.toUpperCase()] || code;
+            option.textContent = plate ? plate + " - " + displayDescription : displayDescription;
             select.appendChild(option);
         });
 
