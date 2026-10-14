@@ -1119,12 +1119,36 @@ function calculateRequiredDP(
     terms,
     so
 ) {
+    const orderTotal = parseMoney(total);
+
     /*
-       Required DP is based on the multiplier assigned to the
-       exact Sales Order Terms. Terms without a multiplier have
-       no required DP amount (0). This is used by Create Payment.
+       Prefer the original Required DP stored on the Sales Order.
+       This prevents the value from becoming zero or changing after
+       payments are recorded. Only calculate from terms when no
+       explicit Required DP amount is available.
     */
-    const termKey = String(terms || "").replace(/\s+/g, " ").trim().toUpperCase();
+    const explicitDPFields = [
+        so && so.REQUIRED_DP,
+        so && so.REQUIRED_DP_AMOUNT,
+        so && so.REQUIRED_DOWN_PAYMENT,
+        so && so.requiredDP,
+        so && so.requiredDp,
+        so && so.requiredDownPayment,
+        so && so.downPayment,
+        so && so.downpayment,
+        so && so.dpAmount,
+        so && so.depositAmount
+    ];
+
+    for (let i = 0; i < explicitDPFields.length; i++) {
+        const rawValue = explicitDPFields[i];
+        if (rawValue !== "" && rawValue !== undefined && rawValue !== null) {
+            const value = parseMoney(rawValue);
+            if (value > 0) return Math.min(orderTotal, value);
+        }
+    }
+
+    const termKey = String(terms || "").replace(/\\s+/g, " ").trim().toUpperCase();
     const requiredDPMultipliers = {
         "COD": 0.5,
         "50% DP, 50% UPON DELIVERY": 0.5,
@@ -1142,7 +1166,7 @@ function calculateRequiredDP(
         "7 DAYS UPI": 0,
         "CASH": 0,
         "60 DAYS UPI TO FINANCE": 0,
-        "30% DP BAL. PROGRESS BILLING": 0.3,
+        "30% DP, BAL. PROGRESS BILLING": 0.3,
         "30 DAYS UPI": 0,
         "50% DP, 30DAYS UPI": 0.5,
         "15 DAYS": 0,
@@ -1153,7 +1177,6 @@ function calculateRequiredDP(
         "30% DOWNPAYMENT, 70% BAL WITHIN 30 DAYS BASED ON PROGRESS BILLING": 0.3,
         "45 DAYS PDC": 0,
         "30% DP, 70% 30 DAYS PDC": 0.3,
-        "20% DP, 70% UPON DELIVERY": 0.2,
         "PAID": 0,
         "30% DP, BALANCE 30 DAYS PDC UPON DELIVERY (STAGGERED DELIVERY)": 0.3,
         "15 DAYS UPON DELIVERY": 0,
@@ -1165,7 +1188,6 @@ function calculateRequiredDP(
         "30% DP, 60% UPON DEL. 10% RETENTION": 0.3,
         "50% DP, BAL. 30 DAYS UPI": 0.5,
         "50% CASH, 50% POSTED CHECK BEFORE DELIVERY": 0.5,
-        "30% DP, BAL 30 DAYS PDC": 0.3,
         "50% DP, 50% UPON ACCEPTANCE": 0.5,
         "30% DP, BAL COD": 0.3,
         "10% DP, BALANCE PB, 10% RETENTION": 0.1,
@@ -1186,36 +1208,16 @@ function calculateRequiredDP(
     };
 
     if (Object.prototype.hasOwnProperty.call(requiredDPMultipliers, termKey)) {
-        return Math.max(0, Math.min(parseMoney(total), parseMoney(total) * requiredDPMultipliers[termKey]));
-    }
-
-    /*
-       Legacy fallback for terms not listed in the current
-       Sales Order terms dropdown.
-    */
-    const explicitDPFields = [
-        so && so.requiredDP,
-        so && so.requiredDp,
-        so && so.downPayment,
-        so && so.downpayment,
-        so && so.dpAmount,
-        so && so.depositAmount,
-        so && so.requiredDownPayment
-    ];
-
-    for (let i = 0; i < explicitDPFields.length; i++) {
-        const value = parseMoney(explicitDPFields[i]);
-        if (value > 0) return Math.min(parseMoney(total), value);
+        return Math.max(0, Math.min(orderTotal, parseMoney(orderTotal * requiredDPMultipliers[termKey])));
     }
 
     const percentage = extractPercentage(terms);
     if (percentage > 0) {
-        return Math.min(parseMoney(total), parseMoney(total) * percentage);
+        return Math.min(orderTotal, orderTotal * percentage);
     }
 
     return 0;
 }
-
 
 /* =========================================================
    EXTRACT PAYMENT PERCENTAGE
