@@ -12,7 +12,7 @@
 
     <link
         rel="stylesheet"
-        href="../css/create-payment.css?v=20261014-07"
+        href="../css/create-payment.css?v=20261014-08"
     >
 </head>
 
@@ -210,6 +210,21 @@
                                         <th>SO TOTAL</th><th>TOTAL PAID</th><th>UNPAID BALANCE</th><th>DELIVERY STATUS</th><th>ACTION</th>
                                     </tr></thead>
                                     <tbody id="unpaidPaymentSOTableBody"><tr><td colspan="9" class="create-payment-unpaid-empty">Loading unpaid Sales Orders from database...</td></tr></tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <section class="create-payment-unpaid-section create-payment-history-section" aria-labelledby="selectedSOPaymentHistoryHeading">
+                            <div class="create-payment-unpaid-header">
+                                <div>
+                                    <h2 id="selectedSOPaymentHistoryHeading">Payment Transactions for Selected SO</h2>
+                                    <p id="selectedSOPaymentHistoryCaption">Select a Sales Order to view its saved payment transactions from the database.</p>
+                                </div>
+                            </div>
+                            <div class="create-payment-unpaid-table-wrap">
+                                <table class="create-payment-unpaid-table">
+                                    <thead><tr><th>PAYMENT NO.</th><th>PAYMENT DATE</th><th>METHOD</th><th>RECEIPT NO.</th><th>REFERENCE NO.</th><th>AMOUNT</th><th>STATUS</th></tr></thead>
+                                    <tbody id="selectedSOPaymentHistoryBody"><tr><td colspan="7" class="create-payment-unpaid-empty">No Sales Order selected.</td></tr></tbody>
                                 </table>
                             </div>
                         </section>
@@ -638,7 +653,7 @@
 </main>
 
 
-<script src="../js/create-payment.js?v=20261014-07"></script>
+<script src="../js/create-payment.js?v=20261014-08"></script>
 
 </body>
 </html>
