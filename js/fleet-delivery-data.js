@@ -918,7 +918,7 @@ async function saveTripTicket() {
  */
 function generateFleetTripTicketNo(date) {
     const datePart = String(date || "").replace(/-/g, "");
-    if (!/^\\d{8}$/.test(datePart)) return "";
+    if (!/^\d{8}$/.test(datePart)) return "";
     const prefix = "TT-" + datePart + "-";
     const existing = (fdeData.tripTickets || []).map(function(item) {
         return String(item.tripTicketNo || "").trim();
