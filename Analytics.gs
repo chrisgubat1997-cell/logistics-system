@@ -102,15 +102,26 @@ function saveFleetRecord(payload) {
     idColumn = "MAINTENANCE_ID";
     values = {
       MAINTENANCE_ID: record.id || fleetMakeId_("MAIN"),
+      MNT_REQUEST_NO: record.requestNo || "",
+      REQUESTED_BY: record.requestedBy || "",
       MAINTENANCE_DATE: fleetParseDate_(record.date),
+      REQUEST_DATE: fleetParseDate_(record.date),
       VEHICLE_ID: vehicleId,
       VEHICLE_CODE: vehicleCode,
+      PLATE_NUMBER: record.plateNumber || fleetGetVehiclePlate_(vehicleCode),
+      DEPARTMENT: record.department || "",
+      ODOMETER: fleetNumberOrBlank_(record.odometer),
+      CLASSIFICATIONS: Array.isArray(record.classifications) ? record.classifications.join(", ") : (record.maintenanceType || ""),
       MAINTENANCE_TYPE: record.maintenanceType || "",
-      DEFECT: record.defect || "",
+      REQUEST_DESCRIPTION: record.description || record.defect || "",
+      DEFECT: record.description || record.defect || "",
       REPAIR_ACTION: record.repair || "",
-      COST: fleetNumberOrBlank_(record.cost),
+      ESTIMATED_COST: fleetNumberOrBlank_(record.estimatedCost !== undefined ? record.estimatedCost : record.cost),
+      COST: fleetNumberOrBlank_(record.estimatedCost !== undefined ? record.estimatedCost : record.cost),
+      TARGET_COMPLETION_DATE: fleetParseDate_(record.targetDate),
+      LAST_COMPLETION_DATE: fleetParseDate_(record.lastCompletion),
       IDLE_DAYS: fleetNumberOrBlank_(record.idleDays),
-      STATUS: record.status || "Completed",
+      STATUS: record.status || "Pending",
       REMARKS: record.remarks || "",
       CREATED_BY: record.createdBy || "",
       CREATED_AT: createdAt,
@@ -146,6 +157,10 @@ function saveFleetRecord(payload) {
 
   if (type === "tripTicket") {
     fleetEnsureHeader_(sheetName, "ROUTE_DETAILS");
+  } else if (type === "maintenance") {
+    ["MNT_REQUEST_NO", "REQUESTED_BY", "REQUEST_DATE", "PLATE_NUMBER", "DEPARTMENT", "ODOMETER", "CLASSIFICATIONS", "REQUEST_DESCRIPTION", "ESTIMATED_COST", "TARGET_COMPLETION_DATE", "LAST_COMPLETION_DATE"].forEach(function(header) {
+      fleetEnsureHeader_(sheetName, header);
+    });
   }
   const saved = fleetUpsertSheetRecord_(sheetName, idColumn, values, type);
   return {
@@ -238,6 +253,15 @@ function fleetParseDate_(value) {
   if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
   const d = new Date(value);
   return isNaN(d.getTime()) ? "" : d;
+}
+
+function fleetGetVehiclePlate_(vehicleCode) {
+  if (!vehicleCode) return "";
+  const vehicles = getAllRecords(CONFIG.SHEETS.VEHICLES);
+  const match = vehicles.find(function(v) {
+    return String(v.VEHICLE_CODE || v.vehicleCode || v.code || "").trim().toUpperCase() === String(vehicleCode).trim().toUpperCase();
+  });
+  return match ? String(match.PLATE_NUMBER || match.PLATE_NO || match.LICENSE_PLATE || match.PLATE || match.plateNumber || match.plateNo || "") : "";
 }
 
 function getFleetVehicleId_(vehicleCode) {
