@@ -815,3 +815,23 @@ body {
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
+
+
+/* UNPAID SALES ORDERS TABLE */
+.create-payment-unpaid-section { margin: 22px 0 26px; padding: 18px; border: 1px solid #e0e6ee; border-radius: 12px; background: #fff; box-shadow: 0 4px 14px rgba(16,24,40,.04); }
+.create-payment-unpaid-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:14px; }
+.create-payment-unpaid-header h2 { margin:0; color:#253247; font-size:17px; font-weight:800; }
+.create-payment-unpaid-header p { margin:5px 0 0; color:#667085; font-size:12px; line-height:1.5; }
+.create-payment-unpaid-table-wrap { width:100%; overflow:auto; border:1px solid #e8edf3; border-radius:8px; }
+.create-payment-unpaid-table { width:100%; min-width:1050px; border-collapse:collapse; font-size:12px; }
+.create-payment-unpaid-table th { padding:11px 12px; background:#f5f7fa; color:#596579; text-align:left; white-space:nowrap; font-size:10px; letter-spacing:.04em; }
+.create-payment-unpaid-table td { padding:11px 12px; border-top:1px solid #edf0f4; color:#344054; white-space:nowrap; }
+.create-payment-unpaid-table tbody tr:hover { background:#f8fbff; }
+.create-payment-unpaid-empty { padding:22px !important; text-align:center; color:#667085 !important; white-space:normal !important; }
+.create-payment-unpaid-balance { color:#b42318 !important; font-weight:800; }
+.create-payment-delivery-status { display:inline-flex; padding:5px 8px; border-radius:20px; font-size:10px; font-weight:800; white-space:nowrap; }
+.create-payment-delivery-status.is-fully-delivered { color:#176534; background:#e8f7ed; }
+.create-payment-delivery-status.is-partially-delivered { color:#854d0e; background:#fff4d6; }
+.create-payment-delivery-status.is-undelivered { color:#344054; background:#edf1f5; }
+.create-payment-select-so { padding:7px 10px !important; min-height:30px; font-size:10px !important; }
+@media (max-width:700px) { .create-payment-unpaid-section { padding:12px; } .create-payment-unpaid-header { flex-direction:column; } }
