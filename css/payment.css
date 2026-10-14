@@ -1215,3 +1215,127 @@
     }
 
 }
+
+
+/* =========================================================
+   CUSTOMER CREDIT TABLE + DETAILS MODAL
+========================================================= */
+.customer-credit-row {
+    cursor: pointer;
+}
+.customer-credit-row:hover {
+    background: #f5f9ff;
+}
+.customer-credit-amount {
+    color: #176534;
+    font-weight: 700;
+}
+.customer-credit-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.customer-credit-modal.is-open {
+    display: flex;
+}
+.customer-credit-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(16, 24, 40, .55);
+}
+.customer-credit-modal-panel {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 1000px);
+    max-height: min(88vh, 850px);
+    overflow: auto;
+    padding: 22px;
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 24px 70px rgba(16, 24, 40, .28);
+}
+.customer-credit-modal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+.customer-credit-modal-header h2 {
+    margin: 0;
+    color: #1d2939;
+    font-size: 19px;
+}
+.customer-credit-modal-header p {
+    margin: 5px 0 0;
+    color: #7a8798;
+    font-size: 12px;
+}
+.customer-credit-modal-close {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #dfe5ec;
+    border-radius: 8px;
+    background: #fff;
+    color: #475467;
+    font-size: 23px;
+    cursor: pointer;
+}
+.customer-credit-modal-summary {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+.customer-credit-modal-summary > div {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #e5eaf0;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+.customer-credit-modal-summary span {
+    display: block;
+    margin-bottom: 7px;
+    color: #7a8798;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+.customer-credit-modal-summary strong {
+    display: block;
+    overflow-wrap: anywhere;
+    color: #263247;
+    font-size: 14px;
+}
+.customer-credit-modal-summary .customer-credit-modal-balance {
+    border-color: #b7dfc4;
+    background: #f0faf3;
+}
+.customer-credit-modal-summary .customer-credit-modal-balance strong {
+    color: #176534;
+    font-size: 18px;
+}
+.customer-credit-history-title {
+    margin: 0 0 10px;
+    color: #273449;
+    font-size: 13px;
+}
+.customer-credit-history-wrapper {
+    max-height: 360px;
+}
+@media (max-width: 700px) {
+    .customer-credit-modal {
+        padding: 10px;
+    }
+    .customer-credit-modal-panel {
+        padding: 15px;
+    }
+    .customer-credit-modal-summary {
+        grid-template-columns: 1fr;
+    }
+}
