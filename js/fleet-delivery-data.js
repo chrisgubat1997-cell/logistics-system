@@ -225,6 +225,33 @@ async function loadFleetDeliveryData() {
     updateStorageStatus(true, "Google Sheets connected");
 }
 
+
+function bindSearchableVehicleSelect(select, searchInput, allLabel) {
+    if (!select || !searchInput) return;
+    select._allVehicleOptions = Array.from(select.options).map(function(option) { return option.cloneNode(true); });
+    if (!searchInput.dataset.vehicleSearchBound) {
+        searchInput.addEventListener("input", function() {
+            const query = searchInput.value.trim().toLowerCase();
+            const selected = select.value;
+            const allOptions = select._allVehicleOptions || [];
+            select.innerHTML = "";
+            allOptions.filter(function(option, index) {
+                return index === 0 || !query || option.textContent.toLowerCase().includes(query) || option.value.toLowerCase().includes(query);
+            }).forEach(function(option) { select.appendChild(option.cloneNode(true)); });
+            if (Array.from(select.options).some(function(option) { return option.value === selected; })) select.value = selected;
+        });
+        select.addEventListener("change", function() {
+            searchInput.value = "";
+            select.innerHTML = "";
+            (select._allVehicleOptions || []).forEach(function(option) { select.appendChild(option.cloneNode(true)); });
+            if (Array.from(select.options).some(function(option) { return option.value === select.dataset.selectedVehicle; })) select.value = select.dataset.selectedVehicle;
+            select.dataset.selectedVehicle = select.value;
+        });
+        searchInput.dataset.vehicleSearchBound = "true";
+    }
+    select.dataset.selectedVehicle = select.value;
+}
+
 function populateFleetVehicleDropdowns() {
     const selectors = [
         { id: "fde-tripVehicle", placeholder: "Select Vehicle" },
@@ -276,6 +303,8 @@ function populateFleetVehicleDropdowns() {
         if (previousValue && Array.from(select.options).some(function(option) { return option.value === previousValue; })) {
             select.value = previousValue;
         }
+        const searchId = config.id + "Search";
+        bindSearchableVehicleSelect(select, document.getElementById(searchId));
     });
 
     fillMaintenancePlateNumber();
