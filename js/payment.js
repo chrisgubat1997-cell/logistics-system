@@ -431,8 +431,18 @@ async function loadPaymentData() {
                 status: row.STATUS || row.status || ''
             });
         });
-        customerCreditRecords = getStoredArray(CUSTOMER_CREDIT_STORAGE_KEYS);
-        customerCreditTransactions = getStoredArray(CUSTOMER_CREDIT_TRANSACTION_STORAGE_KEYS);
+        try {
+            const creditResults = await Promise.all([
+                paymentDashboardAPI('getCustomerCredits'),
+                paymentDashboardAPI('getCustomerCreditTransactions')
+            ]);
+            customerCreditRecords = paymentDashboardRows(creditResults[0], ['customerCredits', 'credits']);
+            customerCreditTransactions = paymentDashboardRows(creditResults[1], ['customerCreditTransactions', 'transactions']);
+        } catch (creditError) {
+            console.warn('Customer credit ledger API is not available; credit records are not loaded from database.', creditError);
+            customerCreditRecords = [];
+            customerCreditTransactions = [];
+        }
         populatePaymentYears();
         applyPaymentFilters();
         console.log('Payment data loaded from Google Sheets:', paymentRecords.length, 'payments;', paymentSalesOrders.length, 'sales orders.');
