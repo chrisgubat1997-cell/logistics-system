@@ -2153,6 +2153,7 @@ function getRecordReference(
     ) {
 
         return (
+            record.serviceClassification ||
             record.maintenanceType ||
             "-"
         );
