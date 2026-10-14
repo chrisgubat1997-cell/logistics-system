@@ -540,3 +540,78 @@
     .fde-route-heading { align-items: flex-start; flex-direction: column; }
     .fde-route-heading .fde-btn { width: 100%; }
 }
+
+
+/* =========================================================
+   MAINTENANCE REQUEST ENTRY
+========================================================= */
+.fde-maint-classifications {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #d9e0e8;
+    border-radius: 8px;
+    background: #fff;
+}
+.fde-maint-classifications label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.fde-maint-classifications input {
+    width: 16px;
+    height: 16px;
+}
+.fde-maint-request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.fde-maint-request-header p {
+    margin: 4px 0 0;
+    color: #64748b;
+    font-size: 12px;
+}
+.fde-maint-request-list {
+    display: grid;
+    gap: 10px;
+}
+.fde-maint-request-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) auto;
+    gap: 12px;
+    align-items: end;
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+}
+.fde-maint-request-row .fde-field label {
+    font-size: 10px;
+}
+.fde-maint-request-row .fde-maint-remove-request {
+    min-width: 90px;
+    margin-bottom: 0;
+}
+.fde-maint-request-row .fde-maint-remove-request:disabled {
+    opacity: .45;
+    cursor: not-allowed;
+}
+@media (max-width: 760px) {
+    .fde-maint-request-row {
+        grid-template-columns: 1fr;
+    }
+    .fde-maint-request-header {
+        align-items: flex-start;
+    }
+}
