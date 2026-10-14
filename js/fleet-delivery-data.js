@@ -55,6 +55,7 @@ const FDE_VEHICLES = [
 ========================================================= */
 
 let fdeInitialized = false;
+let fdeMaintenanceEditingRequestNo = "";
 
 let fdeData = {
     version: FLEET_DELIVERY_DATA_VERSION,
@@ -1135,74 +1136,40 @@ async function saveMaintenanceRecord() {
     const estimatedCost = numberValue("fde-maintenanceCost");
     const classifications = Array.from(document.querySelectorAll('input[name="fde-maintenanceClass"]:checked')).map(function(input) { return input.value; });
     const requests = getMaintenanceRequestDetails();
-
+    const isEditing = Boolean(fdeMaintenanceEditingRequestNo);
     if (!requestedBy) { alert("Please select Requested By."); return; }
     if (!date) { alert("Please enter the Request Date."); return; }
     if (!vehicle) { alert("Please select a vehicle."); return; }
     if (!classifications.length) { alert("Please select at least one classification: Repair, Replacement, Improvement, or Installation."); return; }
-    if (!requests.length || requests.some(function(item) { return !item.description; })) {
-        alert("Please enter the description for each maintenance request."); return;
-    }
-
-    const finalRequestNo = requestNo || generateMaintenanceRequestNo();
+    if (!requests.length || requests.some(function(item) { return !item.description; })) { alert("Please enter the description for each repair."); return; }
+    const finalRequestNo = fdeMaintenanceEditingRequestNo || requestNo || generateMaintenanceRequestNo();
     const saveButton = document.getElementById("fde-saveMaintenanceBtn");
     const originalButtonText = saveButton ? saveButton.textContent : "";
-    if (saveButton) {
-        if (saveButton.dataset.saving === "true") return;
-        saveButton.dataset.saving = "true";
-        saveButton.disabled = true;
-        saveButton.textContent = "Saving Requests...";
-    }
-
+    if (saveButton) { if (saveButton.dataset.saving === "true") return; saveButton.dataset.saving = "true"; saveButton.disabled = true; saveButton.textContent = isEditing ? "Updating Repairs..." : "Saving Repairs..."; }
     let savedCount = 0;
     try {
         for (let i = 0; i < requests.length; i++) {
             const request = requests[i];
+            const existing = request.id ? (fdeData.maintenance || []).find(function(item) { return String(item.id) === String(request.id); }) : null;
             const now = new Date().toISOString();
-            const record = {
-                id: generateRecordId("MAIN"),
-                type: "maintenance",
-                requestNo: finalRequestNo,
-                requestedBy: requestedBy,
-                date: date,
-                vehicle: vehicle,
-                plateNumber: plateNumber,
-                department: department,
-                odometer: Number.isFinite(odometer) ? odometer : 0,
-                classifications: classifications,
-                maintenanceType: classifications.join(", "),
-                serviceClassification: request.serviceClassification || "",
-                description: request.description,
-                defect: request.description,
-                lastCompletion: request.lastCompletion || "",
-                targetDate: targetDate || "",
-                // Estimated cost belongs to the whole maintenance request.
-                // Store it once so analytics does not multiply the same estimate by item count.
-                estimatedCost: i === 0 && Number.isFinite(estimatedCost) ? estimatedCost : 0,
-                cost: i === 0 && Number.isFinite(estimatedCost) ? estimatedCost : 0,
-                repair: "",
-                idleDays: 0,
-                status: request.status || "Pending",
-                remarks: "",
-                createdAt: now,
-                updatedAt: now
-            };
-            await persistFleetRecord("maintenance", record);
-            savedCount++;
-            if (saveButton) saveButton.textContent = "Saving " + savedCount + " of " + requests.length + "...";
+            const catalogMatch = findMaintenanceCatalogMatch(request.description);
+            const record = { id: request.id || generateRecordId("MAIN"), type: "maintenance", requestNo: finalRequestNo,
+                requestedBy: requestedBy, date: date, vehicle: vehicle, plateNumber: plateNumber, department: department,
+                odometer: Number.isFinite(odometer) ? odometer : 0, classifications: classifications, maintenanceType: classifications.join(", "),
+                serviceClassification: catalogMatch ? catalogMatch.category : (request.serviceClassification || ""),
+                description: request.description, defect: request.description, lastCompletion: request.lastCompletion || "", targetDate: targetDate || "",
+                estimatedCost: i === 0 && Number.isFinite(estimatedCost) ? estimatedCost : 0, cost: i === 0 && Number.isFinite(estimatedCost) ? estimatedCost : 0,
+                finalCost: existing ? existing.finalCost : 0, actualCompletionDate: existing ? existing.actualCompletionDate : "",
+                cancellationReason: existing ? existing.cancellationReason : "", repair: existing ? (existing.repair || "") : "",
+                idleDays: existing ? (existing.idleDays || 0) : 0, status: request.status || "Pending", remarks: existing ? (existing.remarks || "") : "",
+                createdAt: existing ? existing.createdAt : now, updatedAt: now };
+            await persistFleetRecord("maintenance", record); savedCount++;
+            if (saveButton) saveButton.textContent = (isEditing ? "Updating " : "Saving ") + savedCount + " of " + requests.length + "...";
         }
         clearMaintenanceForm();
-        alert("Maintenance request saved successfully.\nMaintenance No.: " + finalRequestNo + "\nSeparate request items saved: " + savedCount);
-    } catch (error) {
-        console.error("Maintenance save failed:", error);
-        alert("Naka-save ang " + savedCount + " sa " + requests.length + " request items. Maintenance No.: " + finalRequestNo + ". Error: " + error.message);
-    } finally {
-        if (saveButton) {
-            saveButton.disabled = false;
-            saveButton.textContent = originalButtonText || "Save Maintenance";
-            delete saveButton.dataset.saving;
-        }
-    }
+        alert((isEditing ? "Maintenance request updated successfully." : "Maintenance request saved successfully.") + "\nMaintenance No.: " + finalRequestNo + "\nRepair items saved/updated: " + savedCount);
+    } catch (error) { console.error("Maintenance save/update failed:", error); alert("Na-save/na-update ang " + savedCount + " sa " + requests.length + " repair items. Maintenance No.: " + finalRequestNo + ". Error: " + error.message); }
+    finally { if (saveButton) { saveButton.disabled = false; saveButton.textContent = originalButtonText || "Save Maintenance"; delete saveButton.dataset.saving; } }
 }
 
 function generateMaintenanceRequestNo() {
@@ -1244,6 +1211,7 @@ function addMaintenanceRequestRow(details) {
     if (!body) return;
     const row = document.createElement("div");
     row.className = "fde-maint-request-row";
+    if (details && details.id) row.dataset.recordId = details.id;
     const datalistId = "fde-maint-service-options-" + (++fdeMaintenanceDatalistSequence);
     const options = Object.keys(FDE_MAINTENANCE_CATALOG).map(function(category) {
         return FDE_MAINTENANCE_CATALOG[category].map(function(service) {
@@ -1259,6 +1227,7 @@ function addMaintenanceRequestRow(details) {
         row.querySelector(".fde-maint-request-description").value = details.description || "";
         row.querySelector(".fde-maint-request-last-completion").value = details.lastCompletion || "";
         row.querySelector(".fde-maint-request-status").value = details.status || "Pending";
+        if (details.id) { const removeButton = row.querySelector(".fde-maint-remove-request"); if (removeButton) { removeButton.disabled = true; removeButton.title = "Saved repair items are retained; add a new repair instead."; removeButton.textContent = "Saved"; } }
     }
     body.appendChild(row);
     const descriptionInput = row.querySelector(".fde-maint-request-description");
@@ -1278,6 +1247,7 @@ function refreshMaintenanceRequestRemoveButtons() {
 function getMaintenanceRequestDetails() {
     return Array.from(document.querySelectorAll("#fde-maintenanceRequestRows .fde-maint-request-row")).map(function(row) {
         return {
+            id: row.dataset.recordId || "",
             description: row.querySelector(".fde-maint-request-description").value.trim(),
             serviceClassification: row.querySelector(".fde-maint-request-classification").value || "",
             lastCompletion: row.querySelector(".fde-maint-request-last-completion").value,
@@ -2558,6 +2528,9 @@ function clearFuelForm() {
 ========================================================= */
 
 function clearMaintenanceForm() {
+    fdeMaintenanceEditingRequestNo = "";
+    const saveButton = document.getElementById("fde-saveMaintenanceBtn"); if (saveButton) saveButton.textContent = "Save Maintenance";
+    const addButton = document.getElementById("fde-addMaintenanceRequestBtn"); if (addButton) addButton.textContent = "＋ Add Repair";
     setValue("fde-maintenanceNo", generateMaintenanceRequestNo());
     setValue("fde-requestedBy", "");
     setValue("fde-maintenanceDate", fleetTodayForInput());
