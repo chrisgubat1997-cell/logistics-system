@@ -629,6 +629,18 @@
 }
 
 
+/* Keep the maintenance input boxes aligned even when the service suggestion helper
+   appears only under Description of Service / Request. */
+.fde-maint-request-row .fde-field:not(:first-child)::after {
+    content: "";
+    display: block;
+    min-height: 35px;
+    margin-top: 5px;
+}
+.fde-maint-request-row .fde-field:first-child .fde-maint-suggestion-help {
+    min-height: 35px;
+}
+
 /* Maintenance status actions in the saved-records table */
 .fde-record-actions {
     display: flex;
@@ -646,8 +658,5 @@
     cursor: not-allowed;
 }
 
-.fde-maint-request-row { grid-template-columns: minmax(240px, 2fr) minmax(150px, 1fr) minmax(150px, 1fr) minmax(140px, 1fr) auto; }
-.fde-maint-suggestion-help { display:block; margin-top:5px; color:#64748b; font-size:11px; line-height:1.35; }
+.fde-maint-suggestion-help { display:block; margin-top:5px; color:#64748b; font-size:10px; line-height:1.4; }
 .fde-maint-request-classification { font-weight:600; background:#f1f5f9; }
-@media (max-width:980px) { .fde-maint-request-row { grid-template-columns:1fr 1fr; } }
-@media (max-width:760px) { .fde-maint-request-row { grid-template-columns:1fr; } }
