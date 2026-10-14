@@ -39,6 +39,10 @@ const PAYMENT_STORAGE_KEYS = [
 ];
 
 const PAYMENT_PRIMARY_STORAGE_KEY = "logitechPayments";
+const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+let databaseSalesOrders = [];
+let databasePayments = [];
+let paymentDataLoaded = false;
 
 const SALES_ORDER_STORAGE_KEYS = [
     "logitechSalesOrders",
@@ -66,7 +70,7 @@ let currentRemainingBalance = 0;
    INITIALIZE
    ========================================================= */
 
-function initializeCreatePayment() {
+async function initializeCreatePayment() {
 
     if (createPaymentInitialized) {
         return;
@@ -80,9 +84,9 @@ function initializeCreatePayment() {
     console.log("========================================");
 
     setDefaultPaymentDate();
-    setDefaultPaymentNumber();
-
     bindCreatePaymentEvents();
+    await loadPaymentDataFromDatabase();
+    setDefaultPaymentNumber();
 
     updatePaymentSummary();
 
@@ -475,14 +479,15 @@ function bindCreatePaymentEvents() {
 
     }
 
-    if (drNo) {
-
-        drNo.addEventListener(
-            "input",
-            updatePaymentSummary
-        );
-
+    if (drNo) drNo.addEventListener("input", updatePaymentSummary);
+    const soSearchInput=document.getElementById("paymentSONo"),referenceInput=document.getElementById("paymentReferenceNo");
+    if(soSearchInput){
+        soSearchInput.addEventListener("input",handleSOSearchInput);
+        soSearchInput.addEventListener("focus",handleSOSearchInput);
+        soSearchInput.addEventListener("keydown",handleSOSearchKeyboard);
+        document.addEventListener("click",function(event){const wrap=document.querySelector(".create-payment-so-search-wrap");if(wrap&&!wrap.contains(event.target))hideSOSuggestions();});
     }
+    if(referenceInput)referenceInput.addEventListener("input",updatePaymentSummary);
 
 }
 
@@ -508,11 +513,72 @@ function cancelPayment() {
 }
 
 
+/* GOOGLE SHEETS API + SALES ORDER AUTOCOMPLETE */
+async function paymentAPI(action, data = {}) {
+    const response = await fetch(PAYMENT_API_URL, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({action:action,data:data}) });
+    const raw = await response.text();
+    let result;
+    try { result=JSON.parse(raw); } catch(error) { throw new Error("Invalid response from LOGIS-TECH database."); }
+    if (!response.ok || !result || result.success===false) throw new Error(result && (result.message||result.error) || "Database request failed.");
+    return result;
+}
+async function loadPaymentDataFromDatabase() {
+    try {
+        const results=await Promise.all([paymentAPI("getSalesOrders",{}),paymentAPI("getPayments",{})]);
+        const soRows=Array.isArray(results[0].salesOrders)?results[0].salesOrders:(Array.isArray(results[0].records)?results[0].records:[]);
+        const paymentRows=Array.isArray(results[1].payments)?results[1].payments:(Array.isArray(results[1].records)?results[1].records:[]);
+        databaseSalesOrders=soRows.map(function(row){return Object.assign({},row,{
+            soNo:row.SO_NUMBER||row.soNo||row.salesOrderNo||"",poNo:row.PO_NUMBER||row.poNo||row.poNumber||"",
+            client:row.CLIENT_NAME||row.client||row.clientName||"",project:row.PROJECT||row.project||"",
+            billingAddress:row.BILLING_ADDRESS||row.billingAddress||"",
+            total:row.GRAND_TOTAL??row.TOTAL_AMOUNT??row.SO_TOTAL??row.total??row.grandTotal??0,
+            terms:row.TERMS||row.PAYMENT_TERMS||row.terms||"",status:row.STATUS||row.status||""
+        });});
+        databasePayments=paymentRows.map(function(row){return Object.assign({},row,{
+            soNo:row.SO_NUMBER||row.soNo||"",currentPayment:row.CURRENT_PAYMENT??row.currentPayment??row.amount??0,
+            status:row.PAYMENT_STATUS||row.status||"RECEIVED"
+        });});
+        paymentDataLoaded=true; return true;
+    } catch(error) { console.error("Could not load payment data from database:",error); paymentDataLoaded=false; return false; }
+}
+function getSalesOrderPONumber(so){return String(so.PO_NUMBER||so.poNo||so.poNumber||"").trim();}
+function handleSOSearchInput(){
+    const input=document.getElementById("paymentSONo"),query=normalizeText(input?input.value:"");
+    if(!query){hideSOSuggestions();return;}
+    if(!paymentDataLoaded){loadPaymentDataFromDatabase().then(function(ok){if(ok)renderSOSuggestions(query);});return;}
+    renderSOSuggestions(query);
+}
+function renderSOSuggestions(query){
+    const box=document.getElementById("paymentSOSuggestions");if(!box)return;
+    const matches=databaseSalesOrders.filter(function(so){
+        const status=normalizeText(so.STATUS||so.status||"");if(status==="cancelled")return false;
+        return [getSalesOrderNumber(so),getSalesOrderPONumber(so),getSalesOrderClient(so),getSalesOrderProject(so)].some(function(value){return normalizeText(value).includes(query);});
+    }).slice(0,10);
+    if(!matches.length){box.innerHTML='<div class="create-payment-so-suggestion-empty">No matching Sales Orders found</div>';box.hidden=false;return;}
+    box.innerHTML=matches.map(function(so,index){return '<button type="button" class="create-payment-so-suggestion" role="option" data-index="'+index+'">'+
+        '<span class="create-payment-so-suggestion-main">'+escapePaymentHTML(getSalesOrderNumber(so))+'</span>'+
+        '<span class="create-payment-so-suggestion-meta">'+escapePaymentHTML(getSalesOrderClient(so))+' · PO: '+escapePaymentHTML(getSalesOrderPONumber(so)||"—")+'</span>'+
+        '<span class="create-payment-so-suggestion-project">'+escapePaymentHTML(getSalesOrderProject(so)||"No project")+'</span></button>';}).join("");
+    box.hidden=false;
+    box.querySelectorAll("[data-index]").forEach(function(button){button.addEventListener("click",function(){
+        const so=matches[Number(button.dataset.index)];if(!so)return;
+        setValue("paymentSONo",getSalesOrderNumber(so));hideSOSuggestions();selectedSalesOrder=so;
+        loadSalesOrderInformation(so);updatePaymentSummary();
+    });});
+}
+function handleSOSearchKeyboard(event){
+    if(event.key==="Escape")hideSOSuggestions();
+    if(event.key==="Enter"){const box=document.getElementById("paymentSOSuggestions"),first=box&&box.querySelector("[data-index]");if(first&&!box.hidden){event.preventDefault();first.click();}}
+}
+function hideSOSuggestions(){const box=document.getElementById("paymentSOSuggestions");if(box){box.hidden=true;box.innerHTML="";}}
+function escapePaymentHTML(value){return String(value==null?"":value).replace(/[&<>"']/g,function(char){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char];});}
+
+
 /* =========================================================
    CHECK SALES ORDER
    ========================================================= */
 
-function checkSalesOrder() {
+async function checkSalesOrder() {
 
     const input =
         document.getElementById(
@@ -546,8 +612,11 @@ function checkSalesOrder() {
     );
 
 
-    const salesOrders =
-        getStoredSalesOrders();
+    if (!paymentDataLoaded) {
+        const loaded = await loadPaymentDataFromDatabase();
+        if (!loaded) { alert("Could not load Sales Orders from the Google Sheets database. Please try again."); return; }
+    }
+    const salesOrders = databaseSalesOrders.length ? databaseSalesOrders : getStoredSalesOrders();
 
 
     if (!salesOrders.length) {
@@ -619,6 +688,8 @@ function checkSalesOrder() {
    ========================================================= */
 
 function getStoredSalesOrders() {
+
+    if (databaseSalesOrders.length) return databaseSalesOrders;
 
     for (
         let i = 0;
@@ -740,6 +811,8 @@ function isSameSalesOrder(
 
 
     const possibleNumbers = [
+
+        so.SO_NUMBER,
 
         so.soNo,
 
@@ -1202,7 +1275,7 @@ function calculatePreviousPaid(
 
 
     const payments =
-        getStoredPayments();
+        databasePayments.length ? databasePayments : getStoredPayments();
 
 
     let totalPaid = 0;
@@ -1237,13 +1310,9 @@ function calculatePreviousPaid(
                 );
 
 
-            if (
-                amount > 0
-            ) {
-
-                totalPaid += amount;
-
-            }
+            const paymentStatus=normalizeText(payment.PAYMENT_STATUS||payment.paymentStatus||payment.status||"received");
+            const countsAsPaid=["received","paid","confirmed","completed","posted"].includes(paymentStatus);
+            if(amount>0&&countsAsPaid)totalPaid+=amount;
 
         }
     );
@@ -1259,6 +1328,8 @@ function calculatePreviousPaid(
    ========================================================= */
 
 function getStoredPayments() {
+
+    if (databasePayments.length) return databasePayments;
 
     for (
         let i = 0;
@@ -1322,6 +1393,8 @@ function getPaymentSONumber(
 
     return (
 
+        payment.SO_NUMBER ||
+
         payment.soNo ||
 
         payment.salesOrderNo ||
@@ -1350,6 +1423,8 @@ function getPaymentAmount(
 ) {
 
     const fields = [
+
+        payment.CURRENT_PAYMENT,
 
         payment.amount,
 
@@ -1433,6 +1508,8 @@ function getSalesOrderClient(
 
     return (
 
+        so.CLIENT_NAME ||
+
         so.client ||
 
         so.clientName ||
@@ -1462,6 +1539,8 @@ function getSalesOrderProject(
 
     return (
 
+        so.PROJECT ||
+
         so.project ||
 
         so.projectName ||
@@ -1484,6 +1563,8 @@ function getSalesOrderBillingAddress(
 ) {
 
     return (
+
+        so.BILLING_ADDRESS ||
 
         so.billingAddress ||
 
@@ -1509,6 +1590,12 @@ function getSalesOrderTotal(
 ) {
 
     const fields = [
+
+        so.GRAND_TOTAL,
+
+        so.TOTAL_AMOUNT,
+
+        so.SO_TOTAL,
 
         so.total,
 
@@ -1616,6 +1703,10 @@ function getPaymentTerms(
 ) {
 
     return (
+
+        so.TERMS ||
+
+        so.PAYMENT_TERMS ||
 
         so.terms ||
 
@@ -1741,12 +1832,9 @@ function updatePaymentSummary() {
     );
 
 
-    setValue(
-        "paymentRemainingBalanceInput",
-        formatCurrency(
-            remaining
-        )
-    );
+    setValue("paymentRemainingBalanceInput", formatCurrency(remaining));
+    const paymentOver = Math.max(0, currentPayment - Math.max(0, currentSalesOrderTotal - currentPreviousPaid));
+    setValue("paymentOverInput", formatCurrency(paymentOver));
 
 
     /*
@@ -1765,66 +1853,8 @@ function updatePaymentSummary() {
     );
 
 
-    /*
-       Status.
-    */
-
-    const status =
-        getPaymentStatusFromBalance(
-            currentSalesOrderTotal,
-            totalPaidAfterPayment
-        );
-
-
-    setValue(
-        "paymentSOStatus",
-        status
-    );
-
-
-    setText(
-        "paymentStatusPreview",
-        status
-    );
-
-
-    /*
-       Automatic status selection.
-    */
-
-    const statusSelect =
-        document.getElementById(
-            "paymentStatus"
-        );
-
-
-    if (statusSelect) {
-
-        if (
-            currentPayment <= 0 &&
-            currentPreviousPaid <= 0
-        ) {
-
-            statusSelect.value =
-                "Pending";
-
-        } else if (
-            currentSalesOrderTotal > 0 &&
-            totalPaidAfterPayment >=
-            currentSalesOrderTotal
-        ) {
-
-            statusSelect.value =
-                "Paid";
-
-        } else {
-
-            statusSelect.value =
-                "Partial";
-
-        }
-
-    }
+    const status=getPaymentStatusFromBalance(currentSalesOrderTotal,totalPaidAfterPayment);
+    setValue("paymentSOStatus",status);setText("paymentStatusPreview",status);
 
 
     /*
@@ -1970,345 +2000,21 @@ function updateStatusBadge(
    SAVE PAYMENT
    ========================================================= */
 
-function savePayment() {
-
-    const validation =
-        validatePayment();
-
-
-    if (!validation.valid) {
-
-        alert(
-            validation.message
-        );
-
-        return;
-
-    }
-
-
-    const paymentNo =
-        getValue(
-            "paymentNo"
-        );
-
-
-    const paymentDate =
-        getValue(
-            "paymentDate"
-        );
-
-
-    const paymentMethod =
-        getValue(
-            "paymentMethod"
-        );
-
-
-    const paymentStatus =
-        getValue(
-            "paymentStatus"
-        );
-
-
-    const soNo =
-        getValue(
-            "paymentSONo"
-        );
-
-
-    const invoiceNo =
-        getValue(
-            "paymentInvoiceNo"
-        );
-
-
-    const siNo =
-        getValue(
-            "paymentSINo"
-        );
-
-
-    const drNo =
-        getValue(
-            "paymentDRNo"
-        );
-
-
-    const receiptType =
-        getValue(
-            "paymentReceiptType"
-        );
-
-
-    const receiptNo =
-        getValue(
-            "paymentReceiptNo"
-        );
-
-
-    const referenceNo =
-        getValue(
-            "paymentReferenceNo"
-        );
-
-
-    const client =
-        getValue(
-            "paymentClient"
-        );
-
-
-    const project =
-        getValue(
-            "paymentProject"
-        );
-
-
-    const billingAddress =
-        getValue(
-            "paymentBillingAddress"
-        );
-
-
-    const invoiceAmount =
-        currentSalesOrderTotal;
-
-
-    const previousPaid =
-        currentPreviousPaid;
-
-
-    const currentPayment =
-        getNumericInput(
-            "paymentCurrentAmountInput"
-        );
-
-
-    const remainingBalance =
-        Math.max(
-            0,
-            invoiceAmount -
-            previousPaid -
-            currentPayment
-        );
-
-
-    const paymentRecord = {
-
-        /* =================================================
-           PAYMENT IDENTITY
-           ================================================= */
-
-        paymentNo:
-            paymentNo,
-
-        date:
-            paymentDate,
-
-        paymentDate:
-            paymentDate,
-
-        paymentMethod:
-            paymentMethod,
-
-        status:
-            paymentStatus,
-
-
-        /* =================================================
-           SALES ORDER
-           ================================================= */
-
-        soNo:
-            soNo,
-
-        salesOrderNo:
-            soNo,
-
-        salesOrderNumber:
-            soNo,
-
-
-        /* =================================================
-           CUSTOMER
-           ================================================= */
-
-        client:
-            client,
-
-        clientName:
-            client,
-
-        project:
-            project,
-
-        projectName:
-            project,
-
-        billingAddress:
-            billingAddress,
-
-
-        /* =================================================
-           SALES ORDER AMOUNT
-           ================================================= */
-
-        invoiceAmount:
-            invoiceAmount,
-
-        soTotal:
-            invoiceAmount,
-
-        salesOrderTotal:
-            invoiceAmount,
-
-        requiredDP:
-            currentRequiredDP,
-
-
-        /* =================================================
-           PAYMENT
-           ================================================= */
-
-        previousPaid:
-            previousPaid,
-
-        amount:
-            currentPayment,
-
-        paymentAmount:
-            currentPayment,
-
-        amountPaid:
-            currentPayment,
-
-        currentPayment:
-            currentPayment,
-
-        totalPaid:
-            previousPaid +
-            currentPayment,
-
-        remainingBalance:
-            remainingBalance,
-
-        balance:
-            remainingBalance,
-
-
-        /* =================================================
-           PAYMENT DOCUMENT
-           ================================================= */
-
-        receiptType:
-            receiptType,
-
-        receiptNo:
-            receiptNo,
-
-        collectionReceiptNo:
-            receiptType ===
-                "Collection Receipt"
-                ? receiptNo
-                : "",
-
-        acknowledgmentReceiptNo:
-            receiptType ===
-                "Acknowledgment Receipt"
-                ? receiptNo
-                : "",
-
-
-        /* =================================================
-           REFERENCES
-           ================================================= */
-
-        invoiceNo:
-            invoiceNo,
-
-        siNo:
-            siNo,
-
-        drNo:
-            drNo,
-
-        referenceNo:
-            referenceNo,
-
-
-        /* =================================================
-           REMARKS
-           ================================================= */
-
-        remarks:
-            getValue(
-                "paymentRemarks"
-            ),
-
-
-        /* =================================================
-           SOURCE
-           ================================================= */
-
-        source:
-            "CREATE PAYMENT",
-
-        createdAt:
-            new Date().toISOString()
-
-    };
-
-
-    console.log(
-        "Saving Payment:",
-        paymentRecord
-    );
-
-
-    const payments =
-        getStoredPayments();
-
-
-    payments.push(
-        paymentRecord
-    );
-
-
-    localStorage.setItem(
-        PAYMENT_PRIMARY_STORAGE_KEY,
-        JSON.stringify(
-            payments
-        )
-    );
-
-
-    localStorage.setItem(
-        "logitechLastPayment",
-        JSON.stringify(
-            paymentRecord
-        )
-    );
-
-
-    alert(
-        "Payment saved successfully.\n\n" +
-        "Payment No.: " +
-        paymentNo +
-        "\n" +
-        "SO No.: " +
-        soNo +
-        "\n" +
-        "Amount: " +
-        formatCurrency(
-            currentPayment
-        )
-    );
-
-
-    window.location.href =
-        "../index.html";
-
+async function savePayment(){
+    const validation=validatePayment();if(!validation.valid){alert(validation.message);return;}
+    const paymentNo=getValue("paymentNo"),paymentDate=getValue("paymentDate"),paymentMethod=getValue("paymentMethod");
+    const soNo=getValue("paymentSONo"),receiptType=getValue("paymentReceiptType"),receiptNo=getValue("paymentReceiptNo");
+    const referenceNo=getValue("paymentReferenceNo"),client=getValue("paymentClient"),project=getValue("paymentProject");
+    const billingAddress=getValue("paymentBillingAddress"),currentPayment=getNumericInput("paymentCurrentAmountInput");
+    try{
+        const result=await paymentAPI("createPayment",{paymentNo:paymentNo,paymentDate:paymentDate,paymentMethod:paymentMethod,soNumber:soNo,
+            clientName:client,project:project,billingAddress:billingAddress,currentPayment:currentPayment,receiptType:receiptType,
+            receiptNo:receiptNo,referenceNo:referenceNo,remarks:getValue("paymentRemarks"),createdBy:localStorage.getItem("logitechUser")||""});
+        if(!result||result.success!==true)throw new Error(result&&(result.message||result.error)||"Payment could not be saved.");
+        localStorage.setItem("logitechLastPayment",JSON.stringify(result.payment||{}));
+        alert("Payment saved to Google Sheets database.\n\nPayment No.: "+((result.payment&&result.payment.PAYMENT_NO)||paymentNo)+"\nSO No.: "+soNo+"\nAmount: "+formatCurrency(currentPayment));
+        window.location.href="../index.html";
+    }catch(error){console.error("Create Payment API error:",error);alert("Payment was not saved.\n\n"+(error.message||"Please try again."));}
 }
 
 
@@ -2388,16 +2094,11 @@ function validatePayment() {
 
 
     if (!paymentMethod) {
-
-        return {
-            valid: false,
-            message:
-                "Please select the payment method."
-        };
-
+        return { valid:false, message:"Please select the payment method." };
     }
-
-
+    if (!getValue("paymentReferenceNo")) {
+        return { valid:false, message:"Reference No. is required." };
+    }
     if (!client) {
 
         return {
@@ -2434,11 +2135,7 @@ function validatePayment() {
         );
 
 
-    if (
-        allowedBalance > 0 &&
-        currentPayment >
-        allowedBalance
-    ) {
+    if (currentPayment > allowedBalance + 0.005) {
 
         return {
             valid: false,
