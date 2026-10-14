@@ -113,6 +113,7 @@ function saveFleetRecord(payload) {
       ODOMETER: fleetNumberOrBlank_(record.odometer),
       CLASSIFICATIONS: Array.isArray(record.classifications) ? record.classifications.join(", ") : (record.maintenanceType || ""),
       MAINTENANCE_TYPE: record.maintenanceType || "",
+      SERVICE_CLASSIFICATION: record.serviceClassification || "",
       REQUEST_DESCRIPTION: record.description || record.defect || "",
       DEFECT: record.description || record.defect || "",
       REPAIR_ACTION: record.repair || "",
@@ -158,7 +159,7 @@ function saveFleetRecord(payload) {
   if (type === "tripTicket") {
     fleetEnsureHeader_(sheetName, "ROUTE_DETAILS");
   } else if (type === "maintenance") {
-    ["MNT_REQUEST_NO", "REQUESTED_BY", "REQUEST_DATE", "PLATE_NUMBER", "DEPARTMENT", "ODOMETER", "CLASSIFICATIONS", "REQUEST_DESCRIPTION", "ESTIMATED_COST", "TARGET_COMPLETION_DATE", "LAST_COMPLETION_DATE"].forEach(function(header) {
+    ["MNT_REQUEST_NO", "REQUESTED_BY", "REQUEST_DATE", "PLATE_NUMBER", "DEPARTMENT", "ODOMETER", "CLASSIFICATIONS", "SERVICE_CLASSIFICATION", "REQUEST_DESCRIPTION", "ESTIMATED_COST", "TARGET_COMPLETION_DATE", "LAST_COMPLETION_DATE"].forEach(function(header) {
       fleetEnsureHeader_(sheetName, header);
     });
   }
