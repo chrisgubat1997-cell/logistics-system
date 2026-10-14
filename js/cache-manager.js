@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    LOCAL CACHE MANAGER
    cache-manager.js
-   VERSION: 20261008-01
+   VERSION: 20261014-02
 
    PURPOSE:
    - IndexedDB local cache
@@ -786,7 +786,26 @@
      * Keep both APIs available and map the sync methods here.
      */
     window.LogisTechCache = {
+        // Keep the API used by sales-order.js and other existing modules.
+        openDatabase: openDatabase,
         open: openDatabase,
+        put: put,
+        get: get,
+        getAll: getAll,
+        clear: clear,
+        clearAllCache: clearAllCache,
+
+        saveCustomers: saveCustomers,
+        getCustomers: getCustomers,
+        getCustomer: getCustomer,
+        saveSalesOrders: saveSalesOrders,
+        getSalesOrders: getSalesOrders,
+        getSalesOrder: getSalesOrder,
+
+        setSyncMeta: setSyncMeta,
+        getSyncMeta: getSyncMeta,
+        setMeta: setSyncMeta,
+        getMeta: getSyncMeta,
 
         replaceAll: async function (storeName, records) {
             const rows = Array.isArray(records) ? records : [];
@@ -806,10 +825,7 @@
         count: async function (storeName) {
             const rows = await getAll(storeName);
             return Array.isArray(rows) ? rows.length : 0;
-        },
-
-        setMeta: setSyncMeta,
-        getMeta: getSyncMeta
+        }
     };
 
 
