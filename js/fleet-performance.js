@@ -67,6 +67,14 @@ async function refreshFleetPerformance(){
             const id=String(fleetField(v,"VEHICLE_ID","vehicleId")||"");
             return !["INACTIVE","CANCELLED","CANCELED","RETIRED","DISABLED"].includes(status) && (!f.vehicle||f.vehicle==="ALL"||f.vehicle==="All Vehicle"||f.vehicle===code||f.vehicle===id);
         });
+        // If the vehicle master sheet has not been populated yet, count only
+        // distinct vehicles present in actual filtered records (never mock data).
+        const observedVehicleCodes = Array.from(new Set(
+            trips.concat(fuel, maintenance)
+                .map(r => String(fleetField(r,"VEHICLE_CODE","vehicleCode","vehicle") || fleetField(r,"VEHICLE_ID","vehicleId") || ""))
+                .filter(Boolean)
+        ));
+        const vehicleCount = activeVehicles.length || observedVehicleCodes.length;
         const map={};
         function ensure(r){const code=String(fleetField(r,"VEHICLE_CODE","vehicleCode","vehicle")||fleetField(r,"VEHICLE_ID","vehicleId")||"Unknown");if(!map[code])map[code]={vehicle:code,km:0,fuel:0,cost:0,idle:0};return map[code];}
         trips.forEach(r=>{const x=ensure(r);const km=fleetNum(fleetField(r,"TOTAL_KM","totalKm"));if(km>=0)x.km+=km;});
@@ -75,7 +83,7 @@ async function refreshFleetPerformance(){
         const rows=Object.values(map).sort((a,b)=>a.vehicle.localeCompare(b.vehicle));
         rows.forEach(x=>x.kmL=x.fuel>0?x.km/x.fuel:0);
         const totalKm=rows.reduce((s,x)=>s+x.km,0),totalFuel=rows.reduce((s,x)=>s+x.fuel,0);
-        setElementText("totalVehicles",activeVehicles.length?formatNumber(activeVehicles.length):"0");
+        setElementText("totalVehicles",formatNumber(vehicleCount));
         setElementText("totalKm",formatNumber(totalKm));
         setElementText("totalFuel",formatNumber(totalFuel,2));
         setElementText("averageKmL",totalFuel>0?formatNumber(totalKm/totalFuel,2):"—");
