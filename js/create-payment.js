@@ -42,6 +42,7 @@ const PAYMENT_PRIMARY_STORAGE_KEY = "logitechPayments";
 const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 let databaseSalesOrders = [];
 let databasePayments = [];
+let databaseDeliveryReceipts = [];
 let paymentDataLoaded = false;
 
 const SALES_ORDER_STORAGE_KEYS = [
@@ -474,6 +475,12 @@ function bindCreatePaymentEvents() {
         document.addEventListener("click",function(event){const wrap=document.querySelector(".create-payment-so-search");if(wrap&&!wrap.contains(event.target))hideSOSuggestions();});
     }
     if(referenceInput)referenceInput.addEventListener("input",updatePaymentSummary);
+    const refreshUnpaidSOBtn = document.getElementById("refreshUnpaidPaymentSOBtn");
+    if (refreshUnpaidSOBtn) refreshUnpaidSOBtn.addEventListener("click", async function() {
+        refreshUnpaidSOBtn.disabled = true;
+        await loadPaymentDataFromDatabase();
+        refreshUnpaidSOBtn.disabled = false;
+    });
 
 }
 
@@ -510,23 +517,134 @@ async function paymentAPI(action, data = {}) {
 }
 async function loadPaymentDataFromDatabase() {
     try {
-        const results=await Promise.all([paymentAPI("getSalesOrders",{}),paymentAPI("getPayments",{})]);
-        const soRows=Array.isArray(results[0].salesOrders)?results[0].salesOrders:(Array.isArray(results[0].records)?results[0].records:(Array.isArray(results[0].data)?results[0].data:[]));
-        const paymentRows=Array.isArray(results[1].payments)?results[1].payments:(Array.isArray(results[1].records)?results[1].records:(Array.isArray(results[1].data)?results[1].data:[]));
-        databaseSalesOrders=soRows.map(function(row){return Object.assign({},row,{
-            soNo:row.SO_NUMBER||row.soNo||row.salesOrderNo||"",poNo:row.PO_NUMBER||row.poNo||row.poNumber||"",
-            client:row.CLIENT_NAME||row.client||row.clientName||"",project:row.PROJECT||row.project||"",
-            billingAddress:row.BILLING_ADDRESS||row.billingAddress||"",
-            total:row.GRAND_TOTAL??row.TOTAL_AMOUNT??row.SO_TOTAL??row.total??row.grandTotal??0,
-            terms:row.TERMS||row.PAYMENT_TERMS||row.terms||"",status:row.STATUS||row.status||""
-        });});
-        databasePayments=paymentRows.map(function(row){return Object.assign({},row,{
-            soNo:row.SO_NUMBER||row.soNo||"",currentPayment:row.CURRENT_PAYMENT??row.currentPayment??row.amount??0,
-            status:row.PAYMENT_STATUS||row.status||"RECEIVED"
-        });});
-        paymentDataLoaded=true; return true;
-    } catch(error) { console.error("Could not load payment data from database:",error); paymentDataLoaded=false; return false; }
+        const results = await Promise.all([
+            paymentAPI("getSalesOrders", {}),
+            paymentAPI("getPayments", {}),
+            paymentAPI("getDeliveryReceipts", {})
+        ]);
+        const soRows = Array.isArray(results[0].salesOrders) ? results[0].salesOrders : (Array.isArray(results[0].records) ? results[0].records : (Array.isArray(results[0].data) ? results[0].data : []));
+        const paymentRows = Array.isArray(results[1].payments) ? results[1].payments : (Array.isArray(results[1].records) ? results[1].records : (Array.isArray(results[1].data) ? results[1].data : []));
+        const drRows = Array.isArray(results[2].deliveryReceipts) ? results[2].deliveryReceipts : (Array.isArray(results[2].records) ? results[2].records : (Array.isArray(results[2].data) ? results[2].data : []));
+        databaseSalesOrders = soRows.map(function(row) { return Object.assign({}, row, {
+            soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || "", poNo: row.PO_NUMBER || row.poNo || row.poNumber || "",
+            client: row.CLIENT_NAME || row.client || row.clientName || "", project: row.PROJECT || row.project || "",
+            billingAddress: row.BILLING_ADDRESS || row.billingAddress || "",
+            total: row.GRAND_TOTAL ?? row.TOTAL_AMOUNT ?? row.SO_TOTAL ?? row.total ?? row.grandTotal ?? 0,
+            terms: row.TERMS || row.PAYMENT_TERMS || row.terms || "", status: row.STATUS || row.status || ""
+        }); });
+        databasePayments = paymentRows.map(function(row) { return Object.assign({}, row, {
+            soNo: row.SO_NUMBER || row.soNo || "", currentPayment: row.CURRENT_PAYMENT ?? row.currentPayment ?? row.amount ?? 0,
+            status: row.PAYMENT_STATUS || row.status || "RECEIVED"
+        }); });
+        databaseDeliveryReceipts = drRows;
+        paymentDataLoaded = true;
+        renderUnpaidPaymentSOTable();
+        return true;
+    } catch(error) {
+        console.error("Could not load payment data from database:", error);
+        paymentDataLoaded = false;
+        const tbody = document.getElementById("unpaidPaymentSOTableBody");
+        if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="create-payment-unpaid-empty">Unable to load unpaid Sales Orders or delivery status from the database. Please refresh.</td></tr>';
+        return false;
+    }
 }
+
+function paymentSOKey(value) { return String(value || "").trim().toLowerCase(); }
+
+function getPaymentAppliedForSO(soNumber) {
+    const accepted = ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"];
+    return databasePayments.reduce(function(total, payment) {
+        if (paymentSOKey(payment.SO_NUMBER || payment.soNo || payment.salesOrderNo) !== paymentSOKey(soNumber)) return total;
+        const status = String(payment.PAYMENT_STATUS || payment.status || "RECEIVED").trim().toUpperCase();
+        if (!accepted.includes(status)) return total;
+        const applied = payment.SO_APPLIED_AMOUNT ?? payment.soAppliedAmount;
+        return total + parseMoney(applied !== undefined && applied !== null && applied !== "" ? applied : (payment.CURRENT_PAYMENT ?? payment.currentPayment ?? payment.amount ?? 0));
+    }, 0);
+}
+
+function paymentSOItems(so) {
+    if (Array.isArray(so.items)) return so.items;
+    if (Array.isArray(so.ITEMS)) return so.ITEMS;
+    if (Array.isArray(so.SO_ITEMS)) return so.SO_ITEMS;
+    return [];
+}
+
+function paymentDRItems(dr) {
+    if (Array.isArray(dr.items)) return dr.items;
+    if (Array.isArray(dr.ITEMS)) return dr.ITEMS;
+    if (Array.isArray(dr.DR_ITEMS)) return dr.DR_ITEMS;
+    return [];
+}
+
+function paymentDeliveryStatus(so) {
+    const soNo = getSalesOrderNumber(so);
+    const deliveryStatusRaw = String(so.DELIVERY_STATUS || so.DELIVERY_PROGRESS || so.deliveryStatus || "").trim().toUpperCase().replace(/[ _-]+/g, " ");
+    if (/FULLY DELIVERED|FULL DELIVERY|COMPLETED DELIVERY/.test(deliveryStatusRaw)) return "FULLY DELIVERED";
+    if (/PARTIALLY DELIVERED|PARTIAL DELIVERY/.test(deliveryStatusRaw)) return "PARTIALLY DELIVERED";
+    const matching = databaseDeliveryReceipts.filter(function(dr) {
+        const ref = dr.SO_NUMBER || dr.soNumber || dr.SO_NO || dr.soNo || dr.SALES_ORDER_NO || dr.salesOrderNo || "";
+        const status = String(dr.STATUS || dr.status || "").trim().toUpperCase().replace(/[ _-]+/g, "_");
+        return paymentSOKey(ref) === paymentSOKey(soNo) && !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(status);
+    });
+    if (!matching.length) return "UNDELIVERED";
+    const delivered = matching.filter(function(dr) {
+        const status = String(dr.STATUS || dr.status || "").trim().toUpperCase().replace(/[ _-]+/g, "_");
+        const deliveredDate = dr.DATE_DELIVERED || dr.DATE_DELIVERY || dr.DELIVERED_DATE || dr.dateDelivered || "";
+        return !!deliveredDate || ["COMPLETED", "DELIVERED", "FULLY_DELIVERED", "FOR_INVOICE", "FOR_BILLING"].includes(status);
+    });
+    if (!delivered.length) return "UNDELIVERED";
+    const orderedItems = paymentSOItems(so);
+    const totalOrdered = orderedItems.reduce(function(sum, item) { return sum + parseMoney(item.QTY ?? item.QUANTITY ?? item.ORDER_QTY ?? item.ORDERED_QTY ?? item.qty ?? item.quantity ?? item.orderQty ?? 0); }, 0);
+    if (totalOrdered > 0) {
+        const deliveredQty = delivered.reduce(function(sum, dr) {
+            return sum + paymentDRItems(dr).reduce(function(itemSum, item) { return itemSum + parseMoney(item.DELIVERED_QTY ?? item.QTY_DELIVERED ?? item.QUANTITY_DELIVERED ?? item.QTY ?? item.QUANTITY ?? item.qty ?? item.quantity ?? 0); }, 0);
+        }, 0);
+        return deliveredQty >= totalOrdered - 0.0001 ? "FULLY DELIVERED" : (deliveredQty > 0 ? "PARTIALLY DELIVERED" : "UNDELIVERED");
+    }
+    const explicitStatus = String(so.DELIVERY_STATUS || so.DELIVERY_PROGRESS || so.deliveryStatus || "").trim().toUpperCase().replace(/[ _-]+/g, " ");
+    if (/FULLY DELIVERED|FULL DELIVERY|COMPLETED DELIVERY/.test(explicitStatus)) return "FULLY DELIVERED";
+    return "PARTIALLY DELIVERED";
+}
+
+function renderUnpaidPaymentSOTable() {
+    const tbody = document.getElementById("unpaidPaymentSOTableBody");
+    if (!tbody) return;
+    const rows = databaseSalesOrders.map(function(so) {
+        const soNo = getSalesOrderNumber(so);
+        const total = getSalesOrderTotal(so);
+        const paid = getPaymentAppliedForSO(soNo);
+        return { so: so, soNo: soNo, total: total, paid: paid, balance: Math.max(0, total - paid), deliveryStatus: paymentDeliveryStatus(so) };
+    }).filter(function(row) {
+        const status = String(row.so.STATUS || row.so.status || "").trim().toUpperCase();
+        return row.soNo && row.balance > 0.005 && !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(status);
+    }).sort(function(a, b) { return String(getSalesOrderDateForPayment(b.so) || "").localeCompare(String(getSalesOrderDateForPayment(a.so) || "")); });
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="create-payment-unpaid-empty">No unpaid Sales Orders found in the database.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = rows.map(function(row, index) {
+        return '<tr><td>'+escapePaymentHTML(row.soNo)+'</td><td>'+escapePaymentHTML(getSalesOrderClient(row.so)||"—")+'</td><td>'+escapePaymentHTML(getSalesOrderProject(row.so)||"—")+'</td><td>'+escapePaymentHTML(formatPaymentSODate(getSalesOrderDateForPayment(row.so)))+'</td><td>'+escapePaymentHTML(formatPaymentCurrency(row.total))+'</td><td>'+escapePaymentHTML(formatPaymentCurrency(row.paid))+'</td><td class="create-payment-unpaid-balance">'+escapePaymentHTML(formatPaymentCurrency(row.balance))+'</td><td><span class="create-payment-delivery-status '+paymentDeliveryStatusClass(row.deliveryStatus)+'">'+escapePaymentHTML(row.deliveryStatus)+'</span></td><td><button type="button" class="create-payment-btn create-payment-btn-primary create-payment-select-so" data-unpaid-so-index="'+index+'">SELECT</button></td></tr>';
+    }).join("");
+    tbody.querySelectorAll("[data-unpaid-so-index]").forEach(function(button) {
+        button.addEventListener("click", function() {
+            const row = rows[Number(button.getAttribute("data-unpaid-so-index"))];
+            if (!row) return;
+            const input = document.getElementById("paymentSONo");
+            if (input) input.value = row.soNo;
+            selectedSalesOrder = row.so;
+            hideSOSuggestions();
+            loadSalesOrderInformation(row.so);
+            updatePaymentSummary();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+    });
+}
+
+function getSalesOrderDateForPayment(so) { return so.DATE_CREATION || so.SO_DATE || so.DATE || so.date || so.createdAt || so.CREATED_AT || ""; }
+function formatPaymentSODate(value) { if (!value) return "—"; const date = new Date(value); return isNaN(date.getTime()) ? String(value) : date.toLocaleDateString("en-PH"); }
+function formatPaymentCurrency(value) { return "₱" + parseMoney(value).toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function paymentDeliveryStatusClass(status) { return status === "FULLY DELIVERED" ? "is-fully-delivered" : status === "PARTIALLY DELIVERED" ? "is-partially-delivered" : "is-undelivered"; }
+
 function getSalesOrderPONumber(so){return String(so.PO_NUMBER||so.poNo||so.poNumber||"").trim();}
 function handleSOSearchInput(){
     const input=document.getElementById("paymentSONo"),query=normalizeText(input?input.value:"");
