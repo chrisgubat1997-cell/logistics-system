@@ -591,6 +591,15 @@ function initializeFleetButtons() {
     if (clearTrip) {
         clearTrip.addEventListener("click", clearTripTicketForm);
     }
+    const ticketDate = document.getElementById("fde-tripDate");
+    const ticketVehicle = document.getElementById("fde-tripVehicle");
+    const refreshTicketNumber = function() {
+        const date = getValue("fde-tripDate");
+        if (date) setValue("fde-tripTicketNo", generateFleetTripTicketNo(date));
+        else setValue("fde-tripTicketNo", "");
+    };
+    if (ticketDate) ticketDate.addEventListener("change", refreshTicketNumber);
+    if (ticketVehicle) ticketVehicle.addEventListener("change", refreshTicketNumber);
     const addTripStop = document.getElementById("fde-addTripStopBtn");
     if (addTripStop) addTripStop.addEventListener("click", function() { addFleetTripStop(); });
     const routeRows = document.getElementById("fde-routeRows");
@@ -764,136 +773,76 @@ function initializeFleetButtons() {
 ========================================================= */
 
 async function saveTripTicket() {
-
-    const tripTicketNo =
-        getValue(
-            "fde-tripTicketNo"
-        );
-
-
-    const date =
-        getValue(
-            "fde-tripDate"
-        );
-
-
-    const vehicle =
-        getValue(
-            "fde-tripVehicle"
-        );
-
-
-    const driver =
-        getValue(
-            "fde-tripDriver"
-        );
-
-
-    const startKm =
-        numberValue(
-            "fde-startKm"
-        );
-
-
-    const endKm =
-        numberValue(
-            "fde-endKm"
-        );
-
-
-    const totalKm =
-        endKm - startKm;
-
-
-    const status =
-        getValue(
-            "fde-tripStatus"
-        );
-
-
+    const date = getValue("fde-tripDate");
+    const vehicle = getValue("fde-tripVehicle");
+    const driver = getValue("fde-tripDriver");
+    const startKm = numberValue("fde-startKm");
+    const endKm = numberValue("fde-endKm");
+    const status = getValue("fde-tripStatus");
     const origin = getValue("fde-origin");
     const returnOrigin = getValue("fde-returnOrigin");
     const routeDetails = getFleetTripRouteDetails();
-    const destination = routeDetails.map(function(stop) {
-        return stop.destination + (stop.km !== "" ? " (KM " + stop.km + ")" : "");
-    }).join(" → ");
-    const purpose = routeDetails.map(function(stop) { return stop.purpose; }).filter(Boolean).join(" | ");
+    const remarks = getValue("fde-tripRemarks");
 
-
-    const remarks =
-        getValue(
-            "fde-tripRemarks"
-        );
-
-
-    if (!date) {
-
-        alert(
-            "Please enter the trip ticket date."
-        );
-
-        return;
-
+    if (!date) { alert("Please enter the trip ticket date."); return; }
+    if (!vehicle) { alert("Please select a vehicle."); return; }
+    if (!driver.trim()) { alert("Please enter the driver name."); return; }
+    if (!Number.isFinite(startKm) || !Number.isFinite(endKm)) {
+        alert("Please enter Start KM and End KM."); return;
     }
-
-
-    if (!vehicle) {
-
-        alert(
-            "Please select a vehicle."
-        );
-
-        return;
-
-    }
-
-
-    if (
-        isNaN(startKm) ||
-        isNaN(endKm)
-    ) {
-
-        alert(
-            "Please enter Start KM and End KM."
-        );
-
-        return;
-
-    }
-
-
-    if (endKm < startKm) {
-        alert("End KM cannot be lower than Start KM.");
-        return;
-    }
+    if (endKm < startKm) { alert("End KM cannot be lower than Start KM."); return; }
     if (!origin) { alert("Please enter the starting Origin."); return; }
     if (!returnOrigin || returnOrigin.trim().toLowerCase() !== origin.trim().toLowerCase()) {
         alert("The return location must match the starting Origin."); return;
     }
-    if (!routeDetails.length || routeDetails.some(function(stop) { return !stop.destination || stop.km === ""; })) {
-        alert("Please complete each destination and its KM reading."); return;
+    if (!routeDetails.length || routeDetails.some(function(stop) {
+        return !stop.destination || stop.km === "" || !stop.purpose;
+    })) {
+        alert("Please complete each destination, its KM reading, and its purpose."); return;
     }
+
     let previousKm = startKm;
     for (const stop of routeDetails) {
-        if (Number(stop.km) < previousKm) { alert("Each destination KM must be equal to or greater than the previous odometer reading."); return; }
+        if (Number(stop.km) < previousKm) {
+            alert("Each destination KM must be equal to or greater than the previous odometer reading."); return;
+        }
         previousKm = Number(stop.km);
     }
     if (endKm < previousKm) { alert("End KM must be equal to or greater than the last destination KM."); return; }
 
+    const tripTicketNo = generateFleetTripTicketNo(date);
+    setValue("fde-tripTicketNo", tripTicketNo);
 
-    // Auto-number trip sequence per vehicle per trip date.
-    const sameDayTrips = (fdeData.tripTickets || []).filter(function (item) {
-        return String(item.vehicle || "").trim().toUpperCase() === vehicle.trim().toUpperCase()
-            && fdeDateForInput(item.date) === date;
+    // Save each leg as its own row. The same Trip Ticket No. and vehicle details
+    // are reused; only trip sequence, route, purpose, odometer and total KM change.
+    const legs = [];
+    let legOrigin = origin;
+    let legStartKm = startKm;
+
+    routeDetails.forEach(function(stop) {
+        const legEndKm = Number(stop.km);
+        legs.push({
+            origin: legOrigin,
+            destination: stop.destination,
+            purpose: stop.purpose,
+            startKm: legStartKm,
+            endKm: legEndKm,
+            totalKm: legEndKm - legStartKm
+        });
+        legOrigin = stop.destination;
+        legStartKm = legEndKm;
     });
-    const highestSequence = sameDayTrips.reduce(function (highest, item) {
-        return Math.max(highest, Number(item.tripSequence || 0));
-    }, 0);
-    const tripSequence = highestSequence > 0
-        ? highestSequence + 1
-        : sameDayTrips.length + 1;
 
-    const currentUser = getFleetCurrentUser();
+    // Store the return-to-origin leg too, so the individual trip KM totals
+    // account for the complete route rather than losing the return distance.
+    legs.push({
+        origin: legOrigin,
+        destination: returnOrigin,
+        purpose: "Return to Origin",
+        startKm: legStartKm,
+        endKm: endKm,
+        totalKm: endKm - legStartKm
+    });
 
     const saveButton = document.getElementById("fde-saveTripBtn");
     const originalButtonText = saveButton ? saveButton.textContent : "";
@@ -901,84 +850,58 @@ async function saveTripTicket() {
         if (saveButton.dataset.saving === "true") return;
         saveButton.dataset.saving = "true";
         saveButton.disabled = true;
-        saveButton.textContent = "Saving Trip Ticket...";
+        saveButton.textContent = "Saving " + legs.length + " Trips...";
         saveButton.setAttribute("aria-busy", "true");
     }
 
-    const record = {
-
-        id:
-            generateRecordId(
-                "TT"
-            ),
-
-        type:
-            "tripTicket",
-
-        tripTicketNo:
-            tripTicketNo,
-
-        tripSequence:
-            tripSequence,
-
-        createdBy:
-            currentUser,
-
-        date:
-            date,
-
-        vehicle:
-            vehicle,
-
-        driver:
-            driver,
-
-        startKm:
-            startKm,
-
-        endKm:
-            endKm,
-
-        totalKm:
-            totalKm,
-
-        origin:
-            origin,
-
-        destination:
-            destination,
-
-        purpose:
-            purpose,
-
-        routeDetails:
-            routeDetails,
-
-        remarks:
-            remarks,
-
-        status:
-            status,
-
-        createdAt:
-            new Date().toISOString(),
-
-        updatedAt:
-            new Date().toISOString()
-
-    };
-
-
+    const currentUser = getFleetCurrentUser();
+    let savedCount = 0;
     try {
-        updateStorageStatus(true, "Saving Trip Ticket to Google Sheets...");
-        await persistFleetRecord("tripTicket", record);
+        updateStorageStatus(true, "Saving trips to Google Sheets...");
+        for (let i = 0; i < legs.length; i++) {
+            const leg = legs[i];
+            const now = new Date().toISOString();
+            const record = {
+                id: generateRecordId("TT"),
+                type: "tripTicket",
+                tripTicketNo: tripTicketNo,
+                tripSequence: i + 1,
+                createdBy: currentUser,
+                date: date,
+                vehicle: vehicle,
+                driver: driver,
+                startKm: leg.startKm,
+                endKm: leg.endKm,
+                totalKm: leg.totalKm,
+                origin: leg.origin,
+                destination: leg.destination,
+                purpose: leg.purpose,
+                routeDetails: [{
+                    destination: leg.destination,
+                    km: leg.endKm,
+                    purpose: leg.purpose
+                }],
+                remarks: remarks,
+                status: status,
+                createdAt: now,
+                updatedAt: now
+            };
+            await persistFleetRecord("tripTicket", record);
+            savedCount++;
+            if (saveButton) saveButton.textContent = "Saving Trip " + savedCount + " of " + legs.length + "...";
+        }
+
         clearTripTicketForm();
         updateStorageStatus(true, "Google Sheets connected • Trip Ticket saved");
-        alert("Trip Ticket saved successfully to Google Sheets.\nTrip Sequence: " + tripSequence);
+        alert("Trip Ticket saved successfully!\nTrip Ticket No.: " + tripTicketNo +
+            "\nSaved individual trips: " + savedCount +
+            "\nTotal KM: " + (endKm - startKm).toFixed(2));
     } catch (error) {
         console.error("Trip Ticket save failed:", error);
         updateStorageStatus(false, "Trip Ticket save failed");
-        alert("Hindi na-save ang Trip Ticket. " + (error && error.message ? error.message : "Pakisuri ang internet at Apps Script deployment."));
+        alert("Naka-save ang " + savedCount + " sa " + legs.length + " trips bago nagkaroon ng error. " +
+            "Trip Ticket No.: " + tripTicketNo + ". Error: " +
+            (error && error.message ? error.message : "Pakisuri ang internet at Apps Script deployment."));
     } finally {
         if (saveButton) {
             saveButton.disabled = false;
@@ -987,7 +910,26 @@ async function saveTripTicket() {
             delete saveButton.dataset.saving;
         }
     }
+}
 
+/**
+ * Generates one shared ticket number for all legs entered on the same form.
+ * Format: TT-YYYYMMDD-001. Uses existing saved numbers for that date.
+ */
+function generateFleetTripTicketNo(date) {
+    const datePart = String(date || "").replace(/-/g, "");
+    if (!/^\\d{8}$/.test(datePart)) return "";
+    const prefix = "TT-" + datePart + "-";
+    const existing = (fdeData.tripTickets || []).map(function(item) {
+        return String(item.tripTicketNo || "").trim();
+    }).filter(function(number) {
+        return number.indexOf(prefix) === 0;
+    });
+    const highest = existing.reduce(function(max, number) {
+        const suffix = Number(number.slice(prefix.length));
+        return Number.isFinite(suffix) ? Math.max(max, suffix) : max;
+    }, 0);
+    return prefix + String(highest + 1).padStart(3, "0");
 }
 
 
