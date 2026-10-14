@@ -12,14 +12,14 @@
    FEATURES:
    - Payment Summary Cards
    - Recent Payment
-   - Recent Sales Order
+   - Customer Credit
    - Payment Search
    - Sales Order Search
    - Month / Year Filter
    - Dynamic Card Adjustment
    - Refresh
    - Prepare Payment
-   - LocalStorage Data Source
+   - Google Sheets Database Data Source
 
    CARD FILTER LOGIC:
 
