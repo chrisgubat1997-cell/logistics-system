@@ -95,6 +95,16 @@ async function initializeFleetDataEntry() {
 
     initializeFleetButtons();
 
+    // Show the next Trip Ticket number immediately when the module opens.
+    const tripDateInput = document.getElementById("fde-tripDate");
+    if (tripDateInput && !tripDateInput.value) {
+        tripDateInput.value = fleetTodayForInput();
+    }
+    const initialTripDate = getValue("fde-tripDate");
+    if (initialTripDate) setValue("fde-tripTicketNo", generateFleetTripTicketNo(initialTripDate));
+
+    initializeMaintenanceRequestRows();
+
     initializeFleetRecords();
 
     renderFleetDeliveryRecords();
@@ -174,14 +184,24 @@ async function loadFleetDeliveryData() {
             return {
                 id: r.MAINTENANCE_ID || "",
                 type: "maintenance",
-                date: fdeDateForInput(r.MAINTENANCE_DATE),
+                requestNo: r.MNT_REQUEST_NO || "",
+                requestedBy: r.REQUESTED_BY || "",
+                date: fdeDateForInput(r.REQUEST_DATE || r.MAINTENANCE_DATE),
                 vehicle: r.VEHICLE_CODE || "",
+                plateNumber: r.PLATE_NUMBER || r.PLATE_NO || r.LICENSE_PLATE || "",
+                department: r.DEPARTMENT || "",
+                odometer: Number(r.ODOMETER || 0),
+                classifications: String(r.CLASSIFICATIONS || r.MAINTENANCE_TYPE || "").split(",").map(function(v) { return v.trim(); }).filter(Boolean),
+                description: r.REQUEST_DESCRIPTION || r.DEFECT || "",
+                lastCompletion: fdeDateForInput(r.LAST_COMPLETION_DATE),
+                targetDate: fdeDateForInput(r.TARGET_COMPLETION_DATE),
+                estimatedCost: Number(r.ESTIMATED_COST || r.COST || 0),
                 maintenanceType: r.MAINTENANCE_TYPE || "",
-                defect: r.DEFECT || "",
+                defect: r.REQUEST_DESCRIPTION || r.DEFECT || "",
                 repair: r.REPAIR_ACTION || "",
-                cost: Number(r.COST || 0),
+                cost: Number(r.ESTIMATED_COST || r.COST || 0),
                 idleDays: Number(r.IDLE_DAYS || 0),
-                status: r.STATUS || "",
+                status: r.STATUS || "Pending",
                 remarks: r.REMARKS || "",
                 createdAt: r.CREATED_AT || "",
                 updatedAt: r.UPDATED_AT || ""
@@ -212,6 +232,13 @@ async function loadFleetDeliveryData() {
     };
 
     updateStorageStatus(true, "Google Sheets connected");
+}
+
+function fleetTodayForInput() {
+    const now = new Date();
+    return now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
+        String(now.getDate()).padStart(2, "0");
 }
 
 function fdeDateForInput(value) {
@@ -1096,146 +1123,165 @@ async function saveFuelRecord() {
 ========================================================= */
 
 async function saveMaintenanceRecord() {
+    const requestNo = getValue("fde-maintenanceNo");
+    const requestedBy = getValue("fde-requestedBy");
+    const date = getValue("fde-maintenanceDate");
+    const vehicle = getValue("fde-maintenanceVehicle");
+    const plateNumber = getValue("fde-maintenancePlate");
+    const department = getValue("fde-maintenanceDepartment");
+    const odometer = numberValue("fde-maintenanceOdometer");
+    const targetDate = getValue("fde-maintenanceTargetDate");
+    const estimatedCost = numberValue("fde-maintenanceCost");
+    const status = getValue("fde-maintenanceStatus");
+    const classifications = Array.from(document.querySelectorAll('input[name="fde-maintenanceClass"]:checked')).map(function(input) { return input.value; });
+    const requests = getMaintenanceRequestDetails();
 
-    const date =
-        getValue(
-            "fde-maintenanceDate"
-        );
-
-
-    const vehicle =
-        getValue(
-            "fde-maintenanceVehicle"
-        );
-
-
-    const maintenanceType =
-        getValue(
-            "fde-maintenanceType"
-        );
-
-
-    const cost =
-        numberValue(
-            "fde-maintenanceCost"
-        );
-
-
-    const idleDays =
-        numberValue(
-            "fde-idleDays"
-        );
-
-
-    const status =
-        getValue(
-            "fde-maintenanceStatus"
-        );
-
-
-    const defect =
-        getValue(
-            "fde-defect"
-        );
-
-
-    const repair =
-        getValue(
-            "fde-repair"
-        );
-
-
-    const remarks =
-        getValue(
-            "fde-maintenanceRemarks"
-        );
-
-
-    if (!date) {
-
-        alert(
-            "Please enter the maintenance date."
-        );
-
-        return;
-
+    if (!requestedBy) { alert("Please select Requested By."); return; }
+    if (!date) { alert("Please enter the Request Date."); return; }
+    if (!vehicle) { alert("Please select a vehicle."); return; }
+    if (!classifications.length) { alert("Please select at least one classification: Repair, Replacement, Improvement, or Installation."); return; }
+    if (!requests.length || requests.some(function(item) { return !item.description; })) {
+        alert("Please enter the description for each maintenance request."); return;
     }
 
-
-    if (!vehicle) {
-
-        alert(
-            "Please select a vehicle."
-        );
-
-        return;
-
+    const finalRequestNo = requestNo || generateMaintenanceRequestNo();
+    const saveButton = document.getElementById("fde-saveMaintenanceBtn");
+    const originalButtonText = saveButton ? saveButton.textContent : "";
+    if (saveButton) {
+        if (saveButton.dataset.saving === "true") return;
+        saveButton.dataset.saving = "true";
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving Requests...";
     }
 
-
-    const record = {
-
-        id:
-            generateRecordId(
-                "MAIN"
-            ),
-
-        type:
-            "maintenance",
-
-        date:
-            date,
-
-        vehicle:
-            vehicle,
-
-        maintenanceType:
-            maintenanceType,
-
-        defect:
-            defect,
-
-        repair:
-            repair,
-
-        cost:
-            isNaN(cost)
-                ? 0
-                : cost,
-
-        idleDays:
-            isNaN(idleDays)
-                ? 0
-                : idleDays,
-
-        status:
-            status,
-
-        remarks:
-            remarks,
-
-        createdAt:
-            new Date().toISOString(),
-
-        updatedAt:
-            new Date().toISOString()
-
-    };
-
-
-        try {
-        await persistFleetRecord("maintenance", record);
+    let savedCount = 0;
+    try {
+        for (let i = 0; i < requests.length; i++) {
+            const request = requests[i];
+            const now = new Date().toISOString();
+            const record = {
+                id: generateRecordId("MAIN"),
+                type: "maintenance",
+                requestNo: finalRequestNo,
+                requestedBy: requestedBy,
+                date: date,
+                vehicle: vehicle,
+                plateNumber: plateNumber,
+                department: department,
+                odometer: Number.isFinite(odometer) ? odometer : 0,
+                classifications: classifications,
+                maintenanceType: classifications.join(", "),
+                description: request.description,
+                defect: request.description,
+                lastCompletion: request.lastCompletion || "",
+                targetDate: targetDate || "",
+                estimatedCost: Number.isFinite(estimatedCost) ? estimatedCost : 0,
+                cost: Number.isFinite(estimatedCost) ? estimatedCost : 0,
+                repair: "",
+                idleDays: 0,
+                status: status || "Pending",
+                remarks: "",
+                createdAt: now,
+                updatedAt: now
+            };
+            await persistFleetRecord("maintenance", record);
+            savedCount++;
+            if (saveButton) saveButton.textContent = "Saving " + savedCount + " of " + requests.length + "...";
+        }
         clearMaintenanceForm();
-        alert("Maintenance record saved successfully to Google Sheets.");
+        alert("Maintenance request saved successfully.\nMaintenance No.: " + finalRequestNo + "\nSeparate request items saved: " + savedCount);
     } catch (error) {
         console.error("Maintenance save failed:", error);
-        alert("Hindi na-save ang Maintenance record. " + error.message);
+        alert("Naka-save ang " + savedCount + " sa " + requests.length + " request items. Maintenance No.: " + finalRequestNo + ". Error: " + error.message);
+    } finally {
+        if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.textContent = originalButtonText || "Save Maintenance";
+            delete saveButton.dataset.saving;
+        }
     }
-
 }
 
+function generateMaintenanceRequestNo() {
+    const existing = (fdeData.maintenance || []).map(function(item) {
+        return String(item.requestNo || "").trim().toUpperCase();
+    });
+    let highest = 399;
+    existing.forEach(function(number) {
+        const match = number.match(/^MNT-(\d+)$/);
+        if (match) highest = Math.max(highest, Number(match[1]));
+    });
+    return "MNT-" + String(highest + 1).padStart(4, "0");
+}
+
+function addMaintenanceRequestRow(details) {
+    const body = document.getElementById("fde-maintenanceRequestRows");
+    if (!body) return;
+    const row = document.createElement("div");
+    row.className = "fde-maint-request-row";
+    row.innerHTML = '<div class="fde-field"><label>Description of Service / Request</label><input type="text" class="fde-maint-request-description" placeholder="Search or describe requested repair"></div>' +
+        '<div class="fde-field"><label>Last Completion of This Issue</label><input type="date" class="fde-maint-request-last-completion"></div>' +
+        '<button type="button" class="fde-btn secondary fde-maint-remove-request" title="Remove request">Remove</button>';
+    if (details) {
+        row.querySelector(".fde-maint-request-description").value = details.description || "";
+        row.querySelector(".fde-maint-request-last-completion").value = details.lastCompletion || "";
+    }
+    body.appendChild(row);
+    refreshMaintenanceRequestRemoveButtons();
+}
+
+function refreshMaintenanceRequestRemoveButtons() {
+    const rows = Array.from(document.querySelectorAll("#fde-maintenanceRequestRows .fde-maint-request-row"));
+    rows.forEach(function(row) {
+        const button = row.querySelector(".fde-maint-remove-request");
+        if (button) button.disabled = rows.length <= 1;
+    });
+}
+
+function getMaintenanceRequestDetails() {
+    return Array.from(document.querySelectorAll("#fde-maintenanceRequestRows .fde-maint-request-row")).map(function(row) {
+        return {
+            description: row.querySelector(".fde-maint-request-description").value.trim(),
+            lastCompletion: row.querySelector(".fde-maint-request-last-completion").value
+        };
+    }).filter(function(item) { return item.description || item.lastCompletion; });
+}
+
+function initializeMaintenanceRequestRows() {
+    const body = document.getElementById("fde-maintenanceRequestRows");
+    if (!body || body.dataset.initialized === "true") return;
+    body.dataset.initialized = "true";
+    if (!body.querySelector(".fde-maint-request-row")) addMaintenanceRequestRow();
+    const add = document.getElementById("fde-addMaintenanceRequestBtn");
+    if (add) add.addEventListener("click", function() { addMaintenanceRequestRow(); });
+    body.addEventListener("click", function(event) {
+        const button = event.target.closest(".fde-maint-remove-request");
+        if (button) {
+            const row = button.closest(".fde-maint-request-row");
+            if (row) row.remove();
+            refreshMaintenanceRequestRemoveButtons();
+        }
+    });
+    const vehicle = document.getElementById("fde-maintenanceVehicle");
+    if (vehicle) vehicle.addEventListener("change", fillMaintenancePlateNumber);
+    fillMaintenancePlateNumber();
+    const requestNo = document.getElementById("fde-maintenanceNo");
+    if (requestNo) requestNo.value = generateMaintenanceRequestNo();
+}
+
+function fillMaintenancePlateNumber() {
+    const vehicleCode = getValue("fde-maintenanceVehicle").trim().toUpperCase();
+    const plateInput = document.getElementById("fde-maintenancePlate");
+    if (!plateInput) return;
+    const vehicle = (fdeData.vehicles || []).find(function(item) {
+        return String(item.VEHICLE_CODE || item.vehicleCode || item.code || "").trim().toUpperCase() === vehicleCode;
+    });
+    const plate = vehicle ? (vehicle.PLATE_NUMBER || vehicle.PLATE_NO || vehicle.LICENSE_PLATE || vehicle.PLATE || vehicle.plateNumber || vehicle.plateNo || "") : "";
+    plateInput.value = plate;
+}
 
 /* =========================================================
+   SAVE DELIVERY/* =========================================================
    SAVE DELIVERY
 ========================================================= */
 
@@ -2478,56 +2524,26 @@ function clearFuelForm() {
 ========================================================= */
 
 function clearMaintenanceForm() {
-
-    setValue(
-        "fde-maintenanceDate",
-        ""
-    );
-
-    setValue(
-        "fde-maintenanceVehicle",
-        ""
-    );
-
-    setValue(
-        "fde-maintenanceType",
-        ""
-    );
-
-    setValue(
-        "fde-maintenanceCost",
-        ""
-    );
-
-    setValue(
-        "fde-idleDays",
-        ""
-    );
-
-    setValue(
-        "fde-maintenanceStatus",
-        "Completed"
-    );
-
-    setValue(
-        "fde-defect",
-        ""
-    );
-
-    setValue(
-        "fde-repair",
-        ""
-    );
-
-    setValue(
-        "fde-maintenanceRemarks",
-        ""
-    );
-
+    setValue("fde-maintenanceNo", generateMaintenanceRequestNo());
+    setValue("fde-requestedBy", "");
+    setValue("fde-maintenanceDate", fleetTodayForInput());
+    setValue("fde-maintenanceVehicle", "");
+    setValue("fde-maintenancePlate", "");
+    setValue("fde-maintenanceDepartment", "");
+    setValue("fde-maintenanceOdometer", "");
+    setValue("fde-maintenanceTargetDate", "");
+    setValue("fde-maintenanceCost", "");
+    setValue("fde-maintenanceStatus", "Pending");
+    document.querySelectorAll('input[name="fde-maintenanceClass"]').forEach(function(input) { input.checked = false; });
+    const body = document.getElementById("fde-maintenanceRequestRows");
+    if (body) {
+        body.innerHTML = "";
+        addMaintenanceRequestRow();
+    }
 }
 
-
 /* =========================================================
+   CLEAR DELIVERY/* =========================================================
    CLEAR DELIVERY
 ========================================================= */
 
