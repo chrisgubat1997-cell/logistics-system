@@ -1824,7 +1824,10 @@ function updatePaymentSummary() {
 
 
     /*
-       Update SO information balance.
+       Remaining DP / Balance in SALES ORDER INFORMATION:
+       No previous payment = full SO total.
+       Previous payments = SO total minus previous paid.
+       Do not subtract the current payment until it is saved.
     */
 
     setValue(
@@ -1832,8 +1835,8 @@ function updatePaymentSummary() {
         formatCurrency(
             Math.max(
                 0,
-                currentRequiredDP -
-                totalPaidAfterPayment
+                currentSalesOrderTotal -
+                currentPreviousPaid
             )
         )
     );
