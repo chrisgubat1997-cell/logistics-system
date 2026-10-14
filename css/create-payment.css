@@ -840,3 +840,5 @@ body {
 /* SELECTED SALES ORDER PAYMENT HISTORY */
 .create-payment-history-section { margin-top: 16px; }
 .create-payment-history-section .create-payment-unpaid-table { min-width: 850px; }
+
+.create-payment-delivery-status.is-status-unavailable { color:#475467; background:#e4e7ec; }
