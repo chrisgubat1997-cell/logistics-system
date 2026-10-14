@@ -649,6 +649,27 @@ function renderUnpaidPaymentSOTable() {
     });
 }
 
+function renderSelectedSOPaymentTransactions(soNumber) {
+    const tbody = document.getElementById("selectedSOPaymentHistoryBody");
+    const caption = document.getElementById("selectedSOPaymentHistoryCaption");
+    if (!tbody) return;
+    const soKey = paymentSOKey(soNumber);
+    if (caption) caption.textContent = soNumber ? "Saved payment transactions recorded against " + soNumber + "." : "Select a Sales Order to view its saved payment transactions from the database.";
+    if (!soKey) { tbody.innerHTML = '<tr><td colspan="7" class="create-payment-unpaid-empty">No Sales Order selected.</td></tr>'; return; }
+    const rows = databasePayments.filter(function(payment) {
+        return paymentSOKey(payment.SO_NUMBER || payment.soNo || payment.salesOrderNo || payment.salesOrderNumber) === soKey;
+    }).sort(function(a,b) {
+        return String(b.PAYMENT_DATE || b.paymentDate || b.date || b.CREATED_AT || "").localeCompare(String(a.PAYMENT_DATE || a.paymentDate || a.date || a.CREATED_AT || ""));
+    });
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="create-payment-unpaid-empty">No saved payment transactions found for this Sales Order.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(function(payment) {
+        const amount = payment.SO_APPLIED_AMOUNT ?? payment.soAppliedAmount ?? payment.CURRENT_PAYMENT ?? payment.currentPayment ?? payment.AMOUNT ?? payment.amount ?? 0;
+        const date = payment.PAYMENT_DATE || payment.paymentDate || payment.date || "";
+        const status = String(payment.PAYMENT_STATUS || payment.paymentStatus || payment.status || "—").toUpperCase();
+        return '<tr><td>'+escapePaymentHTML(payment.PAYMENT_NO || payment.paymentNo || payment.PAYMENT_ID || "—")+'</td><td>'+escapePaymentHTML(formatPaymentSODate(date))+'</td><td>'+escapePaymentHTML(payment.PAYMENT_METHOD || payment.paymentMethod || "—")+'</td><td>'+escapePaymentHTML(payment.RECEIPT_NO || payment.receiptNo || "—")+'</td><td>'+escapePaymentHTML(payment.REFERENCE_NO || payment.referenceNo || "—")+'</td><td class="create-payment-unpaid-balance">'+escapePaymentHTML(formatPaymentCurrency(amount))+'</td><td>'+escapePaymentHTML(status)+'</td></tr>';
+    }).join("");
+}
+
 function getSalesOrderDateForPayment(so) { return so.DATE_CREATION || so.SO_DATE || so.DATE || so.date || so.createdAt || so.CREATED_AT || ""; }
 function formatPaymentSODate(value) { if (!value) return "—"; const date = new Date(value); return isNaN(date.getTime()) ? String(value) : date.toLocaleDateString("en-PH"); }
 function formatPaymentCurrency(value) { return "₱" + parseMoney(value).toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2}); }
@@ -1136,6 +1157,8 @@ function loadSalesOrderInformation(
         currentRemainingBalance
     );
 
+    renderSelectedSOPaymentTransactions(soNumber);
+
 }
 
 
@@ -1233,6 +1256,7 @@ function clearSalesOrderInformation() {
 
 
     updatePaymentSummary();
+    renderSelectedSOPaymentTransactions("");
 
 }
 
@@ -1444,10 +1468,8 @@ function calculatePreviousPaid(
             }
 
 
-            const amount =
-                getPaymentAmount(
-                    payment
-                );
+            const appliedAmount = payment.SO_APPLIED_AMOUNT ?? payment.soAppliedAmount;
+            const amount = parseMoney(appliedAmount !== undefined && appliedAmount !== null && appliedAmount !== "" ? appliedAmount : getPaymentAmount(payment));
 
 
             const paymentStatus=normalizeText(payment.PAYMENT_STATUS||payment.paymentStatus||payment.status||"received");
