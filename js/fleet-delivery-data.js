@@ -135,6 +135,8 @@ async function loadFleetDeliveryData() {
                 id: r.TRIP_ID || "",
                 type: "tripTicket",
                 tripTicketNo: r.TRIP_TICKET_NO || "",
+                tripSequence: r.TRIP_SEQUENCE || "",
+                createdBy: r.CREATED_BY || "",
                 date: fdeDateForInput(r.TRIP_DATE),
                 vehicle: r.VEHICLE_CODE || "",
                 driver: r.DRIVER_NAME || "",
