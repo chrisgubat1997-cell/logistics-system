@@ -90,17 +90,11 @@ const CUSTOMER_CREDIT_TRANSACTION_STORAGE_KEYS = [
 const PAYMENT_DASHBOARD_API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
 async function paymentDashboardAPI(action) {
-    const response = await fetch(PAYMENT_DASHBOARD_API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action: action, data: {} })
-    });
+    const response = await fetch(PAYMENT_DASHBOARD_API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: action, data: {} }) });
     const raw = await response.text();
     let result;
     try { result = JSON.parse(raw); } catch (error) { throw new Error("Invalid response from LOGIS-TECH database."); }
-    if (!response.ok || !result || result.success === false) {
-        throw new Error(result && (result.message || result.error) || (action + " failed."));
-    }
+    if (!response.ok || !result || result.success === false) throw new Error(result && (result.message || result.error) || (action + " failed."));
     return result;
 }
 
@@ -418,34 +412,25 @@ async function loadPaymentData() {
     const refreshButton = document.getElementById('refreshPaymentBtn');
     if (refreshButton) refreshButton.disabled = true;
     try {
-        const results = await Promise.all([
-            paymentDashboardAPI('getPayments'),
-            paymentDashboardAPI('getSalesOrders')
-        ]);
+        const results = await Promise.all([paymentDashboardAPI('getPayments'), paymentDashboardAPI('getSalesOrders')]);
         paymentRecords = paymentDashboardRows(results[0], ['payments']).map(function (row) {
             return Object.assign({}, row, {
                 paymentNo: row.PAYMENT_NO || row.PAYMENT_ID || row.paymentNo || row.paymentNumber || '',
-                invoiceNo: row.INVOICE_NO || row.invoiceNo || '',
-                siNo: row.SI_NO || row.siNo || '',
-                soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || '',
-                client: row.CLIENT_NAME || row.client || row.clientName || '',
-                project: row.PROJECT || row.project || '',
-                date: row.PAYMENT_DATE || row.paymentDate || row.date || row.CREATED_AT || '',
+                invoiceNo: row.INVOICE_NO || row.invoiceNo || '', siNo: row.SI_NO || row.siNo || '',
+                soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || '', client: row.CLIENT_NAME || row.client || row.clientName || '',
+                project: row.PROJECT || row.project || '', date: row.PAYMENT_DATE || row.paymentDate || row.date || row.CREATED_AT || '',
                 amount: row.CURRENT_PAYMENT ?? row.currentPayment ?? row.AMOUNT ?? row.amount ?? 0,
                 status: row.PAYMENT_STATUS || row.status || 'RECEIVED'
             });
         });
         paymentSalesOrders = paymentDashboardRows(results[1], ['salesOrders']).map(function (row) {
             return Object.assign({}, row, {
-                soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || '',
-                client: row.CLIENT_NAME || row.client || row.clientName || '',
-                project: row.PROJECT || row.project || '',
-                date: row.DATE_CREATION || row.SO_DATE || row.date || row.createdAt || '',
+                soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || '', client: row.CLIENT_NAME || row.client || row.clientName || '',
+                project: row.PROJECT || row.project || '', date: row.DATE_CREATION || row.SO_DATE || row.date || row.createdAt || '',
                 total: row.GRAND_TOTAL ?? row.SO_TOTAL ?? row.TOTAL_AMOUNT ?? row.total ?? row.grandTotal ?? 0,
                 status: row.STATUS || row.status || ''
             });
         });
-        // Credit-ledger display remains compatible with existing saved credit records.
         customerCreditRecords = getStoredArray(CUSTOMER_CREDIT_STORAGE_KEYS);
         customerCreditTransactions = getStoredArray(CUSTOMER_CREDIT_TRANSACTION_STORAGE_KEYS);
         populatePaymentYears();
@@ -465,3 +450,2397 @@ async function loadPaymentData() {
         if (refreshButton) refreshButton.disabled = false;
     }
 }
+
+
+/* =========================================================
+   GET LOCAL STORAGE ARRAY
+========================================================= */
+
+function getStoredArray(keys) {
+
+    for (
+        let i = 0;
+        i < keys.length;
+        i++
+    ) {
+
+        const key = keys[i];
+
+        try {
+
+            const raw =
+                localStorage.getItem(key);
+
+            if (!raw) {
+                continue;
+            }
+
+            const parsed =
+                JSON.parse(raw);
+
+            if (Array.isArray(parsed)) {
+                return parsed;
+            }
+
+            /*
+               Some systems store:
+               {
+                   data: [...]
+               }
+            */
+
+            if (
+                parsed &&
+                Array.isArray(
+                    parsed.data
+                )
+            ) {
+
+                return parsed.data;
+
+            }
+
+            if (
+                parsed &&
+                Array.isArray(
+                    parsed.records
+                )
+            ) {
+
+                return parsed.records;
+
+            }
+
+        } catch (error) {
+
+            console.warn(
+                'Unable to read storage:',
+                key,
+                error
+            );
+
+        }
+
+    }
+
+    return [];
+
+}
+
+
+/* =========================================================
+   POPULATE YEARS
+========================================================= */
+
+function populatePaymentYears() {
+
+    const yearSelect =
+        document.getElementById(
+            'paymentFilterYear'
+        );
+
+    if (!yearSelect) {
+        return;
+    }
+
+    /*
+       Preserve All Years
+    */
+
+    yearSelect.innerHTML =
+        '<option value="all">All Years</option>';
+
+    const years = new Set();
+
+    paymentRecords.forEach(
+        function (payment) {
+
+            const date =
+                getPaymentDate(payment);
+
+            if (!date) {
+                return;
+            }
+
+            years.add(
+                date.getFullYear()
+            );
+
+        }
+    );
+
+    /*
+       Also get years from SO records
+    */
+
+    paymentSalesOrders.forEach(
+        function (so) {
+
+            const date =
+                getSalesOrderDate(so);
+
+            if (!date) {
+                return;
+            }
+
+            years.add(
+                date.getFullYear()
+            );
+
+        }
+    );
+
+
+    /*
+       Current year always available
+    */
+
+    years.add(
+        new Date().getFullYear()
+    );
+
+
+    const sortedYears =
+        Array.from(years)
+            .sort(
+                function (a, b) {
+                    return b - a;
+                }
+            );
+
+
+    sortedYears.forEach(
+        function (year) {
+
+            const option =
+                document.createElement(
+                    'option'
+                );
+
+            option.value =
+                String(year);
+
+            option.textContent =
+                String(year);
+
+            yearSelect.appendChild(
+                option
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   APPLY PAYMENT FILTERS
+========================================================= */
+
+function applyPaymentFilters() {
+
+    const month =
+        getSelectedValue(
+            'paymentFilterMonth'
+        );
+
+    const year =
+        getSelectedValue(
+            'paymentFilterYear'
+        );
+
+
+    const isFiltered =
+        month !== 'all' ||
+        year !== 'all';
+
+
+    /*
+       FILTER PAYMENT RECORDS
+    */
+
+    filteredPaymentRecords =
+        paymentRecords.filter(
+            function (payment) {
+
+                return matchesMonthYear(
+                    getPaymentDate(payment),
+                    month,
+                    year
+                );
+
+            }
+        );
+
+
+    /*
+       FILTER SALES ORDERS
+    */
+
+    filteredPaymentSalesOrders =
+        paymentSalesOrders.filter(
+            function (so) {
+
+                return matchesMonthYear(
+                    getSalesOrderDate(so),
+                    month,
+                    year
+                );
+
+            }
+        );
+
+
+    /*
+       UPDATE CARDS
+    */
+
+    updatePaymentCards(
+        filteredPaymentRecords,
+        isFiltered
+    );
+
+
+    /*
+       RENDER TABLES
+    */
+
+    renderPaymentTable();
+
+    renderCustomerCreditTable();
+
+}
+
+
+/* =========================================================
+   MONTH / YEAR MATCH
+========================================================= */
+
+function matchesMonthYear(
+    date,
+    month,
+    year
+) {
+
+    /*
+       If no date exists,
+       don't include when a filter
+       is active.
+    */
+
+    if (!date) {
+
+        return (
+            month === 'all' &&
+            year === 'all'
+        );
+
+    }
+
+
+    if (
+        year !== 'all' &&
+        String(
+            date.getFullYear()
+        ) !== String(year)
+    ) {
+
+        return false;
+
+    }
+
+
+    if (
+        month !== 'all' &&
+        String(
+            date.getMonth() + 1
+        ).padStart(2, '0') !==
+        String(month).padStart(2, '0')
+    ) {
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =========================================================
+   UPDATE PAYMENT CARDS
+========================================================= */
+
+function updatePaymentCards(
+    records,
+    isFiltered
+) {
+
+    /*
+       -----------------------------------------
+       FILTERED MODE
+       -----------------------------------------
+    */
+
+    if (isFiltered) {
+
+        const totalPayment =
+            records.reduce(
+                function (
+                    total,
+                    payment
+                ) {
+
+                    return (
+                        total +
+                        getPaymentAmount(
+                            payment
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+        const pendingPayment =
+            records
+                .filter(
+                    function (payment) {
+
+                        return isPendingPayment(
+                            payment
+                        );
+
+                    }
+                )
+                .reduce(
+                    function (
+                        total,
+                        payment
+                    ) {
+
+                        return (
+                            total +
+                            getPaymentAmount(
+                                payment
+                            )
+                        );
+
+                    },
+                    0
+                );
+
+
+        /*
+           FILTERED MODE:
+           Today's Payment = 0
+           Paid This Month = 0
+        */
+
+        setPaymentCard(
+            'totalPaymentValue',
+            totalPayment
+        );
+
+        setPaymentCard(
+            'todaysPaymentValue',
+            0
+        );
+
+        setPaymentCard(
+            'paidThisMonthValue',
+            0
+        );
+
+        setPaymentCard(
+            'pendingPaymentValue',
+            pendingPayment
+        );
+
+        return;
+
+    }
+
+
+    /*
+       -----------------------------------------
+       NORMAL MODE
+       -----------------------------------------
+    */
+
+    const totalPayment =
+        records.reduce(
+            function (
+                total,
+                payment
+            ) {
+
+                return (
+                    total +
+                    getPaymentAmount(
+                        payment
+                    )
+                );
+
+            },
+            0
+        );
+
+
+    const today =
+        new Date();
+
+
+    const todaysPayment =
+        records
+            .filter(
+                function (payment) {
+
+                    return isSameDate(
+                        getPaymentDate(
+                            payment
+                        ),
+                        today
+                    );
+
+                }
+            )
+            .reduce(
+                function (
+                    total,
+                    payment
+                ) {
+
+                    return (
+                        total +
+                        getPaymentAmount(
+                            payment
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+    const paidThisMonth =
+        records
+            .filter(
+                function (payment) {
+
+                    return isSameMonth(
+                        getPaymentDate(
+                            payment
+                        ),
+                        today
+                    );
+
+                }
+            )
+            .reduce(
+                function (
+                    total,
+                    payment
+                ) {
+
+                    return (
+                        total +
+                        getPaymentAmount(
+                            payment
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+    const pendingPayment =
+        records
+            .filter(
+                function (payment) {
+
+                    return isPendingPayment(
+                        payment
+                    );
+
+                }
+            )
+            .reduce(
+                function (
+                    total,
+                    payment
+                ) {
+
+                    return (
+                        total +
+                        getPaymentAmount(
+                            payment
+                        )
+                    );
+
+                },
+                0
+            );
+
+
+    setPaymentCard(
+        'totalPaymentValue',
+        totalPayment
+    );
+
+    setPaymentCard(
+        'todaysPaymentValue',
+        todaysPayment
+    );
+
+    setPaymentCard(
+        'paidThisMonthValue',
+        paidThisMonth
+    );
+
+    setPaymentCard(
+        'pendingPaymentValue',
+        pendingPayment
+    );
+
+}
+
+
+/* =========================================================
+   SET CARD VALUE
+========================================================= */
+
+function setPaymentCard(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+    if (!element) {
+        return;
+    }
+
+    element.textContent =
+        formatCurrency(value);
+
+}
+
+
+/* =========================================================
+   RENDER PAYMENT TABLE
+========================================================= */
+
+function renderPaymentTable() {
+
+    const tbody =
+        document.getElementById(
+            'recentPaymentBody'
+        );
+
+    if (!tbody) {
+        return;
+    }
+
+
+    const searchInput =
+        document.getElementById(
+            'paymentSearchInput'
+        );
+
+
+    const search =
+        searchInput
+            ? searchInput.value
+                .trim()
+                .toLowerCase()
+            : '';
+
+
+    let records =
+        filteredPaymentRecords;
+
+
+    /*
+       SEARCH
+    */
+
+    if (search) {
+
+        records =
+            records.filter(
+                function (payment) {
+
+                    const searchable =
+                        [
+
+                            getPaymentNo(
+                                payment
+                            ),
+
+                            getInvoiceNo(
+                                payment
+                            ),
+
+                            getSINo(
+                                payment
+                            ),
+
+                            getSONo(
+                                payment
+                            ),
+
+                            getClientName(
+                                payment
+                            ),
+
+                            getProjectName(
+                                payment
+                            ),
+
+                            getPaymentStatus(
+                                payment
+                            )
+
+                        ]
+                        .join(' ')
+                        .toLowerCase();
+
+
+                    return searchable.includes(
+                        search
+                    );
+
+                }
+            );
+
+    }
+
+
+    /*
+       EMPTY
+    */
+
+    if (!records.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td
+                    colspan="10"
+                    class="payment-empty-state"
+                >
+                    No payment records found.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+
+    /*
+       SORT:
+       Newest first
+    */
+
+    records =
+        [...records].sort(
+            function (a, b) {
+
+                const dateA =
+                    getPaymentDate(a);
+
+                const dateB =
+                    getPaymentDate(b);
+
+                return (
+                    getDateTime(dateB) -
+                    getDateTime(dateA)
+                );
+
+            }
+        );
+
+
+    tbody.innerHTML =
+        records.map(
+            function (payment) {
+
+                return createPaymentRow(
+                    payment
+                );
+
+            }
+        ).join('');
+
+}
+
+
+/* =========================================================
+   CREATE PAYMENT ROW
+========================================================= */
+
+function createPaymentRow(
+    payment
+) {
+
+    const paymentNo =
+        getPaymentNo(payment);
+
+    const invoiceNo =
+        getInvoiceNo(payment);
+
+    const siNo =
+        getSINo(payment);
+
+    const soNo =
+        getSONo(payment);
+
+    const client =
+        getClientName(payment);
+
+    const project =
+        getProjectName(payment);
+
+    const date =
+        formatDate(
+            getPaymentDate(payment)
+        );
+
+    const amount =
+        formatCurrency(
+            getPaymentAmount(payment)
+        );
+
+    const status =
+        getPaymentStatus(payment);
+
+
+    const statusClass =
+        getPaymentStatusClass(
+            status
+        );
+
+
+    return `
+        <tr>
+
+            <td>
+                ${escapeHTML(paymentNo)}
+            </td>
+
+            <td>
+                ${escapeHTML(invoiceNo)}
+            </td>
+
+            <td>
+                ${escapeHTML(siNo)}
+            </td>
+
+            <td>
+                ${escapeHTML(soNo)}
+            </td>
+
+            <td>
+                ${escapeHTML(client)}
+            </td>
+
+            <td>
+                ${escapeHTML(project)}
+            </td>
+
+            <td>
+                ${escapeHTML(date)}
+            </td>
+
+            <td class="payment-amount-cell">
+                ${escapeHTML(amount)}
+            </td>
+
+            <td>
+                <span
+                    class="payment-status ${statusClass}"
+                >
+                    ${escapeHTML(status)}
+                </span>
+            </td>
+
+            <td>
+
+                <button
+                    type="button"
+                    class="payment-action-btn"
+                    onclick="viewPaymentRecord('${escapeAttribute(paymentNo)}')"
+                >
+                    VIEW
+                </button>
+
+            </td>
+
+        </tr>
+    `;
+
+}
+
+
+/* =========================================================
+   CUSTOMER CREDIT TABLE + DETAILS
+========================================================= */
+
+function creditField(record, fields) {
+    for (const field of fields) {
+        const value = record && record[field];
+        if (value !== undefined && value !== null && value !== '') return value;
+    }
+    return '';
+}
+
+function getCreditCustomerId(record) {
+    return String(creditField(record, ['CUSTOMER_ID', 'customerId', 'customerID', 'customer_id', 'id']) || '');
+}
+
+function getCreditCustomerName(record) {
+    return String(creditField(record, ['CLIENT_NAME', 'clientName', 'client', 'CUSTOMER_NAME', 'customerName', 'customer', 'name']) || 'Unknown Customer');
+}
+
+function getCreditAmount(record) {
+    return toNumber(creditField(record, ['AVAILABLE_CREDIT', 'availableCredit', 'available_credit', 'CREDIT_BALANCE', 'creditBalance', 'BALANCE', 'balance', 'AVAILABLE_BALANCE', 'availableBalance']));
+}
+
+function getCreditDate(record) {
+    return creditField(record, ['TXN_DATE', 'CREDIT_DATE', 'UPDATED_AT', 'updatedAt', 'CREATED_AT', 'createdAt', 'PAYMENT_DATE', 'paymentDate', 'DATE', 'date']);
+}
+
+function getCreditCustomerKey(record) {
+    return getCreditCustomerId(record).trim().toLowerCase() || getCreditCustomerName(record).trim().toLowerCase();
+}
+
+function buildCustomerCreditRows() {
+    const map = new Map();
+
+    // Prefer the customer credit balance records when available.
+    customerCreditRecords.forEach(function (record) {
+        const key = getCreditCustomerKey(record);
+        if (!key) return;
+        const balance = getCreditAmount(record);
+        const existing = map.get(key) || {
+            customerId: getCreditCustomerId(record),
+            customerName: getCreditCustomerName(record),
+            availableCredit: 0,
+            lastCreditDate: getCreditDate(record),
+            source: record
+        };
+        existing.customerId = existing.customerId || getCreditCustomerId(record);
+        existing.customerName = getCreditCustomerName(record) || existing.customerName;
+        existing.availableCredit = balance;
+        existing.lastCreditDate = getCreditDate(record) || existing.lastCreditDate;
+        existing.source = record;
+        map.set(key, existing);
+    });
+
+    // If no balance cache is present, derive balances from saved payment records.
+    // This uses the credit columns, never the full cash payment amount.
+    if (!map.size) {
+        paymentRecords.forEach(function (payment) {
+            const customerId = String(creditField(payment, ['CUSTOMER_ID', 'customerId', 'customerID', 'customer_id']) || '');
+            const customerName = getCreditCustomerName(payment);
+            const key = customerId.trim().toLowerCase() || customerName.trim().toLowerCase();
+            if (!key || key === 'unknown customer') return;
+
+            const addedRaw = creditField(payment, ['CREDIT_ADDED', 'creditAdded', 'credit_added']);
+            const appliedRaw = creditField(payment, ['CREDIT_APPLIED', 'creditApplied', 'credit_applied']);
+            const added = toNumber(addedRaw);
+            const applied = toNumber(appliedRaw);
+            if (added <= 0 && applied <= 0) return;
+
+            const row = map.get(key) || {
+                customerId: customerId,
+                customerName: customerName,
+                availableCredit: 0,
+                lastCreditDate: getPaymentDate(payment),
+                source: payment
+            };
+            row.customerId = row.customerId || customerId;
+            row.customerName = customerName || row.customerName;
+            row.availableCredit += added - applied;
+            const paymentDate = getPaymentDate(payment);
+            if (paymentDate && (!row.lastCreditDate || getDateTime(paymentDate) > getDateTime(row.lastCreditDate))) {
+                row.lastCreditDate = paymentDate;
+            }
+            map.set(key, row);
+        });
+    }
+
+    return Array.from(map.values())
+        .map(function (row) {
+            row.availableCredit = Math.max(0, Math.round((row.availableCredit + Number.EPSILON) * 100) / 100);
+            return row;
+        })
+        .filter(function (row) { return row.availableCredit > 0; })
+        .sort(function (a, b) { return a.customerName.localeCompare(b.customerName); });
+}
+
+function renderCustomerCreditTable() {
+    const tbody = document.getElementById('customerCreditBody');
+    if (!tbody) return;
+
+    const input = document.getElementById('customerCreditSearchInput');
+    const search = input ? input.value.trim().toLowerCase() : '';
+    let records = buildCustomerCreditRows();
+
+    if (search) {
+        records = records.filter(function (row) {
+            return (row.customerId + ' ' + row.customerName).toLowerCase().includes(search);
+        });
+    }
+
+    if (!records.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="payment-empty-state">No customers with available credit found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = records.map(function (row) {
+        const key = row.customerId || row.customerName;
+        const date = row.lastCreditDate instanceof Date
+            ? formatDate(row.lastCreditDate)
+            : (row.lastCreditDate ? formatDate(parseDateValue(row.lastCreditDate)) : '—');
+        return `
+            <tr class="customer-credit-row" data-credit-customer="${escapeAttribute(key)}" title="Double-click to view customer credit details">
+                <td>${escapeHTML(row.customerId || '—')}</td>
+                <td>${escapeHTML(row.customerName)}</td>
+                <td class="payment-amount-cell customer-credit-amount">${escapeHTML(formatCurrency(row.availableCredit))}</td>
+                <td>${escapeHTML(date || '—')}</td>
+                <td><button type="button" class="payment-action-btn" onclick="viewCustomerCredit('${escapeAttribute(key)}')">VIEW</button></td>
+            </tr>
+        `;
+    }).join('');
+
+    tbody.querySelectorAll('.customer-credit-row').forEach(function (rowElement) {
+        rowElement.addEventListener('dblclick', function () {
+            viewCustomerCredit(rowElement.getAttribute('data-credit-customer') || '');
+        });
+    });
+}
+
+function parseDateValue(value) {
+    if (!value) return null;
+    if (value instanceof Date) return value;
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function viewCustomerCredit(customerKey) {
+    const row = buildCustomerCreditRows().find(function (item) {
+        return (item.customerId || item.customerName) === customerKey;
+    });
+    if (!row) {
+        alert('Customer credit record not found.');
+        return;
+    }
+
+    const modal = document.getElementById('customerCreditModal');
+    if (!modal) return;
+
+    const setText = function (id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    };
+
+    setText('customerCreditModalTitle', 'Customer Credit Details');
+    setText('customerCreditModalSubtitle', 'Available credit and recorded credit transactions');
+    setText('customerCreditDetailName', row.customerName || '—');
+    setText('customerCreditDetailId', row.customerId || '—');
+    setText('customerCreditDetailBalance', formatCurrency(row.availableCredit));
+
+    const matchingTransactions = customerCreditTransactions.filter(function (txn) {
+        const txnKey = getCreditCustomerKey(txn);
+        return txnKey && txnKey === getCreditCustomerKey({
+            CUSTOMER_ID: row.customerId,
+            CLIENT_NAME: row.customerName
+        });
+    });
+
+    let transactions = matchingTransactions.map(function (txn) {
+        return {
+            date: creditField(txn, ['TXN_DATE', 'DATE', 'date', 'CREATED_AT', 'createdAt']),
+            type: creditField(txn, ['TXN_TYPE', 'transactionType', 'type']) || 'CREDIT',
+            reference: creditField(txn, ['REFERENCE_NO', 'PAYMENT_NO', 'paymentNo', 'referenceNo']) || '—',
+            so: creditField(txn, ['SO_NUMBER', 'soNumber', 'soNo']) || '—',
+            amount: toNumber(creditField(txn, ['AMOUNT', 'amount', 'CREDIT_AMOUNT', 'creditAmount'])),
+            remarks: creditField(txn, ['REMARKS', 'remarks', 'NOTES', 'notes']) || '—'
+        };
+    });
+
+    if (!transactions.length) {
+        transactions = paymentRecords.filter(function (payment) {
+            const paymentKey = getCreditCustomerKey(payment);
+            const rowKey = getCreditCustomerKey({ CUSTOMER_ID: row.customerId, CLIENT_NAME: row.customerName });
+            const added = toNumber(creditField(payment, ['CREDIT_ADDED', 'creditAdded', 'credit_added']));
+            const applied = toNumber(creditField(payment, ['CREDIT_APPLIED', 'creditApplied', 'credit_applied']));
+            return paymentKey === rowKey && (added > 0 || applied > 0);
+        }).map(function (payment) {
+            const added = toNumber(creditField(payment, ['CREDIT_ADDED', 'creditAdded', 'credit_added']));
+            const applied = toNumber(creditField(payment, ['CREDIT_APPLIED', 'creditApplied', 'credit_applied']));
+            return {
+                date: getPaymentDate(payment),
+                type: added > 0 ? 'CREDIT ADDED' : 'CREDIT APPLIED',
+                reference: getPaymentNo(payment),
+                so: getSONo(payment),
+                amount: added > 0 ? added : applied,
+                remarks: creditField(payment, ['REMARKS', 'remarks']) || (added > 0 ? 'Overpayment credit' : 'Credit applied to SO')
+            };
+        });
+    }
+
+    const txnBody = document.getElementById('customerCreditTransactionsBody');
+    if (txnBody) {
+        if (!transactions.length) {
+            txnBody.innerHTML = '<tr><td colspan="6" class="payment-empty-state">No credit transaction details are available in the loaded records.</td></tr>';
+        } else {
+            transactions.sort(function (a, b) {
+                return getDateTime(parseDateValue(b.date)) - getDateTime(parseDateValue(a.date));
+            });
+            txnBody.innerHTML = transactions.map(function (txn) {
+                const parsedDate = parseDateValue(txn.date);
+                const date = parsedDate ? formatDate(parsedDate) : (txn.date || '—');
+                return `<tr>
+                    <td>${escapeHTML(date)}</td>
+                    <td>${escapeHTML(txn.type)}</td>
+                    <td>${escapeHTML(txn.reference)}</td>
+                    <td>${escapeHTML(txn.so)}</td>
+                    <td class="payment-amount-cell">${escapeHTML(formatCurrency(txn.amount))}</td>
+                    <td>${escapeHTML(txn.remarks)}</td>
+                </tr>`;
+            }).join('');
+        }
+    }
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+}
+
+function closeCustomerCreditModal() {
+    const modal = document.getElementById('customerCreditModal');
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+}
+
+window.viewCustomerCredit = viewCustomerCredit;
+
+/* =========================================================
+   RENDER SALES ORDER TABLE
+========================================================= */
+
+function renderSalesOrderTable() {
+
+    const tbody =
+        document.getElementById(
+            'recentPaymentSalesOrderBody'
+        );
+
+    if (!tbody) {
+        return;
+    }
+
+
+    const searchInput =
+        document.getElementById(
+            'salesOrderPaymentSearchInput'
+        );
+
+
+    const search =
+        searchInput
+            ? searchInput.value
+                .trim()
+                .toLowerCase()
+            : '';
+
+
+    let records =
+        filteredPaymentSalesOrders;
+
+
+    if (search) {
+
+        records =
+            records.filter(
+                function (so) {
+
+                    const searchable =
+                        [
+
+                            getSONo(so),
+
+                            getClientName(so),
+
+                            getProjectName(so),
+
+                            getSODateText(so),
+
+                            getInvoiceNo(so),
+
+                            getPO(so)
+
+                        ]
+                        .join(' ')
+                        .toLowerCase();
+
+
+                    return searchable.includes(
+                        search
+                    );
+
+                }
+            );
+
+    }
+
+
+    if (!records.length) {
+
+        tbody.innerHTML = `
+            <tr>
+                <td
+                    colspan="10"
+                    class="payment-empty-state"
+                >
+                    No sales order records found.
+                </td>
+            </tr>
+        `;
+
+        return;
+
+    }
+
+
+    records =
+        [...records].sort(
+            function (a, b) {
+
+                const dateA =
+                    getSalesOrderDate(a);
+
+                const dateB =
+                    getSalesOrderDate(b);
+
+                return (
+                    getDateTime(dateB) -
+                    getDateTime(dateA)
+                );
+
+            }
+        );
+
+
+    tbody.innerHTML =
+        records.map(
+            function (so) {
+
+                return createSalesOrderRow(
+                    so
+                );
+
+            }
+        ).join('');
+
+}
+
+
+/* =========================================================
+   CREATE SALES ORDER ROW
+========================================================= */
+
+function createSalesOrderRow(
+    so
+) {
+
+    const soNo =
+        getSONo(so);
+
+    const client =
+        getClientName(so);
+
+    const project =
+        getProjectName(so);
+
+    const date =
+        formatDate(
+            getSalesOrderDate(so)
+        );
+
+    const invoiceNo =
+        getInvoiceNo(so);
+
+    const total =
+        getSalesOrderTotal(so);
+
+    const paid =
+        getSalesOrderPaid(so);
+
+    const balance =
+        Math.max(
+            0,
+            total - paid
+        );
+
+
+    const status =
+        getSalesOrderPaymentStatus(
+            so,
+            balance
+        );
+
+
+    return `
+        <tr>
+
+            <td>
+                ${escapeHTML(soNo)}
+            </td>
+
+            <td>
+                ${escapeHTML(client)}
+            </td>
+
+            <td>
+                ${escapeHTML(project)}
+            </td>
+
+            <td>
+                ${escapeHTML(date)}
+            </td>
+
+            <td>
+                ${escapeHTML(invoiceNo)}
+            </td>
+
+            <td class="payment-amount-cell">
+                ${escapeHTML(
+                    formatCurrency(total)
+                )}
+            </td>
+
+            <td class="payment-amount-cell">
+                ${escapeHTML(
+                    formatCurrency(paid)
+                )}
+            </td>
+
+            <td class="payment-amount-cell">
+                ${escapeHTML(
+                    formatCurrency(balance)
+                )}
+            </td>
+
+            <td>
+                <span
+                    class="payment-status ${getPaymentStatusClass(status)}"
+                >
+                    ${escapeHTML(status)}
+                </span>
+            </td>
+
+            <td>
+
+                <button
+                    type="button"
+                    class="payment-action-btn"
+                    onclick="viewSalesOrderPayment('${escapeAttribute(soNo)}')"
+                >
+                    VIEW
+                </button>
+
+            </td>
+
+        </tr>
+    `;
+
+}
+
+
+/* =========================================================
+   VIEW PAYMENT
+========================================================= */
+
+function viewPaymentRecord(
+    paymentNo
+) {
+
+    const payment =
+        paymentRecords.find(
+            function (record) {
+
+                return (
+                    getPaymentNo(record) ===
+                    paymentNo
+                );
+
+            }
+        );
+
+
+    if (!payment) {
+
+        alert(
+            'Payment record not found.'
+        );
+
+        return;
+
+    }
+
+
+    /*
+       Temporary view behavior.
+       We can replace this later with
+       a proper Payment Details modal.
+    */
+
+    const amount =
+        formatCurrency(
+            getPaymentAmount(payment)
+        );
+
+
+    alert(
+        'Payment No.: ' +
+        paymentNo +
+        '\n\n' +
+        'Invoice No.: ' +
+        getInvoiceNo(payment) +
+        '\n' +
+        'SO No.: ' +
+        getSONo(payment) +
+        '\n' +
+        'Client: ' +
+        getClientName(payment) +
+        '\n' +
+        'Amount: ' +
+        amount +
+        '\n' +
+        'Status: ' +
+        getPaymentStatus(payment)
+    );
+
+}
+
+
+/* =========================================================
+   VIEW SALES ORDER PAYMENT
+========================================================= */
+
+function viewSalesOrderPayment(
+    soNo
+) {
+
+    const so =
+        paymentSalesOrders.find(
+            function (record) {
+
+                return (
+                    getSONo(record) ===
+                    soNo
+                );
+
+            }
+        );
+
+
+    if (!so) {
+
+        alert(
+            'Sales Order not found.'
+        );
+
+        return;
+
+    }
+
+
+    alert(
+        'Sales Order: ' +
+        soNo +
+        '\n\n' +
+        'Client: ' +
+        getClientName(so) +
+        '\n' +
+        'Project: ' +
+        getProjectName(so) +
+        '\n' +
+        'Total: ' +
+        formatCurrency(
+            getSalesOrderTotal(so)
+        ) +
+        '\n' +
+        'Paid: ' +
+        formatCurrency(
+            getSalesOrderPaid(so)
+        ) +
+        '\n' +
+        'Balance: ' +
+        formatCurrency(
+            Math.max(
+                0,
+                getSalesOrderTotal(so) -
+                getSalesOrderPaid(so)
+            )
+        )
+    );
+
+}
+
+
+/* =========================================================
+   CLEAR FILTER
+========================================================= */
+
+function clearPaymentFilters() {
+
+    const month =
+        document.getElementById(
+            'paymentFilterMonth'
+        );
+
+    const year =
+        document.getElementById(
+            'paymentFilterYear'
+        );
+
+
+    if (month) {
+        month.value = 'all';
+    }
+
+    if (year) {
+        year.value = 'all';
+    }
+
+
+    applyPaymentFilters();
+
+}
+
+
+/* =========================================================
+   PREPARE PAYMENT
+========================================================= */
+
+function openCreatePaymentPage() {
+
+    /*
+       Same workflow as Invoice.
+    */
+
+    window.location.href =
+        'pages/create-payment.html';
+
+}
+
+
+/* =========================================================
+   GET PAYMENT DATE
+========================================================= */
+
+function getPaymentDate(
+    payment
+) {
+
+    if (!payment) {
+        return null;
+    }
+
+
+    const value =
+        payment.date ??
+        payment.paymentDate ??
+        payment.datePaid ??
+        payment.paidDate ??
+        payment.transactionDate ??
+        payment.createdAt;
+
+
+    return parseDateValue(
+        value
+    );
+
+}
+
+
+/* =========================================================
+   GET SALES ORDER DATE
+========================================================= */
+
+function getSalesOrderDate(
+    so
+) {
+
+    if (!so) {
+        return null;
+    }
+
+
+    const value =
+        so.date ??
+        so.soDate ??
+        so.salesOrderDate ??
+        so.orderDate ??
+        so.createdAt;
+
+
+    return parseDateValue(
+        value
+    );
+
+}
+
+
+/* =========================================================
+   PARSE DATE
+========================================================= */
+
+function parseDateValue(
+    value
+) {
+
+    if (!value) {
+        return null;
+    }
+
+
+    if (
+        value instanceof Date
+    ) {
+
+        return isNaN(
+            value.getTime()
+        )
+            ? null
+            : value;
+
+    }
+
+
+    /*
+       Timestamp number
+    */
+
+    if (
+        typeof value === 'number'
+    ) {
+
+        const date =
+            new Date(value);
+
+        return isNaN(
+            date.getTime()
+        )
+            ? null
+            : date;
+
+    }
+
+
+    const text =
+        String(value).trim();
+
+
+    /*
+       YYYY-MM-DD
+       Use local date parts to avoid
+       timezone shifting.
+    */
+
+    const match =
+        text.match(
+            /^(\d{4})-(\d{2})-(\d{2})$/
+        );
+
+
+    if (match) {
+
+        const year =
+            Number(match[1]);
+
+        const month =
+            Number(match[2]) - 1;
+
+        const day =
+            Number(match[3]);
+
+
+        const date =
+            new Date(
+                year,
+                month,
+                day
+            );
+
+
+        return isNaN(
+            date.getTime()
+        )
+            ? null
+            : date;
+
+    }
+
+
+    const parsed =
+        new Date(text);
+
+
+    return isNaN(
+        parsed.getTime()
+    )
+        ? null
+        : parsed;
+
+}
+
+
+/* =========================================================
+   PAYMENT AMOUNT
+========================================================= */
+
+function getPaymentAmount(
+    payment
+) {
+
+    if (!payment) {
+        return 0;
+    }
+
+
+    const value =
+        payment.amount ??
+        payment.paymentAmount ??
+        payment.amountPaid ??
+        payment.paidAmount ??
+        payment.totalPaid ??
+        payment.totalAmount ??
+        0;
+
+
+    return toNumber(value);
+
+}
+
+
+/* =========================================================
+   SALES ORDER TOTAL
+========================================================= */
+
+function getSalesOrderTotal(
+    so
+) {
+
+    if (!so) {
+        return 0;
+    }
+
+
+    const value =
+        so.total ??
+        so.totalAmount ??
+        so.totalSales ??
+        so.grandTotal ??
+        so.amount ??
+        so.orderTotal ??
+        0;
+
+
+    return toNumber(value);
+
+}
+
+
+/* =========================================================
+   SALES ORDER PAID
+========================================================= */
+
+function getSalesOrderPaid(
+    so
+) {
+
+    if (!so) {
+        return 0;
+    }
+
+
+    const value =
+        so.paid ??
+        so.amountPaid ??
+        so.totalPaid ??
+        so.paymentReceived ??
+        so.paidAmount ??
+        0;
+
+
+    return toNumber(value);
+
+}
+
+
+/* =========================================================
+   PAYMENT NUMBER
+========================================================= */
+
+function getPaymentNo(
+    payment
+) {
+
+    return String(
+        payment?.paymentNo ??
+        payment?.paymentNumber ??
+        payment?.paymentID ??
+        payment?.id ??
+        '-'
+    );
+
+}
+
+
+/* =========================================================
+   INVOICE NUMBER
+========================================================= */
+
+function getInvoiceNo(
+    record
+) {
+
+    return String(
+        record?.invoiceNo ??
+        record?.invoiceNumber ??
+        record?.invoice ??
+        record?.siNo ??
+        '-'
+    );
+
+}
+
+
+/* =========================================================
+   SI NUMBER
+========================================================= */
+
+function getSINo(
+    record
+) {
+
+    return String(
+        record?.siNo ??
+        record?.salesInvoiceNo ??
+        record?.salesInvoice ??
+        '-'
+    );
+
+}
+
+
+/* =========================================================
+   SO NUMBER
+========================================================= */
+
+function getSONo(
+    record
+) {
+
+    return String(
+        record?.soNo ??
+        record?.salesOrderNo ??
+        record?.salesOrderNumber ??
+        record?.SO ??
+        record?.so ??
+        '-'
+    );
+
+}
+
+
+/* =========================================================
+   CLIENT
+========================================================= */
+
+function getClientName(
+    record
+) {
+
+    return String(
+        record?.client ??
+        record?.clientName ??
+        record?.customer ??
+        record?.customerName ??
+        record?.company ??
+        '-'
+    );
+
+}
+
+
+/* =========================================================
+   PROJECT
+========================================================= */
+
+function getProjectName(
+    record
+) {
+
+    return String(
+        record?.project ??
+        record?.projectName ??
+        '-'
+    );
+
+}
+
+
+/* =========================================================
+   PO NUMBER
+========================================================= */
+
+function getPO(
+    record
+) {
+
+    return String(
+        record?.po ??
+        record?.poNo ??
+        record?.poNumber ??
+        record?.PONumber ??
+        '-'
+    );
+
+}
+
+
+/* =========================================================
+   PAYMENT STATUS
+========================================================= */
+
+function getPaymentStatus(
+    payment
+) {
+
+    const status =
+        payment?.status ??
+        payment?.paymentStatus ??
+        payment?.state ??
+        'Pending';
+
+
+    return String(
+        status
+    );
+
+}
+
+
+/* =========================================================
+   CHECK PENDING
+========================================================= */
+
+function isPendingPayment(
+    payment
+) {
+
+    const status =
+        getPaymentStatus(
+            payment
+        )
+        .trim()
+        .toLowerCase();
+
+
+    return (
+        status === 'pending' ||
+        status === 'unpaid' ||
+        status === 'outstanding' ||
+        status === 'for payment' ||
+        status === 'partial' ||
+        status === 'pending payment'
+    );
+
+}
+
+
+/* =========================================================
+   SALES ORDER PAYMENT STATUS
+========================================================= */
+
+function getSalesOrderPaymentStatus(
+    so,
+    balance
+) {
+
+    if (balance <= 0) {
+        return 'PAID';
+    }
+
+
+    const explicitStatus =
+        String(
+            so?.paymentStatus ??
+            so?.status ??
+            ''
+        )
+        .trim();
+
+
+    if (explicitStatus) {
+
+        return explicitStatus;
+
+    }
+
+
+    const paid =
+        getSalesOrderPaid(
+            so
+        );
+
+
+    if (paid > 0) {
+        return 'PARTIAL';
+    }
+
+
+    return 'PENDING';
+
+}
+
+
+/* =========================================================
+   STATUS CLASS
+========================================================= */
+
+function getPaymentStatusClass(
+    status
+) {
+
+    const value =
+        String(status)
+            .toLowerCase()
+            .trim();
+
+
+    if (
+        value.includes('paid') ||
+        value === 'complete' ||
+        value === 'completed'
+    ) {
+
+        return 'payment-status-paid';
+
+    }
+
+
+    if (
+        value.includes('cancel')
+    ) {
+
+        return 'payment-status-cancelled';
+
+    }
+
+
+    if (
+        value.includes('partial') ||
+        value.includes('ongoing')
+    ) {
+
+        return 'payment-status-ongoing';
+
+    }
+
+
+    return 'payment-status-pending';
+
+}
+
+
+/* =========================================================
+   SAME DATE
+========================================================= */
+
+function isSameDate(
+    dateA,
+    dateB
+) {
+
+    if (!dateA || !dateB) {
+        return false;
+    }
+
+
+    return (
+        dateA.getFullYear() ===
+            dateB.getFullYear() &&
+
+        dateA.getMonth() ===
+            dateB.getMonth() &&
+
+        dateA.getDate() ===
+            dateB.getDate()
+    );
+
+}
+
+
+/* =========================================================
+   SAME MONTH
+========================================================= */
+
+function isSameMonth(
+    dateA,
+    dateB
+) {
+
+    if (!dateA || !dateB) {
+        return false;
+    }
+
+
+    return (
+        dateA.getFullYear() ===
+            dateB.getFullYear() &&
+
+        dateA.getMonth() ===
+            dateB.getMonth()
+    );
+
+}
+
+
+/* =========================================================
+   GET SELECTED VALUE
+========================================================= */
+
+function getSelectedValue(
+    elementId
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+
+    if (!element) {
+        return 'all';
+    }
+
+
+    return element.value ||
+        'all';
+
+}
+
+
+/* =========================================================
+   FORMAT CURRENCY
+========================================================= */
+
+function formatCurrency(
+    value
+) {
+
+    const number =
+        Number(value) || 0;
+
+
+    return number.toLocaleString(
+        'en-PH',
+        {
+            style: 'currency',
+            currency: 'PHP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }
+    );
+
+}
+
+
+/* =========================================================
+   FORMAT DATE
+========================================================= */
+
+function formatDate(
+    date
+) {
+
+    if (!date) {
+        return '-';
+    }
+
+
+    return date.toLocaleDateString(
+        'en-PH',
+        {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit'
+        }
+    );
+
+}
+
+
+/* =========================================================
+   GET SO DATE TEXT
+========================================================= */
+
+function getSODateText(
+    so
+) {
+
+    return formatDate(
+        getSalesOrderDate(so)
+    );
+
+}
+
+
+/* =========================================================
+   NUMBER CONVERSION
+========================================================= */
+
+function toNumber(
+    value
+) {
+
+    if (
+        typeof value ===
+        'number'
+    ) {
+
+        return isFinite(value)
+            ? value
+            : 0;
+
+    }
+
+
+    if (value === null ||
+        value === undefined) {
+
+        return 0;
+
+    }
+
+
+    let text =
+        String(value)
+            .trim();
+
+
+    if (!text) {
+        return 0;
+    }
+
+
+    /*
+       Remove:
+       ₱
+       PHP
+       commas
+       spaces
+    */
+
+    text =
+        text
+            .replace(
+                /₱/g,
+                ''
+            )
+            .replace(
+                /PHP/gi,
+                ''
+            )
+            .replace(
+                /,/g,
+                ''
+            )
+            .replace(
+                /\s/g,
+                ''
+            );
+
+
+    const number =
+        Number(text);
+
+
+    return isFinite(number)
+        ? number
+        : 0;
+
+}
+
+
+/* =========================================================
+   GET DATETIME
+========================================================= */
+
+function getDateTime(
+    date
+) {
+
+    if (!date) {
+        return 0;
+    }
+
+
+    const time =
+        date.getTime();
+
+
+    return isNaN(time)
+        ? 0
+        : time;
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(
+    value
+) {
+
+    return String(value ?? '')
+        .replace(
+            /&/g,
+            '&amp;'
+        )
+        .replace(
+            /</g,
+            '&lt;'
+        )
+        .replace(
+            />/g,
+            '&gt;'
+        )
+        .replace(
+            /"/g,
+            '&quot;'
+        )
+        .replace(
+            /'/g,
+            '&#039;'
+        );
+
+}
+
+
+/* =========================================================
+   ESCAPE ATTRIBUTE
+========================================================= */
+
+function escapeAttribute(
+    value
+) {
+
+    return String(value ?? '')
+        .replace(
+            /\\/g,
+            '\\\\'
+        )
+        .replace(
+            /'/g,
+            "\\'"
+        );
+
+}
+
+
+/* =========================================================
+   AUTO INITIALIZATION
+========================================================= */
+
+if (
+    document.readyState ===
+    'loading'
+) {
+
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
+
+            /*
+               Only initialize if the
+               Payment module already
+               exists in the DOM.
+            */
+
+            if (
+                document.getElementById(
+                    'paymentModule'
+                ) ||
+                document.getElementById(
+                    'preparePaymentBtn'
+                )
+            ) {
+
+                initializePayment();
+
+            }
+
+        }
+    );
+
+} else {
+
+    if (
+        document.getElementById(
+            'paymentModule'
+        ) ||
+        document.getElementById(
+            'preparePaymentBtn'
+        )
+    ) {
+
+        initializePayment();
+
+    }
+
+}
+
+
+/* =========================================================
+   GLOBAL EXPORTS
+   For index.html / dynamic module
+========================================================= */
+
+window.initializePayment =
+    initializePayment;
+
+window.loadPaymentData =
+    loadPaymentData;
+
+window.applyPaymentFilters =
+    applyPaymentFilters;
+
+window.clearPaymentFilters =
+    clearPaymentFilters;
+
+window.openCreatePaymentPage =
+    openCreatePaymentPage;
+
+window.viewPaymentRecord =
+    viewPaymentRecord;
+
+window.viewSalesOrderPayment =
+    viewSalesOrderPayment;
