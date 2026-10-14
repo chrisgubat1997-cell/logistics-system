@@ -119,8 +119,8 @@ async function initializeFleetDataEntry() {
     );
 
     console.log(
-        "Storage:",
-        FLEET_DELIVERY_STORAGE_KEY
+        "Data source:",
+        "Google Sheets / Apps Script"
     );
 
 }
