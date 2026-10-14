@@ -779,6 +779,40 @@
 
     };
 
+    /*
+     * COMPATIBILITY BRIDGE
+     * sync-manager.js expects window.LogisTechCache while this
+     * file historically exposed window.LOGISTECH_CACHE.
+     * Keep both APIs available and map the sync methods here.
+     */
+    window.LogisTechCache = {
+        open: openDatabase,
+
+        replaceAll: async function (storeName, records) {
+            const rows = Array.isArray(records) ? records : [];
+            if (storeName === "customers") {
+                await clear(STORES.CUSTOMERS);
+                await saveCustomers(rows);
+                return rows.length;
+            }
+            if (storeName === "salesOrders") {
+                await clear(STORES.SALES_ORDERS);
+                await saveSalesOrders(rows);
+                return rows.length;
+            }
+            throw new Error("Unsupported cache store: " + storeName);
+        },
+
+        count: async function (storeName) {
+            const rows = await getAll(storeName);
+            return Array.isArray(rows) ? rows.length : 0;
+        },
+
+        setMeta: setSyncMeta,
+        getMeta: getSyncMeta
+    };
+
+
 
     /* =====================================================
        READY
