@@ -12,7 +12,7 @@
 
     <link
         rel="stylesheet"
-        href="../css/create-payment.css?v=20261006"
+        href="../css/create-payment.css?v=20261014-02"
     >
 </head>
 
@@ -155,553 +155,101 @@
                              ================================================= -->
 
                         <div class="create-payment-reference-box">
-
-                            <div class="create-payment-reference-title">
-                                SALES ORDER INFORMATION
-                            </div>
-
-
+                            <div class="create-payment-reference-title">SALES ORDER INFORMATION</div>
                             <div class="create-payment-form-grid">
-
-
                                 <div class="create-payment-field">
-
-                                    <label for="paymentSOClient">
-                                        CLIENT
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentSOClient"
-                                        readonly
-                                        placeholder="Client will appear here"
-                                    >
-
+                                    <label for="paymentSOClient">CLIENT</label>
+                                    <input type="text" id="paymentSOClient" readonly placeholder="Client will appear here">
                                 </div>
-
-
                                 <div class="create-payment-field">
-
-                                    <label for="paymentSOProject">
-                                        PROJECT
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentSOProject"
-                                        readonly
-                                        placeholder="Project will appear here"
-                                    >
-
+                                    <label for="paymentBillingAddress">BILLING ADDRESS</label>
+                                    <input type="text" id="paymentBillingAddress" name="paymentBillingAddress" placeholder="Billing address" readonly>
                                 </div>
-
-
                                 <div class="create-payment-field">
-
-                                    <label for="paymentSOTotal">
-                                        SO TOTAL
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentSOTotal"
-                                        readonly
-                                        value="₱0.00"
-                                    >
-
+                                    <label for="paymentSOProject">PROJECT</label>
+                                    <input type="text" id="paymentSOProject" readonly placeholder="Project will appear here">
                                 </div>
-
-
                                 <div class="create-payment-field">
-
-                                    <label for="paymentTerms">
-                                        PAYMENT TERMS
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentTerms"
-                                        readonly
-                                        placeholder="Payment terms"
-                                    >
-
+                                    <label for="paymentSOTotal">SO TOTAL</label>
+                                    <input type="text" id="paymentSOTotal" readonly value="₱0.00">
                                 </div>
-
-
                                 <div class="create-payment-field">
-
-                                    <label for="paymentRequiredDP">
-                                        REQUIRED DP
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentRequiredDP"
-                                        readonly
-                                        value="₱0.00"
-                                    >
-
+                                    <label for="paymentTerms">PAYMENT TERMS</label>
+                                    <input type="text" id="paymentTerms" readonly placeholder="Payment terms">
                                 </div>
-
-
                                 <div class="create-payment-field">
-
-                                    <label for="paymentPreviousPaid">
-                                        TOTAL PAID
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentPreviousPaid"
-                                        readonly
-                                        value="₱0.00"
-                                    >
-
+                                    <label for="paymentRequiredDP">REQUIRED DP</label>
+                                    <input type="text" id="paymentRequiredDP" readonly value="₱0.00">
                                 </div>
-
-
                                 <div class="create-payment-field">
-
-                                    <label for="paymentRemainingDP">
-                                        REMAINING DP / BALANCE
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentRemainingDP"
-                                        readonly
-                                        value="₱0.00"
-                                    >
-
+                                    <label for="paymentPreviousPaid">TOTAL PAID</label>
+                                    <input type="text" id="paymentPreviousPaid" readonly value="₱0.00">
                                 </div>
-
-
                                 <div class="create-payment-field">
-
-                                    <label for="paymentSOStatus">
-                                        PAYMENT STATUS
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentSOStatus"
-                                        readonly
-                                        value="NO PAYMENT"
-                                    >
-
+                                    <label for="paymentRemainingDP">REMAINING DP / BALANCE</label>
+                                    <input type="text" id="paymentRemainingDP" readonly value="₱0.00">
                                 </div>
-
                             </div>
-
                         </div>
 
-
-                        <!-- =================================================
-                             CUSTOMER INFORMATION
-                             ================================================= -->
-
-                        <div class="create-payment-section-divider">
-
-                            <span>
-                                CUSTOMER INFORMATION
-                            </span>
-
-                        </div>
-
-
-                        <div class="create-payment-form-grid">
-
-
-                            <div class="create-payment-field">
-
-                                <label for="paymentClient">
-                                    CLIENT
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="paymentClient"
-                                    name="paymentClient"
-                                    placeholder="Client name"
-                                    readonly
-                                >
-
-                            </div>
-
-
-                            <div class="create-payment-field">
-
-                                <label for="paymentProject">
-                                    PROJECT
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="paymentProject"
-                                    name="paymentProject"
-                                    placeholder="Project name"
-                                    readonly
-                                >
-
-                            </div>
-
-
-                            <div class="create-payment-field create-payment-field-full">
-
-                                <label for="paymentBillingAddress">
-                                    BILLING ADDRESS
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="paymentBillingAddress"
-                                    name="paymentBillingAddress"
-                                    placeholder="Billing address"
-                                    readonly
-                                >
-
-                            </div>
-
-                        </div>
-
+                        <!-- Hidden compatibility fields used by the payment JavaScript -->
+                        <input type="hidden" id="paymentClient" name="paymentClient">
+                        <input type="hidden" id="paymentProject" name="paymentProject">
 
                         <!-- =================================================
                              PAYMENT INFORMATION
                              ================================================= -->
 
                         <div class="create-payment-section-divider">
-
-                            <span>
-                                PAYMENT INFORMATION
-                            </span>
-
+                            <span>PAYMENT INFORMATION</span>
                         </div>
 
-
                         <div class="create-payment-form-grid">
-
-
                             <div class="create-payment-field">
-
-                                <label for="paymentNo">
-                                    PAYMENT NO.
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="paymentNo"
-                                    name="paymentNo"
-                                    readonly
-                                >
-
+                                <label for="paymentNo">PAYMENT NO.</label>
+                                <input type="text" id="paymentNo" name="paymentNo" readonly>
                             </div>
-
-
                             <div class="create-payment-field">
-
-                                <label for="paymentDate">
-                                    PAYMENT DATE
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="paymentDate"
-                                    name="paymentDate"
-                                >
-
+                                <label for="paymentDate">PAYMENT DATE</label>
+                                <input type="date" id="paymentDate" name="paymentDate">
                             </div>
-
-
                             <div class="create-payment-field">
-
-                                <label for="paymentMethod">
-                                    PAYMENT METHOD
-                                </label>
-
-                                <select
-                                    id="paymentMethod"
-                                    name="paymentMethod"
-                                >
-
-                                    <option value="">
-                                        Select Payment Method
-                                    </option>
-
-                                    <option value="Cash">
-                                        Cash
-                                    </option>
-
-                                    <option value="Bank Transfer">
-                                        Bank Transfer
-                                    </option>
-
-                                    <option value="Cheque">
-                                        Cheque
-                                    </option>
-
-                                    <option value="GCash">
-                                        GCash
-                                    </option>
-
-                                    <option value="Online Transfer">
-                                        Online Transfer
-                                    </option>
-
-                                    <option value="Other">
-                                        Other
-                                    </option>
-
+                                <label for="paymentMethod">PAYMENT METHOD</label>
+                                <select id="paymentMethod" name="paymentMethod">
+                                    <option value="">Select Payment Method</option>
+                                    <option value="Cash">Cash</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="Cheque">Cheque</option>
+                                    <option value="GCash">GCash</option>
+                                    <option value="Online Transfer">Online Transfer</option>
+                                    <option value="Other">Other</option>
                                 </select>
-
                             </div>
-
-
-
-
-                        </div>
-
-
-                        <!-- =================================================
-                             PAYMENT DOCUMENT
-                             ================================================= -->
-
-                        <div class="create-payment-section-divider">
-
-                            <span>
-                                PAYMENT DOCUMENT
-                            </span>
-
-                        </div>
-
-
-                        <div class="create-payment-reference-box">
-
-
-                            <div class="create-payment-reference-title">
-                                RECEIPT / DOCUMENT DETAILS
-                            </div>
-
-
-                            <p class="create-payment-reference-note">
-
-                                Select the applicable receipt type.
-                                Collection Receipt is normally used for
-                                VAT clients, while Acknowledgment Receipt
-                                may be used for non-VAT clients.
-
-                                Invoice, SI, and DR are optional and may
-                                be entered when already available.
-
-                            </p>
-
-
-                            <div class="create-payment-form-grid">
-
-
-                                <!-- RECEIPT TYPE -->
-
-                                <div class="create-payment-field">
-
-                                    <label for="paymentReceiptType">
-                                        RECEIPT TYPE
-                                    </label>
-
-                                    <select
-                                        id="paymentReceiptType"
-                                        name="paymentReceiptType"
-                                    >
-
-                                        <option value="">
-                                            Select Receipt Type
-                                        </option>
-
-                                        <option value="Collection Receipt">
-                                            Collection Receipt
-                                        </option>
-
-                                        <option value="Acknowledgment Receipt">
-                                            Acknowledgment Receipt
-                                        </option>
-
-                                        <option value="None">
-                                            None / Not Applicable
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-
-                                <!-- RECEIPT NO -->
-
-                                <div class="create-payment-field">
-
-                                    <label for="paymentReceiptNo">
-                                        RECEIPT NO.
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentReceiptNo"
-                                        name="paymentReceiptNo"
-                                        placeholder="CR / AR No."
-                                    >
-
-                                </div>
-
-
-                                <!-- REFERENCE -->
-
-                                <div class="create-payment-field">
-
-                                    <label for="paymentReferenceNo">
-                                        REFERENCE NO. <span>REQUIRED</span>
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        id="paymentReferenceNo"
-                                        name="paymentReferenceNo"
-                                        placeholder="Bank / Cheque / Transaction No."
-                                        required
-                                    >
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- =================================================
-                             PAYMENT AMOUNT
-                             ================================================= -->
-
-                        <div class="create-payment-section-divider">
-
-                            <span>
-                                PAYMENT AMOUNT
-                            </span>
-
-                        </div>
-
-
-                        <div class="create-payment-form-grid">
-
-
                             <div class="create-payment-field">
-
-                                <label for="paymentInvoiceAmountInput">
-                                    SO / INVOICE AMOUNT
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="paymentInvoiceAmountInput"
-                                    name="paymentInvoiceAmount"
-                                    min="0"
-                                    step="0.01"
-                                    value="0"
-                                    placeholder="0.00"
-                                    readonly
-                                >
-
+                                <label for="paymentReceiptType">RECEIPT TYPE</label>
+                                <select id="paymentReceiptType" name="paymentReceiptType">
+                                    <option value="">Select Receipt Type</option>
+                                    <option value="Collection Receipt">Collection Receipt</option>
+                                    <option value="Acknowledgment Receipt">Acknowledgment Receipt</option>
+                                    <option value="None">None / Not Applicable</option>
+                                </select>
                             </div>
-
-
                             <div class="create-payment-field">
-
-                                <label for="paymentPreviousPaidInput">
-                                    PREVIOUS PAID
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="paymentPreviousPaidInput"
-                                    name="paymentPreviousPaid"
-                                    min="0"
-                                    step="0.01"
-                                    value="0"
-                                    placeholder="0.00"
-                                    readonly
-                                >
-
+                                <label for="paymentReceiptNo">RECEIPT NO.</label>
+                                <input type="text" id="paymentReceiptNo" name="paymentReceiptNo" placeholder="CR / AR No.">
                             </div>
-
-
                             <div class="create-payment-field">
-
-                                <label for="paymentCurrentAmountInput">
-                                    CURRENT PAYMENT
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="paymentCurrentAmountInput"
-                                    name="paymentCurrentAmount"
-                                    min="0"
-                                    step="0.01"
-                                    value="0"
-                                    placeholder="Enter amount to pay"
-                                >
-
+                                <label for="paymentReferenceNo">REFERENCE NO. <span>REQUIRED</span></label>
+                                <input type="text" id="paymentReferenceNo" name="paymentReferenceNo" placeholder="Bank / Cheque / Transaction No." required>
                             </div>
-
-
                             <div class="create-payment-field">
-
-                                <label for="paymentRemainingBalanceInput">
-                                    REMAINING BALANCE
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="paymentRemainingBalanceInput"
-                                    name="paymentRemainingBalance"
-                                    value="₱0.00"
-                                    readonly
-                                >
-
+                                <label for="paymentCurrentAmountInput">AMOUNT</label>
+                                <input type="number" id="paymentCurrentAmountInput" name="paymentCurrentAmount" min="0" step="0.01" value="0" placeholder="Enter amount to pay">
                             </div>
-
-                            <div class="create-payment-field">
-                                <label for="paymentOverInput">PAYMENT OVER / CUSTOMER CREDIT</label>
-                                <input type="text" id="paymentOverInput" name="paymentOver" value="₱0.00" readonly>
-                            </div>
-
-                        </div>
-
-
-                        <!-- =================================================
-                             REMARKS
-                             ================================================= -->
-
-                        <div class="create-payment-section-divider">
-
-                            <span>
-                                REMARKS
-                            </span>
-
-                        </div>
-
-
-                        <div class="create-payment-form-grid">
-
                             <div class="create-payment-field create-payment-field-full">
-
-                                <label for="paymentRemarks">
-                                    REMARKS
-                                </label>
-
-                                <textarea
-                                    id="paymentRemarks"
-                                    name="paymentRemarks"
-                                    rows="4"
-                                    placeholder="Enter payment remarks, advance payment details, cheque details, bank reference, etc."
-                                ></textarea>
-
+                                <label for="paymentRemarks">REMARKS</label>
+                                <textarea id="paymentRemarks" name="paymentRemarks" rows="4" placeholder="Enter payment remarks, advance payment details, cheque details, bank reference, etc."></textarea>
                             </div>
-
                         </div>
 
                     </div>
@@ -1057,7 +605,7 @@
 </main>
 
 
-<script src="../js/create-payment.js?v=20261014-01"></script>
+<script src="../js/create-payment.js?v=20261014-02"></script>
 
 </body>
 </html>
