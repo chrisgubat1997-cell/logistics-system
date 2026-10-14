@@ -81,6 +81,54 @@
 
         </div>
 
+        <!-- MAINTENANCE MONITORING -->
+        <div class="fde-maint-monitor">
+            <div class="fde-maint-monitor-header">
+                <div>
+                    <h3>Maintenance Monitoring</h3>
+                    <p>Track open requests, overdue repairs, target dates, and maintenance costs.</p>
+                </div>
+                <div class="fde-maint-monitor-filters">
+                    <input type="search" id="fde-maintMonitorSearch" placeholder="Search request, plate, or repair..." aria-label="Search maintenance requests">
+                    <select id="fde-maintMonitorStatus" aria-label="Filter maintenance status">
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="in progress">In Progress</option>
+                        <option value="overdue">Overdue</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="fde-maint-monitor-kpis">
+                <div class="fde-maint-monitor-kpi"><span>Pending</span><strong id="fde-maintPendingCount">0</strong></div>
+                <div class="fde-maint-monitor-kpi"><span>In Progress</span><strong id="fde-maintInProgressCount">0</strong></div>
+                <div class="fde-maint-monitor-kpi"><span>Overdue</span><strong id="fde-maintOverdueCount">0</strong></div>
+                <div class="fde-maint-monitor-kpi"><span>Completed</span><strong id="fde-maintCompletedCount">0</strong></div>
+                <div class="fde-maint-monitor-kpi"><span>Open Est. Cost</span><strong id="fde-maintOpenCost">₱0.00</strong></div>
+            </div>
+
+            <div class="fde-table-wrap">
+                <table class="fde-table fde-maint-monitor-table">
+                    <thead>
+                        <tr>
+                            <th>Request No.</th>
+                            <th>Request Date</th>
+                            <th>Vehicle</th>
+                            <th>Repair / Service</th>
+                            <th>Est. Cost</th>
+                            <th>Target Completion</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fde-maintMonitorTableBody">
+                        <tr><td colspan="8" class="fde-empty">No maintenance requests saved yet.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
         <div class="fde-form-grid">
 
