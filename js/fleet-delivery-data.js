@@ -1951,9 +1951,9 @@ function renderMaintenanceMonitoring() {
         const cost = Number(record.estimatedCost || record.cost || 0);
         const terminal = status === "completed" || status === "cancelled";
         const actions =
-            '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\\'' + escapeHTML(record.id) + '\\', \\'In Progress\\')"' + (terminal || status === "in progress" ? " disabled" : "") + '>Start Repair</button>' +
-            '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\\'' + escapeHTML(record.id) + '\\', \\'Completed\\')"' + (terminal ? " disabled" : "") + '>Mark Completed</button>' +
-            '<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus(\\'' + escapeHTML(record.id) + '\\', \\'Cancelled\\')"' + (terminal ? " disabled" : "") + '>Cancel</button>';
+            `<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus('${escapeHTML(record.id)}', 'In Progress')"${(terminal || status === "in progress" ? " disabled" : "")}>Start Repair</button>` +
+            `<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus('${escapeHTML(record.id)}', 'Completed')"${(terminal ? " disabled" : "")}>Mark Completed</button>` +
+            `<button type="button" class="fde-btn secondary" onclick="updateMaintenanceRequestStatus('${escapeHTML(record.id)}', 'Cancelled')"${(terminal ? " disabled" : "")}>Cancel</button>`;
         return '<tr>' +
             '<td>' + escapeHTML(record.requestNo || "-") + '</td>' +
             '<td>' + escapeHTML(record.date || "-") + '</td>' +
