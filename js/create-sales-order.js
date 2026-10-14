@@ -2101,6 +2101,10 @@ async function saveSO() {
         soNumber:
             soNumber,
 
+        // Every newly created Sales Order starts as ACTIVE.
+        status:
+            "ACTIVE",
+
         dateCreation:
             dateCreation,
 
