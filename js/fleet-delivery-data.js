@@ -320,6 +320,30 @@ function normalizeFleetData(data) {
 
 
 /* =========================================================
+   CURRENT LOGGED-IN USER
+========================================================= */
+
+function getFleetCurrentUser() {
+    try {
+        const raw = localStorage.getItem("logitechUser");
+        if (!raw) return "System User";
+        const user = JSON.parse(raw);
+        if (typeof user === "string") return user;
+        return String(
+            user.name ||
+            user.fullName ||
+            user.username ||
+            user.email ||
+            user.user ||
+            "System User"
+        );
+    } catch (error) {
+        return "System User";
+    }
+}
+
+
+/* =========================================================
    SAVE DATA
 ========================================================= */
 
@@ -918,6 +942,30 @@ async function saveTripTicket() {
     }
 
 
+    // Auto-number trip sequence per vehicle per trip date.
+    const sameDayTrips = (fdeData.tripTickets || []).filter(function (item) {
+        return String(item.vehicle || "").trim().toUpperCase() === vehicle.trim().toUpperCase()
+            && fdeDateForInput(item.date) === date;
+    });
+    const highestSequence = sameDayTrips.reduce(function (highest, item) {
+        return Math.max(highest, Number(item.tripSequence || 0));
+    }, 0);
+    const tripSequence = highestSequence > 0
+        ? highestSequence + 1
+        : sameDayTrips.length + 1;
+
+    const currentUser = getFleetCurrentUser();
+
+    const saveButton = document.getElementById("fde-saveTripBtn");
+    const originalButtonText = saveButton ? saveButton.textContent : "";
+    if (saveButton) {
+        if (saveButton.dataset.saving === "true") return;
+        saveButton.dataset.saving = "true";
+        saveButton.disabled = true;
+        saveButton.textContent = "Saving Trip Ticket...";
+        saveButton.setAttribute("aria-busy", "true");
+    }
+
     const record = {
 
         id:
@@ -930,6 +978,12 @@ async function saveTripTicket() {
 
         tripTicketNo:
             tripTicketNo,
+
+        tripSequence:
+            tripSequence,
+
+        createdBy:
+            currentUser,
 
         date:
             date,
@@ -973,13 +1027,23 @@ async function saveTripTicket() {
     };
 
 
-        try {
+    try {
+        updateStorageStatus(true, "Saving Trip Ticket to Google Sheets...");
         await persistFleetRecord("tripTicket", record);
         clearTripTicketForm();
-        alert("Trip Ticket saved successfully to Google Sheets.");
+        updateStorageStatus(true, "Google Sheets connected • Trip Ticket saved");
+        alert("Trip Ticket saved successfully to Google Sheets.\nTrip Sequence: " + tripSequence);
     } catch (error) {
         console.error("Trip Ticket save failed:", error);
-        alert("Hindi na-save ang Trip Ticket. " + error.message);
+        updateStorageStatus(false, "Trip Ticket save failed");
+        alert("Hindi na-save ang Trip Ticket. " + (error && error.message ? error.message : "Pakisuri ang internet at Apps Script deployment."));
+    } finally {
+        if (saveButton) {
+            saveButton.disabled = false;
+            saveButton.textContent = originalButtonText || "Save Trip Ticket";
+            saveButton.removeAttribute("aria-busy");
+            delete saveButton.dataset.saving;
+        }
     }
 
 }
