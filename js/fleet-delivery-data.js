@@ -1209,6 +1209,30 @@ function updateMaintenanceClassification(row) {
  output.title = match ? "Detected classification: " + match.category : "Choose a suggested service to fill classification automatically.";
 }
 
+function getLastCompletedMaintenanceDate(description, vehicleCode) {
+    const normalizedDescription = String(description || "").trim().toLowerCase();
+    const normalizedVehicle = String(vehicleCode || "").trim().toUpperCase();
+    if (!normalizedDescription || !normalizedVehicle) return "";
+    const completed = (fdeData.maintenance || []).filter(function(item) {
+        const itemDescription = String(item.description || item.defect || item.REQUEST_DESCRIPTION || "").trim().toLowerCase();
+        const itemVehicle = String(item.vehicle || item.vehicleCode || item.VEHICLE_CODE || "").trim().toUpperCase();
+        const itemStatus = String(item.status || item.STATUS || "").trim().toLowerCase();
+        return itemDescription === normalizedDescription && itemVehicle === normalizedVehicle && itemStatus === "completed";
+    }).map(function(item) {
+        return fdeDateForInput(item.actualCompletionDate || item.ACTUAL_COMPLETION_DATE || item.lastCompletion || item.LAST_COMPLETION_DATE || item.date || item.REQUEST_DATE || "");
+    }).filter(Boolean).sort().reverse();
+    return completed.length ? completed[0] : "";
+}
+
+function updateMaintenanceLastCompletion(row) {
+    if (!row) return;
+    const description = row.querySelector(".fde-maint-request-description");
+    const lastCompletion = row.querySelector(".fde-maint-request-last-completion");
+    if (!description || !lastCompletion) return;
+    const latestDate = getLastCompletedMaintenanceDate(description.value, getValue("fde-maintenanceVehicle"));
+    lastCompletion.value = latestDate;
+    lastCompletion.title = latestDate ? "Auto-filled from the latest completed matching repair for this vehicle." : "No previous completed matching repair found for this vehicle.";
+}
 function addMaintenanceRequestRow(details) {
     const body = document.getElementById("fde-maintenanceRequestRows");
     if (!body) return;
@@ -1234,8 +1258,9 @@ function addMaintenanceRequestRow(details) {
     }
     body.appendChild(row);
     const descriptionInput = row.querySelector(".fde-maint-request-description");
-    if (descriptionInput) descriptionInput.addEventListener("input", function() { updateMaintenanceClassification(row); });
+    if (descriptionInput) descriptionInput.addEventListener("input", function() { updateMaintenanceClassification(row); updateMaintenanceLastCompletion(row); });
     updateMaintenanceClassification(row);
+    if (!(details && details.id && details.lastCompletion)) updateMaintenanceLastCompletion(row);
     refreshMaintenanceRequestRemoveButtons();
 }
 
@@ -1275,7 +1300,10 @@ function initializeMaintenanceRequestRows() {
         }
     });
     const vehicle = document.getElementById("fde-maintenanceVehicle");
-    if (vehicle) vehicle.addEventListener("change", fillMaintenancePlateNumber);
+    if (vehicle) vehicle.addEventListener("change", function() {
+        fillMaintenancePlateNumber();
+        document.querySelectorAll("#fde-maintenanceRequestRows .fde-maint-request-row").forEach(function(row) { updateMaintenanceLastCompletion(row); });
+    });
     fillMaintenancePlateNumber();
     const requestNo = document.getElementById("fde-maintenanceNo");
     if (requestNo) requestNo.value = generateMaintenanceRequestNo();
