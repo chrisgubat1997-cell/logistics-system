@@ -161,33 +161,19 @@ function setDefaultPaymentNumber() {
    ========================================================= */
 
 function generatePaymentNumber() {
-
     const year = new Date().getFullYear();
-
-    const sequenceKey =
-        "logisTechPaymentSequence";
-
-    let sequence =
-        parseInt(
-            localStorage.getItem(sequenceKey) || "0",
-            10
-        );
-
-    sequence++;
-
-    localStorage.setItem(
-        sequenceKey,
-        String(sequence)
-    );
-
-    return (
-        "PAY-" +
-        year +
-        "-" +
-        String(sequence).padStart(4, "0")
-    );
+    let maxSequence = 0;
+    (Array.isArray(databasePayments) ? databasePayments : []).forEach(function(payment) {
+        const number = String(payment.PAYMENT_NO || payment.paymentNo || "");
+        const match = number.match(new RegExp("^PAY-" + year + "-(\\d+)$"));
+        if (match) maxSequence = Math.max(maxSequence, Number(match[1]) || 0);
+    });
+    const sequenceKey = "logisTechPaymentSequence";
+    const localSequence = parseInt(localStorage.getItem(sequenceKey) || "0", 10) || 0;
+    const nextSequence = Math.max(maxSequence, localSequence) + 1;
+    localStorage.setItem(sequenceKey, String(nextSequence));
+    return "PAY-" + year + "-" + String(nextSequence).padStart(4, "0");
 }
-
 
 /* =========================================================
    BIND EVENTS
@@ -616,7 +602,7 @@ async function checkSalesOrder() {
         const loaded = await loadPaymentDataFromDatabase();
         if (!loaded) { alert("Could not load Sales Orders from the Google Sheets database. Please try again."); return; }
     }
-    const salesOrders = databaseSalesOrders.length ? databaseSalesOrders : getStoredSalesOrders();
+    const salesOrders = paymentDataLoaded ? databaseSalesOrders : getStoredSalesOrders();
 
 
     if (!salesOrders.length) {
@@ -689,7 +675,7 @@ async function checkSalesOrder() {
 
 function getStoredSalesOrders() {
 
-    if (databaseSalesOrders.length) return databaseSalesOrders;
+    if (paymentDataLoaded) return databaseSalesOrders;
 
     for (
         let i = 0;
@@ -1275,7 +1261,7 @@ function calculatePreviousPaid(
 
 
     const payments =
-        databasePayments.length ? databasePayments : getStoredPayments();
+        paymentDataLoaded ? databasePayments : getStoredPayments();
 
 
     let totalPaid = 0;
@@ -1329,7 +1315,7 @@ function calculatePreviousPaid(
 
 function getStoredPayments() {
 
-    if (databasePayments.length) return databasePayments;
+    if (paymentDataLoaded) return databasePayments;
 
     for (
         let i = 0;
