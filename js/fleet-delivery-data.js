@@ -205,6 +205,9 @@ async function loadFleetDeliveryData() {
                 idleDays: Number(r.IDLE_DAYS || 0),
                 status: r.STATUS || "Pending",
                 remarks: r.REMARKS || "",
+                actualCompletionDate: fdeDateForInput(r.ACTUAL_COMPLETION_DATE),
+                finalCost: Number(r.FINAL_COST || 0),
+                cancellationReason: r.CANCELLATION_REASON || "",
                 createdAt: r.CREATED_AT || "",
                 updatedAt: r.UPDATED_AT || ""
             };
@@ -1240,7 +1243,7 @@ function refreshMaintenanceRequestRemoveButtons() {
     const rows = Array.from(document.querySelectorAll("#fde-maintenanceRequestRows .fde-maint-request-row"));
     rows.forEach(function(row) {
         const button = row.querySelector(".fde-maint-remove-request");
-        if (button) button.disabled = rows.length <= 1;
+        if (button) button.disabled = rows.length <= 1 || Boolean(row.dataset.recordId);
     });
 }
 
