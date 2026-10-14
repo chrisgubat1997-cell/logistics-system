@@ -359,10 +359,11 @@ function bindSearchableVehicleSelect(select, searchInput, allLabel) {
             if (Array.from(select.options).some(function(option) { return option.value === selected; })) select.value = selected;
         });
         select.addEventListener("change", function() {
+            const chosenValue = select.value;
             searchInput.value = "";
             select.innerHTML = "";
             (select._allVehicleOptions || []).forEach(function(option) { select.appendChild(option.cloneNode(true)); });
-            if (Array.from(select.options).some(function(option) { return option.value === select.dataset.selectedVehicle; })) select.value = select.dataset.selectedVehicle;
+            if (Array.from(select.options).some(function(option) { return option.value === chosenValue; })) select.value = chosenValue;
             select.dataset.selectedVehicle = select.value;
         });
         searchInput.dataset.vehicleSearchBound = "true";
