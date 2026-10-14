@@ -1714,17 +1714,32 @@ function renderInvoiceTable(records) {
                             </span>
                         </td>
 
-                        <td>
+                        <td class="invoice-row-actions">
 
                             <button
                                 type="button"
-                                class="table-action-btn"
-                                data-invoice-view="${escapeHtml(
-                                    invoiceNo
-                                )}"
+                                class="table-action"
+                                data-invoice-view="${escapeHtml(invoiceNo)}"
                             >
                                 VIEW
                             </button>
+
+                            ${String(status).toUpperCase() === "CANCELLED" ? "" : `
+                                <button
+                                    type="button"
+                                    class="table-action primary"
+                                    data-invoice-edit="${escapeHtml(invoiceNo)}"
+                                >
+                                    UPDATE
+                                </button>
+                                <button
+                                    type="button"
+                                    class="table-action danger"
+                                    data-invoice-cancel="${escapeHtml(invoiceNo)}"
+                                >
+                                    CANCEL
+                                </button>
+                            `}
 
                         </td>
 
@@ -1737,6 +1752,8 @@ function renderInvoiceTable(records) {
 
 
     bindInvoiceViewButtons();
+    bindInvoiceEditButtons();
+    bindInvoiceCancelButtons();
 
 }
 
@@ -2588,6 +2605,310 @@ function escapeHtml(value) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 
+}
+
+
+/* =========================================================
+   INVOICE API ACTIONS: UPDATE / CANCEL
+========================================================= */
+
+async function sendInvoiceAction(action, data) {
+    const response = await fetch(INVOICE_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: action, data: data || {} })
+    });
+
+    const text = await response.text();
+    let result;
+
+    try {
+        result = JSON.parse(text);
+    } catch (error) {
+        throw new Error("Invalid response from Invoice API.");
+    }
+
+    if (!response.ok || !result || result.success === false) {
+        throw new Error(
+            result && (result.message || result.error)
+                ? (result.message || result.error)
+                : "Invoice request failed."
+        );
+    }
+
+    return result;
+}
+
+function findInvoiceByNumber(invoiceNo) {
+    return invoiceRecords.find(invoice =>
+        String(invoice.invoiceNo || "") === String(invoiceNo || "")
+    );
+}
+
+function bindInvoiceEditButtons() {
+    document.querySelectorAll("[data-invoice-edit]").forEach(button => {
+        if (button.dataset.bound === "true") return;
+        button.dataset.bound = "true";
+
+        button.addEventListener("click", () => {
+            const invoice = findInvoiceByNumber(button.dataset.invoiceEdit);
+            if (invoice) openInvoiceEditModal(invoice);
+        });
+    });
+}
+
+function bindInvoiceCancelButtons() {
+    document.querySelectorAll("[data-invoice-cancel]").forEach(button => {
+        if (button.dataset.bound === "true") return;
+        button.dataset.bound = "true";
+
+        button.addEventListener("click", async () => {
+            const invoice = findInvoiceByNumber(button.dataset.invoiceCancel);
+            if (!invoice) return;
+
+            const invoiceNo = invoice.invoiceNo || "this invoice";
+            if (!window.confirm(
+                "Cancel invoice " + invoiceNo + "?\n\nThe invoice will remain in the database with CANCELLED status."
+            )) return;
+
+            button.disabled = true;
+            try {
+                await sendInvoiceAction("cancelInvoice", {
+                    invoiceId: invoice.invoiceId,
+                    invoiceNo: invoice.invoiceNo
+                });
+                await refreshInvoicing();
+                window.alert("Invoice " + invoiceNo + " was cancelled.");
+            } catch (error) {
+                console.error("Failed to cancel invoice:", error);
+                window.alert("Could not cancel invoice: " + error.message);
+            } finally {
+                button.disabled = false;
+            }
+        });
+    });
+}
+
+function openInvoiceEditModal(invoice) {
+    if (String(invoice.status || "").toUpperCase() === "CANCELLED") {
+        window.alert("Cancelled invoices cannot be updated.");
+        return;
+    }
+
+    let overlay = document.getElementById("invoiceEditModal");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "invoiceEditModal";
+        overlay.className = "modal-overlay";
+        overlay.hidden = true;
+        overlay.innerHTML = `
+            <div class="modal">
+                <div class="modal-header">
+                    <div>
+                        <h2>UPDATE INVOICE</h2>
+                        <p id="editInvoiceSubtitle">Edit existing invoice details</p>
+                    </div>
+                    <button type="button" class="modal-close" id="closeEditInvoiceModal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Invoice No.</label><input id="editInvoiceNo" readonly></div>
+                        <div class="form-group"><label>Invoice Date</label><input id="editInvoiceDate" type="date"></div>
+                        <div class="form-group"><label>SI No.</label><input id="editInvoiceSiNo"></div>
+                        <div class="form-group"><label>PO No.</label><input id="editInvoicePoNo"></div>
+                        <div class="form-group"><label>Client</label><input id="editInvoiceClient"></div>
+                        <div class="form-group"><label>Project</label><input id="editInvoiceProject"></div>
+                        <div class="form-group"><label>Terms</label>
+                            <select id="editInvoiceTerms">
+                                <option value="">Select Terms</option>
+                                <option value="COD">COD</option>
+                                <option value="15">15 DAYS</option>
+                                <option value="30">30 DAYS</option>
+                                <option value="45">45 DAYS</option>
+                                <option value="60">60 DAYS</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Sales Engineer</label><input id="editInvoiceSE"></div>
+                        <div class="form-group"><label>Billing Address</label><input id="editInvoiceBilling"></div>
+                        <div class="form-group"><label>TIN</label><input id="editInvoiceTin"></div>
+                        <div class="form-group"><label>EWT Type</label>
+                            <select id="editInvoiceEwtType">
+                                <option value="">None</option>
+                                <option value="SUPPLY">SUPPLY</option>
+                                <option value="EWORKS">EWORKS</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="invoice-items-section">
+                        <div class="items-header">
+                            <h3>INVOICE ITEMS</h3>
+                            <button type="button" class="btn btn-secondary" id="editAddInvoiceItem">+ ADD ITEM</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table class="invoice-items-table">
+                                <thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>AMOUNT</th><th></th></tr></thead>
+                                <tbody id="editInvoiceItemsBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="invoice-total-section">
+                        <div class="total-row"><span>SUBTOTAL</span><strong id="editInvoiceSubtotal">₱0.00</strong></div>
+                        <div class="total-row"><span>VAT 12%</span><strong id="editInvoiceVat">₱0.00</strong></div>
+                        <div class="total-row grand-total"><span>TOTAL AMOUNT</span><strong id="editInvoiceTotal">₱0.00</strong></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="cancelEditInvoiceBtn">CLOSE</button>
+                    <button type="button" class="btn btn-primary" id="saveEditInvoiceBtn">SAVE CHANGES</button>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+
+        const close = () => { overlay.hidden = true; };
+        document.getElementById("closeEditInvoiceModal").addEventListener("click", close);
+        document.getElementById("cancelEditInvoiceBtn").addEventListener("click", close);
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) close();
+        });
+        document.getElementById("editAddInvoiceItem").addEventListener("click", () => {
+            addInvoiceEditItemRow({});
+        });
+        document.getElementById("editInvoiceItemsBody").addEventListener("input", calculateInvoiceEditTotals);
+        document.getElementById("editInvoiceItemsBody").addEventListener("click", event => {
+            const button = event.target.closest("[data-remove-edit-item]");
+            if (button) {
+                button.closest("tr").remove();
+                calculateInvoiceEditTotals();
+            }
+        });
+        document.getElementById("saveEditInvoiceBtn").addEventListener("click", saveInvoiceEdit);
+    }
+
+    overlay.dataset.invoiceId = invoice.invoiceId || "";
+    overlay.dataset.invoiceNo = invoice.invoiceNo || "";
+
+    setEditInvoiceValue("editInvoiceNo", invoice.invoiceNo);
+    setEditInvoiceValue("editInvoiceDate", normalizeDate(invoice.invoiceDate));
+    setEditInvoiceValue("editInvoiceSiNo", invoice.siNo);
+    setEditInvoiceValue("editInvoicePoNo", invoice.poNo);
+    setEditInvoiceValue("editInvoiceClient", invoice.clientName || invoice.client);
+    setEditInvoiceValue("editInvoiceProject", invoice.project);
+    setEditInvoiceValue("editInvoiceTerms", invoice.terms);
+    setEditInvoiceValue("editInvoiceSE", invoice.se);
+    setEditInvoiceValue("editInvoiceBilling", invoice.billingAddress);
+    setEditInvoiceValue("editInvoiceTin", invoice.tinNo);
+    setEditInvoiceValue("editInvoiceEwtType", invoice.ewtType);
+
+    const body = document.getElementById("editInvoiceItemsBody");
+    body.innerHTML = "";
+    (Array.isArray(invoice.items) ? invoice.items : []).forEach(item => addInvoiceEditItemRow(item));
+    if (!body.children.length) addInvoiceEditItemRow({});
+    calculateInvoiceEditTotals();
+
+    document.getElementById("editInvoiceSubtitle").textContent =
+        (invoice.invoiceNo || "Invoice") + " · " + (invoice.soNo || "No SO");
+    overlay.hidden = false;
+}
+
+function setEditInvoiceValue(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.value = value == null ? "" : String(value);
+}
+
+function addInvoiceEditItemRow(item) {
+    const body = document.getElementById("editInvoiceItemsBody");
+    const row = document.createElement("tr");
+    const description = item.description || item.DESCRIPTION || item.itemName || "";
+    const qty = item.qtyInvoice ?? item.QTY_INVOICE ?? item.qty ?? "";
+    const unit = item.unit || item.UNIT || "";
+    const price = item.unitPrice ?? item.UNIT_PRICE ?? "";
+    const itemNo = item.itemNo || item.ITEM_NO || (body.children.length + 1);
+
+    row.innerHTML = `
+        <td><input type="text" data-edit-item-no value="${escapeHtml(itemNo)}" aria-label="Item number"></td>
+        <td><input type="text" data-edit-description value="${escapeHtml(description)}" aria-label="Description"></td>
+        <td><input type="number" min="0.01" step="any" data-edit-qty value="${escapeHtml(qty)}" aria-label="Quantity"></td>
+        <td><input type="text" data-edit-unit value="${escapeHtml(unit)}" aria-label="Unit"></td>
+        <td><input type="number" min="0" step="0.01" data-edit-price value="${escapeHtml(price)}" aria-label="Unit price"></td>
+        <td data-edit-amount>₱0.00</td>
+        <td><button type="button" class="remove-item-btn" data-remove-edit-item aria-label="Remove item">×</button></td>`;
+    body.appendChild(row);
+    calculateInvoiceEditTotals();
+}
+
+function calculateInvoiceEditTotals() {
+    const body = document.getElementById("editInvoiceItemsBody");
+    if (!body) return;
+
+    let subtotal = 0;
+    body.querySelectorAll("tr").forEach(row => {
+        const qty = Number(row.querySelector("[data-edit-qty]").value || 0);
+        const price = Number(row.querySelector("[data-edit-price]").value || 0);
+        const amount = Number.isFinite(qty * price) ? qty * price : 0;
+        subtotal += amount;
+        row.querySelector("[data-edit-amount]").textContent = formatCurrency(amount);
+    });
+
+    subtotal = Math.round(subtotal * 100) / 100;
+    const net = Math.round((subtotal / 1.12) * 100) / 100;
+    const vat = Math.round((subtotal - net) * 100) / 100;
+    setText("editInvoiceSubtotal", formatCurrency(net));
+    setText("editInvoiceVat", formatCurrency(vat));
+    setText("editInvoiceTotal", formatCurrency(subtotal));
+}
+
+async function saveInvoiceEdit() {
+    const overlay = document.getElementById("invoiceEditModal");
+    const saveButton = document.getElementById("saveEditInvoiceBtn");
+    const body = document.getElementById("editInvoiceItemsBody");
+    if (!overlay || !saveButton || !body) return;
+
+    const items = Array.from(body.querySelectorAll("tr")).map(row => ({
+        itemNo: row.querySelector("[data-edit-item-no]").value.trim(),
+        description: row.querySelector("[data-edit-description]").value.trim(),
+        qtyInvoice: Number(row.querySelector("[data-edit-qty]").value),
+        unit: row.querySelector("[data-edit-unit]").value.trim(),
+        unitPrice: Number(row.querySelector("[data-edit-price]").value)
+    }));
+
+    if (!items.length || items.some(item =>
+        !Number.isFinite(item.qtyInvoice) || item.qtyInvoice <= 0 ||
+        !Number.isFinite(item.unitPrice) || item.unitPrice < 0
+    )) {
+        window.alert("Please enter a valid quantity and unit price for every invoice item.");
+        return;
+    }
+
+    const payload = {
+        invoiceId: overlay.dataset.invoiceId,
+        invoiceNo: overlay.dataset.invoiceNo,
+        invoiceDate: document.getElementById("editInvoiceDate").value,
+        siNo: document.getElementById("editInvoiceSiNo").value.trim(),
+        poNo: document.getElementById("editInvoicePoNo").value.trim(),
+        clientName: document.getElementById("editInvoiceClient").value.trim(),
+        project: document.getElementById("editInvoiceProject").value.trim(),
+        terms: document.getElementById("editInvoiceTerms").value,
+        se: document.getElementById("editInvoiceSE").value.trim(),
+        billingAddress: document.getElementById("editInvoiceBilling").value.trim(),
+        tinNo: document.getElementById("editInvoiceTin").value.trim(),
+        ewtType: document.getElementById("editInvoiceEwtType").value,
+        items: items
+    };
+
+    saveButton.disabled = true;
+    saveButton.textContent = "SAVING...";
+    try {
+        await sendInvoiceAction("updateInvoice", payload);
+        overlay.hidden = true;
+        await refreshInvoicing();
+        window.alert("Invoice updated successfully.");
+    } catch (error) {
+        console.error("Failed to update invoice:", error);
+        window.alert("Could not update invoice: " + error.message);
+    } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "SAVE CHANGES";
+    }
 }
 
 
