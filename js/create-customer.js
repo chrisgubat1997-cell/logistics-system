@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    CUSTOMER MANAGEMENT
    create-customer.js
-   VERSION: 20261008-02
+   VERSION: 20261014-01
 
    PURPOSE:
    - Create Customer
@@ -944,7 +944,7 @@
         data
     ) {
 
-        if (!data.clientName) {
+        if (!String(data.clientName || "").trim()) {
 
             return {
 
@@ -960,7 +960,7 @@
 
 
         if (
-            data.clientName.length < 2
+            String(data.clientName || "").trim().length < 2
         ) {
 
             return {
@@ -976,7 +976,7 @@
         }
 
 
-        if (data.email) {
+        if (data.email && String(data.email).trim().toUpperCase() !== "N/A") {
 
             const emailPattern =
                 /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -1005,7 +1005,8 @@
 
         if (
             data.contactNumber &&
-            data.contactNumber.length < 7
+            String(data.contactNumber).trim().toUpperCase() !== "N/A" &&
+            String(data.contactNumber).trim().length < 7
         ) {
 
             return {
