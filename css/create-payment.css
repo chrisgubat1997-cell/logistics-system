@@ -835,3 +835,8 @@ body {
 .create-payment-delivery-status.is-undelivered { color:#344054; background:#edf1f5; }
 .create-payment-select-so { padding:7px 10px !important; min-height:30px; font-size:10px !important; }
 @media (max-width:700px) { .create-payment-unpaid-section { padding:12px; } .create-payment-unpaid-header { flex-direction:column; } }
+
+
+/* SELECTED SALES ORDER PAYMENT HISTORY */
+.create-payment-history-section { margin-top: 16px; }
+.create-payment-history-section .create-payment-unpaid-table { min-width: 850px; }
