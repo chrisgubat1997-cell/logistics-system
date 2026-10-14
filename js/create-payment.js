@@ -1148,7 +1148,7 @@ function calculateRequiredDP(
         }
     }
 
-    const termKey = String(terms || "").replace(/\\s+/g, " ").trim().toUpperCase();
+    const termKey = String(terms || "").replace(/\s+/g, " ").trim().toUpperCase();
     const requiredDPMultipliers = {
         "COD": 0.5,
         "50% DP, 50% UPON DELIVERY": 0.5,
