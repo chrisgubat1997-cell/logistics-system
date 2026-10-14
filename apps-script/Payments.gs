@@ -127,3 +127,28 @@ function validateDeliveryPaymentTerms_(so) {
   // COD and ordinary credit terms do not require pre-dispatch payment.
   return { success: true, terms: terms, soTotal: total, totalPaid: paid, requiredDP: dp };
 }
+
+
+/* Optional customer-credit ledger reads. Create these sheet tabs with the headers below
+   before relying on the ledger: CUSTOMER_CREDITS and CUSTOMER_CREDIT_TRANSACTIONS. */
+function getCustomerCredits(payload) {
+  try {
+    const records = getAllRecords("CUSTOMER_CREDITS");
+    return { success: true, customerCredits: records, records: records, count: records.length };
+  } catch (error) {
+    return { success: true, customerCredits: [], records: [], count: 0, warning: "CUSTOMER_CREDITS sheet is not configured yet." };
+  }
+}
+
+function getCustomerCreditTransactions(payload) {
+  payload = payload || {};
+  const customerId = String(payload.customerId || payload.CUSTOMER_ID || "").trim();
+  try {
+    let records = getAllRecords("CUSTOMER_CREDIT_TRANSACTIONS");
+    if (customerId) records = records.filter(function (row) { return String(row.CUSTOMER_ID || "") === customerId; });
+    records.sort(function (a, b) { return String(b.TXN_DATE || b.CREATED_AT || "").localeCompare(String(a.TXN_DATE || a.CREATED_AT || "")); });
+    return { success: true, customerCreditTransactions: records, records: records, count: records.length };
+  } catch (error) {
+    return { success: true, customerCreditTransactions: [], records: [], count: 0, warning: "CUSTOMER_CREDIT_TRANSACTIONS sheet is not configured yet." };
+  }
+}
