@@ -121,6 +121,9 @@ function saveFleetRecord(payload) {
       COST: fleetNumberOrBlank_(record.estimatedCost !== undefined ? record.estimatedCost : record.cost),
       TARGET_COMPLETION_DATE: fleetParseDate_(record.targetDate),
       LAST_COMPLETION_DATE: fleetParseDate_(record.lastCompletion),
+      ACTUAL_COMPLETION_DATE: fleetParseDate_(record.actualCompletionDate),
+      FINAL_COST: fleetNumberOrBlank_(record.finalCost),
+      CANCELLATION_REASON: record.cancellationReason || "",
       IDLE_DAYS: fleetNumberOrBlank_(record.idleDays),
       STATUS: record.status || "Pending",
       REMARKS: record.remarks || "",
@@ -159,7 +162,7 @@ function saveFleetRecord(payload) {
   if (type === "tripTicket") {
     fleetEnsureHeader_(sheetName, "ROUTE_DETAILS");
   } else if (type === "maintenance") {
-    ["MNT_REQUEST_NO", "REQUESTED_BY", "REQUEST_DATE", "PLATE_NUMBER", "DEPARTMENT", "ODOMETER", "CLASSIFICATIONS", "SERVICE_CLASSIFICATION", "REQUEST_DESCRIPTION", "ESTIMATED_COST", "TARGET_COMPLETION_DATE", "LAST_COMPLETION_DATE"].forEach(function(header) {
+    ["MNT_REQUEST_NO", "REQUESTED_BY", "REQUEST_DATE", "PLATE_NUMBER", "DEPARTMENT", "ODOMETER", "CLASSIFICATIONS", "SERVICE_CLASSIFICATION", "REQUEST_DESCRIPTION", "ESTIMATED_COST", "TARGET_COMPLETION_DATE", "LAST_COMPLETION_DATE", "ACTUAL_COMPLETION_DATE", "FINAL_COST", "CANCELLATION_REASON"].forEach(function(header) {
       fleetEnsureHeader_(sheetName, header);
     });
   }
