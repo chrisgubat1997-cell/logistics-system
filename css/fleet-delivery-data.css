@@ -660,3 +660,68 @@
 
 .fde-maint-suggestion-help { display:block; margin-top:5px; color:#64748b; font-size:10px; line-height:1.4; }
 .fde-maint-request-classification { font-weight:600; background:#f1f5f9; }
+
+
+/* =========================================================
+   DEDICATED MAINTENANCE MONITORING
+========================================================= */
+.fde-maint-monitor {
+    margin: 18px 0 24px;
+    padding: 18px;
+    border: 1px solid #dbe3ed;
+    border-radius: 12px;
+    background: #fff;
+}
+.fde-maint-monitor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+.fde-maint-monitor-header h3 { margin: 0 0 5px; font-size: 18px; }
+.fde-maint-monitor-header p { margin: 0; color: #64748b; font-size: 12px; }
+.fde-maint-monitor-filters { display: flex; flex-wrap: wrap; gap: 8px; min-width: min(100%, 440px); }
+.fde-maint-monitor-filters input { flex: 1 1 220px; min-width: 170px; }
+.fde-maint-monitor-filters select { flex: 0 0 150px; }
+.fde-maint-monitor-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.fde-maint-monitor-kpi {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #f8fafc;
+}
+.fde-maint-monitor-kpi span { color: #64748b; font-size: 11px; }
+.fde-maint-monitor-kpi strong { color: #0f172a; font-size: 22px; overflow-wrap: anywhere; }
+.fde-maint-monitor-table { min-width: 1080px; }
+.fde-maint-monitor-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #e2e8f0;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+.fde-maint-monitor-status.pending { background: #fef3c7; color: #92400e; }
+.fde-maint-monitor-status.in-progress { background: #dbeafe; color: #1d4ed8; }
+.fde-maint-monitor-status.overdue { background: #fee2e2; color: #b91c1c; }
+.fde-maint-monitor-status.completed { background: #dcfce7; color: #166534; }
+.fde-maint-monitor-status.cancelled { background: #e5e7eb; color: #4b5563; }
+.fde-maint-monitor-terminal { color: #64748b; font-size: 11px; }
+@media (max-width: 900px) {
+    .fde-maint-monitor-header { flex-direction: column; }
+    .fde-maint-monitor-filters { width: 100%; min-width: 0; }
+    .fde-maint-monitor-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .fde-maint-monitor-kpi:last-child { grid-column: 1 / -1; }
+}
