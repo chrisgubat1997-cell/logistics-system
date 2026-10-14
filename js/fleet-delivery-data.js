@@ -1682,6 +1682,15 @@ function initializeFleetRecords() {
 
     }
 
+    const tbody = document.getElementById("fde-recordTableBody");
+    if (tbody && tbody.dataset.maintenanceEditBound !== "true") {
+        tbody.dataset.maintenanceEditBound = "true";
+        tbody.addEventListener("click", function(event) {
+            const button = event.target.closest("[data-maintenance-edit]");
+            if (button) editMaintenanceRequest(button.getAttribute("data-maintenance-edit"));
+        });
+    }
+
 }
 
 
@@ -2010,6 +2019,7 @@ function createRecordTableRow(
 
             <td>
                 <div class="fde-record-actions">
+                    ${record.recordType === "maintenance" ? '<button type="button" class="fde-btn secondary" data-maintenance-edit="' + escapeHTML(record.id) + '">Update / Add Repair</button>' : ''}
                     ${maintenanceActions}
                     <button type="button" class="fde-delete-btn" onclick="deleteFleetRecord('${record.recordType}', '${record.id}')">Delete</button>
                 </div>
@@ -2333,6 +2343,28 @@ function getRecordStatus(
    DELETE RECORD
 ========================================================= */
 
+async function editMaintenanceRequest(id) {
+    const selected = (fdeData.maintenance || []).find(function(item) { return String(item.id) === String(id); });
+    if (!selected) { alert("Hindi makita ang maintenance record. I-refresh ang page at subukan ulit."); return; }
+    const requestNo = selected.requestNo;
+    const group = (fdeData.maintenance || []).filter(function(item) { return String(item.requestNo || "") === String(requestNo); });
+    if (!group.length) { alert("Walang repair items na makita para sa " + requestNo + "."); return; }
+    if (!confirm("Buksan ang " + requestNo + " para i-update at magdagdag ng repair items?")) return;
+    fdeMaintenanceEditingRequestNo = requestNo;
+    setValue("fde-maintenanceNo", requestNo); setValue("fde-requestedBy", selected.requestedBy || "");
+    setValue("fde-maintenanceDate", selected.date || ""); setValue("fde-maintenanceVehicle", selected.vehicle || "");
+    setValue("fde-maintenancePlate", selected.plateNumber || ""); setValue("fde-maintenanceDepartment", selected.department || "");
+    setValue("fde-maintenanceOdometer", selected.odometer || ""); setValue("fde-maintenanceTargetDate", selected.targetDate || "");
+    setValue("fde-maintenanceCost", selected.estimatedCost || selected.cost || "");
+    document.querySelectorAll('input[name="fde-maintenanceClass"]').forEach(function(input) { input.checked = (selected.classifications || []).includes(input.value); });
+    const body = document.getElementById("fde-maintenanceRequestRows");
+    if (body) { body.innerHTML = ""; group.forEach(function(item) { addMaintenanceRequestRow({ id: item.id, description: item.description || "", serviceClassification: item.serviceClassification || "", lastCompletion: item.lastCompletion || "", status: item.status || "Pending" }); }); }
+    fillMaintenancePlateNumber();
+    const saveButton = document.getElementById("fde-saveMaintenanceBtn"); if (saveButton) saveButton.textContent = "Update Maintenance";
+    const addButton = document.getElementById("fde-addMaintenanceRequestBtn"); if (addButton) addButton.textContent = "＋ Add Repair";
+    const sectionTab = document.querySelector('.fde-tab[data-section="maintenance"]'); if (sectionTab) sectionTab.click();
+    const form = document.getElementById("fde-maintenance-section"); if (form) form.scrollIntoView({ behavior: "smooth", block: "start" });
+}
 async function updateMaintenanceRequestStatus(id, status) {
     if (!id || !["Completed", "Cancelled"].includes(status)) return;
     const record = (fdeData.maintenance || []).find(function(item) {
