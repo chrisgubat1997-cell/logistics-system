@@ -788,3 +788,30 @@ body {
 .create-payment-so-suggestion-main { font-weight:800; font-size:13px; }
 .create-payment-so-suggestion-meta,.create-payment-so-suggestion-project { color:#697586; font-size:12px; }
 .create-payment-so-suggestion-empty { padding:14px; color:#697586; font-size:13px; }
+
+
+/* Customer credit / overpayment in the Payment Summary card */
+.create-payment-summary-credit {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    margin: 10px 0;
+    border: 1px solid #b7dfc4;
+    border-radius: 8px;
+    background: #f0faf3;
+    color: #176534;
+    font-weight: 600;
+}
+
+.create-payment-summary-credit span {
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
+.create-payment-summary-credit strong {
+    font-size: 0.98rem;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
