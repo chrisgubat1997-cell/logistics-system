@@ -11,6 +11,10 @@ case "createInvoice":
   return createInvoice(payload);
 case "getPayments":
   return getPayments(payload);
+case "getCustomerCredits":
+  return getCustomerCredits(payload);
+case "getCustomerCreditTransactions":
+  return getCustomerCreditTransactions(payload);
 case "getPayment":
   return getPayment(payload);
 case "createPayment":
