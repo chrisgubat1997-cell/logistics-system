@@ -1,7 +1,7 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
    DASHBOARD JAVASCRIPT
-   VERSION: 20261014-01
+   VERSION: 20261014-02
 
    PURPOSE:
    - Dashboard summary
@@ -219,7 +219,7 @@
                         throw new Error(result.error || (entry[1] + " failed"));
                     }
 
-                    return [entry[0], normalizeDashboardRecords(result)];
+                    return [entry[0], normalizeDashboardRecords(result, entry[0])];
                 } catch (error) {
                     console.warn("Dashboard API request failed:", entry[1], error);
                     return [entry[0], null];
@@ -274,34 +274,75 @@
     }
 
 
-    function normalizeDashboardRecords(result) {
+    function normalizeDashboardRecords(result, collectionName) {
+        // Some Apps Script actions return the records directly as an array.
         if (Array.isArray(result)) {
             return result;
         }
 
         if (!result || typeof result !== "object") {
-            return [];
+            throw new Error("Empty or invalid dashboard API response.");
         }
 
-        if (Array.isArray(result.records)) {
-            return result.records;
+        if (result.success === false) {
+            throw new Error(result.error || result.message || "Dashboard API request failed.");
+        }
+
+        // The API may return the named collection, for example:
+        // { success: true, salesOrders: [...], data: [...], count: 10 }
+        // or { success: true, data: { salesOrders: [...] } }.
+        const candidateKeys = {
+            salesOrders: ["salesOrders", "sales_orders", "records", "items"],
+            deliveryReceipts: ["deliveryReceipts", "deliveryReceipt", "delivery_receipts", "receipts", "records", "items"],
+            invoices: ["invoices", "invoiceRecords", "records", "items"],
+            payments: ["payments", "paymentRecords", "records", "items"]
+        };
+
+        const keys = candidateKeys[collectionName] || ["records", "items"];
+
+        for (const key of keys) {
+            if (Array.isArray(result[key])) {
+                return result[key];
+            }
         }
 
         if (Array.isArray(result.data)) {
             return result.data;
         }
 
-        if (result.data && Array.isArray(result.data.records)) {
-            return result.data.records;
+        if (result.data && typeof result.data === "object") {
+            for (const key of keys) {
+                if (Array.isArray(result.data[key])) {
+                    return result.data[key];
+                }
+            }
+
+            if (Array.isArray(result.data.records)) {
+                return result.data.records;
+            }
+
+            if (Array.isArray(result.data.items)) {
+                return result.data.items;
+            }
         }
 
-        // A successful API response without a records array is treated as
-        // an empty result, not as stale LocalStorage data.
-        if (result.success === true) {
+        // Only treat a response as a valid empty collection when it clearly
+        // reports success and contains a known empty-list/count structure.
+        if (
+            result.success === true &&
+            (
+                result.count === 0 ||
+                result.total === 0 ||
+                result.totalCount === 0 ||
+                result.data === null
+            )
+        ) {
             return [];
         }
 
-        throw new Error("Unrecognized dashboard API response.");
+        throw new Error(
+            "Unrecognized " + collectionName + " API response shape."
+        );
     }
 
 
