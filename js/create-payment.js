@@ -2209,30 +2209,11 @@ function validatePayment() {
 
 
     /*
-       Prevent payment beyond SO balance.
+       Overpayment is allowed.
+       The backend allocates payment to the selected SO first,
+       then stores any confirmed excess as Customer Credit.
+       Do not block payments greater than the remaining SO balance here.
     */
-
-    const allowedBalance =
-        Math.max(
-            0,
-            currentSalesOrderTotal -
-            currentPreviousPaid
-        );
-
-
-    if (currentPayment > allowedBalance + 0.005) {
-
-        return {
-            valid: false,
-            message:
-                "The payment amount is greater than the remaining SO balance.\n\n" +
-                "Remaining Balance: " +
-                formatCurrency(
-                    allowedBalance
-                )
-        };
-
-    }
 
 
     /*
