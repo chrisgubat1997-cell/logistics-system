@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    SIGN UP
    signup.js
-   VERSION: 20261007-01
+   VERSION: 20261015-02
 ========================================================= */
 
 
@@ -350,7 +350,8 @@ document.addEventListener(
 
                     "SALES",
                     "LOGISTICS",
-                    "FINANCE"
+                    "FINANCE",
+                    "PAYMENT"
 
                 ];
 
