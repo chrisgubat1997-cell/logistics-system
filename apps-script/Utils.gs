@@ -274,3 +274,79 @@ function getCurrentYear() {
   );
 
 }
+
+
+/* =========================================================
+   SERVER-SIDE SESSION + ROLE AUTHORIZATION
+   A valid login session is required for protected actions.
+   Role and account status are re-read from the USERS sheet.
+========================================================= */
+
+function authorizeRole_(payload, allowedRoles) {
+  payload = payload || {};
+  allowedRoles = Array.isArray(allowedRoles) ? allowedRoles : [];
+
+  const sessionToken = String(payload.sessionToken || "").trim();
+  if (!sessionToken) {
+    throw new Error("AUTH_REQUIRED: Please log out and log in again.");
+  }
+
+  const cache = CacheService.getScriptCache();
+  const sessionJson = cache.get("LOGISTECH_SESSION_" + sessionToken);
+  if (!sessionJson) {
+    throw new Error("SESSION_EXPIRED: Your session expired. Please log in again.");
+  }
+
+  let session;
+  try {
+    session = JSON.parse(sessionJson);
+  } catch (error) {
+    throw new Error("INVALID_SESSION: Please log in again.");
+  }
+
+  const spreadsheet = SpreadsheetApp.openById(AUTH_SPREADSHEET_ID);
+  const sheet = spreadsheet.getSheetByName("USERS");
+  if (!sheet) throw new Error("USERS sheet not found.");
+
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) throw new Error("No user accounts were found.");
+
+  const headers = values[0].map(function(value) {
+    return String(value || "").trim().toUpperCase();
+  });
+  const userIdIndex = headers.indexOf("USER_ID");
+  const usernameIndex = headers.indexOf("USERNAME");
+  const roleIndex = headers.indexOf("ROLE");
+  const statusIndex = headers.indexOf("STATUS");
+
+  if ([userIdIndex, usernameIndex, roleIndex, statusIndex].some(function(i) { return i < 0; })) {
+    throw new Error("USERS sheet is missing required authorization columns.");
+  }
+
+  let account = null;
+  for (let i = 1; i < values.length; i++) {
+    const rowUserId = String(values[i][userIdIndex] || "").trim();
+    const rowUsername = String(values[i][usernameIndex] || "").trim().toLowerCase();
+    if (
+      (session.userId && rowUserId === String(session.userId)) ||
+      (session.username && rowUsername === String(session.username).trim().toLowerCase())
+    ) {
+      account = {
+        userId: rowUserId,
+        username: String(values[i][usernameIndex] || "").trim(),
+        role: String(values[i][roleIndex] || "").trim().toUpperCase(),
+        status: String(values[i][statusIndex] || "").trim().toUpperCase()
+      };
+      break;
+    }
+  }
+
+  if (!account) throw new Error("ACCOUNT_NOT_FOUND: Please log in again.");
+  if (account.status !== "ACTIVE") throw new Error("ACCOUNT_INACTIVE: This account is not active.");
+
+  if (allowedRoles.indexOf(account.role) === -1) {
+    throw new Error("ACCESS_DENIED: Role " + account.role + " is not allowed to perform this action.");
+  }
+
+  return account;
+}
