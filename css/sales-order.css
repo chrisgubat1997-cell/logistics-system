@@ -1911,3 +1911,53 @@
     }
 
 }
+
+
+/* =========================================================
+   RECENT ROWS + VIEW ACTION
+========================================================= */
+
+.so-recent-note {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border-color, #e5e9f0);
+    color: var(--text-muted, #667085);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.so-action-cell {
+    min-width: 82px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.so-view-button {
+    min-height: 30px;
+    padding: 0 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    background: #ffffff;
+    color: #243247;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 750;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease,
+                color 0.18s ease, transform 0.18s ease;
+}
+
+.so-view-button:hover {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.so-view-button:focus-visible {
+    outline: 3px solid rgba(37, 99, 235, 0.22);
+    outline-offset: 2px;
+}
+
+.so-view-button:active {
+    transform: translateY(0);
+}
