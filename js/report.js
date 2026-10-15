@@ -2,77 +2,13 @@
    LOGIS-TECH SYSTEM
    REPORT MODULE
    File: js/report.js
-   Version: 20261006
+   Version: 20261015-02
 
-   PURPOSE:
-   - Reports navigation
-   - LocalStorage testing
-   - Sales Order report
-   - Payment report
-   - Invoice report
-   - Delivery / DR report
-   - Receivable report
-   - Fleet report
-   - Executive summary
-
-   NOTE:
-   LocalStorage muna habang testing.
+   DATA POLICY:
+   - All report data is loaded from the Google Apps Script API.
+   - No LocalStorage fallback: failed sources remain empty and
+     are reported clearly so stale browser data is never shown.
    ========================================================= */
-
-
-/* =========================================================
-   STORAGE KEYS
-========================================================= */
-
-const REPORT_STORAGE_KEYS = {
-
-    salesOrders: [
-        "logitechSalesOrders",
-        "logisTechSalesOrders",
-        "salesOrders",
-        "salesOrderRecords"
-    ],
-
-    payments: [
-        "logitechPayments",
-        "logisTechPayments",
-        "payments",
-        "paymentRecords",
-        "logitechPaymentRecords"
-    ],
-
-    invoices: [
-        "logitechInvoices",
-        "logisTechInvoices",
-        "invoices",
-        "invoiceRecords",
-        "logitechInvoiceRecords"
-    ],
-
-    deliveries: [
-        "logitechDeliveries",
-        "logisTechDeliveries",
-        "deliveries",
-        "deliveryRecords"
-    ],
-
-    deliveryReceipts: [
-        "logitechDeliveryReceipts",
-        "logisTechDeliveryReceipts",
-        "deliveryReceipts",
-        "deliveryReceiptRecords",
-        "drRecords"
-    ],
-
-    fleet: [
-        "logitechFleet",
-        "logisTechFleet",
-        "fleet",
-        "fleetRecords",
-        "fleetData"
-    ]
-
-};
 
 
 /* =========================================================
@@ -100,6 +36,7 @@ let filteredReportData = {
 };
 
 let currentReport = "executive";
+let reportDataSourceErrors = [];
 
 
 /* =========================================================
@@ -172,88 +109,98 @@ function buildFleetReportRows(data) {
     return rows;
 }
 async function loadAllReportData() {
-    const badge=document.getElementById("reportDataSourceStatus");
-    if (badge) badge.textContent="Connecting to Google Sheets…";
-    const results=await Promise.allSettled([reportApi("getSalesOrders"),reportApi("getPayments"),reportApi("getInvoices"),reportApi("getDeliveryReceipts"),reportApi("getFleetAnalyticsData")]);
-    const names=["salesOrders","payments","invoices","deliveryReceipts","fleet"];
-    const keys=[["salesOrders","records","orders"],["payments","records"],["invoices","records"],["deliveryReceipts","deliveries","records","drs"],["fleet","records"]];
-    let live=0;
-    results.forEach((item,i)=>{
-        const name=names[i];
-        if(item.status==="fulfilled"){
-            live++; const data=item.value;
-            if(name==="fleet") reportData.fleet=buildFleetReportRows(data);
-            else {
-                const rows=reportArray(data,keys[i]).map(r=>normalizeReportRecord(r,name));
-                if(name==="salesOrders") reportData.salesOrders=rows;
-                if(name==="payments") reportData.payments=rows;
-                if(name==="invoices") reportData.invoices=rows;
-                if(name==="deliveryReceipts"){reportData.deliveryReceipts=rows;reportData.deliveries=rows;}
-            }
-        } else {
-            console.warn("Report database source unavailable:",name,item.reason);
-            if(name==="salesOrders") reportData.salesOrders=getStorageArray(REPORT_STORAGE_KEYS.salesOrders).map(r=>normalizeReportRecord(r,name));
-            if(name==="payments") reportData.payments=getStorageArray(REPORT_STORAGE_KEYS.payments).map(r=>normalizeReportRecord(r,name));
-            if(name==="invoices") reportData.invoices=getStorageArray(REPORT_STORAGE_KEYS.invoices).map(r=>normalizeReportRecord(r,name));
-            if(name==="deliveryReceipts"){reportData.deliveryReceipts=getStorageArray(REPORT_STORAGE_KEYS.deliveryReceipts).map(r=>normalizeReportRecord(r,name));reportData.deliveries=reportData.deliveryReceipts.length?reportData.deliveryReceipts:getStorageArray(REPORT_STORAGE_KEYS.deliveries).map(r=>normalizeReportRecord(r,name));}
-            if(name==="fleet") reportData.fleet=getStorageArray(REPORT_STORAGE_KEYS.fleet).map(r=>normalizeReportRecord(r,name));
-        }
-    });
-    filteredReportData=cloneReportData(reportData);
-    if(badge){badge.textContent=live===5?"LIVE DATABASE DATA":live>0?"DATABASE DATA • SOME SOURCES UNAVAILABLE":"LOCAL CACHE • DATABASE UNAVAILABLE";badge.className="report-data-source "+(live===5?"is-live":live>0?"is-partial":"is-cache");}
-}
-
-
-/* =========================================================
-   GET STORAGE ARRAY
-========================================================= */
-
-function getStorageArray(keys) {
-
-    for (const key of keys) {
-
-        try {
-
-            const raw = localStorage.getItem(key);
-
-            if (!raw) {
-                continue;
-            }
-
-            const parsed = JSON.parse(raw);
-
-            if (Array.isArray(parsed)) {
-                return parsed;
-            }
-
-            if (
-                parsed &&
-                Array.isArray(parsed.data)
-            ) {
-                return parsed.data;
-            }
-
-            if (
-                parsed &&
-                Array.isArray(parsed.records)
-            ) {
-                return parsed.records;
-            }
-
-        } catch (error) {
-
-            console.warn(
-                "REPORT: Unable to read storage key:",
-                key,
-                error
-            );
-
-        }
-
+    const badge = document.getElementById("reportDataSourceStatus");
+    if (badge) {
+        badge.textContent = "Connecting to Google Sheets…";
+        badge.className = "report-data-source is-loading";
+        badge.removeAttribute("title");
     }
 
-    return [];
+    reportDataSourceErrors = [];
+    const requests = [
+        { name: "Sales Orders", key: "salesOrders", action: "getSalesOrders", aliases: ["salesOrders", "records", "orders"] },
+        { name: "Payments", key: "payments", action: "getPayments", aliases: ["payments", "records"] },
+        { name: "Invoices", key: "invoices", action: "getInvoices", aliases: ["invoices", "records"] },
+        { name: "Delivery Receipts", key: "deliveryReceipts", action: "getDeliveryReceipts", aliases: ["deliveryReceipts", "deliveries", "records", "drs"] },
+        { name: "Fleet", key: "fleet", action: "getFleetAnalyticsData", aliases: ["fleet", "records"] }
+    ];
 
+    const results = await Promise.allSettled(
+        requests.map(source => reportApi(source.action))
+    );
+
+    // Clear all collections first so old records cannot remain after a failed refresh.
+    reportData = {
+        salesOrders: [],
+        payments: [],
+        invoices: [],
+        deliveries: [],
+        deliveryReceipts: [],
+        fleet: []
+    };
+
+    let live = 0;
+    results.forEach((result, index) => {
+        const source = requests[index];
+        if (result.status !== "fulfilled") {
+            reportDataSourceErrors.push(source.name + ": " + (result.reason?.message || "Database request failed"));
+            console.error("Reports database source unavailable:", source.name, result.reason);
+            return;
+        }
+
+        live++;
+        const payload = result.value;
+        if (source.key === "fleet") {
+            reportData.fleet = buildFleetReportRows(payload);
+            return;
+        }
+
+        const rows = reportArray(payload, source.aliases)
+            .map(row => normalizeReportRecord(row, source.key));
+
+        if (source.key === "salesOrders") reportData.salesOrders = rows;
+        if (source.key === "payments") reportData.payments = rows;
+        if (source.key === "invoices") reportData.invoices = rows;
+        if (source.key === "deliveryReceipts") {
+            reportData.deliveryReceipts = rows;
+            reportData.deliveries = rows.slice();
+        }
+    });
+
+    filteredReportData = cloneReportData(reportData);
+
+    if (badge) {
+        if (live === requests.length) {
+            badge.textContent = "LIVE DATABASE DATA · " + live + "/" + requests.length + " SOURCES";
+            badge.className = "report-data-source is-live";
+        } else if (live > 0) {
+            badge.textContent = "DATABASE PARTIAL · " + live + "/" + requests.length + " SOURCES";
+            badge.className = "report-data-source is-partial";
+        } else {
+            badge.textContent = "DATABASE UNAVAILABLE · 0/" + requests.length + " SOURCES";
+            badge.className = "report-data-source is-error";
+        }
+        if (reportDataSourceErrors.length) {
+            badge.title = reportDataSourceErrors.join("\n");
+        } else {
+            badge.title = "All report sources loaded directly from Google Apps Script.";
+        }
+    }
+
+    console.info("LOGIS-TECH Reports: database sources loaded", {
+        connectedSources: live,
+        totalSources: requests.length,
+        recordCounts: {
+            salesOrders: reportData.salesOrders.length,
+            deliveryReceipts: reportData.deliveryReceipts.length,
+            invoices: reportData.invoices.length,
+            payments: reportData.payments.length,
+            fleet: reportData.fleet.length
+        },
+        errors: reportDataSourceErrors
+    });
+
+    return { connectedSources: live, totalSources: requests.length, errors: reportDataSourceErrors.slice() };
 }
 
 
