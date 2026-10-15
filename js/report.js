@@ -114,8 +114,6 @@ function initializeReport() {
 
     reportInitialized = true;
 
-    loadAllReportData();
-
     setDefaultReportDates();
 
     populateClientFilter();
@@ -124,11 +122,9 @@ function initializeReport() {
 
     bindReportEvents();
 
-    applyReportFilters();
-
-    showReport("executive");
-
-    setGeneratedDate();
+    loadAllReportData().then(function() {
+        populateClientFilter(false); populateStatusFilter(false); applyReportFilters(); showReport("executive"); setGeneratedDate();
+    }).catch(function(error) { console.error("Reports initialization failed:",error); applyReportFilters(); showReport("executive"); });
 
 }
 
@@ -137,28 +133,74 @@ function initializeReport() {
    LOAD ALL DATA
 ========================================================= */
 
-function loadAllReportData() {
-
-    reportData.salesOrders =
-        getStorageArray(REPORT_STORAGE_KEYS.salesOrders);
-
-    reportData.payments =
-        getStorageArray(REPORT_STORAGE_KEYS.payments);
-
-    reportData.invoices =
-        getStorageArray(REPORT_STORAGE_KEYS.invoices);
-
-    reportData.deliveries =
-        getStorageArray(REPORT_STORAGE_KEYS.deliveries);
-
-    reportData.deliveryReceipts =
-        getStorageArray(REPORT_STORAGE_KEYS.deliveryReceipts);
-
-    reportData.fleet =
-        getStorageArray(REPORT_STORAGE_KEYS.fleet);
-
-    filteredReportData = cloneReportData(reportData);
-
+const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+async function reportApi(action) {
+    const response = await fetch(REPORT_API_URL, {method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:action,data:{}})});
+    if (!response.ok) throw new Error(action + " failed: HTTP " + response.status);
+    const result = await response.json();
+    if (result && result.success === false) throw new Error(result.message || action + " failed");
+    return result && result.data ? result.data : result;
+}
+function reportArray(result, keys) {
+    if (Array.isArray(result)) return result;
+    for (const key of keys) if (result && Array.isArray(result[key])) return result[key];
+    return [];
+}
+function normalizeReportRecord(record, type) {
+    const r = Object.assign({}, record || {});
+    const alias = (to, keys) => { if (r[to] !== undefined && r[to] !== null && r[to] !== "") return; for (const k of keys) if (r[k] !== undefined && r[k] !== null && r[k] !== "") { r[to] = r[k]; return; } };
+    alias("date", ["DATE_CREATION","SO_DATE","PAYMENT_DATE","INVOICE_DATE","DATE_TRANSFER","TRIP_DATE","FUEL_DATE","MAINTENANCE_DATE","REQUEST_DATE","DATE","CREATED_AT"]);
+    alias("createdAt", ["CREATED_AT","UPDATED_AT"]); alias("status", ["STATUS","PAYMENT_STATUS","INVOICE_STATUS","SO_STATUS","DELIVERY_STATUS"]);
+    alias("client", ["CLIENT_NAME","CUSTOMER_NAME","CLIENT","CUSTOMER"]); alias("clientName", ["CLIENT_NAME","CUSTOMER_NAME","CLIENT","CUSTOMER"]);
+    alias("project", ["PROJECT","PROJECT_NAME"]); alias("projectName", ["PROJECT","PROJECT_NAME"]);
+    alias("soNo", ["SO_NUMBER","SO_NO","SALES_ORDER_NO"]); alias("salesOrderNo", ["SO_NUMBER","SO_NO","SALES_ORDER_NO"]); alias("salesOrderNumber", ["SO_NUMBER","SO_NO","SALES_ORDER_NO"]);
+    alias("drNo", ["DR_NUMBER","DR_NO","DELIVERY_RECEIPT_NO"]); alias("deliveryNo", ["DR_NUMBER","DR_NO","DELIVERY_RECEIPT_NO"]);
+    alias("dateTransfer", ["DATE_TRANSFER","TRANSFER_DATE"]); alias("transferDate", ["DATE_TRANSFER","TRANSFER_DATE"]); alias("committedDate", ["COMMITTED_DATE","DATE_COMMITTED"]); alias("dateDelivered", ["DATE_DELIVERED","DELIVERED_DATE"]);
+    alias("total", ["SO_TOTAL","GRAND_TOTAL","TOTAL_AMOUNT","TOTAL","AMOUNT_DUE","FINAL_AMOUNT_DUE","TOTAL_SALES"]); alias("soTotal", ["SO_TOTAL","GRAND_TOTAL","TOTAL_AMOUNT","TOTAL"]); alias("grandTotal", ["GRAND_TOTAL","TOTAL_AMOUNT","SO_TOTAL"]);
+    alias("amountDue", ["FINAL_AMOUNT_DUE","AMOUNT_DUE","TOTAL_AMOUNT","TOTAL_SALES"]); alias("invoiceAmount", ["FINAL_AMOUNT_DUE","AMOUNT_DUE","TOTAL_AMOUNT","TOTAL_SALES"]); alias("netPayable", ["NET_PAYABLE","FINAL_AMOUNT_DUE","AMOUNT_DUE"]); alias("ewtAmount", ["EWT_AMOUNT","EWT"]);
+    alias("paymentNo", ["PAYMENT_NO"]); alias("paymentDate", ["PAYMENT_DATE","DATE"]); alias("paymentAmount", ["CURRENT_PAYMENT","AMOUNT","PAYMENT_AMOUNT"]); alias("currentPayment", ["CURRENT_PAYMENT","AMOUNT","PAYMENT_AMOUNT"]); alias("paymentStatus", ["PAYMENT_STATUS","STATUS"]); alias("paymentMethod", ["PAYMENT_METHOD"]); alias("receiptNo", ["RECEIPT_NO"]);
+    alias("invoiceNo", ["INVOICE_NO"]); alias("invoiceDate", ["INVOICE_DATE","DATE"]); alias("invoiceStatus", ["INVOICE_STATUS","STATUS"]); alias("terms", ["TERMS","PAYMENT_TERMS"]); alias("soStatus", ["STATUS","SO_STATUS"]);
+    alias("vehicle", ["VEHICLE_CODE","VEHICLE","PLATE_NUMBER","PLATE_NO"]); alias("totalKM", ["TOTAL_KM","ACTUAL_KM","KM"]); alias("fuelUsed", ["LITERS","FUEL_LITERS"]); alias("maintenanceCost", ["FINAL_COST","COST","ESTIMATED_COST"]); alias("idleDays", ["IDLE_DAYS"]);
+    if (type === "fleet") r.date = r.TRIP_DATE || r.FUEL_DATE || r.MAINTENANCE_DATE || r.REQUEST_DATE || r.CREATED_AT || r.date;
+    return r;
+}
+function buildFleetReportRows(data) {
+    const rows = [];
+    reportArray(data, ["tripTickets"]).forEach(r0 => { const r=normalizeReportRecord(r0,"fleet"),a=Number(r.START_KM||0),b=Number(r.END_KM||0);r.totalKM=Number(r.TOTAL_KM||(b>a?b-a:0))||0;r.fuelUsed=0;r.trips=1;r.maintenanceCost=0;r.idleDays=0;rows.push(r); });
+    reportArray(data, ["fuelTransactions"]).forEach(r0 => { const r=normalizeReportRecord(r0,"fleet");r.totalKM=0;r.fuelUsed=Number(r.LITERS||0)||0;r.trips=0;r.maintenanceCost=0;r.idleDays=0;rows.push(r); });
+    reportArray(data, ["maintenance"]).forEach(r0 => { const r=normalizeReportRecord(r0,"fleet");r.totalKM=0;r.fuelUsed=0;r.trips=0;r.maintenanceCost=Number(r.FINAL_COST||r.COST||r.ESTIMATED_COST||0)||0;r.idleDays=Number(r.IDLE_DAYS||0)||0;rows.push(r); });
+    return rows;
+}
+async function loadAllReportData() {
+    const badge=document.getElementById("reportDataSourceStatus");
+    if (badge) badge.textContent="Connecting to Google Sheets…";
+    const results=await Promise.allSettled([reportApi("getSalesOrders"),reportApi("getPayments"),reportApi("getInvoices"),reportApi("getDeliveryReceipts"),reportApi("getFleetAnalyticsData")]);
+    const names=["salesOrders","payments","invoices","deliveryReceipts","fleet"];
+    const keys=[["salesOrders","records","orders"],["payments","records"],["invoices","records"],["deliveryReceipts","deliveries","records","drs"],["fleet","records"]];
+    let live=0;
+    results.forEach((item,i)=>{
+        const name=names[i];
+        if(item.status==="fulfilled"){
+            live++; const data=item.value;
+            if(name==="fleet") reportData.fleet=buildFleetReportRows(data);
+            else {
+                const rows=reportArray(data,keys[i]).map(r=>normalizeReportRecord(r,name));
+                if(name==="salesOrders") reportData.salesOrders=rows;
+                if(name==="payments") reportData.payments=rows;
+                if(name==="invoices") reportData.invoices=rows;
+                if(name==="deliveryReceipts"){reportData.deliveryReceipts=rows;reportData.deliveries=rows;}
+            }
+        } else {
+            console.warn("Report database source unavailable:",name,item.reason);
+            if(name==="salesOrders") reportData.salesOrders=getStorageArray(REPORT_STORAGE_KEYS.salesOrders).map(r=>normalizeReportRecord(r,name));
+            if(name==="payments") reportData.payments=getStorageArray(REPORT_STORAGE_KEYS.payments).map(r=>normalizeReportRecord(r,name));
+            if(name==="invoices") reportData.invoices=getStorageArray(REPORT_STORAGE_KEYS.invoices).map(r=>normalizeReportRecord(r,name));
+            if(name==="deliveryReceipts"){reportData.deliveryReceipts=getStorageArray(REPORT_STORAGE_KEYS.deliveryReceipts).map(r=>normalizeReportRecord(r,name));reportData.deliveries=reportData.deliveryReceipts.length?reportData.deliveryReceipts:getStorageArray(REPORT_STORAGE_KEYS.deliveries).map(r=>normalizeReportRecord(r,name));}
+            if(name==="fleet") reportData.fleet=getStorageArray(REPORT_STORAGE_KEYS.fleet).map(r=>normalizeReportRecord(r,name));
+        }
+    });
+    filteredReportData=cloneReportData(reportData);
+    if(badge){badge.textContent=live===5?"LIVE DATABASE DATA":live>0?"DATABASE DATA • SOME SOURCES UNAVAILABLE":"LOCAL CACHE • DATABASE UNAVAILABLE";badge.className="report-data-source "+(live===5?"is-live":live>0?"is-partial":"is-cache");}
 }
 
 
@@ -312,13 +354,7 @@ function bindReportEvents() {
             "click",
             () => {
 
-                loadAllReportData();
-
-                populateClientFilter(false);
-
-                populateStatusFilter(false);
-
-                applyReportFilters();
+                loadAllReportData().then(function() { populateClientFilter(false); populateStatusFilter(false); applyReportFilters(); });
 
             }
         );
@@ -1251,14 +1287,8 @@ function renderExecutiveReport() {
     );
 
 
-    const deliveredCount =
-        deliveries.filter(
-            isDeliveredRecord
-        ).length
-        +
-        filteredReportData.deliveryReceipts.filter(
-            isDeliveredRecord
-        ).length;
+    const deliverySource = deliveries.length ? deliveries : filteredReportData.deliveryReceipts;
+    const deliveredCount = deliverySource.filter(isDeliveredRecord).length;
 
 
     setText(
