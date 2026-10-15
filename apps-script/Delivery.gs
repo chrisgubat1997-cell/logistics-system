@@ -132,6 +132,7 @@ function getDeliveryReceipts(payload) {
 
 function createDeliveryReceipt(payload) {
   payload = payload || {};
+  authorizeRole_(payload, ["ADMIN", "LOGISTICS"]);
 
   const lock = LockService.getScriptLock();
 
