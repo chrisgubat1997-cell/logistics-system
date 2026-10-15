@@ -1,7 +1,7 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
    ROLE-BASED ACTION VISIBILITY
-   VERSION: 20261015-role02
+   VERSION: 20261015-role03
 
    UI convenience only. Server-side authorization is still
    required for every create/update/cancel/post operation.
@@ -90,9 +90,26 @@
         });
     }
 
+    function applyFleetSidebarVisibility(role) {
+        const canSeeFleet = ["ADMIN", "LOGISTICS"].includes(role);
+        document.querySelectorAll(".menu-btn").forEach(function (button) {
+            const action = button.getAttribute("onclick") || "";
+            if (!action.includes("fleetAnalytics") && !action.includes("fleetDataEntry")) return;
+            if (!button.hasAttribute("data-fleet-role-original-display")) {
+                button.setAttribute("data-fleet-role-original-display", button.style.display || "");
+            }
+            button.style.display = canSeeFleet
+                ? (button.getAttribute("data-fleet-role-original-display") || "")
+                : "none";
+            button.setAttribute("aria-hidden", String(!canSeeFleet));
+        });
+    }
+
     function applyRoleActionVisibility() {
         const role = currentRole();
         if (!role) return;
+
+        applyFleetSidebarVisibility(role);
 
         ROOTS.forEach(function (entry) {
             document.querySelectorAll(entry.selector).forEach(function (root) {
