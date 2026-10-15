@@ -1611,3 +1611,12 @@
 @media(max-width:900px){.report-extra-chart-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.report-bar-row{grid-template-columns:78px minmax(35px,1fr) auto;gap:7px}.report-bar-label,.report-bar-row strong{font-size:10px}.report-chart-legend{gap:12px}}
 @media print{.report-extra-chart-grid{break-inside:avoid}.report-data-source{color:#475467}}
+
+
+/* Database source states for Reports */
+.report-data-source.is-loading { color: #64748b; }
+.report-data-source.is-loading::before { background: #94a3b8; animation: report-source-pulse 1.1s ease-in-out infinite alternate; }
+.report-data-source.is-error { color: #b42318; }
+.report-data-source.is-error::before { background: #ef4444; }
+@keyframes report-source-pulse { from { opacity: .35; transform: scale(.85); } to { opacity: 1; transform: scale(1.15); } }
+@media (prefers-reduced-motion: reduce) { .report-data-source.is-loading::before { animation: none; } }
