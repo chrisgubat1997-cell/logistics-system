@@ -1,3 +1,23 @@
+function getLogisTechCurrentRole() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+        const account = saved.account || saved.user || saved;
+        return String(account.role || account.ROLE || account.accountType || account.account_type || account.accounttype || account.type || "").trim().toUpperCase();
+    } catch (error) { return ""; }
+}
+
+function canCreateSalesOrderByRole() {
+    return ["ADMIN", "SALES"].includes(getLogisTechCurrentRole());
+}
+function enforceCreateSalesOrderRole() {
+    if (!canCreateSalesOrderByRole()) {
+        alert("Access denied. Only ADMIN and SALES roles can create Sales Orders.");
+        window.location.replace("../index.html");
+        return false;
+    }
+    return true;
+}
+
 /* =========================================================
    LOGIS-TECH SYSTEM
    CREATE SALES ORDER
@@ -177,6 +197,7 @@ document.addEventListener(
 
 async function initializeCreateSO() {
 
+    if (!enforceCreateSalesOrderRole()) return;
     setCreateSODate();
 
     await loadCustomers();
@@ -1720,6 +1741,7 @@ function collectSOItems() {
 
 async function saveSO() {
 
+    if (!enforceCreateSalesOrderRole()) return;
     console.log("=================================");
     console.log("SAVE SO FUNCTION VERSION:");
     console.log("20261008-01");
