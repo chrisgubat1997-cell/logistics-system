@@ -12,6 +12,22 @@
     >
 
     <title>LOGIS-TECH SYSTEM</title>
+    <!-- Apply saved theme before styles render to avoid a light-mode flash. -->
+    <script>
+    (function () {
+        try {
+            var saved = JSON.parse(localStorage.getItem('logitechSystemSettings') || '{}');
+            var theme = saved.theme || 'light';
+            if (theme === 'system') {
+                theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
+        } catch (e) {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    })();
+    </script>
+
 
 
     <!-- =====================================================
@@ -98,7 +114,7 @@
 
     <link
         rel="stylesheet"
-        href="css/system-settings.css?v=20261006"
+        href="css/system-settings.css?v=20261015-02"
     >
 
 
@@ -2916,7 +2932,7 @@ async function loadSystemSettingsModule() {
     try {
 
         await loadScriptOnce(
-            'js/system-settings.js?v=20261006',
+            'js/system-settings.js?v=20261015-02',
             'data-system-settings-js'
         );
 
