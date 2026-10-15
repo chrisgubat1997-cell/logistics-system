@@ -1584,6 +1584,14 @@ function showSettingsMessage(
 
 function bindSystemSettingsEvents() {
 
+    /* Theme applies immediately and persists without requiring Save Changes. */
+    const liveThemeSetting = getSettingElement("themeSetting");
+    if (liveThemeSetting) {
+        liveThemeSetting.removeEventListener("change", handleImmediateThemeChange);
+        liveThemeSetting.addEventListener("change", handleImmediateThemeChange);
+    }
+
+
     /*
        IMPORTANT:
        Remove previously attached handlers first.
@@ -2228,3 +2236,16 @@ window.LOGISTECH_SYSTEM_SETTINGS = {
    Settings HTML exists and prevents duplicate event
    listeners.
    ========================================================= */
+
+
+/* Apply theme immediately when the user changes the theme selector. */
+function handleImmediateThemeChange() {
+    const selected = getSettingElement("themeSetting")?.value || "light";
+    currentSystemSettings = { ...currentSystemSettings, theme: selected };
+    if (saveSystemSettingsToStorage()) {
+        applyTheme();
+        showSettingsMessage("Theme updated and saved.", "success");
+    } else {
+        showSettingsMessage("Could not save the theme preference.", "error");
+    }
+}
