@@ -611,6 +611,7 @@ function renderCurrentReport() {
             break;
 
     }
+    renderAdditionalReportCharts(currentReport);
 
 }
 
@@ -1454,6 +1455,7 @@ function renderExecutiveReport() {
 
 
     renderExecutiveMonthlyTable();
+    renderExecutiveCharts();
 
 }
 
@@ -4232,6 +4234,86 @@ function debounce(
 }
 
 
+/* =========================================================
+   DATA-DRIVEN SVG CHARTS
+========================================================= */
+function reportEscChart(v){return String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function reportMonthKey(v){const d=normalizeDateValue(v);return d?d.slice(0,7):"";}
+function reportCompactMoney(v){v=Number(v)||0;return Math.abs(v)>=1000000?"₱"+(v/1000000).toFixed(1)+"M":Math.abs(v)>=1000?"₱"+(v/1000).toFixed(0)+"k":"₱"+Math.round(v);}
+function reportMonthlySeries(){
+    const sales={},collections={};
+    const add=(rows,dates,amounts,target)=>rows.forEach(r=>{const m=reportMonthKey(getFirstValue(r,dates));if(m)target[m]=(target[m]||0)+getNumber(r,amounts);});
+    add(filteredReportData.salesOrders,["date","orderDate","createdAt"],["total","soTotal","grandTotal","totalAmount"],sales);
+    add(filteredReportData.payments,["date","paymentDate","createdAt"],["currentPayment","paymentAmount","amount"],collections);
+    const months=Array.from(new Set([...Object.keys(sales),...Object.keys(collections)])).sort();
+    return months.slice(-Math.max(1,Number(document.getElementById("summaryChartPeriod")?.value||12))).map(m=>({month:m,label:formatMonth(m),sales:sales[m]||0,collections:collections[m]||0}));
+}
+function renderExecutiveCharts(){
+    const host=document.getElementById("salesCollectionChart"), rows=reportMonthlySeries();
+    if(host){
+        if(!rows.length){host.innerHTML='<div class="report-chart-empty">No monthly sales or collection data in this period.</div>';}
+        else{
+            const w=720,h=260,l=62,r=18,t=18,b=46,max=Math.max(1,...rows.flatMap(x=>[x.sales,x.collections]));
+            const X=i=>l+(rows.length===1?(w-l-r)/2:i*(w-l-r)/(rows.length-1)),Y=v=>h-b-(v/max)*(h-t-b);
+            const grid=[0,.25,.5,.75,1].map(p=>{const y=h-b-p*(h-t-b);return '<line x1="'+l+'" y1="'+y+'" x2="'+(w-r)+'" y2="'+y+'" stroke="#e7edf5"/><text x="'+(l-8)+'" y="'+(y+4)+'" text-anchor="end" fill="#78859a" font-size="10">'+reportEscChart(reportCompactMoney(max*p))+'</text>';}).join("");
+            const path=k=>rows.map((m,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(m[k]).toFixed(1)).join(" ");
+            const dots=k=>rows.map((m,i)=>'<circle cx="'+X(i)+'" cy="'+Y(m[k])+'" r="3.5" fill="'+(k==="sales"?"#2457d6":"#12a594")+'"><title>'+reportEscChart(m.label+": "+formatCurrency(m[k]))+'</title></circle>').join("");
+            const labels=rows.map((m,i)=>'<text x="'+X(i)+'" y="'+(h-17)+'" text-anchor="middle" fill="#68758a" font-size="10">'+reportEscChart(m.label)+'</text>').join("");
+            host.innerHTML='<svg class="report-svg-chart" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Monthly sales and collection">'+grid+'<path d="'+path("sales")+'" fill="none" stroke="#2457d6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="'+path("collections")+'" fill="none" stroke="#12a594" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'+dots("sales")+dots("collections")+labels+'</svg><div class="report-chart-legend"><span><i class="sales-dot"></i>SO Amount</span><span><i class="collection-dot"></i>Collected</span></div>';
+        }
+    }
+    const donut=document.querySelector("#deliveryPerformanceChart .donut-placeholder");
+    if(donut){
+        const s=calculateDeliveryStats(filteredReportData.deliveries,filteredReportData.deliveryReceipts), total=Math.max(0,s.onTime+s.delayed+s.pending), pct=total?s.onTime/total*100:0, c=2*Math.PI*43, a=c*pct/100, d=total?c*s.delayed/total:0, p=Math.max(0,c-a-d);
+        donut.innerHTML='<svg viewBox="0 0 120 120" role="img" aria-label="Delivery performance"><circle cx="60" cy="60" r="43" fill="none" stroke="#edf1f7" stroke-width="12"/><circle cx="60" cy="60" r="43" fill="none" stroke="#12a594" stroke-width="12" stroke-dasharray="'+a+' '+c+'" transform="rotate(-90 60 60)"/><circle cx="60" cy="60" r="43" fill="none" stroke="#e59b35" stroke-width="12" stroke-dasharray="'+d+' '+c+'" stroke-dashoffset="'+(-a)+'" transform="rotate(-90 60 60)"/><circle cx="60" cy="60" r="43" fill="none" stroke="#8c9bb0" stroke-width="12" stroke-dasharray="'+p+' '+c+'" stroke-dashoffset="'+(-(a+d))+'" transform="rotate(-90 60 60)"/></svg><strong id="deliveryChartPercent">'+formatPercent(s.accuracy)+'</strong><span>On-Time</span>';
+    }
+}
+function ensureReportCharts(name){
+    const view=document.getElementById("report-"+name);if(!view)return null;
+    let grid=view.querySelector(".report-extra-chart-grid");if(grid)return grid;
+    grid=document.createElement("div");grid.className="report-extra-chart-grid";
+    grid.innerHTML='<section class="report-panel report-extra-chart-panel"><div class="report-panel-header"><div><span>VISUAL ANALYTICS</span><h3 id="'+name+'GraphTitleA">Status Breakdown</h3></div></div><div id="'+name+'StatusGraph" class="report-bar-chart"></div></section><section class="report-panel report-extra-chart-panel"><div class="report-panel-header"><div><span>PERFORMANCE TREND</span><h3 id="'+name+'GraphTitleB">Monthly Trend</h3></div></div><div id="'+name+'MonthlyGraph" class="report-bar-chart"></div></section>';
+    const stats=view.querySelector(".report-mini-stat-grid,.report-stat-grid"), heading=view.querySelector(".report-section-heading");
+    if(stats)stats.insertAdjacentElement("afterend",grid);else if(heading)heading.insertAdjacentElement("afterend",grid);else view.prepend(grid);
+    return grid;
+}
+function renderReportBars(id,items,format){
+    const host=document.getElementById(id);if(!host)return;
+    const rows=(items||[]).filter(x=>x&&Number.isFinite(Number(x.value))).slice(-8);
+    if(!rows.length){host.innerHTML='<div class="report-chart-empty">No data available for this chart.</div>';return;}
+    const max=Math.max(1,...rows.map(x=>Number(x.value)||0));
+    host.innerHTML=rows.map(x=>'<div class="report-bar-row"><span class="report-bar-label" title="'+reportEscChart(x.label)+'">'+reportEscChart(x.label)+'</span><span class="report-bar-track"><i style="width:'+Math.max(0,(Number(x.value)||0)/max*100)+'%"></i></span><strong>'+reportEscChart(format?format(Number(x.value)||0):formatNumber(x.value))+'</strong></div>').join("");
+}
+function reportStatusBreakdown(rows){
+    const counts={};(rows||[]).forEach(r=>{const s=String(normalizeStatus(r)||"Unknown").replace(/\b\w/g,c=>c.toUpperCase());counts[s]=(counts[s]||0)+1;});
+    return Object.keys(counts).sort((a,b)=>counts[b]-counts[a]).map(k=>({label:k,value:counts[k]}));
+}
+function reportMonthlyBars(rows,dateFields,valueFields,countOnly){
+    const sums={};(rows||[]).forEach(r=>{const m=reportMonthKey(getFirstValue(r,dateFields));if(!m)return;sums[m]=(sums[m]||0)+(countOnly?1:getNumber(r,valueFields));});
+    return Object.keys(sums).sort().slice(-8).map(m=>({label:formatMonth(m),value:sums[m]}));
+}
+function renderAdditionalReportCharts(name){
+    if(!name||name==="executive")return;
+    const panel=ensureReportCharts(name);if(!panel)return;
+    let rows=[],titleA="Status Breakdown",titleB="Monthly Trend",dateFields=["date","createdAt"],amountFields=["total","totalAmount"],countOnly=false;
+    if(name==="sales-order"){rows=filteredReportData.salesOrders;titleB="Monthly Sales Order Value";dateFields=["date","createdAt"];amountFields=["total","soTotal","grandTotal","totalAmount"];}
+    else if(name==="delivery"){rows=filteredReportData.deliveries.length?filteredReportData.deliveries:filteredReportData.deliveryReceipts;titleB="Monthly Deliveries";dateFields=["dateTransfer","transferDate","date","createdAt"];countOnly=true;}
+    else if(name==="dr"){rows=filteredReportData.deliveryReceipts;titleA="DR Status";titleB="Monthly DR Volume";dateFields=["dateTransfer","transferDate","date","createdAt"];countOnly=true;}
+    else if(name==="invoice"){rows=filteredReportData.invoices;titleB="Monthly Invoiced Value";dateFields=["date","invoiceDate","createdAt"];amountFields=["amountDue","invoiceAmount","totalAmount"];}
+    else if(name==="payment"){rows=filteredReportData.payments;titleA="Collection Status";titleB="Monthly Collections";dateFields=["date","paymentDate","createdAt"];amountFields=["currentPayment","paymentAmount","amount"];}
+    else if(name==="receivable"){rows=filteredReportData.invoices;titleA="Invoice Status";titleB="Monthly Receivable Value";dateFields=["date","invoiceDate","createdAt"];amountFields=["amountDue","invoiceAmount","totalAmount"];}
+    else if(name==="management"){rows=filteredReportData.salesOrders;titleB="Monthly SO Value";dateFields=["date","createdAt"];amountFields=["total","soTotal","grandTotal","totalAmount"];}
+    else if(name==="fleet"){
+        rows=filteredReportData.fleet;titleA="Kilometers by Vehicle";titleB="Maintenance Cost by Vehicle";
+        const vehicles={};rows.forEach(r=>{const v=String(getFirstValue(r,["vehicle","VEHICLE_CODE","plateNumber","PLATE_NUMBER"])||"Unknown");if(!vehicles[v])vehicles[v]={km:0,cost:0};vehicles[v].km+=getNumber(r,["totalKM","TOTAL_KM","km"]);vehicles[v].cost+=getNumber(r,["maintenanceCost","FINAL_COST","COST","ESTIMATED_COST"]);});
+        setText(name+"GraphTitleA",titleA);setText(name+"GraphTitleB",titleB);
+        renderReportBars(name+"StatusGraph",Object.keys(vehicles).map(v=>({label:v,value:vehicles[v].km})),v=>formatNumber(v)+" km");
+        renderReportBars(name+"MonthlyGraph",Object.keys(vehicles).map(v=>({label:v,value:vehicles[v].cost})),formatCurrency);return;
+    }
+    setText(name+"GraphTitleA",titleA);setText(name+"GraphTitleB",titleB);
+    renderReportBars(name+"StatusGraph",reportStatusBreakdown(rows),formatNumber);
+    renderReportBars(name+"MonthlyGraph",reportMonthlyBars(rows,dateFields,amountFields,countOnly),countOnly?formatNumber:reportCompactMoney);
+}
 /* =========================================================
    GLOBAL EXPORTS
 ========================================================= */
