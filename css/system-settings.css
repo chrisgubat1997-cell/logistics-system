@@ -888,3 +888,69 @@ input:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
 }
+
+
+/* =========================================================
+   LOGIS-TECH SYSTEM — DARK MODE + BRAND ALIGNMENT
+   Uses the app-wide data-theme set by system-settings.js.
+========================================================= */
+:root {
+  --primary: #123B91;
+  --primary-dark: #0d2e73;
+  --primary-light: #eaf0fc;
+  --success: #39A935;
+  --radius: 14px;
+}
+.settings-page { color: var(--text); }
+.settings-card, .system-status, .settings-save-bar { transition: background-color .22s ease, color .22s ease, border-color .22s ease, box-shadow .22s ease; }
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --text: #e8edf7;
+  --text-secondary: #b1bdd0;
+  --text-muted: #8f9db3;
+  --bg: #0b1220;
+  --card: #151f30;
+  --border: #2b3950;
+  --primary-light: #1c3155;
+  --success: #52c94d;
+  --danger: #ff7777;
+  --shadow: 0 8px 25px rgba(0,0,0,.22);
+  --shadow-hover: 0 14px 35px rgba(0,0,0,.32);
+}
+html[data-theme="dark"] body,
+html[data-theme="dark"] .settings-page { background: #0b1220 !important; color: #e8edf7 !important; }
+html[data-theme="dark"] .settings-card,
+html[data-theme="dark"] .system-status,
+html[data-theme="dark"] .settings-save-bar { background: #151f30 !important; color: #e8edf7 !important; border-color: #2b3950 !important; }
+html[data-theme="dark"] .card-header,
+html[data-theme="dark"] .setting-row,
+html[data-theme="dark"] .maintenance-btn { border-color: #2b3950 !important; }
+html[data-theme="dark"] .setting-row strong,
+html[data-theme="dark"] .card-header h2,
+html[data-theme="dark"] .system-details h3,
+html[data-theme="dark"] .settings-save-bar strong,
+html[data-theme="dark"] .storage-box strong { color: #e8edf7 !important; }
+html[data-theme="dark"] .setting-row span,
+html[data-theme="dark"] .card-header p,
+html[data-theme="dark"] .settings-header p,
+html[data-theme="dark"] .system-details p,
+html[data-theme="dark"] .settings-save-bar span { color: #9eacc2 !important; }
+html[data-theme="dark"] .setting-row select,
+html[data-theme="dark"] .storage-box,
+html[data-theme="dark"] .action-btn,
+html[data-theme="dark"] .maintenance-btn > span { background: #101827 !important; color: #e8edf7 !important; border-color: #35445b !important; }
+html[data-theme="dark"] .system-logo { background: #fff !important; }
+html[data-theme="dark"] .cancel-btn { background: #202c40 !important; color: #e8edf7 !important; border-color: #35445b !important; }
+html[data-theme="dark"] .save-btn { background: #123B91 !important; color: #fff !important; }
+html[data-theme="dark"] .action-btn.danger:hover { background: #3b2028 !important; }
+html[data-theme="dark"] .version { background: #1c3155 !important; color: #bcd0ff !important; }
+html[data-theme="dark"] .header-icon { background: linear-gradient(135deg,#123B91,#0d2e73) !important; }
+html.disable-animations *, html.disable-animations *::before, html.disable-animations *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+@media (max-width: 760px) {
+  .settings-page { padding: 16px !important; }
+  .settings-grid { grid-template-columns: minmax(0,1fr) !important; }
+  .settings-header, .settings-save-bar { align-items: flex-start; flex-direction: column; }
+  .settings-save-bar { position: static; }
+  .setting-row { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .setting-row select { width: 100%; }
+}
