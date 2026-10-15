@@ -43,6 +43,7 @@ function createPayment(payload) {
     const total = _finSoTotal_(so);
     const previousPaid = _finPaidForSO_(soNumber);
     const remainingBefore = Math.max(0, Math.round((total - previousPaid) * 100) / 100);
+    if (remainingBefore <= 0.005) throw new Error("This Sales Order is already FULLY PAID. No additional payment can be recorded.");
     if (amount > remainingBefore + 0.005) throw new Error("Payment exceeds the remaining Sales Order balance of " + remainingBefore.toFixed(2) + ".");
     const terms = _finTerms_(so);
     const requiredDP = _finRequiredDP_(so);
