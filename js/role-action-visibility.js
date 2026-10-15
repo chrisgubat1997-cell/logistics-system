@@ -23,8 +23,8 @@
         { selector: ".payment-module", section: "payment" }
     ];
 
-    const ACTION_WORDS = /(^|\\b)(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject)(\\b|$)/i;
-    const NON_MUTATING_WORDS = /(^|\\b)(view|details|refresh|search|filter|back|close|print|download|preview)(\\b|$)/i;
+    const ACTION_WORDS = /(^|\b)(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject)(\b|$)/i;
+    const NON_MUTATING_WORDS = /(^|\b)(view|details|refresh|search|filter|back|close|print|download|preview)(\b|$)/i;
 
     function currentRole() {
         try {
