@@ -117,6 +117,7 @@ function initializeSystemSettings() {
     loadSavedSystemSettings();
 
     populateSystemSettingsForm();
+    updateLocalStorageUsage();
 
     bindSystemSettingsEvents();
 
@@ -2247,5 +2248,26 @@ function handleImmediateThemeChange() {
         showSettingsMessage("Theme updated and saved.", "success");
     } else {
         showSettingsMessage("Could not save the theme preference.", "error");
+    }
+}
+
+
+/* Display an honest estimate of browser-local data usage. */
+function updateLocalStorageUsage() {
+    const target = getSettingElement("localStorageUsage");
+    if (!target) return;
+    try {
+        let total = 0;
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i) || "";
+            const value = localStorage.getItem(key) || "";
+            total += (key.length + value.length) * 2;
+        }
+        const formatted = total >= 1024 * 1024
+            ? (total / (1024 * 1024)).toFixed(2) + " MB estimated"
+            : (total / 1024).toFixed(1) + " KB estimated";
+        target.textContent = localStorage.length + " stored entries · " + formatted;
+    } catch (error) {
+        target.textContent = "Browser storage information unavailable";
     }
 }
