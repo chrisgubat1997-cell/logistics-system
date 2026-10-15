@@ -1,3 +1,23 @@
+function getLogisTechCurrentRole() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+        const account = saved.account || saved.user || saved;
+        return String(account.role || account.ROLE || account.accountType || account.account_type || account.accounttype || account.type || "").trim().toUpperCase();
+    } catch (error) { return ""; }
+}
+
+function canPrepareDeliveryReceiptByRole() {
+    return ["ADMIN", "LOGISTICS"].includes(getLogisTechCurrentRole());
+}
+function enforcePrepareDeliveryReceiptRole() {
+    if (!canPrepareDeliveryReceiptByRole()) {
+        alert("Access denied. Only ADMIN and LOGISTICS roles can prepare Delivery Receipts.");
+        window.location.replace("../index.html");
+        return false;
+    }
+    return true;
+}
+
 /* =========================================================
    LOGIS-TECH SYSTEM
    CREATE DELIVERY RECEIPT
@@ -198,6 +218,7 @@ document.addEventListener(
 );
 
 async function initCreateDeliveryReceipt() {
+    if (!enforcePrepareDeliveryReceiptRole()) return;
     console.log(
         "LOGIS-TECH Create Delivery Receipt - API mode"
     );
@@ -3294,6 +3315,7 @@ function backToPrepare() {
 
 
 async function saveDeliveryReceipt() {
+    if (!enforcePrepareDeliveryReceiptRole()) return;
     if (isSavingDR) return;
 
     if (!currentDR) {
