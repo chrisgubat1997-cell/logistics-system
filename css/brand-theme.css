@@ -631,3 +631,38 @@ body {
         padding: 8px;
     }
 }
+
+
+/* =========================================================
+   COMPACT LAYOUT OVERRIDE — FIXED VERSION 20261015-02
+   Scale the actual module canvas, not only inherited text.
+   ========================================================= */
+@supports (zoom: 0.85) {
+  .sales-order-module,
+  .delivery-module,
+  .fleet-analytics-module,
+  .fleet-delivery-data-module,
+  .invoicing-module,
+  .payment-module,
+  .report-module,
+  .system-settings-module {
+    zoom: 0.85;
+    width: 117.647%;
+  }
+}
+
+@media (max-width: 700px) {
+  @supports (zoom: 0.85) {
+    .sales-order-module,
+    .delivery-module,
+    .fleet-analytics-module,
+    .fleet-delivery-data-module,
+    .invoicing-module,
+    .payment-module,
+    .report-module,
+    .system-settings-module {
+      zoom: 1;
+      width: 100%;
+    }
+  }
+}
