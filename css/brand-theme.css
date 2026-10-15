@@ -332,3 +332,87 @@ td, th { border-color: var(--line); }
   .fleet-analytics-page,
   .dashboard-page { padding: 14px; }
 }
+
+
+/* =========================================================
+   APP-WIDE DARK THEME — LOGIS-TECH SYSTEM
+   Controlled by <html data-theme="dark">.
+========================================================= */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --ink: #e8edf7;
+  --ink-muted: #a4b2c8;
+  --line: #2b3950;
+  --line-strong: #40516b;
+  --surface: #151f30;
+  --surface-soft: #101827;
+  --shadow-card: 0 8px 24px rgba(0,0,0,.22);
+  --shadow-hover: 0 14px 32px rgba(0,0,0,.32);
+}
+html[data-theme="dark"] body { background: #0b1220 !important; color: #e8edf7 !important; }
+html[data-theme="dark"] #mainContent,
+html[data-theme="dark"] .main-content,
+html[data-theme="dark"] .content,
+html[data-theme="dark"] .page-content,
+html[data-theme="dark"] .dashboard-page,
+html[data-theme="dark"] .sales-order-module,
+html[data-theme="dark"] .delivery-module,
+html[data-theme="dark"] .fleet-analytics-page,
+html[data-theme="dark"] .fleet-data-entry,
+html[data-theme="dark"] .invoicing-container,
+html[data-theme="dark"] .payment-module,
+html[data-theme="dark"] .report-page,
+html[data-theme="dark"] .settings-page { background-color: #0b1220 !important; color: #e8edf7 !important; }
+html[data-theme="dark"] .dashboard-card,
+html[data-theme="dark"] .kpi-card,
+html[data-theme="dark"] .metric-card,
+html[data-theme="dark"] .stat-card,
+html[data-theme="dark"] .summary-card,
+html[data-theme="dark"] .report-card,
+html[data-theme="dark"] .chart-card,
+html[data-theme="dark"] .analytics-card,
+html[data-theme="dark"] .settings-card,
+html[data-theme="dark"] .form-card,
+html[data-theme="dark"] .table-card,
+html[data-theme="dark"] .section,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .modal-content,
+html[data-theme="dark"] .panel { background: #151f30 !important; color: #e8edf7 !important; border-color: #2b3950 !important; box-shadow: var(--shadow-card); }
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] label,
+html[data-theme="dark"] strong,
+html[data-theme="dark"] td,
+html[data-theme="dark"] th,
+html[data-theme="dark"] p,
+html[data-theme="dark"] span { color: inherit; }
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea { background-color: #101827 !important; color: #e8edf7 !important; border-color: #40516b !important; }
+html[data-theme="dark"] table { background: #151f30 !important; color: #e8edf7 !important; }
+html[data-theme="dark"] thead th,
+html[data-theme="dark"] table thead th { background: #1b2b45 !important; color: #d8e5ff !important; border-color: #344866 !important; }
+html[data-theme="dark"] tbody tr,
+html[data-theme="dark"] tbody tr:nth-child(even) { background: #151f30 !important; }
+html[data-theme="dark"] tbody tr:hover { background: #1c2b42 !important; }
+html[data-theme="dark"] .sidebar { background: #081225 !important; border-color: #1f2e46 !important; }
+html[data-theme="dark"] .menu-btn { color: #c7d2e5 !important; }
+html[data-theme="dark"] .menu-btn.active { background: #123B91 !important; color: #fff !important; }
+html[data-theme="dark"] .menu-btn:hover { background: #172844 !important; color: #fff !important; }
+html[data-theme="dark"] .status-pending,
+html[data-theme="dark"] .status-draft,
+html[data-theme="dark"] .status-partial,
+html[data-theme="dark"] .badge-warning { background: #3b3018 !important; color: #ffdc88 !important; border-color: #6b5525 !important; }
+html[data-theme="dark"] .status-cancelled,
+html[data-theme="dark"] .status-void,
+html[data-theme="dark"] .badge-danger { background: #3b2028 !important; color: #ffaaaa !important; border-color: #713641 !important; }
+html[data-theme="dark"] .status-completed,
+html[data-theme="dark"] .status-paid,
+html[data-theme="dark"] .status-posted,
+html[data-theme="dark"] .status-active,
+html[data-theme="dark"] .badge-success { background: #173522 !important; color: #a6f0a0 !important; border-color: #285c34 !important; }
+html[data-theme="dark"] ::selection { background: #294a80; color: #fff; }
+html[data-theme="dark"] ::-webkit-scrollbar-track { background: #0b1220; }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #34445c; border-color: #0b1220; }
