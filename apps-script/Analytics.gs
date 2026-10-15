@@ -1,155 +1,371 @@
 /* =========================================================
-   LOGIS-TECH SYSTEM — PAYMENTS API
-   File: Payments.gs
-   Uses existing CONFIG, getSheet, getAllRecords, findRecord,
-   generateId, generateDocumentNumber, formatDateTime,
-   logActivity and touchSyncVersion helpers.
+   LOGIS-TECH SYSTEM
+   FLEET & DELIVERY ANALYTICS + DATA ENTRY API
+   Reads and writes only the existing Google Sheets database.
 ========================================================= */
 
-function getPayments(payload) {
-  payload = payload || {};
-  const soNumber = String(payload.soNumber || payload.SO_NUMBER || "").trim();
-  const invoiceNo = String(payload.invoiceNo || payload.INVOICE_NO || "").trim();
-  let records = getAllRecords(CONFIG.SHEETS.PAYMENTS);
-  if (soNumber) records = records.filter(p => String(p.SO_NUMBER || "") === soNumber);
-  if (invoiceNo) records = records.filter(p => String(p.INVOICE_NO || "") === invoiceNo);
-  return { success: true, payments: records, records: records, count: records.length };
+/**
+ * GET API: return the five sheets used by Fleet & Delivery Analytics.
+ */
+function getFleetAnalyticsData() {
+  const vehicles = getAllRecords(CONFIG.SHEETS.VEHICLES);
+  const tripTickets = getAllRecords(CONFIG.SHEETS.TRIP_TICKETS);
+  const fuelTransactions = getAllRecords(CONFIG.SHEETS.FUEL_TRANSACTIONS);
+  const maintenance = getAllRecords(CONFIG.SHEETS.MAINTENANCE);
+  const drMonitoring = getAllRecords(CONFIG.SHEETS.DR_MONITORING);
+
+  return {
+    success: true,
+    vehicles: vehicles,
+    tripTickets: tripTickets,
+    fuelTransactions: fuelTransactions,
+    maintenance: maintenance,
+    drMonitoring: drMonitoring,
+    count: {
+      vehicles: vehicles.length,
+      tripTickets: tripTickets.length,
+      fuelTransactions: fuelTransactions.length,
+      maintenance: maintenance.length,
+      drMonitoring: drMonitoring.length
+    }
+  };
 }
 
-function getPayment(payload) {
-  payload = payload || {};
-  const no = String(payload.paymentNo || payload.PAYMENT_NO || "").trim();
-  const id = String(payload.paymentId || payload.PAYMENT_ID || "").trim();
-  if (!no && !id) return { success: false, message: "Payment number or ID is required." };
-  const found = getAllRecords(CONFIG.SHEETS.PAYMENTS).find(p =>
-    (no && String(p.PAYMENT_NO || "") === no) || (id && String(p.PAYMENT_ID || "") === id)
-  );
-  return found ? { success: true, payment: found } : { success: false, message: "Payment not found." };
-}
+/**
+ * POST API: save a Fleet Data Entry record.
+ * payload = { recordType: "tripTicket|fuel|maintenance|delivery|dr", record: {...} }
+ */
+function saveFleetRecord(payload) {
+  if (!payload || !payload.recordType || !payload.record) {
+    throw new Error("Missing recordType or record.");
+  }
 
-function createPayment(payload) {
-  payload = payload || {};
-  const lock = LockService.getScriptLock();
-  lock.waitLock(30000);
-  try {
-    const soNumber = String(payload.soNumber || payload.soNo || payload.SO_NUMBER || "").trim();
-    if (!soNumber) throw new Error("Sales Order Number is required.");
-    const amount = _finMoney_(payload.currentPayment ?? payload.CURRENT_PAYMENT ?? payload.amount ?? payload.paymentAmount);
-    if (amount <= 0) throw new Error("Payment amount must be greater than zero.");
-    const so = findRecord(CONFIG.SHEETS.SALES_ORDERS, "SO_NUMBER", soNumber);
-    if (!so) throw new Error("Sales Order not found: " + soNumber);
-    if (String(so.STATUS || "").toUpperCase() === "CANCELLED") throw new Error("Cannot record payment for a cancelled Sales Order.");
+  const type = String(payload.recordType);
+  const record = payload.record;
+  const now = new Date();
+  const createdAt = record.createdAt ? new Date(record.createdAt) : now;
+  const updatedAt = now;
+  const vehicleCode = String(record.vehicle || "").trim();
+  const vehicleId = getFleetVehicleId_(vehicleCode);
 
-    const total = _finSoTotal_(so);
-    const previousPaid = _finPaidForSO_(soNumber);
-    const remainingBefore = Math.max(0, Math.round((total - previousPaid) * 100) / 100);
-    if (remainingBefore <= 0.005) throw new Error("This Sales Order is already FULLY PAID. No additional payment can be recorded.");
-    if (amount > remainingBefore + 0.005) throw new Error("Payment exceeds the remaining Sales Order balance of " + remainingBefore.toFixed(2) + ".");
-    const terms = _finTerms_(so);
-    const requiredDP = _finRequiredDP_(so);
-    const statusInput = String(payload.paymentStatus || payload.status || payload.PAYMENT_STATUS || "RECEIVED").trim().toUpperCase();
-    const allowedStatuses = ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED", "PENDING", "DRAFT", "CANCELLED"];
-    if (!allowedStatuses.includes(statusInput)) throw new Error("Invalid payment status.");
-    if (statusInput === "CANCELLED") throw new Error("Create the payment as a separate record; do not use this endpoint to record a cancelled collection.");
-    const counted = ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(statusInput);
-    const totalPaid = previousPaid + (counted ? amount : 0);
-    const remaining = Math.max(0, Math.round((total - totalPaid) * 100) / 100);
+  let sheetName;
+  let idColumn;
+  let values;
 
-    const sheet = getSheet(CONFIG.SHEETS.PAYMENTS);
-    const now = new Date();
-    const timestamp = formatDateTime(now);
-    const paymentId = generateId("PAY");
-    let paymentNo = String(payload.paymentNo || payload.PAYMENT_NO || "").trim();
-    if (!paymentNo) paymentNo = generateDocumentNumber(CONFIG.PREFIX.PAY, CONFIG.SHEETS.PAYMENTS, "PAYMENT_NO");
-    if (getAllRecords(CONFIG.SHEETS.PAYMENTS).some(p => String(p.PAYMENT_NO || "") === paymentNo)) {
-      throw new Error("Payment number already exists. Refresh the payment list and try again.");
-    }
-
-    let invoice = null;
-    const invoiceNo = String(payload.invoiceNo || payload.INVOICE_NO || "").trim();
-    if (invoiceNo) {
-      invoice = findRecord(CONFIG.SHEETS.INVOICES, "INVOICE_NO", invoiceNo);
-      if (!invoice) throw new Error("Invoice not found: " + invoiceNo);
-      if (String(invoice.SO_NUMBER || "") !== soNumber) throw new Error("The selected invoice does not belong to this Sales Order.");
-    }
-    const drNo = String(payload.drNo || payload.DR_NUMBER || "").trim();
-    let dr = null;
-    if (drNo) {
-      dr = findRecord(CONFIG.SHEETS.DELIVERY_RECEIPTS, "DR_NUMBER", drNo);
-      if (!dr) throw new Error("Delivery Receipt not found: " + drNo);
-      if (String(dr.SO_NUMBER || "") !== soNumber) throw new Error("The selected DR does not belong to this Sales Order.");
-    }
-    const payment = {
-      PAYMENT_ID: paymentId, PAYMENT_NO: paymentNo, PAYMENT_DATE: payload.paymentDate || payload.date || payload.PAYMENT_DATE || now,
-      SO_ID: so.SO_ID || "", SO_NUMBER: soNumber, CUSTOMER_ID: so.CUSTOMER_ID || "",
-      CLIENT_NAME: String(payload.clientName || payload.client || payload.CLIENT_NAME || so.CLIENT_NAME || ""),
-      PROJECT: String(payload.project || payload.PROJECT || so.PROJECT || ""),
-      INVOICE_ID: invoice ? invoice.INVOICE_ID : "", INVOICE_NO: invoiceNo,
-      SI_NO: String(payload.siNo || payload.SI_NO || (invoice && invoice.SI_NO) || ""),
-      DR_ID: dr ? dr.DR_ID : "", DR_NUMBER: drNo,
-      PAYMENT_METHOD: String(payload.paymentMethod || payload.PAYMENT_METHOD || ""),
-      PAYMENT_STATUS: statusInput, SO_TOTAL: total, REQUIRED_DP: requiredDP,
-      PREVIOUS_PAID: previousPaid, CURRENT_PAYMENT: amount, TOTAL_PAID: totalPaid,
-      REMAINING_BALANCE: remaining,
-      RECEIPT_TYPE: String(payload.receiptType || payload.RECEIPT_TYPE || ""),
-      RECEIPT_NO: String(payload.receiptNo || payload.RECEIPT_NO || ""),
-      REFERENCE_NO: String(payload.referenceNo || payload.REFERENCE_NO || ""),
-      REMARKS: String(payload.remarks || payload.REMARKS || ""),
-      CREATED_BY: String(payload.createdBy || payload.username || payload.CREATED_BY || ""),
-      CREATED_AT: timestamp, UPDATED_AT: timestamp
+  if (type === "tripTicket") {
+    sheetName = CONFIG.SHEETS.TRIP_TICKETS;
+    idColumn = "TRIP_ID";
+    values = {
+      TRIP_ID: record.id || fleetMakeId_("TT"),
+      TRIP_TICKET_NO: record.tripTicketNo || "",
+      TRIP_DATE: fleetParseDate_(record.date),
+      TRIP_SEQUENCE: record.tripSequence || "",
+      VEHICLE_ID: vehicleId,
+      VEHICLE_CODE: vehicleCode,
+      DRIVER_ID: record.driverId || "",
+      DRIVER_NAME: record.driver || "",
+      START_KM: fleetNumberOrBlank_(record.startKm),
+      END_KM: fleetNumberOrBlank_(record.endKm),
+      TOTAL_KM: fleetNumberOrBlank_(record.totalKm),
+      ORIGIN: record.origin || "",
+      DESTINATION: record.destination || "",
+      PURPOSE: record.purpose || "",
+      ROUTE_DETAILS: JSON.stringify(Array.isArray(record.routeDetails) ? record.routeDetails : []),
+      STATUS: record.status || "Completed",
+      REMARKS: record.remarks || "",
+      CREATED_BY: record.createdBy || "",
+      CREATED_AT: createdAt,
+      UPDATED_AT: updatedAt
     };
-    _finAppendObjectByHeaders_(sheet, payment);
-    if (typeof logActivity === "function") logActivity({
-      username: payment.CREATED_BY || "SYSTEM", action: "CREATE", module: "PAYMENT",
-      recordId: paymentId, recordNumber: paymentNo,
-      details: "Recorded payment for " + soNumber + ": " + amount.toFixed(2) + " (" + statusInput + ")", status: "SUCCESS"
+  } else if (type === "fuel") {
+    sheetName = CONFIG.SHEETS.FUEL_TRANSACTIONS;
+    idColumn = "FUEL_ID";
+    values = {
+      FUEL_ID: record.id || fleetMakeId_("FUEL"),
+      FUEL_DATE: fleetParseDate_(record.date),
+      VEHICLE_ID: vehicleId,
+      VEHICLE_CODE: vehicleCode,
+      TRIP_ID: record.tripId || "",
+      TRIP_TICKET_NO: record.tripTicketNo || "",
+      FUEL_STATION: record.station || "",
+      LITERS: fleetNumberOrBlank_(record.liters),
+      AMOUNT: fleetNumberOrBlank_(record.amount),
+      ODOMETER: fleetNumberOrBlank_(record.odometer),
+      FUEL_RECEIPT_NO: record.fuelReceiptNo || "",
+      REMARKS: record.remarks || "",
+      CREATED_BY: record.createdBy || "",
+      CREATED_AT: createdAt,
+      UPDATED_AT: updatedAt
+    };
+  } else if (type === "maintenance") {
+    sheetName = CONFIG.SHEETS.MAINTENANCE;
+    idColumn = "MAINTENANCE_ID";
+    values = {
+      MAINTENANCE_ID: record.id || fleetMakeId_("MAIN"),
+      MNT_REQUEST_NO: record.requestNo || "",
+      REQUESTED_BY: record.requestedBy || "",
+      MAINTENANCE_DATE: fleetParseDate_(record.date),
+      REQUEST_DATE: fleetParseDate_(record.date),
+      VEHICLE_ID: vehicleId,
+      VEHICLE_CODE: vehicleCode,
+      PLATE_NUMBER: record.plateNumber || fleetGetVehiclePlate_(vehicleCode),
+      DEPARTMENT: record.department || "",
+      ODOMETER: fleetNumberOrBlank_(record.odometer),
+      CLASSIFICATIONS: Array.isArray(record.classifications) ? record.classifications.join(", ") : (record.maintenanceType || ""),
+      MAINTENANCE_TYPE: record.maintenanceType || "",
+      SERVICE_CLASSIFICATION: record.serviceClassification || "",
+      REQUEST_DESCRIPTION: record.description || record.defect || "",
+      DEFECT: record.description || record.defect || "",
+      REPAIR_ACTION: record.repair || "",
+      ESTIMATED_COST: fleetNumberOrBlank_(record.estimatedCost !== undefined ? record.estimatedCost : record.cost),
+      COST: fleetNumberOrBlank_(record.estimatedCost !== undefined ? record.estimatedCost : record.cost),
+      TARGET_COMPLETION_DATE: fleetParseDate_(record.targetDate),
+      LAST_COMPLETION_DATE: fleetParseDate_(record.lastCompletion),
+      ACTUAL_COMPLETION_DATE: fleetParseDate_(record.actualCompletionDate),
+      FINAL_COST: fleetNumberOrBlank_(record.finalCost),
+      CANCELLATION_REASON: record.cancellationReason || "",
+      IDLE_DAYS: fleetNumberOrBlank_(record.idleDays),
+      STATUS: record.status || "Pending",
+      REMARKS: record.remarks || "",
+      CREATED_BY: record.createdBy || "",
+      CREATED_AT: createdAt,
+      UPDATED_AT: updatedAt
+    };
+  } else if (type === "delivery" || type === "dr") {
+    sheetName = CONFIG.SHEETS.DR_MONITORING;
+    idColumn = "DR_MONITORING_ID";
+    values = {
+      DR_MONITORING_ID: record.id || fleetMakeId_("DRM"),
+      DR_ID: record.drId || "",
+      DR_NUMBER: record.drNumber || record.deliveryNo || "",
+      SO_ID: record.soId || "",
+      SO_NUMBER: record.soNumber || "",
+      CLIENT_NAME: record.client || "",
+      PROJECT: record.project || "",
+      VEHICLE_ID: vehicleId,
+      VEHICLE_CODE: vehicleCode,
+      TRIP_ID: record.tripId || "",
+      DATE_TRANSFER: fleetParseDate_(record.dateTransfer),
+      COMMITTED_DATE: fleetParseDate_(record.committedDate),
+      DATE_DELIVERED: fleetParseDate_(record.dateDelivered || record.actualDate),
+      STATUS: record.status || record.deliveryStatus || "Pending",
+      DELAY_SOURCE: record.delaySource || "",
+      DELAY_REASON: record.delayReason || "",
+      REMARKS: record.remarks || "",
+      CREATED_AT: createdAt,
+      UPDATED_AT: updatedAt
+    };
+  } else {
+    throw new Error("Unsupported Fleet record type: " + type);
+  }
+
+  if (type === "tripTicket") {
+    fleetEnsureHeader_(sheetName, "ROUTE_DETAILS");
+  } else if (type === "maintenance") {
+    ["MNT_REQUEST_NO", "REQUESTED_BY", "REQUEST_DATE", "PLATE_NUMBER", "DEPARTMENT", "ODOMETER", "CLASSIFICATIONS", "SERVICE_CLASSIFICATION", "REQUEST_DESCRIPTION", "ESTIMATED_COST", "TARGET_COMPLETION_DATE", "LAST_COMPLETION_DATE", "ACTUAL_COMPLETION_DATE", "FINAL_COST", "CANCELLATION_REASON"].forEach(function(header) {
+      fleetEnsureHeader_(sheetName, header);
     });
-    if (typeof touchSyncVersion === "function") touchSyncVersion();
-    return { success: true, message: "Payment saved to the database.", payment: payment };
-  } finally {
-    lock.releaseLock();
+  }
+  const saved = fleetUpsertSheetRecord_(sheetName, idColumn, values, type);
+  return {
+    success: true,
+    message: "Fleet record saved to Google Sheets.",
+    recordId: saved.id,
+    updated: saved.updated
+  };
+}
+
+/**
+ * POST API: delete a Fleet Data Entry record by its sheet ID.
+ */
+function deleteFleetRecord(payload) {
+  if (!payload || !payload.recordType || !payload.id) {
+    throw new Error("Missing recordType or id.");
+  }
+
+  const type = String(payload.recordType);
+  let sheetName;
+  let idColumn;
+
+  if (type === "tripTicket") {
+    sheetName = CONFIG.SHEETS.TRIP_TICKETS;
+    idColumn = "TRIP_ID";
+  } else if (type === "fuel") {
+    sheetName = CONFIG.SHEETS.FUEL_TRANSACTIONS;
+    idColumn = "FUEL_ID";
+  } else if (type === "maintenance") {
+    sheetName = CONFIG.SHEETS.MAINTENANCE;
+    idColumn = "MAINTENANCE_ID";
+  } else if (type === "delivery" || type === "dr") {
+    sheetName = CONFIG.SHEETS.DR_MONITORING;
+    idColumn = "DR_MONITORING_ID";
+  } else {
+    throw new Error("Unsupported Fleet record type: " + type);
+  }
+
+  const sheet = fleetGetSheet_(sheetName);
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) throw new Error("Record not found.");
+
+  const headers = values[0].map(function(v) { return String(v).trim(); });
+  const idIndex = headers.indexOf(idColumn);
+  if (idIndex < 0) throw new Error("Missing ID column " + idColumn + " in " + sheetName + ".");
+
+  for (let i = 1; i < values.length; i++) {
+    if (String(values[i][idIndex]) === String(payload.id)) {
+      sheet.deleteRow(i + 1);
+      return { success: true, message: "Fleet record deleted." };
+    }
+  }
+
+  throw new Error("Record not found: " + payload.id);
+}
+
+/* ----------------------- Helpers ----------------------- */
+
+function fleetEnsureHeader_(sheetName, headerName) {
+  const sheet = fleetGetSheet_(sheetName);
+  const lastColumn = Math.max(sheet.getLastColumn(), 1);
+  const headers = sheet.getRange(1, 1, 1, lastColumn).getValues()[0].map(function(v) { return String(v).trim(); });
+  if (headers.indexOf(headerName) === -1) {
+    sheet.getRange(1, lastColumn + 1).setValue(headerName);
   }
 }
 
-/* Used by Delivery.gs before a DR can be created. COD permits dispatch without prepayment;
-   50% DP requires confirmed collections equal to the DP; full advance requires full payment. */
-function validateDeliveryPaymentTerms_(so) {
-  if (!so) throw new Error("Sales Order is required for payment validation.");
-  const terms = _finTerms_(so);
-  const total = _finSoTotal_(so);
-  const paid = _finPaidForSO_(so.SO_NUMBER);
-  if (_finIsFullAdvance_(so) && paid + 0.005 < total) {
-    throw new Error("Delivery blocked: full advance payment is required. Paid: " + paid.toFixed(2) + "; required: " + total.toFixed(2) + ".");
-  }
-  const dp = _finRequiredDP_(so);
-  if (dp > 0 && !_finIsFullAdvance_(so) && paid + 0.005 < dp) {
-    throw new Error("Delivery blocked: the required DP has not been recorded. Paid: " + paid.toFixed(2) + "; required DP: " + dp.toFixed(2) + ".");
-  }
-  // COD and ordinary credit terms do not require pre-dispatch payment.
-  return { success: true, terms: terms, soTotal: total, totalPaid: paid, requiredDP: dp };
+function fleetGetSheet_(sheetName) {
+  const ss = SpreadsheetApp.openById(CONFIG.DATABASE_SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(sheetName);
+  if (!sheet) throw new Error("Sheet not found: " + sheetName);
+  return sheet;
 }
 
-
-/* Optional customer-credit ledger reads. Create these sheet tabs with the headers below
-   before relying on the ledger: CUSTOMER_CREDITS and CUSTOMER_CREDIT_TRANSACTIONS. */
-function getCustomerCredits(payload) {
-  try {
-    const records = getAllRecords("CUSTOMER_CREDITS");
-    return { success: true, customerCredits: records, records: records, count: records.length };
-  } catch (error) {
-    return { success: true, customerCredits: [], records: [], count: 0, warning: "CUSTOMER_CREDITS sheet is not configured yet." };
-  }
+function fleetMakeId_(prefix) {
+  return prefix + "-" + new Date().getTime() + "-" + Math.floor(Math.random() * 100000);
 }
 
-function getCustomerCreditTransactions(payload) {
-  payload = payload || {};
-  const customerId = String(payload.customerId || payload.CUSTOMER_ID || "").trim();
-  try {
-    let records = getAllRecords("CUSTOMER_CREDIT_TRANSACTIONS");
-    if (customerId) records = records.filter(function (row) { return String(row.CUSTOMER_ID || "") === customerId; });
-    records.sort(function (a, b) { return String(b.TXN_DATE || b.CREATED_AT || "").localeCompare(String(a.TXN_DATE || a.CREATED_AT || "")); });
-    return { success: true, customerCreditTransactions: records, records: records, count: records.length };
-  } catch (error) {
-    return { success: true, customerCreditTransactions: [], records: [], count: 0, warning: "CUSTOMER_CREDIT_TRANSACTIONS sheet is not configured yet." };
-  }
+function fleetNumberOrBlank_(value) {
+  if (value === "" || value === null || value === undefined) return "";
+  const n = Number(value);
+  return Number.isFinite(n) ? n : "";
 }
+
+function fleetParseDate_(value) {
+  if (!value) return "";
+  if (value instanceof Date) return value;
+  const s = String(value);
+  const match = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  const d = new Date(value);
+  return isNaN(d.getTime()) ? "" : d;
+}
+
+function fleetGetVehiclePlate_(vehicleCode) {
+  if (!vehicleCode) return "";
+  const vehicles = getAllRecords(CONFIG.SHEETS.VEHICLES);
+  const match = vehicles.find(function(v) {
+    return String(v.VEHICLE_CODE || v.vehicleCode || v.code || "").trim().toUpperCase() === String(vehicleCode).trim().toUpperCase();
+  });
+  return match ? String(match.PLATE_NUMBER || match.PLATE_NO || match.LICENSE_PLATE || match.PLATE || match.plateNumber || match.plateNo || "") : "";
+}
+
+function getFleetVehicleId_(vehicleCode) {
+  if (!vehicleCode) return "";
+  const vehicles = getAllRecords(CONFIG.SHEETS.VEHICLES);
+  const match = vehicles.find(function(v) {
+    return String(v.VEHICLE_CODE || "").trim().toUpperCase() === vehicleCode.toUpperCase();
+  });
+  // VEHICLES master may still be unpopulated. Use the selected vehicle code
+  // as a temporary stable identifier instead of saving VEHICLE_ID as blank.
+  return match ? (match.VEHICLE_ID || match.VEHICLE_CODE || vehicleCode) : vehicleCode;
+}
+
+/**
+ * Updates a matching record if an ID exists. For DR monitoring, it also
+ * updates a matching DR number, or matching SO number + transfer date,
+ * instead of creating duplicate monitoring rows.
+ */
+function fleetUpsertSheetRecord_(sheetName, idColumn, recordValues, type) {
+  const sheet = fleetGetSheet_(sheetName);
+  const range = sheet.getDataRange();
+  const data = range.getValues();
+  const headers = data.length ? data[0].map(function(v) { return String(v).trim(); }) : [];
+  if (!headers.length || !headers[0]) throw new Error("Missing header row in " + sheetName + ".");
+
+  const id = String(recordValues[idColumn] || "");
+  let targetRow = -1;
+  const idIndex = headers.indexOf(idColumn);
+  const drIndex = headers.indexOf("DR_NUMBER");
+  const soIndex = headers.indexOf("SO_NUMBER");
+  const transferIndex = headers.indexOf("DATE_TRANSFER");
+  const incomingDr = String(recordValues.DR_NUMBER || "").trim();
+  const incomingSo = String(recordValues.SO_NUMBER || "").trim();
+  const incomingTransfer = fleetDateKey_(recordValues.DATE_TRANSFER);
+
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (idIndex >= 0 && id && String(row[idIndex]) === id) {
+      targetRow = i + 1;
+      break;
+    }
+    if (sheetName === CONFIG.SHEETS.DR_MONITORING) {
+      const existingDr = drIndex >= 0 ? String(row[drIndex] || "").trim() : "";
+      const existingSo = soIndex >= 0 ? String(row[soIndex] || "").trim() : "";
+      const existingTransfer = transferIndex >= 0 ? fleetDateKey_(row[transferIndex]) : "";
+      if (incomingDr && existingDr && incomingDr === existingDr) {
+        targetRow = i + 1;
+        break;
+      }
+      if (!incomingDr && incomingSo && existingSo === incomingSo && incomingTransfer && existingTransfer === incomingTransfer) {
+        targetRow = i + 1;
+        break;
+      }
+    }
+  }
+
+  const output = targetRow > 0 ? sheet.getRange(targetRow, 1, 1, headers.length).getValues()[0] : new Array(headers.length).fill("");
+  const createdIndex = headers.indexOf("CREATED_AT");
+  const updatedIndex = headers.indexOf("UPDATED_AT");
+  if (targetRow > 0 && createdIndex >= 0 && output[createdIndex]) recordValues.CREATED_AT = output[createdIndex];
+  recordValues.UPDATED_AT = new Date();
+
+  headers.forEach(function(header, i) {
+    if (Object.prototype.hasOwnProperty.call(recordValues, header)) {
+      output[i] = recordValues[header];
+    }
+  });
+
+  if (targetRow > 0) {
+    sheet.getRange(targetRow, 1, 1, headers.length).setValues([output]);
+  } else {
+    sheet.appendRow(output);
+  }
+
+  return {
+    id: targetRow > 0 ? (id || String(output[idIndex] || "")) : id,
+    updated: targetRow > 0
+  };
+}
+
+function fleetDateKey_(value) {
+  if (!value) return "";
+  const d = value instanceof Date ? value : new Date(value);
+  if (isNaN(d.getTime())) return String(value).slice(0, 10);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+/*
+   REQUIRED: add these cases inside routeRequest(action, payload) in Code.gs:
+
+   case "getFleetAnalyticsData":
+     return getFleetAnalyticsData(payload);
+
+   case "saveFleetRecord":
+     return saveFleetRecord(payload);
+
+   case "deleteFleetRecord":
+     return deleteFleetRecord(payload);
+
+   After updating Code.gs and Analytics.gs in Apps Script, Save and deploy
+   a new version of the web app. Keep the deployment URL unchanged if editing
+   the existing deployment.
+*/
