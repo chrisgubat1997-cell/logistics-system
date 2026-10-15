@@ -1990,3 +1990,90 @@
     }
 
 }
+
+
+/* =========================================================
+   COMPACT DASHBOARD — NORMAL BROWSER ZOOM
+========================================================= */
+
+.dashboard-page {
+    padding: 20px;
+    font-size: 12.5px;
+}
+
+.dashboard-page h1,
+.dashboard-page .dashboard-title,
+.dashboard-page .page-title {
+    font-size: 23px;
+    line-height: 1.25;
+}
+
+.dashboard-page h2 {
+    font-size: 16px;
+}
+
+.dashboard-page .dashboard-header,
+.dashboard-page .dashboard-page-header {
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.dashboard-page .dashboard-grid,
+.dashboard-page .stats-grid,
+.dashboard-page .kpi-grid {
+    gap: 12px;
+}
+
+.dashboard-page .dashboard-card,
+.dashboard-page .stat-card,
+.dashboard-page .kpi-card,
+.dashboard-page .chart-card,
+.dashboard-page .panel,
+.dashboard-page .quick-actions-section {
+    padding: 15px;
+    border-radius: 12px;
+}
+
+.dashboard-page .stat-value,
+.dashboard-page .kpi-value,
+.dashboard-page .card-value {
+    font-size: 23px;
+    line-height: 1.2;
+}
+
+.dashboard-page .stat-label,
+.dashboard-page .kpi-label,
+.dashboard-page .card-label {
+    font-size: 11px;
+}
+
+.dashboard-page table {
+    font-size: 11.5px;
+}
+
+.dashboard-page th,
+.dashboard-page td {
+    padding: 8px 10px;
+}
+
+.dashboard-page button,
+.dashboard-page input,
+.dashboard-page select {
+    font-size: 12px;
+}
+
+@media (max-width: 900px) {
+    .dashboard-page { padding: 14px; }
+    .dashboard-page .dashboard-card,
+    .dashboard-page .stat-card,
+    .dashboard-page .kpi-card,
+    .dashboard-page .chart-card,
+    .dashboard-page .panel,
+    .dashboard-page .quick-actions-section {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard-page { padding: 12px; font-size: 13px; }
+}
