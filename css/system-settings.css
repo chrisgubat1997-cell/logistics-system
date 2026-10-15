@@ -954,3 +954,7 @@ html.disable-animations *, html.disable-animations *::before, html.disable-anima
   .setting-row { align-items: flex-start; flex-direction: column; gap: 10px; }
   .setting-row select { width: 100%; }
 }
+
+.settings-help, .storage-help { margin-top: 8px; color: var(--text-secondary); font-size: 11px; line-height: 1.55; }
+.storage-info .storage-actions { margin-top: 16px; }
+html[data-theme="dark"] .storage-help { color: #9eacc2 !important; }
