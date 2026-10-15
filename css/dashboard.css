@@ -2077,3 +2077,17 @@
 @media (max-width: 600px) {
     .dashboard-page { padding: 12px; font-size: 13px; }
 }
+
+
+/* Compact dashboard canvas at normal browser zoom — forced sizing */
+@supports (zoom: 0.85) {
+  .dashboard-page {
+    zoom: 0.85;
+    width: 117.647%;
+  }
+}
+@media (max-width: 600px) {
+  @supports (zoom: 0.85) {
+    .dashboard-page { zoom: 1; width: 100%; }
+  }
+}
