@@ -31,6 +31,18 @@
     let selectedDRRecord = null;
     let isLoadingDeliveryData = false;
 
+function getLogisTechCurrentRole() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+        const account = saved.account || saved.user || saved;
+        return String(account.role || account.ROLE || account.accountType || account.account_type || account.accounttype || account.type || "").trim().toUpperCase();
+    } catch (error) { return ""; }
+}
+
+    function canPrepareDeliveryReceiptByRole() {
+        return ["ADMIN", "LOGISTICS"].includes(getLogisTechCurrentRole());
+    }
+
     /* =====================================================
        API
     ===================================================== */
@@ -558,6 +570,10 @@
     ===================================================== */
 
     function openCreateDeliveryReceipt(selectedSO = null) {
+        if (!canPrepareDeliveryReceiptByRole()) {
+            alert("Access denied. Only ADMIN and LOGISTICS roles can prepare Delivery Receipts.");
+            return;
+        }
         console.log("Opening Create Delivery Receipt", selectedSO);
 
         if (selectedSO) {
@@ -808,11 +824,7 @@
                     </td>
 
                     <td>
-                        <button
-                            type="button"
-                            class="btn btn-primary btn-small prepare-so-button">
-                            ＋ PREPARE DR
-                        </button>
+                        ${canPrepareDeliveryReceiptByRole() ? '<button type="button" class="btn btn-primary btn-small prepare-so-button">＋ PREPARE DR</button>' : '<span class="role-view-only-label">VIEW ONLY</span>'}
                     </td>
 
                 </tr>
@@ -1514,8 +1526,17 @@ if (dateElement) {
 
         if (!button) return;
 
+        const allowed = canPrepareDeliveryReceiptByRole();
+        button.style.display = allowed ? "" : "none";
+        button.disabled = !allowed;
+        button.setAttribute("aria-disabled", String(!allowed));
+
         button.addEventListener("click", function (event) {
             event.preventDefault();
+            if (!canPrepareDeliveryReceiptByRole()) {
+                alert("Access denied. Only ADMIN and LOGISTICS roles can prepare Delivery Receipts.");
+                return;
+            }
             openCreateDeliveryReceipt();
         });
     }
@@ -1533,6 +1554,11 @@ if (dateElement) {
             if (!button) return;
 
             event.preventDefault();
+
+            if (!canPrepareDeliveryReceiptByRole()) {
+                alert("Access denied. Only ADMIN and LOGISTICS roles can prepare Delivery Receipts.");
+                return;
+            }
 
             const row = button.closest(".so-row");
 
