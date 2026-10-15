@@ -3,7 +3,7 @@
    Login + Sign Up
    GEMCOR-inspired palette:
    Navy #102A56 | GEMCOR Blue #123B91 | Green #39A935
-   VERSION: 20261015-03
+   VERSION: 20261015-04
 ========================================================= */
 
 :root {
@@ -46,39 +46,11 @@ body {
         radial-gradient(ellipse at 12% 12%, rgba(57, 169, 53, 0.22), transparent 34%),
         radial-gradient(ellipse at 90% 85%, rgba(18, 59, 145, 0.25), transparent 36%),
         linear-gradient(135deg, rgba(10, 31, 68, 0.86), rgba(18, 59, 145, 0.74)),
-        url("../assets/background.png") center / cover fixed,
+        url("../assets/background.png") center / cover,
         var(--gemcor-navy);
-    animation: auth-background-in 900ms ease both;
 }
 
-body::before,
-body::after {
-    content: "";
-    position: fixed;
-    z-index: -1;
-    width: 280px;
-    height: 280px;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(2px);
-    opacity: 0.55;
-    animation: float-orb 11s ease-in-out infinite alternate;
-}
-
-body::before {
-    top: -90px;
-    left: -80px;
-    background: radial-gradient(circle, rgba(57, 169, 53, 0.52), transparent 70%);
-}
-
-body::after {
-    right: -90px;
-    bottom: -100px;
-    width: 360px;
-    height: 360px;
-    background: radial-gradient(circle, rgba(76, 137, 255, 0.46), transparent 70%);
-    animation-delay: -4s;
-}
+/* Removed animated blurred background orbs to keep scrolling smooth on low-powered devices. */
 
 /* Layout */
 .login-container {
@@ -109,8 +81,6 @@ body::after {
         0 28px 75px rgba(4, 18, 45, 0.36),
         0 8px 22px rgba(16, 42, 86, 0.12),
         inset 0 1px 0 rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
     animation: card-enter 650ms cubic-bezier(.2, .8, .2, 1) both;
 }
 
@@ -153,7 +123,6 @@ body::after {
     height: auto;
     margin: 0 auto;
     object-fit: contain;
-    filter: drop-shadow(0 5px 8px rgba(16, 42, 86, 0.08));
     animation: logo-enter 750ms 100ms ease both;
 }
 
@@ -500,22 +469,11 @@ body::after {
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes auth-background-in {
-    from { filter: saturate(0.8); }
-    to { filter: saturate(1); }
-}
-
-@keyframes float-orb {
-    from { transform: translate3d(0, 0, 0) scale(1); }
-    to { transform: translate3d(24px, 30px, 0) scale(1.08); }
-}
-
 /* Responsive layout */
 @media (max-width: 520px) {
     body {
         padding: 12px 0;
-        background-attachment: scroll;
-    }
+        }
 
     .login-container {
         padding: 12px;
