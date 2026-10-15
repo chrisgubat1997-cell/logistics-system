@@ -832,6 +832,20 @@ function loginUser(payload) {
     );
 
 
+    /* =======================================================
+     ISSUE SERVER-SIDE SESSION
+  ======================================================= */
+
+  const sessionToken = Utilities.getUuid() + "." + Utilities.getUuid();
+  CacheService.getScriptCache().put(
+    "LOGISTECH_SESSION_" + sessionToken,
+    JSON.stringify({
+      userId: userId,
+      username: savedUsername
+    }),
+    21600
+  );
+
   /* =======================================================
      LOGIN SUCCESS
   ======================================================= */
@@ -861,7 +875,10 @@ function loginUser(payload) {
         role,
 
       status:
-        status
+        status,
+
+      sessionToken:
+        sessionToken
 
     }
 
