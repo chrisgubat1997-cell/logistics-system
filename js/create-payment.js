@@ -708,6 +708,9 @@ function renderSOSuggestions(query){
         const so=matches[Number(button.dataset.index)];if(!so)return;
         setValue("paymentSONo",getSalesOrderNumber(so));hideSOSuggestions();selectedSalesOrder=so;
         loadSalesOrderInformation(so);updatePaymentSummary();
+        if (currentRemainingBalance <= 0.005 && currentSalesOrderTotal > 0) {
+            alert("This Sales Order is already FULLY PAID.\n\nSO No.: " + getSalesOrderNumber(so) + "\nNo additional payment can be recorded.");
+        }
     });});
 }
 function handleSOSearchKeyboard(event){
@@ -817,6 +820,10 @@ async function checkSalesOrder() {
 
     updatePaymentSummary();
 
+    if (currentRemainingBalance <= 0.005 && currentSalesOrderTotal > 0) {
+        alert("This Sales Order is already FULLY PAID.\n\nSO No.: " + getSalesOrderNumber(foundSO) + "\nNo additional payment can be recorded.");
+        return;
+    }
 
     alert(
         "Sales Order found.\n\n" +
@@ -2109,8 +2116,35 @@ function updatePaymentSummary() {
         status
     );
 
+    updatePaymentActionAvailability();
+
 }
 
+
+/* =========================================================
+   PREVENT PAYMENT FOR A FULLY PAID SALES ORDER
+   ========================================================= */
+function updatePaymentActionAvailability() {
+    const fullyPaid = !!selectedSalesOrder &&
+        currentSalesOrderTotal > 0 &&
+        currentRemainingBalance <= 0.005;
+    const amountInput = document.getElementById("paymentCurrentAmountInput");
+    const saveButtons = [
+        document.getElementById("savePaymentBtn"),
+        document.getElementById("bottomSavePaymentBtn")
+    ].filter(Boolean);
+
+    if (amountInput) {
+        amountInput.disabled = fullyPaid;
+        amountInput.title = fullyPaid ? "This Sales Order is fully paid. Additional payment is not allowed." : "";
+    }
+    saveButtons.forEach(function(button) {
+        button.disabled = fullyPaid;
+        button.title = fullyPaid ? "This Sales Order is fully paid. Additional payment is not allowed." : "";
+        button.setAttribute("aria-disabled", fullyPaid ? "true" : "false");
+    });
+    return fullyPaid;
+}
 
 /* =========================================================
    STATUS BADGE
@@ -2187,6 +2221,11 @@ function updateStatusBadge(
    ========================================================= */
 
 async function savePayment() {
+    if (selectedSalesOrder && currentSalesOrderTotal > 0 && currentRemainingBalance <= 0.005) {
+        updatePaymentActionAvailability();
+        alert("This Sales Order is already FULLY PAID. No additional payment can be recorded.");
+        return;
+    }
     const validation = validatePayment();
     if (!validation.valid) {
         alert(validation.message);
@@ -2356,6 +2395,10 @@ function validatePayment() {
     if (!getValue("paymentReferenceNo")) {
         return { valid:false, message:"Reference No. is required." };
     }
+    if (currentSalesOrderTotal > 0 && currentRemainingBalance <= 0.005) {
+        return { valid: false, message: "This Sales Order is already FULLY PAID. No additional payment can be recorded." };
+    }
+
     if (!client) {
 
         return {
