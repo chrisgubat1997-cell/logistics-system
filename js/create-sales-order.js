@@ -1,3 +1,12 @@
+function getLogisTechSessionAccount() {
+    try {
+        const account = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+        return account && typeof account === "object" ? account : {};
+    } catch (error) {
+        return {};
+    }
+}
+
 function getLogisTechCurrentRole() {
     try {
         const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
@@ -2192,6 +2201,15 @@ async function saveSO() {
 
         createdBy:
             getCurrentUser(),
+
+        sessionToken:
+            getLogisTechSessionAccount().sessionToken || "",
+
+        userId:
+            getLogisTechSessionAccount().userId || "",
+
+        username:
+            getLogisTechSessionAccount().username || "",
 
         items:
             items
