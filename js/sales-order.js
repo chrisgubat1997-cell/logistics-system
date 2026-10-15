@@ -33,6 +33,28 @@ let selectedSO = null;
     /* =====================================================
        INITIALIZE
     ===================================================== */
+function getLogisTechCurrentRole() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+        const account = saved.account || saved.user || saved;
+        return String(account.role || account.ROLE || account.accountType || account.account_type || account.accounttype || account.type || "").trim().toUpperCase();
+    } catch (error) { return ""; }
+}
+
+    function canCreateSalesOrderByRole() {
+        return ["ADMIN", "SALES"].includes(getLogisTechCurrentRole());
+    }
+
+    function applySalesOrderRolePermissions() {
+        const allowed = canCreateSalesOrderByRole();
+        document.querySelectorAll('#createSalesOrderButton, [onclick="openCreateSalesOrder()"]').forEach(function (button) {
+            button.style.display = allowed ? "" : "none";
+            button.disabled = !allowed;
+            button.setAttribute("aria-disabled", String(!allowed));
+            if (!allowed) button.title = "View Only: your account role cannot create Sales Orders.";
+        });
+    }
+
     function initializeSalesOrderModule() {
         console.log(
             "========================================"
@@ -46,6 +68,7 @@ let selectedSO = null;
         console.log(
             "========================================"
         );
+        applySalesOrderRolePermissions();
         bindSalesOrderEvents();
 loadSOList();
 loadCustomerTable();
@@ -4642,6 +4665,11 @@ await openSODetails(
     ===================================================== */
 
     function openCreateSalesOrder() {
+
+        if (!canCreateSalesOrderByRole()) {
+            alert("Access denied. Only ADMIN and SALES roles can create Sales Orders.");
+            return;
+        }
 
         window.location.href =
             CREATE_SALES_ORDER_PAGE;
