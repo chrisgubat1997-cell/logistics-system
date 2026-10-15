@@ -1162,6 +1162,9 @@ function getSOTransactionDetails(payload) {
 
 function createSalesOrder(payload) {
 
+  payload = payload || {};
+  authorizeRole_(payload, ["ADMIN", "SALES"]);
+
   const lock =
     LockService.getScriptLock();
 
