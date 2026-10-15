@@ -1,3 +1,12 @@
+function getLogisTechSessionAccount() {
+    try {
+        const account = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+        return account && typeof account === "object" ? account : {};
+    } catch (error) {
+        return {};
+    }
+}
+
 function getLogisTechCurrentRole() {
     try {
         const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
@@ -3377,7 +3386,9 @@ async function saveDeliveryReceipt() {
     soNumber: currentDR.soNumber,
     dateOfTransfer: currentDR.dateOfTransfer,
     deliveryAddress: currentDR.deliveryAddress,
-    username: localStorage.getItem("logitechUser") || "",
+    username: getLogisTechSessionAccount().username || "",
+    userId: getLogisTechSessionAccount().userId || "",
+    sessionToken: getLogisTechSessionAccount().sessionToken || "",
     items: currentDR.items.map(function (item) {
         if (!item.soItemId && !item.id) {
             throw new Error(
