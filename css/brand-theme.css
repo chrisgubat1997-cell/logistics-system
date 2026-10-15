@@ -1,0 +1,334 @@
+/* =========================================================
+   LOGIS-TECH SYSTEM — GEMCOR BRAND THEME
+   Shared visual layer for every application section
+   Version: 20261015-01
+   Palette inspired by the GEMCOR logo: corporate blue + green
+   ========================================================= */
+
+:root {
+  --brand-blue: #123b91;
+  --brand-blue-deep: #0b2867;
+  --brand-blue-dark: #102f73;
+  --brand-blue-soft: #eaf0ff;
+  --brand-blue-pale: #f5f8ff;
+  --brand-green: #39a935;
+  --brand-green-dark: #248326;
+  --brand-green-soft: #eaf8e8;
+
+  --primary: var(--brand-blue);
+  --primary-dark: var(--brand-blue-deep);
+  --primary-light: var(--brand-blue-soft);
+  --success: var(--brand-green-dark);
+  --success-bg: var(--brand-green-soft);
+
+  --app-bg: #f3f6fb;
+  --surface: #ffffff;
+  --surface-subtle: #f8faff;
+  --ink: #17243b;
+  --ink-muted: #66748b;
+  --line: #e2e8f2;
+  --line-strong: #ccd6e6;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-card: 0 4px 16px rgba(16, 47, 115, .055), 0 1px 3px rgba(16, 47, 115, .04);
+  --shadow-hover: 0 12px 28px rgba(16, 47, 115, .12);
+  --ease-ui: cubic-bezier(.2, .75, .25, 1);
+}
+
+/* Keep the shell and all sections on the same corporate canvas. */
+html { scroll-behavior: smooth; }
+body {
+  color: var(--ink);
+  background: var(--app-bg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.main { background: var(--app-bg); min-width: 0; }
+.content { background: transparent; }
+.page { animation: brandSectionIn .28s var(--ease-ui) both; }
+@keyframes brandSectionIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Left navigation: deep GEMCOR blue, with a green active indicator. */
+.sidebar {
+  background: linear-gradient(180deg, var(--brand-blue-deep) 0%, #102e70 58%, #0c2458 100%);
+  box-shadow: 8px 0 28px rgba(8, 31, 79, .12);
+}
+.logo {
+  color: #fff;
+  letter-spacing: .045em;
+}
+.logo::before { background: var(--brand-green); }
+.menu button, .menu-btn {
+  border-radius: 10px;
+  transition: background .2s var(--ease-ui), color .2s var(--ease-ui),
+    transform .2s var(--ease-ui), box-shadow .2s var(--ease-ui);
+}
+.menu button:hover, .menu-btn:hover {
+  background: rgba(255,255,255,.10);
+  transform: translateX(2px);
+}
+.menu button.active, .menu-btn.active {
+  background: linear-gradient(100deg, rgba(255,255,255,.16), rgba(255,255,255,.07));
+  color: #fff;
+  box-shadow: inset 3px 0 0 var(--brand-green);
+}
+.menu button.active::before, .menu-btn.active::before { background: var(--brand-green); }
+
+/* Header bar and account actions. */
+.topbar {
+  background: rgba(255,255,255,.94);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 3px 16px rgba(18,59,145,.035);
+  backdrop-filter: blur(12px);
+}
+.page-title { color: var(--brand-blue-deep); font-weight: 800; }
+#welcomeUser { color: var(--ink-muted); }
+.profile-btn {
+  border: 1px solid #d6e0f1;
+  background: var(--brand-blue-soft);
+  color: var(--brand-blue);
+  border-radius: 9px;
+}
+.logout-btn {
+  border-radius: 9px;
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+}
+.logout-btn:hover { background: var(--brand-blue-deep); box-shadow: 0 5px 14px rgba(18,59,145,.2); transform: translateY(-1px); }
+
+/* Consistent module canvas, typography and page spacing. */
+.sales-order-module,
+.delivery-module,
+.fleet-data-entry,
+.invoicing-container,
+.payment-module,
+.report-page,
+.settings-page,
+.fleet-analytics-page,
+.dashboard-page {
+  color: var(--ink);
+  background: transparent;
+}
+.sales-order-module,
+.delivery-module,
+.fleet-data-entry,
+.invoicing-container,
+.payment-module,
+.report-page,
+.settings-page,
+.fleet-analytics-page { padding: clamp(16px, 2vw, 28px); }
+
+/* All common cards/panels use the same white surface and border treatment. */
+.section,
+.dashboard-card,
+.dashboard-kpi-card,
+.kpi-card,
+.metric-card,
+.stat-card,
+.summary-card,
+.so-stat-card,
+.delivery-stat-card,
+.invoice-stat-card,
+.payment-stat-card,
+.report-card,
+.report-panel,
+.chart-card,
+.fde-panel,
+.fde-card,
+.fleet-card,
+.analytics-card,
+.settings-card,
+.invoicing-card,
+.payment-card,
+.so-card,
+.dr-card,
+.table-card,
+.form-card,
+.customer-card,
+.vehicle-card {
+  border-color: var(--line) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-card);
+  transition: border-color .22s ease, box-shadow .22s ease, transform .22s var(--ease-ui);
+}
+.dashboard-card:hover,
+.kpi-card:hover,
+.metric-card:hover,
+.stat-card:hover,
+.summary-card:hover,
+.report-card:hover,
+.chart-card:hover,
+.analytics-card:hover,
+.settings-card:hover {
+  border-color: #c8d7f3 !important;
+  box-shadow: var(--shadow-hover);
+}
+
+/* Common page headings: consistent dark-blue emphasis. */
+.so-page-header h1,
+.page-header h1,
+.invoicing-header h1,
+.header-title h1,
+.payment-page-title,
+.report-title,
+.settings-header h1,
+.fde-title,
+.dashboard-header h1,
+.fleet-analytics-page h1 {
+  color: var(--brand-blue-deep);
+  letter-spacing: -.025em;
+}
+.so-page-subtitle,
+.page-header p,
+.invoicing-header p,
+.payment-page-subtitle,
+.report-subtitle,
+.fde-subtitle { color: var(--ink-muted); }
+
+/* Buttons: consistent size, brand color, and responsive feedback. */
+button,
+input[type="button"],
+input[type="submit"],
+.btn,
+.payment-primary-button {
+  transition: color .18s ease, background .18s ease, border-color .18s ease,
+    box-shadow .18s ease, transform .18s var(--ease-ui);
+}
+button:not(:disabled):active,
+input[type="button"]:active,
+input[type="submit"]:active,
+.btn:not(:disabled):active { transform: translateY(1px) scale(.99); }
+.btn-primary,
+.primary-btn,
+.primary-button,
+.so-primary-btn,
+.payment-primary-button,
+button.primary,
+button[type="submit"] {
+  background-color: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: #fff;
+}
+.btn-primary:hover,
+.primary-btn:hover,
+.primary-button:hover,
+.so-primary-btn:hover,
+.payment-primary-button:hover,
+button.primary:hover,
+button[type="submit"]:hover {
+  background-color: var(--brand-blue-deep);
+  border-color: var(--brand-blue-deep);
+  box-shadow: 0 6px 16px rgba(18,59,145,.18);
+  transform: translateY(-1px);
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(57,169,53,.28);
+  outline-offset: 2px;
+}
+
+/* Inputs and filters share one focus language. */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  border-color: var(--line-strong);
+  border-radius: 9px;
+  color: var(--ink);
+  transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 3px rgba(18,59,145,.10);
+  outline: none;
+}
+
+/* Tables across modules: clear headers, calm striping, readable hover. */
+table { border-collapse: separate; border-spacing: 0; }
+thead th, table thead th {
+  background: #eef3fc;
+  color: var(--brand-blue-deep);
+  border-bottom-color: #d9e3f3;
+  font-weight: 800;
+}
+tbody tr { transition: background-color .15s ease; }
+tbody tr:nth-child(even) { background-color: rgba(244,247,252,.68); }
+tbody tr:hover { background-color: #edf4ff; }
+td, th { border-color: var(--line); }
+
+/* Status chips: green = positive, blue = active/info, amber = pending, red = cancelled/error. */
+.status,
+.status-completed,
+.status-paid,
+.status-posted,
+.status-active,
+.badge-success,
+.status-success {
+  background: var(--brand-green-soft);
+  border-color: #c8ebc4;
+  color: var(--brand-green-dark);
+}
+.status-pending,
+.status-draft,
+.status-partial,
+.badge-warning {
+  background: #fff5df;
+  border-color: #f4dfaa;
+  color: #936000;
+}
+.status-cancelled,
+.status-void,
+.badge-danger {
+  background: #fff0f0;
+  border-color: #f2caca;
+  color: #b42318;
+}
+.status-ongoing,
+.status-posted,
+.badge-info {
+  border-color: #cbdaf8;
+}
+
+/* Green accent is reserved for positive indicators, not every element. */
+.status-dot,
+.fde-status-dot { background-color: var(--brand-green); }
+::selection { background: #dce8ff; color: var(--brand-blue-deep); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #eef2f8; }
+::-webkit-scrollbar-thumb { background: #bdcbe0; border: 2px solid #eef2f8; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #8da5c7; }
+
+/* Small motion details without animating layout-heavy elements. */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .section:hover, .form-card:hover, .table-card:hover { box-shadow: var(--shadow-hover); }
+  .menu button:hover { transform: translateX(2px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+@media (max-width: 768px) {
+  .sales-order-module,
+  .delivery-module,
+  .fleet-data-entry,
+  .invoicing-container,
+  .payment-module,
+  .report-page,
+  .settings-page,
+  .fleet-analytics-page,
+  .dashboard-page { padding: 14px; }
+}
