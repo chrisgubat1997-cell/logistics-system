@@ -80,8 +80,19 @@ async function reportApi(action) {
 }
 function reportArray(result, keys) {
     if (Array.isArray(result)) return result;
-    for (const key of keys) if (result && Array.isArray(result[key])) return result[key];
+    if (!result || typeof result !== "object") return [];
+    for (const key of keys) {
+        if (Array.isArray(result[key])) return result[key];
+    }
+    // Some Apps Script actions wrap records one level deeper.
+    if (result.data && result.data !== result) return reportArray(result.data, keys);
     return [];
+}
+function hasReportArrayPayload(result, keys) {
+    if (Array.isArray(result)) return true;
+    if (!result || typeof result !== "object") return false;
+    if (keys.some(key => Array.isArray(result[key]))) return true;
+    return !!(result.data && result.data !== result && hasReportArrayPayload(result.data, keys));
 }
 function normalizeReportRecord(record, type) {
     const r = Object.assign({}, record || {});
@@ -148,13 +159,25 @@ async function loadAllReportData() {
             return;
         }
 
-        live++;
         const payload = result.value;
         if (source.key === "fleet") {
+            const fleetKeys = ["tripTickets", "fuelTransactions", "maintenance", "fleet", "records"];
+            if (!hasReportArrayPayload(payload, fleetKeys)) {
+                reportDataSourceErrors.push(source.name + ": API response did not contain expected fleet data.");
+                console.error("Reports API returned an unexpected fleet payload:", payload);
+                return;
+            }
+            live++;
             reportData.fleet = buildFleetReportRows(payload);
             return;
         }
 
+        if (!hasReportArrayPayload(payload, source.aliases)) {
+            reportDataSourceErrors.push(source.name + ": API response did not contain the expected record list.");
+            console.error("Reports API returned an unexpected payload:", source.name, payload);
+            return;
+        }
+        live++;
         const rows = reportArray(payload, source.aliases)
             .map(row => normalizeReportRecord(row, source.key));
 
