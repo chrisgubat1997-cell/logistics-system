@@ -559,7 +559,26 @@ async function loadSOList(
 
 
         const filtered =
-            getFilteredSalesOrders();
+            getFilteredSalesOrders()
+                .slice()
+                .sort(function (a, b) {
+                    const dateA = new Date(
+                        getSOValue(a, [
+                            "DATE_CREATION", "dateCreation", "date", "DATE",
+                            "CREATED_AT", "createdAt"
+                        ]) || 0
+                    ).getTime() || 0;
+
+                    const dateB = new Date(
+                        getSOValue(b, [
+                            "DATE_CREATION", "dateCreation", "date", "DATE",
+                            "CREATED_AT", "createdAt"
+                        ]) || 0
+                    ).getTime() || 0;
+
+                    return dateB - dateA;
+                })
+                .slice(0, 5);
 
 
         tbody.innerHTML = "";
@@ -798,7 +817,30 @@ async function loadSOList(
                         )}
                     </td>
 
+                    <td class="so-action-cell">
+                        <button
+                            type="button"
+                            class="so-view-button"
+                            aria-label="View Sales Order ${escapeAttribute(soNumber)}"
+                        >View</button>
+                    </td>
+
                 `;
+
+
+                const viewButton =
+                    row.querySelector(".so-view-button");
+
+                if (viewButton) {
+                    viewButton.addEventListener("click", function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        if (soNumber) {
+                            openSODetails(soNumber);
+                        }
+                    });
+                }
 
 
                 /* =========================================
@@ -4941,7 +4983,27 @@ function renderCustomerTable() {
 
 
     const filteredCustomers =
-        getFilteredCustomers();
+        getFilteredCustomers()
+            .slice()
+            .sort(function (a, b) {
+                function customerRecency(customer) {
+                    const rawDate = getCustomerValue(customer, [
+                        "DATE_CREATED", "dateCreated", "CREATED_AT", "createdAt",
+                        "CREATED_DATE", "createdDate", "DATE_CREATION", "dateCreation",
+                        "TIMESTAMP", "timestamp"
+                    ]);
+                    const parsed = rawDate ? new Date(rawDate).getTime() : 0;
+                    if (parsed && !Number.isNaN(parsed)) return parsed;
+
+                    const id = String(getCustomerValue(customer, [
+                        "CUSTOMER_ID", "customerId", "CUSTOMERID", "ID", "id"
+                    ]) || "");
+                    const match = id.match(/(\d+)\s*$/);
+                    return match ? Number(match[1]) : 0;
+                }
+                return customerRecency(b) - customerRecency(a);
+            })
+            .slice(0, 5);
 
 
     if (!filteredCustomers.length) {
