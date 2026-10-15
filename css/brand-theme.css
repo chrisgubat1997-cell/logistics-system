@@ -416,3 +416,218 @@ html[data-theme="dark"] .badge-success { background: #173522 !important; color: 
 html[data-theme="dark"] ::selection { background: #294a80; color: #fff; }
 html[data-theme="dark"] ::-webkit-scrollbar-track { background: #0b1220; }
 html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #34445c; border-color: #0b1220; }
+
+
+/* =========================================================
+   LOGIS-TECH COMPACT DESKTOP UI
+   Target: similar to browser zoom 75%-85%, while keeping
+   browser zoom at 100% and preserving responsive behavior.
+========================================================= */
+
+html {
+    font-size: 90%;
+}
+
+body {
+    font-size: 13px;
+    line-height: 1.42;
+}
+
+/* Main application content modules */
+.sales-order-module,
+.delivery-module,
+.fleet-analytics-module,
+.fleet-delivery-data-module,
+.invoicing-module,
+.payment-module,
+.report-module,
+.system-settings-module {
+    font-size: 12.5px;
+    line-height: 1.42;
+}
+
+.sales-order-module { padding: 18px; }
+.delivery-module { padding: 18px; }
+.fleet-analytics-module { padding: 18px; }
+.fleet-delivery-data-module { padding: 18px; }
+.invoicing-module { padding: 18px; }
+.payment-module { padding: 18px; }
+.report-module { padding: 18px; }
+.system-settings-module { padding: 18px; }
+
+/* Compact page titles and section headings */
+.sales-order-module h1,
+.delivery-module h1,
+.fleet-analytics-module h1,
+.fleet-delivery-data-module h1,
+.invoicing-module h1,
+.payment-module h1,
+.report-module h1,
+.system-settings-module h1 {
+    font-size: 22px;
+    line-height: 1.25;
+}
+
+.sales-order-module h2,
+.delivery-module h2,
+.fleet-analytics-module h2,
+.fleet-delivery-data-module h2,
+.invoicing-module h2,
+.payment-module h2,
+.report-module h2,
+.system-settings-module h2 {
+    font-size: 16px;
+    line-height: 1.3;
+}
+
+/* Tighter tables without hiding data */
+.sales-order-module table,
+.delivery-module table,
+.fleet-analytics-module table,
+.fleet-delivery-data-module table,
+.invoicing-module table,
+.payment-module table,
+.report-module table,
+.system-settings-module table {
+    font-size: 11.5px;
+}
+
+.sales-order-module th,
+.sales-order-module td,
+.delivery-module th,
+.delivery-module td,
+.fleet-analytics-module th,
+.fleet-analytics-module td,
+.fleet-delivery-data-module th,
+.fleet-delivery-data-module td,
+.invoicing-module th,
+.invoicing-module td,
+.payment-module th,
+.payment-module td,
+.report-module th,
+.report-module td,
+.system-settings-module th,
+.system-settings-module td {
+    padding: 8px 10px;
+}
+
+/* Smaller but still comfortable form controls */
+.sales-order-module input,
+.sales-order-module select,
+.sales-order-module textarea,
+.delivery-module input,
+.delivery-module select,
+.delivery-module textarea,
+.fleet-analytics-module input,
+.fleet-analytics-module select,
+.fleet-delivery-data-module input,
+.fleet-delivery-data-module select,
+.invoicing-module input,
+.invoicing-module select,
+.invoicing-module textarea,
+.payment-module input,
+.payment-module select,
+.payment-module textarea,
+.report-module input,
+.report-module select,
+.system-settings-module input,
+.system-settings-module select,
+.system-settings-module textarea {
+    font-size: 12px;
+    min-height: 34px;
+}
+
+.sales-order-module button,
+.delivery-module button,
+.fleet-analytics-module button,
+.fleet-delivery-data-module button,
+.invoicing-module button,
+.payment-module button,
+.report-module button,
+.system-settings-module button {
+    font-size: 11.5px;
+}
+
+/* Reduce excess vertical spacing in common content blocks */
+.sales-order-module .page-header,
+.delivery-module .page-header,
+.fleet-analytics-module .page-header,
+.fleet-delivery-data-module .page-header,
+.invoicing-module .page-header,
+.payment-module .page-header,
+.report-module .page-header,
+.system-settings-module .page-header {
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.sales-order-module .so-table-card,
+.sales-order-module .customer-table-card,
+.delivery-module .delivery-table-card,
+.invoicing-module .invoice-table-card,
+.payment-module .payment-table-card,
+.report-module .report-card {
+    margin-bottom: 16px;
+}
+
+/* Sidebar: compact labels and spacing */
+.sidebar .logo {
+    font-size: 17px;
+}
+
+.sidebar .menu-btn {
+    font-size: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+/* Keep dense data readable on smaller screens */
+@media (max-width: 1100px) {
+    html { font-size: 87.5%; }
+
+    .sales-order-module,
+    .delivery-module,
+    .fleet-analytics-module,
+    .fleet-delivery-data-module,
+    .invoicing-module,
+    .payment-module,
+    .report-module,
+    .system-settings-module {
+        padding: 14px;
+    }
+}
+
+@media (max-width: 700px) {
+    html { font-size: 100%; }
+
+    .sales-order-module,
+    .delivery-module,
+    .fleet-analytics-module,
+    .fleet-delivery-data-module,
+    .invoicing-module,
+    .payment-module,
+    .report-module,
+    .system-settings-module {
+        padding: 12px;
+        font-size: 13px;
+    }
+
+    .sales-order-module th,
+    .sales-order-module td,
+    .delivery-module th,
+    .delivery-module td,
+    .fleet-analytics-module th,
+    .fleet-analytics-module td,
+    .fleet-delivery-data-module th,
+    .fleet-delivery-data-module td,
+    .invoicing-module th,
+    .invoicing-module td,
+    .payment-module th,
+    .payment-module td,
+    .report-module th,
+    .report-module td,
+    .system-settings-module th,
+    .system-settings-module td {
+        padding: 8px;
+    }
+}
