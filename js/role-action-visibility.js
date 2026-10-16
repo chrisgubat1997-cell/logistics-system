@@ -117,7 +117,7 @@
         if (!canSeeRevolvingFund) {
             const page = document.getElementById("revolvingFund");
             if (page && page.classList.contains("active")) {
-                const dashboardButton = document.querySelector('.menu-btn[onclick*="showPage(\\'dashboard\\'"]');
+                const dashboardButton = document.querySelector('.menu-btn[onclick*="dashboard"]');
                 if (typeof window.showPage === "function" && dashboardButton) window.showPage("dashboard", dashboardButton);
             }
         }
