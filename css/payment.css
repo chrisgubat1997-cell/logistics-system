@@ -1358,9 +1358,8 @@
 @media(max-width:700px){.payment-detail-modal,.outstanding-so-modal{padding:10px}.payment-detail-panel,.outstanding-so-panel{padding:15px}.payment-detail-summary,.payment-detail-grid{grid-template-columns:1fr}.payment-detail-full{grid-column:auto}}
 
 
-/* FINAL TABLE WIDTH FIX — payment tables fit without horizontal scroll. */
-.payment-table-wrapper { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
-.payment-table, .customer-credit-table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
-.payment-table th, .payment-table td, .customer-credit-table th, .customer-credit-table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.payment-table td button, .customer-credit-table td button { max-width: 100%; }
+/* FINAL TABLE LAYOUT: keep payment table columns accessible with an inner scrollbar. */
+.payment-module .payment-table-wrapper { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: visible !important; }
+.payment-module .payment-table { width: max-content !important; min-width: 1050px !important; max-width: none !important; table-layout: auto; }
+.payment-module .customer-credit-table { width: max-content !important; min-width: 850px !important; max-width: none !important; table-layout: auto; }
 
