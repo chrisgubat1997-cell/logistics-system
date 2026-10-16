@@ -1363,3 +1363,18 @@
 .payment-module .payment-table { width: max-content !important; min-width: 1050px !important; max-width: none !important; table-layout: auto; }
 .payment-module .customer-credit-table { width: max-content !important; min-width: 850px !important; max-width: none !important; table-layout: auto; }
 
+/* FIT-TO-VIEWPORT FIX — payment cards/actions and inner table scroll */
+.payment-module { min-width: 0 !important; max-width: 100% !important; padding: clamp(12px, 1.4vw, 20px) !important; }
+.payment-page-header, .payment-page-title-area, .payment-page-actions { min-width: 0; }
+.payment-page-header { flex-wrap: wrap; gap: 12px; }
+.payment-page-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.payment-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+.payment-summary-grid > * { min-width: 0; overflow-wrap: anywhere; }
+.payment-section, .payment-section-header, .payment-section-actions { min-width: 0; max-width: 100%; }
+.payment-table-wrapper { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: hidden !important; scrollbar-width: thin; }
+.payment-module .payment-table, .payment-module .customer-credit-table { width: max-content !important; min-width: 850px !important; max-width: none !important; }
+@media (max-width: 650px) {
+    .payment-summary-grid { grid-template-columns: 1fr !important; }
+    .payment-page-actions { width: 100%; }
+    .payment-page-actions > button { flex: 1 1 auto; }
+}
