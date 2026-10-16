@@ -75,58 +75,47 @@ function getRevolvingFundData(payload) {
 function saveRevolvingFundTransaction(payload) {
   payload = payload || {};
   const type = rfNormalizeType(payload.transactionType);
-  if (["CASH ADVANCE","LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(type) < 0) {
-    throw new Error("Unsupported transaction type. Use Cash Advance, Liquidation, Reimbursement, or Direct Expense.");
-  }
+  if (["CASH ADVANCE","LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(type) < 0) throw new Error("Unsupported transaction type.");
   const groupNo = String(payload.replenishmentNo || "").trim();
   const date = String(payload.transactionDate || "").trim();
   const person = String(payload.person || "").trim();
-  const amount = Number(payload.amount);
-  const details = String(payload.details || "").trim();
-  const purpose = String(payload.purpose || "").trim();
-  const category = String(payload.category || "").trim();
-  if (!groupNo || !date || !person || !purpose || !details || !isFinite(amount) || amount <= 0) {
-    throw new Error("Missing required transaction fields or invalid amount. Select a Purpose and complete the details.");
-  }
-  if (["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(type) >= 0 && !category) {
-    throw new Error("Select an Expense Classification for this transaction.");
-  }
+  const items = Array.isArray(payload.items) ? payload.items : [{purpose:payload.purpose,category:payload.category,details:payload.details,amount:payload.amount}];
+  if (!groupNo || !date || !person || !items.length) throw new Error("Complete transaction date, person, replenishment, and at least one item.");
+  const normalizedItems = items.map((item,i)=>({purpose:String(item.purpose||"").trim(),category:String(item.category||"").trim(),details:String(item.details||"").trim(),amount:Number(item.amount),index:i+1}));
+  if (normalizedItems.some(x=>!x.purpose||!x.details||!isFinite(x.amount)||x.amount<=0)) throw new Error("Every item needs a Purpose, details, and amount greater than zero.");
+  if (["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(type)>=0 && normalizedItems.some(x=>!x.category)) throw new Error("Select an Expense Classification for every expense item.");
+  const total = normalizedItems.reduce((sum,x)=>sum+x.amount,0);
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
     const ss = SpreadsheetApp.openById(CONFIG.DATABASE_SPREADSHEET_ID);
     const groupRows = rfReadSheet(ss, "REVOLVING_FUND_GROUPS", RF_GROUP_HEADERS);
-    const group = groupRows.map(rfGroupObject).find(g => g.replenishmentNo === groupNo);
-    if (!group) throw new Error("Replenishment group not found: " + groupNo);
-    if (String(group.status).toUpperCase() === "CLOSED") throw new Error("This replenishment is closed. Select the active replenishment before saving.");
+    const group = groupRows.map(rfGroupObject).find(g=>g.replenishmentNo===groupNo);
+    if (!group) throw new Error("Replenishment group not found: "+groupNo);
+    if (String(group.status).toUpperCase()==="CLOSED") throw new Error("This replenishment is closed. Select the active replenishment before saving.");
     const txSheet = rfEnsureSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS);
-    const txRows = rfReadSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS);
-    const existing = txRows.map(rfTransactionObject);
+    const existing = rfReadSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS).map(rfTransactionObject);
     let relatedCaId = "";
-    if (type === "LIQUIDATION") {
-      relatedCaId = String(payload.relatedCaId || "").trim();
+    if (type==="LIQUIDATION") {
+      relatedCaId = String(payload.relatedCaId||"").trim();
       if (!relatedCaId) throw new Error("Select LIQUIDATE from the Unliquidated Cash Advances table to link this liquidation to its original CA.");
-      const ca = existing.find(t => String(t.transactionId) === relatedCaId && rfNormalizeType(t.transactionType) === "CASH ADVANCE");
+      const ca = existing.find(t=>String(t.transactionId)===relatedCaId && rfNormalizeType(t.transactionType)==="CASH ADVANCE");
       if (!ca) throw new Error("The original Cash Advance could not be found. Refresh the page and try again.");
-      const alreadyLiquidated = existing.filter(t => rfNormalizeType(t.transactionType) === "LIQUIDATION" && String(t.relatedCaId) === relatedCaId)
-        .reduce((sum,t) => sum + Number(t.amount || 0), 0);
-      const remaining = Math.max(0, Number(ca.amount || 0) - alreadyLiquidated);
-      if (amount > remaining + 0.005) throw new Error("Liquidation amount exceeds the remaining CA balance of ₱" + remaining.toFixed(2) + ".");
+      const alreadyLiquidated = existing.filter(t=>rfNormalizeType(t.transactionType)==="LIQUIDATION" && String(t.relatedCaId)===relatedCaId).reduce((sum,t)=>sum+Number(t.amount||0),0);
+      const remaining = Math.max(0,Number(ca.amount||0)-alreadyLiquidated);
+      if (total>remaining+0.005) throw new Error("Total liquidation amount exceeds the remaining CA balance of ₱"+remaining.toFixed(2)+".");
     }
     const now = new Date();
-    const transactionId = "RF-TXN-" + Utilities.formatDate(now, CONFIG.TIMEZONE || "Asia/Manila", "yyyyMMdd-HHmmss") + "-" + Math.floor(Math.random() * 9000 + 1000);
-    const status = type === "CASH ADVANCE" ? "UNLIQUIDATED" : "RECORDED";
-    txSheet.appendRow([
-      transactionId, groupNo, date, rfDisplayType(type), person, relatedCaId,
-      amount, category, details, "", "",
-      status, now, String(payload.createdBy || "SYSTEM"), purpose
+    const rows = normalizedItems.map((item,i)=>[
+      "RF-TXN-"+Utilities.formatDate(now,CONFIG.TIMEZONE||"Asia/Manila","yyyyMMdd-HHmmss")+"-"+Math.floor(Math.random()*9000+1000)+"-"+(i+1),
+      groupNo,date,rfDisplayType(type),person,relatedCaId,item.amount,item.category,
+      item.details,"","",type==="CASH ADVANCE"?"UNLIQUIDATED":"RECORDED",now,String(payload.createdBy||"SYSTEM"),item.purpose
     ]);
-    return { success: true, transactionId: transactionId, message: "Revolving Fund transaction saved." };
-  } finally {
-    lock.releaseLock();
-  }
+    const startRow=txSheet.getLastRow()+1;
+    txSheet.getRange(startRow,1,rows.length,rows[0].length).setValues(rows);
+    return {success:true,transactionIds:rows.map(r=>r[0]),itemCount:rows.length,totalAmount:total,message:"Revolving Fund items saved."};
+  } finally { lock.releaseLock(); }
 }
-
 function createRevolvingFundReplenishment(payload) {
   payload = payload || {};
   const lock = LockService.getScriptLock();
