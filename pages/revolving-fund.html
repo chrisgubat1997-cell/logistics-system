@@ -59,14 +59,10 @@
         <div><label for="rfType">Transaction Type *</label><select id="rfType" required><option>Cash Advance</option><option>Liquidation</option><option>Reimbursement</option><option>Direct Expense</option><option>Replenishment</option></select></div>
         <div><label for="rfDate">Transaction Date *</label><input id="rfDate" type="date" required></div>
         <div><label for="rfPerson">Driver / Helper / Requestor *</label><input id="rfPerson" required maxlength="120" placeholder="Full name"></div>
-        <div id="rfCaLinkField"><label for="rfCaLink">Related Cash Advance *</label><select id="rfCaLink"><option value="">Select existing CA</option></select></div>
         <div><label for="rfAmount">Amount (₱) *</label><input id="rfAmount" type="number" min=".01" step=".01" required placeholder="0.00"></div>
-        <div><label for="rfCategory">Expense Classification</label><select id="rfCategory"><option value="">Select classification</option><option>Meal Expense</option><option>Gate Pass Expense</option><option>Haulier Expense</option><option>Vehicle Expense</option><option>Office Expense</option><option>Errand Expense</option><option>RFID Load</option><option>Fuel / Diesel</option><option>Toll Fee</option><option>Parking</option><option>Transportation</option><option>Communication Expense</option><option>Hotel / Lodging</option><option>Supplies</option><option>Repairs / Maintenance</option><option>Other Expense</option></select></div>
+        <div><label for="rfCategory">Purpose</label><select id="rfCategory"><option value="">Select purpose</option><option>Meal Expense</option><option>Gate Pass Expense</option><option>Haulier Expense</option><option>Vehicle Expense</option><option>Office Expense</option><option>Errand Expense</option><option>RFID Load</option><option>Fuel / Diesel</option><option>Toll Fee</option><option>Parking</option><option>Transportation</option><option>Communication Expense</option><option>Hotel / Lodging</option><option>Supplies</option><option>Repairs / Maintenance</option><option>Other Expense</option></select></div>
         <div class="wide"><label for="rfDetails">Transaction Details *</label><textarea id="rfDetails" rows="3" required maxlength="1000" placeholder="Purpose, description, receipt details…"></textarea></div>
-        <div><label for="rfSoRef">SO / Project Reference (Optional)</label><input id="rfSoRef" maxlength="100" placeholder="Reference only"></div>
-        <div><label for="rfDocumentNo">Receipt / Form No. (Optional)</label><input id="rfDocumentNo" maxlength="100" placeholder="OR / printed form number"></div>
         <div class="wide rf-form-actions"><button type="reset">CLEAR FORM</button><button type="submit" class="primary" id="rfSaveBtn">SAVE TRANSACTION</button></div>
-        <p class="wide rf-note">For Liquidation, select an existing Cash Advance instead of encoding it again. SO / Project is reference-only and must not change Sales Order records.</p>
       </form>
     </section>
   </section>
