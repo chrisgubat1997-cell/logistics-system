@@ -71,10 +71,10 @@
         <div><label for="rfType">Transaction Type *</label><select id="rfType" required><option>Cash Advance</option><option>Liquidation</option><option>Reimbursement</option><option>Direct Expense</option><option>Replenishment</option></select></div>
         <div><label for="rfDate">Transaction Date *</label><input id="rfDate" type="date" required></div>
         <div><label for="rfPerson">Driver / Helper / Requestor *</label><input id="rfPerson" required maxlength="120" placeholder="Full name"></div>
-        <div><label for="rfAmount">Amount (₱) *</label><input id="rfAmount" type="number" min=".01" step=".01" required placeholder="0.00"></div>
-        <div><label for="rfPurpose">Purpose *</label><select id="rfPurpose" required><option value="">Select purpose</option><option>DELIVERY ERRAND</option><option>COMMUNICATION EXPENSE FOR CALL &amp; TEXT</option><option>VEHICLE EXPENSE</option><option>GAS EXPENSE</option><option>OFFICE SUPPLY</option><option>HAULIER EXPENSE</option><option>REIMBURSEMENT - CA</option><option>SERVICING ERRAND</option><option>SALES VISIT ERRAND</option><option>PULL-OUT ERRAND</option><option>SITE INSPECTION ERRAND</option><option>MNT VEHICLE ERRAND</option><option>PULL-OUT/ DELIVERY ERRAND</option><option>RFID LOAD AUTOSWEEP/EASYTRIP GCASH</option><option>TRANSFER/WITHDRAWAL</option><option>CARWASH VEHICLE</option><option>CARWASH</option><option>DELIVERY</option></select></div>
-        <div><label for="rfCategory">Expense Classification</label><select id="rfCategory"><option value="">Select classification</option><option>SERVICE EXPENSE &amp; SALES VISIT/RFID LOAD</option><option>MEAL EXPENSE</option><option>GATE PASS EXPENSE</option><option>COMMUNICATION EXPENSE FOR CALL &amp; TEXT</option></select></div>
-        <div class="wide"><label for="rfDetails">Transaction Details *</label><textarea id="rfDetails" rows="3" required maxlength="1000" placeholder="Enter receipt details or transaction description…"></textarea></div>
+        <div class="wide rf-line-items">
+          <div class="rf-line-items-heading"><div><label>Expense Items *</label><p>Add one row for every purpose or expense included in this transaction.</p></div><button type="button" id="rfAddItemBtn">＋ ADD ITEM</button></div>
+          <div class="rf-table-wrap"><table class="rf-items-table"><thead><tr><th>Purpose *</th><th>Expense Classification</th><th>Item Details *</th><th>Amount (₱) *</th><th></th></tr></thead><tbody id="rfItemsRows"></tbody><tfoot><tr><th colspan="3">TOTAL AMOUNT</th><th id="rfGrandTotal">₱0.00</th><th></th></tr></tfoot></table></div>
+        </div>
         <div class="wide rf-form-actions"><button type="reset">CLEAR FORM</button><button type="submit" class="primary" id="rfSaveBtn">SAVE TRANSACTION</button></div>
       </form>
     </section>
