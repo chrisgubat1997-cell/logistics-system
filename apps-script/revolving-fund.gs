@@ -54,6 +54,7 @@ function getRevolvingFundData(payload) {
   const previousNotReceived = Number(rfSetting(settings, ["PREVIOUS_REPLENISHMENT_NOT_RECEIVED","PREVIOUS_REPLENISHMENT_AMOUNT"], 0)) || 0;
   const fundAmount = currentGroup ? Number(currentGroup.fundAmount || 0) : 0;
   const summary = {
+    configuredFundAmount: Number(rfSetting(settings, ["FUND_AMOUNT","REVOLVING_FUND_AMOUNT","RF_FUND_AMOUNT"], 0)) || 0,
     fundAmount: fundAmount,
     totalExpenses: expenses,
     unliquidatedCashAdvance: outstanding,
@@ -80,7 +81,7 @@ function saveRevolvingFundTransaction(payload) {
   const date = String(payload.transactionDate || "").trim();
   const person = String(payload.person || "").trim();
   const items = Array.isArray(payload.items) ? payload.items : [{purpose:payload.purpose,category:payload.category,details:payload.details,amount:payload.amount}];
-  if (!groupNo || !date || !person || !items.length) throw new Error("Complete transaction date, person, replenishment, and at least one item.");
+  if (!date || !person || !items.length) throw new Error("Complete transaction date, person, and at least one item.");
   const normalizedItems = items.map((item,i)=>({purpose:String(item.purpose||"").trim(),category:String(item.category||"").trim(),details:String(item.details||"").trim(),amount:Number(item.amount),index:i+1}));
   if (normalizedItems.some(x=>!x.purpose||!x.details||!isFinite(x.amount)||x.amount<=0)) throw new Error("Every item needs a Purpose, details, and amount greater than zero.");
   if (["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(type)>=0 && normalizedItems.some(x=>!x.category)) throw new Error("Select an Expense Classification for every expense item.");
@@ -89,10 +90,12 @@ function saveRevolvingFundTransaction(payload) {
   lock.waitLock(20000);
   try {
     const ss = SpreadsheetApp.openById(CONFIG.DATABASE_SPREADSHEET_ID);
-    const groupRows = rfReadSheet(ss, "REVOLVING_FUND_GROUPS", RF_GROUP_HEADERS);
-    const group = groupRows.map(rfGroupObject).find(g=>g.replenishmentNo===groupNo);
-    if (!group) throw new Error("Replenishment group not found: "+groupNo);
-    if (String(group.status).toUpperCase()==="CLOSED") throw new Error("This replenishment is closed. Select the active replenishment before saving.");
+    if (groupNo) {
+      const groupRows = rfReadSheet(ss, "REVOLVING_FUND_GROUPS", RF_GROUP_HEADERS);
+      const group = groupRows.map(rfGroupObject).find(g=>g.replenishmentNo===groupNo);
+      if (!group) throw new Error("Replenishment group not found: "+groupNo);
+      if (String(group.status).toUpperCase()==="CLOSED") throw new Error("This replenishment is closed. Save new transactions without an RF number and assign them during REPLENISH.");
+    }
     const txSheet = rfEnsureSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS);
     const existing = rfReadSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS).map(rfTransactionObject);
     let relatedCaId = "";
@@ -141,7 +144,7 @@ function createRevolvingFundReplenishment(payload) {
     if (!prior) prior = groups.find(g => String(g.status).toUpperCase() !== "CLOSED") || groups[0] || null;
     // Validate settings before changing the existing replenishment.
     const settings = rfReadSettings(ss);
-    const fundSetting = rfSetting(settings, ["FUND_AMOUNT","REVOLVING_FUND_AMOUNT","RF_FUND_AMOUNT"], prior ? prior.fundAmount : "");
+    const fundSetting = payload.fundAmount || rfSetting(settings, ["FUND_AMOUNT","REVOLVING_FUND_AMOUNT","RF_FUND_AMOUNT"], prior ? prior.fundAmount : "");
     const fundAmount = Number(fundSetting);
     if (!isFinite(fundAmount) || fundAmount <= 0) throw new Error("Set FUND_AMOUNT in REVOLVING_FUND_SETTINGS before creating a replenishment.");
 
@@ -169,7 +172,12 @@ function createRevolvingFundReplenishment(payload) {
       CREATED_BY: String(payload.createdBy || "SYSTEM")
     };
     rfAppendObjectsByHeader(sheet, [newGroup]);
-    return { success: true, replenishmentNo: nextNo, message: "Replenishment group created." };
+    const txSheet = rfEnsureSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS);
+    const txHeaderMap = rfHeaderMap(txSheet);
+    const txGroupCol = txHeaderMap.REPLENISHMENT_NO;
+    const unassigned = rfReadSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS).filter(r => !String(r.REPLENISHMENT_NO || "").trim());
+    unassigned.forEach(r => txSheet.getRange(r.__rowIndex, txGroupCol + 1).setValue(nextNo));
+    return { success: true, replenishmentNo: nextNo, assignedTransactions: unassigned.length, message: "Replenishment group created and unassigned transactions attached." };
   } finally {
     lock.releaseLock();
   }
