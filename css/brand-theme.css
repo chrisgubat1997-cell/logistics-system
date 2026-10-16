@@ -666,3 +666,136 @@ body {
     }
   }
 }
+
+/* =========================================================
+   SHARED DATA TABLE WIDTH CONTROL
+   Long values are clipped with an ellipsis instead of
+   expanding tables and creating horizontal page/table scroll.
+   Keep input-heavy route/print preview tables untouched.
+========================================================= */
+.sales-order-module .so-table,
+.sales-order-module .customer-table,
+.delivery-module .delivery-table,
+.fleet-analytics-module table,
+.fleet-delivery-data-module .fde-table,
+.fleet-delivery-data-module .fde-maint-monitor-table,
+.invoicing-module .invoice-table,
+.invoicing-module .sales-order-table,
+.payment-module .payment-table,
+.report-module .report-table {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100%;
+  table-layout: fixed;
+}
+
+.sales-order-module .so-table-wrapper,
+.sales-order-module .customer-table-wrapper,
+.delivery-module .table-wrapper,
+.fleet-delivery-data-module .fde-table-wrap,
+.invoicing-module .table-wrapper,
+.payment-module .payment-table-wrapper,
+.report-module .report-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+.sales-order-module .so-table th,
+.sales-order-module .so-table td,
+.sales-order-module .customer-table th,
+.sales-order-module .customer-table td,
+.delivery-module .delivery-table th,
+.delivery-module .delivery-table td,
+.fleet-analytics-module table th,
+.fleet-analytics-module table td,
+.fleet-delivery-data-module .fde-table th,
+.fleet-delivery-data-module .fde-table td,
+.fleet-delivery-data-module .fde-maint-monitor-table th,
+.fleet-delivery-data-module .fde-maint-monitor-table td,
+.invoicing-module .invoice-table th,
+.invoicing-module .invoice-table td,
+.invoicing-module .sales-order-table th,
+.invoicing-module .sales-order-table td,
+.payment-module .payment-table th,
+.payment-module .payment-table td,
+.report-module .report-table th,
+.report-module .report-table td {
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Recent Sales Orders: keep all 13 columns inside the available width. */
+.sales-order-module .so-table th:nth-child(1),
+.sales-order-module .so-table td:nth-child(1) { width: 8%; }
+.sales-order-module .so-table th:nth-child(2),
+.sales-order-module .so-table td:nth-child(2) { width: 7%; }
+.sales-order-module .so-table th:nth-child(3),
+.sales-order-module .so-table td:nth-child(3) { width: 14%; }
+.sales-order-module .so-table th:nth-child(4),
+.sales-order-module .so-table td:nth-child(4) { width: 5%; }
+.sales-order-module .so-table th:nth-child(5),
+.sales-order-module .so-table td:nth-child(5) { width: 9%; }
+.sales-order-module .so-table th:nth-child(6),
+.sales-order-module .so-table td:nth-child(6) { width: 5%; }
+.sales-order-module .so-table th:nth-child(7),
+.sales-order-module .so-table td:nth-child(7) { width: 11%; }
+.sales-order-module .so-table th:nth-child(8),
+.sales-order-module .so-table td:nth-child(8) { width: 9%; }
+.sales-order-module .so-table th:nth-child(9),
+.sales-order-module .so-table td:nth-child(9),
+.sales-order-module .so-table th:nth-child(10),
+.sales-order-module .so-table td:nth-child(10) { width: 5%; }
+.sales-order-module .so-table th:nth-child(11),
+.sales-order-module .so-table td:nth-child(11) { width: 7%; }
+.sales-order-module .so-table th:nth-child(12),
+.sales-order-module .so-table td:nth-child(12) { width: 8%; }
+.sales-order-module .so-table th:nth-child(13),
+.sales-order-module .so-table td:nth-child(13) { width: 7%; }
+
+.sales-order-module .so-table td.so-action-cell {
+  overflow: visible;
+  text-overflow: clip;
+  padding-left: 4px;
+  padding-right: 4px;
+  text-align: center;
+}
+
+.sales-order-module .so-table .so-view-button {
+  max-width: 100%;
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+/* Keep status chips/buttons intact while constraining long text cells. */
+.sales-order-module .so-table td button,
+.sales-order-module .customer-table td button,
+.delivery-module .delivery-table td button,
+.payment-module .payment-table td button,
+.fleet-delivery-data-module .fde-table td button {
+  max-width: 100%;
+}
+
+@media (max-width: 900px) {
+  .sales-order-module .so-table th,
+  .sales-order-module .so-table td,
+  .sales-order-module .customer-table th,
+  .sales-order-module .customer-table td,
+  .delivery-module .delivery-table th,
+  .delivery-module .delivery-table td,
+  .invoicing-module .invoice-table th,
+  .invoicing-module .invoice-table td,
+  .invoicing-module .sales-order-table th,
+  .invoicing-module .sales-order-table td,
+  .payment-module .payment-table th,
+  .payment-module .payment-table td,
+  .report-module .report-table th,
+  .report-module .report-table td {
+    padding-left: 6px;
+    padding-right: 6px;
+    font-size: 10px;
+  }
+}
+
