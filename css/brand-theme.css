@@ -799,3 +799,16 @@ body {
   }
 }
 
+/* Excel export — icon-only, Microsoft Excel green. */
+.table-excel-export-toolbar { display:flex; align-items:center; justify-content:flex-end; width:100%; min-height:32px; box-sizing:border-box; padding:2px 2px 6px; }
+.table-excel-export-button { display:inline-flex; align-items:center; justify-content:center; width:31px; height:29px; min-width:31px; padding:4px; border:1px solid #b7dfc2; border-radius:6px; background:#f0faf3; color:#217346; cursor:pointer; transition:background .18s ease,border-color .18s ease,transform .18s ease,box-shadow .18s ease; }
+.table-excel-export-button svg { display:block; width:21px; height:21px; overflow:visible; }
+.table-excel-export-button .excel-sheet { fill:#217346; stroke:#217346; stroke-width:1.2; stroke-linejoin:round; }
+.table-excel-export-button .excel-fold { fill:none; stroke:#fff; stroke-width:1.2; stroke-linejoin:round; }
+.table-excel-export-button .excel-grid { fill:none; stroke:#fff; stroke-width:1.1; stroke-linecap:round; }
+.table-excel-export-button .excel-x { fill:none; stroke:#fff; stroke-width:1.8; stroke-linecap:round; }
+.table-excel-export-button:hover { background:#217346; border-color:#217346; box-shadow:0 2px 7px rgba(33,115,70,.2); transform:translateY(-1px); }
+.table-excel-export-button:focus-visible { outline:2px solid #217346; outline-offset:2px; }
+.table-excel-export-button:active { transform:translateY(0); }
+@media print { .table-excel-export-toolbar { display:none !important; } }
+
