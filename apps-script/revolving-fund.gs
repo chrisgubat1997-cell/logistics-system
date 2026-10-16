@@ -52,14 +52,20 @@ function getRevolvingFundData(payload) {
     .reduce((sum,t) => sum + Number(t.amount || 0), 0);
   const outstanding = cashAdvances.reduce((sum,ca) => sum + Number(ca.remainingBalance || 0), 0);
   const previousNotReceived = Number(rfSetting(settings, ["PREVIOUS_REPLENISHMENT_NOT_RECEIVED","PREVIOUS_REPLENISHMENT_AMOUNT"], 0)) || 0;
-  const fundAmount = currentGroup ? Number(currentGroup.fundAmount || 0) : 0;
+  const configuredFundAmount = Number(rfSetting(settings, ["FUND_AMOUNT","REVOLVING_FUND_AMOUNT","RF_FUND_AMOUNT"], 40000)) || 40000;
+  const fundAmount = currentGroup ? (Number(currentGroup.fundAmount || 0) || configuredFundAmount) : configuredFundAmount;
+  const expenseTypes = ["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"];
+  const forReplenishment = transactions
+    .filter(t => !String(t.replenishmentNo || "").trim() && expenseTypes.indexOf(rfNormalizeType(t.transactionType)) >= 0)
+    .reduce((sum,t) => sum + Number(t.amount || 0), 0);
   const summary = {
-    configuredFundAmount: Number(rfSetting(settings, ["FUND_AMOUNT","REVOLVING_FUND_AMOUNT","RF_FUND_AMOUNT"], 0)) || 0,
+    configuredFundAmount: configuredFundAmount,
     fundAmount: fundAmount,
     totalExpenses: expenses,
+    forReplenishment: forReplenishment,
     unliquidatedCashAdvance: outstanding,
     previousReplenishmentNotReceived: previousNotReceived,
-    actualCashOnHand: fundAmount - expenses - outstanding - previousNotReceived,
+    actualCashOnHand: fundAmount - forReplenishment,
     custodian: currentGroup ? currentGroup.custodian : "",
     period: currentGroup ? [currentGroup.periodFrom, currentGroup.periodTo].filter(Boolean).join(" – ") : ""
   };
