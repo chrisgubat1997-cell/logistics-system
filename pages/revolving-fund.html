@@ -11,20 +11,20 @@
       <button type="button" class="rf-tab" data-rf-tab="entry">Transaction Entry</button>
     </nav>
   </header>
-  <div class="rf-toolbar">
-    <div class="rf-toolbar-left">
-      <div class="rf-summary-search" aria-label="Search replenishment">
-        <input id="rfSummarySearch" list="rfSummaryNumberOptions" placeholder="Type RF number to search…" autocomplete="off" aria-label="Type RF number to search">
-        <datalist id="rfSummaryNumberOptions"></datalist>
-        <button type="button" class="primary" id="rfSearchSummaryBtn">SEARCH</button>
-        <button type="button" id="rfCurrentSummaryBtn">CURRENT RF</button>
-      </div>
-    </div>
-    <div id="rfStatusNotice" class="rf-notice" role="status">Connecting to database…</div>
-    <div class="rf-actions"><button type="button" id="rfRefreshBtn">↻ Refresh</button><button type="button" class="primary" id="rfReplenishBtn">＋ REPLENISH</button></div>
-  </div>
+  <div id="rfStatusNotice" class="rf-notice" role="status">Connecting to database…</div>
 
   <section class="rf-view active" data-rf-view="summary">
+    <div class="rf-toolbar">
+      <div class="rf-toolbar-left">
+        <div class="rf-summary-search" aria-label="Search replenishment">
+          <input id="rfSummarySearch" list="rfSummaryNumberOptions" placeholder="Type RF number to search…" autocomplete="off" aria-label="Type RF number to search">
+          <datalist id="rfSummaryNumberOptions"></datalist>
+          <button type="button" class="primary" id="rfSearchSummaryBtn">SEARCH</button>
+          <button type="button" id="rfCurrentSummaryBtn">CURRENT RF</button>
+        </div>
+      </div>
+      <div class="rf-actions"><button type="button" id="rfRefreshBtn">↻ Refresh</button><button type="button" class="primary" id="rfReplenishBtn">＋ REPLENISH</button></div>
+    </div>
     <section class="rf-panel rf-summary">
       <div class="rf-panel-heading"><div><h2>Revolving Fund Liquidation Summary</h2><p>Search a previous RF number to review or export its summary.</p></div><div class="rf-summary-actions"><button type="button" id="rfExportSummaryBtn">⇩ EXPORT EXCEL</button><button type="button" class="primary" id="rfPrintSummaryBtn">▣ PRINT SUMMARY</button></div></div>
       <div class="rf-printable" id="rfPrintableSummary">
@@ -48,7 +48,7 @@
   </section>
 
   <section class="rf-view" data-rf-view="monitoring">
-    <div class="rf-section-intro"><div><h2>Replenishment Monitoring</h2><p>Choose a replenishment number to review its transactions and balances.</p></div><div class="rf-filter"><label for="rfGroupFilter">Replenishment No.</label><select id="rfGroupFilter"><option value="">Current group</option></select></div></div>
+    <div class="rf-section-intro"><div><h2>Replenishment Monitoring</h2><p>All saved transactions, including entries not yet assigned to a replenishment.</p></div></div>
     <section class="rf-cards">
       <article><span>REVOLVING FUND</span><strong id="rfFundAmount">₱0.00</strong><small>Fund amount</small></article>
       <article><span>TOTAL EXPENSES</span><strong id="rfTotalExpenses">₱0.00</strong><small>Expenses recorded in selected group</small></article>
@@ -62,7 +62,7 @@
   </section>
 
   <section class="rf-view" data-rf-view="entry">
-    <div class="rf-section-intro"><div><h2>Transaction Entry</h2><p>Record cash advances, liquidations, reimbursements, and direct expenses.</p></div><b class="rf-current-pill" id="rfCurrentGroupEntry">Replenishment No.: —</b></div>
+    <div class="rf-section-intro"><div><h2>Transaction Entry</h2><p>Record cash advances, liquidations, reimbursements, and direct expenses. Replenishment is handled separately in the Liquidation Summary.</p></div></div>
     <section class="rf-panel rf-unliquidated-panel">
       <div class="rf-panel-heading">
         <div><h2>Unliquidated Cash Advances</h2><p>Outstanding CAs from this and previous replenishments. Liquidate an existing CA here when the driver submits receipts.</p></div>
@@ -77,7 +77,7 @@
     </section>
     <section class="rf-panel">
       <form id="rfTransactionForm" class="rf-form">
-        <div><label for="rfType">Transaction Type *</label><select id="rfType" required><option>Cash Advance</option><option>Liquidation</option><option>Reimbursement</option><option>Direct Expense</option><option>Replenishment</option></select></div>
+        <div><label for="rfType">Transaction Type *</label><select id="rfType" required><option>Cash Advance</option><option>Liquidation</option><option>Reimbursement</option><option>Direct Expense</option></select></div>
         <div><label for="rfDate">Transaction Date *</label><input id="rfDate" type="date" required></div>
         <div><label for="rfPerson">Driver / Helper / Requestor *</label><input id="rfPerson" required maxlength="120" placeholder="Full name"></div>
         <div class="wide rf-line-items">
