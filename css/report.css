@@ -1622,8 +1622,7 @@
 @media (prefers-reduced-motion: reduce) { .report-data-source.is-loading::before { animation: none; } }
 
 
-/* FINAL TABLE WIDTH FIX — report tables fit the page; rows scroll vertically with the page. */
-.report-table-wrapper { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
-.report-table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
-.report-table th, .report-table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* FINAL TABLE LAYOUT: report table scrolls inside the report table wrapper. */
+.report-page .report-table-wrapper, .report-module .report-table-wrapper { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: visible !important; }
+.report-page .report-table, .report-module .report-table { width: max-content !important; min-width: 760px !important; max-width: none !important; table-layout: auto; }
 
