@@ -54,6 +54,18 @@
 
   <section class="rf-view" data-rf-view="entry">
     <div class="rf-section-intro"><div><h2>Transaction Entry</h2><p>Record cash advances, liquidations, reimbursements, and direct expenses.</p></div><b class="rf-current-pill" id="rfCurrentGroupEntry">Replenishment No.: —</b></div>
+    <section class="rf-panel rf-unliquidated-panel">
+      <div class="rf-panel-heading">
+        <div><h2>Unliquidated Cash Advances</h2><p>Outstanding CAs from this and previous replenishments. Liquidate an existing CA here when the driver submits receipts.</p></div>
+        <span class="rf-current-pill" id="rfOutstandingCount">0 outstanding</span>
+      </div>
+      <div class="rf-table-wrap">
+        <table class="rf-unliquidated-table">
+          <thead><tr><th>CA Date</th><th>CA Reference</th><th>Driver / Requestor</th><th>Original Amount</th><th>Liquidated</th><th>Balance</th><th>Source RF</th><th>Actions</th></tr></thead>
+          <tbody id="rfUnliquidatedRows"><tr><td colspan="8" class="empty">Loading outstanding cash advances…</td></tr></tbody>
+        </table>
+      </div>
+    </section>
     <section class="rf-panel">
       <form id="rfTransactionForm" class="rf-form">
         <div><label for="rfType">Transaction Type *</label><select id="rfType" required><option>Cash Advance</option><option>Liquidation</option><option>Reimbursement</option><option>Direct Expense</option><option>Replenishment</option></select></div>
@@ -66,4 +78,12 @@
       </form>
     </section>
   </section>
+  <div id="rfCaDetailModal" class="rf-modal" hidden role="dialog" aria-modal="true" aria-labelledby="rfCaDetailTitle">
+    <div class="rf-modal-backdrop" data-rf-close-modal></div>
+    <section class="rf-modal-card">
+      <div class="rf-panel-heading"><div><h2 id="rfCaDetailTitle">Cash Advance Details</h2><p>Review the original cash advance and remaining balance.</p></div><button type="button" data-rf-close-modal aria-label="Close details">✕</button></div>
+      <div id="rfCaDetailContent" class="rf-ca-detail-content"></div>
+      <div class="rf-modal-actions"><button type="button" data-rf-close-modal>Close</button><button type="button" class="primary" id="rfCaModalLiquidateBtn">LIQUIDATE THIS CA</button></div>
+    </section>
+  </div>
 </div>
