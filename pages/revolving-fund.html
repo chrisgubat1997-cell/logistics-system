@@ -20,7 +20,7 @@
           <input id="rfSummarySearch" list="rfSummaryNumberOptions" placeholder="Type RF number to search…" autocomplete="off" aria-label="Type RF number to search">
           <datalist id="rfSummaryNumberOptions"></datalist>
           <button type="button" class="primary" id="rfSearchSummaryBtn">SEARCH</button>
-          <button type="button" id="rfCurrentSummaryBtn">CURRENT RF</button>
+          <button type="button" id="rfCurrentSummaryBtn">PENDING ITEMS</button>
         </div>
       </div>
       <div class="rf-actions"><button type="button" id="rfRefreshBtn">↻ Refresh</button><button type="button" class="primary" id="rfReplenishBtn">＋ REPLENISH</button></div>
@@ -34,8 +34,7 @@
           <div>Department: <b id="rfSummaryDepartment">LOGISTICS</b></div><div>Period: <b id="rfSummaryPeriod">—</b></div>
           <div>Project / SOF: <b id="rfSummaryProject">—</b></div>
         </div>
-        <div class="rf-table-wrap"><table class="rf-summary-table"><thead><tr><th>Expense Classification</th><th>Amount (₱)</th></tr></thead><tbody id="rfSummaryCategoryRows"><tr><td colspan="2" class="empty">No summary loaded.</td></tr></tbody><tfoot><tr><th>TOTAL EXPENSES</th><th id="rfSummaryExpenses">₱0.00</th></tr></tfoot></table></div>
-        <section class="rf-summary-detail-section"><h3>Itemized Liquidation Details</h3><p>Items are grouped by Expense Classification, with a subtotal for each classification.</p><div class="rf-table-wrap"><table class="rf-summary-detail-table"><thead><tr><th>Date</th><th>Invoice / OR No.</th><th>Name</th><th>Item Description</th><th>Purpose</th><th>Amount (₱)</th></tr></thead><tbody id="rfSummaryDetailRows"><tr><td colspan="6" class="empty">No itemized details loaded.</td></tr></tbody></table></div></section>
+        <section class="rf-summary-detail-section"><h3>Transaction Items</h3><p>Pending transaction entries appear here immediately and receive an RF Number only when you click REPLENISH.</p><div class="rf-table-wrap"><table class="rf-summary-detail-table"><thead><tr><th>Date</th><th>Invoice / OR No.</th><th>Name</th><th>Item Description</th><th>Purpose</th><th>Amount (₱)</th></tr></thead><tbody id="rfSummaryDetailRows"><tr><td colspan="6" class="empty">No itemized details loaded.</td></tr></tbody></table></div></section>
         <div class="rf-calcs">
           <div>Revolving Fund Amount <b id="rfSummaryFund">₱0.00</b></div><div>Total Expenses <b id="rfSummaryExpenses2">₱0.00</b></div>
           <div>Total Unliquidated Cash Advances <b id="rfSummaryUnliquidated">₱0.00</b></div><div>Previous Replenishment (not yet received) <b id="rfSummaryPrevious">₱0.00</b></div>
@@ -82,7 +81,7 @@
         <div><label for="rfPerson">Driver / Helper / Requestor *</label><input id="rfPerson" required maxlength="120" placeholder="Full name"></div>
         <div class="wide rf-line-items">
           <div class="rf-line-items-heading"><div><label>Expense Items *</label><p>Add one row for every purpose or expense included in this transaction.</p></div><button type="button" id="rfAddItemBtn">＋ ADD ITEM</button></div>
-          <div class="rf-table-wrap"><table class="rf-items-table"><thead><tr><th>Purpose *</th><th>Expense Classification</th><th>Item Description *</th><th>Amount (₱) *</th><th></th></tr></thead><tbody id="rfItemsRows"></tbody><tfoot><tr><th colspan="3">TOTAL AMOUNT</th><th id="rfGrandTotal">₱0.00</th><th></th></tr></tfoot></table></div>
+          <div class="rf-table-wrap"><table class="rf-items-table"><thead><tr><th>Purpose *</th><th>Expense Classification</th><th>Invoice / OR No.</th><th>Item Description *</th><th>Amount (₱) *</th><th></th></tr></thead><tbody id="rfItemsRows"></tbody><tfoot><tr><th colspan="3">TOTAL AMOUNT</th><th id="rfGrandTotal">₱0.00</th><th></th></tr></tfoot></table></div>
           <datalist id="rfPurposeSuggestions"></datalist>
           <datalist id="rfClassificationSuggestions"></datalist>
         </div>
