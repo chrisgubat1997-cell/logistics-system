@@ -12,6 +12,14 @@
     </nav>
   </header>
   <div class="rf-toolbar">
+    <div class="rf-toolbar-left">
+      <div class="rf-summary-search" aria-label="Search replenishment">
+        <input id="rfSummarySearch" list="rfSummaryNumberOptions" placeholder="Type RF number to search…" autocomplete="off" aria-label="Type RF number to search">
+        <datalist id="rfSummaryNumberOptions"></datalist>
+        <button type="button" class="primary" id="rfSearchSummaryBtn">SEARCH</button>
+        <button type="button" id="rfCurrentSummaryBtn">CURRENT RF</button>
+      </div>
+    </div>
     <div id="rfStatusNotice" class="rf-notice" role="status">Connecting to database…</div>
     <div class="rf-actions"><button type="button" id="rfRefreshBtn">↻ Refresh</button><button type="button" class="primary" id="rfReplenishBtn">＋ REPLENISH</button></div>
   </div>
@@ -19,7 +27,6 @@
   <section class="rf-view active" data-rf-view="summary">
     <section class="rf-panel rf-summary">
       <div class="rf-panel-heading"><div><h2>Revolving Fund Liquidation Summary</h2><p>Search a previous RF number to review or export its summary.</p></div><div class="rf-summary-actions"><button type="button" id="rfExportSummaryBtn">⇩ EXPORT EXCEL</button><button type="button" class="primary" id="rfPrintSummaryBtn">▣ PRINT SUMMARY</button></div></div>
-      <div class="rf-summary-search"><label for="rfSummarySearch">Replenishment / RF Number</label><input id="rfSummarySearch" list="rfSummaryNumberOptions" placeholder="Type RF number to search…" autocomplete="off"><datalist id="rfSummaryNumberOptions"></datalist><button type="button" class="primary" id="rfSearchSummaryBtn">SEARCH</button><button type="button" id="rfCurrentSummaryBtn">CURRENT RF</button></div>
       <div class="rf-printable" id="rfPrintableSummary">
         <h2 class="rf-print-title">REVOLVING FUND LIQUIDATION FOR REPLENISHMENT / CLOSE-OUT</h2>
         <div class="rf-meta">
