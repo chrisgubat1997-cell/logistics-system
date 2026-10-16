@@ -120,7 +120,7 @@ function saveRevolvingFundTransaction(payload) {
       CATEGORY: item.category,
       DETAILS: item.details,
       SO_REFERENCE: "",
-      DOCUMENT_NO: "",
+      DOCUMENT_NO: item.documentNo || "",
       STATUS: type==="CASH ADVANCE" ? "UNLIQUIDATED" : "RECORDED",
       CREATED_AT: now,
       CREATED_BY: String(payload.createdBy||"SYSTEM"),
@@ -167,7 +167,7 @@ function createRevolvingFundReplenishment(payload) {
       DEPARTMENT: rfSetting(settings, ["DEPARTMENT"], prior ? prior.department : "LOGISTICS"),
       PROJECT_SOF: rfSetting(settings, ["PROJECT_SOF","PROJECT"], prior ? prior.projectSof : ""),
       PREVIOUS_REPLENISHMENT: prior ? prior.replenishmentNo : "",
-      STATUS: "ACTIVE",
+      STATUS: "CLOSED",
       CREATED_AT: now,
       CREATED_BY: String(payload.createdBy || "SYSTEM")
     };
