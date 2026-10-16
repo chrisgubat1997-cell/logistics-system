@@ -210,6 +210,15 @@ case "cancelInvoice":
 case "getCustomerCreditTransactions":
   return getCustomerCreditTransactions(payload);
 
+  case "getRevolvingFundData":
+  return getRevolvingFundData(payload);
+
+  case "saveRevolvingFundTransaction":
+  return saveRevolvingFundTransaction(payload);
+
+  case "createRevolvingFundReplenishment":
+  return createRevolvingFundReplenishment(payload);
+
   case "getFleetAnalyticsData":
   return getFleetAnalyticsData(payload);
       
