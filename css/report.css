@@ -1620,3 +1620,10 @@
 .report-data-source.is-error::before { background: #ef4444; }
 @keyframes report-source-pulse { from { opacity: .35; transform: scale(.85); } to { opacity: 1; transform: scale(1.15); } }
 @media (prefers-reduced-motion: reduce) { .report-data-source.is-loading::before { animation: none; } }
+
+
+/* FINAL TABLE WIDTH FIX — report tables fit the page; rows scroll vertically with the page. */
+.report-table-wrapper { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
+.report-table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
+.report-table th, .report-table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
