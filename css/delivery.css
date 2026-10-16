@@ -2203,3 +2203,11 @@
     outline: 2px solid #2563eb;
     outline-offset: -2px;
 }
+
+
+/* FINAL TABLE WIDTH FIX — delivery lists fit the available screen. */
+.table-wrapper, .preview-items { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
+.delivery-table, .preview-items table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
+.delivery-table th, .delivery-table td, .preview-items table th, .preview-items table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.delivery-table td button { max-width: 100%; }
+
