@@ -49,14 +49,21 @@
   <section class="rf-view" data-rf-view="monitoring">
     <div class="rf-section-intro"><div><h2>Replenishment Monitoring</h2><p>All saved transactions, including entries not yet assigned to a replenishment.</p></div></div>
     <section class="rf-cards">
-      <article><span>REVOLVING FUND</span><strong id="rfFundAmount">₱0.00</strong><small>Fund amount</small></article>
+      <article><span>REVOLVING FUND</span><strong id="rfFundAmount">₱40,000.00</strong><small>Set fund amount</small></article>
       <article><span>TOTAL EXPENSES</span><strong id="rfTotalExpenses">₱0.00</strong><small>Expenses recorded in selected group</small></article>
+      <article><span>FOR REPLENISHMENT</span><strong id="rfForReplenishment">₱0.00</strong><small>Expenses not yet assigned an RF Number</small></article>
       <article><span>UNLIQUIDATED CA</span><strong id="rfUnliquidated">₱0.00</strong><small>Outstanding cash advances</small></article>
-      <article><span>ACTUAL CASH ON HAND</span><strong id="rfCashOnHand">₱0.00</strong><small>Calculated balance</small></article>
+      <article><span>ACTUAL CASH ON HAND</span><strong id="rfCashOnHand">₱40,000.00</strong><small>Revolving Fund − For Replenishment</small></article>
     </section>
     <section class="rf-panel">
-      <div class="rf-panel-heading"><div><h2>Transaction Details</h2><p id="rfCurrentGroup">Replenishment No.: —</p></div></div>
-      <div class="rf-table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Person</th><th>Purpose / Details / Classification</th><th>CA Reference</th><th>SO / Project</th><th>Amount</th><th>Status</th></tr></thead><tbody id="rfTransactionRows"><tr><td colspan="8" class="empty">Loading…</td></tr></tbody></table></div>
+      <div class="rf-panel-heading"><div><h2>Transaction Details</h2><p id="rfCurrentGroup">All recorded transactions</p></div></div>
+      <div class="rf-monitor-filters rf-filter">
+        <label for="rfStatusFilter">Status</label>
+        <select id="rfStatusFilter"><option value="ALL">All Statuses</option><option value="FOR_REPLENISHMENT">For Replenishment</option><option value="REPLENISHED">Replenished</option><option value="UNLIQUIDATED">Unliquidated CA</option><option value="RECORDED">Recorded</option></select>
+        <label for="rfNumberFilter">RF Number</label>
+        <select id="rfNumberFilter"><option value="ALL">All RF Numbers</option><option value="NONE">No RF Number</option><option value="HAS_RF">With RF Number</option></select>
+      </div>
+      <div class="rf-table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Person</th><th>Purpose / Details / Classification</th><th>CA Reference</th><th>SO / Project</th><th>RF Number</th><th>Amount</th><th>Status</th></tr></thead><tbody id="rfTransactionRows"><tr><td colspan="9" class="empty">Loading…</td></tr></tbody></table></div>
     </section>
   </section>
 
