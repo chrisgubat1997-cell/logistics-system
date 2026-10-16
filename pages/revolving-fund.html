@@ -61,8 +61,8 @@
       </div>
       <div class="rf-table-wrap">
         <table class="rf-unliquidated-table">
-          <thead><tr><th>CA Date</th><th>CA Reference</th><th>Driver / Requestor</th><th>Original Amount</th><th>Liquidated</th><th>Balance</th><th>Source RF</th><th>Actions</th></tr></thead>
-          <tbody id="rfUnliquidatedRows"><tr><td colspan="8" class="empty">Loading outstanding cash advances…</td></tr></tbody>
+          <thead><tr><th>CA Date</th><th>CA Reference</th><th>Driver / Requestor</th><th>Purpose</th><th>Original Amount</th><th>Liquidated</th><th>Balance</th><th>Source RF</th><th>Actions</th></tr></thead>
+          <tbody id="rfUnliquidatedRows"><tr><td colspan="9" class="empty">Loading outstanding cash advances…</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -72,8 +72,9 @@
         <div><label for="rfDate">Transaction Date *</label><input id="rfDate" type="date" required></div>
         <div><label for="rfPerson">Driver / Helper / Requestor *</label><input id="rfPerson" required maxlength="120" placeholder="Full name"></div>
         <div><label for="rfAmount">Amount (₱) *</label><input id="rfAmount" type="number" min=".01" step=".01" required placeholder="0.00"></div>
-        <div><label for="rfCategory">Purpose</label><select id="rfCategory"><option value="">Select purpose</option><option>Meal Expense</option><option>Gate Pass Expense</option><option>Haulier Expense</option><option>Vehicle Expense</option><option>Office Expense</option><option>Errand Expense</option><option>RFID Load</option><option>Fuel / Diesel</option><option>Toll Fee</option><option>Parking</option><option>Transportation</option><option>Communication Expense</option><option>Hotel / Lodging</option><option>Supplies</option><option>Repairs / Maintenance</option><option>Other Expense</option></select></div>
-        <div class="wide"><label for="rfDetails">Transaction Details *</label><textarea id="rfDetails" rows="3" required maxlength="1000" placeholder="Purpose, description, receipt details…"></textarea></div>
+        <div><label for="rfPurpose">Purpose *</label><select id="rfPurpose" required><option value="">Select purpose</option><option>DELIVERY ERRAND</option><option>COMMUNICATION EXPENSE FOR CALL &amp; TEXT</option><option>VEHICLE EXPENSE</option><option>GAS EXPENSE</option><option>OFFICE SUPPLY</option><option>HAULIER EXPENSE</option><option>REIMBURSEMENT - CA</option><option>SERVICING ERRAND</option><option>SALES VISIT ERRAND</option><option>PULL-OUT ERRAND</option><option>SITE INSPECTION ERRAND</option><option>MNT VEHICLE ERRAND</option><option>PULL-OUT/ DELIVERY ERRAND</option><option>RFID LOAD AUTOSWEEP/EASYTRIP GCASH</option><option>TRANSFER/WITHDRAWAL</option><option>CARWASH VEHICLE</option><option>CARWASH</option><option>DELIVERY</option></select></div>
+        <div><label for="rfCategory">Expense Classification</label><select id="rfCategory"><option value="">Select classification</option><option>SERVICE EXPENSE &amp; SALES VISIT/RFID LOAD</option><option>MEAL EXPENSE</option><option>GATE PASS EXPENSE</option><option>COMMUNICATION EXPENSE FOR CALL &amp; TEXT</option></select></div>
+        <div class="wide"><label for="rfDetails">Transaction Details *</label><textarea id="rfDetails" rows="3" required maxlength="1000" placeholder="Enter receipt details or transaction description…"></textarea></div>
         <div class="wide rf-form-actions"><button type="reset">CLEAR FORM</button><button type="submit" class="primary" id="rfSaveBtn">SAVE TRANSACTION</button></div>
       </form>
     </section>
