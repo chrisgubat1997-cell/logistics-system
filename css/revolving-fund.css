@@ -27,3 +27,22 @@
 @media(max-width:800px){.rf-toolbar{align-items:stretch}.rf-toolbar .rf-notice{min-width:100%}.rf-toolbar .rf-actions{justify-content:flex-end}.rf-tabs{gap:3px}.rf-module .rf-tab{padding:9px 11px}}
 @media(max-width:600px){.rf-header{padding:16px}.rf-tabs{width:calc(100% + 2px);margin-right:-1px}.rf-toolbar .rf-actions{width:100%}.rf-toolbar .rf-actions button{flex:1}.rf-section-intro{align-items:flex-start;flex-direction:column}.rf-signatures span{font-size:10px}}
 @media print{.rf-module{padding:0}.rf-printable{max-width:none}.rf-print-footer{color:#333}}
+
+/* Outstanding cash advance list and CA detail modal */
+.rf-unliquidated-panel{margin-bottom:16px}
+.rf-unliquidated-table{min-width:1050px!important}
+.rf-ca-actions{display:flex;gap:6px;white-space:nowrap}
+.rf-module .rf-ca-actions button{padding:7px 9px;font-size:10px}
+.rf-module .rf-ca-actions button.primary{background:#1b5f96;color:#fff}
+.rf-modal[hidden]{display:none!important}
+.rf-modal{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px}
+.rf-modal-backdrop{position:absolute;inset:0;background:rgba(9,25,43,.62);backdrop-filter:blur(3px)}
+.rf-modal-card{position:relative;width:min(620px,100%);max-height:min(82vh,760px);overflow:auto;background:var(--rf-card-bg,#fff);color:var(--ink,#172b4d);border:1px solid var(--line,#e3e8ef);border-radius:15px;box-shadow:0 24px 70px #07162945;animation:rfViewIn .2s ease both}
+.rf-ca-detail-content{padding:20px}
+.rf-ca-detail-grid{display:grid;grid-template-columns:minmax(140px,.8fr) minmax(0,1.2fr);gap:0;margin:0}
+.rf-ca-detail-grid dt,.rf-ca-detail-grid dd{padding:11px 8px;border-bottom:1px solid var(--line,#e3e8ef);font-size:12px;overflow-wrap:anywhere}
+.rf-ca-detail-grid dt{color:var(--muted,#667085);font-weight:700}
+.rf-ca-detail-grid dd{margin:0;font-weight:600}
+.rf-modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px;flex-wrap:wrap}
+@media(max-width:600px){.rf-modal{padding:10px}.rf-ca-detail-content{padding:12px}.rf-ca-detail-grid{grid-template-columns:1fr}.rf-ca-detail-grid dt{padding-bottom:2px;border-bottom:0}.rf-ca-detail-grid dd{padding-top:3px}.rf-modal-actions{padding:0 12px 12px}}
+@media print{.rf-modal{display:none!important}}
