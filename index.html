@@ -121,7 +121,7 @@
     <!-- =====================================================
          SHARED GEMCOR BRAND THEME — LOAD AFTER MODULE STYLES
     ====================================================== -->
-    <link rel="stylesheet" href="css/brand-theme.css?v=20261016-excel-export01">\n    <link rel="stylesheet" href="css/revolving-fund.css?v=20261016-01">
+    <link rel="stylesheet" href="css/brand-theme.css?v=20261016-excel-export01">\n    <link rel="stylesheet" href="css/revolving-fund.css?v=20261016-02">
 
 </head>
 
@@ -3035,7 +3035,7 @@ async function loadRevolvingFundModule() {
         }
     }
     try {
-        await loadScriptOnce('js/revolving-fund.js?v=20261016-01', 'data-revolving-fund-js');
+        await loadScriptOnce('js/revolving-fund.js?v=20261016-02', 'data-revolving-fund-js');
         if (typeof window.initializeRevolvingFund === 'function') window.initializeRevolvingFund();
     } catch (error) {
         console.error('Revolving Fund module initialization failed:', error);
