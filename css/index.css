@@ -1307,3 +1307,12 @@ tbody tr:last-child td {
         border: none;
     }
 }
+
+
+/* FINAL LAYOUT GUARD: keep page width fixed; only the page scrolls vertically. */
+html, body { max-width: 100%; overflow-x: clip !important; }
+#app, .app-container, .main-content, .content-wrapper, .page-content { min-width: 0; max-width: 100%; }
+.table-container { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
+.table-container > table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
+.table-container > table th, .table-container > table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
