@@ -105,11 +105,30 @@
         });
     }
 
+    function applyRevolvingFundSidebarVisibility(role) {
+        const canSeeRevolvingFund = ["ADMIN", "LOGISTICS"].includes(role);
+        document.querySelectorAll('[data-role-module="revolving-fund"]').forEach(function (button) {
+            button.style.display = canSeeRevolvingFund ? "" : "none";
+            button.setAttribute("aria-hidden", String(!canSeeRevolvingFund));
+            button.disabled = !canSeeRevolvingFund;
+        });
+        // If an unauthorized account reaches the module by direct navigation,
+        // return them to Dashboard rather than showing its content.
+        if (!canSeeRevolvingFund) {
+            const page = document.getElementById("revolvingFund");
+            if (page && page.classList.contains("active")) {
+                const dashboardButton = document.querySelector('.menu-btn[onclick*="showPage(\\'dashboard\\'"]');
+                if (typeof window.showPage === "function" && dashboardButton) window.showPage("dashboard", dashboardButton);
+            }
+        }
+    }
+
     function applyRoleActionVisibility() {
         const role = currentRole();
         if (!role) return;
 
         applyFleetSidebarVisibility(role);
+        applyRevolvingFundSidebarVisibility(role);
 
         ROOTS.forEach(function (entry) {
             document.querySelectorAll(entry.selector).forEach(function (root) {
