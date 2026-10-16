@@ -727,9 +727,9 @@
 }
 
 
-/* FINAL TABLE WIDTH FIX — fleet/data-entry tables fit screen width. */
-.fde-table-wrap, .fde-route-table-wrap { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
-.fde-table, .fde-route-table, .fde-maint-monitor-table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
-.fde-table th, .fde-table td, .fde-route-table th, .fde-route-table td, .fde-maint-monitor-table th, .fde-maint-monitor-table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fde-table td button, .fde-route-table td button, .fde-maint-monitor-table td button { max-width: 100%; }
+/* FINAL TABLE LAYOUT: inner table scroll; keep surrounding cards and buttons within the viewport. */
+.fde-table-wrap, .fde-route-table-wrap { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: visible !important; }
+.fde-table, .fde-route-table, .fde-maint-monitor-table { width: max-content !important; min-width: 850px !important; max-width: none !important; table-layout: auto; }
+.fde-route-table { min-width: 720px !important; }
+.fde-maint-monitor-table { min-width: 1080px !important; }
 
