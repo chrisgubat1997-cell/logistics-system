@@ -46,3 +46,16 @@
 .rf-modal-actions{display:flex;justify-content:flex-end;gap:8px;padding:0 20px 20px;flex-wrap:wrap}
 @media(max-width:600px){.rf-modal{padding:10px}.rf-ca-detail-content{padding:12px}.rf-ca-detail-grid{grid-template-columns:1fr}.rf-ca-detail-grid dt{padding-bottom:2px;border-bottom:0}.rf-ca-detail-grid dd{padding-top:3px}.rf-modal-actions{padding:0 12px 12px}}
 @media print{.rf-modal{display:none!important}}
+
+/* Multi-item transaction entry */
+.rf-line-items{border:1px solid var(--line);border-radius:10px;padding:14px;min-width:0}
+.rf-line-items-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.rf-line-items-heading p{margin:4px 0 0;color:var(--muted);font-size:11px}
+.rf-items-table{min-width:1050px!important}
+.rf-items-table input,.rf-items-table select{width:100%;min-width:145px;border:1px solid #d0d5dd;border-radius:7px;padding:9px;background:var(--rf-input-bg,#fff);color:var(--ink);font:inherit;font-size:12px}
+.rf-items-table .rf-item-details{min-width:210px}
+.rf-items-table .rf-item-amount{min-width:120px;text-align:right}
+.rf-items-table tfoot th{background:#eef6fc;color:#174a7e;font-size:12px}
+.rf-items-table tfoot th:nth-child(2){text-align:right;white-space:nowrap}
+.rf-module .rf-remove-item{padding:7px 10px;color:#b42318;border-color:#fecdca}
+@media(max-width:650px){.rf-line-items{padding:10px}.rf-line-items-heading{align-items:flex-start}}
