@@ -1183,9 +1183,8 @@
 }
 
 
-/* FINAL TABLE WIDTH FIX — invoice tables fit without horizontal scroll. */
-.table-wrapper { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
-.invoice-table, .sales-order-table, .invoice-items-table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
-.invoice-table th, .invoice-table td, .sales-order-table th, .sales-order-table td, .invoice-items-table th, .invoice-items-table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.invoice-table td button, .sales-order-table td button { max-width: 100%; }
+/* FINAL TABLE LAYOUT: invoice table scrolls inside its own wrapper, not the whole page. */
+.invoicing-container .table-wrapper { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: visible !important; }
+.invoicing-container .invoice-table, .invoicing-container .sales-order-table { width: max-content !important; min-width: 900px !important; max-width: none !important; table-layout: auto; }
+.invoicing-container .invoice-items-table { width: max-content !important; min-width: 850px !important; max-width: none !important; table-layout: auto; }
 
