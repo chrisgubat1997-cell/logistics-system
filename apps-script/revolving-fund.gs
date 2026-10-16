@@ -13,7 +13,7 @@ const RF_TX_HEADERS = [
   "TRANSACTION_ID", "REPLENISHMENT_NO", "TRANSACTION_DATE",
   "TRANSACTION_TYPE", "PERSON", "RELATED_CA_ID", "AMOUNT",
   "CATEGORY", "DETAILS", "SO_REFERENCE", "DOCUMENT_NO",
-  "STATUS", "CREATED_AT", "CREATED_BY"
+  "STATUS", "CREATED_AT", "CREATED_BY", "PURPOSE"
 ];
 const RF_SETTING_HEADERS = ["SETTING_KEY", "SETTING_VALUE", "UPDATED_AT", "UPDATED_BY"];
 
@@ -83,8 +83,13 @@ function saveRevolvingFundTransaction(payload) {
   const person = String(payload.person || "").trim();
   const amount = Number(payload.amount);
   const details = String(payload.details || "").trim();
-  if (!groupNo || !date || !person || !details || !isFinite(amount) || amount <= 0) {
-    throw new Error("Missing required transaction fields or invalid amount.");
+  const purpose = String(payload.purpose || "").trim();
+  const category = String(payload.category || "").trim();
+  if (!groupNo || !date || !person || !purpose || !details || !isFinite(amount) || amount <= 0) {
+    throw new Error("Missing required transaction fields or invalid amount. Select a Purpose and complete the details.");
+  }
+  if (["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(type) >= 0 && !category) {
+    throw new Error("Select an Expense Classification for this transaction.");
   }
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -113,8 +118,8 @@ function saveRevolvingFundTransaction(payload) {
     const status = type === "CASH ADVANCE" ? "UNLIQUIDATED" : "RECORDED";
     txSheet.appendRow([
       transactionId, groupNo, date, rfDisplayType(type), person, relatedCaId,
-      amount, String(payload.category || "").trim(), details, "", "",
-      status, now, String(payload.createdBy || "SYSTEM")
+      amount, category, details, "", "",
+      status, now, String(payload.createdBy || "SYSTEM"), purpose
     ]);
     return { success: true, transactionId: transactionId, message: "Revolving Fund transaction saved." };
   } finally {
@@ -176,7 +181,14 @@ function rfReadSheet(ss, name, headers) {
 function rfEnsureSheet(ss, name, headers) {
   let sheet = ss.getSheetByName(name);
   if (!sheet) sheet = ss.insertSheet(name);
-  if (sheet.getLastRow() === 0) sheet.appendRow(headers);
+  if (sheet.getLastRow() === 0) {
+    sheet.appendRow(headers);
+    return sheet;
+  }
+  const lastCol = Math.max(1, sheet.getLastColumn());
+  const existing = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(v => String(v).trim().toUpperCase());
+  const missing = headers.filter(h => existing.indexOf(String(h).trim().toUpperCase()) < 0);
+  if (missing.length) sheet.getRange(1, lastCol + 1, 1, missing.length).setValues([missing]);
   return sheet;
 }
 function rfHeaderMap(sheet) {
@@ -212,6 +224,7 @@ function rfTransactionObject(r) {
     relatedCaId: String(r.RELATED_CA_ID || ""),
     amount: Number(r.AMOUNT || 0),
     category: String(r.CATEGORY || ""),
+    purpose: String(r.PURPOSE || ""),
     details: String(r.DETAILS || ""),
     soReference: String(r.SO_REFERENCE || ""),
     documentNo: String(r.DOCUMENT_NO || ""),
