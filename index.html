@@ -3035,7 +3035,7 @@ async function loadRevolvingFundModule() {
         }
     }
     try {
-        await loadScriptOnce('js/revolving-fund.js?v=20261016-08', 'data-revolving-fund-js');
+        await loadScriptOnce('js/revolving-fund.js?v=20261016-09', 'data-revolving-fund-js');
         if (typeof window.initializeRevolvingFund === 'function') window.initializeRevolvingFund();
     } catch (error) {
         console.error('Revolving Fund module initialization failed:', error);
