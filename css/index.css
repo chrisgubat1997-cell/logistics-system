@@ -1309,10 +1309,11 @@ tbody tr:last-child td {
 }
 
 
-/* FINAL LAYOUT GUARD: keep page width fixed; only the page scrolls vertically. */
-html, body { max-width: 100%; overflow-x: clip !important; }
-#app, .app-container, .main-content, .content-wrapper, .page-content { min-width: 0; max-width: 100%; }
-.table-container { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
-.table-container > table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
-.table-container > table th, .table-container > table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* FINAL LAYOUT GUARD: keep page width fixed; allow only table containers to scroll horizontally. */
+html, body { width: 100%; max-width: 100%; overflow-x: clip !important; }
+.main, .content, .page, .page.active { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.table-container { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: visible !important; }
+.table-container > table { max-width: none; }
+/* Prevent flex/grid children from expanding the overall page. */
+.section, .card, .table-card, .table-wrapper, [class*="-table-wrapper"], [class*="-table-wrap"] { min-width: 0; max-width: 100%; box-sizing: border-box; }
 
