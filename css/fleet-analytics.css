@@ -1344,3 +1344,10 @@ body {
             1fr;
     }
 }
+
+
+/* FINAL TABLE WIDTH FIX — fleet analytics tables stay inside the module. */
+.fleet-analytics-module, .fleet-analytics-page, .fleet-analytics-content { min-width: 0; max-width: 100%; }
+.fleet-analytics-module table, .fleet-analytics-page table, .fleet-analytics-content table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
+.fleet-analytics-module table th, .fleet-analytics-module table td, .fleet-analytics-page table th, .fleet-analytics-page table td, .fleet-analytics-content table th, .fleet-analytics-content table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
