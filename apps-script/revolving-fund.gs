@@ -320,7 +320,7 @@ function rfDateString(value) {
   return String(value);
 }
 function rfNextReplenishmentNo(groups) {
-  let prefix = "RF-", max = 0, width = 3;
+  let prefix = "RFLF:", max = 299, width = 0;
   groups.forEach(g => {
     const no = String(g.replenishmentNo || "");
     const m = no.match(/^(.*?)(\d+)$/);
@@ -329,5 +329,5 @@ function rfNextReplenishmentNo(groups) {
       if (n >= max) { max = n; prefix = m[1]; width = m[2].length; }
     }
   });
-  return prefix + String(max + 1).padStart(width, "0");
+  return "RFLF:" + String(Math.max(300, max + 1));
 }
