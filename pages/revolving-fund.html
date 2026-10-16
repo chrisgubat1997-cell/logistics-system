@@ -18,7 +18,8 @@
 
   <section class="rf-view active" data-rf-view="summary">
     <section class="rf-panel rf-summary">
-      <div class="rf-panel-heading"><div><h2>Revolving Fund Liquidation Summary</h2><p>Accounting report for replenishment / close-out</p></div><button type="button" class="primary" id="rfPrintSummaryBtn">▣ PRINT SUMMARY</button></div>
+      <div class="rf-panel-heading"><div><h2>Revolving Fund Liquidation Summary</h2><p>Search a previous RF number to review or export its summary.</p></div><div class="rf-summary-actions"><button type="button" id="rfExportSummaryBtn">⇩ EXPORT EXCEL</button><button type="button" class="primary" id="rfPrintSummaryBtn">▣ PRINT SUMMARY</button></div></div>
+      <div class="rf-summary-search"><label for="rfSummarySearch">Replenishment / RF Number</label><input id="rfSummarySearch" list="rfSummaryNumberOptions" placeholder="Type RF number to search…" autocomplete="off"><datalist id="rfSummaryNumberOptions"></datalist><button type="button" class="primary" id="rfSearchSummaryBtn">SEARCH</button><button type="button" id="rfCurrentSummaryBtn">CURRENT RF</button></div>
       <div class="rf-printable" id="rfPrintableSummary">
         <h2 class="rf-print-title">REVOLVING FUND LIQUIDATION FOR REPLENISHMENT / CLOSE-OUT</h2>
         <div class="rf-meta">
@@ -27,6 +28,7 @@
           <div>Project / SOF: <b id="rfSummaryProject">—</b></div>
         </div>
         <div class="rf-table-wrap"><table class="rf-summary-table"><thead><tr><th>Expense Classification</th><th>Amount (₱)</th></tr></thead><tbody id="rfSummaryCategoryRows"><tr><td colspan="2" class="empty">No summary loaded.</td></tr></tbody><tfoot><tr><th>TOTAL EXPENSES</th><th id="rfSummaryExpenses">₱0.00</th></tr></tfoot></table></div>
+        <section class="rf-summary-detail-section"><h3>Itemized Liquidation Details</h3><p>Items are grouped by Expense Classification, with a subtotal for each classification.</p><div class="rf-table-wrap"><table class="rf-summary-detail-table"><thead><tr><th>Date</th><th>Invoice / OR No.</th><th>Name</th><th>Item Description</th><th>Purpose</th><th>Amount (₱)</th></tr></thead><tbody id="rfSummaryDetailRows"><tr><td colspan="6" class="empty">No itemized details loaded.</td></tr></tbody></table></div></section>
         <div class="rf-calcs">
           <div>Revolving Fund Amount <b id="rfSummaryFund">₱0.00</b></div><div>Total Expenses <b id="rfSummaryExpenses2">₱0.00</b></div>
           <div>Total Unliquidated Cash Advances <b id="rfSummaryUnliquidated">₱0.00</b></div><div>Previous Replenishment (not yet received) <b id="rfSummaryPrevious">₱0.00</b></div>
