@@ -1317,3 +1317,28 @@ html, body { width: 100%; max-width: 100%; overflow-x: clip !important; }
 /* Prevent flex/grid children from expanding the overall page. */
 .section, .card, .table-card, .table-wrapper, [class*="-table-wrapper"], [class*="-table-wrap"] { min-width: 0; max-width: 100%; box-sizing: border-box; }
 
+/* =========================================================
+   FIT-TO-VIEWPORT FIX — 2026-10-16
+   Keep the content area inside the space beside the sidebar.
+   Wide tables scroll inside their own wrappers.
+========================================================= */
+html, body { max-width: 100%; overflow-x: hidden !important; }
+.main { min-width: 0 !important; max-width: calc(100% - 250px) !important; }
+.content, .page, .page.active, #sales, #delivery, #payment {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+.content { padding-left: clamp(12px, 1.6vw, 22px) !important; padding-right: clamp(12px, 1.6vw, 22px) !important; }
+.page-header, .page-header > *, .action-bar, .section, .card, .table-card {
+    min-width: 0;
+    max-width: 100%;
+}
+@media (max-width: 900px) {
+    .main { max-width: calc(100% - 220px) !important; }
+}
+@media (max-width: 600px) {
+    .main { max-width: calc(100% - 68px) !important; }
+}
+@media (max-width: 400px) {
+    .main { max-width: calc(100% - 58px) !important; }
+}
