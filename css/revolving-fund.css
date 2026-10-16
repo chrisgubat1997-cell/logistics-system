@@ -59,3 +59,9 @@
 .rf-items-table tfoot th:nth-child(2){text-align:right;white-space:nowrap}
 .rf-module .rf-remove-item{padding:7px 10px;color:#b42318;border-color:#fecdca}
 @media(max-width:650px){.rf-line-items{padding:10px}.rf-line-items-heading{align-items:flex-start}}
+
+/* Searchable, type-ahead item fields */
+.rf-items-table .rf-item-purpose,.rf-items-table .rf-item-category{min-width:210px}
+.rf-items-table input[list]{padding-right:30px}
+.rf-items-table input[list]:focus{outline:2px solid rgba(36,112,180,.22);border-color:#2470b4}
+.rf-items-table .rf-item-details{min-width:230px}
