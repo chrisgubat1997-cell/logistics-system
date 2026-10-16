@@ -106,14 +106,26 @@ function saveRevolvingFundTransaction(payload) {
       if (total>remaining+0.005) throw new Error("Total liquidation amount exceeds the remaining CA balance of ₱"+remaining.toFixed(2)+".");
     }
     const now = new Date();
-    const rows = normalizedItems.map((item,i)=>[
-      "RF-TXN-"+Utilities.formatDate(now,CONFIG.TIMEZONE||"Asia/Manila","yyyyMMdd-HHmmss")+"-"+Math.floor(Math.random()*9000+1000)+"-"+(i+1),
-      groupNo,date,rfDisplayType(type),person,relatedCaId,item.amount,item.category,
-      item.details,"","",type==="CASH ADVANCE"?"UNLIQUIDATED":"RECORDED",now,String(payload.createdBy||"SYSTEM"),item.purpose
-    ]);
-    const startRow=txSheet.getLastRow()+1;
-    txSheet.getRange(startRow,1,rows.length,rows[0].length).setValues(rows);
-    return {success:true,transactionIds:rows.map(r=>r[0]),itemCount:rows.length,totalAmount:total,message:"Revolving Fund items saved."};
+    const rows = normalizedItems.map((item,i)=>({
+      TRANSACTION_ID: "RF-TXN-"+Utilities.formatDate(now,CONFIG.TIMEZONE||"Asia/Manila","yyyyMMdd-HHmmss")+"-"+Math.floor(Math.random()*9000+1000)+"-"+(i+1),
+      REPLENISHMENT_NO: groupNo,
+      TRANSACTION_DATE: date,
+      TRANSACTION_TYPE: rfDisplayType(type),
+      PERSON: person,
+      RELATED_CA_ID: relatedCaId,
+      AMOUNT: item.amount,
+      CATEGORY: item.category,
+      DETAILS: item.details,
+      SO_REFERENCE: "",
+      DOCUMENT_NO: "",
+      STATUS: type==="CASH ADVANCE" ? "UNLIQUIDATED" : "RECORDED",
+      CREATED_AT: now,
+      CREATED_BY: String(payload.createdBy||"SYSTEM"),
+      PURPOSE: item.purpose
+    }));
+    const transactionIds = rows.map(r=>r.TRANSACTION_ID);
+    rfAppendObjectsByHeader(txSheet, rows);
+    return {success:true,transactionIds:transactionIds,itemCount:rows.length,totalAmount:total,message:"Revolving Fund items saved."};
   } finally { lock.releaseLock(); }
 }
 function createRevolvingFundReplenishment(payload) {
@@ -127,6 +139,12 @@ function createRevolvingFundReplenishment(payload) {
     const groups = rows.map(rfGroupObject);
     let prior = groups.find(g => g.replenishmentNo === String(payload.previousReplenishmentNo || ""));
     if (!prior) prior = groups.find(g => String(g.status).toUpperCase() !== "CLOSED") || groups[0] || null;
+    // Validate settings before changing the existing replenishment.
+    const settings = rfReadSettings(ss);
+    const fundSetting = rfSetting(settings, ["FUND_AMOUNT","REVOLVING_FUND_AMOUNT","RF_FUND_AMOUNT"], prior ? prior.fundAmount : "");
+    const fundAmount = Number(fundSetting);
+    if (!isFinite(fundAmount) || fundAmount <= 0) throw new Error("Set FUND_AMOUNT in REVOLVING_FUND_SETTINGS before creating a replenishment.");
+
     if (payload.closeCurrentGroup && prior && String(prior.status).toUpperCase() !== "CLOSED") {
       const headerMap = rfHeaderMap(sheet);
       const rowIndex = prior._rowIndex;
@@ -135,20 +153,22 @@ function createRevolvingFundReplenishment(payload) {
       const periodToCol = headerMap.PERIOD_TO;
       if (periodToCol != null) sheet.getRange(rowIndex, periodToCol + 1).setValue(new Date());
     }
-    const settings = rfReadSettings(ss);
-    const fundSetting = rfSetting(settings, ["FUND_AMOUNT","REVOLVING_FUND_AMOUNT","RF_FUND_AMOUNT"], prior ? prior.fundAmount : "");
-    const fundAmount = Number(fundSetting);
-    if (!isFinite(fundAmount) || fundAmount <= 0) throw new Error("Set FUND_AMOUNT in REVOLVING_FUND_SETTINGS before creating a replenishment.");
     const nextNo = rfNextReplenishmentNo(groups);
     const now = new Date();
-    sheet.appendRow([
-      nextNo, now, "", fundAmount,
-      rfSetting(settings, ["CUSTODIAN"], prior ? prior.custodian : ""),
-      rfSetting(settings, ["DEPARTMENT"], prior ? prior.department : "LOGISTICS"),
-      rfSetting(settings, ["PROJECT_SOF","PROJECT"], prior ? prior.projectSof : ""),
-      prior ? prior.replenishmentNo : "",
-      "ACTIVE", now, String(payload.createdBy || "SYSTEM")
-    ]);
+    const newGroup = {
+      REPLENISHMENT_NO: nextNo,
+      PERIOD_FROM: now,
+      PERIOD_TO: "",
+      FUND_AMOUNT: fundAmount,
+      CUSTODIAN: rfSetting(settings, ["CUSTODIAN"], prior ? prior.custodian : ""),
+      DEPARTMENT: rfSetting(settings, ["DEPARTMENT"], prior ? prior.department : "LOGISTICS"),
+      PROJECT_SOF: rfSetting(settings, ["PROJECT_SOF","PROJECT"], prior ? prior.projectSof : ""),
+      PREVIOUS_REPLENISHMENT: prior ? prior.replenishmentNo : "",
+      STATUS: "ACTIVE",
+      CREATED_AT: now,
+      CREATED_BY: String(payload.createdBy || "SYSTEM")
+    };
+    rfAppendObjectsByHeader(sheet, [newGroup]);
     return { success: true, replenishmentNo: nextNo, message: "Replenishment group created." };
   } finally {
     lock.releaseLock();
@@ -185,6 +205,34 @@ function rfHeaderMap(sheet) {
   const map = {};
   row.forEach((v,i) => map[String(v).trim().toUpperCase()] = i);
   return map;
+}
+
+/**
+ * Appends records using the actual header names, not a hard-coded column order.
+ * Existing rows and their values are not rewritten.
+ */
+function rfAppendObjectsByHeader(sheet, records) {
+  if (!records || !records.length) return;
+  const width = sheet.getLastColumn();
+  if (!width) throw new Error("Missing header row in " + sheet.getName() + ".");
+  const headerMap = rfHeaderMap(sheet);
+  const headers = sheet.getRange(1, 1, 1, width).getValues()[0]
+    .map(v => String(v).trim().toUpperCase());
+  const missing = [];
+  records.forEach(record => Object.keys(record).forEach(key => {
+    if (headerMap[String(key).trim().toUpperCase()] == null) missing.push(key);
+  }));
+  if (missing.length) throw new Error("Missing required column(s) in " + sheet.getName() + ": " + Array.from(new Set(missing)).join(", "));
+  const values = records.map(record => {
+    const row = new Array(width).fill("");
+    Object.keys(record).forEach(key => {
+      const index = headerMap[String(key).trim().toUpperCase()];
+      row[index] = record[key];
+    });
+    return row;
+  });
+  const startRow = sheet.getLastRow() + 1;
+  sheet.getRange(startRow, 1, values.length, width).setValues(values);
 }
 function rfGroupObject(r) {
   return {
