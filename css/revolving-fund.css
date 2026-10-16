@@ -65,3 +65,18 @@
 .rf-items-table input[list]{padding-right:30px}
 .rf-items-table input[list]:focus{outline:2px solid rgba(36,112,180,.22);border-color:#2470b4}
 .rf-items-table .rf-item-details{min-width:230px}
+
+/* RF summary search and classification-grouped itemized report */
+.rf-summary-actions{display:flex;gap:8px;flex-wrap:wrap}
+.rf-summary-search{display:flex;align-items:end;gap:8px;flex-wrap:wrap;padding:12px 0 16px}
+.rf-summary-search label{display:block;font-size:12px;font-weight:700;color:var(--muted);width:100%}
+.rf-summary-search input{min-width:220px;max-width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--rf-input-bg,#fff);color:var(--ink);font:inherit}
+.rf-summary-detail-section{margin-top:24px}
+.rf-summary-detail-section h3{margin:0 0 5px;font-size:15px}
+.rf-summary-detail-section>p{margin:0 0 12px;color:var(--muted);font-size:12px}
+.rf-summary-detail-table{min-width:850px!important}
+.rf-summary-detail-table td,.rf-summary-detail-table th{padding:9px 10px}
+.rf-summary-detail-table .rf-detail-amount{text-align:right;white-space:nowrap}
+.rf-summary-detail-table .rf-detail-subtotal-row th{background:#e5eff8;color:#174a7e;border-top:2px solid #8caecb}
+@media(max-width:650px){.rf-summary-search{align-items:stretch}.rf-summary-search input{width:100%;min-width:0}.rf-summary-actions{width:100%}}
+@media print{.rf-summary-search,.rf-summary-actions{display:none!important}.rf-summary-detail-table{min-width:0!important;font-size:8pt}.rf-summary-detail-table th,.rf-summary-detail-table td{padding:4px}}
