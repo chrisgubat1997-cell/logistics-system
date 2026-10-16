@@ -1961,3 +1961,12 @@
 .so-view-button:active {
     transform: translateY(0);
 }
+
+
+/* FINAL TABLE WIDTH FIX — no horizontal scrolling for Sales Order and Customer lists. */
+.so-table-wrapper, .customer-table-wrapper { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
+.so-table, .customer-table, #soDetailsItemsTable { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
+.so-table th, .so-table td, .customer-table th, .customer-table td, #soDetailsItemsTable th, #soDetailsItemsTable td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.so-table td.so-action-cell { overflow: visible !important; text-overflow: clip; }
+.so-table td button, .customer-table td button { max-width: 100%; }
+
