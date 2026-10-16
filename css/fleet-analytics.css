@@ -1346,8 +1346,8 @@ body {
 }
 
 
-/* FINAL TABLE WIDTH FIX — fleet analytics tables stay inside the module. */
+/* FINAL TABLE LAYOUT: analytics tables scroll within their own module, not the page. */
 .fleet-analytics-module, .fleet-analytics-page, .fleet-analytics-content { min-width: 0; max-width: 100%; }
-.fleet-analytics-module table, .fleet-analytics-page table, .fleet-analytics-content table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
-.fleet-analytics-module table th, .fleet-analytics-module table td, .fleet-analytics-page table th, .fleet-analytics-page table td, .fleet-analytics-content table th, .fleet-analytics-content table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fleet-analytics-module table, .fleet-analytics-page table, .fleet-analytics-content table { width: max-content !important; min-width: 760px !important; max-width: none !important; table-layout: auto; }
+.fleet-analytics-module .table-wrapper, .fleet-analytics-page .table-wrapper, .fleet-analytics-content .table-wrapper, .fleet-analytics-module .table-container, .fleet-analytics-page .table-container, .fleet-analytics-content .table-container { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: visible !important; }
 
