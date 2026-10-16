@@ -2205,9 +2205,8 @@
 }
 
 
-/* FINAL TABLE WIDTH FIX — delivery lists fit the available screen. */
-.table-wrapper, .preview-items { width: 100%; max-width: 100%; overflow-x: clip !important; overflow-y: visible !important; }
-.delivery-table, .preview-items table { width: 100% !important; min-width: 0 !important; max-width: 100%; table-layout: fixed; }
-.delivery-table th, .delivery-table td, .preview-items table th, .preview-items table td { max-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.delivery-table td button { max-width: 100%; }
+/* FINAL TABLE LAYOUT: horizontal overflow stays inside the delivery table wrapper. */
+.delivery-module .table-wrapper, .delivery-module .preview-items { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: visible !important; }
+.delivery-module .delivery-table { width: max-content !important; min-width: 900px !important; max-width: none !important; table-layout: auto; }
+.delivery-module .preview-items table { width: max-content !important; min-width: 650px !important; max-width: none !important; table-layout: auto; }
 
