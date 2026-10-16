@@ -103,3 +103,9 @@
  .rf-toolbar .rf-summary-search button{flex:1 1 auto}
 }
 @media print{.rf-toolbar-left{display:none!important}}
+
+/* Summary metadata entry fields and classification subtotal dividers */
+.rf-meta-input{display:inline-block;min-width:190px;max-width:100%;padding:5px 8px;border:1px solid var(--rf-border,#cbd5e1);border-radius:6px;background:var(--rf-surface,#fff);color:inherit;font:inherit;font-weight:600}
+.rf-detail-class-row th{background:#e8eef5!important;color:#20354b;font-weight:800;text-transform:uppercase;letter-spacing:.04em;border-top:2px solid #9aafc4!important}
+.rf-detail-subtotal-row th{background:#f3f6fa!important;color:#20354b;font-weight:800;border-bottom:2px solid #9aafc4!important}
+@media print{.rf-meta-input{border:0!important;border-bottom:1px solid #777!important;border-radius:0!important;background:transparent!important;padding:1px 2px!important;color:#000!important}}
