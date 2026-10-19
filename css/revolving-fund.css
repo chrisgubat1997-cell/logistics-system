@@ -115,3 +115,13 @@
 .rf-monitor-filters label{font-size:11px;font-weight:800;color:var(--muted)}
 .rf-monitor-filters select{min-width:180px;max-width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--rf-input-bg,#fff);color:var(--ink);font:inherit;font-size:12px}
 @media(max-width:600px){.rf-monitor-filters{padding:12px;align-items:stretch}.rf-monitor-filters label{width:100%}.rf-monitor-filters select{width:100%;min-width:0}}
+
+/* CA liquidation return / reimbursement fields */
+.rf-liquidation-adjustments{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:14px;border:1px solid var(--rf-border,#cbd5e1);border-radius:10px;background:var(--rf-surface,#fff)}
+.rf-liquidation-adjustments[hidden]{display:none!important}
+.rf-liquidation-adjustments>div{display:flex;flex-direction:column;gap:7px}
+.rf-liquidation-adjustments label{font-size:12px;font-weight:800;color:var(--rf-muted,#64748b)}
+.rf-liquidation-adjustments input{width:100%;padding:10px 12px;border:1px solid var(--rf-border,#cbd5e1);border-radius:8px;background:var(--rf-surface,#fff);color:inherit;font:inherit}
+.rf-liquidation-adjustments small{font-size:11px;line-height:1.45;color:var(--rf-muted,#64748b)}
+.rf-reimbursement-preview strong{font-size:20px;color:#16803c}
+@media(max-width:600px){.rf-liquidation-adjustments{grid-template-columns:1fr}}
