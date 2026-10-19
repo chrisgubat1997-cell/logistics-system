@@ -3261,7 +3261,8 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
     const qty = Number(item.qty || item.quantity || item.QTY || 0);
     const unitPrice = Number(item.amount || item.unitPrice || item.UNIT_PRICE || 0);
     const total = Number(item.total || item.TOTAL || (qty * unitPrice));
-    const itemNumber = item.itemNumber || item.ITEM_NUMBER || (index + 1) + ".0";
+    const rawItemNumber = item.itemNumber || item.ITEM_NUMBER || (index + 1);
+    const itemNumber = isFinite(Number(rawItemNumber)) ? Number(rawItemNumber).toFixed(1) : rawItemNumber;
     const name = item.itemName || item.ITEM_NAME || "";
     const description = item.description || item.DESCRIPTION || "";
     return "<tr class='item-row'><td class='center item-no'>" + escapeHtml(itemNumber) + "</td>" +
@@ -3279,7 +3280,7 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
   const logoUrl = "https://raw.githubusercontent.com/chrisgubat1997-cell/logistics-system/main/assets/logo.png";
   const total = Number(payload.subtotal || 0);
   const discount = Number(payload.discount || 0);
-  const sellingPrice = Number(payload.vatable !== undefined ? payload.vatable : total - discount);
+  const sellingPrice = Number(payload.grandTotal !== undefined ? payload.grandTotal : (payload.vatable !== undefined ? payload.vatable : total - discount));
   const vatAmount = Number(payload.vatAmount || 0);
   const grossProfit = val("grossProfit", "GROSS_PROFIT");
   const tpc = val("tpc", "TPC");
