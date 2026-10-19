@@ -91,6 +91,8 @@
     window.XLSX.writeFile(workbook, safeFileName(getTableTitle(table)) + "_" + new Date().toISOString().slice(0, 10) + ".xlsx");
   }
   function createExportButton(table) {
+    // Keep the Sales Order Form preview clean; this universal exporter is for data tables only.
+    if (table && table.closest("#soFormPreviewOverlay, .sof-overlay")) return;
     if (!table || table.dataset.excelExportReady === "true" || !table.tHead || !table.tBodies || !table.tBodies.length || !table.querySelector("thead th")) return;
     table.dataset.excelExportReady = "true";
     if (!table.id) table.id = "table-excel-export-" + (++tableCounter);
