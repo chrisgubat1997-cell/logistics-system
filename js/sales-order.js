@@ -1600,6 +1600,11 @@ async function loadSOList(
             const v = value(keys).trim();
             return v ? escapeHTML(v) : "&nbsp;";
         };
+        const billingAddressShown = function() {
+            const v = value(["BILLING_ADDRESS", "billingAddress"]).trim();
+            if (!v) return "&nbsp;";
+            return escapeHTML(v.replace(/(1400)\\s*(Caloocan City)/i, "$1\\n$2")).replace(/\\n/g, "<br>");
+        };
         const dateShown = function(keys) {
             const raw = value(keys).trim();
             if (!raw) return "&nbsp;";
@@ -1719,7 +1724,7 @@ async function loadSOList(
                         </tr></table>
                         <table class="sof-meta">
                             <tr><td class="sof-label">Sold to:</td><td class="sof-value"><b>${shown(["CLIENT_NAME","clientName"])}</b></td><td class="sof-right-label">SOF No.</td><td class="sof-right-value"><b>${shown(["SO_NUMBER","soNumber"])}</b></td></tr>
-                            <tr><td class="sof-label">Billing Address</td><td class="sof-value">${shown(["BILLING_ADDRESS","billingAddress"])}</td><td class="sof-right-label">Date</td><td class="sof-right-value">${dateShown(["DATE_CREATION","dateCreation","DATE","date"])}</td></tr>
+                            <tr><td class="sof-label">Billing Address</td><td class="sof-value">${billingAddressShown()}</td><td class="sof-right-label">Date</td><td class="sof-right-value">${dateShown(["DATE_CREATION","dateCreation","DATE","date"])}</td></tr>
                             <tr><td class="sof-label">Delivery Address</td><td class="sof-value">${shown(["DELIVERY_ADDRESS","deliveryAddress"])}</td><td class="sof-right-label">P.O Number</td><td class="sof-right-value">${shown(["PO_NUMBER","poNumber"])}</td></tr>
                             <tr><td class="sof-label">Classification</td><td class="sof-value">${shown(["CLASSIFICATION","classification"])}</td><td class="sof-right-label">Terms</td><td class="sof-right-value">${shown(["TERMS","terms"])}</td></tr>
                             <tr><td class="sof-label">Required Del. Date</td><td class="sof-value">${dateShown(["REQUIRED_DELIVERY_DATE","requiredDeliveryDate","REQUIRED_DEL_DATE"])}</td><td class="sof-right-label">J.O No.</td><td class="sof-right-value">${shown(["JOB_ORDER","jobOrder","JO"])}</td></tr>
