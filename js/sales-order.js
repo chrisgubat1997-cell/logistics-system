@@ -1692,7 +1692,7 @@ async function loadSOList(
                 <div class="sof-scroll">
                     <div class="sof-paper">
                         <table class="sof-header"><tr>
-                            <td class="sof-logo-cell"></td>
+                            <td class="sof-logo-cell"><img class="sof-logo" src="${logo}" alt="Greenmetal Electric Manufacturing Corporation"></td>
                             <td class="sof-title-cell">SALES ORDER FORM</td>
                             <td class="sof-check-cell"><div class="sof-check-row"><span class="sof-check"></span> ACCOUNTING</div><div class="sof-check-row"><span class="sof-check"></span> PURCHASING</div><div class="sof-check-row"><span class="sof-check"></span> SALES</div></td>
                         </tr></table>
