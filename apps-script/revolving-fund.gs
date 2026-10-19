@@ -61,7 +61,7 @@ function getRevolvingFundData(payload) {
   const summary = {
     configuredFundAmount: configuredFundAmount,
     fundAmount: fundAmount,
-    totalExpenses: expenses,
+    totalExpenses: forReplenishment,
     forReplenishment: forReplenishment,
     unliquidatedCashAdvance: outstanding,
     previousReplenishmentNotReceived: previousNotReceived,
