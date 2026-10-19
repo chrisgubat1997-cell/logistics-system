@@ -3277,7 +3277,7 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
   const blankRows = Array.from({length: minimumRows}, function() {
     return "<tr class='blank-row'><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
   }).join("");
-  const logoUrl = "https://raw.githubusercontent.com/chrisgubat1997-cell/logistics-system/main/asset/drlogo.png";
+  const logoUrl = "https://raw.githubusercontent.com/chrisgubat1997-cell/logistics-system/main/assets/drlogo.png";
   const total = Number(payload.subtotal || 0);
   const discount = Number(payload.discount || 0);
   const sellingPrice = Number(payload.grandTotal !== undefined ? payload.grandTotal : (payload.vatable !== undefined ? payload.vatable : total - discount));
