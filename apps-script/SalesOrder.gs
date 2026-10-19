@@ -3275,7 +3275,7 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
       "<td class='number'>" + money(unitPrice) + "</td>" +
       "<td class='number'>" + money(total) + "</td></tr>";
   }).join("");
-  const minimumRows = Math.max(0, 25 - items.length);
+  const minimumRows = Math.max(0, 47 - items.length);
   const blankRows = Array.from({length: minimumRows}, function() {
     return "<tr class='blank-row'><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
   }).join("");
@@ -3291,14 +3291,14 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
   const checkedBy = val("checkedBy", "CHECKED_BY") || "Kaye B. Ochoa";
   const approvedBy = val("approvedBy", "APPROVED_BY") || "Melannie C. Mendiola";
   const html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" +
-    "@page{size:8.5in 14in;margin:0.42in 0.45in 0.35in}" +
+    "@page{size:8.5in 14in;margin:0.75in 0.7in}" +
     "*{box-sizing:border-box}body{font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;color:#111;font-size:8px;margin:0}" +
-    "table{border-collapse:collapse;table-layout:fixed;width:100%}.header td{border:1px solid #b7b7b7;height:48px;padding:3px 5px}" +
+    "table{border-collapse:collapse;table-layout:fixed;width:100%}.header td{border:1px solid #b7b7b7;height:58px;padding:3px 5px}" +
     ".logo-cell{width:47%;vertical-align:middle}.logo{width:215px;height:auto;max-height:48px;object-fit:contain}" +
     ".title-cell{text-align:center;font-size:16px;font-weight:800;white-space:nowrap}" +
     ".check-cell{width:20%;font-size:7px}.check-row{white-space:nowrap;line-height:15px}.check{display:inline-block;width:11px;height:11px;border:1px solid #111;vertical-align:middle;margin-right:5px}" +
     ".meta{margin-top:0}.meta td{border:1px solid #aaa;height:16px;padding:2px 4px;vertical-align:middle}.meta .label{width:13%;white-space:nowrap}.meta .value{width:37%;overflow-wrap:anywhere}.meta .right-label{width:17%;white-space:nowrap}.meta .right-value{width:33%;text-align:center;overflow-wrap:anywhere}.bold{font-weight:700}" +
-    ".items{margin-top:10px}.items th{height:17px;background:#000;color:#fff;border:1px solid #333;font-size:8px;text-align:center;padding:3px 2px}.items td{border-left:1px solid #888;border-right:1px solid #888;border-bottom:1px solid #ddd;height:15px;padding:2px 4px;vertical-align:middle}.items th:nth-child(1){width:5.5%}.items th:nth-child(2){width:50%}.items th:nth-child(3){width:6%}.items th:nth-child(4){width:6%}.items th:nth-child(5){width:15%}.items th:nth-child(6){width:17.5%}.item-row td{height:27px}.item-no{font-weight:bold}.description{overflow-wrap:anywhere}.sub-description{font-size:7px;margin-top:2px}.center{text-align:center}.number{text-align:right;white-space:nowrap}" +
+    ".items{margin-top:10px}.items th{height:17px;background:#333;color:#fff;border:1px solid #333;font-size:8px;text-align:center;padding:3px 2px}.items td{border-left:1px solid #888;border-right:1px solid #888;border-bottom:1px solid #ddd;height:11.5px;padding:1px 4px;vertical-align:middle}.items th:nth-child(1){width:5.6%}.items th:nth-child(2){width:50.8%}.items th:nth-child(3){width:5.8%}.items th:nth-child(4){width:5.6%}.items th:nth-child(5){width:12%}.items th:nth-child(6){width:20.2%}.item-row td{height:11.5px}.item-no{font-weight:bold}.description{overflow-wrap:anywhere}.sub-description{font-size:7px;margin-top:2px}.center{text-align:center}.number{text-align:right;white-space:nowrap}" +
     ".notes{height:22px;text-align:center;font-weight:bold;font-style:italic;color:#e00000;font-size:8px}.nothing{height:16px;text-align:center;font-weight:bold;font-style:italic}.page-no{height:16px;text-align:center;font-weight:bold;font-style:italic;border-bottom:1px solid #888}" +
     ".bottom{width:100%;margin-top:0}.bottom td{border:1px solid #aaa;padding:3px 5px;height:16px}.bottom .spacer{border-left:0;border-right:0}.bottom .label{font-weight:600}.bottom .amount{text-align:right;white-space:nowrap;width:19%}.bottom .currency{text-align:center;width:4%}.bottom .total-selling td{background:#bdbdbd;font-weight:bold}.bottom .total-selling .amount{font-size:10px}.bottom .gross td{background:#bdbdbd;font-weight:bold}.bottom .pct td{background:#bdbdbd;font-weight:bold}" +
     ".signatures{margin-top:8px}.signatures td{width:33.33%;border:0;border-top:1px solid #aaa;padding:4px 3px;text-align:center;height:21px;vertical-align:bottom}.signature-label{text-align:left!important;height:18px!important;vertical-align:top!important}.signature-name{font-weight:bold;text-decoration:underline;height:18px}.signature-role{font-size:7px;height:16px}.signature-gap td{height:11.5px;padding:0;border:0}.dr-invoice{text-align:right;height:15px;border:0!important}.company-footer{margin-top:8px;border-top:1px solid #aaa;border-bottom:1px solid #aaa;padding:4px 2px;font-size:6.5px;white-space:nowrap}.form-code{margin-top:8px;font-size:7px}.form-code div{margin-top:3px}" +
@@ -3316,7 +3316,7 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
     "<tr><td class='label'>Attention</td><td class='value'>" + escapeHtml(val("attention", "ATTENTION")) + "</td><td class='right-label'>Quotation No.</td><td class='right-value'>" + escapeHtml(val("quotationNo", "quotationNumber", "QUOTATION_NO", "QUOTATION_NUMBER")) + "</td></tr>" +
     "<tr><td class='label'>Project Name</td><td class='value'>" + escapeHtml(val("project", "PROJECT")) + "</td><td class='right-label'>Account Manager</td><td class='right-value'>" + escapeHtml(val("accountManager", "ACCOUNT_MANAGER", "salesEngineer", "se", "SALES_ENGINEER")) + "</td></tr>" +
     "<tr><td class='label'>Tin Number</td><td class='value'>" + escapeHtml(val("tin", "TIN")) + "</td><td class='right-label'></td><td class='right-value'></td></tr></table>" +
-    "<table class='items'><thead><tr><th>ITEM NO.</th><th>ITEM NAME</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>" +
+    "<table class='items'><thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>" +
     (itemRows || "") + blankRows +
     "</tbody></table>" +
     "<div class='notes'>***WITH SHOPDRAWING***　　　　　　　　　***WITHOUT STOCK***</div>" +
