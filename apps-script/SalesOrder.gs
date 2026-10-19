@@ -3264,10 +3264,8 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
     const rawItemNumber = item.itemNumber || item.ITEM_NUMBER || (index + 1);
     const itemNumber = isFinite(Number(rawItemNumber)) ? Number(rawItemNumber).toFixed(1) : rawItemNumber;
     const name = item.itemName || item.ITEM_NAME || "";
-    const description = item.description || item.DESCRIPTION || "";
     return "<tr class='item-row'><td class='center item-no'>" + escapeHtml(itemNumber) + "</td>" +
-      "<td class='description'><b>" + escapeHtml(name) + "</b>" +
-      (description ? "<div class='sub-description'>" + escapeHtml(description) + "</div>" : "") + "</td>" +
+      "<td class='description'><b>" + escapeHtml(name) + "</b></td>" +
       "<td class='center'>" + escapeHtml(qty) + "</td>" +
       "<td class='center'>" + escapeHtml(item.unit || item.UNIT || "") + "</td>" +
       "<td class='number'>" + money(unitPrice) + "</td>" +
@@ -3314,7 +3312,7 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
     "<tr><td class='label'>Attention</td><td class='value'>" + escapeHtml(val("attention", "ATTENTION")) + "</td><td class='right-label'>Quotation No.</td><td class='right-value'>" + escapeHtml(val("quotationNo", "quotationNumber", "QUOTATION_NO", "QUOTATION_NUMBER")) + "</td></tr>" +
     "<tr><td class='label'>Project Name</td><td class='value'>" + escapeHtml(val("project", "PROJECT")) + "</td><td class='right-label'>Account Manager</td><td class='right-value'>" + escapeHtml(val("accountManager", "ACCOUNT_MANAGER", "salesEngineer", "se", "SALES_ENGINEER")) + "</td></tr>" +
     "<tr><td class='label'>Tin Number</td><td class='value'>" + escapeHtml(val("tin", "TIN")) + "</td><td class='right-label'></td><td class='right-value'></td></tr></table>" +
-    "<table class='items'><thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>" +
+    "<table class='items'><thead><tr><th>ITEM NO.</th><th>ITEM NAME</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>" +
     (itemRows || "") + blankRows +
     "</tbody></table>" +
     "<div class='notes'>***WITH SHOPDRAWING***　　　　　　　　　***WITHOUT STOCK***</div>" +
