@@ -1673,6 +1673,27 @@ async function loadSOList(
                 @keyframes sofFade{from{opacity:0}to{opacity:1}}
                 @media(max-width:650px){.sof-overlay{padding:5px}.sof-dialog{height:97vh}.sof-scroll{padding:8px}.sof-paper{width:8.5in;min-width:8.5in;padding:0.75in 0.7in}.sof-toolbar{padding:10px}.sof-toolbar h2{font-size:12px}}
                 @media print{body>*:not(#soFormPreviewOverlay){display:none!important}.sof-overlay{position:static;display:block;padding:0;background:#fff}.sof-dialog{height:auto;width:100%;box-shadow:none;border-radius:0;overflow:visible}.sof-toolbar{display:none}.sof-scroll{overflow:visible;padding:0}.sof-paper{box-sizing:border-box;width:100%;box-shadow:none;max-width:none;min-height:0;padding:0;zoom:1}}
+                /* Compact all Sales Order Form typography for preview and print */
+                .sof-paper{font-size:10px!important}
+                .sof-title-cell{font-size:18px!important}
+                .sof-check-cell{font-size:10px!important}.sof-check-row{line-height:13px!important}
+                .sof-meta td,.sof-meta .sof-value,.sof-meta .sof-right-value{font-size:10px!important;line-height:1.1!important}
+                .sof-meta tr:first-child .sof-value,.sof-meta tr:first-child .sof-right-value{font-size:11px!important}
+                .sof-items th{font-size:10px!important;padding:2px 1px!important;height:14px!important}
+                .sof-items td,.sof-items .sof-item td{font-size:9px!important;line-height:9px!important;height:9px!important}
+                .sof-desc{font-size:10px!important}
+                .sof-notes{font-size:10px!important;height:18px!important;line-height:1.1!important}
+                .sof-nothing,.sof-page-no{font-size:9px!important;height:13px!important;line-height:1.1!important}
+                .sof-bottom td{font-size:9px!important;padding:1px 3px!important;height:12px!important}
+                .sof-bottom .sof-selling .sof-amount{font-size:10px!important}
+                .sof-signatures td{font-size:9px!important;padding:3px 2px!important;height:17px!important}
+                .sof-signatures .sof-sign-label,.sof-signatures .sof-sign-name{font-size:9px!important;height:15px!important}
+                .sof-signatures .sof-sign-role{font-size:9px!important;height:13px!important}
+                .sof-signatures .sof-sign-gap td{height:8px!important}
+                .sof-dr-invoice{font-size:9px!important;height:12px!important}
+                .sof-company-footer,.sof-code{font-size:8px!important}
+                .sof-toolbar h2{font-size:12px!important}.sof-toolbar p{font-size:9px!important}
+                .sof-actions button{font-size:9px!important}
             `;
             document.head.appendChild(style);
         }
