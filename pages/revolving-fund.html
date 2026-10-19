@@ -59,11 +59,11 @@
       <div class="rf-panel-heading"><div><h2>Transaction Details</h2><p id="rfCurrentGroup">All recorded transactions</p></div></div>
       <div class="rf-monitor-filters rf-filter">
         <label for="rfStatusFilter">Status</label>
-        <select id="rfStatusFilter"><option value="ALL">All Statuses</option><option value="FOR_REPLENISHMENT">For Replenishment</option><option value="REPLENISHED">Replenished</option><option value="UNLIQUIDATED">Unliquidated CA</option><option value="RECORDED">Recorded</option></select>
+        <select id="rfStatusFilter"><option value="ALL">All Statuses</option><option value="FOR_REPLENISHMENT">For Replenishment</option><option value="UNLIQUIDATED">Unliquidated CA</option><option value="PARTIAL">Partially Liquidated</option><option value="LIQUIDATED">Liquidated</option><option value="REIMBURSEMENT">Reimbursement</option><option value="REPLENISHED">Replenished</option><option value="RECORDED">Recorded</option></select>
         <label for="rfNumberFilter">RF Number</label>
         <select id="rfNumberFilter"><option value="ALL">All RF Numbers</option><option value="NONE">No RF Number</option><option value="HAS_RF">With RF Number</option></select>
       </div>
-      <div class="rf-table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Person</th><th>Purpose / Details / Classification</th><th>CA Reference</th><th>SO / Project</th><th>RF Number</th><th>Amount</th><th>Status</th></tr></thead><tbody id="rfTransactionRows"><tr><td colspan="9" class="empty">Loading…</td></tr></tbody></table></div>
+      <div class="rf-table-wrap"><table><thead><tr><th>Date</th><th>Type</th><th>Person</th><th>Purpose / Details / Classification</th><th>CA Reference</th><th>SO / Project</th><th>RF Number</th><th>Amount</th><th>Return Amount</th><th>Reimbursement</th><th>Status</th></tr></thead><tbody id="rfTransactionRows"><tr><td colspan="11" class="empty">Loading…</td></tr></tbody></table></div>
     </section>
   </section>
 
@@ -76,7 +76,7 @@
       </div>
       <div class="rf-table-wrap">
         <table class="rf-unliquidated-table">
-          <thead><tr><th>CA Date</th><th>CA Reference</th><th>Driver / Requestor</th><th>Purpose</th><th>Original Amount</th><th>Liquidated</th><th>Balance</th><th>Source RF</th><th>Actions</th></tr></thead>
+          <thead><tr><th>CA Date</th><th>CA Reference</th><th>Driver / Requestor</th><th>Purpose</th><th>Original Amount</th><th>Liquidation Amount</th><th>Return Amount</th><th>Balance</th><th>Source RF</th><th>Actions</th></tr></thead>
           <tbody id="rfUnliquidatedRows"><tr><td colspan="9" class="empty">Loading outstanding cash advances…</td></tr></tbody>
         </table>
       </div>
@@ -91,6 +91,10 @@
           <div class="rf-table-wrap"><table class="rf-items-table"><thead><tr><th>Purpose *</th><th>Expense Classification</th><th>Invoice / OR No.</th><th>Item Description *</th><th>Amount (₱) *</th><th></th></tr></thead><tbody id="rfItemsRows"></tbody><tfoot><tr><th colspan="4">TOTAL AMOUNT</th><th id="rfGrandTotal">₱0.00</th><th></th></tr></tfoot></table></div>
           <datalist id="rfPurposeSuggestions"></datalist>
           <datalist id="rfClassificationSuggestions"></datalist>
+        </div>
+        <div class="wide rf-liquidation-adjustments" id="rfLiquidationAdjustments" hidden>
+          <div><label for="rfReturnAmount">Return Amount (₱)</label><input id="rfReturnAmount" type="number" min="0" step="0.01" value="0.00"><small>Cash returned from the CA. This amount helps close the cash advance.</small></div>
+          <div class="rf-reimbursement-preview"><label>Reimbursement to Requestor</label><strong id="rfReimbursementPreview">₱0.00</strong><small>If liquidation expenses exceed the remaining CA balance, the excess is recorded as reimbursement.</small></div>
         </div>
         <div class="wide rf-form-actions"><button type="reset">CLEAR FORM</button><button type="submit" class="primary" id="rfSaveBtn">SAVE TRANSACTION</button></div>
       </form>
