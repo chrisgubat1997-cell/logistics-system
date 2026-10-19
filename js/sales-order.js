@@ -1681,7 +1681,7 @@ async function loadSOList(
                 .sof-meta tr:first-child .sof-value,.sof-meta tr:first-child .sof-right-value{font-size:11px!important}
                 .sof-items th{font-size:10px!important;padding:2px 1px!important;height:14px!important}
                 .sof-items td,.sof-items .sof-item td{font-size:9px!important;line-height:9px!important;height:9px!important}
-                .sof-desc{font-size:10px!important}
+                .sof-desc{font-size:10px!important}.sof-items .sof-desc-footer td{font-size:9px!important;line-height:10px!important;height:10px!important;padding:1px 3px!important;border:0!important;vertical-align:middle!important}.sof-items .sof-desc-footer td:nth-child(2){text-align:left!important}
                 .sof-notes{font-size:10px!important;height:18px!important;line-height:1.1!important}
                 .sof-nothing,.sof-page-no{font-size:9px!important;height:13px!important;line-height:1.1!important}
                 .sof-bottom td{font-size:9px!important;padding:1px 3px!important;height:12px!important}
@@ -1729,9 +1729,10 @@ async function loadSOList(
                         </table>
                         <table class="sof-items"><thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>
                             ${itemRows || ""}${blankRows}
+                            <tr class="sof-desc-footer"><td></td><td>***WITH SHOPDRAWING***　***WITHOUT STOCK***</td><td colspan="4"></td></tr>
+                            <tr class="sof-desc-footer"><td></td><td>***Nothing follows*******</td><td colspan="4"></td></tr>
+                            <tr class="sof-desc-footer"><td></td><td>Page 1 of 1</td><td colspan="4"></td></tr>
                         </tbody></table>
-                        <div class="sof-notes">***WITH SHOPDRAWING***　　　　　　　　　***WITHOUT STOCK***</div>
-                        <div class="sof-nothing">***Nothing follows*******</div><div class="sof-page-no">Page 1 of 1</div>
                         <table class="sof-bottom">
                             <tr><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">TOTAL</td><td class="sof-currency">₱</td><td class="sof-amount">${money(subtotal)}</td></tr>
                             <tr><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">LESS DISCOUNT</td><td class="sof-currency">₱</td><td class="sof-amount">${money(discount)}</td></tr>
