@@ -1748,7 +1748,56 @@ async function loadSOList(
         });
         overlay.querySelector(".sof-close").addEventListener("click", close);
         overlay.querySelector(".sof-print").addEventListener("click", function() {
-            window.print();
+            /*
+             * Print the exact same rendered preview in an isolated window.
+             * This avoids the application's global print CSS hiding the SOF
+             * and prevents a blank print page.
+             */
+            const printWindow = window.open("", "_blank", "width=1000,height=800");
+            if (!printWindow) {
+                alert("Hindi mabuksan ang print window. Payagan ang pop-ups para sa site na ito, pagkatapos subukan ulit.");
+                return;
+            }
+
+            const previewStyles = document.getElementById("soFormPreviewStyles");
+            const printStyles = previewStyles ? previewStyles.textContent : "";
+            const previewMarkup = overlay.outerHTML;
+
+            printWindow.document.open();
+            printWindow.document.write(
+                "<!doctype html><html><head><meta charset='utf-8'>" +
+                "<meta name='viewport' content='width=device-width, initial-scale=1'>" +
+                "<title>Sales Order Form - " + escapeHTML(soNumber) + "</title>" +
+                "<style>" + printStyles + "\\n" +
+                "@page{size:8.5in 14in;margin:0!important}" +
+                "html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}" +
+                "#soFormPreviewOverlay{position:static!important;display:block!important;inset:auto!important;padding:0!important;background:#fff!important;backdrop-filter:none!important}" +
+                ".sof-dialog{height:auto!important;width:auto!important;max-width:none!important;overflow:visible!important;box-shadow:none!important;border-radius:0!important;background:#fff!important}" +
+                ".sof-toolbar{display:none!important}.sof-scroll{overflow:visible!important;padding:0!important;display:block!important}" +
+                ".sof-paper{box-sizing:border-box!important;width:8.5in!important;min-width:8.5in!important;max-width:8.5in!important;min-height:14in!important;margin:0!important;padding:.75in .7in!important;box-shadow:none!important;zoom:1!important}" +
+                "</style></head><body>" + previewMarkup + "</body></html>"
+            );
+            printWindow.document.close();
+
+            const startPrint = function() {
+                const images = Array.from(printWindow.document.images);
+                Promise.all(images.map(function(img) {
+                    if (img.complete) return Promise.resolve();
+                    return new Promise(function(resolve) {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
+                })).then(function() {
+                    printWindow.focus();
+                    printWindow.print();
+                });
+            };
+
+            if (printWindow.document.readyState === "complete") {
+                startPrint();
+            } else {
+                printWindow.onload = startPrint;
+            }
         });
         document.addEventListener("keydown", escapeHandler);
         document.body.appendChild(overlay);
