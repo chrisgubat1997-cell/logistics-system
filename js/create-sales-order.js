@@ -2486,47 +2486,21 @@ async function saveSO() {
 
     /* FINAL SUCCESS MESSAGE */
 
-    if (
-        uploadErrors.length > 0
-    ) {
+    const automaticPdfSaved = result.pdfSaved === true;
+    const automaticPdfWarning = result.pdfSaved === false
+        ? "\n\nWARNING: The Sales Order was saved, but its automatic PDF could not be created. " + (result.pdfError || "Please check Apps Script permissions and try again.")
+        : "";
 
-        alert(
-
-            "Sales Order " +
-            finalSONumber +
-            " was saved successfully, but some files failed to upload.\n\n" +
-            uploadErrors.join("\n")
-
-        );
-
-    }
-
-    else if (
-        soCreateFiles.length > 0
-    ) {
-
-        alert(
-
-            "Sales Order " +
-            finalSONumber +
-            " and " +
-            soCreateFiles.length +
-            " PDF file(s) were saved successfully."
-
-        );
-
-    }
-
-    else {
-
-        alert(
-
-            "Sales Order " +
-            finalSONumber +
-            " saved successfully."
-
-        );
-
+    if (uploadErrors.length > 0) {
+        alert("Sales Order " + finalSONumber + " was saved successfully." +
+            (automaticPdfSaved ? "\n\nAutomatic Sales Order PDF saved to Google Drive." : automaticPdfWarning) +
+            "\n\nSome selected attachments failed to upload:\n" + uploadErrors.join("\n"));
+    } else if (soCreateFiles.length > 0) {
+        alert("Sales Order " + finalSONumber + " saved successfully." +
+            (automaticPdfSaved ? "\n\nAutomatic Sales Order PDF and " + soCreateFiles.length + " attachment(s) saved to Google Drive." : automaticPdfWarning));
+    } else {
+        alert("Sales Order " + finalSONumber + " saved successfully." +
+            (automaticPdfSaved ? "\n\nAutomatic Sales Order PDF saved to Google Drive." : automaticPdfWarning));
     }
 
 
