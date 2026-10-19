@@ -5183,80 +5183,36 @@ function renderCustomerTable() {
             `;
 
 
+            /*
+             * Always reopen and initialize the Customer module before
+             * calling editCustomer(). After Back, the global function can
+             * still exist even though the Customer form DOM was cleared.
+             * Calling it directly in that state makes the Edit button fail.
+             */
             const editButton =
-                row.querySelector(
-                    ".customer-edit-button"
-                );
-
+                row.querySelector(".customer-edit-button");
 
             if (editButton) {
+                editButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
 
-                editButton.addEventListener(
-                    "click",
-                    function (event) {
+                    const selectedCustomerId = customerId;
 
-                        event.preventDefault();
+                    openCustomerModule()
+                        .then(function () {
+                            if (typeof window.editCustomer !== "function") {
+                                throw new Error("Customer Edit module failed to initialize.");
+                            }
 
-                        event.stopPropagation();
-
-
-                        if (
-                            typeof window.editCustomer ===
-                            "function"
-                        ) {
-
-                            window.editCustomer(
-                                customerId
-                            );
-
-                            return;
-
-                        }
-
-
-                        openCustomerModule()
-                            .then(
-                                function () {
-
-                                    if (
-                                        typeof window.editCustomer !==
-                                        "function"
-                                    ) {
-
-                                        alert(
-                                            "Customer Edit module failed to load."
-                                        );
-
-                                        return;
-
-                                    }
-
-
-                                    window.editCustomer(
-                                        customerId
-                                    );
-
-                                }
-                            )
-                            .catch(
-                                function (error) {
-
-                                    console.error(
-                                        "Unable to open Customer Edit:",
-                                        error
-                                    );
-
-
-                                    alert(
-                                        "Unable to open Customer Edit module."
-                                    );
-
-                                }
-                            );
-
-                    }
-                );
-
+                            window.editCustomer(selectedCustomerId);
+                        })
+                        .catch(function (error) {
+                            console.error("Unable to open Customer Edit:", error);
+                            alert("Unable to open Customer Edit module. Please try again. " +
+                                (error && error.message ? error.message : ""));
+                        });
+                });
             }
 
 
