@@ -3288,7 +3288,7 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
   const approvedBy = val("approvedBy", "APPROVED_BY") || "Melannie C. Mendiola";
   const html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" +
     "@page{size:8.5in 14in;margin:0.42in 0.45in 0.35in}" +
-    "*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;font-size:8px;margin:0}" +
+    "*{box-sizing:border-box}body{font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;color:#111;font-size:8px;margin:0}" +
     "table{border-collapse:collapse;table-layout:fixed;width:100%}.header td{border:1px solid #b7b7b7;height:48px;padding:3px 5px}" +
     ".logo-cell{width:47%;vertical-align:middle}.logo{width:215px;height:auto;max-height:48px;object-fit:contain}" +
     ".title-cell{text-align:center;font-size:16px;font-weight:800;white-space:nowrap}" +
