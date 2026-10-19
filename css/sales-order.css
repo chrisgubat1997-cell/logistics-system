@@ -769,6 +769,46 @@
     outline-offset: 2px;
 }
 
+.customer-view-button {
+    min-height: 30px;
+    margin-left: 5px;
+    padding: 0 10px;
+    border: 1px solid #cbdcf5;
+    border-radius: 7px;
+    outline: none;
+    background: #eef5ff;
+    color: #315ea8;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .2px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background .18s ease,
+        border-color .18s ease,
+        box-shadow .18s ease,
+        transform .18s ease;
+}
+
+.customer-view-button:hover {
+    background: #dfeeff;
+    border-color: #a9c5ef;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(49, 94, 168, .12);
+}
+
+.customer-view-button:focus-visible {
+    outline: 2px solid #315ea8;
+    outline-offset: 2px;
+}
+
+.customer-edit-button,
+.customer-view-button {
+    cursor: pointer;
+}
+
+
 
 /* =========================================================
    CUSTOMER TABLE EMPTY / ERROR
