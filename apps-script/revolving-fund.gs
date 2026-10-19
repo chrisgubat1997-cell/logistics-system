@@ -13,7 +13,7 @@ const RF_TX_HEADERS = [
   "TRANSACTION_ID", "REPLENISHMENT_NO", "TRANSACTION_DATE",
   "TRANSACTION_TYPE", "PERSON", "RELATED_CA_ID", "AMOUNT",
   "CATEGORY", "DETAILS", "SO_REFERENCE", "DOCUMENT_NO",
-  "STATUS", "CREATED_AT", "CREATED_BY", "PURPOSE"
+  "STATUS", "CREATED_AT", "CREATED_BY", "PURPOSE", "RETURN_AMOUNT", "REIMBURSEMENT_AMOUNT"
 ];
 const RF_SETTING_HEADERS = ["SETTING_KEY", "SETTING_VALUE", "UPDATED_AT", "UPDATED_BY"];
 
@@ -28,27 +28,27 @@ function getRevolvingFundData(payload) {
   transactions.forEach(t => {
     if (rfNormalizeType(t.transactionType) === "LIQUIDATION" && t.relatedCaId) {
       const id = String(t.relatedCaId);
-      liquidatedByCA[id] = (liquidatedByCA[id] || 0) + Number(t.amount || 0);
+      if (!liquidatedByCA[id]) liquidatedByCA[id] = {expense:0, returned:0, reimbursed:0};
+      liquidatedByCA[id].expense += Number(t.amount || 0);
+      liquidatedByCA[id].returned += Number(t.returnAmount || 0);
+      liquidatedByCA[id].reimbursed += Number(t.reimbursementAmount || 0);
     }
   });
-  const cashAdvances = transactions.filter(t => rfNormalizeType(t.transactionType) === "CASH ADVANCE").map(ca => {
-    const original = Number(ca.amount || 0);
-    const liquidated = Math.min(original, Number(liquidatedByCA[String(ca.transactionId)] || 0));
-    const balance = Math.max(0, original - liquidated);
-    return Object.assign({}, ca, {
-      originalAmount: original,
-      liquidatedAmount: liquidated,
-      remainingBalance: balance,
-      status: balance <= 0 ? "LIQUIDATED" : (liquidated > 0 ? "PARTIALLY LIQUIDATED" : "UNLIQUIDATED")
-    });
-  }).filter(ca => ca.remainingBalance > 0);
+  const allCashAdvances = transactions.filter(t => rfNormalizeType(t.transactionType) === "CASH ADVANCE").map(ca => {
+    const original = Number(ca.amount || 0), totals = liquidatedByCA[String(ca.transactionId)] || {expense:0,returned:0,reimbursed:0};
+    const liquidated = Math.min(original, Number(totals.expense || 0));
+    const returned = Math.min(Math.max(0, original-liquidated), Number(totals.returned || 0));
+    const balance = Math.max(0, original-liquidated-returned);
+    return Object.assign({}, ca, {originalAmount:original,liquidatedAmount:liquidated,returnAmount:returned,reimbursementAmount:Number(totals.reimbursed||0),remainingBalance:balance,status:balance<=0?"LIQUIDATED":(liquidated+returned>0?"PARTIALLY LIQUIDATED":"UNLIQUIDATED")});
+  });
+  const cashAdvances = allCashAdvances.filter(ca => ca.remainingBalance > 0);
   const active = groups.find(g => String(g.status).toUpperCase() !== "CLOSED") || groups[0] || null;
   const currentGroup = payload && payload.replenishmentNo
     ? groups.find(g => g.replenishmentNo === String(payload.replenishmentNo)) || active
     : active;
   const groupNo = currentGroup ? currentGroup.replenishmentNo : "";
   const groupTx = transactions.filter(t => t.replenishmentNo === groupNo);
-  const expenses = groupTx.filter(t => ["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(rfNormalizeType(t.transactionType)) >= 0)
+  const expenses = groupTx.filter(t => ["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(rfNormalizeType(t.transactionType)) >= 0 && String(t.status||"").toUpperCase() !== "CA EXCESS REIMBURSEMENT")
     .reduce((sum,t) => sum + Number(t.amount || 0), 0);
   const outstanding = cashAdvances.reduce((sum,ca) => sum + Number(ca.remainingBalance || 0), 0);
   const previousNotReceived = Number(rfSetting(settings, ["PREVIOUS_REPLENISHMENT_NOT_RECEIVED","PREVIOUS_REPLENISHMENT_AMOUNT"], 0)) || 0;
@@ -56,7 +56,7 @@ function getRevolvingFundData(payload) {
   const fundAmount = currentGroup ? (Number(currentGroup.fundAmount || 0) || configuredFundAmount) : configuredFundAmount;
   const expenseTypes = ["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"];
   const forReplenishment = transactions
-    .filter(t => !String(t.replenishmentNo || "").trim() && expenseTypes.indexOf(rfNormalizeType(t.transactionType)) >= 0)
+    .filter(t => !String(t.replenishmentNo || "").trim() && expenseTypes.indexOf(rfNormalizeType(t.transactionType)) >= 0 && String(t.status||"").toUpperCase() !== "CA EXCESS REIMBURSEMENT")
     .reduce((sum,t) => sum + Number(t.amount || 0), 0);
   const summary = {
     configuredFundAmount: configuredFundAmount,
@@ -74,6 +74,7 @@ function getRevolvingFundData(payload) {
     groups: groups,
     transactions: transactions,
     cashAdvances: cashAdvances,
+    cashAdvanceHistory: allCashAdvances,
     currentGroup: groupNo,
     summary: summary
   };
@@ -88,7 +89,7 @@ function saveRevolvingFundTransaction(payload) {
   const person = String(payload.person || "").trim();
   const items = Array.isArray(payload.items) ? payload.items : [{purpose:payload.purpose,category:payload.category,details:payload.details,amount:payload.amount}];
   if (!date || !person || !items.length) throw new Error("Complete transaction date, person, and at least one item.");
-  const normalizedItems = items.map((item,i)=>({purpose:String(item.purpose||"").trim(),category:String(item.category||"").trim(),details:String(item.details||"").trim(),amount:Number(item.amount),index:i+1}));
+  const normalizedItems = items.map((item,i)=>({purpose:String(item.purpose||"").trim(),category:String(item.category||"").trim(),details:String(item.details||"").trim(),documentNo:String(item.documentNo||"").trim(),amount:Number(item.amount),index:i+1}));
   if (normalizedItems.some(x=>!x.purpose||!x.details||!isFinite(x.amount)||x.amount<=0)) throw new Error("Every item needs a Purpose, details, and amount greater than zero.");
   if (["LIQUIDATION","REIMBURSEMENT","DIRECT EXPENSE"].indexOf(type)>=0 && normalizedItems.some(x=>!x.category)) throw new Error("Select an Expense Classification for every expense item.");
   const total = normalizedItems.reduce((sum,x)=>sum+x.amount,0);
@@ -104,15 +105,21 @@ function saveRevolvingFundTransaction(payload) {
     }
     const txSheet = rfEnsureSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS);
     const existing = rfReadSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS).map(rfTransactionObject);
-    let relatedCaId = "";
+    let relatedCaId = "", returnAmount = 0, reimbursementAmount = 0, caRemaining = 0;
     if (type==="LIQUIDATION") {
       relatedCaId = String(payload.relatedCaId||"").trim();
       if (!relatedCaId) throw new Error("Select LIQUIDATE from the Unliquidated Cash Advances table to link this liquidation to its original CA.");
       const ca = existing.find(t=>String(t.transactionId)===relatedCaId && rfNormalizeType(t.transactionType)==="CASH ADVANCE");
       if (!ca) throw new Error("The original Cash Advance could not be found. Refresh the page and try again.");
-      const alreadyLiquidated = existing.filter(t=>rfNormalizeType(t.transactionType)==="LIQUIDATION" && String(t.relatedCaId)===relatedCaId).reduce((sum,t)=>sum+Number(t.amount||0),0);
-      const remaining = Math.max(0,Number(ca.amount||0)-alreadyLiquidated);
-      if (total>remaining+0.005) throw new Error("Total liquidation amount exceeds the remaining CA balance of ₱"+remaining.toFixed(2)+".");
+      const prior = existing.filter(t=>rfNormalizeType(t.transactionType)==="LIQUIDATION" && String(t.relatedCaId)===relatedCaId);
+      const priorExpense = prior.reduce((sum,t)=>sum+Number(t.amount||0),0), priorReturn = prior.reduce((sum,t)=>sum+Number(t.returnAmount||0),0);
+      caRemaining = Math.max(0,Number(ca.amount||0)-Math.min(Number(ca.amount||0),priorExpense)-priorReturn);
+      returnAmount = Number(payload.returnAmount||0);
+      if (!isFinite(returnAmount) || returnAmount < 0) throw new Error("Enter a valid Return Amount of zero or more.");
+      if (total > caRemaining + 0.005) {
+        if (returnAmount > 0.005) throw new Error("Return Amount must be ₱0.00 when liquidation exceeds the remaining CA balance.");
+        reimbursementAmount = total-caRemaining;
+      } else if (total+returnAmount > caRemaining+0.005) throw new Error("Liquidation Amount plus Return Amount cannot exceed the remaining CA balance of ₱"+caRemaining.toFixed(2)+".");
     }
     const now = new Date();
     const rows = normalizedItems.map((item,i)=>({
@@ -130,11 +137,20 @@ function saveRevolvingFundTransaction(payload) {
       STATUS: type==="CASH ADVANCE" ? "UNLIQUIDATED" : "RECORDED",
       CREATED_AT: now,
       CREATED_BY: String(payload.createdBy||"SYSTEM"),
-      PURPOSE: item.purpose
+      PURPOSE: item.purpose,
+      RETURN_AMOUNT: type==="LIQUIDATION" && i===0 ? returnAmount : 0,
+      REIMBURSEMENT_AMOUNT: type==="LIQUIDATION" && i===0 ? reimbursementAmount : 0
     }));
     const transactionIds = rows.map(r=>r.TRANSACTION_ID);
+    if (type==="LIQUIDATION" && reimbursementAmount > 0.005) rows.push({
+      TRANSACTION_ID:"RF-TXN-"+Utilities.formatDate(now,CONFIG.TIMEZONE||"Asia/Manila","yyyyMMdd-HHmmss")+"-"+Math.floor(Math.random()*9000+1000)+"-R",
+      REPLENISHMENT_NO:groupNo, TRANSACTION_DATE:date, TRANSACTION_TYPE:"Reimbursement", PERSON:person, RELATED_CA_ID:relatedCaId,
+      AMOUNT:reimbursementAmount, CATEGORY:normalizedItems[0].category||"REIMBURSEMENT - CA", DETAILS:"Reimbursement for expense exceeding CA balance "+relatedCaId,
+      SO_REFERENCE:"", DOCUMENT_NO:normalizedItems[0].documentNo||"", STATUS:"CA EXCESS REIMBURSEMENT", CREATED_AT:now,
+      CREATED_BY:String(payload.createdBy||"SYSTEM"), PURPOSE:"REIMBURSEMENT - CA", RETURN_AMOUNT:0, REIMBURSEMENT_AMOUNT:0
+    });
     rfAppendObjectsByHeader(txSheet, rows);
-    return {success:true,transactionIds:transactionIds,itemCount:rows.length,totalAmount:total,message:"Revolving Fund items saved."};
+    return {success:true,transactionIds:transactionIds,itemCount:rows.length,totalAmount:total,returnAmount:returnAmount,reimbursementAmount:reimbursementAmount,message:"Revolving Fund items saved."};
   } finally { lock.releaseLock(); }
 }
 function createRevolvingFundReplenishment(payload) {
@@ -279,6 +295,8 @@ function rfTransactionObject(r) {
     details: String(r.DETAILS || ""),
     soReference: String(r.SO_REFERENCE || ""),
     documentNo: String(r.DOCUMENT_NO || ""),
+    returnAmount: Number(r.RETURN_AMOUNT || 0),
+    reimbursementAmount: Number(r.REIMBURSEMENT_AMOUNT || 0),
     status: String(r.STATUS || ""),
     createdAt: rfDateString(r.CREATED_AT),
     createdBy: String(r.CREATED_BY || ""),
