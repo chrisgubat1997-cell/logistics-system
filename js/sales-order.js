@@ -1767,7 +1767,7 @@ async function loadSOList(
             printWindow.document.write(
                 "<!doctype html><html><head><meta charset='utf-8'>" +
                 "<meta name='viewport' content='width=device-width, initial-scale=1'>" +
-                "<title>Sales Order Form - " + escapeHTML(soNumber) + "</title>" +
+                "<title></title>" +
                 "<style>" + printStyles + "\\n" +
                 "@page{size:8.5in 14in;margin:0!important}" +
                 "html,body{margin:0!important;padding:0!important;background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}" +
