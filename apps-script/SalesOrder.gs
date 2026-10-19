@@ -1438,6 +1438,16 @@ const now =
       );
 
 
+    /* AUTO-GENERATE SALES ORDER PDF IN THE SO FOLDER */
+    let pdfResult = { saved: false, error: "PDF generation was not completed." };
+    try {
+      pdfResult = createSalesOrderPDF_(payload, soFolder, soId, soNumber, year);
+    } catch (pdfError) {
+      console.error("AUTO SALES ORDER PDF ERROR:", soNumber, pdfError);
+      pdfResult = { saved: false, error: pdfError && pdfError.message ? pdfError.message : String(pdfError) };
+    }
+
+
     /* =====================================================
        ACTIVITY LOG
     ===================================================== */
@@ -1480,7 +1490,19 @@ touchSyncVersion();
         true,
 
       message:
-        "Sales Order created successfully.",
+        pdfResult.saved ? "Sales Order created and PDF saved successfully." : "Sales Order created, but automatic PDF generation failed.",
+
+      pdfSaved:
+        Boolean(pdfResult.saved),
+
+      pdfFileId:
+        pdfResult.fileId || "",
+
+      pdfUrl:
+        pdfResult.fileUrl || "",
+
+      pdfError:
+        pdfResult.error || "",
 
       soId:
         soId,
@@ -1506,7 +1528,13 @@ touchSyncVersion();
           soFolder.getId(),
 
         folderUrl:
-          soFolder.getUrl()
+          soFolder.getUrl(),
+
+        pdfSaved:
+          Boolean(pdfResult.saved),
+
+        pdfUrl:
+          pdfResult.fileUrl || ""
 
       }
 
@@ -3190,6 +3218,81 @@ function appendRow(
 
 }
 
+
+
+
+/* =========================================================
+   AUTO-GENERATE SALES ORDER PDF
+   Saves to 02_SALES_ORDER/<year>/<SO_NUMBER>/
+========================================================= */
+function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
+  payload = payload || {};
+  const items = Array.isArray(payload.items) ? payload.items : [];
+  const escapeHtml = function(value) {
+    return String(value == null ? "" : value).replace(/[&<>"']/g, function(ch) {
+      return {"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"}[ch];
+    });
+  };
+  const money = function(value) {
+    const number = Number(value || 0);
+    const safeNumber = isFinite(number) ? number : 0;
+    return "&#8369;" + safeNumber.toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2});
+  };
+  const itemRows = items.map(function(item, index) {
+    item = item || {};
+    const qty = Number(item.qty || item.quantity || item.QTY || 0);
+    const unitPrice = Number(item.amount || item.unitPrice || item.UNIT_PRICE || 0);
+    const total = Number(item.total || item.TOTAL || (qty * unitPrice));
+    return "<tr><td class='center'>" + (index + 1) + "</td>" +
+      "<td>" + escapeHtml(item.itemName || item.ITEM_NAME || "") + "</td>" +
+      "<td>" + escapeHtml(item.description || item.DESCRIPTION || "") + "</td>" +
+      "<td class='center'>" + escapeHtml(qty) + "</td>" +
+      "<td class='center'>" + escapeHtml(item.unit || item.UNIT || "") + "</td>" +
+      "<td class='number'>" + money(unitPrice) + "</td>" +
+      "<td class='number'>" + money(total) + "</td></tr>";
+  }).join("");
+  const html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" +
+    "@page{size:A4;margin:14mm}body{font-family:Arial,sans-serif;color:#172033;font-size:10px}" +
+    "h1{font-size:22px;margin:0;color:#12345a}h2{font-size:12px;margin:0 0 5px}p{margin:3px 0}" +
+    ".top{border-bottom:3px solid #12345a;padding-bottom:12px;margin-bottom:16px}.muted{color:#667085}" +
+    ".meta{width:100%;border-collapse:collapse;margin:12px 0 18px}.meta td{width:50%;padding:5px 7px;border:1px solid #d8dee8;vertical-align:top}" +
+    ".items{width:100%;border-collapse:collapse;margin-top:8px}.items th{background:#12345a;color:white;font-size:8px;text-align:left}" +
+    ".items th,.items td{padding:7px 6px;border:1px solid #d8dee8}.center{text-align:center}.number{text-align:right;white-space:nowrap}" +
+    ".totals{width:48%;margin:12px 0 0 auto;border-collapse:collapse}.totals td{padding:5px 7px;border-bottom:1px solid #d8dee8}" +
+    ".grand{font-weight:bold;font-size:12px;background:#eef3f9}.footer{margin-top:35px}.sign{display:inline-block;width:44%;margin-right:5%;border-top:1px solid #667085;padding-top:6px;text-align:center}" +
+    ".small{font-size:8px;color:#667085}</style></head><body>" +
+    "<div class='top'><h1>LOGIS-TECH</h1><p class='muted'>SALES ORDER</p><h2>SALES ORDER NO. " + escapeHtml(soNumber) + "</h2></div>" +
+    "<table class='meta'><tr><td><b>SO Date:</b> " + escapeHtml(payload.dateCreation || formatDate(new Date())) +
+    "<br><b>Client:</b> " + escapeHtml(payload.clientName || "") + "<br><b>Attention:</b> " + escapeHtml(payload.attention || "") +
+    "<br><b>Contact:</b> " + escapeHtml(payload.contactNumber || "") + "<br><b>Email:</b> " + escapeHtml(payload.email || "") +
+    "</td><td><b>Project:</b> " + escapeHtml(payload.project || "") + "<br><b>PO Number:</b> " + escapeHtml(payload.poNumber || "") +
+    "<br><b>Job Order:</b> " + escapeHtml(payload.jobOrder || "") + "<br><b>Sales Engineer:</b> " + escapeHtml(payload.salesEngineer || payload.se || "") +
+    "<br><b>Terms:</b> " + escapeHtml(payload.terms || "") + "<br><b>TIN:</b> " + escapeHtml(payload.tin || "") +
+    "</td></tr><tr><td><b>Billing Address</b><br>" + escapeHtml(payload.billingAddress || "") +
+    "</td><td><b>Delivery Address</b><br>" + escapeHtml(payload.deliveryAddress || "") + "</td></tr></table>" +
+    "<h2>ORDER ITEMS</h2><table class='items'><thead><tr><th>#</th><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>AMOUNT</th></tr></thead><tbody>" +
+    (itemRows || "<tr><td colspan='7'>No item details provided.</td></tr>") + "</tbody></table>" +
+    "<table class='totals'><tr><td>Subtotal</td><td class='number'>" + money(payload.subtotal) + "</td></tr>" +
+    "<tr><td>Discount</td><td class='number'>" + money(payload.discount) + "</td></tr>" +
+    "<tr><td>Vatable Amount</td><td class='number'>" + money(payload.vatable) + "</td></tr>" +
+    "<tr><td>VAT (" + escapeHtml(Number(payload.vatRate || CONFIG.VAT_RATE) * 100) + "%)</td><td class='number'>" + money(payload.vatAmount) + "</td></tr>" +
+    "<tr class='grand'><td>GRAND TOTAL</td><td class='number'>" + money(payload.grandTotal) + "</td></tr></table>" +
+    "<div class='footer'><div class='sign'>Prepared By</div><div class='sign'>Customer Conforme</div></div>" +
+    "<p class='small'>Generated automatically by LOGIS-TECH SYSTEM • " + escapeHtml(formatDateTime(new Date())) +
+    " • SO ID: " + escapeHtml(soId) + " • Folder year: " + escapeHtml(year) + "</p></body></html>";
+  const pdfBlob = HtmlService.createHtmlOutput(html).getBlob().getAs(MimeType.PDF).setName(soNumber + ".pdf");
+  const file = soFolder.createFile(pdfBlob);
+  try {
+    appendRow(CONFIG.SHEETS.DOCUMENT_INDEX, [
+      generateId("DOC"), "SALES_ORDER_PDF", soId, soNumber,
+      file.getName(), file.getId(), soFolder.getId(), file.getMimeType(),
+      file.getUrl(), payload.createdBy || "SYSTEM", formatDateTime(new Date()), "ACTIVE"
+    ]);
+  } catch (indexError) {
+    console.warn("Sales Order PDF saved but DOCUMENT_INDEX update failed:", indexError);
+  }
+  return {saved:true, fileId:file.getId(), fileUrl:file.getUrl(), fileName:file.getName()};
+}
 
 /* =========================================================
    CREATE SALES ORDER FOLDER
