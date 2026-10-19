@@ -1618,10 +1618,8 @@ async function loadSOList(
             const rawNumber = getSOValue(item, ["ITEM_NUMBER", "itemNumber", "LINE_NUMBER", "lineNumber"]) || (index + 1);
             const number = isFinite(Number(rawNumber)) ? Number(rawNumber).toFixed(1) : rawNumber;
             const name = getSOValue(item, ["ITEM_NAME", "itemName", "ITEM_CODE", "itemCode", "ITEM", "item"]);
-            const desc = getSOValue(item, ["DESCRIPTION", "description"]);
             return "<tr class='sof-item'><td class='sof-center'>" + escapeHTML(number) +
                 "</td><td><b>" + escapeHTML(name || "") + "</b>" +
-                (desc ? "<div class='sof-desc'>" + escapeHTML(desc) + "</div>" : "") +
                 "</td><td class='sof-center'>" + escapeHTML(qty) +
                 "</td><td class='sof-center'>" + escapeHTML(getSOValue(item, ["UNIT", "unit"]) || "") +
                 "</td><td class='sof-number'>" + money(unitPrice) +
@@ -1693,7 +1691,7 @@ async function loadSOList(
                             <tr><td class="sof-label">Project Name</td><td class="sof-value">${shown(["PROJECT","project"])}</td><td class="sof-right-label">Account Manager</td><td class="sof-right-value">${shown(["ACCOUNT_MANAGER","accountManager","SALES_ENGINEER","salesEngineer","SE","se"])}</td></tr>
                             <tr><td class="sof-label">Tin Number</td><td class="sof-value">${shown(["TIN","tin"])}</td><td class="sof-right-label"></td><td class="sof-right-value"></td></tr>
                         </table>
-                        <table class="sof-items"><thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>
+                        <table class="sof-items"><thead><tr><th>ITEM NO.</th><th>ITEM NAME</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>
                             ${itemRows || ""}${blankRows}
                         </tbody></table>
                         <div class="sof-notes">***WITH SHOPDRAWING***　　　　　　　　　***WITHOUT STOCK***</div>
