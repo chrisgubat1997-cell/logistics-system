@@ -3233,53 +3233,104 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
       return {"&":"&amp;", "<":"&lt;", ">":"&gt;", "\"":"&quot;", "'":"&#39;"}[ch];
     });
   };
+  const val = function() {
+    for (let i = 0; i < arguments.length; i++) {
+      const value = payload[arguments[i]];
+      if (value !== undefined && value !== null && String(value).trim() !== "") return value;
+    }
+    return "";
+  };
   const money = function(value) {
     const number = Number(value || 0);
-    const safeNumber = isFinite(number) ? number : 0;
-    return "&#8369;" + safeNumber.toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2});
+    const safe = isFinite(number) ? number : 0;
+    return safe.toLocaleString("en-PH", {minimumFractionDigits:2, maximumFractionDigits:2});
+  };
+  const dateText = function(value) {
+    if (!value) return "";
+    if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) {
+      return Utilities.formatDate(value, Session.getScriptTimeZone(), "d-MMM-yy");
+    }
+    const parsed = new Date(value);
+    if (!isNaN(parsed.getTime()) && String(value).indexOf("T") >= 0) {
+      return Utilities.formatDate(parsed, Session.getScriptTimeZone(), "d-MMM-yy");
+    }
+    return String(value);
   };
   const itemRows = items.map(function(item, index) {
     item = item || {};
     const qty = Number(item.qty || item.quantity || item.QTY || 0);
     const unitPrice = Number(item.amount || item.unitPrice || item.UNIT_PRICE || 0);
     const total = Number(item.total || item.TOTAL || (qty * unitPrice));
-    return "<tr><td class='center'>" + (index + 1) + "</td>" +
-      "<td>" + escapeHtml(item.itemName || item.ITEM_NAME || "") + "</td>" +
-      "<td>" + escapeHtml(item.description || item.DESCRIPTION || "") + "</td>" +
+    const itemNumber = item.itemNumber || item.ITEM_NUMBER || (index + 1) + ".0";
+    const name = item.itemName || item.ITEM_NAME || "";
+    const description = item.description || item.DESCRIPTION || "";
+    return "<tr class='item-row'><td class='center item-no'>" + escapeHtml(itemNumber) + "</td>" +
+      "<td class='description'><b>" + escapeHtml(name) + "</b>" +
+      (description ? "<div class='sub-description'>" + escapeHtml(description) + "</div>" : "") + "</td>" +
       "<td class='center'>" + escapeHtml(qty) + "</td>" +
       "<td class='center'>" + escapeHtml(item.unit || item.UNIT || "") + "</td>" +
       "<td class='number'>" + money(unitPrice) + "</td>" +
       "<td class='number'>" + money(total) + "</td></tr>";
   }).join("");
+  const minimumRows = Math.max(0, 25 - items.length);
+  const blankRows = Array.from({length: minimumRows}, function() {
+    return "<tr class='blank-row'><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+  }).join("");
+  const logoUrl = "https://raw.githubusercontent.com/chrisgubat1997-cell/logistics-system/main/assets/logo.png";
+  const total = Number(payload.subtotal || 0);
+  const discount = Number(payload.discount || 0);
+  const sellingPrice = Number(payload.vatable !== undefined ? payload.vatable : total - discount);
+  const vatAmount = Number(payload.vatAmount || 0);
+  const grossProfit = val("grossProfit", "GROSS_PROFIT");
+  const tpc = val("tpc", "TPC");
+  const percentage = val("percentage", "PERCENTAGE");
+  const preparedBy = val("preparedBy", "PREPARED_BY") || "Katrina Mae S. Tagatac";
+  const checkedBy = val("checkedBy", "CHECKED_BY") || "Kaye B. Ochoa";
+  const approvedBy = val("approvedBy", "APPROVED_BY") || "Melannie C. Mendiola";
   const html = "<!DOCTYPE html><html><head><meta charset='UTF-8'><style>" +
-    "@page{size:A4;margin:14mm}body{font-family:Arial,sans-serif;color:#172033;font-size:10px}" +
-    "h1{font-size:22px;margin:0;color:#12345a}h2{font-size:12px;margin:0 0 5px}p{margin:3px 0}" +
-    ".top{border-bottom:3px solid #12345a;padding-bottom:12px;margin-bottom:16px}.muted{color:#667085}" +
-    ".meta{width:100%;border-collapse:collapse;margin:12px 0 18px}.meta td{width:50%;padding:5px 7px;border:1px solid #d8dee8;vertical-align:top}" +
-    ".items{width:100%;border-collapse:collapse;margin-top:8px}.items th{background:#12345a;color:white;font-size:8px;text-align:left}" +
-    ".items th,.items td{padding:7px 6px;border:1px solid #d8dee8}.center{text-align:center}.number{text-align:right;white-space:nowrap}" +
-    ".totals{width:48%;margin:12px 0 0 auto;border-collapse:collapse}.totals td{padding:5px 7px;border-bottom:1px solid #d8dee8}" +
-    ".grand{font-weight:bold;font-size:12px;background:#eef3f9}.footer{margin-top:35px}.sign{display:inline-block;width:44%;margin-right:5%;border-top:1px solid #667085;padding-top:6px;text-align:center}" +
-    ".small{font-size:8px;color:#667085}</style></head><body>" +
-    "<div class='top'><h1>LOGIS-TECH</h1><p class='muted'>SALES ORDER</p><h2>SALES ORDER NO. " + escapeHtml(soNumber) + "</h2></div>" +
-    "<table class='meta'><tr><td><b>SO Date:</b> " + escapeHtml(payload.dateCreation || formatDate(new Date())) +
-    "<br><b>Client:</b> " + escapeHtml(payload.clientName || "") + "<br><b>Attention:</b> " + escapeHtml(payload.attention || "") +
-    "<br><b>Contact:</b> " + escapeHtml(payload.contactNumber || "") + "<br><b>Email:</b> " + escapeHtml(payload.email || "") +
-    "</td><td><b>Project:</b> " + escapeHtml(payload.project || "") + "<br><b>PO Number:</b> " + escapeHtml(payload.poNumber || "") +
-    "<br><b>Job Order:</b> " + escapeHtml(payload.jobOrder || "") + "<br><b>Sales Engineer:</b> " + escapeHtml(payload.salesEngineer || payload.se || "") +
-    "<br><b>Terms:</b> " + escapeHtml(payload.terms || "") + "<br><b>TIN:</b> " + escapeHtml(payload.tin || "") +
-    "</td></tr><tr><td><b>Billing Address</b><br>" + escapeHtml(payload.billingAddress || "") +
-    "</td><td><b>Delivery Address</b><br>" + escapeHtml(payload.deliveryAddress || "") + "</td></tr></table>" +
-    "<h2>ORDER ITEMS</h2><table class='items'><thead><tr><th>#</th><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>AMOUNT</th></tr></thead><tbody>" +
-    (itemRows || "<tr><td colspan='7'>No item details provided.</td></tr>") + "</tbody></table>" +
-    "<table class='totals'><tr><td>Subtotal</td><td class='number'>" + money(payload.subtotal) + "</td></tr>" +
-    "<tr><td>Discount</td><td class='number'>" + money(payload.discount) + "</td></tr>" +
-    "<tr><td>Vatable Amount</td><td class='number'>" + money(payload.vatable) + "</td></tr>" +
-    "<tr><td>VAT (" + escapeHtml(Number(payload.vatRate || CONFIG.VAT_RATE) * 100) + "%)</td><td class='number'>" + money(payload.vatAmount) + "</td></tr>" +
-    "<tr class='grand'><td>GRAND TOTAL</td><td class='number'>" + money(payload.grandTotal) + "</td></tr></table>" +
-    "<div class='footer'><div class='sign'>Prepared By</div><div class='sign'>Customer Conforme</div></div>" +
-    "<p class='small'>Generated automatically by LOGIS-TECH SYSTEM • " + escapeHtml(formatDateTime(new Date())) +
-    " • SO ID: " + escapeHtml(soId) + " • Folder year: " + escapeHtml(year) + "</p></body></html>";
+    "@page{size:8.5in 14in;margin:0.42in 0.45in 0.35in}" +
+    "*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;font-size:8px;margin:0}" +
+    "table{border-collapse:collapse;table-layout:fixed;width:100%}.header td{border:1px solid #b7b7b7;height:48px;padding:3px 5px}" +
+    ".logo-cell{width:47%;vertical-align:middle}.logo{width:215px;height:auto;max-height:48px;object-fit:contain}" +
+    ".title-cell{text-align:center;font-size:16px;font-weight:800;white-space:nowrap}" +
+    ".check-cell{width:20%;font-size:7px}.check-row{white-space:nowrap;line-height:15px}.check{display:inline-block;width:11px;height:11px;border:1px solid #111;vertical-align:middle;margin-right:5px}" +
+    ".meta{margin-top:0}.meta td{border:1px solid #aaa;height:16px;padding:2px 4px;vertical-align:middle}.meta .label{width:13%;white-space:nowrap}.meta .value{width:37%;overflow-wrap:anywhere}.meta .right-label{width:17%;white-space:nowrap}.meta .right-value{width:33%;text-align:center;overflow-wrap:anywhere}.bold{font-weight:700}" +
+    ".items{margin-top:10px}.items th{height:17px;background:#333;color:#fff;border:1px solid #555;font-size:8px;text-align:center;padding:3px 2px}.items td{border-left:1px solid #888;border-right:1px solid #888;border-bottom:1px solid #ddd;height:15px;padding:2px 4px;vertical-align:middle}.items th:nth-child(1){width:5.5%}.items th:nth-child(2){width:50%}.items th:nth-child(3){width:6%}.items th:nth-child(4){width:6%}.items th:nth-child(5){width:15%}.items th:nth-child(6){width:17.5%}.item-row td{height:27px}.item-no{font-weight:bold}.description{overflow-wrap:anywhere}.sub-description{font-size:7px;margin-top:2px}.center{text-align:center}.number{text-align:right;white-space:nowrap}" +
+    ".notes{height:22px;text-align:center;font-weight:bold;font-style:italic;color:#e00000;font-size:8px}.nothing{height:16px;text-align:center;font-weight:bold;font-style:italic}.page-no{height:16px;text-align:center;font-weight:bold;font-style:italic;border-bottom:1px solid #888}" +
+    ".bottom{width:100%;margin-top:0}.bottom td{border:1px solid #aaa;padding:3px 5px;height:16px}.bottom .spacer{border-left:0;border-right:0}.bottom .label{font-weight:600}.bottom .amount{text-align:right;white-space:nowrap;width:19%}.bottom .currency{text-align:center;width:4%}.bottom .total-selling td{background:#bdbdbd;font-weight:bold}.bottom .total-selling .amount{font-size:10px}.bottom .gross td{background:#bdbdbd;font-weight:bold}.bottom .pct td{background:#bdbdbd;font-weight:bold}" +
+    ".signatures{margin-top:8px}.signatures td{width:33.33%;border:0;border-top:1px solid #aaa;padding:4px 3px;text-align:center;height:21px;vertical-align:bottom}.signature-label{text-align:left!important;height:18px!important;vertical-align:top!important}.signature-name{font-weight:bold;text-decoration:underline}.signature-role{font-size:7px}.dr-invoice{text-align:right;height:16px;border:0!important}.company-footer{margin-top:8px;border-top:1px solid #aaa;border-bottom:1px solid #aaa;padding:4px 2px;font-size:6.5px;white-space:nowrap}.form-code{margin-top:8px;font-size:7px}.form-code div{margin-top:3px}" +
+    "</style></head><body>" +
+    "<table class='header'><tr><td class='logo-cell'><img class='logo' src='" + logoUrl + "'></td>" +
+    "<td class='title-cell'>SALES ORDER FORM</td><td class='check-cell'>" +
+    "<div class='check-row'><span class='check'></span> ACCOUNTING</div><div class='check-row'><span class='check'></span> PURCHASING</div><div class='check-row'><span class='check'></span> SALES</div>" +
+    "</td></tr></table>" +
+    "<table class='meta'>" +
+    "<tr><td class='label'>Sold to:</td><td class='value bold'>" + escapeHtml(val("clientName", "CLIENT_NAME")) + "</td><td class='right-label'>SOF No.</td><td class='right-value bold'>" + escapeHtml(soNumber) + "</td></tr>" +
+    "<tr><td class='label'>Billing Address</td><td class='value'>" + escapeHtml(val("billingAddress", "BILLING_ADDRESS")) + "</td><td class='right-label'>Date</td><td class='right-value'>" + escapeHtml(dateText(val("dateCreation", "DATE_CREATION") || new Date())) + "</td></tr>" +
+    "<tr><td class='label'>Delivery Address</td><td class='value'>" + escapeHtml(val("deliveryAddress", "DELIVERY_ADDRESS")) + "</td><td class='right-label'>P.O Number</td><td class='right-value'>" + escapeHtml(val("poNumber", "PO_NUMBER")) + "</td></tr>" +
+    "<tr><td class='label'>Classification</td><td class='value'>" + escapeHtml(val("classification", "CLASSIFICATION")) + "</td><td class='right-label'>Terms</td><td class='right-value'>" + escapeHtml(val("terms", "TERMS")) + "</td></tr>" +
+    "<tr><td class='label'>Required Del. Date</td><td class='value'>" + escapeHtml(dateText(val("requiredDeliveryDate", "requiredDelDate", "REQUIRED_DELIVERY_DATE", "REQUIRED_DEL_DATE"))) + "</td><td class='right-label'>J.O No.</td><td class='right-value'>" + escapeHtml(val("jobOrder", "JOB_ORDER")) + "</td></tr>" +
+    "<tr><td class='label'>Attention</td><td class='value'>" + escapeHtml(val("attention", "ATTENTION")) + "</td><td class='right-label'>Quotation No.</td><td class='right-value'>" + escapeHtml(val("quotationNo", "quotationNumber", "QUOTATION_NO", "QUOTATION_NUMBER")) + "</td></tr>" +
+    "<tr><td class='label'>Project Name</td><td class='value'>" + escapeHtml(val("project", "PROJECT")) + "</td><td class='right-label'>Account Manager</td><td class='right-value'>" + escapeHtml(val("accountManager", "ACCOUNT_MANAGER", "salesEngineer", "se", "SALES_ENGINEER")) + "</td></tr>" +
+    "<tr><td class='label'>Tin Number</td><td class='value'>" + escapeHtml(val("tin", "TIN")) + "</td><td class='right-label'></td><td class='right-value'></td></tr></table>" +
+    "<table class='items'><thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>" +
+    (itemRows || "") + blankRows +
+    "</tbody></table>" +
+    "<div class='notes'>***WITH SHOPDRAWING***　　　　　　　　　***WITHOUT STOCK***</div>" +
+    "<div class='nothing'>***Nothing follows*******</div><div class='page-no'>Page 1 of 1</div>" +
+    "<table class='bottom'><tr><td class='spacer' colspan='3'></td><td class='label'>TOTAL</td><td class='currency'>&#8369;</td><td class='amount'>" + money(total) + "</td></tr>" +
+    "<tr><td class='spacer' colspan='3'></td><td class='label'>LESS DISCOUNT</td><td class='currency'>&#8369;</td><td class='amount'>" + money(discount) + "</td></tr>" +
+    "<tr><td class='spacer' colspan='3'></td><td class='label'>ADDED VAT</td><td class='currency'>" + (vatAmount ? "&#8369;" : "") + "</td><td class='amount'>" + (vatAmount ? money(vatAmount) : "") + "</td></tr>" +
+    "<tr class='total-selling'><td class='spacer' colspan='3'></td><td class='label'>TOTAL SELLING PRICE</td><td class='currency'>&#8369;</td><td class='amount'>" + money(sellingPrice) + "</td></tr>" +
+    "<tr class='gross'><td class='spacer' colspan='3'></td><td class='label'>TPC</td><td class='currency'></td><td class='amount'>" + (tpc !== "" ? money(tpc) : "") + "</td></tr>" +
+    "<tr class='gross'><td class='spacer' colspan='3'></td><td class='label'>GROSS PROFIT</td><td class='currency'>" + (grossProfit !== "" ? "&#8369;" : "") + "</td><td class='amount'>" + (grossProfit !== "" ? money(grossProfit) : "") + "</td></tr>" +
+    "<tr class='pct'><td class='spacer' colspan='3'></td><td class='label'>PERCENTAGE</td><td class='currency'></td><td class='amount'>" + (percentage !== "" ? escapeHtml(percentage) : "") + "</td></tr></table>" +
+    "<table class='signatures'><tr><td class='signature-label'>Prepared by:</td><td class='signature-label'>Checked by:</td><td class='signature-label'>Approved by:</td></tr>" +
+    "<tr><td class='signature-name'>" + escapeHtml(preparedBy) + "</td><td class='signature-name'>" + escapeHtml(checkedBy) + "</td><td class='signature-name'>" + escapeHtml(approvedBy) + "</td></tr>" +
+    "<tr><td class='signature-role'>Sales Coordinator</td><td class='signature-role'>Sales Account Manager</td><td class='signature-role'>Finance Manager</td></tr>" +
+    "<tr><td></td><td></td><td class='dr-invoice'>DR # __________________<br>Invoice # _______________</td></tr></table>" +
+    "<div class='company-footer'>Greenmetal Electric Manufacturing Corporation: Dolores St. cor. Camia St., Dolmar Golden Hills Subd., Llano Road, Caloocan City　 Contact Nos.: 0917 708 4533 (Globe) 8356-5128 (Landline)</div>" +
+    "<div class='form-code'><div>F-SAM-003</div><div>Rev. 2 06-01-23</div></div></body></html>";
   const pdfBlob = HtmlService.createHtmlOutput(html).getBlob().getAs(MimeType.PDF).setName(soNumber + ".pdf");
   const file = soFolder.createFile(pdfBlob);
   try {
