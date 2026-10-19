@@ -837,7 +837,7 @@ async function loadSOList(
                         event.stopPropagation();
 
                         if (soNumber) {
-                            openSODetails(soNumber);
+                            openSOFormPreview(soNumber);
                         }
                     });
                 }
@@ -1564,6 +1564,177 @@ async function loadSOList(
 
     }
 
+
+    /* =====================================================
+       SALES ORDER FORM PREVIEW (MATCHES SOF PDF TEMPLATE)
+    ===================================================== */
+    async function openSOFormPreview(soNumber) {
+        if (!soNumber) {
+            alert("Sales Order number is required.");
+            return;
+        }
+
+        let result;
+        try {
+            showLoading(true);
+            result = await salesOrderAPI("getSOTransactionDetails", { soNumber: soNumber });
+            const data = normalizeTransactionResult(result);
+            renderSOFormPreview(data);
+        } catch (error) {
+            console.error("Unable to open Sales Order Form preview:", error);
+            alert("Unable to load Sales Order Form preview.\n\n" +
+                (error && error.message ? error.message : String(error)));
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    function renderSOFormPreview(data) {
+        const so = data.salesOrder || data.so || {};
+        const items = Array.isArray(data.items) ? data.items : [];
+        const value = function(keys) {
+            const v = getSOValue(so, keys);
+            return v === null || v === undefined ? "" : String(v);
+        };
+        const shown = function(keys) {
+            const v = value(keys).trim();
+            return v ? escapeHTML(v) : "&nbsp;";
+        };
+        const money = function(v) {
+            return toNumber(v).toLocaleString("en-PH", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        };
+        const field = function(label, keys, extraClass) {
+            return "<div class='sof-field " + (extraClass || "") + "'><span>" +
+                escapeHTML(label) + "</span><b>" + shown(keys) + "</b></div>";
+        };
+        const soNumber = value(["SO_NUMBER", "soNumber", "so_number"]);
+        const itemRows = items.map(function(item, index) {
+            const qty = toNumber(getSOValue(item, ["QTY", "qty", "QUANTITY", "quantity"]));
+            const unitPrice = toNumber(getSOValue(item, ["UNIT_PRICE", "unitPrice", "AMOUNT", "amount"]));
+            const total = toNumber(getSOValue(item, ["TOTAL", "total", "EXTENDED_PRICE", "extendedPrice"])) || qty * unitPrice;
+            const number = getSOValue(item, ["ITEM_NUMBER", "itemNumber", "LINE_NUMBER", "lineNumber"]) || (index + 1) + ".0";
+            const name = getSOValue(item, ["ITEM_NAME", "itemName", "ITEM_CODE", "itemCode", "ITEM", "item"]);
+            const desc = getSOValue(item, ["DESCRIPTION", "description"]);
+            return "<tr class='sof-item'><td class='sof-center'>" + escapeHTML(number) +
+                "</td><td><b>" + escapeHTML(name || "") + "</b>" +
+                (desc ? "<div class='sof-desc'>" + escapeHTML(desc) + "</div>" : "") +
+                "</td><td class='sof-center'>" + escapeHTML(qty) +
+                "</td><td class='sof-center'>" + escapeHTML(getSOValue(item, ["UNIT", "unit"]) || "") +
+                "</td><td class='sof-number'>" + money(unitPrice) +
+                "</td><td class='sof-number'>" + money(total) + "</td></tr>";
+        }).join("");
+        const blankRows = Array.from({length: Math.max(0, 25 - items.length)}, function() {
+            return "<tr class='sof-blank'><td></td><td></td><td></td><td></td><td></td><td></td></tr>";
+        }).join("");
+        const subtotal = toNumber(getSOValue(so, ["SUBTOTAL", "subtotal"]));
+        const discount = toNumber(getSOValue(so, ["DISCOUNT", "discount"]));
+        const vatable = toNumber(getSOValue(so, ["VATABLE", "vatable", "VATABLE_SALES", "vatableSales"]));
+        const vat = toNumber(getSOValue(so, ["VAT_AMOUNT", "vatAmount", "VAT", "vat"]));
+        const selling = vatable || (subtotal - discount);
+        const logo = "https://raw.githubusercontent.com/chrisgubat1997-cell/logistics-system/main/assets/logo.png";
+
+        const old = document.getElementById("soFormPreviewOverlay");
+        if (old) old.remove();
+        if (!document.getElementById("soFormPreviewStyles")) {
+            const style = document.createElement("style");
+            style.id = "soFormPreviewStyles";
+            style.textContent = `
+                .sof-overlay{position:fixed;inset:0;z-index:10070;background:rgba(15,23,42,.68);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:18px;animation:sofFade .18s ease-out}
+                .sof-dialog{width:min(1040px,100%);height:min(94vh,1200px);display:flex;flex-direction:column;background:#eef1f5;border-radius:14px;overflow:hidden;box-shadow:0 25px 90px rgba(0,0,0,.35)}
+                .sof-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;background:#173b72;color:#fff;flex-shrink:0}
+                .sof-toolbar h2{font-size:14px;margin:0}.sof-toolbar p{font-size:10px;margin:3px 0 0;color:#dbeafe}
+                .sof-actions{display:flex;gap:8px;align-items:center}.sof-actions button{border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:8px 12px;background:rgba(255,255,255,.12);color:#fff;font:700 10px inherit;cursor:pointer}.sof-actions button:hover{background:rgba(255,255,255,.22)}
+                .sof-scroll{overflow:auto;padding:22px;flex:1}.sof-paper{width:100%;max-width:850px;min-height:1100px;margin:0 auto;padding:24px;background:#fff;box-shadow:0 5px 24px rgba(15,23,42,.15);color:#111;font-family:Arial,sans-serif;font-size:9px}
+                .sof-paper table{border-collapse:collapse;table-layout:fixed;width:100%}.sof-header td{border:1px solid #aaa;height:56px;padding:4px}.sof-logo-cell{width:47%;vertical-align:middle}.sof-logo{width:100%;max-width:250px;max-height:55px;object-fit:contain}.sof-title-cell{text-align:center;font-size:17px;font-weight:800;white-space:nowrap}.sof-check-cell{width:20%;font-size:8px}.sof-check-row{white-space:nowrap;line-height:16px}.sof-check{display:inline-block;width:11px;height:11px;border:1px solid #111;vertical-align:middle;margin-right:5px}
+                .sof-meta td{border:1px solid #aaa;height:21px;padding:3px 5px;vertical-align:middle;overflow-wrap:anywhere}.sof-meta .sof-label{width:13%;white-space:nowrap}.sof-meta .sof-value{width:37%}.sof-meta .sof-right-label{width:17%;white-space:nowrap}.sof-meta .sof-right-value{width:33%;text-align:center}
+                .sof-items{margin-top:12px}.sof-items th{height:22px;background:#333;color:#fff;border:1px solid #555;font-size:9px;text-align:center;padding:3px}.sof-items th:nth-child(1){width:6%}.sof-items th:nth-child(2){width:49%}.sof-items th:nth-child(3){width:6%}.sof-items th:nth-child(4){width:7%}.sof-items th:nth-child(5){width:15%}.sof-items th:nth-child(6){width:17%}.sof-items td{border-left:1px solid #888;border-right:1px solid #888;border-bottom:1px solid #ddd;height:18px;padding:3px 5px;vertical-align:middle}.sof-items .sof-item td{height:34px}.sof-center{text-align:center}.sof-number{text-align:right;white-space:nowrap}.sof-desc{font-size:8px;margin-top:3px}
+                .sof-notes{height:25px;text-align:center;font-weight:bold;font-style:italic;color:#e00000;padding-top:6px}.sof-nothing{text-align:center;font-weight:bold;font-style:italic;height:20px}.sof-page-no{text-align:center;font-weight:bold;font-style:italic;height:21px;border-bottom:1px solid #aaa}
+                .sof-bottom td{border:1px solid #aaa;padding:5px;height:22px}.sof-bottom .sof-spacer{border-left:0;border-right:0}.sof-bottom .sof-total-label{font-weight:600}.sof-bottom .sof-currency{text-align:center;width:4%}.sof-bottom .sof-amount{text-align:right;white-space:nowrap;width:19%}.sof-bottom .sof-selling td{background:#bdbdbd;font-weight:bold}.sof-bottom .sof-selling .sof-amount{font-size:12px}.sof-bottom .sof-gross td,.sof-bottom .sof-pct td{background:#bdbdbd;font-weight:bold}
+                .sof-signatures{margin-top:12px}.sof-signatures td{width:33.33%;border:0;padding:5px 4px;text-align:center;height:24px;vertical-align:bottom}.sof-signatures .sof-sign-label{text-align:left;vertical-align:top;height:22px}.sof-signatures .sof-sign-name{font-weight:bold;text-decoration:underline}.sof-signatures .sof-sign-role{font-size:8px}.sof-dr-invoice{text-align:right;height:35px}
+                .sof-company-footer{margin-top:12px;border-top:1px solid #aaa;border-bottom:1px solid #aaa;padding:5px 2px;font-size:7px;text-align:center}.sof-code{font-size:8px;margin-top:10px}.sof-code div{margin-top:3px}
+                @keyframes sofFade{from{opacity:0}to{opacity:1}}
+                @media(max-width:650px){.sof-overlay{padding:5px}.sof-dialog{height:97vh}.sof-scroll{padding:8px}.sof-paper{padding:12px;min-width:650px}.sof-toolbar{padding:10px}.sof-toolbar h2{font-size:12px}}
+                @media print{body>*:not(#soFormPreviewOverlay){display:none!important}.sof-overlay{position:static;display:block;padding:0;background:#fff}.sof-dialog{height:auto;width:100%;box-shadow:none;border-radius:0;overflow:visible}.sof-toolbar{display:none}.sof-scroll{overflow:visible;padding:0}.sof-paper{box-shadow:none;max-width:none;min-height:0;padding:0}}
+            `;
+            document.head.appendChild(style);
+        }
+
+        const overlay = document.createElement("div");
+        overlay.id = "soFormPreviewOverlay";
+        overlay.className = "sof-overlay";
+        overlay.setAttribute("role", "dialog");
+        overlay.setAttribute("aria-modal", "true");
+        overlay.setAttribute("aria-label", "Sales Order Form preview");
+        overlay.innerHTML = `
+            <div class="sof-dialog">
+                <div class="sof-toolbar">
+                    <div><h2>SALES ORDER FORM PREVIEW</h2><p>SOF No. ${escapeHTML(soNumber)} · document layout</p></div>
+                    <div class="sof-actions"><button type="button" class="sof-print">PRINT</button><button type="button" class="sof-close">CLOSE ✕</button></div>
+                </div>
+                <div class="sof-scroll">
+                    <div class="sof-paper">
+                        <table class="sof-header"><tr>
+                            <td class="sof-logo-cell"><img class="sof-logo" src="${logo}" alt="Greenmetal Electric Manufacturing Corporation"></td>
+                            <td class="sof-title-cell">SALES ORDER FORM</td>
+                            <td class="sof-check-cell"><div class="sof-check-row"><span class="sof-check"></span> ACCOUNTING</div><div class="sof-check-row"><span class="sof-check"></span> PURCHASING</div><div class="sof-check-row"><span class="sof-check"></span> SALES</div></td>
+                        </tr></table>
+                        <table class="sof-meta">
+                            <tr><td class="sof-label">Sold to:</td><td class="sof-value"><b>${shown(["CLIENT_NAME","clientName"])}</b></td><td class="sof-right-label">SOF No.</td><td class="sof-right-value"><b>${shown(["SO_NUMBER","soNumber"])}</b></td></tr>
+                            <tr><td class="sof-label">Billing Address</td><td class="sof-value">${shown(["BILLING_ADDRESS","billingAddress"])}</td><td class="sof-right-label">Date</td><td class="sof-right-value">${shown(["DATE_CREATION","dateCreation","DATE","date"])}</td></tr>
+                            <tr><td class="sof-label">Delivery Address</td><td class="sof-value">${shown(["DELIVERY_ADDRESS","deliveryAddress"])}</td><td class="sof-right-label">P.O Number</td><td class="sof-right-value">${shown(["PO_NUMBER","poNumber"])}</td></tr>
+                            <tr><td class="sof-label">Classification</td><td class="sof-value">${shown(["CLASSIFICATION","classification"])}</td><td class="sof-right-label">Terms</td><td class="sof-right-value">${shown(["TERMS","terms"])}</td></tr>
+                            <tr><td class="sof-label">Required Del. Date</td><td class="sof-value">${shown(["REQUIRED_DELIVERY_DATE","requiredDeliveryDate","REQUIRED_DEL_DATE"])}</td><td class="sof-right-label">J.O No.</td><td class="sof-right-value">${shown(["JOB_ORDER","jobOrder","JO"])}</td></tr>
+                            <tr><td class="sof-label">Attention</td><td class="sof-value">${shown(["ATTENTION","attention"])}</td><td class="sof-right-label">Quotation No.</td><td class="sof-right-value">${shown(["QUOTATION_NO","quotationNo","QUOTATION_NUMBER","quotationNumber"])}</td></tr>
+                            <tr><td class="sof-label">Project Name</td><td class="sof-value">${shown(["PROJECT","project"])}</td><td class="sof-right-label">Account Manager</td><td class="sof-right-value">${shown(["ACCOUNT_MANAGER","accountManager","SALES_ENGINEER","salesEngineer","SE","se"])}</td></tr>
+                            <tr><td class="sof-label">Tin Number</td><td class="sof-value">${shown(["TIN","tin"])}</td><td class="sof-right-label"></td><td class="sof-right-value"></td></tr>
+                        </table>
+                        <table class="sof-items"><thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>UNIT PRICE</th><th>EXTENDED PRICE</th></tr></thead><tbody>
+                            ${itemRows || ""}${blankRows}
+                        </tbody></table>
+                        <div class="sof-notes">***WITH SHOPDRAWING***　　　　　　　　　***WITHOUT STOCK***</div>
+                        <div class="sof-nothing">***Nothing follows*******</div><div class="sof-page-no">Page 1 of 1</div>
+                        <table class="sof-bottom">
+                            <tr><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">TOTAL</td><td class="sof-currency">₱</td><td class="sof-amount">${money(subtotal)}</td></tr>
+                            <tr><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">LESS DISCOUNT</td><td class="sof-currency">₱</td><td class="sof-amount">${money(discount)}</td></tr>
+                            <tr><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">ADDED VAT</td><td class="sof-currency">${vat ? "₱" : ""}</td><td class="sof-amount">${vat ? money(vat) : ""}</td></tr>
+                            <tr class="sof-selling"><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">TOTAL SELLING PRICE</td><td class="sof-currency">₱</td><td class="sof-amount">${money(selling)}</td></tr>
+                            <tr class="sof-gross"><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">TPC</td><td class="sof-currency"></td><td class="sof-amount">${value(["TPC","tpc"]) ? money(value(["TPC","tpc"])) : ""}</td></tr>
+                            <tr class="sof-gross"><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">GROSS PROFIT</td><td class="sof-currency">${value(["GROSS_PROFIT","grossProfit"]) ? "₱" : ""}</td><td class="sof-amount">${value(["GROSS_PROFIT","grossProfit"]) ? money(value(["GROSS_PROFIT","grossProfit"])) : ""}</td></tr>
+                            <tr class="sof-pct"><td class="sof-spacer" colspan="3"></td><td class="sof-total-label">PERCENTAGE</td><td class="sof-currency"></td><td class="sof-amount">${escapeHTML(value(["PERCENTAGE","percentage"]))}</td></tr>
+                        </table>
+                        <table class="sof-signatures">
+                            <tr><td class="sof-sign-label">Prepared by:</td><td class="sof-sign-label">Checked by:</td><td class="sof-sign-label">Approved by:</td></tr>
+                            <tr><td class="sof-sign-name">Katrina Mae S. Tagatac</td><td class="sof-sign-name">Kaye B. Ochoa</td><td class="sof-sign-name">Melannie C. Mendiola</td></tr>
+                            <tr><td class="sof-sign-role">Sales Coordinator</td><td class="sof-sign-role">Sales Account Manager</td><td class="sof-sign-role">Finance Manager</td></tr>
+                            <tr><td></td><td></td><td class="sof-dr-invoice">DR # __________________<br>Invoice # _______________</td></tr>
+                        </table>
+                        <div class="sof-company-footer">Greenmetal Electric Manufacturing Corporation: Dolores St. cor. Camia St., Dolmar Golden Hills Subd., Llano Road, Caloocan City　 Contact Nos.: 0917 708 4533 (Globe) 8356-5128 (Landline)</div>
+                        <div class="sof-code"><div>F-SAM-003</div><div>Rev. 2 06-01-23</div></div>
+                    </div>
+                </div>
+            </div>`;
+
+        const close = function() {
+            overlay.remove();
+            document.removeEventListener("keydown", escapeHandler);
+        };
+        const escapeHandler = function(event) {
+            if (event.key === "Escape") close();
+        };
+        overlay.addEventListener("click", function(event) {
+            if (event.target === overlay) close();
+        });
+        overlay.querySelector(".sof-close").addEventListener("click", close);
+        overlay.querySelector(".sof-print").addEventListener("click", function() {
+            window.print();
+        });
+        document.addEventListener("keydown", escapeHandler);
+        document.body.appendChild(overlay);
+        overlay.querySelector(".sof-close").focus();
+    }
 
     /* =====================================================
        NORMALIZE TRANSACTION RESULT
