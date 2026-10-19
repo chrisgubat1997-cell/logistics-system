@@ -5178,6 +5178,15 @@ function renderCustomerTable() {
                         EDIT
                     </button>
 
+                    <button
+                        type="button"
+                        class="customer-view-button"
+                        data-customer-id="${escapeAttribute(customerId)}"
+                        aria-label="View customer details"
+                    >
+                        VIEW
+                    </button>
+
                 </td>
 
             `;
@@ -5216,6 +5225,24 @@ function renderCustomerTable() {
             }
 
 
+            const viewButton = row.querySelector(".customer-view-button");
+
+            if (viewButton) {
+                viewButton.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    const selectedCustomer = customers.find(function (entry) {
+                        return String(getCustomerValue(entry, [
+                            "CUSTOMER_ID", "customerId", "CUSTOMERID", "ID", "id"
+                        ]) || "") === String(customerId || "");
+                    }) || customer;
+
+                    openCustomerViewModal(selectedCustomer);
+                });
+            }
+
+
             tbody.appendChild(
                 row
             );
@@ -5227,6 +5254,185 @@ function renderCustomerTable() {
     bindCustomerTableControls();
 
 }
+
+/* =========================================================
+   CUSTOMER VIEW MODAL
+========================================================= */
+function openCustomerViewModal(customer) {
+    if (!customer) {
+        alert("Customer details are not available.");
+        return;
+    }
+
+    const existingModal = document.getElementById("customerViewModal");
+    if (existingModal) existingModal.remove();
+
+    if (!document.getElementById("customerViewModalStyles")) {
+        const style = document.createElement("style");
+        style.id = "customerViewModalStyles";
+        style.textContent = `
+            .customer-view-overlay {
+                position: fixed; inset: 0; z-index: 10050;
+                display: flex; align-items: center; justify-content: center;
+                padding: 22px; background: rgba(15, 23, 42, .58);
+                backdrop-filter: blur(4px);
+                animation: customerViewFadeIn .18s ease-out;
+            }
+            .customer-view-dialog {
+                width: min(760px, 100%); max-height: min(88vh, 900px);
+                overflow: auto; background: #f8fafc; color: #172033;
+                border: 1px solid #dbe3ef; border-radius: 16px;
+                box-shadow: 0 24px 80px rgba(15, 23, 42, .28);
+                animation: customerViewSlideIn .2s ease-out;
+            }
+            .customer-view-head {
+                display: flex; align-items: flex-start; justify-content: space-between;
+                gap: 16px; padding: 22px 24px; color: white;
+                background: linear-gradient(125deg, #173b72, #315ea8);
+                border-radius: 15px 15px 0 0;
+            }
+            .customer-view-head h2 { margin: 0 0 5px; font-size: 20px; line-height: 1.3; }
+            .customer-view-head p { margin: 0; font-size: 12px; color: #dbeafe; }
+            .customer-view-close {
+                display: inline-flex; align-items: center; justify-content: center;
+                width: 34px; height: 34px; flex: 0 0 34px; border-radius: 9px;
+                border: 1px solid rgba(255,255,255,.35); background: rgba(255,255,255,.12);
+                color: #fff; font-size: 22px; cursor: pointer;
+            }
+            .customer-view-body { display: grid; gap: 14px; padding: 20px 24px 24px; }
+            .customer-view-section {
+                padding: 16px; background: #fff; border: 1px solid #e1e8f0;
+                border-radius: 11px; box-shadow: 0 2px 8px rgba(15,23,42,.025);
+            }
+            .customer-view-section h3 {
+                margin: 0 0 13px; color: #315ea8; font-size: 11px;
+                letter-spacing: .7px; text-transform: uppercase;
+            }
+            .customer-view-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px 18px; }
+            .customer-view-field { min-width: 0; }
+            .customer-view-field.wide { grid-column: 1 / -1; }
+            .customer-view-field span {
+                display: block; margin-bottom: 5px; color: #748094;
+                font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .35px;
+            }
+            .customer-view-field strong {
+                display: block; color: #1e293b; font-size: 12.5px; font-weight: 600;
+                line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere;
+            }
+            .customer-view-status {
+                display: inline-flex !important; width: fit-content; padding: 4px 9px;
+                border-radius: 20px; background: #e8f7ee; color: #187443 !important;
+                font-size: 10px !important; letter-spacing: .3px;
+            }
+            .customer-view-footer {
+                display: flex; justify-content: flex-end; padding-top: 2px;
+            }
+            .customer-view-footer button {
+                min-height: 38px; padding: 0 17px; border: 1px solid #d5dce7;
+                border-radius: 8px; background: #fff; color: #334155;
+                font: 700 11px inherit; cursor: pointer;
+            }
+            @keyframes customerViewFadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes customerViewSlideIn { from { opacity: 0; transform: translateY(10px) scale(.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+            @media (max-width: 560px) {
+                .customer-view-overlay { padding: 10px; }
+                .customer-view-head { padding: 18px; }
+                .customer-view-head h2 { font-size: 17px; }
+                .customer-view-body { padding: 12px; }
+                .customer-view-grid { grid-template-columns: 1fr; }
+                .customer-view-field.wide { grid-column: auto; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    const value = function (keys) {
+        const result = getCustomerValue(customer, keys);
+        return result == null || String(result).trim() === "" ? "—" : String(result);
+    };
+    const field = function (label, keys, wide, status) {
+        const result = value(keys);
+        return `<div class="customer-view-field${wide ? " wide" : ""}">
+            <span>${escapeHTML(label)}</span>
+            ${status && result !== "—"
+                ? `<strong class="customer-view-status">${escapeHTML(result)}</strong>`
+                : `<strong>${escapeHTML(result)}</strong>`}
+        </div>`;
+    };
+    const clientName = value(["CLIENT_NAME", "clientName", "CLIENT", "client"]);
+    const customerId = value(["CUSTOMER_ID", "customerId", "CUSTOMERID", "ID", "id"]);
+    const status = value(["STATUS", "status"]) || "ACTIVE";
+
+    const modal = document.createElement("div");
+    modal.id = "customerViewModal";
+    modal.className = "customer-view-overlay";
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    modal.setAttribute("aria-label", "Customer details");
+    modal.innerHTML = `
+        <div class="customer-view-dialog">
+            <header class="customer-view-head">
+                <div>
+                    <h2>${escapeHTML(clientName)}</h2>
+                    <p>Customer Details · ${escapeHTML(customerId)}</p>
+                </div>
+                <button type="button" class="customer-view-close" aria-label="Close customer details">×</button>
+            </header>
+            <div class="customer-view-body">
+                <section class="customer-view-section">
+                    <h3>Customer Identification</h3>
+                    <div class="customer-view-grid">
+                        ${field("Customer ID", ["CUSTOMER_ID", "customerId", "CUSTOMERID", "ID", "id"])}
+                        ${field("Status", ["STATUS", "status"], false, true)}
+                        ${field("Client Name", ["CLIENT_NAME", "clientName", "CLIENT", "client"])}
+                        ${field("Attention / Contact Person", ["ATTENTION", "attention"])}
+                        ${field("TIN", ["TIN", "tin"])}
+                    </div>
+                </section>
+                <section class="customer-view-section">
+                    <h3>Contact Information</h3>
+                    <div class="customer-view-grid">
+                        ${field("Contact Number", ["CONTACT_NUMBER", "contactNumber", "CONTACT", "contact", "PHONE", "phone"])}
+                        ${field("Email Address", ["EMAIL", "email", "EMAIL_ADDRESS", "emailAddress"])}
+                    </div>
+                </section>
+                <section class="customer-view-section">
+                    <h3>Addresses</h3>
+                    <div class="customer-view-grid">
+                        ${field("Billing Address", ["BILLING_ADDRESS", "billingAddress"], true)}
+                        ${field("Delivery Address", ["DELIVERY_ADDRESS", "deliveryAddress"], true)}
+                    </div>
+                </section>
+                <section class="customer-view-section">
+                    <h3>System Information</h3>
+                    <div class="customer-view-grid">
+                        ${field("Created At", ["CREATED_AT", "createdAt", "DATE_CREATED", "dateCreated"])}
+                        ${field("Updated At", ["UPDATED_AT", "updatedAt", "DATE_UPDATED", "dateUpdated"])}
+                    </div>
+                </section>
+                <div class="customer-view-footer">
+                    <button type="button" class="customer-view-dismiss">Close</button>
+                </div>
+            </div>
+        </div>`;
+
+    const closeModal = function () {
+        modal.remove();
+        document.removeEventListener("keydown", handleEscape);
+    };
+    const handleEscape = function (event) {
+        if (event.key === "Escape") closeModal();
+    };
+    modal.addEventListener("click", function (event) {
+        if (event.target === modal) closeModal();
+    });
+    modal.querySelector(".customer-view-close").addEventListener("click", closeModal);
+    modal.querySelector(".customer-view-dismiss").addEventListener("click", closeModal);
+    document.addEventListener("keydown", handleEscape);
+    document.body.appendChild(modal);
+    modal.querySelector(".customer-view-close").focus();
+}
+
 
 /* =========================================================
    CUSTOMER TABLE SEARCH / FILTER
