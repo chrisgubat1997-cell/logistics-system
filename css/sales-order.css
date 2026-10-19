@@ -1988,3 +1988,7 @@
     .so-header-actions { width: 100%; }
     .so-header-actions > button { flex: 1 1 auto; }
 }
+
+
+/* SALES ORDER TABLE HEADER */
+.so-table-header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 18px 15px;border-bottom:1px solid #e5e9ee;background:#fff}.so-table-title h2{margin:0;color:#27344d;font-size:15px;font-weight:750}.so-table-title p{margin:4px 0 0;color:#7a8495;font-size:11px;line-height:1.5}@media(max-width:640px){.so-table-header{padding:15px 12px 13px}}
