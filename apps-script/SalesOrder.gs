@@ -3250,11 +3250,15 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
     if (Object.prototype.toString.call(value) === "[object Date]" && !isNaN(value.getTime())) {
       return Utilities.formatDate(value, Session.getScriptTimeZone(), "d-MMM-yy");
     }
-    const parsed = new Date(value);
-    if (!isNaN(parsed.getTime()) && String(value).indexOf("T") >= 0) {
+    const raw = String(value);
+    const isoDate = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const parsed = isoDate
+      ? new Date(Number(isoDate[1]), Number(isoDate[2]) - 1, Number(isoDate[3]), 12, 0, 0)
+      : new Date(value);
+    if (!isNaN(parsed.getTime()) && (isoDate || raw.indexOf("T") >= 0)) {
       return Utilities.formatDate(parsed, Session.getScriptTimeZone(), "d-MMM-yy");
     }
-    return String(value);
+    return raw;
   };
   const itemRows = items.map(function(item, index) {
     item = item || {};
@@ -3297,7 +3301,7 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
     ".items{margin-top:10px}.items th{height:17px;background:#000;color:#fff;border:1px solid #333;font-size:8px;text-align:center;padding:3px 2px}.items td{border-left:1px solid #888;border-right:1px solid #888;border-bottom:1px solid #ddd;height:15px;padding:2px 4px;vertical-align:middle}.items th:nth-child(1){width:5.5%}.items th:nth-child(2){width:50%}.items th:nth-child(3){width:6%}.items th:nth-child(4){width:6%}.items th:nth-child(5){width:15%}.items th:nth-child(6){width:17.5%}.item-row td{height:27px}.item-no{font-weight:bold}.description{overflow-wrap:anywhere}.sub-description{font-size:7px;margin-top:2px}.center{text-align:center}.number{text-align:right;white-space:nowrap}" +
     ".notes{height:22px;text-align:center;font-weight:bold;font-style:italic;color:#e00000;font-size:8px}.nothing{height:16px;text-align:center;font-weight:bold;font-style:italic}.page-no{height:16px;text-align:center;font-weight:bold;font-style:italic;border-bottom:1px solid #888}" +
     ".bottom{width:100%;margin-top:0}.bottom td{border:1px solid #aaa;padding:3px 5px;height:16px}.bottom .spacer{border-left:0;border-right:0}.bottom .label{font-weight:600}.bottom .amount{text-align:right;white-space:nowrap;width:19%}.bottom .currency{text-align:center;width:4%}.bottom .total-selling td{background:#bdbdbd;font-weight:bold}.bottom .total-selling .amount{font-size:10px}.bottom .gross td{background:#bdbdbd;font-weight:bold}.bottom .pct td{background:#bdbdbd;font-weight:bold}" +
-    ".signatures{margin-top:8px}.signatures td{width:33.33%;border:0;border-top:1px solid #aaa;padding:4px 3px;text-align:center;height:21px;vertical-align:bottom}.signature-label{text-align:left!important;height:18px!important;vertical-align:top!important}.signature-name{font-weight:bold;text-decoration:underline}.signature-role{font-size:7px}.dr-invoice{text-align:right;height:16px;border:0!important}.company-footer{margin-top:8px;border-top:1px solid #aaa;border-bottom:1px solid #aaa;padding:4px 2px;font-size:6.5px;white-space:nowrap}.form-code{margin-top:8px;font-size:7px}.form-code div{margin-top:3px}" +
+    ".signatures{margin-top:8px}.signatures td{width:33.33%;border:0;border-top:1px solid #aaa;padding:4px 3px;text-align:center;height:21px;vertical-align:bottom}.signature-label{text-align:left!important;height:18px!important;vertical-align:top!important}.signature-name{font-weight:bold;text-decoration:underline;height:18px}.signature-role{font-size:7px;height:16px}.signature-gap td{height:11.5px;padding:0;border:0}.dr-invoice{text-align:right;height:15px;border:0!important}.company-footer{margin-top:8px;border-top:1px solid #aaa;border-bottom:1px solid #aaa;padding:4px 2px;font-size:6.5px;white-space:nowrap}.form-code{margin-top:8px;font-size:7px}.form-code div{margin-top:3px}" +
     "</style></head><body>" +
     "<table class='header'><tr><td class='logo-cell'><img class='logo' src='" + logoUrl + "'></td>" +
     "<td class='title-cell'>SALES ORDER FORM</td><td class='check-cell'>" +
@@ -3325,9 +3329,13 @@ function createSalesOrderPDF_(payload, soFolder, soId, soNumber, year) {
     "<tr class='gross'><td class='spacer' colspan='3'></td><td class='label'>GROSS PROFIT</td><td class='currency'>" + (grossProfit !== "" ? "&#8369;" : "") + "</td><td class='amount'>" + (grossProfit !== "" ? money(grossProfit) : "") + "</td></tr>" +
     "<tr class='pct'><td class='spacer' colspan='3'></td><td class='label'>PERCENTAGE</td><td class='currency'></td><td class='amount'>" + (percentage !== "" ? escapeHtml(percentage) : "") + "</td></tr></table>" +
     "<table class='signatures'><tr><td class='signature-label'>Prepared by:</td><td class='signature-label'>Checked by:</td><td class='signature-label'>Approved by:</td></tr>" +
+    "<tr class='signature-gap'><td></td><td></td><td></td></tr>" +
     "<tr><td class='signature-name'>" + escapeHtml(preparedBy) + "</td><td class='signature-name'>" + escapeHtml(checkedBy) + "</td><td class='signature-name'>" + escapeHtml(approvedBy) + "</td></tr>" +
     "<tr><td class='signature-role'>Sales Coordinator</td><td class='signature-role'>Sales Account Manager</td><td class='signature-role'>Finance Manager</td></tr>" +
-    "<tr><td></td><td></td><td class='dr-invoice'>DR # __________________<br>Invoice # _______________</td></tr></table>" +
+    "<tr class='signature-gap'><td></td><td></td><td></td></tr>" +
+    "<tr><td></td><td></td><td class='dr-invoice'>DR # __________________</td></tr>" +
+    "<tr class='signature-gap'><td></td><td></td><td></td></tr>" +
+    "<tr><td></td><td></td><td class='dr-invoice'>Invoice # _______________</td></tr></table>" +
     "<div class='company-footer'>Greenmetal Electric Manufacturing Corporation: Dolores St. cor. Camia St., Dolmar Golden Hills Subd., Llano Road, Caloocan City　 Contact Nos.: 0917 708 4533 (Globe) 8356-5128 (Landline)</div>" +
     "<div class='form-code'><div>F-SAM-003</div><div>Rev. 2 06-01-23</div></div></body></html>";
   const pdfBlob = HtmlService.createHtmlOutput(html).getBlob().getAs(MimeType.PDF).setName(soNumber + ".pdf");
