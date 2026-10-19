@@ -1615,7 +1615,8 @@ async function loadSOList(
             const qty = toNumber(getSOValue(item, ["QTY", "qty", "QUANTITY", "quantity"]));
             const unitPrice = toNumber(getSOValue(item, ["UNIT_PRICE", "unitPrice", "AMOUNT", "amount"]));
             const total = toNumber(getSOValue(item, ["TOTAL", "total", "EXTENDED_PRICE", "extendedPrice"])) || qty * unitPrice;
-            const number = getSOValue(item, ["ITEM_NUMBER", "itemNumber", "LINE_NUMBER", "lineNumber"]) || (index + 1) + ".0";
+            const rawNumber = getSOValue(item, ["ITEM_NUMBER", "itemNumber", "LINE_NUMBER", "lineNumber"]) || (index + 1);
+            const number = isFinite(Number(rawNumber)) ? Number(rawNumber).toFixed(1) : rawNumber;
             const name = getSOValue(item, ["ITEM_NAME", "itemName", "ITEM_CODE", "itemCode", "ITEM", "item"]);
             const desc = getSOValue(item, ["DESCRIPTION", "description"]);
             return "<tr class='sof-item'><td class='sof-center'>" + escapeHTML(number) +
@@ -1633,7 +1634,8 @@ async function loadSOList(
         const discount = toNumber(getSOValue(so, ["DISCOUNT", "discount"]));
         const vatable = toNumber(getSOValue(so, ["VATABLE", "vatable", "VATABLE_SALES", "vatableSales"]));
         const vat = toNumber(getSOValue(so, ["VAT_AMOUNT", "vatAmount", "VAT", "vat"]));
-        const selling = vatable || (subtotal - discount);
+        const grandTotal = toNumber(getSOValue(so, ["GRAND_TOTAL", "grandTotal"]));
+        const selling = grandTotal || vatable || (subtotal - discount);
         const logo = "https://raw.githubusercontent.com/chrisgubat1997-cell/logistics-system/main/assets/logo.png";
 
         const old = document.getElementById("soFormPreviewOverlay");
