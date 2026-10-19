@@ -1600,6 +1600,19 @@ async function loadSOList(
             const v = value(keys).trim();
             return v ? escapeHTML(v) : "&nbsp;";
         };
+        const dateShown = function(keys) {
+            const raw = value(keys).trim();
+            if (!raw) return "&nbsp;";
+            const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (!match && raw.indexOf("T") === -1) return escapeHTML(raw);
+            const date = match
+                ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12, 0, 0)
+                : new Date(raw);
+            if (isNaN(date.getTime())) return escapeHTML(raw);
+            return escapeHTML(date.getDate() + "-" +
+                date.toLocaleString("en-US", { month: "short" }) + "-" +
+                String(date.getFullYear()).slice(-2));
+        };
         const money = function(v) {
             return toNumber(v).toLocaleString("en-PH", {
                 minimumFractionDigits: 2,
@@ -1653,7 +1666,7 @@ async function loadSOList(
                 .sof-items{margin-top:12px}.sof-items th{height:22px;background:#000;color:#fff;border:1px solid #333;font-size:9px;text-align:center;padding:3px}.sof-items th:nth-child(1){width:6%}.sof-items th:nth-child(2){width:49%}.sof-items th:nth-child(3){width:6%}.sof-items th:nth-child(4){width:7%}.sof-items th:nth-child(5){width:15%}.sof-items th:nth-child(6){width:17%}.sof-items td{border-left:1px solid #888;border-right:1px solid #888;border-bottom:1px solid #ddd;height:18px;padding:3px 5px;vertical-align:middle}.sof-items .sof-item td{height:34px}.sof-center{text-align:center}.sof-number{text-align:right;white-space:nowrap}.sof-desc{font-size:8px;margin-top:3px}
                 .sof-notes{height:25px;text-align:center;font-weight:bold;font-style:italic;color:#e00000;padding-top:6px}.sof-nothing{text-align:center;font-weight:bold;font-style:italic;height:20px}.sof-page-no{text-align:center;font-weight:bold;font-style:italic;height:21px;border-bottom:1px solid #aaa}
                 .sof-bottom td{border:1px solid #aaa;padding:5px;height:22px}.sof-bottom .sof-spacer{border-left:0;border-right:0}.sof-bottom .sof-total-label{font-weight:600}.sof-bottom .sof-currency{text-align:center;width:4%}.sof-bottom .sof-amount{text-align:right;white-space:nowrap;width:19%}.sof-bottom .sof-selling td{background:#bdbdbd;font-weight:bold}.sof-bottom .sof-selling .sof-amount{font-size:12px}.sof-bottom .sof-gross td,.sof-bottom .sof-pct td{background:#bdbdbd;font-weight:bold}
-                .sof-signatures{margin-top:12px}.sof-signatures td{width:33.33%;border:0;padding:5px 4px;text-align:center;height:24px;vertical-align:bottom}.sof-signatures .sof-sign-label{text-align:left;vertical-align:top;height:22px}.sof-signatures .sof-sign-name{font-weight:bold;text-decoration:underline}.sof-signatures .sof-sign-role{font-size:8px}.sof-dr-invoice{text-align:right;height:35px}
+                .sof-signatures{margin-top:12px}.sof-signatures td{width:33.33%;border:0;padding:5px 4px;text-align:center;height:24px;vertical-align:bottom}.sof-signatures .sof-sign-label{text-align:left;vertical-align:top;height:18px}.sof-signatures .sof-sign-name{font-weight:bold;text-decoration:underline;height:18px}.sof-signatures .sof-sign-role{font-size:7px;height:16px}.sof-signatures .sof-sign-gap td{height:11.5px;padding:0;border:0}.sof-dr-invoice{text-align:right;height:15px}
                 .sof-company-footer{margin-top:12px;border-top:1px solid #aaa;border-bottom:1px solid #aaa;padding:5px 2px;font-size:7px;text-align:center}.sof-code{font-size:8px;margin-top:10px}.sof-code div{margin-top:3px}
                 @keyframes sofFade{from{opacity:0}to{opacity:1}}
                 @media(max-width:650px){.sof-overlay{padding:5px}.sof-dialog{height:97vh}.sof-scroll{padding:8px}.sof-paper{padding:12px;min-width:650px}.sof-toolbar{padding:10px}.sof-toolbar h2{font-size:12px}}
@@ -1683,10 +1696,10 @@ async function loadSOList(
                         </tr></table>
                         <table class="sof-meta">
                             <tr><td class="sof-label">Sold to:</td><td class="sof-value"><b>${shown(["CLIENT_NAME","clientName"])}</b></td><td class="sof-right-label">SOF No.</td><td class="sof-right-value"><b>${shown(["SO_NUMBER","soNumber"])}</b></td></tr>
-                            <tr><td class="sof-label">Billing Address</td><td class="sof-value">${shown(["BILLING_ADDRESS","billingAddress"])}</td><td class="sof-right-label">Date</td><td class="sof-right-value">${shown(["DATE_CREATION","dateCreation","DATE","date"])}</td></tr>
+                            <tr><td class="sof-label">Billing Address</td><td class="sof-value">${shown(["BILLING_ADDRESS","billingAddress"])}</td><td class="sof-right-label">Date</td><td class="sof-right-value">${dateShown(["DATE_CREATION","dateCreation","DATE","date"])}</td></tr>
                             <tr><td class="sof-label">Delivery Address</td><td class="sof-value">${shown(["DELIVERY_ADDRESS","deliveryAddress"])}</td><td class="sof-right-label">P.O Number</td><td class="sof-right-value">${shown(["PO_NUMBER","poNumber"])}</td></tr>
                             <tr><td class="sof-label">Classification</td><td class="sof-value">${shown(["CLASSIFICATION","classification"])}</td><td class="sof-right-label">Terms</td><td class="sof-right-value">${shown(["TERMS","terms"])}</td></tr>
-                            <tr><td class="sof-label">Required Del. Date</td><td class="sof-value">${shown(["REQUIRED_DELIVERY_DATE","requiredDeliveryDate","REQUIRED_DEL_DATE"])}</td><td class="sof-right-label">J.O No.</td><td class="sof-right-value">${shown(["JOB_ORDER","jobOrder","JO"])}</td></tr>
+                            <tr><td class="sof-label">Required Del. Date</td><td class="sof-value">${dateShown(["REQUIRED_DELIVERY_DATE","requiredDeliveryDate","REQUIRED_DEL_DATE"])}</td><td class="sof-right-label">J.O No.</td><td class="sof-right-value">${shown(["JOB_ORDER","jobOrder","JO"])}</td></tr>
                             <tr><td class="sof-label">Attention</td><td class="sof-value">${shown(["ATTENTION","attention"])}</td><td class="sof-right-label">Quotation No.</td><td class="sof-right-value">${shown(["QUOTATION_NO","quotationNo","QUOTATION_NUMBER","quotationNumber"])}</td></tr>
                             <tr><td class="sof-label">Project Name</td><td class="sof-value">${shown(["PROJECT","project"])}</td><td class="sof-right-label">Account Manager</td><td class="sof-right-value">${shown(["ACCOUNT_MANAGER","accountManager","SALES_ENGINEER","salesEngineer","SE","se"])}</td></tr>
                             <tr><td class="sof-label">Tin Number</td><td class="sof-value">${shown(["TIN","tin"])}</td><td class="sof-right-label"></td><td class="sof-right-value"></td></tr>
@@ -1707,9 +1720,13 @@ async function loadSOList(
                         </table>
                         <table class="sof-signatures">
                             <tr><td class="sof-sign-label">Prepared by:</td><td class="sof-sign-label">Checked by:</td><td class="sof-sign-label">Approved by:</td></tr>
+                            <tr class="sof-sign-gap"><td></td><td></td><td></td></tr>
                             <tr><td class="sof-sign-name">Katrina Mae S. Tagatac</td><td class="sof-sign-name">Kaye B. Ochoa</td><td class="sof-sign-name">Melannie C. Mendiola</td></tr>
                             <tr><td class="sof-sign-role">Sales Coordinator</td><td class="sof-sign-role">Sales Account Manager</td><td class="sof-sign-role">Finance Manager</td></tr>
-                            <tr><td></td><td></td><td class="sof-dr-invoice">DR # __________________<br>Invoice # _______________</td></tr>
+                            <tr class="sof-sign-gap"><td></td><td></td><td></td></tr>
+                            <tr><td></td><td></td><td class="sof-dr-invoice">DR # __________________</td></tr>
+                            <tr class="sof-sign-gap"><td></td><td></td><td></td></tr>
+                            <tr><td></td><td></td><td class="sof-dr-invoice">Invoice # _______________</td></tr>
                         </table>
                         <div class="sof-company-footer">Greenmetal Electric Manufacturing Corporation: Dolores St. cor. Camia St., Dolmar Golden Hills Subd., Llano Road, Caloocan City　 Contact Nos.: 0917 708 4533 (Globe) 8356-5128 (Landline)</div>
                         <div class="sof-code"><div>F-SAM-003</div><div>Rev. 2 06-01-23</div></div>
