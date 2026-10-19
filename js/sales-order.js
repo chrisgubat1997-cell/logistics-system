@@ -1636,7 +1636,7 @@ async function loadSOList(
         const vat = toNumber(getSOValue(so, ["VAT_AMOUNT", "vatAmount", "VAT", "vat"]));
         const grandTotal = toNumber(getSOValue(so, ["GRAND_TOTAL", "grandTotal"]));
         const selling = grandTotal || vatable || (subtotal - discount);
-        const logo = "https://raw.githubusercontent.com/chrisgubat1997-cell/logistics-system/main/asset/drlogo.png";
+        const logo = "https://raw.githubusercontent.com/chrisgubat1997-cell/logistics-system/main/assets/drlogo.png";
 
         const old = document.getElementById("soFormPreviewOverlay");
         if (old) old.remove();
