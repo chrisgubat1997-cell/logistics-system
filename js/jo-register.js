@@ -27,24 +27,39 @@
   }
   function filteredOrders() {
     const q=String($("joSearch")&&$("joSearch").value||"").trim().toLowerCase();
-    return orders.filter(function(so){return !q||[so.soNumber,so.clientName,so.project,so.poNumber].some(function(v){return String(v||"").toLowerCase().includes(q);});});
+    const joFilter=String($("joStatusFilter")&&$("joStatusFilter").value||"all");
+    const adjustmentFilter=String($("joAdjustmentFilter")&&$("joAdjustmentFilter").value||"all");
+    return orders.filter(function(so){
+      const hasJO=String(so.jobOrder||"").trim()!=="";
+      const adjusted=!!so.deliveryDateAdjusted;
+      if(joFilter==="assigned"&&!hasJO)return false;
+      if(joFilter==="pending"&&hasJO)return false;
+      if(adjustmentFilter==="adjusted"&&!adjusted)return false;
+      if(adjustmentFilter==="not-adjusted"&&adjusted)return false;
+      return !q||[so.soNumber,so.clientName,so.project,so.poNumber,so.jobOrder].some(function(v){return String(v||"").toLowerCase().includes(q);});
+    });
   }
   function render() {
     const tbody=$("joRows");if(!tbody)return;
     const list=filteredOrders();
-    if(!list.length){tbody.innerHTML='<tr><td colspan="7" class="jo-empty">'+(orders.length?'No Sales Orders match your search.':'No Sales Orders without a JO Number were found.')+'</td></tr>';}
+    if(!list.length){tbody.innerHTML='<tr><td colspan="9" class="jo-empty">'+(orders.length?'No Sales Orders match your filters.':'No Sales Orders were found.')+'</td></tr>';}
     else tbody.innerHTML=list.map(function(so){
+      const hasJO=String(so.jobOrder||"").trim()!=="";
       const dateAvailable=so.deliveryDateColumnAvailable!==false;
+      const adjusted=!!so.deliveryDateAdjusted;
+      const currentDate=String(so.requiredDeliveryDate||"");
       return '<tr data-so="'+safe(so.soNumber)+'">'+
         '<td><div class="jo-so-number">'+safe(so.soNumber)+'</div><div class="jo-project">Created: '+safe(fmtDate(so.dateCreation))+'</div></td>'+
         '<td><div class="jo-client">'+safe(so.clientName||"—")+'</div><div class="jo-project">'+safe(so.project||"No project specified")+'</div></td>'+
         '<td>'+safe(so.poNumber||"—")+'</td>'+
-        '<td class="jo-date-text">'+safe(fmtDate(so.requiredDeliveryDate))+'</td>'+
-        '<td><input type="text" class="jo-number-input" maxlength="100" required placeholder="Enter JO Number" aria-label="JO Number for '+safe(so.soNumber)+'"></td>'+
-        '<td><input type="date" class="jo-date-input" value="'+safe(so.requiredDeliveryDate||"")+'" '+(!dateAvailable?'disabled title="No delivery-date column exists in SALES_ORDERS"':'')+' aria-label="Adjusted delivery date for '+safe(so.soNumber)+'"><div class="jo-project">'+(dateAvailable?'Leave unchanged if no adjustment is needed.':'Delivery-date column not found.')+'</div></td>'+
-        '<td><button type="button" class="jo-row-save" data-jo-save="'+safe(so.soNumber)+'">SAVE</button></td></tr>';
+        '<td class="jo-date-text">'+safe(fmtDate(currentDate))+'</td>'+
+        '<td>'+(hasJO?'<div class="jo-client">'+safe(so.jobOrder)+'</div>':'<span class="jo-muted">Not assigned</span>')+'</td>'+
+        '<td><span class="jo-status '+(hasJO?'jo-status-assigned':'jo-status-pending')+'">'+(hasJO?'With JO':'Without JO')+'</span></td>'+
+        '<td><span class="jo-status '+(adjusted?'jo-status-adjusted':'jo-status-none')+'">'+(adjusted?'Adjusted':'Not Adjusted')+'</span>'+(adjusted&&so.deliveryDateAdjustedAt?'<div class="jo-project">Updated: '+safe(fmtDate(so.deliveryDateAdjustedAt))+'</div>':'')+'</td>'+
+        '<td><input type="date" class="jo-date-input" value="'+safe(currentDate)+'" '+(!dateAvailable?'disabled title="No delivery-date column exists in SALES_ORDERS"':'')+' aria-label="Adjusted delivery date for '+safe(so.soNumber)+'"><div class="jo-project">'+(adjusted?'Previously adjusted; change only if needed.':'Leave unchanged if no adjustment is needed.')+'</div></td>'+
+        '<td>'+(hasJO?'<button type="button" class="jo-row-save" data-jo-save="'+safe(so.soNumber)+'">SAVE DATE</button>':'<input type="text" class="jo-number-input" maxlength="100" required placeholder="Enter JO Number" aria-label="JO Number for '+safe(so.soNumber)+'"><button type="button" class="jo-row-save" data-jo-save="'+safe(so.soNumber)+'">SAVE JO</button>')+'</td></tr>';
     }).join("");
-    $("joCount").textContent=list.length+" Sales Order"+(list.length===1?"":"s");
+    $("joCount").textContent=list.length+" of "+orders.length+" Sales Order"+(orders.length===1?"":"s");
   }
   async function load() {
     const refresh=$("joRefreshBtn");if(refresh){refresh.disabled=true;refresh.textContent="Loading…";}
@@ -54,7 +69,7 @@
       const result=await api("getJORegisterData",{});
       orders=Array.isArray(result.salesOrders)?result.salesOrders:[];
       render();
-      notice(orders.length+" Sales Order"+(orders.length===1?"":"s")+" without a JO Number loaded.","success");
+      notice(orders.length+" Sales Order"+(orders.length===1?"":"s")+" loaded, including assigned and unassigned JO records.","success");
     }catch(error){
       orders=[];render();notice("Unable to load JO Register: "+error.message,"error");
       if($("joRows"))$("joRows").innerHTML='<tr><td colspan="7" class="jo-empty">Could not load Sales Orders. Check your session and Production account access.</td></tr>';
@@ -66,15 +81,17 @@
     const joInput=row.querySelector(".jo-number-input");
     const dateInput=row.querySelector(".jo-date-input");
     const jobOrder=String(joInput&&joInput.value||"").trim();
+    const existing=orders.find(function(so){return String(so.soNumber)===String(soNumber);});
+    const hasExistingJO=!!(existing&&String(existing.jobOrder||"").trim());
     const deliveryDate=String(dateInput&&dateInput.value||"").trim();
-    if(!jobOrder){notice("Enter a manual JO Number for "+soNumber+".","error");joInput&&joInput.focus();return;}
+    if(!hasExistingJO&&!jobOrder){notice("Enter a manual JO Number for "+soNumber+".","error");joInput&&joInput.focus();return;}
     if(jobOrder.length>100||/[\r\n]/.test(jobOrder)){notice("JO Number must be a single line with 100 characters or fewer.","error");joInput.focus();return;}
     button.disabled=true;button.textContent="SAVING…";
     try{
-      const result=await api("updateJORegisterEntry",{soNumber:soNumber,jobOrder:jobOrder,deliveryDate:deliveryDate});
+      const result=await api("updateJORegisterEntry",{soNumber:soNumber,jobOrder:jobOrder,deliveryDate:deliveryDate,adjustmentOnly:hasExistingJO});
       notice(result.message||("Saved "+soNumber+"."),"success");
       await load();
-    }catch(error){notice("Not saved: "+error.message,"error");button.disabled=false;button.textContent="SAVE";}
+    }catch(error){notice("Not saved: "+error.message,"error");button.disabled=false;button.textContent=hasExistingJO?"SAVE DATE":"SAVE JO";}
   }
   async function initialize() {
     if(!token()){notice("Login session not found. Please log in again.","error");if($("joRows"))$("joRows").innerHTML='<tr><td colspan="7" class="jo-empty">Please log in again to use JO Register.</td></tr>';return;}
@@ -82,6 +99,8 @@
       initialized=true;
       if($("joRefreshBtn"))$("joRefreshBtn").addEventListener("click",load);
       if($("joSearch"))$("joSearch").addEventListener("input",render);
+      if($("joStatusFilter"))$("joStatusFilter").addEventListener("change",render);
+      if($("joAdjustmentFilter"))$("joAdjustmentFilter").addEventListener("change",render);
       if($("joRows"))$("joRows").addEventListener("click",function(event){const button=event.target.closest("[data-jo-save]");if(button)save(button);});
     }
     await load();
