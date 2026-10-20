@@ -2032,3 +2032,10 @@
 
 /* SALES ORDER TABLE HEADER */
 .so-table-header{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 18px 15px;border-bottom:1px solid #e5e9ee;background:#fff}.so-table-title h2{margin:0;color:#27344d;font-size:15px;font-weight:750}.so-table-title p{margin:4px 0 0;color:#7a8495;font-size:11px;line-height:1.5}@media(max-width:640px){.so-table-header{padding:15px 12px 13px}}
+
+
+/* Post Sales Order to Production action */
+.so-action-cell{min-width:170px;white-space:normal}
+.so-post-production-button{display:inline-block;margin:4px 0 0 5px;padding:6px 9px;border:1px solid #166534;border-radius:6px;background:#166534;color:#fff;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap}
+.so-post-production-button:hover{background:#14532d}
+.so-post-production-button:disabled{background:#dcfce7;color:#166534;border-color:#bbf7d0;cursor:default;white-space:normal}
