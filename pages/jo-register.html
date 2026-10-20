@@ -4,6 +4,13 @@
     <button type="button" class="jo-refresh" id="joRefreshBtn">↻ Refresh</button>
   </header>
   <div class="jo-notice" id="joNotice" role="status">Loading Sales Orders…</div>
+  <section class="jo-summary" id="joSummaryCards" aria-label="Sales Order summary">
+    <button type="button" class="jo-stat active" data-jo-card="all" aria-pressed="true"><small>All Sales Orders</small><strong id="joTotalCard">—</strong><span>Show all orders</span></button>
+    <button type="button" class="jo-stat" data-jo-card="assigned" aria-pressed="false"><small>With JO</small><strong id="joAssignedCard">—</strong><span>JO already assigned</span></button>
+    <button type="button" class="jo-stat" data-jo-card="pending" aria-pressed="false"><small>Without JO</small><strong id="joPendingCard">—</strong><span>Needs JO assignment</span></button>
+    <button type="button" class="jo-stat" data-jo-card="adjusted" aria-pressed="false"><small>RDD Adjusted</small><strong id="joAdjustedCard">—</strong><span>Delivery date changed</span></button>
+    <button type="button" class="jo-stat" data-jo-card="not-adjusted" aria-pressed="false"><small>RDD Not Adjusted</small><strong id="joNotAdjustedCard">—</strong><span>No delivery date adjustment</span></button>
+  </section>
   <section class="jo-panel">
     <div class="jo-toolbar"><div><h2>All Sales Orders</h2><p>View every Sales Order and filter by JO assignment or delivery-date adjustment status.</p></div><div class="jo-filters"><div class="jo-filter-wrap"><label for="joStatusFilter">JO Status</label><select id="joStatusFilter"><option value="all">All JO Status</option><option value="assigned">With JO</option><option value="pending">Without JO</option></select></div><div class="jo-filter-wrap"><label for="joAdjustmentFilter">Delivery Date Adjustment</label><select id="joAdjustmentFilter"><option value="all">All Adjustment Status</option><option value="adjusted">Adjusted</option><option value="not-adjusted">Not Adjusted</option></select></div><div class="jo-search-wrap"><label for="joSearch">Search Sales Orders</label><input id="joSearch" type="search" placeholder="SO Number, client, project or PO…"></div></div>
     <div class="jo-table-wrap"><table class="jo-table"><thead><tr><th>SO Number</th><th>Client / Project</th><th>PO Number</th><th>Current RDD</th><th>JO Number</th><th>JO Status</th><th>Adjustment Status</th><th>Adjusted Delivery Date</th><th>Action</th></tr></thead><tbody id="joRows"><tr><td colspan="9" class="jo-empty">Loading Sales Orders…</td></tr></tbody></table></div>
