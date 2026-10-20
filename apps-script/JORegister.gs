@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    JO REGISTER
    Uses existing SALES_ORDERS records only.
-   Access: active "admin" username with PRODUCTION role.
+   Access: active user account with PRODUCTION role.
 ========================================================= */
 
 function requireJORegisterAccess_(payload) {
@@ -21,9 +21,7 @@ function requireJORegisterAccess_(payload) {
   }
 
   const sessionUsername = String(session.username || "").trim().toLowerCase();
-  if (sessionUsername !== "admin") {
-    throw new Error("Access denied. Only the authorized admin username may use JO Register.");
-  }
+  if (!sessionUsername) throw new Error("Invalid login session. Please log in again.");
 
   const sheet = getSheet(CONFIG.SHEETS.USERS);
   const values = sheet.getDataRange().getValues();
