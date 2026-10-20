@@ -2039,3 +2039,11 @@
 .so-post-production-button{display:inline-block;margin:4px 0 0 5px;padding:6px 9px;border:1px solid #166534;border-radius:6px;background:#166534;color:#fff;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap}
 .so-post-production-button:hover{background:#14532d}
 .so-post-production-button:disabled{background:#dcfce7;color:#166534;border-color:#bbf7d0;cursor:default;white-space:normal}
+
+
+/* Sales Order table: compact key columns and clear posting state. */
+.so-table th:nth-child(1), .so-table td:nth-child(1) { width: 125px; min-width: 125px; max-width: 125px; padding-left: 9px; padding-right: 9px; }
+.so-table th:nth-child(2), .so-table td:nth-child(2) { width: 95px; min-width: 95px; max-width: 95px; padding-left: 8px; padding-right: 8px; }
+.so-table th:nth-child(3), .so-table td:nth-child(3) { width: 88px; min-width: 88px; max-width: 88px; padding-left: 8px; padding-right: 8px; }
+.so-table th:nth-child(7), .so-table td:nth-child(7) { width: 105px; min-width: 105px; max-width: 105px; padding-left: 8px; padding-right: 8px; }
+.so-table th:nth-child(10), .so-table td:nth-child(10) { min-width: 125px; }
