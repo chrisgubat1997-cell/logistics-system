@@ -1,0 +1,31 @@
+<section class="production-orders-page">
+  <style>
+    .production-orders-page{padding:22px;color:var(--text-primary,#172033)}
+    .poq-header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+    .poq-header h1{margin:0;font-size:25px}.poq-header p{margin:6px 0 0;color:var(--text-secondary,#64748b);font-size:13px}
+    .poq-actions{display:flex;gap:8px;flex-wrap:wrap}.poq-btn{border:1px solid #cbd5e1;border-radius:8px;padding:9px 13px;background:#fff;color:#1f2937;font-weight:700;cursor:pointer}.poq-btn.primary{background:#14532d;color:#fff;border-color:#14532d}.poq-btn:disabled{opacity:.55;cursor:wait}
+    .poq-notice{display:none;margin:12px 0;padding:11px 13px;border-radius:8px;background:#eff6ff;color:#1d4ed8;font-size:13px}.poq-notice.show{display:block}.poq-notice.error{background:#fef2f2;color:#b91c1c}.poq-notice.success{background:#f0fdf4;color:#166534}
+    .poq-summary{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.poq-stat{background:var(--surface,#fff);border:1px solid var(--border-color,#e2e8f0);border-radius:10px;padding:13px 16px;min-width:145px}.poq-stat small{display:block;color:#64748b;font-size:11px;font-weight:700;text-transform:uppercase}.poq-stat strong{display:block;font-size:22px;margin-top:4px}
+    .poq-panel{background:var(--surface,#fff);border:1px solid var(--border-color,#e2e8f0);border-radius:12px;overflow:hidden;margin-top:16px}.poq-panel-heading{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:15px 17px;border-bottom:1px solid #e2e8f0}.poq-panel-heading h2{font-size:16px;margin:0}.poq-panel-heading p{margin:5px 0 0;color:#64748b;font-size:12px}
+    .poq-table-wrap{overflow:auto}.poq-table{width:100%;border-collapse:collapse;min-width:900px;font-size:12px}.poq-table th{background:#172033;color:#fff;text-align:left;padding:11px 12px;white-space:nowrap}.poq-table td{padding:11px 12px;border-bottom:1px solid #e5e7eb;vertical-align:top}.poq-table tr:last-child td{border-bottom:0}.poq-table .muted{color:#64748b}.poq-pill{display:inline-block;border-radius:99px;padding:4px 8px;background:#dcfce7;color:#166534;font-size:10px;font-weight:800;white-space:nowrap}.poq-pill.new{background:#fef3c7;color:#92400e}
+    .poq-notifications{padding:12px 17px}.poq-notification{padding:11px 0;border-bottom:1px solid #e5e7eb}.poq-notification:last-child{border-bottom:0}.poq-notification strong{display:block;font-size:13px}.poq-notification p{margin:4px 0;color:#475569;font-size:12px}.poq-notification small{color:#64748b}.poq-empty{padding:24px;text-align:center;color:#64748b;font-size:13px}
+    @media(max-width:700px){.production-orders-page{padding:12px}.poq-header h1{font-size:21px}.poq-stat{flex:1}}
+  </style>
+  <header class="poq-header">
+    <div><small>LOGIS-TECH SYSTEM / PRODUCTION</small><h1>Production Queue</h1><p>Sales Orders posted by Sales are listed here with RDD and posting details.</p></div>
+    <div class="poq-actions"><button type="button" class="poq-btn" id="poqMarkRead">Mark notifications read</button><button type="button" class="poq-btn primary" id="poqRefresh">↻ Refresh</button></div>
+  </header>
+  <div id="poqNotice" class="poq-notice" role="status"></div>
+  <div class="poq-summary">
+    <div class="poq-stat"><small>Posted Sales Orders</small><strong id="poqOrderCount">—</strong></div>
+    <div class="poq-stat"><small>Unread Notifications</small><strong id="poqUnreadCount">—</strong></div>
+  </div>
+  <section class="poq-panel">
+    <div class="poq-panel-heading"><div><h2>Posted Sales Orders</h2><p>Only SOs posted to Production appear in this table.</p></div></div>
+    <div class="poq-table-wrap"><table class="poq-table"><thead><tr><th>SO NUMBER</th><th>SO DATE</th><th>CLIENT</th><th>PROJECT</th><th>PO NUMBER</th><th>RDD</th><th>POSTED BY</th><th>POSTED AT</th><th>NOTIFICATION</th></tr></thead><tbody id="poqRows"><tr><td colspan="9" class="poq-empty">Loading Production Queue…</td></tr></tbody></table></div>
+  </section>
+  <section class="poq-panel">
+    <div class="poq-panel-heading"><div><h2>Notifications</h2><p>In-app notifications sent to your Production account.</p></div></div>
+    <div id="poqNotifications" class="poq-notifications"><div class="poq-empty">Loading notifications…</div></div>
+  </section>
+</section>
