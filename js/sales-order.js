@@ -302,7 +302,7 @@ async function loadSOList(
                     const tbody = document.getElementById("soTableBody");
                     const emptyState = document.getElementById("soEmptyState");
                     if (tbody) {
-                        tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
                     }
                     if (emptyState) emptyState.style.display = "none";
                     return;
@@ -604,6 +604,23 @@ async function loadSOList(
                         ]
                     );
 
+                const requiredDeliveryDate =
+                    getSOValue(
+                        so,
+                        [
+                            "REQUIRED_DELIVERY_DATE",
+                            "REQUIRED_DEL_DATE",
+                            "RDD",
+                            "DELIVERY_DATE",
+                            "DEL_DATE",
+                            "requiredDeliveryDate"
+                        ]
+                    );
+
+                const productionPostStatus = String(
+                    getSOValue(so, ["POSTED_TO_PRODUCTION", "postedToProduction"]) || ""
+                ).trim().toUpperCase();
+
 
                 const client =
                     getSOValue(
@@ -731,6 +748,10 @@ async function loadSOList(
                     </td>
 
                     <td>
+                        ${escapeHTML(requiredDeliveryDate ? formatDate(requiredDeliveryDate) : "-")}
+                    </td>
+
+                    <td>
                         ${escapeHTML(client || "-")}
                     </td>
 
@@ -792,6 +813,11 @@ async function loadSOList(
                             class="so-view-button"
                             aria-label="View Sales Order ${escapeAttribute(soNumber)}"
                         >View</button>
+                        ${["ADMIN", "SALES"].includes(getLogisTechCurrentRole()) ? (
+                            '<button type="button" class="so-post-production-button" data-so-post-production="' + escapeAttribute(soNumber) + '"' +
+                            (productionPostStatus === "POSTED" ? ' disabled title="Already posted to Production"' : '') + '>' +
+                            (productionPostStatus === "POSTED" ? 'Posted to Production' : 'Post to Production') + '</button>'
+                        ) : ""}
                     </td>
 
                 `;
@@ -807,6 +833,44 @@ async function loadSOList(
 
                         if (soNumber) {
                             openSOFormPreview(soNumber);
+                        }
+                    });
+                }
+
+                const postProductionButton = row.querySelector(".so-post-production-button");
+                if (postProductionButton && productionPostStatus !== "POSTED") {
+                    postProductionButton.addEventListener("click", async function (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (!soNumber) return;
+                        if (!confirm("Post Sales Order " + soNumber + " to Production?\\n\\nThis will add it to the Production Queue and notify active Production accounts.")) return;
+                        const button = postProductionButton;
+                        button.disabled = true;
+                        button.textContent = "Posting…";
+                        try {
+                            let account = {};
+                            try {
+                                const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+                                account = saved.account || saved.user || saved;
+                            } catch (ignored) {}
+                            const result = await salesOrderAPI("postSalesOrderToProduction", {
+                                soNumber: soNumber,
+                                sessionToken: account.sessionToken || account.session_token || "",
+                                userId: account.userId || account.USER_ID || "",
+                                username: account.username || account.USERNAME || ""
+                            });
+                            alert(result.message || ("SO " + soNumber + " posted to Production."));
+                            so.POSTED_TO_PRODUCTION = "POSTED";
+                            so.PRODUCTION_POSTED_AT = result.postedAt || "";
+                            so.PRODUCTION_POSTED_BY = account.username || account.USERNAME || "";
+                            if (window.LogisTechSync && typeof window.LogisTechSync.backgroundSync === "function") {
+                                try { await window.LogisTechSync.backgroundSync(); } catch (syncError) { console.warn("Sync after Production posting failed:", syncError); }
+                            }
+                            await loadSOList(true);
+                        } catch (error) {
+                            alert("Unable to post SO to Production.\\n\\n" + error.message);
+                            button.disabled = false;
+                            button.textContent = "Post to Production";
                         }
                     });
                 }
