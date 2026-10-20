@@ -12,7 +12,12 @@
     <button type="button" class="jo-stat" data-jo-card="not-adjusted" aria-pressed="false"><small>RDD Not Adjusted</small><strong id="joNotAdjustedCard">—</strong><span>No delivery date adjustment</span></button>
   </section>
   <section class="jo-panel">
-    <div class="jo-toolbar"><div><h2>All Sales Orders</h2><p>View every Sales Order and filter by JO assignment or delivery-date adjustment status.</p></div><div class="jo-filters"><div class="jo-filter-wrap"><label for="joStatusFilter">JO Status</label><select id="joStatusFilter"><option value="all">All JO Status</option><option value="assigned">With JO</option><option value="pending">Without JO</option></select></div><div class="jo-filter-wrap"><label for="joAdjustmentFilter">Delivery Date Adjustment</label><select id="joAdjustmentFilter"><option value="all">All Adjustment Status</option><option value="adjusted">Adjusted</option><option value="not-adjusted">Not Adjusted</option></select></div><div class="jo-search-wrap"><label for="joSearch">Search Sales Orders</label><input id="joSearch" type="search" placeholder="SO Number, client, project or PO…"></div></div>
+    <div class="jo-toolbar"><div><h2>Sales Order Register</h2><p>All Sales Orders with JO assignment and RDD adjustment tracking.</p></div></div>
+    <div class="jo-filter-bar" aria-label="Filter Sales Orders">
+      <div class="jo-filter-wrap"><label for="joStatusFilter">JO Status</label><select id="joStatusFilter"><option value="all">All JO Status</option><option value="assigned">With JO</option><option value="pending">Without JO</option></select></div>
+      <div class="jo-filter-wrap"><label for="joAdjustmentFilter">RDD Adjustment</label><select id="joAdjustmentFilter"><option value="all">All Adjustment Status</option><option value="adjusted">Adjusted</option><option value="not-adjusted">Not Adjusted</option></select></div>
+      <div class="jo-search-wrap"><label for="joSearch">Search Sales Orders</label><input id="joSearch" type="search" placeholder="SO Number, client, project or PO…"></div>
+    </div>
     <div class="jo-table-wrap"><table class="jo-table"><thead><tr><th>SO Number</th><th>Client / Project</th><th>PO Number</th><th>Current RDD</th><th>JO Number</th><th>JO Status</th><th>Adjustment Status</th><th>Adjusted Delivery Date</th><th>Action</th></tr></thead><tbody id="joRows"><tr><td colspan="9" class="jo-empty">Loading Sales Orders…</td></tr></tbody></table></div>
     <footer class="jo-table-footer"><span id="joCount">0 Sales Orders</span><span>JO assignment and delivery-date adjustments are tracked per Sales Order.</span></footer>
   </section>
