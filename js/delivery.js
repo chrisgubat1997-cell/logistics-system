@@ -1525,14 +1525,14 @@ if (dateElement) {
             else html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+cell(amount === null ? "" : formatMoney(amount))+"</tr>";
         }
         // Row 22: columns 1–2 merged, column 3 separate, columns 4–6 merged.
-        html += "<tr>"+merge("TOTAL",2)+cell("")+merge(known ? formatMoney(total) : "",3)+"</tr>";
+        html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
         // Row 23: columns 1–4 separate, columns 5–6 merged.
         html += "<tr>"+cell("")+cell("")+cell("")+cell("")+merge("",2)+"</tr>";
         // Row 24: columns 1–2 merged; columns 3–6 separate.
         html += "<tr>"+merge("",2)+cell("")+cell("")+cell("")+cell("")+"</tr>";
         // Row 25: columns 1–2 merged; column 3 separate; columns 4–5 merged; column 6 separate.
         html += "<tr>"+merge("",2)+cell("")+merge("",2)+cell("")+"</tr>";
-        tbody.innerHTML=html;put("drPreviewTotal",known?formatMoney(total):"—");
+        tbody.innerHTML=html;
     }
 
     function showDRPrepareView() {
