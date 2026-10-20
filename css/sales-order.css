@@ -2043,9 +2043,9 @@
 
 /* Sales Order table: compact SO, JO, Date, PO Number and Grand Total columns. */
 .so-table { table-layout: fixed; }
-.so-table th:nth-child(1), .so-table td:nth-child(1) { width: 105px; min-width: 105px; max-width: 105px; padding-left: 7px; padding-right: 7px; }
-.so-table th:nth-child(2), .so-table td:nth-child(2) { width: 78px; min-width: 78px; max-width: 78px; padding-left: 6px; padding-right: 6px; }
-.so-table th:nth-child(3), .so-table td:nth-child(3) { width: 76px; min-width: 76px; max-width: 76px; padding-left: 6px; padding-right: 6px; }
-.so-table th:nth-child(8), .so-table td:nth-child(8) { width: 90px; min-width: 90px; max-width: 90px; padding-left: 6px; padding-right: 6px; }
-.so-table th:nth-child(9), .so-table td:nth-child(9) { width: 105px; min-width: 105px; max-width: 105px; padding-left: 7px; padding-right: 7px; }
+.so-table th:nth-child(1), .so-table td:nth-child(1) { width: 80px; min-width: 80px; max-width: 105px; padding-left: 7px; padding-right: 7px; }
+.so-table th:nth-child(2), .so-table td:nth-child(2) { width: 60px; min-width: 60px; max-width: 78px; padding-left: 6px; padding-right: 6px; }
+.so-table th:nth-child(3), .so-table td:nth-child(3) { width: 60px; min-width: 60px; max-width: 76px; padding-left: 6px; padding-right: 6px; }
+.so-table th:nth-child(8), .so-table td:nth-child(8) { width: 75px; min-width: 75px; max-width: 90px; padding-left: 6px; padding-right: 6px; }
+.so-table th:nth-child(9), .so-table td:nth-child(9) { width: 80px; min-width: 80px; max-width: 105px; padding-left: 7px; padding-right: 7px; }
 .so-table th:nth-child(10), .so-table td:nth-child(10) { min-width: 125px; }
