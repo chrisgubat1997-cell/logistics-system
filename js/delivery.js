@@ -217,6 +217,17 @@ function getLogisTechCurrentRole() {
         });
     }
 
+    function formatDRDisplayDate(value) {
+        if (!value) return "—";
+        const raw = String(value).trim();
+        const dateOnly = raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+        const date = dateOnly
+            ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+            : new Date(raw);
+        if (Number.isNaN(date.getTime())) return escapeHTML(raw);
+        return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    }
+
     function getLocalDateKey(value) {
         if (!value) return "";
 
@@ -1512,7 +1523,7 @@ if (dateElement) {
         put("drPreviewShipTo", val("SHIP_TO","shipTo","shipToAddress","DELIVERY_ADDRESS","deliveryAddress"));
         put("drPreviewTIN", val("TIN","tin","TIN_NUMBER","tinNumber"));
         put("drPreviewAttention", val("ATTENTION","attention","contactPerson"));
-        put("drPreviewDate", val("DATE_OF_TRANSFER","dateOfTransfer","DATE","date"));
+        put("drPreviewDate", formatDRDisplayDate(getDRCreatedDate(dr)));
         put("drPreviewPONumber", val("PO_NUMBER","poNumber"));
         put("drPreviewInvoice", val("SALES_INVOICE_NO","salesInvoiceNo","invoiceNumber","invoiceNo"));
         put("drPreviewTerms", val("TERMS","terms","paymentTerms"));
