@@ -1,12 +1,12 @@
 <div class="jo-module">
   <header class="jo-header">
-    <div><small>LOGIS-TECH SYSTEM / PRODUCTION</small><h1>JO Register</h1><p>Assign manual Job Order Numbers and update the required delivery date for Sales Orders without a JO Number.</p></div>
+    <div><small>LOGIS-TECH SYSTEM / PRODUCTION</small><h1>JO Register</h1><p>View all Sales Orders, check JO assignment status, and track required delivery-date adjustments.</p></div>
     <button type="button" class="jo-refresh" id="joRefreshBtn">↻ Refresh</button>
   </header>
   <div class="jo-notice" id="joNotice" role="status">Loading Sales Orders…</div>
   <section class="jo-panel">
-    <div class="jo-toolbar"><div><h2>Sales Orders Without JO Number</h2><p>All Sales Orders without a Job Order Number are included, regardless of status.</p></div><div class="jo-search-wrap"><label for="joSearch">Search Sales Orders</label><input id="joSearch" type="search" placeholder="SO Number, client, project or PO…"></div></div>
-    <div class="jo-table-wrap"><table class="jo-table"><thead><tr><th>SO Number</th><th>Client / Project</th><th>PO Number</th><th>Current RDD</th><th>Manual JO Number *</th><th>Adjusted Delivery Date</th><th>Action</th></tr></thead><tbody id="joRows"><tr><td colspan="7" class="jo-empty">Loading Sales Orders…</td></tr></tbody></table></div>
-    <footer class="jo-table-footer"><span id="joCount">0 Sales Orders</span><span>Saving a JO Number removes that SO from this pending register.</span></footer>
+    <div class="jo-toolbar"><div><h2>All Sales Orders</h2><p>View every Sales Order and filter by JO assignment or delivery-date adjustment status.</p></div><div class="jo-filters"><div class="jo-filter-wrap"><label for="joStatusFilter">JO Status</label><select id="joStatusFilter"><option value="all">All JO Status</option><option value="assigned">With JO</option><option value="pending">Without JO</option></select></div><div class="jo-filter-wrap"><label for="joAdjustmentFilter">Delivery Date Adjustment</label><select id="joAdjustmentFilter"><option value="all">All Adjustment Status</option><option value="adjusted">Adjusted</option><option value="not-adjusted">Not Adjusted</option></select></div><div class="jo-search-wrap"><label for="joSearch">Search Sales Orders</label><input id="joSearch" type="search" placeholder="SO Number, client, project or PO…"></div></div>
+    <div class="jo-table-wrap"><table class="jo-table"><thead><tr><th>SO Number</th><th>Client / Project</th><th>PO Number</th><th>Current RDD</th><th>JO Number</th><th>JO Status</th><th>Adjustment Status</th><th>Adjusted Delivery Date</th><th>Action</th></tr></thead><tbody id="joRows"><tr><td colspan="9" class="jo-empty">Loading Sales Orders…</td></tr></tbody></table></div>
+    <footer class="jo-table-footer"><span id="joCount">0 Sales Orders</span><span>JO assignment and delivery-date adjustments are tracked per Sales Order.</span></footer>
   </section>
 </div>
