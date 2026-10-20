@@ -122,6 +122,7 @@
          SHARED GEMCOR BRAND THEME — LOAD AFTER MODULE STYLES
     ====================================================== -->
     <link rel="stylesheet" href="css/brand-theme.css?v=20261016-excel-export01">\n    <link rel="stylesheet" href="css/revolving-fund.css?v=20261016-02">
+    <link rel="stylesheet" href="css/jo-register.css?v=20261020-01">
 
 </head>
 
@@ -176,6 +177,13 @@
 
         </button>
 
+
+        <!-- =================================================
+             JO REGISTER (RESTRICTED)
+        ================================================== -->
+        <button class="menu-btn" data-jo-register-menu onclick="showPage('joRegister', this)" style="display:none">
+            🧾 JO Register
+        </button>
 
         <!-- =================================================
              DELIVERY
@@ -383,6 +391,13 @@
         </div>
 
 
+
+        <!-- =================================================
+             JO REGISTER MODULE
+        ================================================== -->
+        <div id="joRegister" class="page">
+            <div id="joRegisterModule"></div>
+        </div>
 
         <!-- =================================================
              DELIVERY MODULE
@@ -1098,6 +1113,13 @@ function showPage(pageId, button) {
 
     }
 
+
+    /* =====================================================
+       JO REGISTER
+    ===================================================== */
+    if (pageId === 'joRegister') {
+        loadJORegisterModule();
+    }
 
     /* =====================================================
        DELIVERY
@@ -3044,6 +3066,45 @@ async function loadRevolvingFundModule() {
 }
 
 /* =========================================================
+   JO REGISTER MODULE (RESTRICTED TO ADMIN / PRODUCTION)
+========================================================= */
+let joRegisterModuleLoaded = false;
+async function loadJORegisterModule() {
+    const container = document.getElementById('joRegisterModule');
+    if (!container) return;
+    let account = {};
+    try {
+        const saved = JSON.parse(localStorage.getItem('logitechUser') || '{}');
+        account = saved.account || saved.user || saved;
+    } catch (error) {}
+    const username = String(account.username || account.USERNAME || '').trim().toLowerCase();
+    const role = String(account.role || account.ROLE || account.accountType || account.account_type || account.type || '').trim().toUpperCase();
+    if (username !== 'admin' || role !== 'PRODUCTION') {
+        container.innerHTML = '<div class="jo-access-denied"><h2>Access restricted</h2><p>JO Register is limited to the authorized <strong>admin</strong> account with the <strong>Production</strong> account type.</p></div>';
+        return;
+    }
+    document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) { button.style.display = ''; });
+    if (!joRegisterModuleLoaded) {
+        try {
+            const response = await fetch('pages/jo-register.html?v=' + Date.now(), { cache: 'no-store' });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            container.innerHTML = await response.text();
+            joRegisterModuleLoaded = true;
+        } catch (error) {
+            container.innerHTML = '<div class="jo-access-denied"><h2>Unable to load JO Register</h2><p>' + String(error.message || error) + '</p></div>';
+            return;
+        }
+    }
+    try {
+        await loadScriptOnce('js/jo-register.js?v=20261020-01', 'data-jo-register-js');
+        if (typeof window.initializeJORegister === 'function') await window.initializeJORegister();
+    } catch (error) {
+        console.error('JO Register initialization failed:', error);
+        container.insertAdjacentHTML('afterbegin', '<div class="jo-access-denied">Unable to initialize JO Register.</div>');
+    }
+}
+
+/* =========================================================
    USER ACCOUNT
 ========================================================= */
 
@@ -3101,6 +3162,12 @@ function loadUserAccount() {
 
     }
 
+
+    const joUsername = String(user.username || user.USERNAME || '').trim().toLowerCase();
+    const joRole = String(user.role || user.ROLE || user.accountType || user.account_type || user.type || '').trim().toUpperCase();
+    document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) {
+        button.style.display = joUsername === 'admin' && joRole === 'PRODUCTION' ? '' : 'none';
+    });
 
     const fullname =
         user.fullname ||
