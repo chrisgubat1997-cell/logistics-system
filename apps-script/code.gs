@@ -231,6 +231,12 @@ case "deleteFleetRecord":
        SALES ORDER
     ===================================================== */
 
+    case "getJORegisterData":
+      return getJORegisterData(payload);
+
+    case "updateJORegisterEntry":
+      return updateJORegisterEntry(payload);
+
     case "getSalesOrders":
 
       return getSalesOrders(
