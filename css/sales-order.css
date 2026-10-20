@@ -2050,22 +2050,23 @@
 .so-table th:nth-child(9), .so-table td:nth-child(9) { width: 80px; min-width: 80px; max-width: 105px; padding-left: 7px; padding-right: 7px; }
 .so-table th:nth-child(10), .so-table td:nth-child(10) { min-width: 125px; }
 
-/* FINAL OVERRIDE: all 11 Sales Order list columns use equal widths. */
+/* RESPONSIVE SALES ORDER TABLE: fit all columns within the visible screen. */
 .so-table {
-    width: 1320px !important;
-    min-width: 1320px !important;
-    max-width: 1320px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     table-layout: fixed !important;
 }
 .so-table thead th,
 .so-table tbody td {
-    width: 120px !important;
-    min-width: 120px !important;
-    max-width: 120px !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
     box-sizing: border-box !important;
-    padding-left: 8px !important;
-    padding-right: 8px !important;
+    padding-left: 5px !important;
+    padding-right: 5px !important;
     overflow-wrap: anywhere;
+    word-break: normal;
 }
 .so-table thead th {
     white-space: normal;
@@ -2074,6 +2075,8 @@
     white-space: normal;
 }
 .so-table td.so-action-cell {
+    min-width: 0 !important;
+    width: 200px !important;
     white-space: normal !important;
 }
 .so-table thead th:nth-child(11),
@@ -2081,4 +2084,28 @@
     width: 200px !important;
     min-width: 200px !important;
     max-width: 200px !important;
+}
+@media (max-width: 1100px) {
+    .so-table thead th,
+    .so-table tbody td {
+        font-size: 10px;
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+    .so-table td.so-action-cell,
+    .so-table thead th:nth-child(11),
+    .so-table tbody td:nth-child(11) {
+        width: 150px !important;
+        min-width: 150px !important;
+        max-width: 150px !important;
+    }
+}
+@media (max-width: 760px) {
+    .so-table td.so-action-cell,
+    .so-table thead th:nth-child(11),
+    .so-table tbody td:nth-child(11) {
+        width: 120px !important;
+        min-width: 120px !important;
+        max-width: 120px !important;
+    }
 }
