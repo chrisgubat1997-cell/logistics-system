@@ -1015,65 +1015,153 @@ async function loadSOList(
                 ""
             )
                 .trim()
-                .toLowerCase(    // Cache normalized search fields and date order so typing does not
-    // repeatedly parse dates and sort the entire Sales Order list.
-    let sortedSalesOrdersSource = null;
-    let sortedSalesOrdersCache = [];
-    const salesOrderSearchIndex = new WeakMap();
+                .toLowerCase();
 
-    function getSalesOrderSearchRecord(so) {
-        let record = salesOrderSearchIndex.get(so);
-        if (record) return record;
 
-        const read = (keys) => String(getSOValue(so, keys) || "").trim().toLowerCase();
-        const dateValue = getSOValue(so, [
-            "DATE_CREATION", "dateCreation", "date", "DATE",
-            "CREATED_AT", "createdAt"
-        ]);
-        const parsedDate = dateValue ? new Date(dateValue).getTime() : 0;
+        const payment =
+            (
+                paymentFilter?.value ||
+                ""
+            )
+                .trim()
+                .toLowerCase();
 
-        record = {
-            searchText: [
-                read(["SO_NUMBER", "soNumber", "so_number"]),
-                read(["CLIENT_NAME", "clientName", "CLIENT"]),
-                read(["PROJECT", "project"]),
-                read(["PO_NUMBER", "poNumber"])
-            ].join(" "),
-            status: read(["STATUS", "status"]),
-            payment: read(["PAYMENT_STATUS", "paymentStatus", "PAYMENT"]),
-            date: Number.isFinite(parsedDate) ? parsedDate : 0
-        };
 
-        salesOrderSearchIndex.set(so, record);
-        return record;
+        return salesOrders.filter(
+            function (so) {
+
+                const soNumber =
+                    String(
+                        getSOValue(
+                            so,
+                            [
+                                "SO_NUMBER",
+                                "soNumber"
+                            ]
+                        ) || ""
+                    ).toLowerCase();
+
+
+                const client =
+                    String(
+                        getSOValue(
+                            so,
+                            [
+                                "CLIENT_NAME",
+                                "clientName"
+                            ]
+                        ) || ""
+                    ).toLowerCase();
+
+
+                const project =
+                    String(
+                        getSOValue(
+                            so,
+                            [
+                                "PROJECT",
+                                "project"
+                            ]
+                        ) || ""
+                    ).toLowerCase();
+
+
+                const po =
+                    String(
+                        getSOValue(
+                            so,
+                            [
+                                "PO_NUMBER",
+                                "poNumber"
+                            ]
+                        ) || ""
+                    ).toLowerCase();
+
+
+                const currentStatus =
+                    String(
+                        getSOValue(
+                            so,
+                            [
+                                "STATUS",
+                                "status"
+                            ]
+                        ) || ""
+                    ).toLowerCase();
+
+
+                const currentPayment =
+                    String(
+                        getSOValue(
+                            so,
+                            [
+                                "PAYMENT_STATUS",
+                                "paymentStatus",
+                                "PAYMENT"
+                            ]
+                        ) || ""
+                    ).toLowerCase();
+
+
+                const matchesSearch =
+                    !search ||
+                    soNumber.includes(search) ||
+                    client.includes(search) ||
+                    project.includes(search) ||
+                    po.includes(search);
+
+
+                const matchesStatus =
+                    !status ||
+                    currentStatus === status;
+
+
+                const matchesPayment =
+                    !payment ||
+                    currentPayment === payment;
+
+
+                return (
+                    matchesSearch &&
+                    matchesStatus &&
+                    matchesPayment
+                );
+
+            }
+        );
+
     }
 
-    function getSortedSalesOrders() {
-        if (sortedSalesOrdersSource !== salesOrders) {
-            sortedSalesOrdersSource = salesOrders;
-            sortedSalesOrdersCache = salesOrders.slice().sort(function (a, b) {
-                return getSalesOrderSearchRecord(b).date - getSalesOrderSearchRecord(a).date;
-            });
-        }
-        return sortedSalesOrdersCache;
-    }
 
-    function getFilteredSalesOrders() {
-        const searchInput = document.getElementById("soSearchInput");
-        const statusFilter = document.getElementById("soStatusFilter");
-        const paymentFilter = document.getElementById("soPaymentFilter");
+    /* =====================================================
+       SUMMARY
+    ===================================================== */
 
-        const search = (searchInput?.value || "").trim().toLowerCase();
-        const status = (statusFilter?.value || "").trim().toLowerCase();
-        const payment = (paymentFilter?.value || "").trim().toLowerCase();
+    function updateSOSummary() {
 
-        return getSortedSalesOrders().filter(function (so) {
-            const record = getSalesOrderSearchRecord(so);
-            return (!search || record.searchText.includes(search)) &&
-                (!status || record.status === status) &&
-                (!payment || record.payment === payment);
-        });
-    }).toUpperCase();
+        const total =
+            salesOrders.length;
+
+
+        let partial = 0;
+        let active = 0;
+        let completed = 0;
+        let cancelled = 0;
+
+
+        salesOrders.forEach(
+            function (so) {
+
+                const status =
+                    String(
+                        getSOValue(
+                            so,
+                            [
+                                "STATUS",
+                                "status"
+                            ]
+                        ) || ""
+                    ).toUpperCase();
 
 
                 if (
