@@ -3096,7 +3096,7 @@ async function loadProductionQueueModule() {
         } catch (error) { container.innerHTML = '<div class="jo-access-denied"><h2>Unable to load Production Queue</h2><p>' + String(error.message || error) + '</p></div>'; return; }
     }
     try {
-        await loadScriptOnce('js/production-orders.js?v=20261020-01', 'data-production-orders-js');
+        await loadScriptOnce('js/production-orders.js?v=20261020-kpi-filters01', 'data-production-orders-js');
         if (typeof window.initializeProductionOrders === 'function') await window.initializeProductionOrders();
     } catch (error) { console.error('Production Queue initialization failed:', error); container.insertAdjacentHTML('afterbegin', '<div class="jo-access-denied">Unable to initialize Production Queue.</div>'); }
 }
