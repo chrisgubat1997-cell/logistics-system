@@ -1507,7 +1507,7 @@ if (dateElement) {
         const esc=v=>escapeHTML(v===null||v===undefined?"":String(v));
         const cell = value => "<td>"+value+"</td>";
         const merge = (value, span) => '<td colspan="'+span+'">'+value+'</td>';
-        let html = '<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr>';
+        let html = '<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th></th></tr>';
         let total = 0, known = false;
         // 25 physical rows total: one heading, 20 item rows, four footer rows.
         for (let i=0; i<20; i++) {
@@ -1522,7 +1522,7 @@ if (dateElement) {
             const itemCell = cell(escapeHTML(no));
             const descriptionCell = merge(escapeHTML(desc), 2);
             if (i === 1) html += "<tr>"+itemCell+descriptionCell+merge("",3)+"</tr>";
-            else html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+cell(amount === null ? "" : formatMoney(amount))+"</tr>";
+            else html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+cell("")+"</tr>";
         }
         // Row 22: columns 1–2 merged, column 3 separate, columns 4–6 merged.
         html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
