@@ -90,6 +90,17 @@
             <button
                 type="button"
                 class="so-summary-card"
+                data-summary-filter="without-jo"
+                onclick="filterSOBySummary('without-jo')"
+            >
+                <div class="so-summary-label">WITHOUT JO</div>
+                <div class="so-summary-value" id="withoutJOSOCount">0</div>
+            </button>
+
+
+            <button
+                type="button"
+                class="so-summary-card"
                 data-summary-filter="partial"
                 onclick="filterSOBySummary('partial')"
             >
@@ -316,6 +327,8 @@
                         <tr>
 
                             <th>SO NUMBER</th>
+
+                            <th>JO NUMBER</th>
 
                             <th>DATE</th>
 
