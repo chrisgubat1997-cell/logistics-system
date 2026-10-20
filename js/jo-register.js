@@ -116,7 +116,7 @@
     const dateInput=$("joModalRDD");
     const deliveryDate=String(dateInput.value||"").trim();
     if(!adjustmentOnly&&!jobOrder){notice("Enter a manual JO Number for "+soNumber+".","error");joInput.focus();return;}
-    if(jobOrder.length>100||/[\\r\\n]/.test(jobOrder)){notice("JO Number must be a single line with 100 characters or fewer.","error");joInput.focus();return;}
+    if(jobOrder.length>100||/[\r\n]/.test(jobOrder)){notice("JO Number must be a single line with 100 characters or fewer.","error");joInput.focus();return;}
     const button=$("joModalSave");button.disabled=true;button.textContent="SAVING…";
     try{
       const result=await api("updateJORegisterEntry",{soNumber:soNumber,jobOrder:jobOrder,deliveryDate:deliveryDate,adjustmentOnly:adjustmentOnly});
