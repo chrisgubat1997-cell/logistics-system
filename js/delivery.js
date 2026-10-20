@@ -1503,9 +1503,33 @@ if (dateElement) {
         try { const response=await callDeliveryAPI("getDeliveryReceipts"); const records=extractRecords(response,["deliveryReceipts","records","data"]); const latest=records.find(x=>getDRNumber(x)===getDRNumber(dr)); if(latest){selectedDRRecord=latest;dr=latest;items=getDRItems(latest);} } catch(error){console.warn("Using cached DR preview data",error);}
         const tbody=document.getElementById("drPreviewItemsBody"); if(!tbody)return;
         const esc=v=>escapeHTML(v===null||v===undefined?"":String(v));
-        let html='<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr>',total=0,known=false;
-        for(let i=0;i<20;i++){const item=items[i]||{};const no=getValue(item,["ITEM_NUMBER","itemNumber","ITEM_NO","itemNo"],"");const desc=getValue(item,["ITEM_DESCRIPTION","itemDescription","DESCRIPTION","description","ITEM_NAME","itemName"],"");const qty=toNumber(getValue(item,["PICK_QTY","pickQty","DELIVERED_QTY","deliveredQty","QTY","qty","QUANTITY","quantity"],0));const unit=getValue(item,["UNIT","unit","UOM","uom"],"");const raw=getValue(item,["DR_AMOUNT","LINE_TOTAL","TOTAL_AMOUNT","AMOUNT","drAmount","lineTotal","TOTAL","total"],null);const amount=raw===null?null:toNumber(raw);if(amount!==null){total+=amount;known=true;}if(i===1){html+='<tr><td>'+esc(no)+'</td><td colspan="2">'+esc(desc)+'</td><td colspan="3"></td></tr>';}else{html+='<tr><td>'+esc(no)+'</td><td colspan="2">'+esc(desc)+'</td><td>'+(no||desc?qty:"")+'</td><td>'+esc(unit)+'</td><td>'+(amount===null?"":formatMoney(amount))+'</td></tr>';}}
-        html+='<tr><td colspan="2">TOTAL</td><td></td><td colspan="3">'+(known?formatMoney(total):"")+'</td></tr><tr><td></td><td></td><td></td><td></td><td colspan="2"></td></tr><tr><td colspan="2"></td><td></td><td></td><td></td><td></td></tr><tr><td colspan="2"></td><td></td><td colspan="2"></td><td></td></tr>';
+        const cell = value => "<td>"+value+"</td>";
+        const merge = (value, span) => '<td colspan="'+span+'">'+value+'</td>';
+        let html = '<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr>';
+        let total = 0, known = false;
+        // 25 physical rows total: one heading, 20 item rows, four footer rows.
+        for (let i=0; i<20; i++) {
+            const item = items[i] || {};
+            const no = getValue(item, ["ITEM_NUMBER","itemNumber","ITEM_NO","itemNo"], "");
+            const desc = getValue(item, ["ITEM_DESCRIPTION","itemDescription","DESCRIPTION","description","ITEM_NAME","itemName"], "");
+            const qty = toNumber(getValue(item, ["PICK_QTY","pickQty","DELIVERED_QTY","deliveredQty","QTY","qty","QUANTITY","quantity"], 0));
+            const unit = getValue(item, ["UNIT","unit","UOM","uom"], "");
+            const raw = getValue(item, ["DR_AMOUNT","LINE_TOTAL","TOTAL_AMOUNT","AMOUNT","drAmount","lineTotal","TOTAL","total"], null);
+            const amount = raw === null || raw === "" ? null : toNumber(raw);
+            if (amount !== null) { total += amount; known = true; }
+            const itemCell = cell(escapeHTML(no));
+            const descriptionCell = merge(escapeHTML(desc), 2);
+            if (i === 1) html += "<tr>"+itemCell+descriptionCell+merge("",3)+"</tr>";
+            else html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+cell(amount === null ? "" : formatMoney(amount))+"</tr>";
+        }
+        // Row 22: columns 1–2 merged, column 3 separate, columns 4–6 merged.
+        html += "<tr>"+merge("TOTAL",2)+cell("")+merge(known ? formatMoney(total) : "",3)+"</tr>";
+        // Row 23: columns 1–4 separate, columns 5–6 merged.
+        html += "<tr>"+cell("")+cell("")+cell("")+cell("")+merge("",2)+"</tr>";
+        // Row 24: columns 1–2 merged; columns 3–6 separate.
+        html += "<tr>"+merge("",2)+cell("")+cell("")+cell("")+cell("")+"</tr>";
+        // Row 25: columns 1–2 merged; column 3 separate; columns 4–5 merged; column 6 separate.
+        html += "<tr>"+merge("",2)+cell("")+merge("",2)+cell("")+"</tr>";
         tbody.innerHTML=html;put("drPreviewTotal",known?formatMoney(total):"—");
     }
 
