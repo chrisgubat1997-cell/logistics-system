@@ -4,6 +4,7 @@
   const API = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
   let initialized = false;
   let orders = [];
+  let selectedCard = "all";
   const $ = function(id) { return document.getElementById(id); };
   function account() {
     try { const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}"); return saved.account || saved.user || saved; }
@@ -40,6 +41,10 @@
     });
   }
   function render() {
+    const total=orders.length;
+    const assigned=orders.filter(function(so){return String(so.jobOrder||"").trim()!=="";}).length;
+    const adjusted=orders.filter(function(so){return !!so.deliveryDateAdjusted;}).length;
+    [["joTotalCard",total],["joAssignedCard",assigned],["joPendingCard",total-assigned],["joAdjustedCard",adjusted],["joNotAdjustedCard",total-adjusted]].forEach(function(pair){if($(pair[0]))$(pair[0]).textContent=String(pair[1]);});
     const tbody=$("joRows");if(!tbody)return;
     const list=filteredOrders();
     if(!list.length){tbody.innerHTML='<tr><td colspan="9" class="jo-empty">'+(orders.length?'No Sales Orders match your filters.':'No Sales Orders were found.')+'</td></tr>';}
@@ -93,14 +98,27 @@
       await load();
     }catch(error){notice("Not saved: "+error.message,"error");button.disabled=false;button.textContent=hasExistingJO?"SAVE DATE":"SAVE JO";}
   }
+  function syncCards() {
+    document.querySelectorAll("[data-jo-card]").forEach(function(button){
+      const active=button.getAttribute("data-jo-card")===selectedCard;
+      button.classList.toggle("active",active);
+      button.setAttribute("aria-pressed",active?"true":"false");
+    });
+  }
   async function initialize() {
     if(!token()){notice("Login session not found. Please log in again.","error");if($("joRows"))$("joRows").innerHTML='<tr><td colspan="7" class="jo-empty">Please log in again to use JO Register.</td></tr>';return;}
     if(!initialized){
       initialized=true;
       if($("joRefreshBtn"))$("joRefreshBtn").addEventListener("click",load);
       if($("joSearch"))$("joSearch").addEventListener("input",render);
-      if($("joStatusFilter"))$("joStatusFilter").addEventListener("change",render);
-      if($("joAdjustmentFilter"))$("joAdjustmentFilter").addEventListener("change",render);
+      if($("joStatusFilter"))$("joStatusFilter").addEventListener("change",function(){selectedCard="all";syncCards();render();});
+      if($("joAdjustmentFilter"))$("joAdjustmentFilter").addEventListener("change",function(){selectedCard="all";syncCards();render();});
+      document.querySelectorAll("[data-jo-card]").forEach(function(button){button.addEventListener("click",function(){
+        selectedCard=button.getAttribute("data-jo-card")||"all";
+        if($("joStatusFilter"))$("joStatusFilter").value=["assigned","pending"].includes(selectedCard)?selectedCard:"all";
+        if($("joAdjustmentFilter"))$("joAdjustmentFilter").value=["adjusted","not-adjusted"].includes(selectedCard)?selectedCard:"all";
+        syncCards();render();
+      });});
       if($("joRows"))$("joRows").addEventListener("click",function(event){const button=event.target.closest("[data-jo-save]");if(button)save(button);});
     }
     await load();
