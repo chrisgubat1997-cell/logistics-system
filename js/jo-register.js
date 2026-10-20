@@ -61,8 +61,8 @@
         '<td>'+(hasJO?'<div class="jo-client">'+safe(so.jobOrder)+'</div>':'<span class="jo-muted">Not assigned</span>')+'</td>'+
         '<td><span class="jo-status '+(hasJO?'jo-status-assigned':'jo-status-pending')+'">'+(hasJO?'With JO':'Without JO')+'</span></td>'+
         '<td><span class="jo-status '+(adjusted?'jo-status-adjusted':'jo-status-none')+'">'+(adjusted?'Adjusted':'Not Adjusted')+'</span>'+(adjusted&&so.deliveryDateAdjustedAt?'<div class="jo-project">Updated: '+safe(fmtDate(so.deliveryDateAdjustedAt))+'</div>':'')+'</td>'+
-        '<td><input type="date" class="jo-date-input" value="'+safe(currentDate)+'" '+(!dateAvailable?'disabled title="No delivery-date column exists in SALES_ORDERS"':'')+' aria-label="Adjusted delivery date for '+safe(so.soNumber)+'"><div class="jo-project">'+(adjusted?'Previously adjusted; change only if needed.':'Leave unchanged if no adjustment is needed.')+'</div></td>'+
-        '<td>'+(hasJO?'<button type="button" class="jo-row-save" data-jo-save="'+safe(so.soNumber)+'">SAVE DATE</button>':'<input type="text" class="jo-number-input" maxlength="100" required placeholder="Enter JO Number" aria-label="JO Number for '+safe(so.soNumber)+'"><button type="button" class="jo-row-save" data-jo-save="'+safe(so.soNumber)+'">SAVE JO</button>')+'</td></tr>';
+        '<td class="jo-date-text">'+safe(adjusted?fmtDate(currentDate):'—')+'</td>'+
+        '<td><button type="button" class="jo-action-btn" data-jo-action="'+safe(so.soNumber)+'" '+(!dateAvailable?'data-date-unavailable="true"':'')+'>'+(hasJO?'ADJUST RDD':'ASSIGN JO / ADJUST RDD')+'</button></td></tr>';
     }).join("");
     $("joCount").textContent=list.length+" of "+orders.length+" Sales Order"+(orders.length===1?"":"s");
   }
@@ -80,23 +80,50 @@
       if($("joRows"))$("joRows").innerHTML='<tr><td colspan="7" class="jo-empty">Could not load Sales Orders. Check your session and Production account access.</td></tr>';
     }finally{if(refresh){refresh.disabled=false;refresh.textContent="↻ Refresh";}}
   }
-  async function save(button) {
-    const row=button.closest("tr");if(!row)return;
-    const soNumber=button.getAttribute("data-jo-save");
-    const joInput=row.querySelector(".jo-number-input");
-    const dateInput=row.querySelector(".jo-date-input");
-    const jobOrder=String(joInput&&joInput.value||"").trim();
-    const existing=orders.find(function(so){return String(so.soNumber)===String(soNumber);});
-    const hasExistingJO=!!(existing&&String(existing.jobOrder||"").trim());
-    const deliveryDate=String(dateInput&&dateInput.value||"").trim();
-    if(!hasExistingJO&&!jobOrder){notice("Enter a manual JO Number for "+soNumber+".","error");joInput&&joInput.focus();return;}
-    if(jobOrder.length>100||/[\r\n]/.test(jobOrder)){notice("JO Number must be a single line with 100 characters or fewer.","error");joInput.focus();return;}
-    button.disabled=true;button.textContent="SAVING…";
+  let activeOrder = null;
+  function openActionModal(soNumber, button) {
+    activeOrder = orders.find(function(so){return String(so.soNumber)===String(soNumber);});
+    if(!activeOrder)return;
+    const hasJO=String(activeOrder.jobOrder||"").trim()!=="";
+    const dateAvailable=activeOrder.deliveryDateColumnAvailable!==false;
+    $("joModalTitle").textContent=hasJO?"Adjust Required Delivery Date":"Assign JO Number / Adjust RDD";
+    $("joModalSubtitle").textContent=hasJO?"Update the required delivery date for this Sales Order.":"Enter the manual JO Number and, if needed, adjust the required delivery date.";
+    $("joModalSO").textContent="Sales Order: "+String(activeOrder.soNumber||"—")+"  •  "+String(activeOrder.clientName||"");
+    $("joModalJOField").hidden=hasJO;
+    $("joModalJONumber").value="";
+    $("joModalJONumber").required=!hasJO;
+    $("joModalRDD").value=String(activeOrder.requiredDeliveryDate||"");
+    $("joModalRDD").disabled=!dateAvailable;
+    $("joModalRDD").title=dateAvailable?"":"No delivery-date column exists in SALES_ORDERS";
+    $("joModalSave").disabled=false;
+    $("joModalSave").textContent="Save Changes";
+    $("joActionModal").hidden=false;
+    $("joActionModal").dataset.soNumber=String(activeOrder.soNumber);
+    $("joActionModal").dataset.adjustmentOnly=hasJO?"true":"false";
+    if(!hasJO)$("joModalJONumber").focus();else if(dateAvailable)$("joModalRDD").focus();
+  }
+  function closeActionModal() {
+    $("joActionModal").hidden=true;
+    activeOrder=null;
+  }
+  async function saveModal(event) {
+    if(event)event.preventDefault();
+    const modal=$("joActionModal");
+    const soNumber=modal.dataset.soNumber||"";
+    const adjustmentOnly=modal.dataset.adjustmentOnly==="true";
+    const joInput=$("joModalJONumber");
+    const jobOrder=String(joInput.value||"").trim();
+    const dateInput=$("joModalRDD");
+    const deliveryDate=String(dateInput.value||"").trim();
+    if(!adjustmentOnly&&!jobOrder){notice("Enter a manual JO Number for "+soNumber+".","error");joInput.focus();return;}
+    if(jobOrder.length>100||/[\\r\\n]/.test(jobOrder)){notice("JO Number must be a single line with 100 characters or fewer.","error");joInput.focus();return;}
+    const button=$("joModalSave");button.disabled=true;button.textContent="SAVING…";
     try{
-      const result=await api("updateJORegisterEntry",{soNumber:soNumber,jobOrder:jobOrder,deliveryDate:deliveryDate,adjustmentOnly:hasExistingJO});
+      const result=await api("updateJORegisterEntry",{soNumber:soNumber,jobOrder:jobOrder,deliveryDate:deliveryDate,adjustmentOnly:adjustmentOnly});
+      closeActionModal();
       notice(result.message||("Saved "+soNumber+"."),"success");
       await load();
-    }catch(error){notice("Not saved: "+error.message,"error");button.disabled=false;button.textContent=hasExistingJO?"SAVE DATE":"SAVE JO";}
+    }catch(error){notice("Not saved: "+error.message,"error");button.disabled=false;button.textContent="Save Changes";}
   }
   function syncCards() {
     document.querySelectorAll("[data-jo-card]").forEach(function(button){
@@ -119,7 +146,11 @@
         if($("joAdjustmentFilter"))$("joAdjustmentFilter").value=["adjusted","not-adjusted"].includes(selectedCard)?selectedCard:"all";
         syncCards();render();
       });});
-      if($("joRows"))$("joRows").addEventListener("click",function(event){const button=event.target.closest("[data-jo-save]");if(button)save(button);});
+      if($("joRows"))$("joRows").addEventListener("click",function(event){const button=event.target.closest("[data-jo-action]");if(button)openActionModal(button.getAttribute("data-jo-action"),button);});
+      if($("joActionForm"))$("joActionForm").addEventListener("submit",saveModal);
+      ["joModalClose","joModalCancel"].forEach(function(id){if($(id))$(id).addEventListener("click",closeActionModal);});
+      if($("joActionModal"))$("joActionModal").addEventListener("click",function(event){if(event.target===$("joActionModal"))closeActionModal();});
+      document.addEventListener("keydown",function(event){if(event.key==="Escape"&&$("joActionModal")&&!$("joActionModal").hidden)closeActionModal();});
     }
     await load();
   }
