@@ -1786,6 +1786,12 @@ async function saveSO() {
         );
 
 
+    const requiredDeliveryDate =
+        getValue(
+            "requiredDeliveryDate"
+        ) || "";
+
+
     const customerId =
         getValue(
             "customerId"
@@ -2138,6 +2144,9 @@ async function saveSO() {
 
         dateCreation:
             dateCreation,
+
+        requiredDeliveryDate:
+            requiredDeliveryDate,
 
         customerId:
             customerId,
