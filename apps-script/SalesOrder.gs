@@ -1192,6 +1192,21 @@ if (!soNumber) {
   };
 }
 
+const requiredDeliveryDateValue = String(payload.requiredDeliveryDate || payload.requiredDelDate || "").trim();
+let requiredDeliveryDateDate = null;
+if (requiredDeliveryDateValue) {
+  const rddMatch = requiredDeliveryDateValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!rddMatch) {
+    return { success: false, message: "Required Delivery Date must be a valid date." };
+  }
+  requiredDeliveryDateDate = new Date(Number(rddMatch[1]), Number(rddMatch[2]) - 1, Number(rddMatch[3]), 12, 0, 0);
+  if (requiredDeliveryDateDate.getFullYear() !== Number(rddMatch[1]) ||
+      requiredDeliveryDateDate.getMonth() !== Number(rddMatch[2]) - 1 ||
+      requiredDeliveryDateDate.getDate() !== Number(rddMatch[3])) {
+    return { success: false, message: "Required Delivery Date must be a valid date." };
+  }
+}
+
 // CHECK FOR DUPLICATE SO NUMBER
 const existingOrders = getAllRecords(
   CONFIG.SHEETS.SALES_ORDERS
@@ -1338,17 +1353,8 @@ const now =
       rddColumnIndex = salesOrderLastColumnForRDD;
       salesOrderSheetForRDD.getRange(1, rddColumnIndex + 1).setValue("REQUIRED_DELIVERY_DATE");
     }
-    const rddValue = String(payload.requiredDeliveryDate || payload.requiredDelDate || "").trim();
-    if (rddValue) {
-      const rddMatch = rddValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-      if (!rddMatch) throw new Error("Required Delivery Date must be a valid date.");
-      const rddDate = new Date(Number(rddMatch[1]), Number(rddMatch[2]) - 1, Number(rddMatch[3]), 12, 0, 0);
-      if (rddDate.getFullYear() !== Number(rddMatch[1]) ||
-          rddDate.getMonth() !== Number(rddMatch[2]) - 1 ||
-          rddDate.getDate() !== Number(rddMatch[3])) {
-        throw new Error("Required Delivery Date must be a valid date.");
-      }
-      salesOrderSheetForRDD.getRange(salesOrderSheetForRDD.getLastRow(), rddColumnIndex + 1).setValue(rddDate);
+    if (requiredDeliveryDateDate) {
+      salesOrderSheetForRDD.getRange(salesOrderSheetForRDD.getLastRow(), rddColumnIndex + 1).setValue(requiredDeliveryDateDate);
     }
 
 
