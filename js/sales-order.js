@@ -843,7 +843,7 @@ async function loadSOList(
                         event.preventDefault();
                         event.stopPropagation();
                         if (!soNumber) return;
-                        if (!confirm("Post Sales Order " + soNumber + " to Production?\\n\\nThis will add it to the Production Queue and notify active Production accounts.")) return;
+                        if (!confirm("Post Sales Order " + soNumber + " to Production?\n\nThis will add it to the Production Queue and notify active Production accounts.")) return;
                         const button = postProductionButton;
                         button.disabled = true;
                         button.textContent = "Posting…";
@@ -868,7 +868,7 @@ async function loadSOList(
                             }
                             await loadSOList(true);
                         } catch (error) {
-                            alert("Unable to post SO to Production.\\n\\n" + error.message);
+                            alert("Unable to post SO to Production.\n\n" + error.message);
                             button.disabled = false;
                             button.textContent = "Post to Production";
                         }
