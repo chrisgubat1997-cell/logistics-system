@@ -2076,3 +2076,9 @@
 .so-table td.so-action-cell {
     white-space: normal !important;
 }
+.so-table thead th:nth-child(11),
+.so-table tbody td:nth-child(11) {
+    width: 200px !important;
+    min-width: 200px !important;
+    max-width: 200px !important;
+}
