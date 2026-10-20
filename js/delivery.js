@@ -1474,17 +1474,39 @@ if (dateElement) {
         }
     }
 
-    function showDRPreview() {
+    async function showDRPreview() {
         const listView = document.getElementById("deliveryListView");
         const previewView = document.getElementById("drPreviewView");
-
-        if (!previewView) return;
-
-        if (listView) {
-            listView.style.display = "none";
-        }
-
+        if (!previewView || !selectedDRRecord) return;
+        if (listView) listView.style.display = "none";
         previewView.style.display = "block";
+        await renderRecentDRPreview(selectedDRRecord);
+    }
+
+    async function renderRecentDRPreview(dr) {
+        const val = (...keys) => getValue(dr, keys, "—");
+        const put = (id, value) => { const el=document.getElementById(id); if(el) el.textContent=(value===null||value===undefined||String(value).trim()==="")?"—":String(value); };
+        put("drPreviewHeaderNumber", getDRNumber(dr));
+        put("drPreviewClient", val("CLIENT_NAME","clientName","customerName","CUSTOMER_NAME"));
+        put("drPreviewAddress", val("DELIVERY_ADDRESS","deliveryAddress","billingAddress","ADDRESS"));
+        put("drPreviewShipTo", val("SHIP_TO","shipTo","shipToAddress","DELIVERY_ADDRESS","deliveryAddress"));
+        put("drPreviewTIN", val("TIN","tin","TIN_NUMBER","tinNumber"));
+        put("drPreviewAttention", val("ATTENTION","attention","contactPerson"));
+        put("drPreviewDate", val("DATE_OF_TRANSFER","dateOfTransfer","DATE","date"));
+        put("drPreviewPONumber", val("PO_NUMBER","poNumber"));
+        put("drPreviewInvoice", val("SALES_INVOICE_NO","salesInvoiceNo","invoiceNumber","invoiceNo"));
+        put("drPreviewTerms", val("TERMS","terms","paymentTerms"));
+        put("drPreviewSONumber", val("SO_NUMBER","soNumber","salesOrderNumber"));
+        put("drPreviewSOF", val("SOF_NO","sofNo","projectSOF","projectSof"));
+        put("drPreviewSalesman", val("SALESMAN","salesman","salesmanName","accountManager"));
+        let items=getDRItems(dr);
+        try { const response=await callDeliveryAPI("getDeliveryReceipts"); const records=extractRecords(response,["deliveryReceipts","records","data"]); const latest=records.find(x=>getDRNumber(x)===getDRNumber(dr)); if(latest){selectedDRRecord=latest;dr=latest;items=getDRItems(latest);} } catch(error){console.warn("Using cached DR preview data",error);}
+        const tbody=document.getElementById("drPreviewItemsBody"); if(!tbody)return;
+        const esc=v=>escapeHTML(v===null||v===undefined?"":String(v));
+        let html='<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr>',total=0,known=false;
+        for(let i=0;i<20;i++){const item=items[i]||{};const no=getValue(item,["ITEM_NUMBER","itemNumber","ITEM_NO","itemNo"],"");const desc=getValue(item,["ITEM_DESCRIPTION","itemDescription","DESCRIPTION","description","ITEM_NAME","itemName"],"");const qty=toNumber(getValue(item,["PICK_QTY","pickQty","DELIVERED_QTY","deliveredQty","QTY","qty","QUANTITY","quantity"],0));const unit=getValue(item,["UNIT","unit","UOM","uom"],"");const raw=getValue(item,["DR_AMOUNT","LINE_TOTAL","TOTAL_AMOUNT","AMOUNT","drAmount","lineTotal","TOTAL","total"],null);const amount=raw===null?null:toNumber(raw);if(amount!==null){total+=amount;known=true;}html+='<tr><td>'+esc(no)+'</td><td colspan="2">'+esc(desc)+'</td><td>'+(no||desc?qty:"")+'</td><td>'+esc(unit)+'</td><td>'+(amount===null?"":formatMoney(amount))+'</td></tr>';}
+        html+='<tr><td colspan="2">TOTAL</td><td></td><td colspan="3">'+(known?formatMoney(total):"")+'</td></tr><tr><td></td><td></td><td></td><td></td><td colspan="2"></td></tr><tr><td colspan="2"></td><td></td><td></td><td></td><td></td></tr><tr><td colspan="2"></td><td></td><td colspan="2"></td><td></td></tr>';
+        tbody.innerHTML=html;put("drPreviewTotal",known?formatMoney(total):"—");
     }
 
     function showDRPrepareView() {
