@@ -1665,7 +1665,7 @@ async function loadSOList(
                 .sof-dialog{width:min(1040px,100%);height:min(94vh,1200px);display:flex;flex-direction:column;background:#eef1f5;border-radius:14px;overflow:hidden;box-shadow:0 25px 90px rgba(0,0,0,.35)}
                 .sof-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 18px;background:#173b72;color:#fff;flex-shrink:0}
                 .sof-toolbar h2{font-size:14px;margin:0}.sof-toolbar p{font-size:10px;margin:3px 0 0;color:#dbeafe}
-                .sof-actions{display:flex;gap:8px;align-items:center}.sof-actions button{border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:8px 12px;background:rgba(255,255,255,.12);color:#fff;font:700 10px inherit;cursor:pointer}.sof-actions button:hover{background:rgba(255,255,255,.22)}
+                .sof-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sof-actions button{border:1px solid rgba(255,255,255,.4);border-radius:7px;padding:8px 12px;background:rgba(255,255,255,.12);color:#fff;font:700 10px inherit;cursor:pointer}.sof-actions button:hover{background:rgba(255,255,255,.22)}.sof-actions .sof-zoom-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:5px;border:1px solid rgba(255,255,255,.45);border-radius:7px;background:rgba(255,255,255,.12);color:#fff}.sof-zoom-btn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.sof-zoom-level{min-width:40px;text-align:center;color:#fff;font:600 10px Arial,sans-serif}
                 .sof-scroll{overflow:auto;padding:22px;flex:1}.sof-paper{box-sizing:border-box;display:flex;flex-direction:column;width:8.5in;max-width:none;height:14in;min-height:14in;margin:0 auto;padding:0.75in 0.7in;background:#fff;box-shadow:0 5px 24px rgba(15,23,42,.15);color:#111;font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;font-size:13px;zoom:1}
                 .sof-paper table{border-collapse:collapse;table-layout:fixed;width:100%}.sof-header td{border:0;height:58px;padding:3px 5px}.sof-logo-cell{width:47%;vertical-align:middle}.sof-logo{width:215px;height:auto;max-height:48px;object-fit:contain}.sof-title-cell{text-align:center;font-size:23px;font-weight:800;white-space:nowrap}.sof-check-cell{width:20%;font-size:13px}.sof-check-row{white-space:nowrap;line-height:16px}.sof-check{display:inline-block;width:11px;height:11px;border:1px solid #111;vertical-align:middle;margin-right:5px}.sof-dept{display:inline-block;border:1px solid #111;padding:1px 5px;line-height:12px;vertical-align:middle;box-sizing:border-box}
                 .sof-meta,.sof-meta tr,.sof-meta td{background:#fff!important}.sof-meta td{background:#fff!important;border:0;min-height:16px;padding:2px 4px;vertical-align:middle;overflow-wrap:anywhere;font-size:13px}.sof-meta{width:100%;table-layout:fixed;border-collapse:collapse}.sof-meta .sof-label{width:15%;white-space:nowrap;text-align:left;padding-left:0!important;padding-right:3px!important;box-sizing:border-box}.sof-meta .sof-value{width:40%;text-align:left;text-decoration:none;border-bottom:1px solid #111!important;font-size:13px;padding-left:0!important;padding-right:4px!important;box-sizing:border-box;overflow-wrap:anywhere}.sof-meta .sof-right-label{width:23%;white-space:nowrap;text-align:left;padding-left:78px!important;padding-right:3px!important;box-sizing:border-box;position:static;left:auto;z-index:auto;overflow:visible;overflow-wrap:normal}.sof-meta .sof-right-value{width:22%;text-align:center;text-decoration:none;border-bottom:0!important;font-size:13px;padding-left:0!important;padding-right:4px!important;box-sizing:border-box;position:relative;white-space:nowrap}.sof-meta .sof-right-value:after{content:"";position:absolute;left:0;right:4px;bottom:1px;border-bottom:1px solid #111}.sof-meta .sof-no-underline:after{display:none!important}
@@ -1713,7 +1713,7 @@ async function loadSOList(
             <div class="sof-dialog">
                 <div class="sof-toolbar">
                     <div><h2>SALES ORDER FORM PREVIEW</h2><p>SOF No. ${escapeHTML(soNumber)} · document layout</p></div>
-                    <div class="sof-actions"><button type="button" class="sof-print">PRINT</button><button type="button" class="sof-close">CLOSE ✕</button></div>
+                    <div class="sof-actions"><button type="button" class="sof-zoom-btn sof-zoom-out" aria-label="Zoom out" title="Zoom out"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 21 21M7.5 10.5h6"></path></svg></button><button type="button" class="sof-zoom-btn sof-zoom-in" aria-label="Zoom in" title="Zoom in"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5 21 21M7.5 10.5h6M10.5 7.5v6"></path></svg></button><span class="sof-zoom-level" aria-live="polite">100%</span><button type="button" class="sof-print">PRINT</button><button type="button" class="sof-close">CLOSE ✕</button></div>
                 </div>
                 <div class="sof-scroll">
                     <div class="sof-paper">
@@ -1762,6 +1762,22 @@ async function loadSOList(
                     </div>
                 </div>
             </div>`;
+
+        let sofZoom = 1;
+        const sofPaper = overlay.querySelector(".sof-paper");
+        const sofZoomLevel = overlay.querySelector(".sof-zoom-level");
+        const applySofZoom = function() {
+            sofPaper.style.zoom = String(sofZoom);
+            sofZoomLevel.textContent = Math.round(sofZoom * 100) + "%";
+        };
+        overlay.querySelector(".sof-zoom-in").addEventListener("click", function() {
+            sofZoom = Math.min(1.6, Math.round((sofZoom + 0.1) * 10) / 10);
+            applySofZoom();
+        });
+        overlay.querySelector(".sof-zoom-out").addEventListener("click", function() {
+            sofZoom = Math.max(0.5, Math.round((sofZoom - 0.1) * 10) / 10);
+            applySofZoom();
+        });
 
         const close = function() {
             overlay.remove();
