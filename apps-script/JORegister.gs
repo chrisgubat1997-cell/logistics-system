@@ -202,7 +202,7 @@ function updateJORegisterEntry(payload) {
     let dateWasChanged = false;
     if (deliveryDate && dateIndex >= 0 && deliveryDate !== oldDate) {
       dateWasChanged = true;
-      if (originalDateIndex >= 0 && !String(values[targetRow - 1][originalDateIndex] || "").trim()) {
+      if (originalDateIndex >= 0 && oldDate && !String(values[targetRow - 1][originalDateIndex] || "").trim()) {
         const originalValue = values[targetRow - 1][dateIndex];
         sheet.getRange(targetRow, originalDateIndex + 1).setValue(originalValue || "");
       }
