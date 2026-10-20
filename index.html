@@ -3066,7 +3066,7 @@ async function loadRevolvingFundModule() {
 }
 
 /* =========================================================
-   JO REGISTER MODULE (RESTRICTED TO ADMIN / PRODUCTION)
+   JO REGISTER MODULE (RESTRICTED TO PRODUCTION)
 ========================================================= */
 let joRegisterModuleLoaded = false;
 async function loadJORegisterModule() {
@@ -3079,8 +3079,8 @@ async function loadJORegisterModule() {
     } catch (error) {}
     const username = String(account.username || account.USERNAME || '').trim().toLowerCase();
     const role = String(account.role || account.ROLE || account.accountType || account.account_type || account.type || '').trim().toUpperCase();
-    if (username !== 'admin' || role !== 'PRODUCTION') {
-        container.innerHTML = '<div class="jo-access-denied"><h2>Access restricted</h2><p>JO Register is limited to the authorized <strong>admin</strong> account with the <strong>Production</strong> account type.</p></div>';
+    if (role !== 'PRODUCTION') {
+        container.innerHTML = '<div class="jo-access-denied"><h2>Access restricted</h2><p>JO Register is available only to active accounts with the <strong>Production</strong> account type.</p></div>';
         return;
     }
     document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) { button.style.display = ''; });
@@ -3166,7 +3166,7 @@ function loadUserAccount() {
     const joUsername = String(user.username || user.USERNAME || '').trim().toLowerCase();
     const joRole = String(user.role || user.ROLE || user.accountType || user.account_type || user.type || '').trim().toUpperCase();
     document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) {
-        button.style.display = joUsername === 'admin' && joRole === 'PRODUCTION' ? '' : 'none';
+        button.style.display = joRole === 'PRODUCTION' ? '' : 'none';
     });
 
     const fullname =
