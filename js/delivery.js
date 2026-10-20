@@ -1524,10 +1524,11 @@ if (dateElement) {
             if (i === 1) html += "<tr>"+itemCell+descriptionCell+merge("",2)+"</tr>";
             else html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+"</tr>";
         }
-        // Footer rows retain six logical columns after removing the old final column.
+        // Rows 22–24: columns 1–2 merged, column 3 solo, columns 4–6 merged.
         html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
-        html += "<tr>"+cell("")+cell("")+cell("")+cell("")+merge("",2)+"</tr>";
-        html += "<tr>"+merge("",2)+cell("")+cell("")+cell("")+cell("")+"</tr>";
+        html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
+        html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
+        // Row 25 retains its separate footer layout.
         html += "<tr>"+merge("",2)+cell("")+merge("",2)+cell("")+"</tr>";
         tbody.innerHTML=html;
     }
