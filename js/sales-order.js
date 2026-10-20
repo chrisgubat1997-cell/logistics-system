@@ -22,6 +22,7 @@
        STATE
     ===================================================== */
     let salesOrders = [];
+let soSummaryFilter = "all";
 let customers = [];
 let customersLoaded = false;
 let selectedSO = null;
@@ -83,6 +84,7 @@ function getLogisTechCurrentRole() {
             searchInput.addEventListener(
                 "input",
                 function () {
+                    soSummaryFilter = "all";
                     renderSOList();
                 }
             );
@@ -93,6 +95,7 @@ function getLogisTechCurrentRole() {
             statusFilter.addEventListener(
                 "change",
                 function () {
+                   soSummaryFilter = "all";
                    renderSOList();
                 }
             );
@@ -302,7 +305,7 @@ async function loadSOList(
                     const tbody = document.getElementById("soTableBody");
                     const emptyState = document.getElementById("soEmptyState");
                     if (tbody) {
-                        tbody.innerHTML = '<tr><td colspan="14" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
                     }
                     if (emptyState) emptyState.style.display = "none";
                     return;
@@ -742,6 +745,10 @@ async function loadSOList(
                     </td>
 
                     <td>
+                        ${escapeHTML(getSOValue(so, ["JOB_ORDER", "jobOrder", "job_order", "JO"]) || "—")}
+                    </td>
+
+                    <td>
                         ${escapeHTML(
                             formatDate(date)
                         )}
@@ -1166,6 +1173,11 @@ async function loadSOList(
                         ) || ""
                     ).toLowerCase();
 
+                const jobOrder = String(
+                    getSOValue(so, ["JOB_ORDER", "jobOrder", "job_order", "JO"]) || ""
+                ).trim();
+                const matchesSummary = soSummaryFilter !== "without-jo" || !jobOrder;
+
 
                 const matchesSearch =
                     !search ||
@@ -1188,7 +1200,8 @@ async function loadSOList(
                 return (
                     matchesSearch &&
                     matchesStatus &&
-                    matchesPayment
+                    matchesPayment &&
+                    matchesSummary
                 );
 
             }
@@ -1276,6 +1289,11 @@ async function loadSOList(
             total
         );
 
+        const withoutJO = salesOrders.filter(function (so) {
+            return !String(getSOValue(so, ["JOB_ORDER", "jobOrder", "job_order", "JO"]) || "").trim();
+        }).length;
+        setText("withoutJOSOCount", withoutJO);
+
         setText(
             "partialSOCount",
             partial
@@ -1313,6 +1331,8 @@ async function loadSOList(
             );
 
 
+        soSummaryFilter = String(filter || "all").toLowerCase();
+
         const payment =
             document.getElementById(
                 "soPaymentFilter"
@@ -1344,6 +1364,10 @@ async function loadSOList(
 
                 case "cancelled":
                     status.value = "CANCELLED";
+                    break;
+
+                case "without-jo":
+                    status.value = "";
                     break;
 
                 default:
