@@ -89,10 +89,17 @@ function getJORegisterData(payload) {
   try {
     const user = requireJORegisterAccess_(payload);
     const sheet = getSheet(CONFIG.SHEETS.SALES_ORDERS);
-    const values = sheet.getDataRange().getValues();
+    let values = sheet.getDataRange().getValues();
     if (!values.length) return { success: true, salesOrders: [], count: 0 };
 
-    const headers = values[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
+    let headers = values[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
+    const existingDateColumn = joRegisterHeaderIndex_(headers, ["REQUIRED_DELIVERY_DATE", "REQUIRED_DEL_DATE", "RDD", "DELIVERY_DATE", "DEL_DATE"]);
+    if (existingDateColumn < 0) {
+      const newColumn = sheet.getLastColumn() + 1;
+      sheet.getRange(1, newColumn).setValue("REQUIRED_DELIVERY_DATE");
+      values = sheet.getDataRange().getValues();
+      headers = values[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
+    }
     const soIndex = joRegisterHeaderIndex_(headers, ["SO_NUMBER"]);
     const joIndex = joRegisterHeaderIndex_(headers, ["JOB_ORDER", "JO"]);
     if (soIndex < 0) throw new Error("SO_NUMBER column was not found in SALES_ORDERS.");
