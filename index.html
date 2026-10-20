@@ -3096,7 +3096,7 @@ async function loadJORegisterModule() {
         }
     }
     try {
-        await loadScriptOnce('js/jo-register.js?v=20261020-actionmodal01', 'data-jo-register-js');
+        await loadScriptOnce('js/jo-register.js?v=20261020-modalnoscroll02', 'data-jo-register-js');
         if (typeof window.initializeJORegister === 'function') await window.initializeJORegister();
     } catch (error) {
         console.error('JO Register initialization failed:', error);
