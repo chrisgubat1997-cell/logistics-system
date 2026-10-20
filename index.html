@@ -3066,23 +3066,12 @@ async function loadRevolvingFundModule() {
 }
 
 /* =========================================================
-   JO REGISTER MODULE (RESTRICTED TO PRODUCTION)
+   JO REGISTER MODULE (VISIBLE TO ALL ACCOUNTS; ACTIONS RESTRICTED)
 ========================================================= */
 let joRegisterModuleLoaded = false;
 async function loadJORegisterModule() {
     const container = document.getElementById('joRegisterModule');
     if (!container) return;
-    let account = {};
-    try {
-        const saved = JSON.parse(localStorage.getItem('logitechUser') || '{}');
-        account = saved.account || saved.user || saved;
-    } catch (error) {}
-    const username = String(account.username || account.USERNAME || '').trim().toLowerCase();
-    const role = String(account.role || account.ROLE || account.accountType || account.account_type || account.type || '').trim().toUpperCase();
-    if (!['ADMIN', 'PRODUCTION'].includes(role)) {
-        container.innerHTML = '<div class="jo-access-denied"><h2>Access restricted</h2><p>JO Register is available only to active accounts with the <strong>Production</strong> account type.</p></div>';
-        return;
-    }
     document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) { button.style.display = ''; });
     if (!joRegisterModuleLoaded) {
         try {
@@ -3096,7 +3085,7 @@ async function loadJORegisterModule() {
         }
     }
     try {
-        await loadScriptOnce('js/jo-register.js?v=20261020-modalnoscroll02', 'data-jo-register-js');
+        await loadScriptOnce('js/jo-register.js?v=20261020-allroles-readonly01', 'data-jo-register-js');
         if (typeof window.initializeJORegister === 'function') await window.initializeJORegister();
     } catch (error) {
         console.error('JO Register initialization failed:', error);
@@ -3163,11 +3152,8 @@ function loadUserAccount() {
     }
 
 
-    const roleSource = user.account || user.user || user;
-    const joUsername = String(roleSource.username || roleSource.USERNAME || '').trim().toLowerCase();
-    const joRole = String(roleSource.role || roleSource.ROLE || roleSource.accountType || roleSource.account_type || roleSource.type || '').trim().toUpperCase();
     document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) {
-        button.style.display = ['ADMIN', 'PRODUCTION'].includes(joRole) ? '' : 'none';
+        button.style.display = '';
     });
 
     const fullname =
