@@ -1664,172 +1664,34 @@
 
 
             <div class="preview-body">
-
-                <div class="preview-dr-number">
-
-                    <span>
-                        DR NUMBER
-                    </span>
-
-                    <strong id="previewDrNumber">
-                        —
-                    </strong>
-
-                </div>
-
-
-
-                <div class="preview-info-grid">
-
-                    <div>
-
-                        <span>
-                            DR NUMBER
-                        </span>
-
-                        <strong id="previewNumber">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            DATE OF TRANSFER
-                        </span>
-
-                        <strong id="previewDate">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            SALES ORDER
-                        </span>
-
-                        <strong id="previewSO">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            PO NUMBER
-                        </span>
-
-                        <strong id="previewPO">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            CLIENT
-                        </span>
-
-                        <strong id="previewClient">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div>
-
-                        <span>
-                            PROJECT
-                        </span>
-
-                        <strong id="previewProject">
-                            —
-                        </strong>
-
-                    </div>
-
-
-                    <div class="preview-full">
-
-                        <span>
-                            DELIVERY ADDRESS
-                        </span>
-
-                        <strong id="previewAddress">
-                            —
-                        </strong>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="preview-items">
-
-                    <h3>
-                        Delivery Items
-                    </h3>
-
-
-                    <div class="table-wrapper">
-
-                        <table class="preview-table">
-
-                            <thead>
-
-                                <tr>
-
-                                    <th>
-                                        ITEM NO.
-                                    </th>
-
-                                    <th>
-                                        DESCRIPTION
-                                    </th>
-
-                                    <th>
-                                        QTY
-                                    </th>
-
-                                    <th>
-                                        UNIT
-                                    </th>
-
-                                    <th>
-                                        REMARKS
-                                    </th>
-
-                                </tr>
-
-                            </thead>
-
-
-                            <tbody id="previewItemsBody">
-
-                                <!-- JS GENERATED -->
-
-                            </tbody>
-
-                        </table>
-
-                    </div>
-
-                </div>
-
+                <article class="dr-paper" id="drPrintPaper">
+                    <header class="dr-paper-header">
+                        <img class="dr-paper-logo" src="../assets/drlogo.png" alt="Greenmetal Electric Manufacturing Corporation logo">
+                        <div class="dr-paper-company">
+                            <h1>GREENMETAL ELECTRIC</h1><p>ELECTRIC MANUFACTURING CORPORATION</p>
+                            <small>Dolores St. cor. Camia St., Dolmar Golden Hills Subd., Llano Road, Caloocan City</small>
+                            <small>Contact Nos.: 0917 708 4533 (Globe) | 8356-5128 (Landline)</small>
+                        </div>
+                        <div class="dr-paper-number"><h2>DELIVERY RECEIPT</h2><span>DR NO.</span><strong id="previewDrNumber">—</strong><span>DATE</span><strong id="previewDate">—</strong></div>
+                    </header>
+                    <section class="dr-paper-parties">
+                        <div><b>DELIVERED TO:</b><span id="previewClient">—</span></div>
+                        <div><b>DELIVERY ADDRESS:</b><span id="previewAddress">—</span></div>
+                        <div><b>SALES ORDER NO.:</b><span id="previewSO">—</span></div>
+                        <div><b>PO NUMBER:</b><span id="previewPO">—</span></div>
+                        <div><b>PROJECT:</b><span id="previewProject">—</span></div>
+                    </section>
+                    <table class="dr-paper-table">
+                        <thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr></thead>
+                        <tbody id="previewItemsBody"><tr><td colspan="5">No items</td></tr></tbody>
+                        <tfoot><tr><th colspan="4">TOTAL</th><th id="previewTotal">—</th></tr></tfoot>
+                    </table>
+                    <p class="dr-paper-condition">RECEIVED THE ABOVE ITEMS IN GOOD ORDER AND CONDITION.</p>
+                    <div class="dr-paper-received"><div><span>RECEIVED BY:</span><i></i><small>Signature over printed name</small></div><div><span>DATE:</span><i></i></div></div>
+                    <footer class="dr-paper-signatures"><div><i></i><b>PREPARED BY</b></div><div><i></i><b>CHECKED BY</b></div><div><i></i><b>APPROVED BY</b></div></footer>
+                    <div class="dr-paper-formcode">F-LOG-DR-001</div>
+                </article>
             </div>
-
-
 
             <div class="preview-footer">
 
