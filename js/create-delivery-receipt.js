@@ -3587,6 +3587,7 @@ function renderPreview(dr) {
     setText("previewDrNumber", val("drNumber", "DR_NUMBER"));
     setText("previewDate", formatDateDisplay(dr.dateOfTransfer));
     setText("previewSO", val("soNumber", "SO_NUMBER", "project"));
+    setText("previewSOF", val("sofNo", "SOF_NO", "projectSOF", "projectSof"));
     setText("previewPO", val("poNumber", "PO_NUMBER"));
     setText("previewClient", val("clientName", "CLIENT_NAME", "customerName"));
     setText("previewAddress", val("deliveryAddress", "DELIVERY_ADDRESS", "billingAddress"));
@@ -3600,24 +3601,12 @@ function renderPreview(dr) {
     if (!tbody) return;
     const items = Array.isArray(dr.items) ? dr.items : [];
     let total = 0, allAmountsKnown = items.length > 0;
-    tbody.innerHTML = "";
-    items.forEach(function(item) {
-        const qty = toNumber(item.pickQty ?? item.qty ?? item.quantity);
-        const priceRaw = item.unitAmount ?? item.unitPrice ?? item.unitPriceAmount ?? null;
-        const amountRaw = item.amount ?? item.lineTotal ?? item.totalAmount ?? null;
-        const price = priceRaw === null || priceRaw === "" ? null : toNumber(priceRaw);
-        const amount = amountRaw === null || amountRaw === "" ? (price === null ? null : price * qty) : toNumber(amountRaw);
-        if (amount === null) allAmountsKnown = false; else total += amount;
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${escapeHTML(item.itemNumber || item.itemNo || "—")}</td><td>${escapeHTML(item.itemDescription || item.description || item.itemName || "—")}</td><td>${formatNumber(qty)}</td><td>${escapeHTML(item.unit || "—")}</td><td>${amount === null ? "" : formatCurrency(amount)}</td>`;
-        tbody.appendChild(row);
-    });
-    for (let i = items.length; i < Math.max(12, items.length); i++) {
-        const row = document.createElement("tr");
-        row.innerHTML = "<td>&nbsp;</td><td></td><td></td><td></td><td></td>";
-        tbody.appendChild(row);
-    }
-    if (totalEl) totalEl.textContent = allAmountsKnown ? formatCurrency(total) : "";
+    const esc = v => escapeHTML(v === null || v === undefined ? "" : String(v));
+    let rows = '<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr>';
+    for (let i=0;i<20;i++) { const item=items[i]||{}; const qty=toNumber(item.pickQty??item.qty??item.quantity??0); const priceRaw=item.unitAmount??item.unitPrice??item.unitPriceAmount??null; const raw=item.amount??item.lineTotal??item.totalAmount??null; const price=priceRaw===null||priceRaw===""?null:toNumber(priceRaw); const amount=raw===null||raw===""?(price===null?null:price*qty):toNumber(raw); if(amount===null)allAmountsKnown=false;else total+=amount; const no=item.itemNumber||item.itemNo||item.itemCode||""; const desc=item.itemDescription||item.description||item.itemName||""; rows+='<tr><td>'+esc(no)+'</td><td colspan="2">'+esc(desc)+'</td><td>'+(no||desc?formatNumber(qty):'')+'</td><td>'+esc(item.unit||'')+'</td><td>'+(amount===null?'':formatCurrency(amount))+'</td></tr>'; }
+    rows+='<tr><td colspan="2">TOTAL</td><td></td><td colspan="3">'+(allAmountsKnown?formatCurrency(total):'')+'</td></tr><tr><td></td><td></td><td></td><td></td><td colspan="2"></td></tr><tr><td colspan="2"></td><td></td><td></td><td></td><td></td></tr><tr><td colspan="2"></td><td></td><td colspan="2"></td><td></td></tr>';
+    tbody.innerHTML=rows;
+    if(totalEl)totalEl.textContent=allAmountsKnown?formatCurrency(total):'';
 }
 
 
