@@ -1507,7 +1507,7 @@ if (dateElement) {
         const esc=v=>escapeHTML(v===null||v===undefined?"":String(v));
         const cell = value => "<td>"+value+"</td>";
         const merge = (value, span) => '<td colspan="'+span+'">'+value+'</td>';
-        let html = '<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th></th></tr>';
+        let html = '<tr><th>ITEM</th><th colspan="3">DESCRIPTION</th><th>QTY</th><th>UNIT</th></tr>';
         let total = 0, known = false;
         // 25 physical rows total: one heading, 20 item rows, four footer rows.
         for (let i=0; i<20; i++) {
@@ -1520,17 +1520,14 @@ if (dateElement) {
             const amount = raw === null || raw === "" ? null : toNumber(raw);
             if (amount !== null) { total += amount; known = true; }
             const itemCell = cell(escapeHTML(no));
-            const descriptionCell = merge(escapeHTML(desc), 2);
-            if (i === 1) html += "<tr>"+itemCell+descriptionCell+merge("",3)+"</tr>";
-            else html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+cell("")+"</tr>";
+            const descriptionCell = merge(escapeHTML(desc), 3);
+            if (i === 1) html += "<tr>"+itemCell+descriptionCell+merge("",2)+"</tr>";
+            else html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+"</tr>";
         }
-        // Row 22: columns 1–2 merged, column 3 separate, columns 4–6 merged.
+        // Footer rows retain six logical columns after removing the old final column.
         html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
-        // Row 23: columns 1–4 separate, columns 5–6 merged.
         html += "<tr>"+cell("")+cell("")+cell("")+cell("")+merge("",2)+"</tr>";
-        // Row 24: columns 1–2 merged; columns 3–6 separate.
         html += "<tr>"+merge("",2)+cell("")+cell("")+cell("")+cell("")+"</tr>";
-        // Row 25: columns 1–2 merged; column 3 separate; columns 4–5 merged; column 6 separate.
         html += "<tr>"+merge("",2)+cell("")+merge("",2)+cell("")+"</tr>";
         tbody.innerHTML=html;
     }
