@@ -133,7 +133,7 @@
        SAVE INITIAL DATA TO CACHE
     ===================================================== */
 
-    async function saveInitialData(result) {
+    async function saveInitialData(result, fallbackVersion = null) {
 
         if (!result) {
             return;
@@ -165,6 +165,7 @@
             data.version ||
             data.syncVersion ||
             data.dataVersion ||
+            fallbackVersion ||
             null;
 
 
@@ -511,7 +512,8 @@
 
             const saved =
                 await saveInitialData(
-                    result
+                    result,
+                    serverVersion
                 );
 
 
@@ -674,7 +676,8 @@
 
             const saved =
                 await saveInitialData(
-                    result
+                    result,
+                    serverVersion
                 );
 
 
