@@ -51,8 +51,8 @@ function requireJORegisterAccess_(payload) {
   if (String(matched[statusIndex] || "").trim().toUpperCase() !== "ACTIVE") {
     throw new Error("This user account is not active.");
   }
-  if (String(matched[roleIndex] || "").trim().toUpperCase() !== "PRODUCTION") {
-    throw new Error("Access denied. JO Register requires the Production account type.");
+  if (!["ADMIN", "PRODUCTION"].includes(String(matched[roleIndex] || "").trim().toUpperCase())) {
+    throw new Error("Access denied. JO Register requires an Admin or Production account.");
   }
 
   return {
