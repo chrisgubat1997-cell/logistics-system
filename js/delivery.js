@@ -1528,7 +1528,7 @@ if (dateElement) {
         html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
         html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
         html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
-        // Row 25 retains its separate footer layout.
+        // Row 25: columns 1–2 merged, column 3 solo, columns 4–5 merged, column 6 solo.
         html += "<tr>"+merge("",2)+cell("")+merge("",2)+cell("")+"</tr>";
         tbody.innerHTML=html;
     }
