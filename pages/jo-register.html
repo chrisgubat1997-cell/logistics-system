@@ -21,4 +21,15 @@
     <div class="jo-table-wrap"><table class="jo-table"><thead><tr><th>SO Number</th><th>Client / Project</th><th>PO Number</th><th>Current RDD</th><th>JO Number</th><th>JO Status</th><th>Adjustment Status</th><th>Adjusted Delivery Date</th><th>Action</th></tr></thead><tbody id="joRows"><tr><td colspan="9" class="jo-empty">Loading Sales Orders…</td></tr></tbody></table></div>
     <footer class="jo-table-footer"><span id="joCount">0 Sales Orders</span><span>JO assignment and delivery-date adjustments are tracked per Sales Order.</span></footer>
   </section>
+  <div class="jo-modal-backdrop" id="joActionModal" hidden>
+    <section class="jo-modal" role="dialog" aria-modal="true" aria-labelledby="joModalTitle">
+      <header class="jo-modal-header"><div><h2 id="joModalTitle">Sales Order Action</h2><p id="joModalSubtitle">Assign a JO Number or adjust the required delivery date.</p></div><button type="button" class="jo-modal-close" id="joModalClose" aria-label="Close">×</button></header>
+      <div class="jo-modal-so" id="joModalSO"></div>
+      <form id="joActionForm">
+        <div class="jo-modal-field" id="joModalJOField"><label for="joModalJONumber">JO Number</label><input id="joModalJONumber" type="text" maxlength="100" placeholder="Enter JO Number" autocomplete="off"></div>
+        <div class="jo-modal-field"><label for="joModalRDD">Adjusted Required Delivery Date</label><input id="joModalRDD" type="date"><small>Keep the current date if no adjustment is needed.</small></div>
+        <div class="jo-modal-actions"><button type="button" class="jo-modal-cancel" id="joModalCancel">Cancel</button><button type="submit" class="jo-row-save" id="joModalSave">Save Changes</button></div>
+      </form>
+    </section>
+  </div>
 </div>
