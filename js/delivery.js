@@ -1499,8 +1499,10 @@ if (dateElement) {
         put("drPreviewSONumber", val("SO_NUMBER","soNumber","salesOrderNumber"));
         put("drPreviewSOF", val("SOF_NO","sofNo","projectSOF","projectSof"));
         put("drPreviewSalesman", val("SALESMAN","salesman","salesmanName","accountManager"));
-        let items=getDRItems(dr);
-        try { const response=await callDeliveryAPI("getDeliveryReceipts"); const records=extractRecords(response,["deliveryReceipts","records","data"]); const latest=records.find(x=>getDRNumber(x)===getDRNumber(dr)); if(latest){selectedDRRecord=latest;dr=latest;items=getDRItems(latest);} } catch(error){console.warn("Using cached DR preview data",error);}
+        // Render immediately from the selected DR record. Do not wait for a
+        // second API request before filling the table; that request can stall
+        // and leave only the static first table and footer visible.
+        const items=getDRItems(dr);
         const tbody=document.getElementById("drPreviewItemsBody"); if(!tbody)return;
         const esc=v=>escapeHTML(v===null||v===undefined?"":String(v));
         const cell = value => "<td>"+value+"</td>";
