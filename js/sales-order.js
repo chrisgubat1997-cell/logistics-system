@@ -70,8 +70,8 @@ function getLogisTechCurrentRole() {
         );
         applySalesOrderRolePermissions();
         bindSalesOrderEvents();
-loadSOList();
-loadCustomerTable();
+        // The page loader starts data loading after the HTML is mounted.
+        // Avoid duplicate Sales Order and Customer requests during initialization.
     }
     /* =====================================================
        EVENT BINDINGS
@@ -276,48 +276,36 @@ async function loadSOList(
 
 
                 if (
-                    Array.isArray(
-                        cachedSalesOrders
-                    ) &&
+                    Array.isArray(cachedSalesOrders) &&
                     cachedSalesOrders.length > 0
                 ) {
+                    console.log("LOGIS-TECH: Loading Sales Orders from local cache...");
 
-                    console.log(
-                        "LOGIS-TECH: Loading Sales Orders from local cache..."
-                    );
-
-
-                    salesOrders =
-                        normalizeSalesOrders(
-                            cachedSalesOrders
-                        );
-
-
-                    salesOrdersLoaded =
-                        true;
-
+                    salesOrders = normalizeSalesOrders(cachedSalesOrders);
+                    salesOrdersLoaded = true;
 
                     renderSOList();
-
                     updateSOSummary();
 
-
-                    console.log(
-                        "LOGIS-TECH: Sales Orders loaded from cache:",
-                        salesOrders.length
-                    );
-
-
-                    /*
-                     * IMPORTANT:
-                     * Do NOT wait for Google Sheets here.
-                     *
-                     * Background Sync Manager will check
-                     * whether the data has changed.
-                     */
-
+                    console.log("LOGIS-TECH: Sales Orders loaded from cache:", salesOrders.length);
                     return;
+                }
 
+                // On a first visit, Sync Manager is already downloading the
+                // initial dataset. Avoid making a second, competing API call.
+                // The logistech:data-updated event below will populate the table
+                // as soon as IndexedDB has been refreshed.
+                if (Array.isArray(cachedSalesOrders) && cachedSalesOrders.length === 0 &&
+                    window.LogisTechSync && !forceRefresh) {
+                    console.log("LOGIS-TECH: Waiting for initial sync to populate the Sales Order cache.");
+
+                    const tbody = document.getElementById("soTableBody");
+                    const emptyState = document.getElementById("soEmptyState");
+                    if (tbody) {
+                        tbody.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
+                    }
+                    if (emptyState) emptyState.style.display = "none";
+                    return;
                 }
 
             } catch (cacheError) {
