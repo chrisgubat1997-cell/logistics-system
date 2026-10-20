@@ -1521,8 +1521,7 @@ if (dateElement) {
             if (amount !== null) { total += amount; known = true; }
             const itemCell = cell(escapeHTML(no));
             const descriptionCell = merge(escapeHTML(desc), 3);
-            if (i === 1) html += "<tr>"+itemCell+descriptionCell+merge("",2)+"</tr>";
-            else html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+"</tr>";
+            html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+"</tr>";
         }
         // Rows 22–24: columns 1–2 merged, column 3 solo, columns 4–6 merged.
         html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
