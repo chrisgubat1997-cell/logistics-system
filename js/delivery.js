@@ -1523,12 +1523,11 @@ if (dateElement) {
             const descriptionCell = merge(escapeHTML(desc), 3);
             html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+"</tr>";
         }
-        // Rows 22–24: columns 1–2 merged, column 3 solo, columns 4–6 merged.
-        html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
-        html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
-        html += "<tr>"+merge("",2)+cell("")+merge("",3)+"</tr>";
-        // Row 25: columns 1–2 merged, column 3 solo, columns 4–5 merged, column 6 solo.
-        html += "<tr>"+merge("",2)+cell("")+merge("",2)+cell("")+"</tr>";
+        // Rows 22–25: signature and receiving details.
+        html += "<tr>"+merge("Delivered by :",2)+cell("Cris Gubat / Franz Jade Bayba")+merge("Recieved the above items in good order and condition.",3)+"</tr>";
+        html += "<tr>"+merge("Prepared by :",2)+cell("Ellaine Elpedes")+merge("By:",3)+"</tr>";
+        html += "<tr>"+merge("Checked by :",2)+cell("Jeriel Garlit")+merge("",3)+"</tr>";
+        html += "<tr>"+merge("Approed by:",2)+cell("")+merge("(Printed Name and Signature)",2)+cell("Date")+"</tr>";
         tbody.innerHTML=html;
     }
 
