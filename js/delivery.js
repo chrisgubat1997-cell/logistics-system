@@ -1488,7 +1488,27 @@ if (dateElement) {
         const put = (id, value) => { const el=document.getElementById(id); if(el) el.textContent=(value===null||value===undefined||String(value).trim()==="")?"—":String(value); };
         put("drPreviewHeaderNumber", getDRNumber(dr));
         put("drPreviewClient", val("CLIENT_NAME","clientName","customerName","CUSTOMER_NAME"));
-        put("drPreviewAddress", val("DELIVERY_ADDRESS","deliveryAddress","billingAddress","ADDRESS"));
+        // ADDRESS in the DR first table must use the customer's billing address.
+        put("drPreviewAddress", val("BILLING_ADDRESS","billingAddress","billing_address"));
+
+        // Older DR/SO records may not include the billing address, so resolve it
+        // from the customer database using the customer name.
+        const previewCustomerName = val("CLIENT_NAME","clientName","customerName","CUSTOMER_NAME");
+        const existingBillingAddress = getValue(dr, ["BILLING_ADDRESS","billingAddress","billing_address"], "");
+        if (!existingBillingAddress && previewCustomerName && previewCustomerName !== "—") {
+            try {
+                const customerResult = await callDeliveryAPI("getCustomers");
+                const customers = extractRecords(customerResult, ["customers","data","records"]);
+                const normalizeCustomerName = value => normalizeText(value).replace(/_/g, " ");
+                const matchingCustomer = customers.find(customer =>
+                    normalizeCustomerName(getValue(customer, ["CUSTOMER_NAME","customerName","CLIENT_NAME","clientName","NAME","name"], "")) === normalizeCustomerName(previewCustomerName)
+                );
+                const billingAddress = matchingCustomer && getValue(matchingCustomer, ["BILLING_ADDRESS","billingAddress","billing_address"], "");
+                if (billingAddress) put("drPreviewAddress", billingAddress);
+            } catch (error) {
+                console.warn("Unable to load customer billing address for DR preview:", error);
+            }
+        }
         put("drPreviewShipTo", val("SHIP_TO","shipTo","shipToAddress","DELIVERY_ADDRESS","deliveryAddress"));
         put("drPreviewTIN", val("TIN","tin","TIN_NUMBER","tinNumber"));
         put("drPreviewAttention", val("ATTENTION","attention","contactPerson"));
