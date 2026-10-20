@@ -4623,7 +4623,7 @@ if (
                 "Post Sales Order " +
                 soNumber +
                 "?\n\n" +
-                "Once posted, this SO will be available for the next transaction workflow."
+                "This will add the SO to the Production Queue and notify active Production accounts."
             );
 
 
@@ -4649,18 +4649,23 @@ if (
             }
 
 
-            await salesOrderAPI(
-                "postSalesOrder",
+            let postAccount = {};
+            try {
+                const savedAccount = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+                postAccount = savedAccount.account || savedAccount.user || savedAccount;
+            } catch (ignored) {}
+
+            const postResult = await salesOrderAPI(
+                "postSalesOrderToProduction",
                 {
-                    soNumber:
-                        soNumber
+                    soNumber: soNumber,
+                    sessionToken: postAccount.sessionToken || postAccount.session_token || "",
+                    userId: postAccount.userId || postAccount.USER_ID || "",
+                    username: postAccount.username || postAccount.USERNAME || ""
                 }
             );
 
-
-            alert(
-                "Sales Order posted successfully."
-            );
+            alert(postResult.message || "Sales Order posted to Production.");
 
 
             setDetailsEditMode(
