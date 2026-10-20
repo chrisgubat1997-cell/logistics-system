@@ -122,7 +122,7 @@
          SHARED GEMCOR BRAND THEME — LOAD AFTER MODULE STYLES
     ====================================================== -->
     <link rel="stylesheet" href="css/brand-theme.css?v=20261016-excel-export01">\n    <link rel="stylesheet" href="css/revolving-fund.css?v=20261016-02">
-    <link rel="stylesheet" href="css/jo-register.css?v=20261020-filterbar02">
+    <link rel="stylesheet" href="css/jo-register.css?v=20261020-actionmodal01">
 
 </head>
 
@@ -3096,7 +3096,7 @@ async function loadJORegisterModule() {
         }
     }
     try {
-        await loadScriptOnce('js/jo-register.js?v=20261020-cards01', 'data-jo-register-js');
+        await loadScriptOnce('js/jo-register.js?v=20261020-actionmodal01', 'data-jo-register-js');
         if (typeof window.initializeJORegister === 'function') await window.initializeJORegister();
     } catch (error) {
         console.error('JO Register initialization failed:', error);
