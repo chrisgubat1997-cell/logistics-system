@@ -2049,3 +2049,30 @@
 .so-table th:nth-child(8), .so-table td:nth-child(8) { width: 75px; min-width: 75px; max-width: 90px; padding-left: 6px; padding-right: 6px; }
 .so-table th:nth-child(9), .so-table td:nth-child(9) { width: 80px; min-width: 80px; max-width: 105px; padding-left: 7px; padding-right: 7px; }
 .so-table th:nth-child(10), .so-table td:nth-child(10) { min-width: 125px; }
+
+/* FINAL OVERRIDE: all 11 Sales Order list columns use equal widths. */
+.so-table {
+    width: 1320px !important;
+    min-width: 1320px !important;
+    max-width: 1320px !important;
+    table-layout: fixed !important;
+}
+.so-table thead th,
+.so-table tbody td {
+    width: 120px !important;
+    min-width: 120px !important;
+    max-width: 120px !important;
+    box-sizing: border-box !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    overflow-wrap: anywhere;
+}
+.so-table thead th {
+    white-space: normal;
+}
+.so-table tbody td {
+    white-space: normal;
+}
+.so-table td.so-action-cell {
+    white-space: normal !important;
+}
