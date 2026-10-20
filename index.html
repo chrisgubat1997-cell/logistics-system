@@ -3096,7 +3096,7 @@ async function loadJORegisterModule() {
         }
     }
     try {
-        await loadScriptOnce('js/jo-register.js?v=20261020-02', 'data-jo-register-js');
+        await loadScriptOnce('js/jo-register.js?v=20261020-cards01', 'data-jo-register-js');
         if (typeof window.initializeJORegister === 'function') await window.initializeJORegister();
     } catch (error) {
         console.error('JO Register initialization failed:', error);
@@ -3167,9 +3167,6 @@ function loadUserAccount() {
     const joUsername = String(roleSource.username || roleSource.USERNAME || '').trim().toLowerCase();
     const joRole = String(roleSource.role || roleSource.ROLE || roleSource.accountType || roleSource.account_type || roleSource.type || '').trim().toUpperCase();
     document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) {
-        button.style.display = ['ADMIN', 'PRODUCTION'].includes(joRole) ? '' : 'none';
-    });
-    document.querySelectorAll('[data-production-queue-menu]').forEach(function (button) {
         button.style.display = ['ADMIN', 'PRODUCTION'].includes(joRole) ? '' : 'none';
     });
 
