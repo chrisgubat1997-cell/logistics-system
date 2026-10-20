@@ -1323,6 +1323,34 @@ const now =
       soRow
     );
 
+    /* Save the client-requested RDD in its own SALES_ORDERS column.
+       Add the column once if the current sheet schema does not have one. */
+    const salesOrderSheetForRDD = getSheet(CONFIG.SHEETS.SALES_ORDERS);
+    const salesOrderLastColumnForRDD = salesOrderSheetForRDD.getLastColumn();
+    let salesOrderHeadersForRDD = salesOrderSheetForRDD.getRange(1, 1, 1, salesOrderLastColumnForRDD).getValues()[0]
+      .map(function(header) { return String(header || "").trim().toUpperCase(); });
+    let rddColumnIndex = -1;
+    ["REQUIRED_DELIVERY_DATE", "REQUIRED_DEL_DATE", "RDD", "DELIVERY_DATE", "DEL_DATE"].some(function(name) {
+      rddColumnIndex = salesOrderHeadersForRDD.indexOf(name);
+      return rddColumnIndex >= 0;
+    });
+    if (rddColumnIndex < 0) {
+      rddColumnIndex = salesOrderLastColumnForRDD;
+      salesOrderSheetForRDD.getRange(1, rddColumnIndex + 1).setValue("REQUIRED_DELIVERY_DATE");
+    }
+    const rddValue = String(payload.requiredDeliveryDate || payload.requiredDelDate || "").trim();
+    if (rddValue) {
+      const rddMatch = rddValue.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!rddMatch) throw new Error("Required Delivery Date must be a valid date.");
+      const rddDate = new Date(Number(rddMatch[1]), Number(rddMatch[2]) - 1, Number(rddMatch[3]), 12, 0, 0);
+      if (rddDate.getFullYear() !== Number(rddMatch[1]) ||
+          rddDate.getMonth() !== Number(rddMatch[2]) - 1 ||
+          rddDate.getDate() !== Number(rddMatch[3])) {
+        throw new Error("Required Delivery Date must be a valid date.");
+      }
+      salesOrderSheetForRDD.getRange(salesOrderSheetForRDD.getLastRow(), rddColumnIndex + 1).setValue(rddDate);
+    }
+
 
     /* =====================================================
        CREATE SO ITEMS
