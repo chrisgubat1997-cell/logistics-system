@@ -155,10 +155,10 @@ function updateJORegisterEntry(payload) {
     if (!soNumber) throw new Error("Select a Sales Order.");
     if (!adjustmentOnly && !jobOrder) throw new Error("Enter the manual JO Number.");
     if (jobOrder.length > 100) throw new Error("JO Number must be 100 characters or fewer.");
-    if (/[\\r\\n]/.test(jobOrder)) throw new Error("JO Number must be a single line.");
+    if (/[\r\n]/.test(jobOrder)) throw new Error("JO Number must be a single line.");
     let parsedDate = null;
     if (deliveryDate) {
-      const match = deliveryDate.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+      const match = deliveryDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
       if (!match) throw new Error("Enter a valid delivery date.");
       parsedDate = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12, 0, 0);
       if (parsedDate.getFullYear() !== Number(match[1]) || parsedDate.getMonth() !== Number(match[2]) - 1 || parsedDate.getDate() !== Number(match[3])) throw new Error("Enter a valid delivery date.");
