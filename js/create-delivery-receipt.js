@@ -3605,7 +3605,6 @@ function renderPreview(dr) {
     const cell = value => "<td>"+value+"</td>";
     const merge = (value, span) => '<td colspan="'+span+'">'+value+'</td>';
     let rows = '<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr>';
-    let total = 0, allAmountsKnown = items.length > 0;
     // 25 physical rows total: one heading, 20 item rows, four footer rows.
     for (let i=0; i<20; i++) {
         const item = items[i] || {};
