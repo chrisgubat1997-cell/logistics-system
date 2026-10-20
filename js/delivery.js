@@ -1507,7 +1507,7 @@ if (dateElement) {
         const esc=v=>escapeHTML(v===null||v===undefined?"":String(v));
         const cell = value => "<td>"+value+"</td>";
         const merge = (value, span) => '<td colspan="'+span+'">'+value+'</td>';
-        const signoffLabel = label => '<td colspan="2" class="dr-signoff-label-cell"><span>'+label+'</span><span>:</span></td>';
+        const signoffLabel = label => '<td colspan="2" class="dr-signoff-label-cell"><div><span>'+label+'</span><span>:</span></div></td>';
         let html = '<tr><th>ITEM</th><th colspan="3">DESCRIPTION</th><th>QTY</th><th>UNIT</th></tr>';
         let total = 0, known = false;
         // 25 physical rows total: one heading, 20 item rows, four footer rows.
