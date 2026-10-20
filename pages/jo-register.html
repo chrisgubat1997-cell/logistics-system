@@ -1,0 +1,12 @@
+<div class="jo-module">
+  <header class="jo-header">
+    <div><small>LOGIS-TECH SYSTEM / PRODUCTION</small><h1>JO Register</h1><p>Assign manual Job Order Numbers and update the required delivery date for Sales Orders without a JO Number.</p></div>
+    <button type="button" class="jo-refresh" id="joRefreshBtn">↻ Refresh</button>
+  </header>
+  <div class="jo-notice" id="joNotice" role="status">Loading Sales Orders…</div>
+  <section class="jo-panel">
+    <div class="jo-toolbar"><div><h2>Sales Orders Without JO Number</h2><p>All Sales Orders without a Job Order Number are included, regardless of status.</p></div><div class="jo-search-wrap"><label for="joSearch">Search Sales Orders</label><input id="joSearch" type="search" placeholder="SO Number, client, project or PO…"></div></div>
+    <div class="jo-table-wrap"><table class="jo-table"><thead><tr><th>SO Number</th><th>Client / Project</th><th>PO Number</th><th>Current RDD</th><th>Manual JO Number *</th><th>Adjusted Delivery Date</th><th>Action</th></tr></thead><tbody id="joRows"><tr><td colspan="7" class="jo-empty">Loading Sales Orders…</td></tr></tbody></table></div>
+    <footer class="jo-table-footer"><span id="joCount">0 Sales Orders</span><span>Saving a JO Number removes that SO from this pending register.</span></footer>
+  </section>
+</div>
