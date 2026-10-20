@@ -11,6 +11,7 @@
     catch (error) { return {}; }
   }
   function token() { return String(account().sessionToken || account().session_token || "").trim(); }
+  function canManageJO() { const a=account(); const role=String(a.role || a.ROLE || a.accountType || a.account_type || a.type || "").trim().toUpperCase(); return role==="ADMIN" || role==="PRODUCTION"; }
   function safe(value) { return String(value == null ? "" : value).replace(/[&<>"']/g, function(c) { return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
   function notice(message, kind) { const el=$("joNotice"); if(!el)return;el.textContent=message;el.className="jo-notice show "+(kind||""); }
   async function api(action, data) {
@@ -53,6 +54,7 @@
       const dateAvailable=so.deliveryDateColumnAvailable!==false;
       const adjusted=!!so.deliveryDateAdjusted;
       const currentDate=String(so.requiredDeliveryDate||"");
+      const canManage=canManageJO();
       return '<tr data-so="'+safe(so.soNumber)+'">'+
         '<td><div class="jo-so-number">'+safe(so.soNumber)+'</div><div class="jo-project">Created: '+safe(fmtDate(so.dateCreation))+'</div></td>'+
         '<td><div class="jo-client">'+safe(so.clientName||"—")+'</div><div class="jo-project">'+safe(so.project||"No project specified")+'</div></td>'+
@@ -62,7 +64,7 @@
         '<td><span class="jo-status '+(hasJO?'jo-status-assigned':'jo-status-pending')+'">'+(hasJO?'With JO':'Without JO')+'</span></td>'+
         '<td><span class="jo-status '+(adjusted?'jo-status-adjusted':'jo-status-none')+'">'+(adjusted?'Adjusted':'Not Adjusted')+'</span>'+(adjusted&&so.deliveryDateAdjustedAt?'<div class="jo-project">Updated: '+safe(fmtDate(so.deliveryDateAdjustedAt))+'</div>':'')+'</td>'+
         '<td class="jo-date-text">'+safe(adjusted?fmtDate(currentDate):'—')+'</td>'+
-        '<td><button type="button" class="jo-action-btn" data-jo-action="'+safe(so.soNumber)+'" '+(!dateAvailable?'data-date-unavailable="true"':'')+'>'+(hasJO?'ADJUST RDD':'ASSIGN JO / ADJUST RDD')+'</button></td></tr>';
+        '<td><button type="button" class="jo-action-btn" data-jo-action="'+safe(so.soNumber)+'" '+(!canManage?'disabled title="Only Admin and Production accounts can assign JO or adjust RDD"':'')+' '+(!dateAvailable?'data-date-unavailable="true"':'')+'>'+(hasJO?'ADJUST RDD':'ASSIGN JO / ADJUST RDD')+'</button></td></tr>';
     }).join("");
     $("joCount").textContent=list.length+" of "+orders.length+" Sales Order"+(orders.length===1?"":"s");
   }
@@ -82,6 +84,7 @@
   }
   let activeOrder = null;
   function openActionModal(soNumber, button) {
+    if(!canManageJO()){notice("Only Admin and Production accounts can assign JO or adjust RDD.","error");return;}
     activeOrder = orders.find(function(so){return String(so.soNumber)===String(soNumber);});
     if(!activeOrder)return;
     const hasJO=String(activeOrder.jobOrder||"").trim()!=="";
@@ -149,7 +152,7 @@
         if($("joAdjustmentFilter"))$("joAdjustmentFilter").value=["adjusted","not-adjusted"].includes(selectedCard)?selectedCard:"all";
         syncCards();render();
       });});
-      if($("joRows"))$("joRows").addEventListener("click",function(event){const button=event.target.closest("[data-jo-action]");if(button)openActionModal(button.getAttribute("data-jo-action"),button);});
+      if($("joRows"))$("joRows").addEventListener("click",function(event){const button=event.target.closest("[data-jo-action]");if(button&&!button.disabled)openActionModal(button.getAttribute("data-jo-action"),button);});
       if($("joActionForm"))$("joActionForm").addEventListener("submit",saveModal);
       ["joModalClose","joModalCancel"].forEach(function(id){if($(id))$(id).addEventListener("click",closeActionModal);});
       if($("joActionModal"))$("joActionModal").addEventListener("click",function(event){if(event.target===$("joActionModal"))closeActionModal();});
