@@ -305,7 +305,7 @@ async function loadSOList(
                     const tbody = document.getElementById("soTableBody");
                     const emptyState = document.getElementById("soEmptyState");
                     if (tbody) {
-                        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
                     }
                     if (emptyState) emptyState.style.display = "none";
                     return;
@@ -763,24 +763,12 @@ async function loadSOList(
                     </td>
 
                     <td>
-                        ${escapeHTML(
-                            salesEngineer || "-"
-                        )}
-                    </td>
-
-                    <td>
                         ${escapeHTML(project || "-")}
                     </td>
 
                     <td>
                         ${escapeHTML(
                             poNumber || "-"
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            terms || "-"
                         )}
                     </td>
 
@@ -794,6 +782,10 @@ async function loadSOList(
                         ${renderStatusBadge(
                             status
                         )}
+                    </td>
+
+                    <td>
+                        ${renderStatusBadge(productionPostStatus || "UNPOSTED")}
                     </td>
 
                     <td class="so-action-cell">
