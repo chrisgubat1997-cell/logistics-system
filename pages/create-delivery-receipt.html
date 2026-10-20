@@ -9,7 +9,7 @@
 
     <link
         rel="stylesheet"
-        href="../css/create-delivery-receipt.css?v=20261020-01"
+        href="../css/create-delivery-receipt.css?v=20261020-refmatch"
     >
 </head>
 
@@ -1664,36 +1664,15 @@
 
 
             <div class="preview-body">
-                <article class="dr-paper" id="drPrintPaper">
-                    <header class="dr-paper-header">
-                        <img class="dr-paper-logo" src="../assets/drlogo.png" alt="Greenmetal Electric Manufacturing Corporation logo">
-                        <div class="dr-paper-company">
-                            <h1>GREENMETAL ELECTRIC</h1><p>ELECTRIC MANUFACTURING CORPORATION</p>
-                            <small>Dolores St. cor. Camia St., Dolmar Golden Hills Subd., Llano Road, Caloocan City</small>
-                            <small>Contact Nos.: 0917 708 4533 (Globe) | 8356-5128 (Landline)</small>
-                        </div>
-                        <div class="dr-paper-number"><h2>DELIVERY RECEIPT</h2><span>DR NO.</span><strong id="previewDrNumber">—</strong><span>DATE</span><strong id="previewDate">—</strong></div>
-                    </header>
-                    <section class="dr-paper-parties">
-                        <div><b>DELIVERED TO:</b><span id="previewClient">—</span></div>
-                        <div><b>DELIVERY ADDRESS:</b><span id="previewAddress">—</span></div>
-                        <div><b>SALES ORDER NO.:</b><span id="previewSO">—</span></div>
-                        <div><b>PO NUMBER:</b><span id="previewPO">—</span></div>
-                        <div><b>PROJECT:</b><span id="previewProject">—</span></div>
-                    </section>
-                    <table class="dr-paper-table">
-                        <thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr></thead>
-                        <tbody id="previewItemsBody"><tr><td colspan="5">No items</td></tr></tbody>
-                        <tfoot><tr><th colspan="4">TOTAL</th><th id="previewTotal">—</th></tr></tfoot>
-                    </table>
-                    <p class="dr-paper-condition">RECEIVED THE ABOVE ITEMS IN GOOD ORDER AND CONDITION.</p>
-                    <div class="dr-paper-received"><div><span>RECEIVED BY:</span><i></i><small>Signature over printed name</small></div><div><span>DATE:</span><i></i></div></div>
-                    <footer class="dr-paper-signatures"><div><i></i><b>PREPARED BY</b></div><div><i></i><b>CHECKED BY</b></div><div><i></i><b>APPROVED BY</b></div></footer>
-                    <div class="dr-paper-formcode">F-LOG-DR-001</div>
-                </article>
-            </div>
+<article class="dr-paper" id="drPrintPaper">
+<header class="dr-form-header"><div class="dr-form-brand"><img class="dr-paper-logo" src="../assets/drlogo.png" alt="Company logo"><div class="dr-form-company"><h1>GREENMETAL ELECTRIC</h1><h2>MANUFACTURING CORPORATION</h2><p>Dolores St. cor. Camia St., Dolmar Golden Hills Subd., Llano Road, Caloocan City</p><p>Contact Nos.: 0917 708 4533 (Globe) | 8356-5128 (Landline)</p><p>VAT Reg. TIN: ____________________</p></div></div><div class="dr-form-title"><h1>DELIVERY RECEIPT</h1><div class="dr-form-number"><span>No.</span><strong id="previewDrNumber">—</strong></div></div></header>
+<section class="dr-form-details"><div class="dr-form-detail-column"><div><b>DELIVERED TO</b><span>:</span><span id="previewClient">—</span></div><div><b>ADDRESS</b><span>:</span><span id="previewAddress">—</span></div><div><b>SHIP TO</b><span>:</span><span id="previewShipTo">—</span></div><div><b>TIN</b><span>:</span><span id="previewTIN">—</span></div><div><b>ATTENTION</b><span>:</span><span id="previewAttention">—</span></div></div>
+<div class="dr-form-detail-column"><div><b>DATE</b><span>:</span><span id="previewDate">—</span></div><div><b>P.O. NO.</b><span>:</span><span id="previewPO">—</span></div><div><b>SALES INVOICE NO.</b><span>:</span><span id="previewInvoiceNo">—</span></div><div><b>TERMS</b><span>:</span><span id="previewTerms">—</span></div><div><b>J.O. NO.</b><span>:</span><span id="previewSO">—</span></div><div><b>SALESMAN</b><span>:</span><span id="previewSalesman">—</span></div></div></section>
+<table class="dr-form-table"><thead><tr><th>ITEM</th><th>DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr></thead><tbody id="previewItemsBody"></tbody><tfoot><tr><th colspan="4">TOTAL</th><th id="previewTotal">—</th></tr></tfoot></table>
+<section class="dr-form-bottom"><div class="dr-form-signoffs"><div><b>Delivered by:</b><span></span></div><div><b>Prepared by:</b><span></span></div><div><b>Checked by:</b><span></span></div><div><b>Approved by:</b><span></span></div></div><div class="dr-form-received"><p>Received the above items in good order and condition.</p><div><b>By:</b><span></span></div><div><b>Date</b><span></span></div><small>(Printed Name and Signature)</small></div></section><footer class="dr-form-footer"><span>Greenmetal Electric Manufacturing Corporation</span><span>F-LOG-DR-001</span></footer>
+</article></div>
 
-            <div class="preview-footer">
+<div class="preview-footer">
 
                 <button
                     type="button"
@@ -1725,7 +1704,7 @@
          ===================================================== -->
 
     <script
-        src="../js/create-delivery-receipt.js?v=20261020-drpreview"
+        src="../js/create-delivery-receipt.js?v=20261020-refmatch"
     ></script>
 
 </div>
