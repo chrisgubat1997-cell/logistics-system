@@ -3602,9 +3602,34 @@ function renderPreview(dr) {
     const items = Array.isArray(dr.items) ? dr.items : [];
     let total = 0, allAmountsKnown = items.length > 0;
     const esc = v => escapeHTML(v === null || v === undefined ? "" : String(v));
+    const cell = value => "<td>"+value+"</td>";
+    const merge = (value, span) => '<td colspan="'+span+'">'+value+'</td>';
     let rows = '<tr><th>ITEM</th><th colspan="2">DESCRIPTION</th><th>QTY</th><th>UNIT</th><th>AMOUNT</th></tr>';
-    for (let i=0;i<20;i++) { const item=items[i]||{}; const qty=toNumber(item.pickQty??item.qty??item.quantity??0); const priceRaw=item.unitAmount??item.unitPrice??item.unitPriceAmount??null; const raw=item.amount??item.lineTotal??item.totalAmount??null; const price=priceRaw===null||priceRaw===""?null:toNumber(priceRaw); const amount=raw===null||raw===""?(price===null?null:price*qty):toNumber(raw); if(amount===null)allAmountsKnown=false;else total+=amount; const no=item.itemNumber||item.itemNo||item.itemCode||""; const desc=item.itemDescription||item.description||item.itemName||""; if(i===1){rows+='<tr><td>'+esc(no)+'</td><td colspan="2">'+esc(desc)+'</td><td colspan="3"></td></tr>';}else{rows+='<tr><td>'+esc(no)+'</td><td colspan="2">'+esc(desc)+'</td><td>'+(no||desc?formatNumber(qty):'')+'</td><td>'+esc(item.unit||'')+'</td><td>'+(amount===null?'':formatCurrency(amount))+'</td></tr>';} }
-    rows+='<tr><td colspan="2">TOTAL</td><td></td><td colspan="3">'+(allAmountsKnown?formatCurrency(total):'')+'</td></tr><tr><td></td><td></td><td></td><td></td><td colspan="2"></td></tr><tr><td colspan="2"></td><td></td><td></td><td></td><td></td></tr><tr><td colspan="2"></td><td></td><td colspan="2"></td><td></td></tr>';
+    let total = 0, allAmountsKnown = items.length > 0;
+    // 25 physical rows total: one heading, 20 item rows, four footer rows.
+    for (let i=0; i<20; i++) {
+        const item = items[i] || {};
+        const qty = toNumber(item.pickQty ?? item.qty ?? item.quantity ?? 0);
+        const priceRaw = item.unitAmount ?? item.unitPrice ?? item.unitPriceAmount ?? null;
+        const amountRaw = item.amount ?? item.lineTotal ?? item.totalAmount ?? null;
+        const price = priceRaw === null || priceRaw === "" ? null : toNumber(priceRaw);
+        const amount = amountRaw === null || amountRaw === "" ? (price === null ? null : price * qty) : toNumber(amountRaw);
+        if (amount === null) allAmountsKnown = false; else total += amount;
+        const no = item.itemNumber || item.itemNo || item.itemCode || "";
+        const desc = item.itemDescription || item.description || item.itemName || "";
+        const itemCell = cell(esc(no));
+        const descriptionCell = merge(esc(desc),2);
+        if (i === 1) rows += "<tr>"+itemCell+descriptionCell+merge("",3)+"</tr>";
+        else rows += "<tr>"+itemCell+descriptionCell+cell(no || desc ? formatNumber(qty) : "")+cell(esc(item.unit || ""))+cell(amount === null ? "" : formatCurrency(amount))+"</tr>";
+    }
+    // Row 22: columns 1–2 merged, column 3 separate, columns 4–6 merged.
+    rows += "<tr>"+merge("TOTAL",2)+cell("")+merge(allAmountsKnown ? formatCurrency(total) : "",3)+"</tr>";
+    // Row 23: columns 1–4 separate, columns 5–6 merged.
+    rows += "<tr>"+cell("")+cell("")+cell("")+cell("")+merge("",2)+"</tr>";
+    // Row 24: columns 1–2 merged; columns 3–6 separate.
+    rows += "<tr>"+merge("",2)+cell("")+cell("")+cell("")+cell("")+"</tr>";
+    // Row 25: columns 1–2 merged; column 3 separate; columns 4–5 merged; column 6 separate.
+    rows += "<tr>"+merge("",2)+cell("")+merge("",2)+cell("")+"</tr>";
     tbody.innerHTML=rows;
     if(totalEl)totalEl.textContent=allAmountsKnown?formatCurrency(total):'';
 }
