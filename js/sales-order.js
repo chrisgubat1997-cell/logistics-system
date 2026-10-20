@@ -305,7 +305,7 @@ async function loadSOList(
                     const tbody = document.getElementById("soTableBody");
                     const emptyState = document.getElementById("soEmptyState");
                     if (tbody) {
-                        tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="12" style="text-align:center;padding:24px;">Loading Sales Orders from database...</td></tr>';
                     }
                     if (emptyState) emptyState.style.display = "none";
                     return;
@@ -787,24 +787,6 @@ async function loadSOList(
                     <td>
                         ${formatCurrency(
                             grandTotal
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            drNumber
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            invoiceNumber
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHTML(
-                            paymentStatus
                         )}
                     </td>
 
