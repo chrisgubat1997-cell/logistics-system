@@ -100,7 +100,7 @@
     $("joActionModal").hidden=false;
     $("joActionModal").dataset.soNumber=String(activeOrder.soNumber);
     $("joActionModal").dataset.adjustmentOnly=hasJO?"true":"false";
-    if(!hasJO)$("joModalJONumber").focus();else if(dateAvailable)$("joModalRDD").focus();
+    if(!hasJO)$("joModalJONumber").focus({preventScroll:true});else if(dateAvailable)$("joModalRDD").focus({preventScroll:true});
   }
   function closeActionModal() {
     $("joActionModal").hidden=true;
@@ -136,6 +136,9 @@
     if(!token()){notice("Login session not found. Please log in again.","error");if($("joRows"))$("joRows").innerHTML='<tr><td colspan="7" class="jo-empty">Please log in again to use JO Register.</td></tr>';return;}
     if(!initialized){
       initialized=true;
+      // Keep the modal outside transformed/scrollable app containers so it overlays the viewport without moving the page.
+      const actionModal=$("joActionModal");
+      if(actionModal&&actionModal.parentElement!==document.body)document.body.appendChild(actionModal);
       if($("joRefreshBtn"))$("joRefreshBtn").addEventListener("click",load);
       if($("joSearch"))$("joSearch").addEventListener("input",render);
       if($("joStatusFilter"))$("joStatusFilter").addEventListener("change",function(){selectedCard="all";syncCards();render();});
