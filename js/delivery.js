@@ -1507,6 +1507,7 @@ if (dateElement) {
         const esc=v=>escapeHTML(v===null||v===undefined?"":String(v));
         const cell = value => "<td>"+value+"</td>";
         const merge = (value, span) => '<td colspan="'+span+'">'+value+'</td>';
+        const signoffLabel = label => '<td colspan="2" class="dr-signoff-label-cell"><span>'+label+'</span><span>:</span></td>';
         let html = '<tr><th>ITEM</th><th colspan="3">DESCRIPTION</th><th>QTY</th><th>UNIT</th></tr>';
         let total = 0, known = false;
         // 25 physical rows total: one heading, 20 item rows, four footer rows.
@@ -1524,10 +1525,10 @@ if (dateElement) {
             html += "<tr>"+itemCell+descriptionCell+cell(no || desc ? String(qty) : "")+cell(escapeHTML(unit))+"</tr>";
         }
         // Rows 22–25: signature and receiving details.
-        html += "<tr>"+merge("Delivered by :",2)+cell("Cris Gubat / Franz Jade Bayba")+merge("Recieved the above items in good order and condition.",3)+"</tr>";
-        html += "<tr>"+merge("Prepared by :",2)+cell("Ellaine Elpedes")+merge("By:",3)+"</tr>";
-        html += "<tr>"+merge("Checked by :",2)+cell("Jeriel Garlit")+merge("",3)+"</tr>";
-        html += "<tr>"+merge("Approed by:",2)+cell("")+merge("(Printed Name and Signature)",2)+cell("Date")+"</tr>";
+        html += "<tr>"+signoffLabel("Delivered by")+cell("Cris Gubat / Franz Jade Bayba")+merge("Recieved the above items in good order and condition.",3)+"</tr>";
+        html += "<tr>"+signoffLabel("Prepared by")+cell("Ellaine Elpedes")+merge("By:",3)+"</tr>";
+        html += "<tr>"+signoffLabel("Checked by")+cell("Jeriel Garlit")+merge("",3)+"</tr>";
+        html += "<tr>"+signoffLabel("Approved by")+cell("")+merge("(Printed Name and Signature)",2)+cell("Date")+"</tr>";
         tbody.innerHTML=html;
     }
 
