@@ -178,6 +178,9 @@
         </button>
 
 
+        <!-- PRODUCTION QUEUE -->
+        <button class="menu-btn" data-production-queue-menu onclick="showPage('productionQueue', this)" style="display:none">🏭 Production Queue</button>
+
         <!-- =================================================
              JO REGISTER (PRODUCTION)
         ================================================== -->
@@ -391,6 +394,9 @@
         </div>
 
 
+
+        <!-- PRODUCTION QUEUE MODULE -->
+        <div id="productionQueue" class="page"><div id="productionQueueModule"></div></div>
 
         <!-- =================================================
              JO REGISTER MODULE
@@ -991,6 +997,7 @@
 ========================================================= */
 
 let salesModuleLoaded = false;
+let productionQueueModuleLoaded = false;
 
 let deliveryModuleLoaded = false;
 
@@ -1111,6 +1118,10 @@ function showPage(pageId, button) {
 
         loadSalesOrderModule();
 
+    }
+
+    if (pageId === 'productionQueue') {
+        loadProductionQueueModule();
     }
 
 
@@ -3069,6 +3080,27 @@ async function loadRevolvingFundModule() {
    JO REGISTER MODULE (RESTRICTED TO PRODUCTION)
 ========================================================= */
 let joRegisterModuleLoaded = false;
+async function loadProductionQueueModule() {
+    const container = document.getElementById('productionQueueModule');
+    if (!container) return;
+    let account = {};
+    try { const saved = JSON.parse(localStorage.getItem('logitechUser') || '{}'); account = saved.account || saved.user || saved; } catch (error) {}
+    const role = String(account.role || account.ROLE || account.accountType || account.account_type || account.type || '').trim().toUpperCase();
+    if (!['ADMIN', 'PRODUCTION'].includes(role)) { container.innerHTML = '<div class="jo-access-denied"><h2>Access restricted</h2><p>Production Queue is available only to Admin and Production accounts.</p></div>'; return; }
+    if (!productionQueueModuleLoaded) {
+        try {
+            const response = await fetch('pages/production-orders.html?v=' + Date.now(), { cache: 'no-store' });
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            container.innerHTML = await response.text();
+            productionQueueModuleLoaded = true;
+        } catch (error) { container.innerHTML = '<div class="jo-access-denied"><h2>Unable to load Production Queue</h2><p>' + String(error.message || error) + '</p></div>'; return; }
+    }
+    try {
+        await loadScriptOnce('js/production-orders.js?v=20261020-01', 'data-production-orders-js');
+        if (typeof window.initializeProductionOrders === 'function') await window.initializeProductionOrders();
+    } catch (error) { console.error('Production Queue initialization failed:', error); container.insertAdjacentHTML('afterbegin', '<div class="jo-access-denied">Unable to initialize Production Queue.</div>'); }
+}
+
 async function loadJORegisterModule() {
     const container = document.getElementById('joRegisterModule');
     if (!container) return;
@@ -3163,9 +3195,13 @@ function loadUserAccount() {
     }
 
 
-    const joUsername = String(user.username || user.USERNAME || '').trim().toLowerCase();
-    const joRole = String(user.role || user.ROLE || user.accountType || user.account_type || user.type || '').trim().toUpperCase();
+    const roleSource = user.account || user.user || user;
+    const joUsername = String(roleSource.username || roleSource.USERNAME || '').trim().toLowerCase();
+    const joRole = String(roleSource.role || roleSource.ROLE || roleSource.accountType || roleSource.account_type || roleSource.type || '').trim().toUpperCase();
     document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) {
+        button.style.display = ['ADMIN', 'PRODUCTION'].includes(joRole) ? '' : 'none';
+    });
+    document.querySelectorAll('[data-production-queue-menu]').forEach(function (button) {
         button.style.display = ['ADMIN', 'PRODUCTION'].includes(joRole) ? '' : 'none';
     });
 
