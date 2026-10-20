@@ -234,6 +234,15 @@ case "deleteFleetRecord":
     case "getJORegisterData":
       return getJORegisterData(payload);
 
+    case "postSalesOrderToProduction":
+      return postSalesOrderToProduction(payload);
+
+    case "getProductionQueue":
+      return getProductionQueue(payload);
+
+    case "markProductionNotificationsRead":
+      return markProductionNotificationsRead(payload);
+
     case "updateJORegisterEntry":
       return updateJORegisterEntry(payload);
 
