@@ -107,6 +107,7 @@ function getJORegisterData(payload) {
     const adjustedAtIndex = ensureColumn("RDD_ADJUSTED_AT");
     const adjustedByIndex = ensureColumn("RDD_ADJUSTED_BY");
     const soIndex = joRegisterHeaderIndex_(headers, ["SO_NUMBER"]);
+    const postedToProductionIndex = joRegisterHeaderIndex_(headers, ["POSTED_TO_PRODUCTION"]);
     const joIndex = joRegisterHeaderIndex_(headers, ["JOB_ORDER", "JO"]);
     if (soIndex < 0) throw new Error("SO_NUMBER column was not found in SALES_ORDERS.");
     if (joIndex < 0) throw new Error("JOB_ORDER / JO column was not found in SALES_ORDERS.");
@@ -119,7 +120,10 @@ function getJORegisterData(payload) {
     for (let i = 1; i < values.length; i++) {
       const row = values[i];
       const soNumber = String(row[soIndex] || "").trim();
-      if (!soNumber) continue;
+      const productionPostingStatus = postedToProductionIndex >= 0
+        ? String(row[postedToProductionIndex] || "").trim().toUpperCase()
+        : "";
+      if (!soNumber || productionPostingStatus !== "POSTED") continue;
       orders.push({
         soNumber: soNumber,
         soId: idIndex >= 0 ? String(row[idIndex] || "") : "",
