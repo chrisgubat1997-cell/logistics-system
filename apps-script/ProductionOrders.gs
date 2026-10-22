@@ -79,93 +79,182 @@ function getProductionNotificationsSheet_(spreadsheet) {
 }
 
 function postSalesOrderToProduction(payload) {
+  payload = payload || {};
   const lock = LockService.getScriptLock();
-  lock.waitLock(30000);
+  let lockAcquired = false;
+
   try {
-    payload = payload || {};
+    lock.waitLock(30000);
+    lockAcquired = true;
+
+    // Authenticate against the active server-side session, not client-supplied role fields.
     const user = requireProductionOrdersUser_(payload, ["ADMIN", "SALES"]);
     const soNumber = String(payload.soNumber || payload.SO_NUMBER || "").trim();
     if (!soNumber) throw new Error("SO Number is required.");
+
     const sheet = getSheet(CONFIG.SHEETS.SALES_ORDERS);
     const state = ensureProductionOrderColumns_(sheet);
     const headers = state.headers;
     const values = state.values;
-    const soIndex = headers.indexOf("SO_NUMBER");
-    const statusIndex = headers.indexOf("STATUS");
-    const clientIndex = headers.indexOf("CLIENT_NAME") >= 0 ? headers.indexOf("CLIENT_NAME") : headers.indexOf("CLIENT");
-    const projectIndex = headers.indexOf("PROJECT");
-    const poIndex = headers.indexOf("PO_NUMBER");
-    const rddIndex = ["REQUIRED_DELIVERY_DATE", "REQUIRED_DEL_DATE", "RDD", "DELIVERY_DATE", "DEL_DATE"].map(function(name) { return headers.indexOf(name); }).filter(function(index) { return index >= 0; })[0];
+    const index = function(names) {
+      for (let i = 0; i < names.length; i++) {
+        const found = headers.indexOf(names[i]);
+        if (found >= 0) return found;
+      }
+      return -1;
+    };
+
+    const soIndex = index(["SO_NUMBER"]);
+    const statusIndex = index(["STATUS"]);
+    const clientIndex = index(["CLIENT_NAME", "CLIENT"]);
+    const projectIndex = index(["PROJECT", "PROJECT_NAME"]);
+    const poIndex = index(["PO_NUMBER", "PO"]);
+    const rddIndex = index(["REQUIRED_DELIVERY_DATE", "REQUIRED_DEL_DATE", "RDD", "DELIVERY_DATE", "DEL_DATE"]);
+    const postIndex = index(["POSTED_TO_PRODUCTION"]);
+    const postedAtIndex = index(["PRODUCTION_POSTED_AT"]);
+    const postedByIndex = index(["PRODUCTION_POSTED_BY"]);
+
     if (soIndex < 0) throw new Error("SO_NUMBER column was not found in SALES_ORDERS.");
+
     let target = -1;
     for (let i = 1; i < values.length; i++) {
-      if (String(values[i][soIndex] || "").trim().toUpperCase() === soNumber.toUpperCase()) { target = i; break; }
+      if (String(values[i][soIndex] || "").trim().toUpperCase() === soNumber.toUpperCase()) {
+        target = i;
+        break;
+      }
     }
     if (target < 0) throw new Error("Sales Order not found: " + soNumber);
-    if (statusIndex >= 0 && String(values[target][statusIndex] || "").trim().toUpperCase() === "CANCELLED") {
+
+    const currentStatus = statusIndex >= 0
+      ? String(values[target][statusIndex] || "").trim().toUpperCase()
+      : "";
+    if (currentStatus === "CANCELLED" || currentStatus === "CANCELED") {
       throw new Error("Cancelled Sales Orders cannot be posted to Production.");
     }
-    const postIndex = headers.indexOf("POSTED_TO_PRODUCTION");
-    const postedAtIndex = headers.indexOf("PRODUCTION_POSTED_AT");
-    const postedByIndex = headers.indexOf("PRODUCTION_POSTED_BY");
     if (String(values[target][postIndex] || "").trim().toUpperCase() === "POSTED") {
       throw new Error("Sales Order " + soNumber + " has already been posted to Production.");
     }
-    const spreadsheet = sheet.getParent();
-    const usersSheet = getSheet(CONFIG.SHEETS.USERS);
-    const users = usersSheet.getDataRange().getValues();
-    const userHeaders = users[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
-    const userIdIndex = userHeaders.indexOf("USER_ID");
-    const usernameIndex = userHeaders.indexOf("USERNAME");
-    const roleIndex = userHeaders.indexOf("ROLE");
-    const statusUserIndex = userHeaders.indexOf("STATUS");
-    const now = formatDateTime(new Date());
-    sheet.getRange(target + 1, postIndex + 1).setValue("POSTED");
-    sheet.getRange(target + 1, postedAtIndex + 1).setValue(now);
-    sheet.getRange(target + 1, postedByIndex + 1).setValue(user.username);
 
-    const notificationSheet = getProductionNotificationsSheet_(spreadsheet);
-    const notificationValues = notificationSheet.getDataRange().getValues();
-    const notificationHeaders = notificationValues[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
-    const col = function(name) { return notificationHeaders.indexOf(name); };
+    const now = formatDateTime(new Date());
+    const rowNumber = target + 1;
+
+    // Commit the Production posting status first. Secondary notifications/logging
+    // must not turn a successful posting into a misleading failure response.
+    sheet.getRange(rowNumber, postIndex + 1, 1, 3).setValues([["POSTED", now, user.username]]);
+    SpreadsheetApp.flush();
+
+    const client = clientIndex >= 0 ? String(values[target][clientIndex] || "").trim() : "";
+    const project = projectIndex >= 0 ? String(values[target][projectIndex] || "").trim() : "";
+    const poNumber = poIndex >= 0 ? String(values[target][poIndex] || "").trim() : "";
     const rdd = rddIndex >= 0 ? productionOrdersDate_(values[target][rddIndex]) : "";
-    const client = clientIndex >= 0 ? String(values[target][clientIndex] || "") : "";
-    const project = projectIndex >= 0 ? String(values[target][projectIndex] || "") : "";
-    const poNumber = poIndex >= 0 ? String(values[target][poIndex] || "") : "";
     const title = "New Sales Order posted";
-    const message = "SO " + soNumber + " is ready for Production." + (client ? " Client: " + client + "." : "") + (rdd ? " RDD: " + rdd + "." : "") + (project ? " Project: " + project + "." : "") + (poNumber ? " PO: " + poNumber + "." : "");
+    const message = "SO " + soNumber + " is ready for Production."
+      + (client ? " Client: " + client + "." : "")
+      + (rdd ? " RDD: " + rdd + "." : "")
+      + (project ? " Project: " + project + "." : "")
+      + (poNumber ? " PO: " + poNumber + "." : "");
+
     let notified = 0;
-    for (let i = 1; i < users.length; i++) {
-      const row = users[i];
-      const role = roleIndex >= 0 ? String(row[roleIndex] || "").trim().toUpperCase() : "";
-      const status = statusUserIndex >= 0 ? String(row[statusUserIndex] || "").trim().toUpperCase() : "";
-      const recipientId = userIdIndex >= 0 ? String(row[userIdIndex] || "").trim() : "";
-      const recipientUsername = usernameIndex >= 0 ? String(row[usernameIndex] || "").trim() : "";
-      if (role !== "PRODUCTION" || status !== "ACTIVE" || !recipientId || !recipientUsername) continue;
-      const record = new Array(notificationHeaders.length).fill("");
-      record[col("NOTIFICATION_ID")] = Utilities.getUuid();
-      record[col("RECIPIENT_USER_ID")] = recipientId;
-      record[col("RECIPIENT_USERNAME")] = recipientUsername;
-      record[col("SO_NUMBER")] = soNumber;
-      record[col("TITLE")] = title;
-      record[col("MESSAGE")] = message;
-      record[col("CREATED_AT")] = now;
-      record[col("READ_AT")] = "";
-      notificationSheet.appendRow(record);
-      notified++;
+    let notificationWarning = "";
+    try {
+      const spreadsheet = sheet.getParent();
+      const usersSheet = getSheet(CONFIG.SHEETS.USERS);
+      const users = usersSheet.getDataRange().getValues();
+      if (!users.length) throw new Error("USERS sheet has no header row.");
+
+      const userHeaders = users[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
+      const userIdIndex = userHeaders.indexOf("USER_ID");
+      const usernameIndex = userHeaders.indexOf("USERNAME");
+      const roleIndex = userHeaders.indexOf("ROLE");
+      const userStatusIndex = userHeaders.indexOf("STATUS");
+      if ([userIdIndex, usernameIndex, roleIndex, userStatusIndex].some(function(i) { return i < 0; })) {
+        throw new Error("USERS sheet is missing USER_ID, USERNAME, ROLE, or STATUS.");
+      }
+
+      const notificationSheet = getProductionNotificationsSheet_(spreadsheet);
+      const notificationValues = notificationSheet.getDataRange().getValues();
+      const notificationHeaders = notificationValues[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
+      const col = function(name) { return notificationHeaders.indexOf(name); };
+      const required = ["NOTIFICATION_ID", "RECIPIENT_USER_ID", "RECIPIENT_USERNAME", "SO_NUMBER", "TITLE", "MESSAGE", "CREATED_AT", "READ_AT"];
+      required.forEach(function(name) {
+        if (col(name) < 0) throw new Error("PRODUCTION_NOTIFICATIONS is missing column " + name + ".");
+      });
+
+      const records = [];
+      for (let i = 1; i < users.length; i++) {
+        const row = users[i];
+        const role = String(row[roleIndex] || "").trim().toUpperCase();
+        const userStatus = String(row[userStatusIndex] || "").trim().toUpperCase();
+        const recipientId = String(row[userIdIndex] || "").trim();
+        const recipientUsername = String(row[usernameIndex] || "").trim();
+        if (role !== "PRODUCTION" || userStatus !== "ACTIVE" || !recipientId || !recipientUsername) continue;
+
+        const record = new Array(notificationHeaders.length).fill("");
+        record[col("NOTIFICATION_ID")] = Utilities.getUuid();
+        record[col("RECIPIENT_USER_ID")] = recipientId;
+        record[col("RECIPIENT_USERNAME")] = recipientUsername;
+        record[col("SO_NUMBER")] = soNumber;
+        record[col("TITLE")] = title;
+        record[col("MESSAGE")] = message;
+        record[col("CREATED_AT")] = now;
+        record[col("READ_AT")] = "";
+        records.push(record);
+      }
+
+      if (records.length) {
+        notificationSheet.getRange(
+          notificationSheet.getLastRow() + 1,
+          1,
+          records.length,
+          notificationHeaders.length
+        ).setValues(records);
+      }
+      notified = records.length;
+    } catch (notificationError) {
+      notificationWarning = " Production posting succeeded, but notifications could not be created: "
+        + (notificationError.message || String(notificationError));
+      console.error("Production notification creation failed for " + soNumber + ": " + notificationWarning);
     }
-    if (typeof logActivity === "function") {
-      logActivity({ userId: user.userId, username: user.username, action: "POST_TO_PRODUCTION", module: "Sales Order", recordId: "", recordNumber: soNumber, details: "Sales Order posted to Production; notifications created: " + notified, status: "SUCCESS" });
+
+    try {
+      if (typeof logActivity === "function") {
+        logActivity({
+          userId: user.userId,
+          username: user.username,
+          action: "POST_TO_PRODUCTION",
+          module: "Sales Order",
+          recordId: "",
+          recordNumber: soNumber,
+          details: "Sales Order posted to Production; notifications created: " + notified,
+          status: "SUCCESS"
+        });
+      }
+    } catch (logError) {
+      console.error("Production posting activity log failed for " + soNumber + ": " + (logError.message || String(logError)));
     }
-    if (typeof touchSyncVersion === "function") touchSyncVersion();
-    return { success: true, message: "SO " + soNumber + " posted to Production. " + notified + " Production account notification(s) created.", soNumber: soNumber, postedAt: now, notified: notified };
+
+    try {
+      if (typeof touchSyncVersion === "function") touchSyncVersion();
+    } catch (syncError) {
+      console.error("Production posting sync-version update failed for " + soNumber + ": " + (syncError.message || String(syncError)));
+    }
+
+    return {
+      success: true,
+      message: "SO " + soNumber + " posted to Production. " + notified + " Production account notification(s) created." + notificationWarning,
+      soNumber: soNumber,
+      postedAt: now,
+      postedBy: user.username,
+      notified: notified,
+      warning: notificationWarning
+    };
   } catch (error) {
-    return { success: false, message: error.message || String(error) };
+    console.error("postSalesOrderToProduction failed:", error);
+    return { success: false, message: error.message || String(error), error: error.message || String(error) };
   } finally {
-    lock.releaseLock();
+    if (lockAcquired) lock.releaseLock();
   }
 }
-
 function productionOrdersDate_(value) {
   if (value instanceof Date && !isNaN(value.getTime())) return Utilities.formatDate(value, CONFIG.TIMEZONE || "Asia/Manila", "yyyy-MM-dd");
   const raw = String(value == null ? "" : value).trim();
