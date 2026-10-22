@@ -180,7 +180,9 @@ function getLogisTechCurrentRole() {
 
                 throw new Error(
                     result.message ||
-                    "API request failed."
+                    result.error ||
+                    result.details ||
+                    "API request failed. The server returned no error message."
                 );
 
             }
