@@ -140,7 +140,9 @@ function postSalesOrderToProduction(payload) {
 
     // Commit the Production posting status first. Secondary notifications/logging
     // must not turn a successful posting into a misleading failure response.
-    sheet.getRange(rowNumber, postIndex + 1, 1, 3).setValues([["POSTED", now, user.username]]);
+    sheet.getRange(rowNumber, postIndex + 1).setValue("POSTED");
+    sheet.getRange(rowNumber, postedAtIndex + 1).setValue(now);
+    sheet.getRange(rowNumber, postedByIndex + 1).setValue(user.username);
     SpreadsheetApp.flush();
 
     const client = clientIndex >= 0 ? String(values[target][clientIndex] || "").trim() : "";
