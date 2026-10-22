@@ -1357,6 +1357,26 @@ const now =
       salesOrderSheetForRDD.getRange(salesOrderSheetForRDD.getLastRow(), rddColumnIndex + 1).setValue(requiredDeliveryDateDate);
     }
 
+    /* Initialize the Production posting fields for every newly created Sales Order.
+       POSTED_TO_PRODUCTION is the single source of truth for the table and Production queue. */
+    let postingHeaders = salesOrderSheetForRDD.getRange(1, 1, 1, salesOrderSheetForRDD.getLastColumn())
+      .getValues()[0]
+      .map(function(header) { return String(header || "").trim().toUpperCase(); });
+    ["POSTED_TO_PRODUCTION", "PRODUCTION_POSTED_AT", "PRODUCTION_POSTED_BY"].forEach(function(name) {
+      if (postingHeaders.indexOf(name) < 0) {
+        const newColumn = postingHeaders.length + 1;
+        salesOrderSheetForRDD.getRange(1, newColumn).setValue(name);
+        postingHeaders.push(name);
+      }
+    });
+    const createdSoRow = salesOrderSheetForRDD.getLastRow();
+    const postedStatusColumn = postingHeaders.indexOf("POSTED_TO_PRODUCTION") + 1;
+    const postedAtColumn = postingHeaders.indexOf("PRODUCTION_POSTED_AT") + 1;
+    const postedByColumn = postingHeaders.indexOf("PRODUCTION_POSTED_BY") + 1;
+    salesOrderSheetForRDD.getRange(createdSoRow, postedStatusColumn).setValue("UNPOSTED");
+    salesOrderSheetForRDD.getRange(createdSoRow, postedAtColumn).clearContent();
+    salesOrderSheetForRDD.getRange(createdSoRow, postedByColumn).clearContent();
+
 
     /* =====================================================
        CREATE SO ITEMS
