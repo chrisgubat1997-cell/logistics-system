@@ -20,7 +20,24 @@
 </head>
 
 
-<body>
+<body class="intro-active">
+
+    <!-- CINEMATIC LOGIN INTRO -->
+    <section id="introScreen" class="intro-screen" aria-label="LOGIS-TECH introduction">
+        <div class="intro-art">
+            <img class="intro-monitor-image" src="assets/login-monitor.png" alt="">
+            <video
+                id="introVideo"
+                class="intro-monitor-video"
+                src="assets/login-intro.mp4"
+                autoplay
+                muted
+                playsinline
+                preload="auto"
+                aria-label="LOGIS-TECH introduction video"
+            ></video>
+        </div>
+    </section>
 
 
     <!-- =====================================================
@@ -191,6 +208,45 @@
     <script
         src="js/login.js"
     ></script>
+
+    <script>
+    (function () {
+        const intro = document.getElementById("introScreen");
+        const video = document.getElementById("introVideo");
+        if (!intro || !video) {
+            document.body.classList.remove("intro-active");
+            return;
+        }
+
+        let finished = false;
+        function finishIntro() {
+            if (finished) return;
+            finished = true;
+            intro.classList.add("intro-screen--leaving");
+            document.body.classList.remove("intro-active");
+            document.body.classList.add("intro-finished");
+            window.setTimeout(function () {
+                intro.hidden = true;
+            }, 1000);
+        }
+
+        video.addEventListener("ended", finishIntro, { once: true });
+        video.addEventListener("error", finishIntro, { once: true });
+
+        const startPlayback = function () {
+            const playback = video.play();
+            if (playback && typeof playback.catch === "function") {
+                playback.catch(finishIntro);
+            }
+        };
+
+        if (video.readyState >= 2) {
+            startPlayback();
+        } else {
+            video.addEventListener("canplay", startPlayback, { once: true });
+        }
+    })();
+    </script>
 
 
 </body>
