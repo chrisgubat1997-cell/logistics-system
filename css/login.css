@@ -527,3 +527,106 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+
+/* =========================================================
+   CINEMATIC LOGIN INTRO — monitor video
+========================================================= */
+body.intro-active {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 0;
+    overflow: hidden;
+    background: #080d16;
+}
+
+body.intro-active .login-container {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+}
+
+body.intro-finished .login-container {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 850ms ease, transform 850ms cubic-bezier(.2, .8, .2, 1);
+    animation: login-scene-enter 900ms cubic-bezier(.2, .8, .2, 1) both;
+}
+
+.intro-screen {
+    position: fixed;
+    z-index: 9999;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background:
+        radial-gradient(ellipse at center, rgba(35, 55, 79, .22), transparent 65%),
+        #080d16;
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 950ms ease, visibility 950ms ease;
+}
+
+.intro-screen[hidden] {
+    display: none;
+}
+
+.intro-screen--leaving {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.intro-art {
+    position: relative;
+    width: min(100vw, 177.8846vh);
+    width: min(100vw, 177.8846dvh);
+    aspect-ratio: 740 / 416;
+    overflow: hidden;
+    box-shadow: 0 28px 90px rgba(0, 0, 0, .45);
+}
+
+.intro-monitor-image {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+}
+
+/* Screen opening measured against the uploaded 740 × 416 monitor image. */
+.intro-monitor-video {
+    position: absolute;
+    left: 40.4%;
+    top: 45.0%;
+    width: 23.1%;
+    height: 26.4%;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    border: 0;
+    border-radius: 1px;
+    background: #05080d;
+}
+
+@keyframes login-scene-enter {
+    from { opacity: 0; transform: translateY(14px) scale(.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-aspect-ratio: 4 / 5) {
+    .intro-art {
+        width: 100vw;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .intro-screen,
+    body.intro-finished .login-container {
+        transition-duration: 1ms;
+        animation-duration: 1ms;
+    }
+}
