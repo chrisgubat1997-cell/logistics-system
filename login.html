@@ -90,9 +90,9 @@
         type="button"
         id="loginSoundControl"
         class="login-sound-control"
-        aria-pressed="false"
-        aria-label="Turn background music on"
-    >♫ SOUND OFF</button>
+        aria-pressed="true"
+        aria-label="Turn background music off"
+    >♫ SOUND ON</button>
 
 
     <!-- =====================================================
@@ -273,6 +273,19 @@
 
         if (music && soundControl) {
             music.volume = 0.28;
+            music.muted = false;
+
+            // Try to start music automatically. Some browsers require user interaction first.
+            music.play().then(function () {
+                soundControl.textContent = "♫ SOUND ON";
+                soundControl.setAttribute("aria-pressed", "true");
+                soundControl.setAttribute("aria-label", "Turn background music off");
+            }).catch(function (error) {
+                console.info("LOGI-TECH autoplay requires user interaction:", error);
+                soundControl.textContent = "♫ TAP TO PLAY";
+                soundControl.setAttribute("aria-pressed", "false");
+                soundControl.setAttribute("aria-label", "Play background music");
+            });
 
             soundControl.addEventListener("click", async function () {
                 if (music.paused) {
