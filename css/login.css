@@ -597,6 +597,62 @@ body.intro-finished .login-container {
     object-fit: fill;
 }
 
+/* Intro play control sits directly over the monitor's display. */
+.intro-play-button {
+    position: absolute;
+    z-index: 2;
+    left: 41.1%;
+    top: 46.6%;
+    width: 21.3%;
+    height: 20%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: 1px solid rgba(255, 255, 255, .72);
+    border-radius: 2px;
+    background: linear-gradient(135deg, rgba(8, 22, 40, .78), rgba(12, 38, 65, .88));
+    color: #fff;
+    font: 800 clamp(9px, 1.15vw, 15px)/1 Arial, sans-serif;
+    letter-spacing: .22em;
+    cursor: pointer;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, .6);
+    transition: background .2s ease, box-shadow .2s ease;
+}
+
+.intro-play-button:hover {
+    background: linear-gradient(135deg, rgba(18, 59, 145, .9), rgba(39, 133, 36, .88));
+    box-shadow: inset 0 0 28px rgba(255, 255, 255, .12);
+}
+
+.intro-play-button:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 3px;
+}
+
+.intro-play-icon {
+    display: grid;
+    place-items: center;
+    width: clamp(25px, 4vw, 48px);
+    aspect-ratio: 1;
+    padding-left: 3px;
+    border: 2px solid rgba(255, 255, 255, .9);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .14);
+    font-size: clamp(10px, 1.35vw, 17px);
+    letter-spacing: 0;
+}
+
+.intro-play-button.is-starting {
+    cursor: wait;
+    opacity: .85;
+}
+
+.intro-play-button[hidden] {
+    display: none;
+}
+
 /* Video is aligned to the actual illuminated display area of login-monitor.png. */
 .intro-monitor-video {
     position: absolute;
