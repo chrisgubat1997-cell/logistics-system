@@ -76,6 +76,11 @@
                 aria-label="LOGIS-TECH introduction video"
             ></video>
         </div>
+            <button type="button" id="introPlayButton" class="intro-play-button" aria-label="Play introduction video and sound">
+                <span class="intro-play-icon" aria-hidden="true">▶</span>
+                <span>PLAY</span>
+            </button>
+        </div>
     </section>
 
     <!-- LOGIN BACKGROUND MUSIC -->
@@ -92,6 +97,7 @@
         class="login-sound-control"
         aria-pressed="true"
         aria-label="Turn background music off"
+        hidden
     >♫ SOUND ON</button>
 
 
@@ -270,70 +276,38 @@
         const video = document.getElementById("introVideo");
         const music = document.getElementById("loginMusic");
         const soundControl = document.getElementById("loginSoundControl");
+        const playButton = document.getElementById("introPlayButton");
 
-        if (music && soundControl) {
-            music.volume = 0.28;
-            music.muted = false;
-
-            // Try to start music automatically. Some browsers require user interaction first.
-            music.play().then(function () {
-                soundControl.textContent = "♫ SOUND ON";
-                soundControl.setAttribute("aria-pressed", "true");
-                soundControl.setAttribute("aria-label", "Turn background music off");
-            }).catch(function (error) {
-                console.info("LOGI-TECH autoplay requires user interaction:", error);
-                soundControl.textContent = "♫ TAP TO PLAY";
-                soundControl.setAttribute("aria-pressed", "false");
-                soundControl.setAttribute("aria-label", "Play background music");
-            });
-
-            soundControl.addEventListener("click", async function () {
-                if (music.paused) {
-                    try {
-                        await music.play();
-                        music.muted = false;
-                        soundControl.textContent = "♫ SOUND ON";
-                        soundControl.setAttribute("aria-pressed", "true");
-                        soundControl.setAttribute("aria-label", "Turn background music off");
-                    } catch (error) {
-                        console.warn("LOGI-TECH music playback was blocked:", error);
-                        soundControl.textContent = "♫ TAP TO PLAY";
-                    }
-                } else {
-                    music.muted = !music.muted;
-                    soundControl.textContent = music.muted ? "♫ SOUND OFF" : "♫ SOUND ON";
-                    soundControl.setAttribute("aria-pressed", String(!music.muted));
-                    soundControl.setAttribute(
-                        "aria-label",
-                        music.muted ? "Turn background music on" : "Turn background music off"
-                    );
-                }
-            });
-
-            window.addEventListener("pagehide", function () {
-                music.pause();
-                music.currentTime = 0;
-            }, { once: true });
-        }
-
-        if (!intro || !video) {
+        if (!intro || !video || !playButton) {
             document.body.classList.remove("intro-active");
             return;
         }
 
+        let started = false;
         let finished = false;
+        let soundOn = true;
+
+        if (music) music.volume = 0.28;
+
+        function updateSoundButton() {
+            if (!soundControl) return;
+            soundControl.textContent = soundOn ? "♫ SOUND ON" : "♫ SOUND OFF";
+            soundControl.setAttribute("aria-pressed", String(soundOn));
+            soundControl.setAttribute(
+                "aria-label",
+                soundOn ? "Turn background music off" : "Turn background music on"
+            );
+        }
+
         function finishIntro() {
             if (finished) return;
             finished = true;
 
-            // Stop the intro music and remove its control when the video ends.
             if (music) {
                 music.pause();
                 music.currentTime = 0;
             }
-            if (soundControl) {
-                soundControl.hidden = true;
-            }
+            if (soundControl) soundControl.hidden = true;
 
             intro.classList.add("intro-screen--leaving");
             document.body.classList.remove("intro-active");
@@ -343,23 +317,79 @@
             }, 1000);
         }
 
-        video.addEventListener("ended", finishIntro, { once: true });
-        video.addEventListener("error", finishIntro, { once: true });
+        playButton.addEventListener("click", async function () {
+            if (started || finished) return;
+            started = true;
+            playButton.disabled = true;
+            playButton.classList.add("is-starting");
+            playButton.innerHTML = '<span class="intro-play-icon" aria-hidden="true">▶</span><span>STARTING...</span>';
 
-        const startPlayback = function () {
-            const playback = video.play();
-            if (playback && typeof playback.catch === "function") {
-                playback.catch(finishIntro);
+            if (soundControl) soundControl.hidden = false;
+
+            const videoPromise = video.play();
+            const musicPromise = music ? music.play() : Promise.resolve();
+
+            try {
+                await videoPromise;
+                playButton.hidden = true;
+            } catch (error) {
+                console.error("LOGI-TECH intro video could not play:", error);
+                playButton.disabled = false;
+                playButton.classList.remove("is-starting");
+                playButton.innerHTML = '<span class="intro-play-icon" aria-hidden="true">▶</span><span>TRY AGAIN</span>';
+                if (music) music.pause();
+                if (soundControl) soundControl.hidden = true;
+                started = false;
+                return;
             }
-        };
 
-        if (video.readyState >= 2) {
-            startPlayback();
-        } else {
-            video.addEventListener("canplay", startPlayback, { once: true });
+            try {
+                await musicPromise;
+                soundOn = true;
+                updateSoundButton();
+            } catch (error) {
+                console.info("LOGI-TECH music playback was blocked:", error);
+                soundOn = false;
+                if (soundControl) {
+                    soundControl.textContent = "♫ SOUND OFF";
+                    soundControl.setAttribute("aria-pressed", "false");
+                    soundControl.setAttribute("aria-label", "Turn background music on");
+                }
+            }
+        });
+
+        if (soundControl && music) {
+            soundControl.addEventListener("click", async function () {
+                if (soundOn) {
+                    music.pause();
+                    soundOn = false;
+                } else {
+                    try {
+                        await music.play();
+                        soundOn = true;
+                    } catch (error) {
+                        console.warn("LOGI-TECH music playback failed:", error);
+                        soundOn = false;
+                    }
+                }
+                updateSoundButton();
+            });
         }
+
+        video.addEventListener("ended", finishIntro, { once: true });
+        video.addEventListener("error", function () {
+            if (started) finishIntro();
+        }, { once: true });
+
+        window.addEventListener("pagehide", function () {
+            video.pause();
+            if (music) {
+                music.pause();
+                music.currentTime = 0;
+            }
+        }, { once: true });
     })();
-    </script>
+    </script>ipt>
 
 
 </body>
