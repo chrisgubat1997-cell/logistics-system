@@ -597,13 +597,13 @@ body.intro-finished .login-container {
     object-fit: fill;
 }
 
-/* Screen opening measured against the uploaded 740 × 416 monitor image. */
+/* Video is aligned to the actual illuminated display area of login-monitor.png. */
 .intro-monitor-video {
     position: absolute;
-    left: 40.4%;
-    top: 45.0%;
-    width: 23.1%;
-    height: 26.4%;
+    left: 41.1%;
+    top: 46.6%;
+    width: 21.3%;
+    height: 20.0%;
     display: block;
     object-fit: cover;
     object-position: center;
