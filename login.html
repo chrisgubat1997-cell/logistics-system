@@ -17,6 +17,45 @@
         href="css/login.css"
     >
 
+    <style>
+        .login-sound-control {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 10000;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 999px;
+            padding: 11px 17px;
+            background: rgba(8, 18, 30, 0.82);
+            color: #fff;
+            font: 600 12px/1.2 Arial, sans-serif;
+            letter-spacing: 1px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 6px 22px rgba(0, 0, 0, 0.22);
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .login-sound-control:hover {
+            background: rgba(8, 18, 30, 0.96);
+            transform: translateY(-2px);
+        }
+
+        .login-sound-control:focus-visible {
+            outline: 2px solid #fff;
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .login-sound-control {
+                right: 14px;
+                bottom: 14px;
+                padding: 10px 14px;
+            }
+        }
+    </style>
+
 </head>
 
 
@@ -38,6 +77,22 @@
             ></video>
         </div>
     </section>
+
+    <!-- LOGIN BACKGROUND MUSIC -->
+    <audio
+        id="loginMusic"
+        src="assets/login-music.mp3"
+        preload="auto"
+        loop
+    ></audio>
+
+    <button
+        type="button"
+        id="loginSoundControl"
+        class="login-sound-control"
+        aria-pressed="false"
+        aria-label="Turn background music on"
+    >♫ SOUND OFF</button>
 
 
     <!-- =====================================================
@@ -213,6 +268,41 @@
     (function () {
         const intro = document.getElementById("introScreen");
         const video = document.getElementById("introVideo");
+        const music = document.getElementById("loginMusic");
+        const soundControl = document.getElementById("loginSoundControl");
+
+        if (music && soundControl) {
+            music.volume = 0.28;
+
+            soundControl.addEventListener("click", async function () {
+                if (music.paused) {
+                    try {
+                        await music.play();
+                        music.muted = false;
+                        soundControl.textContent = "♫ SOUND ON";
+                        soundControl.setAttribute("aria-pressed", "true");
+                        soundControl.setAttribute("aria-label", "Turn background music off");
+                    } catch (error) {
+                        console.warn("LOGI-TECH music playback was blocked:", error);
+                        soundControl.textContent = "♫ TAP TO PLAY";
+                    }
+                } else {
+                    music.muted = !music.muted;
+                    soundControl.textContent = music.muted ? "♫ SOUND OFF" : "♫ SOUND ON";
+                    soundControl.setAttribute("aria-pressed", String(!music.muted));
+                    soundControl.setAttribute(
+                        "aria-label",
+                        music.muted ? "Turn background music on" : "Turn background music off"
+                    );
+                }
+            });
+
+            window.addEventListener("pagehide", function () {
+                music.pause();
+                music.currentTime = 0;
+            }, { once: true });
+        }
+
         if (!intro || !video) {
             document.body.classList.remove("intro-active");
             return;
