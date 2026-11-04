@@ -312,6 +312,16 @@
         function finishIntro() {
             if (finished) return;
             finished = true;
+
+            // Stop the intro music and remove its control when the video ends.
+            if (music) {
+                music.pause();
+                music.currentTime = 0;
+            }
+            if (soundControl) {
+                soundControl.hidden = true;
+            }
+
             intro.classList.add("intro-screen--leaving");
             document.body.classList.remove("intro-active");
             document.body.classList.add("intro-finished");
