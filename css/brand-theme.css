@@ -1181,3 +1181,34 @@ html[data-theme="dark"] .jo-module table tbody tr:hover,
 html[data-theme="dark"] .rf-module table tbody tr:hover {
   background: #1c2b42 !important;
 }
+
+
+/* Title logos for KPI / summary cards that do not already render an icon node. */
+.sales-order-module .so-summary-label::before,
+.invoicing-container .summary-label::before,
+.payment-module .payment-summary-label::before,
+.fleet-analytics-page .kpi-label::before,
+.dashboard-page .summary-card-label::before,
+.jo-module .jo-stat small::before,
+.rf-module .rf-cards article > span::before {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 27px;
+  height: 27px;
+  margin-right: 9px;
+  border-radius: 8px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  color: #1d4ed8;
+  vertical-align: middle;
+  font-size: 14px;
+  line-height: 1;
+}
+.sales-order-module .so-summary-label::before { content: "📄"; }
+.invoicing-container .summary-label::before { content: "🧾"; }
+.payment-module .payment-summary-label::before { content: "💳"; }
+.fleet-analytics-page .kpi-label::before { content: "🚚"; }
+.dashboard-page .summary-card-label::before { content: "📊"; }
+.jo-module .jo-stat small::before { content: "🏭"; }
+.rf-module .rf-cards article > span::before { content: "💰"; }
