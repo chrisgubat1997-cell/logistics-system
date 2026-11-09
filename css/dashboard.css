@@ -146,7 +146,7 @@
 
     color: #ffffff;
 
-    font-size: 17px;
+    font-size: 15.64px;
     font-weight: 900;
 
     letter-spacing: -0.04em;
@@ -221,7 +221,7 @@
 
     color: #111827;
 
-    font-size: 22px;
+    font-size: 20.24px;
     line-height: 1.15;
 
     font-weight: 850;
@@ -234,7 +234,7 @@
 
     color: #7b8799;
 
-    font-size: 12px;
+    font-size: 11.04px;
     font-weight: 500;
 
     letter-spacing: 0.01em;
@@ -267,7 +267,7 @@
 
     color: #657186;
 
-    font-size: 12px;
+    font-size: 11.04px;
     font-weight: 600;
 
     white-space: nowrap;
@@ -293,7 +293,7 @@
 
     cursor: pointer;
 
-    font-size: 12px;
+    font-size: 11.04px;
     font-weight: 700;
 
     box-shadow:
@@ -452,7 +452,7 @@
 .summary-card-label {
     color: #7b8799;
 
-    font-size: 10px;
+    font-size: 9.2px;
     font-weight: 800;
 
     letter-spacing: .075em;
@@ -465,7 +465,7 @@
 
     color: #172033;
 
-    font-size: 28px;
+    font-size: 25.76px;
     line-height: 1;
 
     font-weight: 850;
@@ -478,7 +478,7 @@
 
     color: #8c96a7;
 
-    font-size: 10px;
+    font-size: 9.2px;
     font-weight: 500;
 }
 
@@ -506,7 +506,7 @@
 
     color: #536176;
 
-    font-size: 12px;
+    font-size: 11.04px;
     font-weight: 900;
 
     box-shadow:
@@ -632,7 +632,7 @@
 
     color: #1c2638;
 
-    font-size: 15px;
+    font-size: 13.8px;
     line-height: 1.3;
 
     font-weight: 850;
@@ -645,7 +645,7 @@
 
     color: #8b95a5;
 
-    font-size: 10px;
+    font-size: 9.2px;
     line-height: 1.45;
 
     font-weight: 500;
@@ -665,7 +665,7 @@
 
     color: #59667b;
 
-    font-size: 11px;
+    font-size: 10.12px;
     font-weight: 600;
 
     outline: none;
@@ -733,7 +733,7 @@
 .sales-order-stat-label {
     color: #8791a3;
 
-    font-size: 9px;
+    font-size: 8.28px;
     font-weight: 700;
 
     text-transform: uppercase;
@@ -745,7 +745,7 @@
 
     color: #263248;
 
-    font-size: 18px;
+    font-size: 16.56px;
 
     font-weight: 850;
 
@@ -809,7 +809,7 @@
 
     color: #68748a;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     font-weight: 750;
 }
@@ -913,7 +913,7 @@
 .dashboard-bar-label {
     color: #7b8698;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     font-weight: 650;
 }
@@ -1022,7 +1022,7 @@
 .delivery-rate-value {
     color: #1c2638;
 
-    font-size: 28px;
+    font-size: 25.76px;
 
     font-weight: 850;
 
@@ -1034,7 +1034,7 @@
 
     color: #8a94a6;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     font-weight: 700;
 
@@ -1086,7 +1086,7 @@
 .delivery-metric-label {
     color: #8a94a6;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     font-weight: 650;
 }
@@ -1096,7 +1096,7 @@
 
     color: #28344a;
 
-    font-size: 18px;
+    font-size: 16.56px;
 
     font-weight: 850;
 
@@ -1128,7 +1128,7 @@
 .finance-row-label {
     color: #68748a;
 
-    font-size: 11px;
+    font-size: 10.12px;
 
     font-weight: 550;
 }
@@ -1136,7 +1136,7 @@
 .finance-row-value {
     color: #263248;
 
-    font-size: 13px;
+    font-size: 11.96px;
 
     font-weight: 850;
 
@@ -1243,7 +1243,7 @@
 .fleet-status-label {
     color: #8791a3;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     font-weight: 700;
 
@@ -1256,7 +1256,7 @@
 
     color: #273349;
 
-    font-size: 20px;
+    font-size: 18.4px;
 
     font-weight: 850;
 
@@ -1359,7 +1359,7 @@
 .attention-title {
     color: #29354a;
 
-    font-size: 11px;
+    font-size: 10.12px;
 
     font-weight: 750;
 }
@@ -1369,7 +1369,7 @@
 
     color: #8791a3;
 
-    font-size: 10px;
+    font-size: 9.2px;
 
     line-height: 1.5;
 }
@@ -1381,7 +1381,7 @@
 
     color: #8b95a6;
 
-    font-size: 11px;
+    font-size: 10.12px;
 }
 
 
@@ -1408,7 +1408,7 @@
 
     color: #6e798c;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     font-weight: 800;
 
@@ -1466,7 +1466,7 @@
 
     color: #526078;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     font-weight: 850;
 }
@@ -1480,7 +1480,7 @@
 .activity-title {
     color: #334056;
 
-    font-size: 11px;
+    font-size: 10.12px;
 
     font-weight: 750;
 }
@@ -1490,7 +1490,7 @@
 
     color: #8a94a6;
 
-    font-size: 10px;
+    font-size: 9.2px;
 
     line-height: 1.4;
 }
@@ -1498,7 +1498,7 @@
 .activity-time {
     color: #9aa3b2;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     white-space: nowrap;
 }
@@ -1510,7 +1510,7 @@
 
     color: #8b95a6;
 
-    font-size: 11px;
+    font-size: 10.12px;
 }
 
 
@@ -1602,7 +1602,7 @@
 }
 
 .quick-action-icon {
-    font-size: 14px;
+    font-size: 12.88px;
 
     font-weight: 850;
 
@@ -1618,7 +1618,7 @@
 .quick-action-label {
     margin-top: 7px;
 
-    font-size: 10px;
+    font-size: 9.2px;
 
     font-weight: 750;
 
@@ -1637,7 +1637,7 @@
 
     color: #9aa3b2;
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     font-weight: 500;
 
@@ -1890,7 +1890,7 @@
     }
 
     .summary-card-value {
-        font-size: 24px;
+        font-size: 22.08px;
     }
 
     .dashboard-panel {
@@ -1931,11 +1931,11 @@
     }
 
     .dashboard-brand-text h1 {
-        font-size: 18px;
+        font-size: 16.56px;
     }
 
     .dashboard-brand-text p {
-        font-size: 10px;
+        font-size: 9.2px;
     }
 
     .dashboard-summary-grid {
@@ -1981,7 +1981,7 @@
     }
 
     .summary-card-value {
-        font-size: 22px;
+        font-size: 20.24px;
     }
 
     .delivery-metrics,
@@ -1998,18 +1998,18 @@
 
 .dashboard-page {
     padding: 20px;
-    font-size: 12.5px;
+    font-size: 11.5px;
 }
 
 .dashboard-page h1,
 .dashboard-page .dashboard-title,
 .dashboard-page .page-title {
-    font-size: 23px;
+    font-size: 21.16px;
     line-height: 1.25;
 }
 
 .dashboard-page h2 {
-    font-size: 16px;
+    font-size: 14.72px;
 }
 
 .dashboard-page .dashboard-header,
@@ -2037,18 +2037,18 @@
 .dashboard-page .stat-value,
 .dashboard-page .kpi-value,
 .dashboard-page .card-value {
-    font-size: 23px;
+    font-size: 21.16px;
     line-height: 1.2;
 }
 
 .dashboard-page .stat-label,
 .dashboard-page .kpi-label,
 .dashboard-page .card-label {
-    font-size: 11px;
+    font-size: 10.12px;
 }
 
 .dashboard-page table {
-    font-size: 11.5px;
+    font-size: 10.58px;
 }
 
 .dashboard-page th,
@@ -2059,7 +2059,7 @@
 .dashboard-page button,
 .dashboard-page input,
 .dashboard-page select {
-    font-size: 12px;
+    font-size: 11.04px;
 }
 
 @media (max-width: 900px) {
@@ -2075,7 +2075,7 @@
 }
 
 @media (max-width: 600px) {
-    .dashboard-page { padding: 12px; font-size: 13px; }
+    .dashboard-page { padding: 12px; font-size: 11.96px; }
 }
 
 
