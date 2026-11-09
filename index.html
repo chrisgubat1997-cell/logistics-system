@@ -36,7 +36,7 @@
 
     <link
         rel="stylesheet"
-        href="css/index.css?v=20261016-fit-layout03"
+        href="css/index.css?v=20261109-main-interface01"
     >
 
 
@@ -305,16 +305,6 @@
     ====================================================== -->
 
     <div class="topbar">
-
-        <div
-            class="page-title"
-            id="pageTitle"
-        >
-
-            Dashboard
-
-        </div>
-
 
         <div class="user-area">
 
@@ -1061,6 +1051,27 @@ function showPage(pageId, button) {
     page.classList.add(
         'active'
     );
+
+    // Match the active sidebar and section display with one accent color.
+    const sectionAccents = {
+        dashboard: '#16865b',
+        sales: '#2563eb',
+        joRegister: '#7c3aed',
+        delivery: '#0891b2',
+        fleetAnalytics: '#0d9488',
+        fleetDataEntry: '#0f766e',
+        invoice: '#d97706',
+        payment: '#16a34a',
+        revolvingFund: '#ca8a04',
+        reports: '#4f46e5',
+        settings: '#64748b',
+        profile: '#2563eb'
+    };
+
+    const sectionAccent = sectionAccents[pageId] || '#2563eb';
+    document.documentElement.style.setProperty('--section-accent', sectionAccent);
+    document.documentElement.setAttribute('data-active-section', pageId);
+
 /* =====================================================
        SIDEBAR ACTIVE BUTTON
     ===================================================== */
@@ -3305,21 +3316,9 @@ function openProfile() {
 
     }
 
+    document.documentElement.style.setProperty('--section-accent', '#2563eb');
+    document.documentElement.setAttribute('data-active-section', 'profile');
 
-    const pageTitle =
-        document.getElementById(
-            'pageTitle'
-        );
-
-
-    if (
-        pageTitle
-    ) {
-
-        pageTitle.innerText =
-            'My Profile';
-
-    }
 
 
     document
