@@ -16,7 +16,7 @@ const MESSAGING_HEADERS_ = {
     "THREAD_ID", "SO_ID", "SO_NUMBER", "SUBJECT", "CLIENT_NAME",
     "PROJECT", "STATUS", "CREATED_AT", "CREATED_BY",
     "LAST_MESSAGE_ID", "LAST_MESSAGE_AT", "LAST_MESSAGE_BY",
-    "LAST_MESSAGE_PREVIEW", "MESSAGE_COUNT"
+    "LAST_MESSAGE_PREVIEW", "MESSAGE_COUNT", "THREAD_TYPE"
   ],
   MESSAGES: [
     "MESSAGE_ID", "THREAD_ID", "SENDER_USER_ID", "SENDER_USERNAME",
@@ -26,6 +26,9 @@ const MESSAGING_HEADERS_ = {
   ],
   MESSAGES_READ_STATUS: [
     "THREAD_ID", "USER_ID", "LAST_READ_MESSAGE_ID", "LAST_READ_AT"
+  ],
+  MESSAGES_PARTICIPANTS: [
+    "THREAD_ID", "USER_ID", "ADDED_AT", "ADDED_BY", "STATUS"
   ]
 };
 
@@ -152,7 +155,8 @@ function ensureSalesOrderMessagingThread_(salesOrder) {
     "",
     "",
     "",
-    0
+    0,
+    "SO"
   ]);
 
   return { created: true, threadId: threadId };
@@ -160,34 +164,32 @@ function ensureSalesOrderMessagingThread_(salesOrder) {
 
 function getMessagingThreads(payload) {
   const account = authorizeRole_(payload, MESSAGING_ALLOWED_ROLES_);
+  const readRows = getAllRecords(CONFIG.SHEETS.MESSAGES_READ_STATUS);
+  const userReads = {};
+  readRows.forEach(function(row) {
+    if (String(row.USER_ID) === account.userId) userReads[String(row.THREAD_ID)] = row;
+  });
+
+  const participantIds = getMessagingParticipantThreadIds_(account.userId);
   const threads = getAllRecords(CONFIG.SHEETS.MESSAGES_THREADS)
     .filter(function(thread) {
-      return String(thread.STATUS || "ACTIVE").toUpperCase() === "ACTIVE";
+      if (String(thread.STATUS || "ACTIVE").toUpperCase() !== "ACTIVE") return false;
+      const type = String(thread.THREAD_TYPE || (thread.SO_NUMBER ? "SO" : "PRIVATE")).toUpperCase();
+      return type === "SO" || participantIds[String(thread.THREAD_ID)] === true;
     })
     .sort(function(a, b) {
       return new Date(b.LAST_MESSAGE_AT || b.CREATED_AT || 0) -
              new Date(a.LAST_MESSAGE_AT || a.CREATED_AT || 0);
     });
 
-  const readRows = getAllRecords(CONFIG.SHEETS.MESSAGES_READ_STATUS);
-  const userReads = {};
-  readRows.forEach(function(row) {
-    if (String(row.USER_ID) === account.userId) {
-      userReads[String(row.THREAD_ID)] = row;
-    }
-  });
-
   return {
     success: true,
-    user: {
-      userId: account.userId,
-      username: account.username,
-      role: account.role
-    },
+    user: { userId: account.userId, username: account.username, role: account.role },
     threads: threads.slice(0, 200).map(function(thread) {
       const read = userReads[String(thread.THREAD_ID)];
       return {
         threadId: thread.THREAD_ID,
+        threadType: String(thread.THREAD_TYPE || (thread.SO_NUMBER ? "SO" : "PRIVATE")).toUpperCase(),
         soId: thread.SO_ID,
         soNumber: thread.SO_NUMBER,
         subject: thread.SUBJECT,
@@ -212,6 +214,7 @@ function getMessagingMessages(payload) {
 
   const thread = findRecord(CONFIG.SHEETS.MESSAGES_THREADS, "THREAD_ID", threadId);
   if (!thread) throw new Error("Conversation not found.");
+  assertMessagingThreadAccess_(thread, account.userId);
 
   const limit = Math.min(Math.max(Number(payload.limit || 50), 1), 100);
   const all = getAllRecords(CONFIG.SHEETS.MESSAGES)
@@ -282,6 +285,7 @@ function sendMessagingMessage(payload) {
     if (!thread || String(thread.STATUS).toUpperCase() !== "ACTIVE") {
       throw new Error("Active conversation not found.");
     }
+    assertMessagingThreadAccess_(thread, account.userId);
 
     const now = new Date();
     const messageId = generateId("MSG");
@@ -292,7 +296,7 @@ function sendMessagingMessage(payload) {
       threadId,
       account.userId,
       account.username,
-      account.fullName || account.username,
+      getMessagingFullName_(account.userId) || account.username,
       "TEXT",
       body,
       "",
@@ -305,7 +309,7 @@ function sendMessagingMessage(payload) {
     updateMessagingThreadLastMessage_(threadId, {
       messageId: messageId,
       sentAt: now,
-      senderName: account.fullName || account.username,
+      senderName: getMessagingFullName_(account.userId) || account.username,
       preview: body
     });
 
@@ -330,6 +334,7 @@ function markMessagingThreadRead(payload) {
 
   const thread = findRecord(CONFIG.SHEETS.MESSAGES_THREADS, "THREAD_ID", threadId);
   if (!thread) throw new Error("Conversation not found.");
+  assertMessagingThreadAccess_(thread, account.userId);
 
   const now = new Date();
   upsertMessagingReadStatus_(
@@ -388,4 +393,142 @@ function upsertMessagingReadStatus_(threadId, userId, messageId, readAt) {
   } else {
     sheet.appendRow(row);
   }
+}
+
+
+/* =========================================================
+   PRIVATE DIRECT MESSAGES
+========================================================= */
+
+function getMessagingUsers(payload) {
+  const account = authorizeRole_(payload, MESSAGING_ALLOWED_ROLES_);
+  const sheet = SpreadsheetApp.openById(AUTH_SPREADSHEET_ID).getSheetByName(USERS_SHEET_NAME);
+  if (!sheet) throw new Error("USERS sheet not found.");
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) return { success: true, users: [] };
+
+  const headers = values[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
+  const index = {
+    id: headers.indexOf("USER_ID"),
+    username: headers.indexOf("USERNAME"),
+    name: headers.indexOf("FULL_NAME"),
+    email: headers.indexOf("EMAIL"),
+    role: headers.indexOf("ROLE"),
+    status: headers.indexOf("STATUS")
+  };
+  if ([index.id,index.username,index.name,index.email,index.role,index.status].some(function(i){return i<0;})) {
+    throw new Error("USERS sheet is missing required columns.");
+  }
+
+  const users = [];
+  for (let i=1;i<values.length;i++) {
+    const row=values[i];
+    if (String(row[index.status] || "").trim().toUpperCase() !== "ACTIVE") continue;
+    const userId=String(row[index.id] || "").trim();
+    if (!userId || userId === account.userId) continue;
+    users.push({
+      userId:userId,
+      username:String(row[index.username] || ""),
+      fullName:String(row[index.name] || ""),
+      email:String(row[index.email] || ""),
+      role:String(row[index.role] || "")
+    });
+  }
+  return { success:true, users:users };
+}
+
+function createPrivateMessageThread(payload) {
+  const account = authorizeRole_(payload, MESSAGING_ALLOWED_ROLES_);
+  const recipientId = String(payload.recipientUserId || payload.userId || "").trim();
+  if (!recipientId) throw new Error("Select a recipient.");
+  if (recipientId === account.userId) throw new Error("You cannot start a private conversation with yourself.");
+
+  const users = getMessagingUsersInternal_();
+  const recipient = users.filter(function(user){return user.userId === recipientId;})[0];
+  if (!recipient) throw new Error("Recipient account was not found or is inactive.");
+
+  const existing = getAllRecords(CONFIG.SHEETS.MESSAGES_THREADS);
+  const participantMap = getMessagingParticipantMap_();
+  for (let i=0;i<existing.length;i++) {
+    const thread=existing[i];
+    if (String(thread.THREAD_TYPE || "").toUpperCase() !== "PRIVATE" ||
+        String(thread.STATUS || "ACTIVE").toUpperCase() !== "ACTIVE") continue;
+    const ids = participantMap[String(thread.THREAD_ID)] || [];
+    if (ids.length === 2 && ids.indexOf(account.userId)>=0 && ids.indexOf(recipientId)>=0) {
+      return {success:true, threadId:thread.THREAD_ID, existing:true};
+    }
+  }
+
+  const now=new Date();
+  const threadId=generateId("THR");
+  const subject=String(payload.subject || ("Private message: " + recipient.fullName)).trim().substring(0,160);
+  const sheet=getSheet(CONFIG.SHEETS.MESSAGES_THREADS);
+  sheet.appendRow([
+    threadId, "", "", subject, "", "", "ACTIVE", now,
+    account.username, "", "", "", "", 0, "PRIVATE"
+  ]);
+
+  addMessagingParticipant_(threadId, account.userId, account.userId, now);
+  addMessagingParticipant_(threadId, recipientId, account.userId, now);
+
+  return {success:true, threadId:threadId, existing:false};
+}
+
+function getMessagingUsersInternal_() {
+  const sheet=SpreadsheetApp.openById(AUTH_SPREADSHEET_ID).getSheetByName(USERS_SHEET_NAME);
+  if (!sheet) throw new Error("USERS sheet not found.");
+  const values=sheet.getDataRange().getValues();
+  if (values.length<2) return [];
+  const headers=values[0].map(function(v){return String(v||"").trim().toUpperCase();});
+  const idx={id:headers.indexOf("USER_ID"),username:headers.indexOf("USERNAME"),name:headers.indexOf("FULL_NAME"),status:headers.indexOf("STATUS")};
+  return values.slice(1).filter(function(row){return String(row[idx.status]||"").toUpperCase()==="ACTIVE";}).map(function(row){
+    return {userId:String(row[idx.id]||""),username:String(row[idx.username]||""),fullName:String(row[idx.name]||"")};
+  });
+}
+
+function getMessagingFullName_(userId) {
+  const user=getMessagingUsersInternal_().filter(function(item){return item.userId===userId;})[0];
+  return user ? user.fullName : "";
+}
+
+function getMessagingParticipantMap_() {
+  const rows=getAllRecords(CONFIG.SHEETS.MESSAGES_PARTICIPANTS);
+  const map={};
+  rows.forEach(function(row){
+    if (String(row.STATUS||"ACTIVE").toUpperCase()!=="ACTIVE") return;
+    const id=String(row.THREAD_ID||"");
+    if (!map[id]) map[id]=[];
+    map[id].push(String(row.USER_ID||""));
+  });
+  return map;
+}
+
+function getMessagingParticipantThreadIds_(userId) {
+  const map={};
+  getAllRecords(CONFIG.SHEETS.MESSAGES_PARTICIPANTS).forEach(function(row){
+    if (String(row.USER_ID)===userId && String(row.STATUS||"ACTIVE").toUpperCase()==="ACTIVE") {
+      map[String(row.THREAD_ID)]=true;
+    }
+  });
+  return map;
+}
+
+function addMessagingParticipant_(threadId,userId,addedBy,addedAt) {
+  const sheet=getSheet(CONFIG.SHEETS.MESSAGES_PARTICIPANTS);
+  const rows=getAllRecords(CONFIG.SHEETS.MESSAGES_PARTICIPANTS);
+  const exists=rows.some(function(row){
+    return String(row.THREAD_ID)===threadId && String(row.USER_ID)===userId &&
+      String(row.STATUS||"ACTIVE").toUpperCase()==="ACTIVE";
+  });
+  if (!exists) sheet.appendRow([threadId,userId,addedAt||new Date(),addedBy,"ACTIVE"]);
+}
+
+function assertMessagingThreadAccess_(thread,userId) {
+  const type=String(thread.THREAD_TYPE || (thread.SO_NUMBER ? "SO" : "PRIVATE")).toUpperCase();
+  if (type==="SO") return true;
+  const participants=getMessagingParticipantThreadIds_(userId);
+  if (!participants[String(thread.THREAD_ID)]) {
+    throw new Error("ACCESS_DENIED: You are not a participant in this private conversation.");
+  }
+  return true;
 }
