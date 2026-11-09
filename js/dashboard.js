@@ -1273,6 +1273,18 @@
                 isMaintenanceVehicle
             );
 
+        const awaitingJO =
+            data.salesOrders.filter(function(order) {
+                return isDashboardPostedToProduction(order) && !hasDashboardJO(order);
+            });
+
+        if (awaitingJO.length > 0) {
+            attention.push({
+                title: awaitingJO.length + " Sales Order awaiting JO Number",
+                description: "Review the JO Register and assign the pending Job Order numbers."
+            });
+        }
+
 
         if (delayed.length > 0) {
 
@@ -2023,9 +2035,9 @@
             "invoiceAmount",
 
             "paymentAmount",
-
+            "AMOUNT",
             "total",
-
+            "TOTAL",
             "totalValue",
 
             "orderValue",
@@ -2164,10 +2176,14 @@
             record,
             [
                 "date",
+                "DATE",
                 "soDate",
                 "salesOrderDate",
+                "dateCreation",
+                "DATE_CREATION",
                 "createdDate",
-                "createdAt"
+                "createdAt",
+                "CREATED_AT"
             ]
         );
 
@@ -2180,9 +2196,11 @@
             record,
             [
                 "dateDelivered",
+                "DATE_DELIVERED",
                 "deliveredDate",
                 "actualDate",
                 "date",
+                "DATE",
                 "deliveryDate",
                 "createdDate"
             ]
@@ -2197,9 +2215,12 @@
             record,
             [
                 "paymentDate",
+                "PAYMENT_DATE",
                 "date",
+                "DATE",
                 "createdDate",
-                "createdAt"
+                "createdAt",
+                "CREATED_AT"
             ]
         );
 
@@ -2370,43 +2391,8 @@
     }
 
 
-    function getAnyValue(
-        record,
-        fields
-    ) {
-
-        if (!record) {
-            return "";
-        }
-
-
-        for (
-            let i = 0;
-            i < fields.length;
-            i++
-        ) {
-
-            const field =
-                fields[i];
-
-
-            if (
-                record[field] !==
-                undefined &&
-                record[field] !==
-                null &&
-                record[field] !== ""
-            ) {
-
-                return record[field];
-
-            }
-
-        }
-
-
-        return "";
-
+    function getAnyValue(record, fields) {
+        return getDashboardField(record, fields);
     }
 
 
