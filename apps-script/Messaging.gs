@@ -1,7 +1,7 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
    MESSAGING DATABASE
-   VERSION: 20261109-02
+   VERSION: 20261109-03
 
    All active registered users may view and reply to all SO
    conversations. Each SO has one permanent thread.
@@ -170,7 +170,6 @@ function getMessagingThreads(payload) {
     if (String(row.USER_ID) === account.userId) userReads[String(row.THREAD_ID)] = row;
   });
 
-  const participantIds = getMessagingParticipantThreadIds_(account.userId);
   const participantMap = getMessagingParticipantMap_();
   const userDirectory = getMessagingUsersInternal_();
   const userById = {};
@@ -180,7 +179,8 @@ function getMessagingThreads(payload) {
     .filter(function(thread) {
       if (String(thread.STATUS || "ACTIVE").toUpperCase() !== "ACTIVE") return false;
       const type = String(thread.THREAD_TYPE || (thread.SO_NUMBER ? "SO" : "PRIVATE")).toUpperCase();
-      return type === "SO" || participantIds[String(thread.THREAD_ID)] === true;
+      const members = participantMap[String(thread.THREAD_ID)] || [];
+      return type === "SO" || members.indexOf(String(account.userId)) >= 0;
     })
     .sort(function(a, b) {
       return new Date(b.LAST_MESSAGE_AT || b.CREATED_AT || 0) -
@@ -492,6 +492,12 @@ function createPrivateMessageThread(payload) {
 }
 
 function getMessagingUsersInternal_() {
+  const cache = CacheService.getScriptCache();
+  const cacheKey = "MESSAGING_ACTIVE_USERS_V1";
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    try { return JSON.parse(cached); } catch (e) { cache.remove(cacheKey); }
+  }
   const sheet=SpreadsheetApp.openById(AUTH_SPREADSHEET_ID).getSheetByName(USERS_SHEET_NAME);
   if (!sheet) throw new Error("USERS sheet not found.");
   const values=sheet.getDataRange().getValues();
@@ -505,7 +511,7 @@ function getMessagingUsersInternal_() {
     role:headers.indexOf("ROLE"),
     status:headers.indexOf("STATUS")
   };
-  return values.slice(1).filter(function(row){return String(row[idx.status]||"").toUpperCase()==="ACTIVE";}).map(function(row){
+  const users = values.slice(1).filter(function(row){return String(row[idx.status]||"").toUpperCase()==="ACTIVE";}).map(function(row){
     return {
       userId:String(row[idx.id]||""),
       username:String(row[idx.username]||""),
@@ -514,6 +520,8 @@ function getMessagingUsersInternal_() {
       role:idx.role>=0?String(row[idx.role]||""):""
     };
   });
+  cache.put(cacheKey, JSON.stringify(users), 300);
+  return users;
 }
 
 function getMessagingFullName_(userId) {
