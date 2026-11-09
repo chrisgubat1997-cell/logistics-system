@@ -1,7 +1,16 @@
 /* =========================================================
-   LOGIS-TECH MAIL — VISUAL DESIGN ONLY
-   Version: 20261109-01
+   LOGIS-TECH MAIL — SHARED MESSAGES MODULE
+   Version: 20261109-02
 ========================================================= */
+
+/* Do not hide the shared Messages entry for any account role. */
+.menu .messages-menu-btn,
+.menu button[data-messages-menu] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 
 .messages-menu-count {
     display: inline-flex;
