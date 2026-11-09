@@ -131,3 +131,119 @@ html[data-theme="dark"] .about-load-error { background: #2a171b; border-color: #
 @media (prefers-reduced-motion: reduce) {
   .about-page * { animation: none !important; transition: none !important; }
 }
+
+/* =========================================================
+   ANIMATED PLANT-TO-FINANCE JOURNEY
+========================================================= */
+.about-journey {
+  --journey-blue: #174a9a;
+  --journey-green: #32a852;
+  --journey-line: #dce6f2;
+  position: relative;
+  overflow: hidden;
+  padding: clamp(20px, 2.5vw, 28px);
+  border: 1px solid var(--about-line);
+  border-radius: 16px;
+  background: var(--about-surface);
+  box-shadow: 0 4px 16px rgba(16,47,115,.045);
+}
+.about-journey-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; margin-bottom:18px; }
+.about-journey-heading h2 { color:var(--about-blue-deep) !important; font-size:19px; font-weight:850; letter-spacing:-.025em; }
+.about-journey-heading p { margin-top:5px; color:var(--about-muted) !important; font-size:11px; line-height:1.6; }
+.about-live-label { display:inline-flex; align-items:center; gap:7px; flex:0 0 auto; margin-top:5px; padding:7px 10px; border:1px solid #d7efdd; border-radius:99px; background:#f1fbf3; color:#238343; font-size:9px; font-weight:850; letter-spacing:.08em; }
+.about-live-label i { width:7px; height:7px; border-radius:50%; background:#32b85b; box-shadow:0 0 0 4px rgba(50,184,91,.13); animation:about-live-pulse 1.5s ease-in-out infinite; }
+.about-journey-stages { position:relative; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; padding:8px 0 5px; }
+.about-stage { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; min-width:0; min-height:195px; padding:15px 8px 65px; border:1px solid var(--about-line); border-radius:13px; background:var(--about-surface); text-align:center; }
+.about-stage-number { position:absolute; top:10px; left:11px; color:#9aa9bd; font-size:9px; font-weight:850; letter-spacing:.08em; }
+.about-stage-icon { display:grid; place-items:center; width:58px; height:58px; margin:12px 0 10px; border-radius:16px; background:#edf3ff; color:#174a9a; }
+.about-stage-icon svg { width:39px; height:39px; fill:none; stroke:currentColor; stroke-width:2.7; stroke-linecap:round; stroke-linejoin:round; }
+.about-warehouse-icon { background:#eff8ed; color:#388b42; }
+.about-logistics-icon { background:#edf6fb; color:#147aa5; }
+.about-client-icon { background:#f2efff; color:#7151b8; }
+.about-finance-icon { background:#fff6e8; color:#c17b16; }
+.about-stage h3 { color:var(--about-ink) !important; font-size:11px; font-weight:900; letter-spacing:.07em; }
+.about-stage p { min-height:28px; margin-top:5px; color:var(--about-muted) !important; font-size:10px; line-height:1.45; }
+.about-stage-caption { margin-top:7px; padding:4px 8px; border-radius:99px; background:rgba(50,168,82,.09); color:#278348; font-size:9px; font-weight:750; }
+.about-journey-rail { position:absolute; z-index:3; left:5%; right:5%; bottom:33px; height:30px; pointer-events:none; }
+.about-journey-rail::before { content:""; position:absolute; left:0; right:0; top:14px; height:3px; border-radius:4px; background:var(--journey-line); }
+.about-rail-fill { position:absolute; left:0; top:14px; width:100%; height:3px; border-radius:4px; background:linear-gradient(90deg,#35a852,#2586bf,#d6a13a); transform-origin:left; animation:about-rail-flow 8s linear infinite; }
+.about-journey-payload { position:absolute; top:0; left:0; display:flex; align-items:center; justify-content:center; opacity:0; animation:about-payload-travel 8s linear infinite; filter:drop-shadow(0 3px 3px rgba(13,40,80,.16)); }
+.about-payload-panel { width:34px; height:24px; gap:3px; padding:3px; border:2px solid #1b4e91; border-radius:4px; background:#dbeafe; }
+.about-payload-panel i, .about-payload-panel b { display:block; width:6px; height:14px; border-radius:1px; background:#3977bb; }
+.about-payload-box { width:25px; height:24px; border:2px solid #a66a2b; border-radius:3px; background:#e8b66f; }
+.about-payload-box::before { content:""; position:absolute; top:0; bottom:0; left:10px; width:2px; background:#a66a2b; }
+.about-payload-box i { position:absolute; top:0; left:0; width:100%; height:2px; background:#a66a2b; }
+.about-payload-truck { width:46px; height:23px; border-radius:4px 3px 3px 4px; background:#2586bf; }
+.about-payload-truck::before { content:""; position:absolute; left:30px; top:7px; width:15px; height:16px; border-radius:2px 5px 2px 2px; background:#2586bf; }
+.about-payload-truck::after { content:""; position:absolute; left:33px; top:9px; width:8px; height:6px; border-radius:2px 3px 0 0; background:#d9f1ff; }
+.about-payload-truck i { position:absolute; z-index:1; left:8px; top:5px; width:14px; height:12px; border-radius:2px; background:#e8b66f; box-shadow:0 0 0 1px rgba(0,0,0,.08); }
+.about-payload-truck b { position:absolute; z-index:2; left:7px; bottom:-4px; width:9px; height:9px; border:2px solid #31506b; border-radius:50%; background:#fff; }
+.about-payload-truck b:last-child { left:33px; }
+.about-payload-money { width:28px; height:23px; border:2px solid #21844b; border-radius:5px; background:#bff0ce; color:#18763d; font-size:17px; font-weight:950; line-height:19px; }
+.about-payload-panel { animation-delay:0s; }
+.about-payload-box { animation-delay:0s; }
+.about-payload-truck { animation-delay:0s; }
+.about-payload-money { animation-delay:0s; }
+.about-journey-note { display:flex; align-items:center; gap:10px; margin-top:7px; color:var(--about-muted); font-size:9px; letter-spacing:.1em; }
+.about-journey-note > span:first-child { font-weight:850; white-space:nowrap; }
+.about-note-line { flex:1; height:1px; background:var(--about-line); }
+.about-journey-note strong { color:var(--about-blue); font-size:9px; font-weight:850; letter-spacing:.06em; white-space:nowrap; }
+@keyframes about-live-pulse { 50% { opacity:.45; box-shadow:0 0 0 7px rgba(50,184,91,.05); } }
+@keyframes about-rail-flow { 0% { transform:scaleX(.05); opacity:.5; } 85%,100% { transform:scaleX(1); opacity:1; } }
+@keyframes about-payload-travel {
+  0% { left:0%; opacity:0; transform:translate(-50%,-2px) scale(.85); }
+  4% { opacity:1; }
+  18% { opacity:1; }
+  22% { opacity:0; }
+  24% { opacity:0; }
+  27% { opacity:1; }
+  42% { opacity:1; }
+  46% { opacity:0; }
+  48% { opacity:0; }
+  51% { opacity:1; }
+  73% { opacity:1; }
+  77% { opacity:0; }
+  79% { opacity:0; }
+  82% { opacity:1; }
+  96% { opacity:1; }
+  100% { left:100%; opacity:0; transform:translate(-50%,-2px) scale(.85); }
+}
+.about-payload-panel { animation-name:about-payload-panel; }
+.about-payload-box { animation-name:about-payload-box; }
+.about-payload-truck { animation-name:about-payload-truck; }
+.about-payload-money { animation-name:about-payload-money; }
+@keyframes about-payload-panel {
+  0% { left:0%; opacity:0; } 4%,18% { opacity:1; } 22%,100% { left:100%; opacity:0; }
+}
+@keyframes about-payload-box {
+  0%,23% { left:0%; opacity:0; } 27%,42% { opacity:1; } 46%,100% { left:100%; opacity:0; }
+}
+@keyframes about-payload-truck {
+  0%,47% { left:0%; opacity:0; } 51%,73% { opacity:1; } 77%,100% { left:100%; opacity:0; }
+}
+@keyframes about-payload-money {
+  0%,78% { left:0%; opacity:0; } 82%,96% { opacity:1; } 100% { left:100%; opacity:0; }
+}
+html[data-theme="dark"] .about-journey-heading h2 { color:#dce8ff !important; }
+html[data-theme="dark"] .about-stage { background:#151f30; border-color:#2b3950; }
+html[data-theme="dark"] .about-stage h3 { color:#e8edf7 !important; }
+html[data-theme="dark"] .about-live-label { background:#142b20; border-color:#28583a; color:#8fe0a5; }
+html[data-theme="dark"] .about-journey-note strong { color:#bcd1ff; }
+html[data-theme="dark"] .about-payload-panel { background:#203d64; }
+html[data-theme="dark"] .about-payload-box { background:#76532e; }
+html[data-theme="dark"] .about-payload-money { background:#174b30; color:#9ae6b4; }
+
+@media (max-width:700px) {
+  .about-journey-heading { flex-direction:column; }
+  .about-journey-stages { grid-template-columns:repeat(5,minmax(118px,1fr)); overflow-x:auto; padding-bottom:12px; }
+  .about-stage { min-height:180px; }
+  .about-journey-rail { left:5%; right:5%; min-width:560px; }
+  .about-journey-note { flex-wrap:wrap; }
+  .about-journey-note strong { white-space:normal; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .about-journey *, .about-journey *::before, .about-journey *::after { animation:none !important; }
+  .about-rail-fill { transform:scaleX(1); }
+  .about-payload-panel { left:10%; opacity:1; }
+  .about-payload-box, .about-payload-truck, .about-payload-money { display:none; }
+}
