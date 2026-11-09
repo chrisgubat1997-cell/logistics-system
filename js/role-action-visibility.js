@@ -132,11 +132,21 @@
 
         // Messages is a shared communication module for every registered account.
         document.querySelectorAll("[data-messages-menu]").forEach(function (button) {
-            button.style.setProperty("display", "flex", "important");
-            button.style.setProperty("visibility", "visible", "important");
-            button.style.setProperty("opacity", "1", "important");
-            button.disabled = false;
-            button.removeAttribute("aria-hidden");
+            // Avoid rewriting the style attribute on every MutationObserver pass.
+            if (button.style.getPropertyValue("display") !== "flex" ||
+                button.style.getPropertyPriority("display") !== "important") {
+                button.style.setProperty("display", "flex", "important");
+            }
+            if (button.style.getPropertyValue("visibility") !== "visible" ||
+                button.style.getPropertyPriority("visibility") !== "important") {
+                button.style.setProperty("visibility", "visible", "important");
+            }
+            if (button.style.getPropertyValue("opacity") !== "1" ||
+                button.style.getPropertyPriority("opacity") !== "important") {
+                button.style.setProperty("opacity", "1", "important");
+            }
+            if (button.disabled) button.disabled = false;
+            if (button.hasAttribute("aria-hidden")) button.removeAttribute("aria-hidden");
         });
 
         ROOTS.forEach(function (entry) {
