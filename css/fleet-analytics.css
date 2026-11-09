@@ -1351,3 +1351,60 @@ body {
 .fleet-analytics-module table, .fleet-analytics-page table, .fleet-analytics-content table { width: max-content !important; min-width: 760px !important; max-width: none !important; table-layout: auto; }
 .fleet-analytics-module .table-wrapper, .fleet-analytics-page .table-wrapper, .fleet-analytics-content .table-wrapper, .fleet-analytics-module .table-container, .fleet-analytics-page .table-container, .fleet-analytics-content .table-container { display: block; width: 100%; max-width: 100%; min-width: 0; overflow-x: auto !important; overflow-y: visible !important; }
 
+
+
+/* =========================================================
+   VEHICLE FILTER SEARCH — CLEAN COMPACT CONTROL
+========================================================= */
+.fleet-filters > .filter-group:first-child {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 5px;
+    width: clamp(210px, 25vw, 285px);
+}
+.fleet-filters > .filter-group:first-child label {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+}
+.fleet-analytics-page .vehicle-dropdown-search {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 35px;
+    margin: 0;
+    padding: 0 12px 0 34px;
+    border: 1px solid #d8e1ec;
+    border-radius: 9px;
+    outline: none;
+    background-color: #fff;
+    color: #172033;
+    font: inherit;
+    font-size: 11px;
+    box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238092a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 11px center;
+    background-size: 15px;
+}
+.fleet-analytics-page .vehicle-dropdown-search:focus {
+    border-color: #6d9be8;
+    box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+.fleet-filters > .filter-group:first-child select {
+    width: 100%;
+    min-width: 0;
+    height: 35px;
+    border-radius: 9px;
+}
+@media (max-width: 900px) {
+    .fleet-filters > .filter-group:first-child { width: 100%; }
+}
+@media (max-width: 600px) {
+    .fleet-filters > .filter-group:first-child { grid-column: 1 / -1; }
+}
