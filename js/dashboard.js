@@ -439,16 +439,27 @@
         return "";
     }
 
+    const DASHBOARD_JO_FIELDS = [
+        "jobOrder", "job_order", "JOB_ORDER", "jo", "JO", "joNumber", "jo_number", "jobOrderNumber"
+    ];
+    const DASHBOARD_POSTED_FIELDS = [
+        "postedToProduction", "POSTED_TO_PRODUCTION", "productionPostingStatus", "productionStatus"
+    ];
+
+    function hasDashboardField(records, candidates) {
+        return records.some(record => {
+            if (!record || typeof record !== "object") return false;
+            const keys = Object.keys(record).map(key => key.toLowerCase());
+            return candidates.some(candidate => keys.includes(candidate.toLowerCase()));
+        });
+    }
+
     function hasDashboardJO(record) {
-        return Boolean(String(getDashboardField(record, [
-            "jobOrder", "job_order", "JOB_ORDER", "jo", "JO", "joNumber", "jo_number", "jobOrderNumber"
-        ]) || "").trim());
+        return Boolean(String(getDashboardField(record, DASHBOARD_JO_FIELDS) || "").trim());
     }
 
     function isDashboardPostedToProduction(record) {
-        const value = normalizeStatus(getDashboardField(record, [
-            "postedToProduction", "POSTED_TO_PRODUCTION", "productionPostingStatus", "productionStatus"
-        ]));
+        const value = normalizeStatus(getDashboardField(record, DASHBOARD_POSTED_FIELDS));
         return ["posted", "yes", "true", "1", "sent"].includes(value);
     }
 
@@ -458,15 +469,17 @@
         const posted = orders.filter(isDashboardPostedToProduction);
         const awaitingJO = posted.filter(order => !hasDashboardJO(order));
         const notPosted = orders.filter(order => !isDashboardPostedToProduction(order));
+        const hasJOData = orders.length === 0 || hasDashboardField(orders, DASHBOARD_JO_FIELDS);
+        const hasPostingData = orders.length === 0 || hasDashboardField(orders, DASHBOARD_POSTED_FIELDS);
 
-        setText("dashboardJOAssigned", formatNumber(withJO.length));
-        setText("dashboardJOPending", formatNumber(awaitingJO.length) + " awaiting JO");
-        setText("dashboardProductionPosted", formatNumber(posted.length));
-        setText("dashboardProductionNotPosted", formatNumber(notPosted.length) + " not posted");
+        setText("dashboardJOAssigned", hasJOData ? formatNumber(withJO.length) : "—");
+        setText("dashboardJOPending", hasJOData && hasPostingData ? formatNumber(awaitingJO.length) + " awaiting JO" : "JO data unavailable");
+        setText("dashboardProductionPosted", hasPostingData ? formatNumber(posted.length) : "—");
+        setText("dashboardProductionNotPosted", hasPostingData ? formatNumber(notPosted.length) + " not posted" : "Posting data unavailable");
         setText("dashboardProductionSO", formatNumber(orders.length));
-        setText("dashboardProductionJO", formatNumber(withJO.length));
-        setText("dashboardProductionAwaitingJO", formatNumber(awaitingJO.length));
-        setText("dashboardProductionPostedCount", formatNumber(posted.length));
+        setText("dashboardProductionJO", hasJOData ? formatNumber(withJO.length) : "—");
+        setText("dashboardProductionAwaitingJO", hasJOData && hasPostingData ? formatNumber(awaitingJO.length) : "—");
+        setText("dashboardProductionPostedCount", hasPostingData ? formatNumber(posted.length) : "—");
     }
 
     /* =====================================================
