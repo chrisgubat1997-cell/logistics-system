@@ -343,6 +343,12 @@ case "createPayment":
     case "setupMessagingDatabase":
       return setupMessagingDatabaseApi(payload);
 
+    case "getMessagingUsers":
+      return getMessagingUsers(payload);
+
+    case "createPrivateMessageThread":
+      return createPrivateMessageThread(payload);
+
     case "getMessagingThreads":
       return getMessagingThreads(payload);
 
