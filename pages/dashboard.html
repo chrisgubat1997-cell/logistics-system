@@ -129,6 +129,32 @@
 
 
 
+        <!-- JO REGISTER -->
+        <div class="dashboard-summary-card jo-card" data-module="jo">
+            <div class="summary-card-top">
+                <div class="summary-card-icon">🧾</div>
+                <span class="summary-card-label">JO REGISTER</span>
+            </div>
+            <div class="summary-card-value" id="dashboardJOAssigned">0</div>
+            <div class="summary-card-footer">
+                <span>Assigned JO numbers</span>
+                <span id="dashboardJOPending" class="summary-card-highlight">0 awaiting JO</span>
+            </div>
+        </div>
+
+        <!-- PRODUCTION QUEUE -->
+        <div class="dashboard-summary-card production-card" data-module="production">
+            <div class="summary-card-top">
+                <div class="summary-card-icon">🏭</div>
+                <span class="summary-card-label">PRODUCTION QUEUE</span>
+            </div>
+            <div class="summary-card-value" id="dashboardProductionPosted">0</div>
+            <div class="summary-card-footer">
+                <span>SO posted to Production</span>
+                <span id="dashboardProductionNotPosted" class="summary-card-highlight">0 not posted</span>
+            </div>
+        </div>
+
         <!-- ACTIVE DELIVERY -->
 
         <div
@@ -179,7 +205,7 @@
         <!-- PENDING INVOICE -->
 
         <div
-            class="dashboard-summary-card invoice-card"
+            class="dashboard-summary-card invoice-card" data-role-scope="finance"
             data-module="invoice"
         >
 
@@ -223,7 +249,7 @@
         <!-- OUTSTANDING PAYMENT -->
 
         <div
-            class="dashboard-summary-card payment-card"
+            class="dashboard-summary-card payment-card" data-role-scope="finance"
             data-module="payment"
         >
 
@@ -314,7 +340,7 @@
         <!-- FLEET STATUS -->
 
         <div
-            class="dashboard-summary-card fleet-card"
+            class="dashboard-summary-card fleet-card" data-role-scope="fleet"
             data-module="fleet"
         >
 
@@ -596,6 +622,42 @@
 
 
         <!-- =================================================
+             JO REGISTER & PRODUCTION OVERVIEW
+        ================================================== -->
+        <div class="dashboard-panel production-overview-panel" data-role-scope="production">
+            <div class="dashboard-panel-header">
+                <div>
+                    <span class="panel-eyebrow">SALES → PRODUCTION</span>
+                    <h2>JO Register & Production Overview</h2>
+                </div>
+                <span class="panel-period">Live SO records</span>
+            </div>
+            <div class="production-overview-grid">
+                <div class="production-metric">
+                    <span class="production-metric-icon">📄</span>
+                    <strong id="dashboardProductionSO">0</strong>
+                    <span>Sales Orders</span>
+                </div>
+                <div class="production-metric">
+                    <span class="production-metric-icon">📋</span>
+                    <strong id="dashboardProductionJO">0</strong>
+                    <span>With JO Number</span>
+                </div>
+                <div class="production-metric warning">
+                    <span class="production-metric-icon">⏳</span>
+                    <strong id="dashboardProductionAwaitingJO">0</strong>
+                    <span>Awaiting JO Number</span>
+                </div>
+                <div class="production-metric">
+                    <span class="production-metric-icon">🏭</span>
+                    <strong id="dashboardProductionPostedCount">0</strong>
+                    <span>Posted to Production</span>
+                </div>
+            </div>
+            <p class="dashboard-data-note">Counts are based on the Sales Order records currently returned by the system.</p>
+        </div>
+
+        <!-- =================================================
              DELIVERY PERFORMANCE
         ================================================== -->
 
@@ -721,7 +783,7 @@
              FINANCE SNAPSHOT
         ================================================== -->
 
-        <div class="dashboard-panel finance-panel">
+        <div class="dashboard-panel finance-panel" data-role-scope="finance">
 
             <div class="dashboard-panel-header">
 
@@ -832,10 +894,37 @@
 
 
         <!-- =================================================
+             MONTHLY COLLECTIONS
+        ================================================== -->
+        <div class="dashboard-panel collections-panel" data-role-scope="finance">
+            <div class="dashboard-panel-header">
+                <div>
+                    <span class="panel-eyebrow">FINANCE</span>
+                    <h2>Monthly Collections</h2>
+                </div>
+                <span class="panel-period" id="dashboardCollectionsPeriod">Last 6 months</span>
+            </div>
+            <div class="collections-summary">
+                <div>
+                    <span>Collections this month</span>
+                    <strong id="dashboardCollectionsMonth">₱0.00</strong>
+                </div>
+                <div>
+                    <span>All recorded payments</span>
+                    <strong id="dashboardCollectionsTotal">₱0.00</strong>
+                </div>
+            </div>
+            <div class="collections-chart" id="dashboardCollectionsChart" aria-label="Monthly collections chart">
+                <div class="collections-empty">Loading payment records...</div>
+            </div>
+            <p class="dashboard-data-note">Based on recorded Payment transactions and their payment dates.</p>
+        </div>
+
+        <!-- =================================================
              FLEET STATUS
         ================================================== -->
 
-        <div class="dashboard-panel fleet-panel">
+        <div class="dashboard-panel fleet-panel" data-role-scope="fleet">
 
             <div class="dashboard-panel-header">
 
@@ -1211,7 +1300,7 @@
 
 
 <script
-    src="../js/dashboard.js?v=20261014-02"
+    src="../js/dashboard.js?v=20261109-company-dashboard01"
 ></script>
 
 </body>
