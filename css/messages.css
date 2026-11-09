@@ -206,3 +206,15 @@ html[data-theme="dark"] .messages-app .mail-header p,html[data-theme="dark"] .me
     }
     .menu .messages-menu-btn > span:not(.messages-menu-icon) { display: none; }
 }
+
+/* Outgoing message delivery state */
+.mail-message-status-wrap{min-height:13px;padding:0 4px}
+.mail-message-status{display:inline-flex;align-items:center;gap:6px;font-size:8px;line-height:1.35;color:var(--mail-muted)}
+.mail-message-status.is-sending{color:#64748b}
+.mail-message-status.is-sending img{display:block;width:13px;height:13px;object-fit:contain;animation:mailLogoPulse .85s ease-in-out infinite alternate;filter:drop-shadow(0 0 3px rgba(37,99,235,.18))}
+.mail-message-status.is-sent{color:#64748b}
+.mail-message-status.is-failed{color:#b42318;font-weight:700}
+@keyframes mailLogoPulse{from{opacity:.45;transform:scale(.82) rotate(-8deg)}to{opacity:1;transform:scale(1.12) rotate(8deg)}}
+html[data-theme="dark"] .messages-app .mail-message-status.is-sending,html[data-theme="dark"] .messages-app .mail-message-status.is-sent{color:#a8b5c8}
+@media(prefers-reduced-motion:reduce){.mail-message-status.is-sending img{animation:none}}
+
