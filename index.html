@@ -255,7 +255,7 @@
         </button>
 
         <!-- MESSAGES -->
-        <button class="menu-btn messages-menu-btn" onclick="showPage('messages', this)" type="button" style="display:flex !important; visibility:visible !important; opacity:1 !important;">
+        <button class="menu-btn messages-menu-btn" data-messages-menu onclick="showPage('messages', this)" type="button" style="display:flex !important; visibility:visible !important; opacity:1 !important;">
             <span class="messages-menu-icon">✉</span>
             <span>Messages</span>
             <span class="messages-menu-count">5</span>
@@ -3359,6 +3359,15 @@ function loadUserAccount() {
 
     document.querySelectorAll('[data-jo-register-menu]').forEach(function (button) {
         button.style.display = '';
+    });
+
+    // Messages is available to every authenticated/registered account, regardless of role.
+    document.querySelectorAll('[data-messages-menu]').forEach(function (button) {
+        button.style.setProperty('display', 'flex', 'important');
+        button.style.setProperty('visibility', 'visible', 'important');
+        button.style.setProperty('opacity', '1', 'important');
+        button.disabled = false;
+        button.removeAttribute('aria-hidden');
     });
 
     const fullname =
