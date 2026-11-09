@@ -174,7 +174,7 @@ body {
     display: flex;
     align-items: center;
 
-    font-size: 19px;
+    font-size: 17.48px;
     font-weight: 800;
 
     letter-spacing: 0.5px;
@@ -242,7 +242,7 @@ body {
 
     text-align: left;
 
-    font-size: 14px;
+    font-size: 12.88px;
     font-weight: 500;
 
     cursor: pointer;
@@ -353,7 +353,7 @@ body {
 ========================================================= */
 
 .page-title {
-    font-size: 21px;
+    font-size: 19.32px;
 
     font-weight: 700;
 
@@ -378,7 +378,7 @@ body {
 #welcomeUser {
     color: #64748b;
 
-    font-size: 13px;
+    font-size: 11.96px;
 
     font-weight: 500;
 
@@ -400,7 +400,7 @@ body {
 
     cursor: pointer;
 
-    font-size: 12px;
+    font-size: 11.04px;
 
     font-weight: 600;
 
@@ -519,7 +519,7 @@ body {
 .section h2 {
     margin-bottom: 20px;
 
-    font-size: 18px;
+    font-size: 16.56px;
 
     color: #111827;
 }
@@ -544,7 +544,7 @@ body {
 .page-header h1 {
     color: #111827;
 
-    font-size: 25px;
+    font-size: 23px;
 
     font-weight: 750;
 
@@ -556,7 +556,7 @@ body {
 
     margin-top: 6px;
 
-    font-size: 13px;
+    font-size: 11.96px;
 }
 
 
@@ -571,7 +571,7 @@ body {
 
     border-radius: 8px;
 
-    font-size: 13px;
+    font-size: 11.96px;
 
     font-weight: 600;
 
@@ -692,7 +692,7 @@ th {
 
     color: #64748b;
 
-    font-size: 11px;
+    font-size: 10.12px;
 
     font-weight: 700;
 
@@ -710,7 +710,7 @@ th:last-child {
 }
 
 td {
-    font-size: 13px;
+    font-size: 11.96px;
 
     color: #334155;
 }
@@ -770,7 +770,7 @@ tbody tr:last-child td {
 }
 
 .form-group label {
-    font-size: 12px;
+    font-size: 11.04px;
 
     font-weight: 650;
 
@@ -789,7 +789,7 @@ tbody tr:last-child td {
 
     border-radius: 8px;
 
-    font-size: 13px;
+    font-size: 11.96px;
 
     width: 100%;
 
@@ -953,7 +953,7 @@ tbody tr:last-child td {
 
     justify-content: center;
 
-    font-size: 25px;
+    font-size: 23px;
 
     font-weight: bold;
 
@@ -962,7 +962,7 @@ tbody tr:last-child td {
 }
 
 .profile-name {
-    font-size: 20px;
+    font-size: 18.4px;
 
     font-weight: 700;
 }
@@ -972,7 +972,7 @@ tbody tr:last-child td {
 
     margin-top: 4px;
 
-    font-size: 13px;
+    font-size: 11.96px;
 }
 
 .profile-info {
@@ -1005,7 +1005,7 @@ tbody tr:last-child td {
 }
 
 .profile-info-label {
-    font-size: 10px;
+    font-size: 9.2px;
 
     color: #94a3b8;
 
@@ -1023,7 +1023,7 @@ tbody tr:last-child td {
 
     color: #1f2937;
 
-    font-size: 13px;
+    font-size: 11.96px;
 }
 
 
@@ -1040,7 +1040,7 @@ tbody tr:last-child td {
 
     border-radius: 20px;
 
-    font-size: 11px;
+    font-size: 10.12px;
 
     font-weight: 700;
 
@@ -1168,7 +1168,7 @@ tbody tr:last-child td {
     }
 
     .menu button::first-letter {
-        font-size: 20px;
+        font-size: 18.4px;
     }
 
     .topbar {
@@ -1178,7 +1178,7 @@ tbody tr:last-child td {
     }
 
     .page-title {
-        font-size: 17px;
+        font-size: 15.64px;
     }
 
     .user-area {
@@ -1193,7 +1193,7 @@ tbody tr:last-child td {
     .logout-btn {
         padding: 7px 9px;
 
-        font-size: 10px;
+        font-size: 9.2px;
     }
 
     .content {
@@ -1215,7 +1215,7 @@ tbody tr:last-child td {
     }
 
     .page-header h1 {
-        font-size: 21px;
+        font-size: 19.32px;
     }
 
     .action-bar {
@@ -1261,7 +1261,7 @@ tbody tr:last-child td {
     }
 
     .page-title {
-        font-size: 16px;
+        font-size: 14.72px;
     }
 
     .content {
