@@ -94,6 +94,7 @@
     function initializeDashboard() {
 
         updateDashboardDate();
+        applyDashboardRoleVisibility();
         bindDashboardEvents();
         refreshDashboard();
 
@@ -162,7 +163,10 @@
             const data = await collectDashboardData();
             lastDashboardData = data;
 
+            applyDashboardRoleVisibility();
             updateSummaryCards(data);
+            updateJOProductionOverview(data);
+            updateCollectionsOverview(data);
             updateSalesOrderPerformance(data);
             updateDeliveryPerformance(data);
             updateFinanceSnapshot(data);
@@ -411,6 +415,128 @@
 
         return [];
 
+    }
+
+
+
+
+    /* =====================================================
+       JO REGISTER & PRODUCTION OVERVIEW
+       Uses the existing Sales Order API data; no extra API call.
+    ===================================================== */
+    function getDashboardField(record, candidates) {
+        if (!record || typeof record !== "object") return "";
+        const keys = Object.keys(record);
+        for (const candidate of candidates) {
+            if (record[candidate] !== undefined && record[candidate] !== null && record[candidate] !== "") {
+                return record[candidate];
+            }
+            const match = keys.find(key => key.toLowerCase() === candidate.toLowerCase());
+            if (match && record[match] !== undefined && record[match] !== null && record[match] !== "") {
+                return record[match];
+            }
+        }
+        return "";
+    }
+
+    function hasDashboardJO(record) {
+        return Boolean(String(getDashboardField(record, [
+            "jobOrder", "job_order", "JOB_ORDER", "jo", "JO", "joNumber", "jo_number", "jobOrderNumber"
+        ]) || "").trim());
+    }
+
+    function isDashboardPostedToProduction(record) {
+        const value = normalizeStatus(getDashboardField(record, [
+            "postedToProduction", "POSTED_TO_PRODUCTION", "productionPostingStatus", "productionStatus"
+        ]));
+        return ["posted", "yes", "true", "1", "sent"].includes(value);
+    }
+
+    function updateJOProductionOverview(data) {
+        const orders = Array.isArray(data.salesOrders) ? data.salesOrders : [];
+        const withJO = orders.filter(hasDashboardJO);
+        const posted = orders.filter(isDashboardPostedToProduction);
+        const awaitingJO = posted.filter(order => !hasDashboardJO(order));
+        const notPosted = orders.filter(order => !isDashboardPostedToProduction(order));
+
+        setText("dashboardJOAssigned", formatNumber(withJO.length));
+        setText("dashboardJOPending", formatNumber(awaitingJO.length) + " awaiting JO");
+        setText("dashboardProductionPosted", formatNumber(posted.length));
+        setText("dashboardProductionNotPosted", formatNumber(notPosted.length) + " not posted");
+        setText("dashboardProductionSO", formatNumber(orders.length));
+        setText("dashboardProductionJO", formatNumber(withJO.length));
+        setText("dashboardProductionAwaitingJO", formatNumber(awaitingJO.length));
+        setText("dashboardProductionPostedCount", formatNumber(posted.length));
+    }
+
+    /* =====================================================
+       MONTHLY COLLECTIONS
+    ===================================================== */
+    function updateCollectionsOverview(data) {
+        const payments = Array.isArray(data.payments) ? data.payments : [];
+        const now = new Date();
+        const months = [];
+        for (let offset = 5; offset >= 0; offset--) {
+            const date = new Date(now.getFullYear(), now.getMonth() - offset, 1);
+            months.push({
+                year: date.getFullYear(),
+                monthIndex: date.getMonth(),
+                label: date.toLocaleDateString("en-PH", { month: "short" }),
+                value: 0
+            });
+        }
+        payments.forEach(payment => {
+            const date = parseDate(getPaymentDate(payment));
+            if (!date) return;
+            const month = months.find(item => item.year === date.getFullYear() && item.monthIndex === date.getMonth());
+            if (month) month.value += getRecordAmount(payment);
+        });
+        const thisMonth = months[months.length - 1];
+        const total = payments.reduce((sum, payment) => sum + getRecordAmount(payment), 0);
+        setText("dashboardCollectionsMonth", formatCurrency(thisMonth ? thisMonth.value : 0));
+        setText("dashboardCollectionsTotal", formatCurrency(total));
+        const chart = document.getElementById("dashboardCollectionsChart");
+        if (!chart) return;
+        const max = Math.max(1, ...months.map(item => item.value));
+        chart.innerHTML = months.map(item => {
+            const height = item.value > 0 ? Math.max(7, Math.round(item.value / max * 82)) : 3;
+            return '<div class="collections-month" title="' + escapeHtml(item.label + " " + item.year + ": " + formatCurrency(item.value)) + '">' +
+                '<strong>' + escapeHtml(item.value > 0 ? formatCompactCurrency(item.value) : "₱0") + '</strong>' +
+                '<div class="collections-month-bar" style="height:' + height + 'px"></div>' +
+                '<span>' + escapeHtml(item.label) + '</span></div>';
+        }).join("");
+    }
+
+    function formatCompactCurrency(value) {
+        const amount = Number(value) || 0;
+        if (amount >= 1000000) return "₱" + (amount / 1000000).toFixed(1) + "M";
+        if (amount >= 1000) return "₱" + (amount / 1000).toFixed(1) + "k";
+        return "₱" + Math.round(amount).toLocaleString("en-PH");
+    }
+
+    /* =====================================================
+       ROLE-BASED DASHBOARD VISIBILITY
+    ===================================================== */
+    function applyDashboardRoleVisibility() {
+        let role = "";
+        try {
+            const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+            const account = saved.account || saved.user || saved;
+            role = String(account.role || account.ROLE || account.accountType || account.account_type || account.type || "").trim().toUpperCase();
+        } catch (error) {
+            console.warn("Dashboard role could not be read:", error);
+        }
+        const scopes = {
+            finance: ["ADMIN", "SALES", "FINANCE", "PAYMENT"],
+            fleet: ["ADMIN", "LOGISTICS"],
+            production: ["ADMIN", "PRODUCTION", "SALES", "LOGISTICS", "FINANCE", "PAYMENT"]
+        };
+        document.querySelectorAll("[data-role-scope]").forEach(element => {
+            const scope = element.getAttribute("data-role-scope");
+            const allowed = scopes[scope] || [];
+            const visible = !role || allowed.includes(role);
+            element.classList.toggle("dashboard-role-hidden", !visible);
+        });
     }
 
 
