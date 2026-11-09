@@ -139,6 +139,19 @@ function routeRequest(
     payload ||
     {};
 
+  // Maintenance mode: only authenticated ADMIN accounts may continue.
+  // Login, account creation, ping, and maintenance control remain available.
+  const maintenanceExemptActions = ["ping", "login", "createAccount", "getSystemMaintenanceStatus", "setSystemMaintenanceMode"];
+  if (maintenanceExemptActions.indexOf(String(action)) === -1 && isSystemMaintenanceEnabled_()) {
+    const maintenanceAccount = authorizeRole_(payload, ["ADMIN", "SALES", "LOGISTICS", "FINANCE", "PAYMENT", "PRODUCTION"]);
+    if (maintenanceAccount.role !== "ADMIN") {
+      return {
+        success: false,
+        code: "MAINTENANCE_MODE",
+        message: "The system is temporarily under maintenance. Please try again later."
+      };
+    }
+  }
 
   switch (action) {
 
@@ -149,6 +162,12 @@ case "getSalesOrderItems":
     /* =====================================================
        SYSTEM
     ===================================================== */
+
+    case "getSystemMaintenanceStatus":
+      return getSystemMaintenanceStatus_(payload);
+
+    case "setSystemMaintenanceMode":
+      return setSystemMaintenanceMode_(payload);
 
     case "ping":
 
