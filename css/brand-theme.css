@@ -1394,3 +1394,71 @@ html[data-theme="dark"] .status-active,
 html[data-theme="dark"] .badge-success { background: #173522 !important; color: #a6f0a0 !important; border-color: #285c34 !important; }
 html[data-theme="dark"] a { color: #9fc2ff !important; }
 html[data-theme="dark"] hr { border-color: var(--line) !important; }
+
+
+/* =========================================================
+   APP-WIDE COMPACT TYPOGRAPHY — ALL SECTIONS
+   Slightly smaller type while preserving comfortable reading.
+========================================================= */
+body {
+  font-size: 12px;
+  line-height: 1.4;
+}
+#mainContent,
+#mainContent .page,
+#mainContent [class*="module"],
+#mainContent [class*="-page"],
+#mainContent [class*="-container"] {
+  font-size: 11.75px;
+  line-height: 1.4;
+}
+#mainContent h1,
+#mainContent .page-header h1,
+#mainContent .settings-header h1,
+#mainContent .so-page-header h1,
+#mainContent .invoicing-header h1,
+#mainContent .dashboard-header h1,
+#mainContent .fleet-analytics-page h1 {
+  font-size: 20px;
+  line-height: 1.25;
+}
+#mainContent h2,
+#mainContent .card-header h2 {
+  font-size: 15px;
+  line-height: 1.3;
+}
+#mainContent h3 { font-size: 13px; line-height: 1.3; }
+#mainContent p,
+#mainContent label,
+#mainContent small,
+#mainContent .subtitle,
+#mainContent .description {
+  font-size: 11px;
+  line-height: 1.45;
+}
+#mainContent table,
+#mainContent table th,
+#mainContent table td {
+  font-size: 10.5px;
+}
+#mainContent button,
+#mainContent .btn,
+#mainContent input,
+#mainContent select,
+#mainContent textarea {
+  font-size: 11px;
+}
+.sidebar .menu-btn,
+.sidebar .menu button { font-size: 11.5px; }
+.topbar,
+.topbar button,
+.topbar .profile-btn,
+.topbar .logout-btn { font-size: 11.5px; }
+
+@media (max-width: 700px) {
+  #mainContent table,
+  #mainContent table th,
+  #mainContent table td { font-size: 10.5px; }
+  #mainContent h1,
+  #mainContent .page-header h1 { font-size: 19px; }
+}
