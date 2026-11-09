@@ -1212,3 +1212,185 @@ html[data-theme="dark"] .rf-module table tbody tr:hover {
 .dashboard-page .summary-card-label::before { content: "📊"; }
 .jo-module .jo-stat small::before { content: "🏭"; }
 .rf-module .rf-cards article > span::before { content: "💰"; }
+
+
+/* =========================================================
+   DARK MODE READABILITY PATCH — ALL LOGIS-TECH MODULES
+   Fixes hard-coded light surfaces and dark text left behind
+   by individual module stylesheets.
+========================================================= */
+html[data-theme="dark"] {
+  --app-bg: #0b1220;
+  --surface: #151f30;
+  --surface-subtle: #1b293d;
+  --ink: #e8edf7;
+  --ink-muted: #b1bdd0;
+  --line: #2b3950;
+  --line-strong: #40516b;
+  --primary-light: #1c3155;
+}
+
+/* Prevent fixed black/gray text colors from surviving dark mode. */
+html[data-theme="dark"] body,
+html[data-theme="dark"] #mainContent,
+html[data-theme="dark"] .main,
+html[data-theme="dark"] .content,
+html[data-theme="dark"] .page,
+html[data-theme="dark"] [class*="module"],
+html[data-theme="dark"] [class*="page"]:not(.sidebar):not(.topbar) {
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6,
+html[data-theme="dark"] p,
+html[data-theme="dark"] label,
+html[data-theme="dark"] small,
+html[data-theme="dark"] strong,
+html[data-theme="dark"] b,
+html[data-theme="dark"] span,
+html[data-theme="dark"] div,
+html[data-theme="dark"] li,
+html[data-theme="dark"] dt,
+html[data-theme="dark"] dd,
+html[data-theme="dark"] th,
+html[data-theme="dark"] td,
+html[data-theme="dark"] caption,
+html[data-theme="dark"] legend {
+  color: inherit;
+}
+html[data-theme="dark"] [style*="color:"],
+html[data-theme="dark"] [style*="color:"] * {
+  color: inherit !important;
+}
+
+/* Repaint common surfaces used by modules with different class names. */
+html[data-theme="dark"] [class*="card"],
+html[data-theme="dark"] [class*="panel"],
+html[data-theme="dark"] [class*="box"],
+html[data-theme="dark"] [class*="table-wrapper"],
+html[data-theme="dark"] [class*="table-container"],
+html[data-theme="dark"] [class*="filter"],
+html[data-theme="dark"] [class*="toolbar"],
+html[data-theme="dark"] [class*="modal"],
+html[data-theme="dark"] [class*="dropdown-menu"],
+html[data-theme="dark"] [class*="popover"],
+html[data-theme="dark"] .section,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel {
+  background-color: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] [class*="header"]:not(.topbar):not(.sidebar),
+html[data-theme="dark"] [class*="subheader"] {
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] .topbar {
+  background: rgba(15, 25, 42, .96) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] .page-title,
+html[data-theme="dark"] .page-header h1,
+html[data-theme="dark"] .so-page-header h1,
+html[data-theme="dark"] .invoicing-header h1,
+html[data-theme="dark"] .header-title h1,
+html[data-theme="dark"] .payment-page-title,
+html[data-theme="dark"] .report-title,
+html[data-theme="dark"] .settings-header h1,
+html[data-theme="dark"] .fde-title,
+html[data-theme="dark"] .dashboard-header h1,
+html[data-theme="dark"] .fleet-analytics-page h1 {
+  color: #dbe7ff !important;
+}
+
+/* Form controls, search fields, and editable cells. */
+html[data-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] [contenteditable="true"] {
+  background: #101827 !important;
+  color: #f1f5fb !important;
+  border-color: var(--line-strong) !important;
+  caret-color: #ffffff;
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #8999b1 !important;
+  opacity: 1;
+}
+html[data-theme="dark"] option {
+  background: #101827 !important;
+  color: #f1f5fb !important;
+}
+
+/* Data tables and their scroll containers. */
+html[data-theme="dark"] table,
+html[data-theme="dark"] .table-responsive,
+html[data-theme="dark"] .table-scroll,
+html[data-theme="dark"] [class*="table-wrap"] {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] thead th,
+html[data-theme="dark"] table thead th {
+  background: #1b2b45 !important;
+  color: #e2ecff !important;
+  border-color: #344866 !important;
+}
+html[data-theme="dark"] tbody tr,
+html[data-theme="dark"] tbody tr:nth-child(even) {
+  background: #151f30 !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] tbody tr:hover {
+  background: #20324d !important;
+}
+html[data-theme="dark"] td,
+html[data-theme="dark"] th {
+  border-color: var(--line) !important;
+}
+
+/* Neutral buttons, while retaining clear primary/danger actions. */
+html[data-theme="dark"] button:not(.btn-primary):not(.primary-btn):not(.primary-button):not(.so-primary-btn):not(.payment-primary-button):not(.save-btn):not([class*="danger"]):not([class*="delete"]) {
+  color: #e8edf7;
+}
+html[data-theme="dark"] .btn-primary,
+html[data-theme="dark"] .primary-btn,
+html[data-theme="dark"] .primary-button,
+html[data-theme="dark"] .so-primary-btn,
+html[data-theme="dark"] .payment-primary-button,
+html[data-theme="dark"] button.primary,
+html[data-theme="dark"] button[type="submit"],
+html[data-theme="dark"] .save-btn {
+  background: #2456ad !important;
+  border-color: #3c70c9 !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"] button[class*="danger"],
+html[data-theme="dark"] button[class*="delete"],
+html[data-theme="dark"] .btn-danger {
+  background: #48232d !important;
+  border-color: #793846 !important;
+  color: #ffc0c7 !important;
+}
+
+/* Preserve legible semantic status colors after the global text fix. */
+html[data-theme="dark"] .status-pending,
+html[data-theme="dark"] .status-draft,
+html[data-theme="dark"] .status-partial,
+html[data-theme="dark"] .badge-warning { background: #3b3018 !important; color: #ffdc88 !important; border-color: #6b5525 !important; }
+html[data-theme="dark"] .status-cancelled,
+html[data-theme="dark"] .status-void,
+html[data-theme="dark"] .badge-danger { background: #3b2028 !important; color: #ffaaaa !important; border-color: #713641 !important; }
+html[data-theme="dark"] .status-completed,
+html[data-theme="dark"] .status-paid,
+html[data-theme="dark"] .status-posted,
+html[data-theme="dark"] .status-active,
+html[data-theme="dark"] .badge-success { background: #173522 !important; color: #a6f0a0 !important; border-color: #285c34 !important; }
+html[data-theme="dark"] a { color: #9fc2ff !important; }
+html[data-theme="dark"] hr { border-color: var(--line) !important; }
