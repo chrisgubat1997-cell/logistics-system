@@ -297,7 +297,12 @@
     const subtitle = type === "PRIVATE" ? [counterpart.username ? "@" + counterpart.username : "", counterpart.email || "", counterpart.role || ""].filter(Boolean).join(" · ") : [thread.clientName, thread.project].filter(Boolean).join(" · ");
     const messagesHTML = state.messages.length ? state.messages.map(message => {
       const mine = String(message.senderUserId) === String(state.user.userId);
-      return '<div class="mail-message ' + (mine ? "mine" : "theirs") + '"><div class="mail-message-name">' + (mine ? "You" : escapeHTML(message.senderFullName || message.senderUsername || "User")) + '</div><div class="mail-bubble">' + escapeHTML(message.messageBody || "").replace(/\n/g, "<br>") + '</div><time>' + escapeHTML(fullDate(message.sentAt)) + '</time></div>';
+      const status = mine && message.localStatus === "sending"
+        ? '<div class="mail-message-status is-sending"><img src="assets/logo.png" alt=""><span>Sending...</span></div>'
+        : mine && message.localStatus === "failed"
+          ? '<div class="mail-message-status is-failed">Not sent · Please try again</div>'
+          : '<time>' + escapeHTML(fullDate(message.sentAt)) + '</time>';
+      return '<div class="mail-message ' + (mine ? "mine" : "theirs") + '"' + (message.localId ? ' data-local-message-id="' + escapeHTML(message.localId) + '"' : '') + '><div class="mail-message-name">' + (mine ? "You" : escapeHTML(message.senderFullName || message.senderUsername || "User")) + '</div><div class="mail-bubble">' + escapeHTML(message.messageBody || "").replace(/\n/g, "<br>") + '</div><div class="mail-message-status-wrap">' + status + '</div></div>';
     }).join("") : '<div class="mail-no-messages"><span>✉</span><strong>No messages yet</strong><small>Send the first message in this conversation.</small></div>';
     panel.innerHTML = '<div class="mail-chat-head"><span class="mail-avatar large">' + escapeHTML(initials(title)) + '</span><div class="mail-chat-title"><h2>' + escapeHTML(title) + '</h2><p>' + escapeHTML(subtitle || (type === "SO" ? "Shared Sales Order conversation" : "Private conversation")) + '</p></div><span class="mail-chat-type ' + (type === "PRIVATE" ? "private" : "so") + '">' + (type === "PRIVATE" ? "PRIVATE" : "SO THREAD") + '</span></div>' +
       (type === "SO" ? '<div class="mail-so-context"><strong>' + escapeHTML(thread.subject || title) + '</strong><span>' + escapeHTML([thread.clientName, thread.project].filter(Boolean).join(" · ")) + '</span></div>' : '') +
@@ -311,23 +316,69 @@
     if (state.sending) return;
     const input = $("#mailMessageInput");
     const body = input ? input.value.trim() : "";
-    if (!body || !state.selectedThreadId) return;
+    const threadId = state.selectedThreadId;
+    if (!body || !threadId) return;
+
+    // Render the outgoing bubble immediately; network delivery continues in the background.
     state.sending = true;
-    const button = $("#mailSendForm button");
-    if (button) button.disabled = true;
+    const localId = "local-" + Date.now() + "-" + Math.floor(Math.random() * 100000);
+    const optimisticMessage = {
+      localId,
+      senderUserId: state.user.userId,
+      senderFullName: state.user.fullName || state.user.fullname || state.user.username || "You",
+      senderUsername: state.user.username || "",
+      messageBody: body,
+      sentAt: new Date().toISOString(),
+      localStatus: "sending"
+    };
+    state.messages.push(optimisticMessage);
+    if (input) input.value = "";
+    renderChat();
+
+    const history = $("#mailMessageHistory");
+    if (history) history.scrollTop = history.scrollHeight;
+    const sendButton = $("#mailSendForm button");
+    if (sendButton) sendButton.disabled = true;
+
     try {
-      await api("sendMessagingMessage", { threadId: state.selectedThreadId, messageBody: body });
-      await loadMessages(state.selectedThreadId, true);
-      await refreshData(false);
-      showToast("Message sent.");
+      const result = await api("sendMessagingMessage", { threadId, messageBody: body });
+      optimisticMessage.localStatus = "sent";
+      optimisticMessage.sentAt =
+        (result && result.message && (result.message.sentAt || result.message.SENT_AT)) ||
+        (result && (result.sentAt || result.SENT_AT)) ||
+        new Date().toISOString();
+
+      const status = document.querySelector('[data-local-message-id="' + localId + '"] .mail-message-status');
+      if (status) {
+        status.className = "mail-message-status is-sent";
+        status.textContent = fullDate(optimisticMessage.sentAt);
+      }
+
+      // Update the thread preview locally and refresh server data without delaying the sent indicator.
+      const thread = state.threads.find(item => item.threadId === threadId);
+      if (thread) {
+        thread.lastMessagePreview = body;
+        thread.lastMessageAt = optimisticMessage.sentAt;
+        thread.lastMessageBy = state.user.fullName || state.user.username;
+      }
+      renderThreads();
+      refreshData(false).catch(error => console.warn("Post-send refresh failed:", error));
     } catch (error) {
+      optimisticMessage.localStatus = "failed";
+      const status = document.querySelector('[data-local-message-id="' + localId + '"] .mail-message-status');
+      if (status) {
+        status.className = "mail-message-status is-failed";
+        status.textContent = "Not sent · " + error.message;
+      }
+      const current = $("#mailMessageInput");
+      if (current && !current.value) current.value = body;
       showToast(error.message, true);
     } finally {
       state.sending = false;
       const current = $("#mailMessageInput");
       if (current) current.focus();
-      const sendButton = $("#mailSendForm button");
-      if (sendButton) sendButton.disabled = false;
+      const button = $("#mailSendForm button");
+      if (button) button.disabled = false;
     }
   }
 
