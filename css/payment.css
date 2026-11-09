@@ -56,7 +56,7 @@
 
     color: #1d2939;
 
-    font-size: 24px;
+    font-size: 22.08px;
     font-weight: 700;
 
     letter-spacing: -0.4px;
@@ -68,7 +68,7 @@
 
     color: #7a8798;
 
-    font-size: 11px;
+    font-size: 10.12px;
     font-weight: 500;
 }
 
@@ -101,7 +101,7 @@
     color: #ffffff;
 
     font-family: inherit;
-    font-size: 10px;
+    font-size: 9.2px;
     font-weight: 700;
 
     letter-spacing: .35px;
@@ -141,7 +141,7 @@
 .payment-button-icon {
     margin-right: 6px;
 
-    font-size: 14px;
+    font-size: 12.88px;
     line-height: 1;
 }
 
@@ -227,7 +227,7 @@
 .payment-summary-label {
     color: #7b8798;
 
-    font-size: 9px;
+    font-size: 8.28px;
     font-weight: 800;
 
     letter-spacing: .55px;
@@ -249,7 +249,7 @@
     background: #eef3f9;
     color: #315f9e;
 
-    font-size: 13px;
+    font-size: 11.96px;
     font-weight: 800;
 }
 
@@ -259,7 +259,7 @@
 
     color: #202d40;
 
-    font-size: 22px;
+    font-size: 20.24px;
     font-weight: 700;
 
     line-height: 1.15;
@@ -278,7 +278,7 @@
 
     color: #98a3b2;
 
-    font-size: 9px;
+    font-size: 8.28px;
     font-weight: 500;
 
     line-height: 1.35;
@@ -357,7 +357,7 @@
 
     color: #273449;
 
-    font-size: 14px;
+    font-size: 12.88px;
     font-weight: 700;
 
     letter-spacing: -.1px;
@@ -369,7 +369,7 @@
 
     color: #8a96a6;
 
-    font-size: 9px;
+    font-size: 8.28px;
     font-weight: 500;
 }
 
@@ -403,7 +403,7 @@
     color: #657286;
 
     font-family: inherit;
-    font-size: 13px;
+    font-size: 11.96px;
 
     cursor: pointer;
 
@@ -496,7 +496,7 @@
 
     color: #8491a2;
 
-    font-size: 12px;
+    font-size: 11.04px;
 }
 
 
@@ -515,7 +515,7 @@
 
     font-family: inherit;
 
-    font-size: 10px;
+    font-size: 9.2px;
 }
 
 
@@ -540,7 +540,7 @@
 
     color: #8995a5;
 
-    font-size: 17px;
+    font-size: 15.64px;
 
     cursor: pointer;
 }
@@ -584,7 +584,7 @@
 .payment-filter-group label {
     color: #778397;
 
-    font-size: 9px;
+    font-size: 8.28px;
     font-weight: 800;
 
     letter-spacing: .45px;
@@ -608,7 +608,7 @@
 
     font-family: inherit;
 
-    font-size: 10px;
+    font-size: 9.2px;
 
     cursor: pointer;
 
@@ -639,7 +639,7 @@
 
     font-family: inherit;
 
-    font-size: 9px;
+    font-size: 8.28px;
     font-weight: 800;
 
     cursor: pointer;
@@ -697,7 +697,7 @@
     border-collapse: separate;
     border-spacing: 0;
 
-    font-size: 10px;
+    font-size: 9.2px;
 }
 
 
@@ -712,7 +712,7 @@
 
     color: #718096;
 
-    font-size: 8.5px;
+    font-size: 8px;
     font-weight: 800;
 
     letter-spacing: .4px;
@@ -742,7 +742,7 @@
 
     color: #465368;
 
-    font-size: 9.5px;
+    font-size: 8.74px;
     font-weight: 500;
 
     vertical-align: middle;
@@ -919,7 +919,7 @@
 
     color: #9aa5b3 !important;
 
-    font-size: 10px !important;
+    font-size: 9.2px !important;
 
     text-align: center !important;
 }
@@ -938,7 +938,7 @@
 
     color: #8995a5;
 
-    font-size: 10px;
+    font-size: 9.2px;
 }
 
 
@@ -983,7 +983,7 @@
 
     color: #a34c4c;
 
-    font-size: 10px;
+    font-size: 9.2px;
 }
 
 
@@ -1007,7 +1007,7 @@
 .payment-module .module-error h3 {
     margin: 0 0 7px;
 
-    font-size: 14px;
+    font-size: 12.88px;
     font-weight: 700;
 }
 
@@ -1015,7 +1015,7 @@
 .payment-module .module-error p {
     margin: 4px 0;
 
-    font-size: 10px;
+    font-size: 9.2px;
 }
 
 
@@ -1046,7 +1046,7 @@
     background: #edf3fa;
     color: #52749e;
 
-    font-size: 7px;
+    font-size: 8px;
     font-weight: 800;
 
     letter-spacing: .35px;
@@ -1123,7 +1123,7 @@
 
 
     .payment-page-title {
-        font-size: 21px;
+        font-size: 19.32px;
     }
 
 
@@ -1201,12 +1201,12 @@
 
 
     .payment-summary-value {
-        font-size: 19px;
+        font-size: 17.48px;
     }
 
 
     .payment-section-title {
-        font-size: 13px;
+        font-size: 11.96px;
     }
 
 
@@ -1268,12 +1268,12 @@
 .customer-credit-modal-header h2 {
     margin: 0;
     color: #1d2939;
-    font-size: 19px;
+    font-size: 17.48px;
 }
 .customer-credit-modal-header p {
     margin: 5px 0 0;
     color: #7a8798;
-    font-size: 12px;
+    font-size: 11.04px;
 }
 .customer-credit-modal-close {
     width: 34px;
@@ -1282,7 +1282,7 @@
     border-radius: 8px;
     background: #fff;
     color: #475467;
-    font-size: 23px;
+    font-size: 21.16px;
     cursor: pointer;
 }
 .customer-credit-modal-summary {
@@ -1302,7 +1302,7 @@
     display: block;
     margin-bottom: 7px;
     color: #7a8798;
-    font-size: 10px;
+    font-size: 9.2px;
     font-weight: 700;
     text-transform: uppercase;
 }
@@ -1310,7 +1310,7 @@
     display: block;
     overflow-wrap: anywhere;
     color: #263247;
-    font-size: 14px;
+    font-size: 12.88px;
 }
 .customer-credit-modal-summary .customer-credit-modal-balance {
     border-color: #b7dfc4;
@@ -1318,12 +1318,12 @@
 }
 .customer-credit-modal-summary .customer-credit-modal-balance strong {
     color: #176534;
-    font-size: 18px;
+    font-size: 16.56px;
 }
 .customer-credit-history-title {
     margin: 0 0 10px;
     color: #273449;
-    font-size: 13px;
+    font-size: 11.96px;
 }
 .customer-credit-history-wrapper {
     max-height: 360px;
@@ -1348,11 +1348,11 @@
 .payment-detail-summary{grid-template-columns:1.2fr 1fr 1fr}
 .payment-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .payment-detail-grid>div{min-width:0;padding:12px 14px;border:1px solid #e5eaf0;border-radius:9px;background:#fff}
-.payment-detail-grid span{display:block;margin-bottom:6px;color:#7a8798;font-size:10px;font-weight:700;text-transform:uppercase}
-.payment-detail-grid strong{display:block;overflow-wrap:anywhere;color:#263247;font-size:12px}
+.payment-detail-grid span{display:block;margin-bottom:6px;color:#7a8798;font-size:9.2px;font-weight:700;text-transform:uppercase}
+.payment-detail-grid strong{display:block;overflow-wrap:anywhere;color:#263247;font-size:11.04px}
 .payment-detail-full{grid-column:1/-1}
 .outstanding-balance-value{color:#ad4a18!important;font-weight:800}
-.outstanding-delivery-status{display:inline-flex;align-items:center;padding:5px 8px;border-radius:20px;font-size:9px;font-weight:800;white-space:nowrap}
+.outstanding-delivery-status{display:inline-flex;align-items:center;padding:5px 8px;border-radius:20px;font-size:8.28px;font-weight:800;white-space:nowrap}
 .outstanding-delivery-full{color:#176534;background:#edf7f1}.outstanding-delivery-partial{color:#456c9d;background:#eef3fa}.outstanding-delivery-none{color:#ad711d;background:#fff5e7}
 .outstanding-so-row{cursor:pointer}.outstanding-so-row:hover{background:#f8fafc}.payment-search-box.is-visible{display:block;margin-bottom:12px}
 @media(max-width:700px){.payment-detail-modal,.outstanding-so-modal{padding:10px}.payment-detail-panel,.outstanding-so-panel{padding:15px}.payment-detail-summary,.payment-detail-grid{grid-template-columns:1fr}.payment-detail-full{grid-column:auto}}
