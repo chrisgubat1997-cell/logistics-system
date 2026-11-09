@@ -141,7 +141,7 @@ function routeRequest(
 
   // Maintenance mode: only authenticated ADMIN accounts may continue.
   // Login, account creation, ping, and maintenance control remain available.
-  const maintenanceExemptActions = ["ping", "login", "createAccount", "getSystemMaintenanceStatus", "setSystemMaintenanceMode"];
+  const maintenanceExemptActions = ["ping", "login", "getSystemMaintenanceStatus", "setSystemMaintenanceMode"];
   if (maintenanceExemptActions.indexOf(String(action)) === -1 && isSystemMaintenanceEnabled_()) {
     const maintenanceAccount = authorizeRole_(payload, ["ADMIN", "SALES", "LOGISTICS", "FINANCE", "PAYMENT", "PRODUCTION"]);
     if (maintenanceAccount.role !== "ADMIN") {
