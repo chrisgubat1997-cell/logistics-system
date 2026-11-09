@@ -122,7 +122,7 @@
          SHARED GEMCOR BRAND THEME — LOAD AFTER MODULE STYLES
     ====================================================== -->
     <link rel="stylesheet" href="css/brand-theme.css?v=20261109-dark-finish04">\n    <link rel="stylesheet" href="css/revolving-fund.css?v=20261016-02">
-    <link rel="stylesheet" href="css/messages.css?v=20261109-01">
+    <link rel="stylesheet" href="css/messages.css?v=20261109-03">
     <link rel="stylesheet" href="css/jo-register.css?v=20261109-fit-table02">
 
 </head>
@@ -169,7 +169,7 @@
         <button class="menu-btn messages-menu-btn" data-messages-menu onclick="showPage('messages', this)" type="button" style="display:flex !important; visibility:visible !important; opacity:1 !important;">
             <span class="messages-menu-icon">✉</span>
             <span>Messages</span>
-            <span class="messages-menu-count">5</span>
+            
         </button>
 
         <!-- =================================================
@@ -798,187 +798,11 @@
 
 
 <!-- =================================================
-     MESSAGES — VISUAL MOCKUP ONLY
+     MESSAGES — LIVE MESSAGING MODULE
 ================================================= -->
 <div id="messages" class="page">
     <div class="messages-page">
-        <div class="messages-heading">
-            <div>
-                <div class="messages-eyebrow">COMMUNICATION CENTER</div>
-                <h1>Messages</h1>
-                <p>Keep project and sales order conversations in one place.</p>
-            </div>
-            <button class="messages-compose-btn" type="button">
-                <span>＋</span> Compose
-            </button>
-        </div>
-
-        <div class="messages-workspace">
-            <aside class="messages-nav">
-                <button class="messages-nav-compose" type="button">＋ &nbsp; Compose</button>
-                <div class="messages-nav-label">MAILBOX</div>
-                <button class="messages-nav-item active" type="button"><span>📥</span> Inbox <b>5</b></button>
-                <button class="messages-nav-item" type="button"><span>⭐</span> Starred</button>
-                <button class="messages-nav-item" type="button"><span>📤</span> Sent</button>
-                <button class="messages-nav-item" type="button"><span>📝</span> Drafts <small>2</small></button>
-                <button class="messages-nav-item" type="button"><span>🗄️</span> Archived</button>
-                <button class="messages-nav-item" type="button"><span>💬</span> All Messages</button>
-
-                <div class="messages-nav-label messages-category-label">CATEGORIES</div>
-                <button class="messages-nav-item" type="button"><span class="messages-dot dot-blue"></span> Sales Orders</button>
-                <button class="messages-nav-item" type="button"><span class="messages-dot dot-purple"></span> Projects</button>
-                <button class="messages-nav-item" type="button"><span class="messages-dot dot-orange"></span> Delivery Concerns</button>
-                <button class="messages-nav-item" type="button"><span class="messages-dot dot-green"></span> Invoices &amp; Payments</button>
-            </aside>
-
-            <section class="messages-content">
-                <div class="messages-toolbar">
-                    <div class="messages-search">
-                        <span>⌕</span>
-                        <input type="search" placeholder="Search messages, people, or SO number" aria-label="Search messages">
-                    </div>
-                    <div class="messages-toolbar-actions">
-                        <button type="button" title="Refresh">↻</button>
-                        <button type="button" title="More options">⋯</button>
-                    </div>
-                </div>
-
-                <div class="messages-content-title">
-                    <div>
-                        <h2>Inbox <span>5 unread</span></h2>
-                        <p>Your latest conversations and updates</p>
-                    </div>
-                    <button class="messages-filter-btn" type="button">All messages ▾</button>
-                </div>
-
-                <div class="messages-layout">
-                    <div class="messages-list">
-                        <div class="messages-list-tabs">
-                            <button class="selected" type="button">All</button>
-                            <button type="button">Unread</button>
-                            <button type="button">Starred</button>
-                        </div>
-
-                        <button class="message-row selected" type="button">
-                            <span class="message-avatar avatar-blue">LG</span>
-                            <span class="message-row-main">
-                                <span class="message-row-top"><strong>Logistics Team</strong><time>10:42 AM</time></span>
-                                <span class="message-subject">Delivery schedule update – SO-13577</span>
-                                <span class="message-excerpt">Good morning, the delivery is now scheduled for...</span>
-                                <span class="message-tags"><i class="tag-sales">SALES ORDER</i><i>SO-13577</i></span>
-                            </span>
-                            <span class="message-star">☆</span>
-                        </button>
-
-                        <button class="message-row unread" type="button">
-                            <span class="message-avatar avatar-purple">PM</span>
-                            <span class="message-row-main">
-                                <span class="message-row-top"><strong>Project Management</strong><time>9:18 AM</time></span>
-                                <span class="message-subject">Updated requirements – GPI Project</span>
-                                <span class="message-excerpt">Please see the latest requirements for the project...</span>
-                                <span class="message-tags"><i class="tag-project">PROJECT</i><i>GPI PROJECT</i></span>
-                            </span>
-                            <span class="message-star">☆</span>
-                        </button>
-
-                        <button class="message-row unread" type="button">
-                            <span class="message-avatar avatar-orange">FN</span>
-                            <span class="message-row-main">
-                                <span class="message-row-top"><strong>Finance Department</strong><time>Yesterday</time></span>
-                                <span class="message-subject">Invoice clarification – SO-13542</span>
-                                <span class="message-excerpt">We need confirmation regarding the billing details...</span>
-                                <span class="message-tags"><i class="tag-finance">FINANCE</i><i>SO-13542</i></span>
-                            </span>
-                            <span class="message-star">☆</span>
-                        </button>
-
-                        <button class="message-row" type="button">
-                            <span class="message-avatar avatar-green">SA</span>
-                            <span class="message-row-main">
-                                <span class="message-row-top"><strong>Sales Department</strong><time>Nov 7</time></span>
-                                <span class="message-subject">Customer feedback and action items</span>
-                                <span class="message-excerpt">Sharing the feedback received from the client...</span>
-                                <span class="message-tags"><i class="tag-sales">SALES ORDER</i><i>SO-13521</i></span>
-                            </span>
-                            <span class="message-star">☆</span>
-                        </button>
-
-                        <button class="message-row" type="button">
-                            <span class="message-avatar avatar-slate">WH</span>
-                            <span class="message-row-main">
-                                <span class="message-row-top"><strong>Warehouse Team</strong><time>Nov 6</time></span>
-                                <span class="message-subject">Material availability confirmation</span>
-                                <span class="message-excerpt">The requested materials are ready for checking...</span>
-                                <span class="message-tags"><i class="tag-project">PROJECT</i><i>GEMCOR</i></span>
-                            </span>
-                            <span class="message-star">☆</span>
-                        </button>
-                    </div>
-
-                    <article class="message-preview">
-                        <div class="preview-toolbar">
-                            <div class="preview-tool-group">
-                                <button type="button" title="Archive">🗄</button>
-                                <button type="button" title="Report">⚑</button>
-                                <button type="button" title="Delete">⌫</button>
-                            </div>
-                            <div class="preview-tool-group">
-                                <button type="button" title="Previous">‹</button>
-                                <button type="button" title="Next">›</button>
-                            </div>
-                        </div>
-
-                        <div class="preview-subject">
-                            <div>
-                                <h2>Delivery schedule update – SO-13577</h2>
-                                <div class="preview-reference"><span>SALES ORDER</span> Related to <strong>SO-13577</strong></div>
-                            </div>
-                            <button type="button" title="Star">☆</button>
-                        </div>
-
-                        <div class="preview-message">
-                            <div class="preview-sender">
-                                <span class="message-avatar avatar-blue">LG</span>
-                                <div><strong>Logistics Team</strong><small>to Cris Gubat, Sales Team</small></div>
-                                <time>Today, 10:42 AM</time>
-                            </div>
-                            <div class="preview-body">
-                                <p>Good morning,</p>
-                                <p>We would like to provide an update regarding the delivery schedule for <strong>SO-13577</strong>.</p>
-                                <p>The delivery team is currently coordinating the schedule. We will send another update once the final delivery date has been confirmed.</p>
-                                <p>Thank you.</p>
-                                <p>Best regards,<br>Logistics Team</p>
-                            </div>
-                        </div>
-
-                        <div class="preview-thread-divider"><span>1 REPLY IN THIS CONVERSATION</span></div>
-
-                        <div class="preview-message preview-reply">
-                            <div class="preview-sender">
-                                <span class="message-avatar avatar-blue">CG</span>
-                                <div><strong>Cris Gubat</strong><small>to Logistics Team</small></div>
-                                <time>Today, 11:05 AM</time>
-                            </div>
-                            <div class="preview-body">
-                                <p>Thank you for the update. Please keep us posted once the delivery schedule is finalized.</p>
-                            </div>
-                        </div>
-
-                        <div class="preview-reply-actions">
-                            <button type="button">↶ &nbsp; Reply</button>
-                            <button type="button">↶ &nbsp; Reply all</button>
-                            <button type="button">➦ &nbsp; Forward</button>
-                        </div>
-                        <div class="preview-compose-placeholder">
-                            <span>↶</span>
-                            <div><strong>Reply to this conversation</strong><small>Click to write a reply (preview only)</small></div>
-                            <span class="preview-send-icon">➤</span>
-                        </div>
-                    </article>
-                </div>
-                <div class="messages-demo-note">DESIGN PREVIEW · Sample conversations only · Messaging functions are not connected</div>
-            </section>
-        </div>
+        <div class="mail-loading">Loading LOGIS-TECH Messages…</div>
     </div>
 </div>
 
@@ -1305,6 +1129,13 @@ function showPage(pageId, button) {
 
     }
 
+
+    /* =====================================================
+       MESSAGING
+    ===================================================== */
+    if (pageId === 'messages' && typeof window.initializeMessages === 'function') {
+        window.initializeMessages();
+    }
 
     /* =====================================================
        SALES ORDER
@@ -3654,6 +3485,7 @@ document.addEventListener(
 <script src="js/sync-manager.js?v=20261008"></script>
 <script src="js/sales-order.js?v=20261022-posting-errorfix01"></script>
 <script src="js/role-action-visibility.js?v=20261016-revolving-fund01"></script>
+<script src="js/messages.js?v=20261109-03"></script>
 
 
 </body>
