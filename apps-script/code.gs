@@ -337,6 +337,26 @@ case "createPayment":
   return createPayment(payload);
       
     /* =====================================================
+       MESSAGING
+    ===================================================== */
+
+    case "setupMessagingDatabase":
+      return setupMessagingDatabaseApi(payload);
+
+    case "getMessagingThreads":
+      return getMessagingThreads(payload);
+
+    case "getMessagingMessages":
+      return getMessagingMessages(payload);
+
+    case "sendMessagingMessage":
+      return sendMessagingMessage(payload);
+
+    case "markMessagingThreadRead":
+      return markMessagingThreadRead(payload);
+
+
+    /* =====================================================
        UNKNOWN ACTION
     ===================================================== */
 
