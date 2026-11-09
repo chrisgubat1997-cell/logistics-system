@@ -2435,3 +2435,107 @@
     }
 }
 
+
+
+/* =========================================================
+   COMPANY DASHBOARD ADDITIONS — JO / PRODUCTION / COLLECTIONS
+========================================================= */
+.jo-card { border-top:3px solid #6478c9; }
+.production-card { border-top:3px solid #238b65; }
+.production-overview-grid {
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:9px;
+}
+.production-metric {
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:5px;
+    padding:12px;
+    border:1px solid #e6ebf2;
+    border-radius:10px;
+    background:#f8fafc;
+}
+.production-metric-icon { font-size:15px; }
+.production-metric strong { color:#172033; font-size:19px; line-height:1.1; }
+.production-metric > span:last-child { color:#778397; font-size:9px; font-weight:650; }
+.production-metric.warning { background:#fffaf0; border-color:#f4dfb5; }
+.production-metric.warning strong { color:#a66a16; }
+.dashboard-data-note { margin:10px 0 0; color:#8994a5; font-size:8px; line-height:1.5; }
+.collections-summary {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+    margin-bottom:12px;
+}
+.collections-summary > div {
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    padding:10px;
+    border:1px solid #e6ebf2;
+    border-radius:9px;
+    background:#f8fafc;
+}
+.collections-summary span { color:#7b8799; font-size:8px; font-weight:650; }
+.collections-summary strong { color:#172033; font-size:15px; overflow-wrap:anywhere; }
+.collections-chart {
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    align-items:end;
+    gap:8px;
+    min-height:126px;
+    padding:8px 4px 0;
+    border-bottom:1px solid #e7ebf1;
+}
+.collections-month {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    gap:5px;
+    height:118px;
+    min-width:0;
+}
+.collections-month strong { color:#718096; font-size:7px; font-weight:700; }
+.collections-month span { color:#8994a5; font-size:8px; }
+.collections-month-bar {
+    width:min(28px,75%);
+    min-height:3px;
+    border-radius:5px 5px 2px 2px;
+    background:linear-gradient(180deg,#45b58a,#21845f);
+    transition:height .35s ease;
+}
+.collections-empty {
+    grid-column:1/-1;
+    align-self:center;
+    text-align:center;
+    color:#8994a5;
+    font-size:9px;
+    padding:18px 4px;
+}
+.dashboard-role-hidden { display:none !important; }
+html[data-theme="dark"] .production-metric,
+html[data-theme="dark"] .collections-summary > div {
+    background:#182335;
+    border-color:#2d3b50;
+}
+html[data-theme="dark"] .production-metric strong,
+html[data-theme="dark"] .collections-summary strong { color:#e6edf7; }
+html[data-theme="dark"] .production-metric > span:last-child,
+html[data-theme="dark"] .collections-summary span,
+html[data-theme="dark"] .dashboard-data-note { color:#9aa9bd; }
+html[data-theme="dark"] .production-metric.warning {
+    background:#30291c;
+    border-color:#66502b;
+}
+html[data-theme="dark"] .production-metric.warning strong { color:#f2c36d; }
+html[data-theme="dark"] .collections-chart { border-color:#344257; }
+@media (max-width:800px) {
+    .production-overview-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:430px) {
+    .collections-summary { grid-template-columns:1fr; }
+    .collections-chart { gap:4px; }
+}
