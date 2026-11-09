@@ -1342,3 +1342,100 @@ html, body { max-width: 100%; overflow-x: hidden !important; }
 @media (max-width: 400px) {
     .main { max-width: calc(100% - 58px) !important; }
 }
+
+
+/* =========================================================
+   MAIN INTERFACE POLISH — SECTION ACCENT + FIXED ACCOUNT BAR
+   ========================================================= */
+:root {
+    --section-accent: #16865b;
+}
+
+.menu button.active,
+.menu-btn.active {
+    background: linear-gradient(
+        110deg,
+        color-mix(in srgb, var(--section-accent) 92%, #ffffff 8%),
+        color-mix(in srgb, var(--section-accent) 76%, #102e70 24%)
+    ) !important;
+    color: #ffffff !important;
+    box-shadow:
+        inset 4px 0 0 rgba(255,255,255,.78),
+        0 7px 18px color-mix(in srgb, var(--section-accent) 25%, transparent) !important;
+    transform: translateX(2px);
+}
+
+.menu button.active::before,
+.menu-btn.active::before {
+    background: #ffffff !important;
+    width: 3px;
+    opacity: .95;
+}
+
+.menu button,
+.menu-btn {
+    transition:
+        background .28s ease,
+        color .28s ease,
+        box-shadow .28s ease,
+        transform .28s ease;
+}
+
+/* A slim section-colored edge visually carries the selected menu color
+   into the workspace without recoloring module cards or tables. */
+.content {
+    border-top: 3px solid var(--section-accent);
+    background:
+        linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--section-accent) 3.5%, transparent),
+            transparent 190px
+        );
+    transition: border-color .28s ease, background .28s ease;
+}
+
+/* Keep the account controls visible while the workspace scrolls. */
+.topbar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 250px;
+    right: 0;
+    width: auto;
+    height: 72px;
+    z-index: 1200;
+    box-sizing: border-box;
+}
+
+.main {
+    padding-top: 72px;
+}
+
+.page-title {
+    display: none !important;
+}
+
+@media (max-width: 900px) {
+    .topbar {
+        left: 220px;
+    }
+}
+
+@media (max-width: 600px) {
+    .topbar {
+        left: 68px;
+        height: 64px;
+    }
+    .main {
+        padding-top: 64px;
+    }
+}
+
+@media (max-width: 400px) {
+    .topbar {
+        left: 58px;
+        height: 60px;
+    }
+    .main {
+        padding-top: 60px;
+    }
+}
