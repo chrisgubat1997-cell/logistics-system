@@ -130,6 +130,15 @@
         applyFleetSidebarVisibility(role);
         applyRevolvingFundSidebarVisibility(role);
 
+        // Messages is a shared communication module for every registered account.
+        document.querySelectorAll("[data-messages-menu]").forEach(function (button) {
+            button.style.setProperty("display", "flex", "important");
+            button.style.setProperty("visibility", "visible", "important");
+            button.style.setProperty("opacity", "1", "important");
+            button.disabled = false;
+            button.removeAttribute("aria-hidden");
+        });
+
         ROOTS.forEach(function (entry) {
             document.querySelectorAll(entry.selector).forEach(function (root) {
                 applyToRoot(root, entry.section, role);
