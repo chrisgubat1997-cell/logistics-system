@@ -2539,3 +2539,49 @@ html[data-theme="dark"] .collections-chart { border-color:#344257; }
     .collections-summary { grid-template-columns:1fr; }
     .collections-chart { gap:4px; }
 }
+
+
+/* =========================================================
+   DASHBOARD TYPOGRAPHY — MATCH ABOUT SYSTEM REFERENCE
+========================================================= */
+.dashboard-page {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  font-size: 12px;
+  color: #17243b;
+  line-height: 1.55;
+}
+.dashboard-page h1,
+.dashboard-page h2,
+.dashboard-page h3,
+.dashboard-panel-title {
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+  color: #0b2867;
+  font-weight: 850;
+  letter-spacing: -.025em;
+}
+.dashboard-header h1 { font-size: 24px; line-height: 1.2; }
+.dashboard-panel-title { font-size: 14px; }
+.dashboard-header p,
+.dashboard-panel-subtitle { color: #66748b; font-size: 11px; line-height: 1.6; }
+.dashboard-summary-card,
+.dashboard-panel,
+.dashboard-stat-card,
+.production-metric,
+.collections-summary > div { font-family: Inter, "Segoe UI", Arial, sans-serif; }
+.summary-card-label,
+.dashboard-date-label,
+.dashboard-summary-card .summary-card-footer,
+.production-metric > span:last-child,
+.collections-summary span { font-size: 9px; font-weight: 750; }
+.summary-card-value { font-size: 25px; font-weight: 850; color: #17243b; }
+.dashboard-page button,
+.dashboard-page input,
+.dashboard-page select { font-family: Inter, "Segoe UI", Arial, sans-serif; font-size: 10px; }
+.dashboard-page table th { color: #0b2867; font-size: 10px; font-weight: 800; }
+.dashboard-page table td { color: #17243b; font-size: 11px; }
+html[data-theme="dark"] .dashboard-page { color: #e8edf7; }
+html[data-theme="dark"] .dashboard-header h1,
+html[data-theme="dark"] .dashboard-panel-title { color: #dce8ff; }
+html[data-theme="dark"] .dashboard-header p,
+html[data-theme="dark"] .dashboard-panel-subtitle { color: #a4b2c8; }
+html[data-theme="dark"] .summary-card-value { color: #e8edf7; }
