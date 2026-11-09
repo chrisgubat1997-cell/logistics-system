@@ -31,6 +31,12 @@ const MESSAGING_HEADERS_ = {
 
 /* Run once manually from Apps Script, or call the setup API action.
    Safe to run repeatedly: existing data is preserved. */
+function setupMessagingDatabaseApi(payload) {
+  authorizeRole_(payload, ["ADMIN"]);
+  return setupMessagingDatabase();
+}
+
+
 function setupMessagingDatabase() {
   const ss = getDatabase();
   const created = [];
