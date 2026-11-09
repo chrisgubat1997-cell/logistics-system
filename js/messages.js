@@ -1,16 +1,18 @@
 /* =========================================================
    LOGIS-TECH MAIL — FUNCTIONAL MESSAGING
-   VERSION: 20261109-03
+   VERSION: 20261109-06
 ========================================================= */
 (function () {
   "use strict";
 
   const API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
-  const POLL_MS = 12000;
+  const POLL_MS = 30000;
   let state = {
     user: null, users: [], threads: [], selectedThreadId: "",
     messages: [], filter: "ALL", search: "", composeOpen: false,
-    composeQuery: "", loading: false, poller: null, sending: false
+    composeQuery: "", loading: false, poller: null, sending: false,
+    refreshInFlight: false, openingRecipientId: "", openingThreadId: "", initialized: false,
+    loadedMessageLastId: ""
   };
 
   const $ = (selector, root) => (root || document).querySelector(selector);
@@ -169,11 +171,13 @@
       return;
     }
     try {
-      await Promise.all([loadUsers(), refreshData(false)]);
+      if (!state.initialized || !state.users.length) await loadUsers();
+      await refreshData(false);
+      state.initialized = true;
       if (state.poller) clearInterval(state.poller);
       state.poller = setInterval(() => {
         const page = $("#messages");
-        if (page && page.classList.contains("active")) refreshData(false);
+        if (page && page.classList.contains("active") && !document.hidden) refreshData(false);
       }, POLL_MS);
     } catch (error) {
       showToast(error.message, true);
@@ -186,13 +190,16 @@
     state.users = result.users || [];
   }
   async function refreshData(showNotice) {
+    if (state.refreshInFlight) return;
+    state.refreshInFlight = true;
     try {
       const result = await api("getMessagingThreads");
       state.threads = result.threads || [];
       renderThreads();
       if (state.selectedThreadId) {
         const stillExists = state.threads.some(t => t.threadId === state.selectedThreadId);
-        if (stillExists) await loadMessages(state.selectedThreadId, false);
+        const selected = state.threads.find(t => t.threadId === state.selectedThreadId);
+        if (stillExists && selected && String(selected.lastMessageId || "") !== state.loadedMessageLastId) await loadMessages(state.selectedThreadId, false);
         else { state.selectedThreadId = ""; state.messages = []; renderChat(); }
       } else {
         renderChat();
@@ -201,6 +208,8 @@
     } catch (error) {
       if (showNotice) showToast(error.message, true);
       else console.warn("Messaging refresh failed:", error);
+    } finally {
+      state.refreshInFlight = false;
     }
   }
 
@@ -241,15 +250,24 @@
   }
 
   async function openThread(threadId) {
+    if (!threadId || state.openingThreadId === threadId) return;
+    state.openingThreadId = threadId;
     state.selectedThreadId = threadId;
+    state.messages = [];
     renderThreads();
-    await loadMessages(threadId, true);
+    const panel = $("#mailChatPanel");
+    if (panel) panel.innerHTML = '<div class="mail-chat-loading"><span class="mail-spinner"></span> Loading conversation…</div>';
+    try { await loadMessages(threadId, true); }
+    catch (error) { showToast(error.message, true); }
+    finally { state.openingThreadId = ""; }
   }
   async function loadMessages(threadId, markRead) {
     const currentInput = $("#mailMessageInput");
     const draft = currentInput ? currentInput.value : "";
     const result = await api("getMessagingMessages", { threadId, limit: 100 });
     state.messages = result.messages || [];
+    const loadedThread = state.threads.find(t => t.threadId === threadId);
+    state.loadedMessageLastId = loadedThread ? String(loadedThread.lastMessageId || "") : "";
     renderChat();
     const refreshedInput = $("#mailMessageInput");
     if (refreshedInput && !markRead) refreshedInput.value = draft;
@@ -332,6 +350,23 @@
   }
 
   async function startPrivateChat(userId) {
+    if (!userId || state.openingRecipientId) return;
+    state.openingRecipientId = userId;
+    const box = $("#mailUserResults");
+    const search = $("#mailUserSearch");
+    if (search) search.disabled = true;
+    if (box) {
+      box.querySelectorAll("button[data-user-id]").forEach(button => {
+        button.disabled = true;
+        button.classList.toggle("is-opening", button.dataset.userId === userId);
+        if (button.dataset.userId === userId) {
+          const name = button.querySelector("strong");
+          if (name) name.textContent = "Opening conversation…";
+          const arrow = button.querySelector("b");
+          if (arrow) arrow.innerHTML = '<span class="mail-spinner"></span>';
+        }
+      });
+    }
     try {
       const result = await api("createPrivateMessageThread", { recipientUserId: userId });
       closeCompose();
@@ -339,6 +374,11 @@
       await openThread(result.threadId);
       showToast(result.existing ? "Private conversation opened." : "Private conversation created.");
     } catch (error) { showToast(error.message, true); }
+    finally {
+      state.openingRecipientId = "";
+      if (search) search.disabled = false;
+      if (box) box.querySelectorAll("button[data-user-id]").forEach(button => button.disabled = false);
+    }
   }
 
   window.initializeMessages = initializeMessages;
