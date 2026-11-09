@@ -1542,7 +1542,9 @@ html[data-theme="dark"] .dashboard-page .attention-icon {
 html[data-theme="dark"] #mainContent [class*="icon"]:not(svg):not(img),
 html[data-theme="dark"] #mainContent [class*="logo"]:not(svg):not(img),
 html[data-theme="dark"] #mainContent [class*="badge-icon"] {
+  background-color: #203653 !important;
   border-color: #344866 !important;
+  color: #dbeafe !important;
 }
 html[data-theme="dark"] #mainContent .summary-card-icon,
 html[data-theme="dark"] #mainContent .summary-icon,
