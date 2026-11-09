@@ -190,7 +190,10 @@
     state.users = result.users || [];
   }
   async function refreshData(showNotice) {
-    if (state.refreshInFlight) return;
+    if (state.refreshInFlight) {
+      await new Promise(resolve => setTimeout(resolve, 250));
+      return refreshData(showNotice);
+    }
     state.refreshInFlight = true;
     try {
       const result = await api("getMessagingThreads");
