@@ -128,3 +128,81 @@ html[data-theme="dark"] .messages-app .mail-header p,html[data-theme="dark"] .me
 .mail-chat-loading{height:100%;min-height:280px;display:flex;align-items:center;justify-content:center;gap:12px;color:var(--mail-muted,#718096);font-size:14px}
 .mail-spinner{display:inline-block;width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:mailSpin .7s linear infinite;vertical-align:middle}
 @keyframes mailSpin{to{transform:rotate(360deg)}}
+
+/* =========================================================
+   SIDEBAR MESSAGES BUTTON — MATCHED TO LOGIS-TECH NAV
+   VERSION: 20261109-05
+========================================================= */
+.menu .messages-menu-btn {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    min-height: 46px;
+    padding: 9px 13px;
+    margin-bottom: 6px;
+    border: 1px solid rgba(148, 163, 184, .12);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .035);
+    color: #c5cfdd;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .1px;
+    text-align: left;
+    transform: none;
+    box-shadow: none;
+}
+.menu .messages-menu-btn .messages-menu-icon {
+    display: inline-flex;
+    flex: 0 0 27px;
+    width: 27px;
+    height: 27px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(148, 163, 184, .22);
+    border-radius: 8px;
+    background: rgba(148, 163, 184, .10);
+    color: #a9c5ee;
+    font-size: 15px;
+    line-height: 1;
+    transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+.menu .messages-menu-btn:hover {
+    background: rgba(255, 255, 255, .085);
+    border-color: rgba(148, 163, 184, .25);
+    color: #fff;
+    transform: translateX(2px);
+}
+.menu .messages-menu-btn:hover .messages-menu-icon {
+    background: rgba(96, 165, 250, .16);
+    border-color: rgba(96, 165, 250, .35);
+    color: #bfdbfe;
+}
+.menu .messages-menu-btn.active {
+    background: linear-gradient(105deg, rgba(22, 134, 91, .30), rgba(22, 134, 91, .12)) !important;
+    border-color: rgba(52, 211, 153, .30);
+    color: #f0fdf4 !important;
+    box-shadow: inset 3px 0 0 #34d399, 0 5px 14px rgba(0, 0, 0, .12) !important;
+    transform: none;
+}
+.menu .messages-menu-btn.active::before { display: none; }
+.menu .messages-menu-btn.active .messages-menu-icon {
+    background: rgba(52, 211, 153, .18);
+    border-color: rgba(52, 211, 153, .42);
+    color: #6ee7b7;
+}
+@media (max-width: 600px) {
+    .menu .messages-menu-btn {
+        justify-content: center;
+        gap: 0;
+        padding: 10px 5px;
+        min-height: 48px;
+        font-size: 0;
+    }
+    .menu .messages-menu-btn .messages-menu-icon {
+        flex-basis: 30px;
+        width: 30px;
+        height: 30px;
+        font-size: 17px;
+    }
+    .menu .messages-menu-btn > span:not(.messages-menu-icon) { display: none; }
+}
