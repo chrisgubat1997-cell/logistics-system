@@ -194,6 +194,8 @@
         const stillExists = state.threads.some(t => t.threadId === state.selectedThreadId);
         if (stillExists) await loadMessages(state.selectedThreadId, false);
         else { state.selectedThreadId = ""; state.messages = []; renderChat(); }
+      } else {
+        renderChat();
       }
       if (showNotice) showToast("Conversations refreshed.");
     } catch (error) {
