@@ -162,7 +162,7 @@ body {
 
     color: #ffffff;
 
-    font-size: 21px;
+    font-size: 19.32px;
 
     box-shadow:
         0 6px 16px
@@ -188,7 +188,7 @@ body {
 
 .fleet-title-text h1 {
 
-    font-size: 21px;
+    font-size: 19.32px;
 
     font-weight: 750;
 
@@ -202,7 +202,7 @@ body {
 
 .fleet-title-text p {
 
-    font-size: 11px;
+    font-size: 10.12px;
 
     color: var(--text-secondary);
 
@@ -270,7 +270,7 @@ body {
 
     border-radius: 7px;
 
-    font-size: 11px;
+    font-size: 10.12px;
 
     font-weight: 650;
 
@@ -340,7 +340,7 @@ body {
 
 .filter-group label {
 
-    font-size: 10px;
+    font-size: 9.2px;
 
     color: var(--text-secondary);
 
@@ -372,7 +372,7 @@ body {
 
     color: var(--text-main);
 
-    font-size: 10px;
+    font-size: 9.2px;
 
     font-weight: 600;
 
@@ -481,7 +481,7 @@ body {
 
 .section-heading h2 {
 
-    font-size: 17px;
+    font-size: 15.64px;
 
     line-height: 1.2;
 
@@ -495,7 +495,7 @@ body {
 
 .section-heading p {
 
-    font-size: 10px;
+    font-size: 9.2px;
 
     color: var(--text-secondary);
 
@@ -620,7 +620,7 @@ body {
 
     background: var(--primary-light);
 
-    font-size: 17px;
+    font-size: 15.64px;
 
     transition:
         transform 0.2s ease;
@@ -650,7 +650,7 @@ body {
 
 .kpi-label {
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     color: var(--text-secondary);
 
@@ -664,7 +664,7 @@ body {
 
 .kpi-content strong {
 
-    font-size: 21px;
+    font-size: 19.32px;
 
     line-height: 1;
 
@@ -761,7 +761,7 @@ body {
 
 .analytics-card-header h3 {
 
-    font-size: 12px;
+    font-size: 11.04px;
 
     font-weight: 700;
 
@@ -775,7 +775,7 @@ body {
 
 .analytics-card-header p {
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     color: var(--text-secondary);
 
@@ -936,7 +936,7 @@ body {
 
 .delay-item span {
 
-    font-size: 9px;
+    font-size: 8.28px;
 
     color: var(--text-secondary);
 
@@ -948,7 +948,7 @@ body {
 
 .delay-item strong {
 
-    font-size: 18px;
+    font-size: 16.56px;
 
     line-height: 1;
 
@@ -1218,19 +1218,19 @@ body {
 
         height: 40px;
 
-        font-size: 18px;
+        font-size: 16.56px;
     }
 
 
     .fleet-title-text h1 {
 
-        font-size: 17px;
+        font-size: 15.64px;
     }
 
 
     .fleet-title-text p {
 
-        font-size: 9px;
+        font-size: 8.28px;
     }
 
 
@@ -1282,7 +1282,7 @@ body {
 
     .filter-group label {
 
-        font-size: 9px;
+        font-size: 8.28px;
     }
 
 
@@ -1366,7 +1366,7 @@ body {
 }
 .fleet-filters > .filter-group:first-child label {
     color: #64748b;
-    font-size: 10px;
+    font-size: 9.2px;
     font-weight: 800;
     letter-spacing: .055em;
     text-transform: uppercase;
@@ -1384,7 +1384,7 @@ body {
     background-color: #fff;
     color: #172033;
     font: inherit;
-    font-size: 11px;
+    font-size: 10.12px;
     box-shadow: 0 1px 2px rgba(15,23,42,.04);
     transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238092a8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E");
