@@ -2091,3 +2091,347 @@
     .dashboard-page { zoom: 1; width: 100%; }
   }
 }
+
+/* =========================================================
+   DASHBOARD COMPACT LAYOUT — 2026-11-09
+   Reduce oversized cards and reclaim usable screen space.
+   ========================================================= */
+
+.dashboard-page {
+    padding: 14px;
+    min-width: 0;
+}
+
+.dashboard-header {
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.dashboard-summary-grid {
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dashboard-summary-card {
+    min-height: 96px;
+    padding: 12px;
+    border-radius: 12px;
+}
+
+.summary-card-top {
+    min-height: 18px;
+}
+
+.summary-card-icon {
+    top: 10px;
+    right: 10px;
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+    font-size: 9px;
+}
+
+.summary-card-label {
+    font-size: 8px;
+    letter-spacing: .045em;
+    padding-right: 25px;
+}
+
+.summary-card-value {
+    margin-top: 7px;
+    font-size: 20px;
+    line-height: 1.05;
+}
+
+.summary-card-footer {
+    gap: 5px;
+    margin-top: 7px;
+    font-size: 8px;
+    line-height: 1.25;
+}
+
+.summary-card-highlight {
+    font-size: 8px;
+}
+
+.dashboard-main-grid,
+.dashboard-lower-grid {
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.dashboard-left-column,
+.dashboard-right-column {
+    gap: 12px;
+}
+
+.dashboard-panel {
+    padding: 14px;
+    border-radius: 13px;
+}
+
+.dashboard-panel-header {
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dashboard-panel-header h2,
+.dashboard-panel h2 {
+    font-size: 13px;
+    line-height: 1.25;
+}
+
+.panel-eyebrow {
+    font-size: 8px;
+}
+
+.panel-period,
+.activity-count {
+    font-size: 8px;
+    padding: 3px 7px;
+}
+
+.sales-performance-layout {
+    gap: 12px;
+}
+
+.sales-performance-stats {
+    gap: 7px;
+}
+
+.mini-stat {
+    padding: 8px;
+    border-radius: 9px;
+}
+
+.mini-stat span {
+    font-size: 8px;
+}
+
+.mini-stat strong {
+    font-size: 14px;
+}
+
+.chart-area {
+    min-height: 130px;
+}
+
+.simple-bar-chart {
+    min-height: 125px;
+    gap: 7px;
+}
+
+.bar-item {
+    gap: 5px;
+}
+
+.bar-item span,
+.bar-item strong {
+    font-size: 8px;
+}
+
+.bar-track {
+    max-width: 25px;
+}
+
+.delivery-performance-content {
+    gap: 12px;
+}
+
+.performance-circle {
+    width: 112px;
+    height: 112px;
+}
+
+.performance-circle strong {
+    font-size: 21px;
+}
+
+.performance-details {
+    gap: 8px;
+}
+
+.performance-row {
+    padding: 6px 0;
+    font-size: 9px;
+}
+
+.finance-list {
+    gap: 10px;
+}
+
+.finance-row {
+    gap: 8px;
+}
+
+.finance-row > div > span {
+    font-size: 9px;
+}
+
+.finance-row small {
+    font-size: 8px;
+}
+
+.finance-row strong {
+    font-size: 10px;
+}
+
+.fleet-status-grid {
+    gap: 8px;
+}
+
+.fleet-status-item {
+    min-height: 78px;
+    padding: 9px;
+    border-radius: 9px;
+}
+
+.fleet-status-icon {
+    font-size: 13px;
+}
+
+.fleet-status-item strong {
+    font-size: 16px;
+}
+
+.fleet-status-item span {
+    font-size: 8px;
+}
+
+.attention-list,
+.activity-list {
+    gap: 6px;
+}
+
+.attention-item {
+    padding: 8px 9px;
+    gap: 8px;
+}
+
+.attention-title,
+.activity-title {
+    font-size: 9px;
+}
+
+.attention-description,
+.activity-description {
+    font-size: 8px;
+}
+
+.activity-item {
+    gap: 8px;
+    padding: 8px 0;
+}
+
+.activity-icon {
+    width: 25px;
+    height: 25px;
+    flex-basis: 25px;
+}
+
+.activity-time {
+    font-size: 7.5px;
+}
+
+.quick-actions-section {
+    padding: 13px;
+    border-radius: 12px;
+}
+
+.quick-actions-header {
+    margin-bottom: 9px;
+}
+
+.quick-actions-header h2 {
+    font-size: 13px;
+}
+
+.quick-actions-grid {
+    gap: 8px;
+}
+
+.quick-action-btn {
+    min-height: 54px;
+    padding: 8px 10px;
+    border-radius: 9px;
+}
+
+.quick-action-icon {
+    font-size: 11px;
+}
+
+.quick-action-btn strong {
+    font-size: 9px;
+}
+
+.quick-action-btn small {
+    font-size: 8px;
+}
+
+.dashboard-footer {
+    padding: 5px 0 6px;
+    font-size: 7.5px;
+}
+
+/* Keep all dashboard content within the available workspace. */
+.dashboard-page,
+.dashboard-page * {
+    min-width: 0;
+}
+
+@media (min-width: 1251px) {
+    .dashboard-summary-card {
+        min-height: 92px;
+    }
+}
+
+@media (max-width: 1250px) {
+    .dashboard-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .dashboard-page {
+        padding: 11px;
+    }
+
+    .dashboard-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .dashboard-summary-card {
+        min-height: 92px;
+        padding: 10px;
+    }
+
+    .dashboard-main-grid,
+    .dashboard-lower-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dashboard-panel {
+        padding: 12px;
+    }
+}
+
+@media (max-width: 430px) {
+    .dashboard-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .summary-card-value {
+        font-size: 18px;
+    }
+
+    .summary-card-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
