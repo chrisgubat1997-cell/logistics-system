@@ -123,6 +123,7 @@
     ====================================================== -->
     <link rel="stylesheet" href="css/brand-theme.css?v=20261109-font-small01">\n    <link rel="stylesheet" href="css/revolving-fund.css?v=20261109-font-small01">
     <link rel="stylesheet" href="css/messages.css?v=20261109-sendstatus01">
+    <link rel="stylesheet" href="css/about.css?v=20261109-about01">
     <link rel="stylesheet" href="css/jo-register.css?v=20261109-font-small01">
 
 </head>
@@ -294,6 +295,10 @@
 
         </button>
 
+        <!-- ABOUT LOGIS-TECH -->
+        <button class="menu-btn" type="button" onclick="showPage('about', this)">
+            <span aria-hidden="true">ⓘ</span> About LOGIS-TECH
+        </button>
 
     </div>
 
@@ -806,6 +811,11 @@
     </div>
 </div>
 
+<!-- ABOUT LOGIS-TECH -->
+<div id="about" class="page">
+    <div id="aboutModule"></div>
+</div>
+
 <!-- =================================================
      REPORTS MODULE
 ================================================= -->
@@ -1013,6 +1023,7 @@ let paymentModuleLoaded = false;
 let reportModuleLoaded = false;
 
 let systemSettingsModuleLoaded = false;
+let aboutModuleLoaded = false;
 
 
 
@@ -1083,6 +1094,7 @@ function showPage(pageId, button) {
         revolvingFund: '#ca8a04',
         reports: '#4f46e5',
         settings: '#64748b',
+        about: '#16865b',
         messages: '#2563eb',
         profile: '#2563eb'
     };
@@ -1269,6 +1281,11 @@ if (
 
         loadSystemSettingsModule();
 
+    }
+
+    /* ABOUT LOGIS-TECH */
+    if (pageId === 'about') {
+        loadAboutModule();
     }
 
 
@@ -2851,6 +2868,29 @@ async function loadReportModule() {
         'Reports module ready.'
     );
 
+}
+
+
+/* =========================================================
+   LOAD ABOUT LOGIS-TECH PAGE
+========================================================= */
+async function loadAboutModule() {
+    const container = document.getElementById('aboutModule');
+    if (!container || aboutModuleLoaded) return;
+
+    try {
+        const response = await fetch('pages/about.html?v=20261109-about01', { cache: 'no-store' });
+        if (!response.ok) throw new Error('HTTP ' + response.status + ' - ' + response.statusText);
+        const html = await response.text();
+        if (!html || !html.trim()) throw new Error('about.html is empty.');
+
+        container.innerHTML = html;
+        aboutModuleLoaded = true;
+    } catch (error) {
+        console.error('ABOUT LOGIS-TECH LOAD ERROR:', error);
+        container.innerHTML = '<section class="about-load-error"><h2>Unable to load About LOGIS-TECH</h2><p>' +
+            String(error.message || error) + '</p><small>Expected file: pages/about.html</small></section>';
+    }
 }
 
 /* =========================================================
