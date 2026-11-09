@@ -1462,3 +1462,185 @@ body {
   #mainContent h1,
   #mainContent .page-header h1 { font-size: 19px; }
 }
+
+
+/* =========================================================
+   DARK MODE FINISHING PASS — DASHBOARD, SECTION ICONS & TABLES
+   ========================================================= */
+html[data-theme="dark"] .dashboard-page {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(37, 99, 235, .13), transparent 34%),
+    linear-gradient(180deg, #0b1220 0%, #0e1728 100%) !important;
+  color: #e8edf7 !important;
+}
+html[data-theme="dark"] .dashboard-header,
+html[data-theme="dark"] .dashboard-summary-card,
+html[data-theme="dark"] .dashboard-panel,
+html[data-theme="dark"] .dashboard-card,
+html[data-theme="dark"] .dashboard-kpi-card,
+html[data-theme="dark"] .dashboard-lower-grid > *,
+html[data-theme="dark"] .quick-actions-section,
+html[data-theme="dark"] .dashboard-date-box,
+html[data-theme="dark"] .sales-performance-layout,
+html[data-theme="dark"] .delivery-performance-content,
+html[data-theme="dark"] .finance-list,
+html[data-theme="dark"] .fleet-status-grid,
+html[data-theme="dark"] .attention-list,
+html[data-theme="dark"] .activity-list {
+  background-color: #151f30 !important;
+  color: #e8edf7 !important;
+  border-color: #2b3950 !important;
+}
+html[data-theme="dark"] .dashboard-page .dashboard-panel-header,
+html[data-theme="dark"] .dashboard-page .quick-actions-header,
+html[data-theme="dark"] .dashboard-page .dashboard-header-left,
+html[data-theme="dark"] .dashboard-page .dashboard-header-right,
+html[data-theme="dark"] .dashboard-page .section-header,
+html[data-theme="dark"] .invoicing-container .section-header,
+html[data-theme="dark"] .invoicing-container .items-header,
+html[data-theme="dark"] .sales-order-module [class*="header"],
+html[data-theme="dark"] .delivery-module [class*="header"],
+html[data-theme="dark"] .payment-module [class*="header"],
+html[data-theme="dark"] .report-page [class*="header"],
+html[data-theme="dark"] .fleet-data-entry [class*="header"],
+html[data-theme="dark"] .fleet-analytics-page [class*="header"],
+html[data-theme="dark"] .settings-page [class*="header"],
+html[data-theme="dark"] .jo-module [class*="header"],
+html[data-theme="dark"] .rf-module [class*="header"] {
+  background-color: #172438 !important;
+  color: #e8edf7 !important;
+  border-color: #2b3950 !important;
+}
+html[data-theme="dark"] .dashboard-page .dashboard-header h1,
+html[data-theme="dark"] .dashboard-page h2,
+html[data-theme="dark"] .dashboard-page h3,
+html[data-theme="dark"] .dashboard-page .panel-eyebrow,
+html[data-theme="dark"] .dashboard-page .dashboard-date-label,
+html[data-theme="dark"] .dashboard-page .dashboard-footer,
+html[data-theme="dark"] .dashboard-page .dashboard-footer *,
+html[data-theme="dark"] .dashboard-page .dashboard-summary-card *,
+html[data-theme="dark"] .dashboard-page .dashboard-panel *,
+html[data-theme="dark"] .dashboard-page .quick-action-btn * {
+  color: #e8edf7 !important;
+}
+html[data-theme="dark"] .dashboard-page .dashboard-summary-card,
+html[data-theme="dark"] .dashboard-page .quick-action-btn {
+  box-shadow: 0 8px 24px rgba(0,0,0,.22) !important;
+  border-color: #2b3950 !important;
+}
+html[data-theme="dark"] .dashboard-page .summary-card-icon,
+html[data-theme="dark"] .dashboard-page .quick-action-icon,
+html[data-theme="dark"] .dashboard-page .fleet-status-icon,
+html[data-theme="dark"] .dashboard-page .activity-icon,
+html[data-theme="dark"] .dashboard-page .attention-icon {
+  background: #203653 !important;
+  border-color: #385477 !important;
+  color: #dbeafe !important;
+}
+
+/* Section title/logo tiles: recolor icon containers without changing logo images. */
+html[data-theme="dark"] #mainContent [class*="icon"]:not(svg):not(img),
+html[data-theme="dark"] #mainContent [class*="logo"]:not(svg):not(img),
+html[data-theme="dark"] #mainContent [class*="badge-icon"] {
+  border-color: #344866 !important;
+}
+html[data-theme="dark"] #mainContent .summary-card-icon,
+html[data-theme="dark"] #mainContent .summary-icon,
+html[data-theme="dark"] #mainContent .kpi-icon,
+html[data-theme="dark"] #mainContent .stat-icon,
+html[data-theme="dark"] #mainContent .section-icon,
+html[data-theme="dark"] #mainContent .title-icon,
+html[data-theme="dark"] #mainContent .icon-box,
+html[data-theme="dark"] #mainContent .module-icon,
+html[data-theme="dark"] #mainContent .card-icon {
+  background: #203653 !important;
+  color: #dbeafe !important;
+  border: 1px solid #385477 !important;
+  box-shadow: none !important;
+}
+
+/* Force every module's table heading to use the dark palette, including
+   module-specific selectors that previously kept a white background. */
+html[data-theme="dark"] #mainContent table thead,
+html[data-theme="dark"] #mainContent table thead tr,
+html[data-theme="dark"] #mainContent table thead th,
+html[data-theme="dark"] #mainContent table tr:first-child th,
+html[data-theme="dark"] #mainContent .table-header,
+html[data-theme="dark"] #mainContent .table-title,
+html[data-theme="dark"] #mainContent .table thead th {
+  background: #1b2b45 !important;
+  background-color: #1b2b45 !important;
+  color: #e2ecff !important;
+  border-color: #344866 !important;
+}
+html[data-theme="dark"] #mainContent table tbody td {
+  color: #dce5f2 !important;
+  border-color: #2b3950 !important;
+}
+html[data-theme="dark"] #mainContent table tbody tr,
+html[data-theme="dark"] #mainContent table tbody tr:nth-child(even) {
+  background: #151f30 !important;
+}
+html[data-theme="dark"] #mainContent table tbody tr:hover {
+  background: #20324d !important;
+}
+
+/* Invoice tables: full-width scroll viewport, with the complete table reachable
+   to the final ACTION column and the final item column on smaller screens. */
+.invoicing-container,
+.invoicing-container .invoice-section,
+.invoicing-container .invoice-items-section {
+  min-width: 0;
+  max-width: 100%;
+}
+.invoicing-container .table-wrapper {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  overscroll-behavior-x: contain;
+  scrollbar-gutter: stable;
+}
+.invoicing-container .invoice-table,
+.invoicing-container .sales-order-table {
+  width: 100% !important;
+  min-width: 1000px !important;
+  max-width: none !important;
+  table-layout: auto !important;
+}
+.invoicing-container .invoice-items-table {
+  width: 100% !important;
+  min-width: 900px !important;
+  max-width: none !important;
+  table-layout: auto !important;
+}
+.invoicing-container .invoice-table th,
+.invoicing-container .invoice-table td,
+.invoicing-container .sales-order-table th,
+.invoicing-container .sales-order-table td,
+.invoicing-container .invoice-items-table th,
+.invoicing-container .invoice-items-table td {
+  white-space: nowrap;
+}
+html[data-theme="dark"] .invoicing-container .invoice-section,
+html[data-theme="dark"] .invoicing-container .invoice-items-section,
+html[data-theme="dark"] .invoicing-container .table-wrapper {
+  background: #151f30 !important;
+  border-color: #2b3950 !important;
+}
+html[data-theme="dark"] .invoicing-container .invoice-table th,
+html[data-theme="dark"] .invoicing-container .sales-order-table th,
+html[data-theme="dark"] .invoicing-container .invoice-items-table th {
+  background: #1b2b45 !important;
+  color: #e2ecff !important;
+  border-color: #344866 !important;
+}
+html[data-theme="dark"] .invoicing-container .invoice-table td,
+html[data-theme="dark"] .invoicing-container .sales-order-table td,
+html[data-theme="dark"] .invoicing-container .invoice-items-table td {
+  background: #151f30 !important;
+  color: #dce5f2 !important;
+  border-color: #2b3950 !important;
+}
