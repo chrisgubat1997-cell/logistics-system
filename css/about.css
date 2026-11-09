@@ -213,16 +213,16 @@ html[data-theme="dark"] .about-load-error { background: #2a171b; border-color: #
 .about-payload-truck { animation-name:about-payload-truck; }
 .about-payload-money { animation-name:about-payload-money; }
 @keyframes about-payload-panel {
-  0% { left:0%; opacity:0; } 4%,18% { opacity:1; } 22%,100% { left:100%; opacity:0; }
+  0% { left:0%; opacity:0; } 4% { left:0%; opacity:1; } 18% { left:18%; opacity:1; } 22% { left:22%; opacity:0; } 100% { left:100%; opacity:0; }
 }
 @keyframes about-payload-box {
-  0%,23% { left:0%; opacity:0; } 27%,42% { opacity:1; } 46%,100% { left:100%; opacity:0; }
+  0%,23% { left:0%; opacity:0; } 27% { left:27%; opacity:1; } 42% { left:42%; opacity:1; } 46% { left:46%; opacity:0; } 100% { left:100%; opacity:0; }
 }
 @keyframes about-payload-truck {
-  0%,47% { left:0%; opacity:0; } 51%,73% { opacity:1; } 77%,100% { left:100%; opacity:0; }
+  0%,47% { left:0%; opacity:0; } 51% { left:51%; opacity:1; } 73% { left:73%; opacity:1; } 77% { left:77%; opacity:0; } 100% { left:100%; opacity:0; }
 }
 @keyframes about-payload-money {
-  0%,78% { left:0%; opacity:0; } 82%,96% { opacity:1; } 100% { left:100%; opacity:0; }
+  0%,78% { left:0%; opacity:0; } 82% { left:82%; opacity:1; } 96% { left:96%; opacity:1; } 100% { left:100%; opacity:0; }
 }
 html[data-theme="dark"] .about-journey-heading h2 { color:#dce8ff !important; }
 html[data-theme="dark"] .about-stage { background:#151f30; border-color:#2b3950; }
