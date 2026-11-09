@@ -1,0 +1,256 @@
+/* =========================================================
+   LOGIS-TECH — ABOUT SYSTEM DESIGN LANGUAGE
+   Shared visual standard copied from css/about.css
+   Apply to every sidebar module; preserve functional/status colors.
+   Build: 2026.11.09
+========================================================= */
+
+:root {
+  --about-blue: #123b91;
+  --about-blue-deep: #0b2867;
+  --about-green: #39a935;
+  --about-ink: #17243b;
+  --about-muted: #66748b;
+  --about-line: #e2e8f2;
+  --about-surface: #ffffff;
+  --about-soft-blue: #edf3ff;
+  --about-soft-green: #eff8ed;
+  --about-font: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+/* Same typography foundation as About System. */
+#mainContent .page,
+#mainContent .page *,
+.dashboard-page,
+.dashboard-page * {
+  font-family: var(--about-font);
+}
+#mainContent .page {
+  color: var(--about-ink);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+/* Page titles: navy, strong weight, compact tracking. */
+#mainContent .page h1,
+#mainContent .page .so-page-header h1,
+#mainContent .page .page-header h1,
+#mainContent .page .invoicing-header h1,
+#mainContent .page .header-title h1,
+#mainContent .page .settings-header h1,
+#mainContent .page .payment-page-title,
+#mainContent .page .report-title,
+#mainContent .page .fde-title {
+  color: var(--about-blue-deep);
+  font-size: clamp(24px, 3vw, 30px);
+  font-weight: 850;
+  line-height: 1.15;
+  letter-spacing: -.035em;
+}
+#mainContent .page h2,
+#mainContent .page .section-title,
+#mainContent .page .card-header h2,
+#mainContent .page .panel-title {
+  color: var(--about-blue-deep);
+  font-size: 19px;
+  font-weight: 850;
+  line-height: 1.3;
+  letter-spacing: -.025em;
+}
+#mainContent .page h3,
+#mainContent .page .subsection-title {
+  color: var(--about-ink);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+#mainContent .page p,
+#mainContent .page .subtitle,
+#mainContent .page .description,
+#mainContent .page .page-subtitle,
+#mainContent .page .section-description {
+  color: var(--about-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+/* Green kicker/eyebrow accents, matching About section headings. */
+#mainContent .page .eyebrow,
+#mainContent .page .section-kicker,
+#mainContent .page .page-kicker,
+#mainContent .page .panel-eyebrow {
+  color: var(--about-green);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .16em;
+}
+
+/* Consistent card surface and borders from About info/feature cards. */
+#mainContent .page .section,
+#mainContent .page .settings-card,
+#mainContent .page .settings-grid > *,
+#mainContent .page .report-card,
+#mainContent .page .report-panel,
+#mainContent .page .chart-card,
+#mainContent .page .fde-panel,
+#mainContent .page .fde-card,
+#mainContent .page .fleet-card,
+#mainContent .page .analytics-card,
+#mainContent .page .invoicing-card,
+#mainContent .page .payment-card,
+#mainContent .page .so-card,
+#mainContent .page .dr-card,
+#mainContent .page .table-card,
+#mainContent .page .form-card,
+#mainContent .page .customer-card,
+#mainContent .page .vehicle-card,
+#mainContent .page .jo-card,
+#mainContent .page .message-panel,
+#mainContent .page .rf-card {
+  border-color: var(--about-line);
+  border-radius: 16px;
+}
+
+/* Small labels and supporting text use the same restrained scale. */
+#mainContent .page label,
+#mainContent .page .form-label,
+#mainContent .page .field-label,
+#mainContent .page .card-header p,
+#mainContent .page .setting-row span,
+#mainContent .page .helper-text,
+#mainContent .page .hint {
+  color: var(--about-muted);
+  font-size: 10px;
+}
+#mainContent .page strong,
+#mainContent .page b {
+  font-weight: 750;
+}
+
+/* Forms: clean typography, soft navy outline and readable focus state. */
+#mainContent .page input,
+#mainContent .page select,
+#mainContent .page textarea {
+  font-family: var(--about-font);
+  font-size: 11px;
+  color: var(--about-ink);
+  border-color: var(--about-line);
+}
+#mainContent .page input:focus,
+#mainContent .page select:focus,
+#mainContent .page textarea:focus {
+  border-color: var(--about-blue);
+  outline-color: rgba(18,59,145,.14);
+  box-shadow: 0 0 0 3px rgba(18,59,145,.08);
+}
+
+/* Tables: readable compact data, blue heading treatment. */
+#mainContent .page table th,
+#mainContent .page table thead th {
+  color: var(--about-blue-deep);
+  font-size: 10px;
+  font-weight: 800;
+}
+#mainContent .page table td {
+  color: var(--about-ink);
+  font-size: 11px;
+}
+
+/* Buttons: retain their existing semantic backgrounds, normalize type. */
+#mainContent .page button,
+#mainContent .page .btn {
+  font-family: var(--about-font);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+/* Icon tiles follow About's pale-blue and pale-green combination. */
+#mainContent .page .icon-box,
+#mainContent .page .title-icon,
+#mainContent .page .section-icon,
+#mainContent .page .module-icon,
+#mainContent .page .card-icon,
+#mainContent .page .summary-icon,
+#mainContent .page .kpi-icon {
+  border-radius: 10px;
+}
+
+/* Dark mode palette taken directly from About System dark styles. */
+html[data-theme="dark"] {
+  --about-ink: #e8edf7;
+  --about-muted: #a4b2c8;
+  --about-line: #2b3950;
+  --about-surface: #151f30;
+}
+html[data-theme="dark"] #mainContent .page {
+  color: var(--about-ink);
+}
+html[data-theme="dark"] #mainContent .page h1,
+html[data-theme="dark"] #mainContent .page h2,
+html[data-theme="dark"] #mainContent .page .section-title,
+html[data-theme="dark"] #mainContent .page .card-header h2,
+html[data-theme="dark"] #mainContent .page .panel-title,
+html[data-theme="dark"] #mainContent .page .page-title {
+  color: #dce8ff;
+}
+html[data-theme="dark"] #mainContent .page h3,
+html[data-theme="dark"] #mainContent .page strong,
+html[data-theme="dark"] #mainContent .page table td {
+  color: var(--about-ink);
+}
+html[data-theme="dark"] #mainContent .page p,
+html[data-theme="dark"] #mainContent .page label,
+html[data-theme="dark"] #mainContent .page .subtitle,
+html[data-theme="dark"] #mainContent .page .description,
+html[data-theme="dark"] #mainContent .page .helper-text,
+html[data-theme="dark"] #mainContent .page .hint {
+  color: var(--about-muted);
+}
+html[data-theme="dark"] #mainContent .page input,
+html[data-theme="dark"] #mainContent .page select,
+html[data-theme="dark"] #mainContent .page textarea {
+  color: #e8edf7;
+  border-color: #344866;
+}
+html[data-theme="dark"] #mainContent .page table th,
+html[data-theme="dark"] #mainContent .page table thead th {
+  color: #e2ecff;
+}
+
+/* Dashboard lives in its own iframe, so mirror the same About palette there. */
+.dashboard-page {
+  color: var(--about-ink);
+  font-size: 12px;
+  line-height: 1.55;
+}
+.dashboard-page h1,
+.dashboard-page h2,
+.dashboard-page .dashboard-panel-title {
+  color: var(--about-blue-deep);
+  font-weight: 850;
+  letter-spacing: -.025em;
+}
+.dashboard-page h1 { font-size: clamp(24px, 3vw, 30px); line-height: 1.15; }
+.dashboard-page h2,
+.dashboard-page .dashboard-panel-title { font-size: 19px; }
+.dashboard-page h3 { color: var(--about-ink); font-size: 12px; font-weight: 800; }
+.dashboard-page p,
+.dashboard-page .dashboard-panel-subtitle {
+  color: var(--about-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+.dashboard-page button,
+.dashboard-page input,
+.dashboard-page select { font-family: var(--about-font); }
+html[data-theme="dark"] .dashboard-page { color: #e8edf7; }
+html[data-theme="dark"] .dashboard-page h1,
+html[data-theme="dark"] .dashboard-page h2,
+html[data-theme="dark"] .dashboard-page .dashboard-panel-title { color: #dce8ff; }
+html[data-theme="dark"] .dashboard-page p,
+html[data-theme="dark"] .dashboard-page .dashboard-panel-subtitle { color: #a4b2c8; }
+
+@media (max-width: 700px) {
+  #mainContent .page h1,
+  #mainContent .page .page-header h1 { font-size: 24px; }
+}
