@@ -171,6 +171,11 @@ function getMessagingThreads(payload) {
   });
 
   const participantIds = getMessagingParticipantThreadIds_(account.userId);
+  const participantMap = getMessagingParticipantMap_();
+  const userDirectory = getMessagingUsersInternal_();
+  const userById = {};
+  userDirectory.forEach(function(user) { userById[String(user.userId)] = user; });
+
   const threads = getAllRecords(CONFIG.SHEETS.MESSAGES_THREADS)
     .filter(function(thread) {
       if (String(thread.STATUS || "ACTIVE").toUpperCase() !== "ACTIVE") return false;
@@ -187,14 +192,26 @@ function getMessagingThreads(payload) {
     user: { userId: account.userId, username: account.username, role: account.role },
     threads: threads.slice(0, 200).map(function(thread) {
       const read = userReads[String(thread.THREAD_ID)];
+      const threadType = String(thread.THREAD_TYPE || (thread.SO_NUMBER ? "SO" : "PRIVATE")).toUpperCase();
+      const members = participantMap[String(thread.THREAD_ID)] || [];
+      const otherUserId = members.filter(function(id) { return String(id) !== String(account.userId); })[0] || "";
+      const otherUser = threadType === "PRIVATE" ? userById[String(otherUserId)] : null;
       return {
         threadId: thread.THREAD_ID,
-        threadType: String(thread.THREAD_TYPE || (thread.SO_NUMBER ? "SO" : "PRIVATE")).toUpperCase(),
+        threadType: threadType,
         soId: thread.SO_ID,
         soNumber: thread.SO_NUMBER,
         subject: thread.SUBJECT,
         clientName: thread.CLIENT_NAME,
         project: thread.PROJECT,
+        counterpart: otherUser ? {
+          userId: otherUser.userId,
+          username: otherUser.username,
+          fullName: otherUser.fullName,
+          email: otherUser.email,
+          role: otherUser.role
+        } : null,
+        createdAt: thread.CREATED_AT,
         lastMessageId: thread.LAST_MESSAGE_ID,
         lastMessageAt: thread.LAST_MESSAGE_AT,
         lastMessageBy: thread.LAST_MESSAGE_BY,
@@ -480,9 +497,22 @@ function getMessagingUsersInternal_() {
   const values=sheet.getDataRange().getValues();
   if (values.length<2) return [];
   const headers=values[0].map(function(v){return String(v||"").trim().toUpperCase();});
-  const idx={id:headers.indexOf("USER_ID"),username:headers.indexOf("USERNAME"),name:headers.indexOf("FULL_NAME"),status:headers.indexOf("STATUS")};
+  const idx={
+    id:headers.indexOf("USER_ID"),
+    username:headers.indexOf("USERNAME"),
+    name:headers.indexOf("FULL_NAME"),
+    email:headers.indexOf("EMAIL"),
+    role:headers.indexOf("ROLE"),
+    status:headers.indexOf("STATUS")
+  };
   return values.slice(1).filter(function(row){return String(row[idx.status]||"").toUpperCase()==="ACTIVE";}).map(function(row){
-    return {userId:String(row[idx.id]||""),username:String(row[idx.username]||""),fullName:String(row[idx.name]||"")};
+    return {
+      userId:String(row[idx.id]||""),
+      username:String(row[idx.username]||""),
+      fullName:String(row[idx.name]||""),
+      email:idx.email>=0?String(row[idx.email]||""):"",
+      role:idx.role>=0?String(row[idx.role]||""):""
+    };
   });
 }
 
