@@ -183,7 +183,7 @@ html[data-theme="dark"] .about-load-error { background: #2a171b; border-color: #
 .about-payload-truck i { position:absolute; z-index:1; left:8px; top:5px; width:14px; height:12px; border:1px solid #a66a2b; border-radius:2px; background:#e8b66f; box-shadow:0 0 0 1px rgba(0,0,0,.08); }
 .about-payload-truck i::after { content:""; position:absolute; left:5px; top:0; height:100%; border-left:1px solid #a66a2b; }
 .about-payload-truck b, .about-payload-return b { position:absolute; z-index:2; left:7px; bottom:-4px; width:9px; height:9px; border:2px solid #31506b; border-radius:50%; background:#fff; }
-.about-payload-truck b:last-child, .about-payload-return b:last-child { left:33px; }
+.about-payload-truck b:last-of-type, .about-payload-return b:last-of-type { left:33px; }
 /* Return truck visibly carries cash bundles from the client toward Finance. */
 .about-payload-return { background:#238b55; }
 .about-payload-return::before { background:#238b55; }
