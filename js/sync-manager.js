@@ -51,7 +51,16 @@
 
             body: JSON.stringify({
                 action: action,
-                data: data
+                data: Object.assign({}, data, {
+                    sessionToken: (function () {
+                        try {
+                            const account = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+                            return account.sessionToken || account.session_token || account.token || "";
+                        } catch (error) {
+                            return "";
+                        }
+                    })()
+                })
             })
 
         });
