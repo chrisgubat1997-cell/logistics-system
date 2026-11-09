@@ -244,9 +244,13 @@
     await loadMessages(threadId, true);
   }
   async function loadMessages(threadId, markRead) {
+    const currentInput = $("#mailMessageInput");
+    const draft = currentInput ? currentInput.value : "";
     const result = await api("getMessagingMessages", { threadId, limit: 100 });
     state.messages = result.messages || [];
     renderChat();
+    const refreshedInput = $("#mailMessageInput");
+    if (refreshedInput && !markRead) refreshedInput.value = draft;
     if (markRead) {
       await api("markMessagingThreadRead", { threadId });
       const thread = getSelected();
