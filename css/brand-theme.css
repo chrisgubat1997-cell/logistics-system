@@ -1646,3 +1646,184 @@ html[data-theme="dark"] .invoicing-container .invoice-items-table td {
   color: #dce5f2 !important;
   border-color: #2b3950 !important;
 }
+
+
+/* =========================================================
+   ABOUT PAGE TYPOGRAPHY STANDARD — APPLY TO ALL SECTIONS
+   Reference: pages/about.html + css/about.css
+   Build: 2026.11.09
+========================================================= */
+:root {
+  --app-font-family: Inter, "Segoe UI", Arial, sans-serif;
+  --app-font-size: 12px;
+  --app-font-small: 10px;
+  --app-font-body: 12px;
+  --app-font-heading: 19px;
+  --app-font-page-title: 24px;
+  --app-ink: #17243b;
+  --app-muted: #66748b;
+  --app-heading: #0b2867;
+}
+body,
+button, input, select, textarea {
+  font-family: var(--app-font-family);
+}
+body { font-size: var(--app-font-body); color: var(--app-ink); }
+#salesModule, #joRegisterModule, #deliveryModule,
+#fleetAnalyticsModule, #fleetDataEntryModule, #invoicingModule,
+#paymentModule, #reportModule, #systemSettingsModule,
+#messagesModule, #revolvingFundModule, #aboutModule,
+.sales-order-module, .jo-register-module, .delivery-module,
+.fleet-analytics-module, .fleet-delivery-data-module,
+.invoicing-module, .payment-module, .report-module,
+.system-settings-module, .messages-page, .revolving-fund-page {
+  color: var(--app-ink);
+  font-family: var(--app-font-family);
+  font-size: var(--app-font-body);
+  line-height: 1.55;
+}
+#salesModule *, #joRegisterModule *, #deliveryModule *,
+#fleetAnalyticsModule *, #fleetDataEntryModule *, #invoicingModule *,
+#paymentModule *, #reportModule *, #systemSettingsModule *,
+#messagesModule *, #revolvingFundModule *, #aboutModule *,
+.sales-order-module *, .jo-register-module *, .delivery-module *,
+.fleet-analytics-module *, .fleet-delivery-data-module *,
+.invoicing-module *, .payment-module *, .report-module *,
+.system-settings-module *, .messages-page *, .revolving-fund-page * {
+  font-family: var(--app-font-family);
+}
+#salesModule h1, #joRegisterModule h1, #deliveryModule h1,
+#fleetAnalyticsModule h1, #fleetDataEntryModule h1, #invoicingModule h1,
+#paymentModule h1, #reportModule h1, #systemSettingsModule h1,
+#messagesModule h1, #revolvingFundModule h1,
+.sales-order-module h1, .jo-register-module h1, .delivery-module h1,
+.fleet-analytics-module h1, .fleet-delivery-data-module h1,
+.invoicing-module h1, .payment-module h1, .report-module h1,
+.system-settings-module h1 {
+  color: var(--app-heading);
+  font-size: var(--app-font-page-title);
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+}
+#salesModule h2, #joRegisterModule h2, #deliveryModule h2,
+#fleetAnalyticsModule h2, #fleetDataEntryModule h2, #invoicingModule h2,
+#paymentModule h2, #reportModule h2, #systemSettingsModule h2,
+#messagesModule h2, #revolvingFundModule h2,
+.sales-order-module h2, .jo-register-module h2, .delivery-module h2,
+.fleet-analytics-module h2, .fleet-delivery-data-module h2,
+.invoicing-module h2, .payment-module h2, .report-module h2,
+.system-settings-module h2 {
+  color: var(--app-heading);
+  font-size: var(--app-font-heading);
+  font-weight: 850;
+  line-height: 1.3;
+  letter-spacing: -.025em;
+}
+#salesModule h3, #joRegisterModule h3, #deliveryModule h3,
+#fleetAnalyticsModule h3, #fleetDataEntryModule h3, #invoicingModule h3,
+#paymentModule h3, #reportModule h3, #systemSettingsModule h3,
+#messagesModule h3, #revolvingFundModule h3 {
+  color: var(--app-ink);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+#salesModule p, #joRegisterModule p, #deliveryModule p,
+#fleetAnalyticsModule p, #fleetDataEntryModule p, #invoicingModule p,
+#paymentModule p, #reportModule p, #systemSettingsModule p,
+#messagesModule p, #revolvingFundModule p,
+.sales-order-module p, .jo-register-module p, .delivery-module p,
+.fleet-analytics-module p, .fleet-delivery-data-module p,
+.invoicing-module p, .payment-module p, .report-module p,
+.system-settings-module p {
+  color: var(--app-muted);
+  font-size: var(--app-font-body);
+  line-height: 1.65;
+}
+#salesModule label, #joRegisterModule label, #deliveryModule label,
+#fleetAnalyticsModule label, #fleetDataEntryModule label, #invoicingModule label,
+#paymentModule label, #reportModule label, #systemSettingsModule label,
+#messagesModule label, #revolvingFundModule label,
+#salesModule th, #joRegisterModule th, #deliveryModule th,
+#fleetAnalyticsModule th, #fleetDataEntryModule th, #invoicingModule th,
+#paymentModule th, #reportModule th, #systemSettingsModule th,
+#messagesModule th, #revolvingFundModule th {
+  font-size: var(--app-font-small);
+  font-weight: 750;
+}
+#salesModule td, #joRegisterModule td, #deliveryModule td,
+#fleetAnalyticsModule td, #fleetDataEntryModule td, #invoicingModule td,
+#paymentModule td, #reportModule td, #systemSettingsModule td,
+#messagesModule td, #revolvingFundModule td {
+  font-size: 11px;
+  color: var(--app-ink);
+}
+#salesModule input, #salesModule select, #salesModule textarea,
+#joRegisterModule input, #joRegisterModule select, #joRegisterModule textarea,
+#deliveryModule input, #deliveryModule select, #deliveryModule textarea,
+#fleetAnalyticsModule input, #fleetAnalyticsModule select, #fleetAnalyticsModule textarea,
+#fleetDataEntryModule input, #fleetDataEntryModule select, #fleetDataEntryModule textarea,
+#invoicingModule input, #invoicingModule select, #invoicingModule textarea,
+#paymentModule input, #paymentModule select, #paymentModule textarea,
+#reportModule input, #reportModule select, #reportModule textarea,
+#systemSettingsModule input, #systemSettingsModule select, #systemSettingsModule textarea,
+#messagesModule input, #messagesModule select, #messagesModule textarea,
+#revolvingFundModule input, #revolvingFundModule select, #revolvingFundModule textarea {
+  font-family: var(--app-font-family);
+  font-size: 11px;
+}
+#salesModule button, #joRegisterModule button, #deliveryModule button,
+#fleetAnalyticsModule button, #fleetDataEntryModule button, #invoicingModule button,
+#paymentModule button, #reportModule button, #systemSettingsModule button,
+#messagesModule button, #revolvingFundModule button {
+  font-family: var(--app-font-family);
+  font-size: 10px;
+  font-weight: 750;
+}
+.so-page-subtitle, .page-header p, .invoicing-header p,
+.payment-page-subtitle, .report-subtitle, .fde-subtitle {
+  color: var(--app-muted);
+}
+html[data-theme="dark"] {
+  --app-ink: #e8edf7;
+  --app-muted: #a4b2c8;
+  --app-heading: #dce8ff;
+}
+html[data-theme="dark"] #salesModule,
+html[data-theme="dark"] #joRegisterModule,
+html[data-theme="dark"] #deliveryModule,
+html[data-theme="dark"] #fleetAnalyticsModule,
+html[data-theme="dark"] #fleetDataEntryModule,
+html[data-theme="dark"] #invoicingModule,
+html[data-theme="dark"] #paymentModule,
+html[data-theme="dark"] #reportModule,
+html[data-theme="dark"] #systemSettingsModule,
+html[data-theme="dark"] #messagesModule,
+html[data-theme="dark"] #revolvingFundModule {
+  color: var(--app-ink);
+}
+html[data-theme="dark"] #salesModule h1,
+html[data-theme="dark"] #salesModule h2,
+html[data-theme="dark"] #joRegisterModule h1,
+html[data-theme="dark"] #joRegisterModule h2,
+html[data-theme="dark"] #deliveryModule h1,
+html[data-theme="dark"] #deliveryModule h2,
+html[data-theme="dark"] #fleetAnalyticsModule h1,
+html[data-theme="dark"] #fleetAnalyticsModule h2,
+html[data-theme="dark"] #fleetDataEntryModule h1,
+html[data-theme="dark"] #fleetDataEntryModule h2,
+html[data-theme="dark"] #invoicingModule h1,
+html[data-theme="dark"] #invoicingModule h2,
+html[data-theme="dark"] #paymentModule h1,
+html[data-theme="dark"] #paymentModule h2,
+html[data-theme="dark"] #reportModule h1,
+html[data-theme="dark"] #reportModule h2,
+html[data-theme="dark"] #systemSettingsModule h1,
+html[data-theme="dark"] #systemSettingsModule h2,
+html[data-theme="dark"] #messagesModule h1,
+html[data-theme="dark"] #messagesModule h2,
+html[data-theme="dark"] #revolvingFundModule h1,
+html[data-theme="dark"] #revolvingFundModule h2 {
+  color: var(--app-heading);
+}
