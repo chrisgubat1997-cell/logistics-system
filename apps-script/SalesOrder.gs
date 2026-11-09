@@ -1338,6 +1338,20 @@ const now =
       soRow
     );
 
+    /* Create the SO's conversation thread when the messaging
+       database has been initialized. Existing SOs are backfilled
+       by setupMessagingDatabase(). */
+    const messagingThreadsSheet = getDatabase().getSheetByName(CONFIG.SHEETS.MESSAGES_THREADS);
+    if (messagingThreadsSheet) {
+      ensureSalesOrderMessagingThread_({
+        SO_ID: soId,
+        SO_NUMBER: soNumber,
+        CLIENT_NAME: payload.clientName || "",
+        PROJECT: payload.project || "",
+        CREATED_BY: payload.createdBy || "SYSTEM"
+      });
+    }
+
     /* Save the client-requested RDD in its own SALES_ORDERS column.
        Add the column once if the current sheet schema does not have one. */
     const salesOrderSheetForRDD = getSheet(CONFIG.SHEETS.SALES_ORDERS);
