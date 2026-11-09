@@ -31,14 +31,14 @@
 }
 
 .fde-title {
-    font-size: 25px;
+    font-size: 23px;
     font-weight: 800;
     letter-spacing: -.3px;
 }
 
 .fde-subtitle {
     margin-top: 5px;
-    font-size: 13px;
+    font-size: 11.96px;
     color: #718096;
 }
 
@@ -51,7 +51,7 @@
     border-radius: 999px;
     background: #fff;
     color: #64748b;
-    font-size: 11px;
+    font-size: 10.12px;
     font-weight: 800;
 }
 
@@ -84,7 +84,7 @@
     background: transparent;
     color: #64748b;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 11.04px;
     font-weight: 800;
     transition: .2s ease;
 }
@@ -139,7 +139,7 @@
 .fde-section-header h2,
 .fde-records-header h2 {
     margin: 0;
-    font-size: 17px;
+    font-size: 15.64px;
     font-weight: 800;
 }
 
@@ -147,7 +147,7 @@
 .fde-records-header p {
     margin: 5px 0 0;
     color: #7a8699;
-    font-size: 12px;
+    font-size: 11.04px;
 }
 
 
@@ -173,7 +173,7 @@
     display: block;
     margin-bottom: 6px;
     color: #475569;
-    font-size: 11px;
+    font-size: 10.12px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .3px;
@@ -191,7 +191,7 @@
     background: #fff;
     color: #172033;
     font-family: inherit;
-    font-size: 13px;
+    font-size: 11.96px;
     transition: .2s ease;
 }
 
@@ -244,7 +244,7 @@
     border: 0;
     border-radius: 8px;
     cursor: pointer;
-    font-size: 11px;
+    font-size: 10.12px;
     font-weight: 800;
     transition: .2s ease;
 }
@@ -282,13 +282,13 @@
     border-radius: 999px;
     background: #f1f5f9;
     color: #64748b;
-    font-size: 11px;
+    font-size: 10.12px;
     font-weight: 800;
 }
 
 .fde-record-count span {
     color: #172033;
-    font-size: 14px;
+    font-size: 12.88px;
 }
 
 .fde-record-toolbar {
@@ -322,7 +322,7 @@
     border-bottom: 1px solid #e3e8ef;
     background: #f7f9fb;
     color: #64748b;
-    font-size: 10px;
+    font-size: 9.2px;
     font-weight: 800;
     text-align: left;
     text-transform: uppercase;
@@ -332,7 +332,7 @@
     padding: 11px 12px;
     border-bottom: 1px solid #edf0f4;
     color: #334155;
-    font-size: 12px;
+    font-size: 11.04px;
     vertical-align: middle;
 }
 
@@ -357,7 +357,7 @@
     align-items: center;
     padding: 5px 8px;
     border-radius: 6px;
-    font-size: 9px;
+    font-size: 8.28px;
     font-weight: 800;
     white-space: nowrap;
 }
@@ -384,7 +384,7 @@
     background: #fff1f2;
     color: #be123c;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 9.2px;
     font-weight: 800;
 }
 
@@ -462,13 +462,13 @@
     display: block;
     margin-bottom: 5px;
     color: #334155;
-    font-size: 12px;
+    font-size: 11.04px;
     font-weight: 800;
 }
 .fde-route-help {
     margin: 0;
     color: #64748b;
-    font-size: 12px;
+    font-size: 11.04px;
     line-height: 1.5;
 }
 .fde-route-table-wrap {
@@ -486,7 +486,7 @@
     padding: 11px 12px;
     background: #f1f5f9;
     color: #475569;
-    font-size: 10px;
+    font-size: 9.2px;
     letter-spacing: .04em;
     text-align: left;
 }
@@ -507,21 +507,21 @@
     border-radius: 7px;
     color: #172033;
     font: inherit;
-    font-size: 12px;
+    font-size: 11.04px;
 }
 .fde-route-badge {
     display: inline-block;
     min-width: 54px;
     margin-right: 7px;
     color: #475569;
-    font-size: 9px;
+    font-size: 8.28px;
     font-weight: 900;
     vertical-align: middle;
 }
 .fde-route-table td:first-child input { width: calc(100% - 66px); }
 .fde-route-start { background: #f8fafc; }
 .fde-route-return { background: #f0fdf4; }
-.fde-route-muted { color: #64748b; font-size: 11px; }
+.fde-route-muted { color: #64748b; font-size: 10.12px; }
 .fde-remove-stop {
     width: 34px;
     height: 34px;
@@ -529,7 +529,7 @@
     border-radius: 7px;
     background: #fff;
     color: #b91c1c;
-    font-size: 20px;
+    font-size: 18.4px;
     cursor: pointer;
 }
 .fde-remove-stop:disabled {
@@ -560,7 +560,7 @@
     gap: 7px;
     margin: 0;
     color: #334155;
-    font-size: 13px;
+    font-size: 11.96px;
     font-weight: 600;
     text-transform: none;
     letter-spacing: 0;
@@ -580,7 +580,7 @@
 .fde-maint-request-header p {
     margin: 4px 0 0;
     color: #64748b;
-    font-size: 12px;
+    font-size: 11.04px;
 }
 .fde-maint-request-list {
     display: grid;
@@ -602,7 +602,7 @@
     align-items: flex-start;
     min-height: 28px;
     margin-bottom: 7px;
-    font-size: 10px;
+    font-size: 9.2px;
     line-height: 1.35;
 }
 .fde-maint-request-row .fde-field input,
@@ -612,7 +612,7 @@
     min-height: 30px;
     margin-top: 5px;
     color: #64748b;
-    font-size: 10px;
+    font-size: 9.2px;
     line-height: 1.4;
 }
 .fde-maint-request-row .fde-maint-remove-request { min-width: 90px; margin-top: 35px; margin-bottom: 0; white-space: nowrap; }
@@ -658,7 +658,7 @@
     cursor: not-allowed;
 }
 
-.fde-maint-suggestion-help { display:block; margin-top:5px; color:#64748b; font-size:10px; line-height:1.4; }
+.fde-maint-suggestion-help { display:block; margin-top:5px; color:#64748b; font-size:9.2px; line-height:1.4; }
 .fde-maint-request-classification { font-weight:600; background:#f1f5f9; }
 
 
@@ -679,8 +679,8 @@
     gap: 16px;
     margin-bottom: 16px;
 }
-.fde-maint-monitor-header h3 { margin: 0 0 5px; font-size: 18px; }
-.fde-maint-monitor-header p { margin: 0; color: #64748b; font-size: 12px; }
+.fde-maint-monitor-header h3 { margin: 0 0 5px; font-size: 16.56px; }
+.fde-maint-monitor-header p { margin: 0; color: #64748b; font-size: 11.04px; }
 .fde-maint-monitor-filters { display: flex; flex-wrap: wrap; gap: 8px; min-width: min(100%, 440px); }
 .fde-maint-monitor-filters input { flex: 1 1 220px; min-width: 170px; }
 .fde-maint-monitor-filters select { flex: 0 0 150px; }
@@ -700,8 +700,8 @@
     border-radius: 9px;
     background: #f8fafc;
 }
-.fde-maint-monitor-kpi span { color: #64748b; font-size: 11px; }
-.fde-maint-monitor-kpi strong { color: #0f172a; font-size: 22px; overflow-wrap: anywhere; }
+.fde-maint-monitor-kpi span { color: #64748b; font-size: 10.12px; }
+.fde-maint-monitor-kpi strong { color: #0f172a; font-size: 20.24px; overflow-wrap: anywhere; }
 .fde-maint-monitor-table { min-width: 1080px; }
 .fde-maint-monitor-status {
     display: inline-block;
@@ -709,7 +709,7 @@
     border-radius: 999px;
     background: #e2e8f0;
     color: #334155;
-    font-size: 11px;
+    font-size: 10.12px;
     font-weight: 700;
     white-space: nowrap;
 }
@@ -718,7 +718,7 @@
 .fde-maint-monitor-status.overdue { background: #fee2e2; color: #b91c1c; }
 .fde-maint-monitor-status.completed { background: #dcfce7; color: #166534; }
 .fde-maint-monitor-status.cancelled { background: #e5e7eb; color: #4b5563; }
-.fde-maint-monitor-terminal { color: #64748b; font-size: 11px; }
+.fde-maint-monitor-terminal { color: #64748b; font-size: 10.12px; }
 @media (max-width: 900px) {
     .fde-maint-monitor-header { flex-direction: column; }
     .fde-maint-monitor-filters { width: 100%; min-width: 0; }
@@ -752,7 +752,7 @@
     background-color: #fff;
     color: #172033;
     font-family: inherit;
-    font-size: 11.5px;
+    font-size: 10.58px;
     font-weight: 500;
     box-shadow: 0 1px 2px rgba(15,23,42,.04);
     transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
