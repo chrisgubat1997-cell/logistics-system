@@ -812,3 +812,372 @@ body {
 .table-excel-export-button:active { transform:translateY(0); }
 @media print { .table-excel-export-toolbar { display:none !important; } }
 
+
+
+/* =========================================================
+   SHARED MODULE DESIGN SYSTEM — DELIVERY UI STANDARD
+   Applies to dashboard, sales, JO, delivery, fleet, invoice,
+   payment, revolving fund, reports and settings.
+   ========================================================= */
+:root {
+  --module-blue: #2563eb;
+  --module-blue-dark: #1d4ed8;
+  --module-blue-soft: #eff6ff;
+  --module-line: #e5eaf1;
+  --module-ink: #172b4d;
+  --module-muted: #64748b;
+  --module-radius: 14px;
+  --module-shadow: 0 5px 18px rgba(15, 23, 42, .055);
+  --module-shadow-hover: 0 12px 28px rgba(30, 64, 110, .10);
+}
+
+/* Shared page heading rhythm */
+.sales-order-module .so-page-header,
+.delivery-module .page-header,
+.invoicing-container .invoicing-header,
+.payment-module .payment-page-header,
+.fleet-analytics-page .fleet-header,
+.fleet-data-entry .fde-header,
+.report-page .report-header,
+.rf-module .rf-header,
+.jo-module .jo-header,
+.settings-page .settings-header {
+  margin-bottom: 22px;
+}
+
+/* Delivery-style cards and panels */
+.sales-order-module .so-summary-card,
+.sales-order-module .so-table-card,
+.sales-order-module .customer-table-card,
+.delivery-module .delivery-summary-card,
+.delivery-module .section-card,
+.invoicing-container .summary-card,
+.invoicing-container .invoice-section,
+.payment-module .payment-summary-card,
+.payment-module .payment-section,
+.fleet-analytics-page .kpi-card,
+.fleet-analytics-page .analytics-card,
+.fleet-data-entry .fde-section,
+.fleet-data-entry .fde-records,
+.report-page .report-card,
+.report-page .report-panel,
+.rf-module .rf-panel,
+.rf-module .rf-cards article,
+.jo-module .jo-stat,
+.jo-module .jo-panel,
+.dashboard-page .dashboard-summary-card,
+.dashboard-page .dashboard-panel,
+.settings-page .settings-card,
+.settings-page .settings-section {
+  border: 1px solid var(--module-line) !important;
+  border-radius: var(--module-radius) !important;
+  background: var(--card, #fff) !important;
+  box-shadow: var(--module-shadow) !important;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.sales-order-module .so-summary-card:hover,
+.delivery-module .delivery-summary-card:hover,
+.invoicing-container .summary-card:hover,
+.payment-module .payment-summary-card:hover,
+.fleet-analytics-page .kpi-card:hover,
+.fleet-analytics-page .analytics-card:hover,
+.report-page .report-card:hover,
+.report-page .report-panel:hover,
+.rf-module .rf-cards article:hover,
+.dashboard-page .dashboard-summary-card:hover,
+.dashboard-page .dashboard-panel:hover {
+  border-color: #c7d8f5 !important;
+  box-shadow: var(--module-shadow-hover) !important;
+  transform: translateY(-2px);
+}
+
+/* Consistent title/icon treatment for cards and section headings.
+   Retains each module's existing icon/logo element. */
+.delivery-module .summary-card-icon,
+.sales-order-module .so-title-icon,
+.invoicing-container .summary-card-icon,
+.invoicing-container .summary-card-icon,
+.payment-module .payment-summary-icon,
+.fleet-analytics-page .kpi-icon,
+.fleet-analytics-page .fleet-title-icon,
+.dashboard-page .summary-card-icon,
+.dashboard-page .dashboard-brand-mark,
+.fleet-data-entry .fde-title-icon,
+.report-page .report-card-icon,
+.rf-module .rf-card-icon,
+.jo-module .jo-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 12px;
+  background: linear-gradient(145deg, #eff6ff, #dbeafe) !important;
+  color: var(--module-blue-dark) !important;
+  border: 1px solid #d7e5fb;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+/* Standard section heading bars, matching Delivery's clean white header. */
+.delivery-module .section-title,
+.sales-order-module .customer-table-header,
+.invoicing-container .section-header,
+.payment-module .payment-section-header,
+.fleet-analytics-page .section-heading,
+.fleet-data-entry .fde-section-header,
+.report-page .report-panel-header,
+.jo-module .jo-toolbar,
+.rf-module .rf-panel-header,
+.dashboard-page .dashboard-panel-header {
+  border-bottom: 1px solid var(--module-line);
+}
+
+/* Shared button language: blue primary, white outlined secondary,
+   consistent radius, height, weight and hover motion. */
+.delivery-module .btn,
+.sales-order-module .so-primary-button,
+.sales-order-module .so-secondary-button,
+.sales-order-module .so-danger-button,
+.sales-order-module .so-refresh-button,
+.invoicing-container .btn,
+.payment-module .payment-primary-button,
+.payment-module .payment-tool-button,
+.fleet-data-entry .fde-btn,
+.fleet-analytics-page .details-button,
+.dashboard-page .dashboard-refresh-btn,
+.jo-module .jo-refresh,
+.jo-module .jo-row-save,
+.jo-module .jo-action-btn,
+.rf-module button,
+.report-page button,
+.settings-page button {
+  min-height: 38px;
+  border-radius: 9px;
+  font-weight: 750;
+  letter-spacing: .01em;
+  transition: background .18s ease, color .18s ease, border-color .18s ease,
+              box-shadow .18s ease, transform .18s ease;
+}
+
+.delivery-module .btn-primary,
+.invoicing-container .btn-primary,
+.sales-order-module .so-primary-button,
+.payment-module .payment-primary-button,
+.fleet-data-entry .fde-btn.primary,
+.jo-module .jo-refresh,
+.jo-module .jo-row-save,
+.rf-module button.primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+  color: #fff !important;
+  border: 1px solid #1d4ed8 !important;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, .16);
+}
+
+.delivery-module .btn-primary:hover:not(:disabled),
+.invoicing-container .btn-primary:hover:not(:disabled),
+.sales-order-module .so-primary-button:hover:not(:disabled),
+.payment-module .payment-primary-button:hover:not(:disabled),
+.fleet-data-entry .fde-btn.primary:hover:not(:disabled),
+.jo-module .jo-refresh:hover:not(:disabled),
+.jo-module .jo-row-save:hover:not(:disabled),
+.rf-module button.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+  box-shadow: 0 7px 16px rgba(37, 99, 235, .23);
+  transform: translateY(-1px);
+}
+
+.delivery-module .btn-secondary,
+.delivery-module .btn-outline,
+.invoicing-container .btn-secondary,
+.invoicing-container .btn-outline,
+.sales-order-module .so-secondary-button,
+.sales-order-module .so-refresh-button,
+.payment-module .payment-tool-button,
+.fleet-data-entry .fde-btn.secondary,
+.jo-module .jo-action-btn,
+.rf-module button:not(.primary) {
+  background: #fff !important;
+  color: #334155 !important;
+  border: 1px solid #d7e0eb !important;
+}
+
+.delivery-module .btn-secondary:hover,
+.delivery-module .btn-outline:hover,
+.invoicing-container .btn-secondary:hover,
+.invoicing-container .btn-outline:hover,
+.sales-order-module .so-secondary-button:hover,
+.sales-order-module .so-refresh-button:hover,
+.payment-module .payment-tool-button:hover,
+.fleet-data-entry .fde-btn.secondary:hover,
+.jo-module .jo-action-btn:hover,
+.rf-module button:not(.primary):hover {
+  background: #f1f6ff !important;
+  border-color: #b9cdef !important;
+  color: #1d4ed8 !important;
+}
+
+/* Standard tables: Delivery-like header, spacing, hover and borders. */
+.sales-order-module table,
+.delivery-module table,
+.invoicing-container table,
+.payment-module table,
+.fleet-data-entry table,
+.fleet-analytics-page table,
+.report-page table,
+.jo-module table,
+.rf-module table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  background: #fff;
+  color: var(--module-ink);
+}
+
+.sales-order-module table thead th,
+.delivery-module table thead th,
+.invoicing-container table thead th,
+.payment-module table thead th,
+.fleet-data-entry table thead th,
+.fleet-analytics-page table thead th,
+.report-page table thead th,
+.jo-module table thead th,
+.rf-module table thead th {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border-bottom: 1px solid #dbe3ec !important;
+  font-size: 10px;
+  font-weight: 850 !important;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.sales-order-module table tbody td,
+.delivery-module table tbody td,
+.invoicing-container table tbody td,
+.payment-module table tbody td,
+.fleet-data-entry table tbody td,
+.fleet-analytics-page table tbody td,
+.report-page table tbody td,
+.jo-module table tbody td,
+.rf-module table tbody td {
+  border-bottom: 1px solid #edf1f5 !important;
+}
+
+.sales-order-module table tbody tr,
+.delivery-module table tbody tr,
+.invoicing-container table tbody tr,
+.payment-module table tbody tr,
+.fleet-data-entry table tbody tr,
+.fleet-analytics-page table tbody tr,
+.report-page table tbody tr,
+.jo-module table tbody tr,
+.rf-module table tbody tr {
+  transition: background-color .16s ease;
+}
+
+.sales-order-module table tbody tr:hover,
+.delivery-module table tbody tr:hover,
+.invoicing-container table tbody tr:hover,
+.payment-module table tbody tr:hover,
+.fleet-data-entry table tbody tr:hover,
+.fleet-analytics-page table tbody tr:hover,
+.report-page table tbody tr:hover,
+.jo-module table tbody tr:hover,
+.rf-module table tbody tr:hover {
+  background: #f5f9ff !important;
+}
+
+/* Unified input styling across every section. */
+.sales-order-module input:not([type="checkbox"]):not([type="radio"]),
+.sales-order-module select,
+.sales-order-module textarea,
+.delivery-module input:not([type="checkbox"]):not([type="radio"]),
+.delivery-module select,
+.delivery-module textarea,
+.invoicing-container input:not([type="checkbox"]):not([type="radio"]),
+.invoicing-container select,
+.invoicing-container textarea,
+.payment-module input:not([type="checkbox"]):not([type="radio"]),
+.payment-module select,
+.payment-module textarea,
+.fleet-data-entry input:not([type="checkbox"]):not([type="radio"]),
+.fleet-data-entry select,
+.fleet-data-entry textarea,
+.fleet-analytics-page input,
+.fleet-analytics-page select,
+.report-page input,
+.report-page select,
+.jo-module input,
+.jo-module select,
+.rf-module input,
+.rf-module select,
+.settings-page input,
+.settings-page select,
+.settings-page textarea {
+  border-radius: 8px;
+}
+
+.sales-order-module input:focus,
+.sales-order-module select:focus,
+.sales-order-module textarea:focus,
+.delivery-module input:focus,
+.delivery-module select:focus,
+.delivery-module textarea:focus,
+.invoicing-container input:focus,
+.invoicing-container select:focus,
+.invoicing-container textarea:focus,
+.payment-module input:focus,
+.payment-module select:focus,
+.payment-module textarea:focus,
+.fleet-data-entry input:focus,
+.fleet-data-entry select:focus,
+.fleet-data-entry textarea:focus,
+.jo-module input:focus,
+.jo-module select:focus,
+.rf-module input:focus,
+.rf-module select:focus {
+  border-color: #7da7ed !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .11) !important;
+  outline: none;
+}
+
+/* Dark mode keeps the same shape and hierarchy. */
+html[data-theme="dark"] .sales-order-module table,
+html[data-theme="dark"] .delivery-module table,
+html[data-theme="dark"] .invoicing-container table,
+html[data-theme="dark"] .payment-module table,
+html[data-theme="dark"] .fleet-data-entry table,
+html[data-theme="dark"] .fleet-analytics-page table,
+html[data-theme="dark"] .report-page table,
+html[data-theme="dark"] .jo-module table,
+html[data-theme="dark"] .rf-module table {
+  background: #151f30 !important;
+  color: #e8edf7 !important;
+}
+html[data-theme="dark"] .sales-order-module table thead th,
+html[data-theme="dark"] .delivery-module table thead th,
+html[data-theme="dark"] .invoicing-container table thead th,
+html[data-theme="dark"] .payment-module table thead th,
+html[data-theme="dark"] .fleet-data-entry table thead th,
+html[data-theme="dark"] .fleet-analytics-page table thead th,
+html[data-theme="dark"] .report-page table thead th,
+html[data-theme="dark"] .jo-module table thead th,
+html[data-theme="dark"] .rf-module table thead th {
+  background: #1b2b45 !important;
+  color: #d8e5ff !important;
+  border-color: #344866 !important;
+}
+html[data-theme="dark"] .sales-order-module table tbody tr:hover,
+html[data-theme="dark"] .delivery-module table tbody tr:hover,
+html[data-theme="dark"] .invoicing-container table tbody tr:hover,
+html[data-theme="dark"] .payment-module table tbody tr:hover,
+html[data-theme="dark"] .fleet-data-entry table tbody tr:hover,
+html[data-theme="dark"] .fleet-analytics-page table tbody tr:hover,
+html[data-theme="dark"] .report-page table tbody tr:hover,
+html[data-theme="dark"] .jo-module table tbody tr:hover,
+html[data-theme="dark"] .rf-module table tbody tr:hover {
+  background: #1c2b42 !important;
+}
