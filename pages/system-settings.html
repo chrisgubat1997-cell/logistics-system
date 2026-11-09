@@ -10,7 +10,20 @@
     <div class="system-status"><span class="status-dot"></span><span>Application Preferences</span></div>
   </header>
 
-  <div class="settings-grid">
+  <div class="settings-grid">\n    <section class="settings-card system-control-card" id="systemMaintenanceControl" data-admin-only="true" style="display:none">
+      <div class="card-header">
+        <div class="card-icon maintenance-icon" aria-hidden="true">⛨</div>
+        <div><h2>System Control</h2><p>Temporarily restrict system access while you perform updates. Admin access remains available.</p></div>
+      </div>
+      <div class="system-control-panel">
+        <div class="system-control-status"><span class="system-control-dot" id="maintenanceStatusDot"></span><div><strong id="maintenanceStatusText">Checking system status…</strong><small id="maintenanceStatusDetail">Connected to central system control</small></div></div>
+        <button type="button" class="action-btn danger" id="maintenanceToggleBtn" disabled>Loading…</button>
+      </div>
+      <p class="system-control-note">When Maintenance Mode is ON, all non-admin accounts will be blocked from using the system. Your Admin account will remain accessible so you can continue working.</p>
+      <div class="system-control-feedback" id="maintenanceControlFeedback" role="status" aria-live="polite"></div>
+    </section>
+
+
     <section class="settings-card">
       <div class="card-header">
         <div class="card-icon appearance-icon" aria-hidden="true">◐</div>
