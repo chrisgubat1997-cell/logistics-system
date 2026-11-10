@@ -1405,3 +1405,16 @@
 .payment-floating-footer button:hover{background:#244c80}
 @keyframes paymentFloatingFade{from{opacity:0}to{opacity:1}}
 @media(max-width:600px){.payment-floating-summary{padding:10px}.payment-floating-card{padding:16px;border-radius:14px;max-height:92vh}.payment-floating-header h2{font-size:17px}.payment-floating-highlight{padding:14px}.payment-floating-highlight strong{font-size:21px}.payment-floating-grid{grid-template-columns:1fr}.payment-floating-grid .payment-floating-wide{grid-column:auto}}
+
+
+/* Outstanding Sales Order floating details + payment history */
+.outstanding-so-modal { position: fixed; inset: 0; z-index: 20060; display: none; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+.outstanding-so-modal.is-open { display: flex; animation: paymentFloatingFade .18s ease; }
+.outstanding-so-backdrop { position: absolute; inset: 0; background: rgba(15,23,42,.60); backdrop-filter: blur(3px); }
+.outstanding-so-panel { position: relative; z-index: 1; width: min(100%, 1050px); max-height: min(90vh, 850px); overflow: auto; padding: 24px; border-radius: 18px; background: var(--surface-card,#fff); color: var(--text-primary,#263247); box-shadow: 0 28px 90px rgba(15,23,42,.32); }
+.outstanding-so-payment-history { margin-top: 22px; }
+.outstanding-so-payment-history[hidden] { display: none !important; }
+.outstanding-so-payment-history h3 { margin: 0 0 12px; color: var(--text-primary,#263247); font-size: 13px; font-weight: 800; }
+.outstanding-so-payment-table { min-width: 760px !important; width: 100% !important; }
+.outstanding-so-payment-table td { white-space: nowrap; }
+@media(max-width:700px) { .outstanding-so-modal { padding: 10px; } .outstanding-so-panel { padding: 15px; border-radius: 14px; max-height: 93vh; } }
