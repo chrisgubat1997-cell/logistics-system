@@ -167,3 +167,36 @@ html[data-theme="dark"][data-company="GREENMETAL"] thead th,
 html[data-theme="dark"][data-company="GREENMETAL"] table thead th { background:#1A3828 !important; color:#DDF0E2 !important; }
 html[data-theme="dark"][data-company="GREENMETAL"] tbody tr:nth-child(even) { background:#142A1E !important; }
 html[data-theme="dark"][data-company="GREENMETAL"] tbody tr:hover { background:#1A3828 !important; }
+
+@media (max-width: 600px) {
+  .topbar {
+    height:auto !important;
+    min-height:72px;
+    padding:8px 10px !important;
+  }
+  .user-area {
+    width:100%;
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) auto;
+    justify-content:end;
+    align-items:center;
+    gap:6px;
+  }
+  #welcomeUser { display:none !important; }
+  .company-context {
+    justify-self:end;
+    padding:6px 8px;
+    font-size:9px;
+    letter-spacing:.04em;
+  }
+  .company-switch-btn {
+    justify-self:start;
+    padding:7px 9px;
+    font-size:9px;
+    letter-spacing:0;
+  }
+  .profile-btn,.logout-btn {
+    padding:8px 10px !important;
+    font-size:9px !important;
+  }
+}
