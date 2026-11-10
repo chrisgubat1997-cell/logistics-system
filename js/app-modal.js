@@ -51,9 +51,9 @@
         });
         document.addEventListener("keydown", function (event) {
             if (!active) return;
-            if (event.key === "Escape" || event.key === "Enter") {
+            if (event.key === "Escape") {
                 event.preventDefault();
-                closeCurrent();
+                closeCurrent(false);
             }
         });
     }
@@ -90,7 +90,7 @@
         titleNode.textContent = style.title;
         messageNode.textContent = item.message;
         iconNode.textContent = style.icon;
-        closeButton.textContent = item.confirm ? "Yes, Leave" : "Okay";
+        closeButton.textContent = item.confirm ? (item.confirmLabel || "Yes, Leave") : "Okay";
         cancelButton.style.display = item.confirm ? "inline-flex" : "none";
         closeButton.focus();
         document.body.classList.add("app-modal-open");
@@ -119,13 +119,14 @@
             queue.push({ message: message == null ? "" : String(message), type: type, title: title });
             showNext();
         },
-        confirm: function (message, title) {
+        confirm: function (message, title, confirmLabel) {
             return new Promise(function (resolve) {
                 queue.push({
                     message: message == null ? "" : String(message),
                     type: "warning",
                     title: title || "Confirm Action",
                     confirm: true,
+                    confirmLabel: confirmLabel || "Yes, Leave",
                     resolve: resolve
                 });
                 showNext();
