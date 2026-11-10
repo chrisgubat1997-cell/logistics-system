@@ -511,9 +511,20 @@ function cancelPayment() {
 function getPaymentSessionToken() {
     try {
         const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
-        const user = saved.account || saved.user || saved;
-        return String(user.sessionToken || user.session_token || saved.sessionToken || saved.session_token || "").trim();
+        // Keep token resolution consistent with the main company switch and
+        // Delivery modules. Some login/account responses use "token" or wrap
+        // the account under account/user/auth/session.
+        const account = saved.account || saved.user || saved.profile || saved;
+        const auth = saved.auth || account.auth || {};
+        const session = saved.session || account.session || {};
+        const token =
+            saved.sessionToken || saved.session_token || saved.token ||
+            account.sessionToken || account.session_token || account.token ||
+            auth.sessionToken || auth.session_token || auth.token ||
+            session.sessionToken || session.session_token || session.token || "";
+        return String(token || "").trim();
     } catch (error) {
+        console.warn("Unable to read Create Payment session:", error);
         return "";
     }
 }
