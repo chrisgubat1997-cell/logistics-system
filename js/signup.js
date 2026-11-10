@@ -158,6 +158,9 @@ document.addEventListener(
                         "accountType"
                     );
 
+                const companyAccessInput =
+                    document.getElementById("companyAccess");
+
 
                 /* =========================================
                    CHECK INPUTS
@@ -169,7 +172,8 @@ document.addEventListener(
                     !usernameInput ||
                     !passwordInput ||
                     !confirmPasswordInput ||
-                    !accountTypeInput
+                    !accountTypeInput ||
+                    !companyAccessInput
                 ) {
 
                     console.error(
@@ -214,6 +218,11 @@ document.addEventListener(
 
                 const accountType =
                     accountTypeInput.value
+                        .trim()
+                        .toUpperCase();
+
+                const companyAccess =
+                    companyAccessInput.value
                         .trim()
                         .toUpperCase();
 
@@ -353,6 +362,19 @@ document.addEventListener(
                 }
 
 
+                if (!companyAccess) {
+                    showMessage("Please select company access.", "error");
+                    companyAccessInput.focus();
+                    return;
+                }
+
+                const allowedCompanyAccess = ["GREENMETAL", "GREENLIGHT", "BOTH"];
+                if (!allowedCompanyAccess.includes(companyAccess)) {
+                    showMessage("Invalid company access selection.", "error");
+                    companyAccessInput.focus();
+                    return;
+                }
+
                 if (!accountType) {
 
                     showMessage(
@@ -453,7 +475,10 @@ document.addEventListener(
                             password,
 
                         accountType:
-                            accountType
+                            accountType,
+
+                        companyAccess:
+                            companyAccess
 
                     }
 
