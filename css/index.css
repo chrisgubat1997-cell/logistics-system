@@ -1877,3 +1877,14 @@ body.sidebar-collapsed .sales-submenu .sidebar-item-icon{font-size:17px!importan
  .sales-submenu-toggle{min-height:42px}
  .sales-submenu{padding-left:9px}
 }
+
+
+/* GLOBAL SO 360 SEARCH — top-right beside profile */
+.global-so-search{height:36px;width:clamp(190px,24vw,330px);display:flex;align-items:center;gap:7px;padding:0 10px;border:1px solid var(--border-color,#d7e0e9);border-radius:9px;background:var(--card-bg,#fff);color:var(--text-primary,#334155);box-sizing:border-box;transition:border-color .18s ease,box-shadow .18s ease}
+.global-so-search:focus-within{border-color:#16865b;box-shadow:0 0 0 3px rgba(22,134,91,.10)}
+.global-so-search>span{font-size:21px;color:#64748b;line-height:1}
+.global-so-search input{width:100%;min-width:0;border:0!important;outline:0!important;box-shadow:none!important;background:transparent!important;color:inherit!important;padding:0!important;font-size:11px!important}
+.global-so-search small{font-size:9px;font-weight:800;color:#16865b;white-space:nowrap}
+@media(max-width:900px){.global-so-search{width:clamp(155px,22vw,230px)}}
+@media(max-width:600px){.global-so-search{width:min(42vw,190px);height:33px;padding:0 7px}.global-so-search input{font-size:10px!important}.global-so-search small{display:none}}
+@media(max-width:420px){.global-so-search{width:36vw}.global-so-search input::placeholder{color:transparent}}
