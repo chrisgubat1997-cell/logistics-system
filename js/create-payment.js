@@ -66,6 +66,10 @@ let currentSalesOrderTotal = 0;
 let currentRequiredDP = 0;
 let currentPreviousPaid = 0;
 let currentRemainingBalance = 0;
+let currentCustomerCreditBalance = 0;
+let currentCustomerCreditApplied = 0;
+let currentCustomerCreditRecord = null;
+let customerCreditRequestId = 0;
 
 
 /* =========================================================
@@ -374,17 +378,15 @@ function bindCreatePaymentEvents() {
        ===================================================== */
 
     if (currentPaymentInput) {
-
-        currentPaymentInput.addEventListener(
-            "input",
-            function () {
-
-                updatePaymentSummary();
-
-            }
-        );
-
+        currentPaymentInput.addEventListener("input", updatePaymentSummary);
     }
+
+    const creditInput = document.getElementById("paymentCreditToApplyInput");
+    const applyCreditButton = document.getElementById("applyCustomerCreditBtn");
+    const clearCreditButton = document.getElementById("clearCustomerCreditBtn");
+    if (creditInput) creditInput.addEventListener("input", updatePaymentSummary);
+    if (applyCreditButton) applyCreditButton.addEventListener("click", applyAvailableCustomerCredit);
+    if (clearCreditButton) clearCreditButton.addEventListener("click", clearAppliedCustomerCredit);
 
 
     /* =====================================================
@@ -1233,6 +1235,7 @@ function loadSalesOrderInformation(
     );
 
     renderSelectedSOPaymentTransactions(soNumber);
+    loadCustomerCreditForSO(so);
 
 }
 
@@ -1249,7 +1252,13 @@ function clearSalesOrderInformation() {
     currentRequiredDP = 0;
     currentPreviousPaid = 0;
     currentRemainingBalance = 0;
-
+    currentCustomerCreditBalance = 0;
+    currentCustomerCreditApplied = 0;
+    currentCustomerCreditRecord = null;
+    customerCreditRequestId++;
+    const creditPanel = document.getElementById("customerCreditPanel");
+    if (creditPanel) creditPanel.hidden = true;
+    setValue("paymentCreditToApplyInput", "0");
 
     setValue(
         "paymentSOClient",
@@ -2004,29 +2013,108 @@ function getPaymentStatusFromBalance(
 
 
 /* =========================================================
+   CUSTOMER CREDIT LOOKUP + APPLICATION PREVIEW
+   ========================================================= */
+
+function getSalesOrderCustomerId(so) {
+    return String(so && (so.CUSTOMER_ID || so.customerId || so.customerID) || "").trim();
+}
+
+function getCreditBalance(record) {
+    if (!record) return 0;
+    const raw = record.AVAILABLE_CREDIT !== undefined && record.AVAILABLE_CREDIT !== null && record.AVAILABLE_CREDIT !== ""
+        ? record.AVAILABLE_CREDIT : record.CREDIT_BALANCE;
+    return Math.max(0, parseMoney(raw));
+}
+
+async function loadCustomerCreditForSO(so) {
+    const requestId = ++customerCreditRequestId;
+    currentCustomerCreditBalance = 0;
+    currentCustomerCreditApplied = 0;
+    currentCustomerCreditRecord = null;
+    setValue("paymentCreditToApplyInput", "0");
+    const panel = document.getElementById("customerCreditPanel");
+    const balanceText = document.getElementById("customerCreditAvailableAmount");
+    const statusText = document.getElementById("customerCreditLookupStatus");
+    const input = document.getElementById("paymentCreditToApplyInput");
+    if (panel) panel.hidden = !so;
+    if (balanceText) balanceText.textContent = formatCurrency(0);
+    if (statusText) statusText.textContent = so ? "Checking customer credit..." : "Select a Sales Order to check credit.";
+    if (input) input.max = "0";
+    if (!so) { updatePaymentSummary(); return; }
+
+    const customerId = getSalesOrderCustomerId(so);
+    const customerName = getSalesOrderClient(so);
+    try {
+        const result = await paymentAPI("getCustomerCredits", {
+            customerId: customerId,
+            clientName: customerName
+        });
+        if (requestId !== customerCreditRequestId || selectedSalesOrder !== so) return;
+        const records = Array.isArray(result.customerCredits) ? result.customerCredits :
+            (Array.isArray(result.records) ? result.records : []);
+        const normalizedName = paymentSOKey(customerName);
+        const record = records.find(function(row) {
+            if (customerId) return String(row.CUSTOMER_ID || "").trim() === customerId;
+            return paymentSOKey(row.CLIENT_NAME || row.CUSTOMER_NAME) === normalizedName;
+        }) || null;
+        currentCustomerCreditRecord = record;
+        currentCustomerCreditBalance = getCreditBalance(record);
+        if (balanceText) balanceText.textContent = formatCurrency(currentCustomerCreditBalance);
+        if (input) input.max = String(currentCustomerCreditBalance);
+        if (statusText) {
+            statusText.textContent = currentCustomerCreditBalance > 0
+                ? "Available credit found for this customer in the active company database."
+                : "No available customer credit for this customer.";
+        }
+        updatePaymentSummary();
+    } catch (error) {
+        if (requestId !== customerCreditRequestId) return;
+        currentCustomerCreditBalance = 0;
+        currentCustomerCreditRecord = null;
+        if (statusText) statusText.textContent = "Unable to check customer credit. Please refresh or try again.";
+        console.error("Customer credit lookup failed:", error);
+        updatePaymentSummary();
+    }
+}
+
+function applyAvailableCustomerCredit() {
+    if (!currentCustomerCreditRecord || currentCustomerCreditBalance <= 0) return;
+    const cash = getNumericInput("paymentCurrentAmountInput");
+    const dueBefore = Math.max(0, currentSalesOrderTotal - currentPreviousPaid);
+    const cashApplied = Math.min(cash, dueBefore);
+    const maxApplicable = Math.min(currentCustomerCreditBalance, Math.max(0, dueBefore - cashApplied));
+    setValue("paymentCreditToApplyInput", maxApplicable.toFixed(2));
+    updatePaymentSummary();
+}
+
+function clearAppliedCustomerCredit() {
+    setValue("paymentCreditToApplyInput", "0");
+    updatePaymentSummary();
+}
+
+
+/* =========================================================
    UPDATE PAYMENT SUMMARY
    ========================================================= */
 
 function updatePaymentSummary() {
 
-    const currentPayment =
-        getNumericInput(
-            "paymentCurrentAmountInput"
-        );
+    const currentPayment = Math.max(0, getNumericInput("paymentCurrentAmountInput"));
+    const dueBeforePayment = Math.max(0, currentSalesOrderTotal - currentPreviousPaid);
+    const cashApplied = Math.min(currentPayment, dueBeforePayment);
+    const creditInput = Math.max(0, getNumericInput("paymentCreditToApplyInput"));
+    currentCustomerCreditApplied = Math.min(
+        creditInput,
+        currentCustomerCreditBalance,
+        Math.max(0, dueBeforePayment - cashApplied)
+    );
+    if (document.getElementById("paymentCreditToApplyInput")) {
+        document.getElementById("paymentCreditToApplyInput").value = currentCustomerCreditApplied.toFixed(2);
+    }
 
-
-    const remaining =
-        Math.max(
-            0,
-            currentSalesOrderTotal -
-            currentPreviousPaid -
-            currentPayment
-        );
-
-
-    const totalPaidAfterPayment =
-        currentPreviousPaid +
-        currentPayment;
+    const remaining = Math.max(0, dueBeforePayment - cashApplied - currentCustomerCreditApplied);
+    const totalPaidAfterPayment = currentPreviousPaid + cashApplied + currentCustomerCreditApplied;
 
 
     /* =====================================================
@@ -2077,11 +2165,8 @@ function updatePaymentSummary() {
     );
 
     // Preview excess payment as Customer Credit in the right summary card.
-    setText(
-        "paymentCreditAmountDisplay",
-        formatCurrency(paymentOver)
-    );
-
+    setText("paymentCreditAmountDisplay", formatCurrency(paymentOver));
+    setText("paymentCustomerCreditAppliedDisplay", formatCurrency(currentCustomerCreditApplied));
     setValue("paymentOverInput", formatCurrency(paymentOver));
 
 
@@ -2393,6 +2478,7 @@ async function savePayment() {
         project: project,
         billingAddress: billingAddress,
         currentPayment: currentPayment,
+        creditToApply: currentCustomerCreditApplied,
         receiptType: getValue("paymentReceiptType"),
         receiptNo: getValue("paymentReceiptNo"),
         referenceNo: getValue("paymentReferenceNo"),
@@ -2412,21 +2498,26 @@ async function savePayment() {
         // Force a fresh read so the next payment uses the latest applied SO amount.
         paymentDataLoaded = false;
         await loadPaymentDataFromDatabase();
+        await loadCustomerCreditForSO(selectedSalesOrder);
 
         const appliedAmount = Number(result.soAppliedAmount ?? savedPayment.SO_APPLIED_AMOUNT ?? currentPayment) || 0;
         const creditAmount = Number(result.creditAmount ?? savedPayment.CREDIT_AMOUNT ?? 0) || 0;
+        const creditAppliedAmount = Number(result.creditAppliedAmount ?? savedPayment.CUSTOMER_CREDIT_APPLIED ?? 0) || 0;
         showPaymentResultModal(
             "success",
-            creditAmount > 0 ? "Payment Saved with Customer Credit" : "Payment Successfully Saved",
-            creditAmount > 0
-                ? "The payment was saved successfully. The excess amount has been added to the customer's credit balance."
-                : "The payment has been successfully recorded in the Google Sheets database.",
+            creditAppliedAmount > 0 ? "Customer Credit Applied Successfully" : creditAmount > 0 ? "Payment Saved with Customer Credit" : "Payment Successfully Saved",
+            creditAppliedAmount > 0
+                ? "The customer's existing credit was successfully applied to this Sales Order."
+                : creditAmount > 0
+                    ? "The excess amount has been added to the customer's available credit balance."
+                    : "The payment has been successfully recorded in the Google Sheets database.",
             [
                 { label: "Payment No.", value: savedPayment.PAYMENT_NO || savedPayment.paymentNo || paymentNo },
                 { label: "Sales Order", value: soNo },
                 { label: "Amount Received", value: formatCurrency(currentPayment) },
                 { label: "Applied to SO", value: formatCurrency(appliedAmount) },
-                { label: "Customer Credit", value: formatCurrency(creditAmount), highlight: creditAmount > 0 }
+                { label: "Existing Credit Applied", value: formatCurrency(creditAppliedAmount), highlight: creditAppliedAmount > 0 },
+                { label: "New Overpayment Credit", value: formatCurrency(creditAmount), highlight: creditAmount > 0 }
             ],
             true
         );
@@ -2527,8 +2618,8 @@ function validatePayment() {
     if (!paymentMethod) {
         return { valid:false, message:"Please select the payment method." };
     }
-    if (!getValue("paymentReferenceNo")) {
-        return { valid:false, message:"Reference No. is required." };
+    if (currentPayment > 0 && !getValue("paymentReferenceNo")) {
+        return { valid:false, message:"Reference No. is required for a cash collection." };
     }
     if (!client) {
 
