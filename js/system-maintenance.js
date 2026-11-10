@@ -24,7 +24,7 @@
   function ensureOverlay() {
     let overlay=document.getElementById("systemMaintenanceOverlay"); if(overlay)return overlay;
     overlay=document.createElement("div");overlay.id="systemMaintenanceOverlay";
-    overlay.innerHTML='<div class="maintenance-overlay-card"><img src="assets/logo.png" alt="LOGIS-TECH"><h1>System Under Maintenance</h1><p id="systemMaintenanceOverlayMessage">The system is temporarily unavailable while maintenance is being performed.</p><div class="maintenance-caption">LOGIS-TECH SYSTEM · PLEASE CHECK BACK LATER</div></div>';
+    overlay.innerHTML='<div class="maintenance-overlay-card"><img src="assets/logo.png" alt="LOGIS-TECH SYSTEM logo"><h1>System Under Maintenance</h1><p id="systemMaintenanceOverlayMessage">The system is temporarily unavailable while maintenance is being performed.</p><div class="maintenance-caption">LOGIS-TECH SYSTEM · PLEASE CHECK BACK LATER</div></div>';
     document.body.appendChild(overlay);return overlay;
   }
   function applyStatus(status) {
