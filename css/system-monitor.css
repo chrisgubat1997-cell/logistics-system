@@ -1,0 +1,28 @@
+/* ADMIN SYSTEM MONITOR */
+.system-monitor-card { grid-column: 1 / -1; }
+.system-monitor-head { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.system-monitor-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.system-monitor-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:18px 20px; }
+.system-monitor-metric { min-width:0; padding:14px; border:1px solid var(--border); border-radius:12px; background:var(--surface-subtle,#f8fafc); }
+.system-monitor-metric span { display:block; color:var(--text-muted); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.system-monitor-metric strong { display:block; margin-top:7px; color:var(--text); font-size:16px; font-weight:800; overflow-wrap:anywhere; }
+.system-monitor-metric small { display:block; margin-top:4px; color:var(--text-secondary); font-size:10px; line-height:1.45; }
+.monitor-status-value.good { color:#16834b; }
+.monitor-status-value.bad { color:#c2413a; }
+.monitor-status-value.warn { color:#b7791f; }
+.monitor-status-value.neutral { color:var(--text); }
+.system-monitor-lower { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:16px; padding:0 20px 18px; }
+.system-monitor-subpanel { min-width:0; border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.system-monitor-subpanel h3 { padding:12px 14px; background:var(--surface-subtle,#f8fafc); color:var(--text); font-size:12px; border-bottom:1px solid var(--border); }
+.monitor-error-list { max-height:190px; overflow:auto; padding:10px 14px; }
+.monitor-error-item { padding:9px 0; border-bottom:1px solid var(--border); }
+.monitor-error-item:last-child { border-bottom:0; }
+.monitor-error-item strong { display:block; color:#b42318; font-size:10px; overflow-wrap:anywhere; }
+.monitor-error-item small { display:block; margin-top:3px; color:var(--text-muted); font-size:9px; overflow-wrap:anywhere; }
+.monitor-empty { padding:16px 0; color:var(--text-secondary); font-size:10px; }
+.system-monitor-foot { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; padding:12px 20px; border-top:1px solid var(--border); color:var(--text-muted); font-size:10px; }
+.system-monitor-note { margin:0 20px 14px; padding:10px 12px; border-radius:9px; background:#eff6ff; color:#31577f; font-size:10px; line-height:1.5; }
+#monitorCleanupResult { padding:0 20px 14px; color:var(--text-secondary); font-size:10px; line-height:1.5; }
+@media(max-width:900px) { .system-monitor-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .system-monitor-grid { grid-template-columns:1fr 1fr; padding:14px; } .system-monitor-lower { grid-template-columns:1fr; padding:0 14px 14px; } .system-monitor-foot { padding:10px 14px; } .system-monitor-note,#monitorCleanupResult { margin-left:14px; margin-right:14px; padding-left:0; padding-right:0; } }
+@media(prefers-reduced-motion:reduce) { .system-monitor-card,.system-monitor-card * { transition:none!important; } }
