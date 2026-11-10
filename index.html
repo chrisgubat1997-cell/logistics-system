@@ -187,19 +187,29 @@
              SALES ORDER
         ================================================== -->
 
-        <button
-            class="menu-btn"
-            onclick="showPage('sales', this)"
-        >
-
-            📄 Sales Order
-
-        </button>
-
-
-        <button class="menu-btn" type="button" onclick="showPage('soMonitoring', this)">
-            🔎 SO Monitoring
-        </button>
+        <div class="sales-menu-group" data-sales-menu-group>
+            <div class="sales-menu-main">
+                <button
+                    class="menu-btn sales-main-btn"
+                    type="button"
+                    onclick="showPage('sales', this)"
+                >
+                    <span class="sidebar-item-icon" aria-hidden="true">📄</span>
+                    <span class="sidebar-item-label">Sales Order</span>
+                </button>
+                <button class="sales-submenu-toggle" type="button"
+                    aria-label="Show Sales Order submenu" aria-expanded="false"
+                    aria-controls="salesOrderSubmenu" onclick="toggleSalesOrderSubmenu()">
+                    <span aria-hidden="true">⌄</span>
+                </button>
+            </div>
+            <div class="sales-submenu" id="salesOrderSubmenu" hidden>
+                <button class="menu-btn sales-submenu-btn" type="button" onclick="showPage('soMonitoring', this)">
+                    <span class="sidebar-item-icon" aria-hidden="true">🔎</span>
+                    <span class="sidebar-item-label">360° Quick View</span>
+                </button>
+            </div>
+        </div>
 
         <!-- =================================================
              JO REGISTER (PRODUCTION)
@@ -1074,6 +1084,17 @@ let aboutModuleLoaded = false;
    PAGE NAVIGATION
 ========================================================= */
 
+function toggleSalesOrderSubmenu() {
+    const submenu = document.getElementById('salesOrderSubmenu');
+    const toggle = document.querySelector('.sales-submenu-toggle');
+    if (!submenu || !toggle) return;
+    const willOpen = submenu.hidden;
+    submenu.hidden = !willOpen;
+    toggle.setAttribute('aria-expanded', String(willOpen));
+    toggle.setAttribute('aria-label', willOpen ? 'Hide Sales Order submenu' : 'Show Sales Order submenu');
+    toggle.classList.toggle('is-open', willOpen);
+}
+
 function showPage(pageId, button) {
 
     console.log(
@@ -1207,6 +1228,13 @@ function showPage(pageId, button) {
 
 
     if (pageId === 'soMonitoring') {
+        const submenu = document.getElementById('salesOrderSubmenu');
+        const toggle = document.querySelector('.sales-submenu-toggle');
+        if (submenu && toggle) {
+            submenu.hidden = false;
+            toggle.setAttribute('aria-expanded', 'true');
+            toggle.classList.add('is-open');
+        }
         loadSOMonitoringModule();
     }
 
