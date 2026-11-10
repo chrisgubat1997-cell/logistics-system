@@ -636,7 +636,21 @@
 </main>
 
 
-<script src="../js/create-payment.js?v=20261110-payment-authfix02"></script>
+
+<!-- PAYMENT RESULT MODAL -->
+<div class="payment-result-modal" id="paymentResultModal" aria-hidden="true">
+    <div class="payment-result-backdrop" data-payment-result-close></div>
+    <section class="payment-result-card" role="alertdialog" aria-modal="true" aria-labelledby="paymentResultTitle" aria-describedby="paymentResultMessage">
+        <div class="payment-result-icon" id="paymentResultIcon" aria-hidden="true">✓</div>
+        <p class="payment-result-eyebrow" id="paymentResultEyebrow">PAYMENT STATUS</p>
+        <h2 id="paymentResultTitle">Payment Saved</h2>
+        <p class="payment-result-message" id="paymentResultMessage">Your payment has been processed.</p>
+        <div class="payment-result-details" id="paymentResultDetails" hidden></div>
+        <button type="button" class="payment-result-button" id="paymentResultCloseBtn">Done</button>
+    </section>
+</div>
+
+<script src="../js/create-payment.js?v=20261110-payment-result-modal01"></script>
 
 </body>
 </html>
