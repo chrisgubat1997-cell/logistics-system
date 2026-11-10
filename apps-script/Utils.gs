@@ -9,12 +9,16 @@
    GET DATABASE
 ========================================================= */
 
+var ACTIVE_COMPANY_CONTEXT_ = null;
+
 function getDatabase() {
-
-  return SpreadsheetApp.openById(
-    CONFIG.DATABASE_SPREADSHEET_ID
-  );
-
+  const context = ACTIVE_COMPANY_CONTEXT_;
+  const company = context && context.company ? context.company : "GREENMETAL";
+  const spreadsheetId = company === "GREENLIGHT"
+    ? CONFIG.GREENLIGHT_DATABASE_SPREADSHEET_ID
+    : CONFIG.GREENMETAL_DATABASE_SPREADSHEET_ID;
+  if (!spreadsheetId) throw new Error("No operational database is configured for " + company + ".");
+  return SpreadsheetApp.openById(spreadsheetId);
 }
 
 
@@ -24,10 +28,11 @@ function getDatabase() {
 
 function getSheet(sheetName) {
 
-  const ss = getDatabase();
+  const ss = String(sheetName).toUpperCase() === "USERS"
+    ? SpreadsheetApp.openById(AUTH_SPREADSHEET_ID)
+    : getDatabase();
 
-  const sheet =
-    ss.getSheetByName(sheetName);
+  const sheet = ss.getSheetByName(sheetName);
 
   if (!sheet) {
 
@@ -276,6 +281,94 @@ function getCurrentYear() {
 }
 
 
+
+/* =========================================================
+   COMPANY CONTEXT
+   Resolved from the authenticated session + central USERS DB.
+   Client-supplied company values are never trusted.
+========================================================= */
+function getCentralUsersSheet_() {
+  const ss = SpreadsheetApp.openById(AUTH_SPREADSHEET_ID);
+  const sheet = ss.getSheetByName(USERS_SHEET_NAME);
+  if (!sheet) throw new Error("Central USERS sheet not found.");
+  return sheet;
+}
+
+function normalizeCompanyAccess_(value) {
+  const raw = String(value || "").trim().toUpperCase();
+  if (raw === "BOTH") return ["GREENMETAL", "GREENLIGHT"];
+  return raw.split(/[,;|]/).map(function(item) {
+    return item.trim();
+  }).filter(function(item, index, all) {
+    return ["GREENMETAL", "GREENLIGHT"].includes(item) && all.indexOf(item) === index;
+  });
+}
+
+function establishCompanyContext_(payload) {
+  payload = payload || {};
+  const token = String(payload.sessionToken || payload.session_token || "").trim();
+  if (!token) throw new Error("AUTH_REQUIRED: Please log out and log in again.");
+
+  const sessionJson = CacheService.getScriptCache().get("LOGISTECH_SESSION_" + token);
+  if (!sessionJson) throw new Error("SESSION_EXPIRED: Your session expired. Please log in again.");
+
+  let session;
+  try { session = JSON.parse(sessionJson); }
+  catch (error) { throw new Error("INVALID_SESSION: Please log in again."); }
+
+  const sheet = getCentralUsersSheet_();
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) throw new Error("No user accounts were found in the central USERS database.");
+
+  const headers = values[0].map(function(value) {
+    return String(value || "").trim().toUpperCase();
+  });
+  const indexes = {
+    userId: headers.indexOf("USER_ID"),
+    username: headers.indexOf("USERNAME"),
+    status: headers.indexOf("STATUS"),
+    companyAccess: headers.indexOf("COMPANY_ACCESS"),
+    defaultCompany: headers.indexOf("DEFAULT_COMPANY")
+  };
+  if (Object.keys(indexes).some(function(key) { return indexes[key] < 0; })) {
+    throw new Error("Central USERS must contain USER_ID, USERNAME, STATUS, COMPANY_ACCESS and DEFAULT_COMPANY headers.");
+  }
+
+  let matched = null;
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    if (String(row[indexes.userId] || "").trim() === String(session.userId || "").trim() &&
+        String(row[indexes.username] || "").trim().toLowerCase() === String(session.username || "").trim().toLowerCase()) {
+      matched = row;
+      break;
+    }
+  }
+  if (!matched) throw new Error("ACCOUNT_NOT_FOUND: Please log in again.");
+  if (String(matched[indexes.status] || "").trim().toUpperCase() !== "ACTIVE") {
+    throw new Error("ACCOUNT_INACTIVE: This account is not active.");
+  }
+
+  const access = normalizeCompanyAccess_(matched[indexes.companyAccess]);
+  const defaultCompany = String(matched[indexes.defaultCompany] || "").trim().toUpperCase();
+  if (!access.length || !["GREENMETAL", "GREENLIGHT"].includes(defaultCompany) || access.indexOf(defaultCompany) < 0) {
+    throw new Error("COMPANY_NOT_CONFIGURED: Ask the administrator to set a valid COMPANY_ACCESS and DEFAULT_COMPANY for this account.");
+  }
+
+  const spreadsheetId = defaultCompany === "GREENLIGHT"
+    ? CONFIG.GREENLIGHT_DATABASE_SPREADSHEET_ID
+    : CONFIG.GREENMETAL_DATABASE_SPREADSHEET_ID;
+  if (!spreadsheetId) throw new Error("The operational database for " + defaultCompany + " is not configured.");
+
+  ACTIVE_COMPANY_CONTEXT_ = {
+    company: defaultCompany,
+    companyAccess: access,
+    userId: String(session.userId || ""),
+    username: String(session.username || ""),
+    spreadsheetId: spreadsheetId
+  };
+  return ACTIVE_COMPANY_CONTEXT_;
+}
+
 /* =========================================================
    SERVER-SIDE SESSION + ROLE AUTHORIZATION
    A valid login session is required for protected actions.
@@ -285,6 +378,7 @@ function getCurrentYear() {
 function authorizeRole_(payload, allowedRoles) {
   payload = payload || {};
   allowedRoles = Array.isArray(allowedRoles) ? allowedRoles : [];
+  const companyContext = establishCompanyContext_(payload);
 
   const sessionToken = String(payload.sessionToken || "").trim();
   if (!sessionToken) {
@@ -335,7 +429,9 @@ function authorizeRole_(payload, allowedRoles) {
         userId: rowUserId,
         username: String(values[i][usernameIndex] || "").trim(),
         role: String(values[i][roleIndex] || "").trim().toUpperCase(),
-        status: String(values[i][statusIndex] || "").trim().toUpperCase()
+        status: String(values[i][statusIndex] || "").trim().toUpperCase(),
+        company: companyContext.company,
+        companyAccess: companyContext.companyAccess
       };
       break;
     }
