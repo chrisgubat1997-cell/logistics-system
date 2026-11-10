@@ -5,7 +5,8 @@
    Access: active user account with ADMIN or PRODUCTION role.
 ========================================================= */
 
-function requireJORegisterAccess_(payload) {
+function requireJORegisterAccess_(payload, requireManage) {
+  requireManage = requireManage !== false;
   payload = payload || {};
   const token = String(payload.sessionToken || payload.session_token || "").trim();
   if (!token) throw new Error("Your login session is missing. Please log in again.");
@@ -51,8 +52,8 @@ function requireJORegisterAccess_(payload) {
   if (String(matched[statusIndex] || "").trim().toUpperCase() !== "ACTIVE") {
     throw new Error("This user account is not active.");
   }
-  if (!["ADMIN", "PRODUCTION"].includes(String(matched[roleIndex] || "").trim().toUpperCase())) {
-    throw new Error("Access denied. JO Register requires an Admin or Production account.");
+  if (requireManage && !["ADMIN", "PRODUCTION"].includes(String(matched[roleIndex] || "").trim().toUpperCase())) {
+    throw new Error("Access denied. JO Register updates require an Admin or Production account.");
   }
 
   return {
@@ -85,7 +86,9 @@ function joRegisterDateValue_(value) {
 
 function getJORegisterData(payload) {
   try {
-    const user = requireJORegisterAccess_(payload);
+    // All active authenticated users may view JO Register records.
+    // Only updateJORegisterEntry() requires ADMIN / PRODUCTION.
+    const user = requireJORegisterAccess_(payload, false);
     const sheet = getSheet(CONFIG.SHEETS.SALES_ORDERS);
     let values = sheet.getDataRange().getValues();
     if (!values.length) return { success: true, salesOrders: [], count: 0 };
