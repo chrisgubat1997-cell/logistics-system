@@ -741,10 +741,13 @@ function renderSelectedSOPaymentTransactions(soNumber) {
     });
     if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="create-payment-unpaid-empty">No saved payment transactions found for this Sales Order.</td></tr>'; return; }
     tbody.innerHTML = rows.map(function(payment) {
-        const amount = payment.CURRENT_PAYMENT ?? payment.currentPayment ?? payment.AMOUNT ?? payment.amount ?? payment.SO_APPLIED_AMOUNT ?? payment.soAppliedAmount ?? 0;
+        const cashAmount = parseMoney(payment.CURRENT_PAYMENT ?? payment.currentPayment ?? payment.AMOUNT ?? payment.amount ?? 0);
+        const creditApplied = parseMoney(payment.CUSTOMER_CREDIT_APPLIED ?? payment.customerCreditApplied ?? 0);
+        const amount = cashAmount + creditApplied;
         const date = payment.PAYMENT_DATE || payment.paymentDate || payment.date || "";
         const status = String(payment.PAYMENT_STATUS || payment.paymentStatus || payment.status || "—").toUpperCase();
-        return '<tr><td>'+escapePaymentHTML(payment.PAYMENT_NO || payment.paymentNo || payment.PAYMENT_ID || "—")+'</td><td>'+escapePaymentHTML(formatPaymentSODate(date))+'</td><td>'+escapePaymentHTML(payment.PAYMENT_METHOD || payment.paymentMethod || "—")+'</td><td>'+escapePaymentHTML(payment.RECEIPT_NO || payment.receiptNo || "—")+'</td><td>'+escapePaymentHTML(payment.REFERENCE_NO || payment.referenceNo || "—")+'</td><td class="create-payment-unpaid-balance">'+escapePaymentHTML(formatPaymentCurrency(amount))+'</td><td>'+escapePaymentHTML(status)+'</td></tr>';
+        const method = cashAmount <= 0 && creditApplied > 0 ? "CUSTOMER CREDIT" : (payment.PAYMENT_METHOD || payment.paymentMethod || "—");
+        return '<tr><td>'+escapePaymentHTML(payment.PAYMENT_NO || payment.paymentNo || payment.PAYMENT_ID || "—")+'</td><td>'+escapePaymentHTML(formatPaymentSODate(date))+'</td><td>'+escapePaymentHTML(method)+'</td><td>'+escapePaymentHTML(payment.RECEIPT_NO || payment.receiptNo || "—")+'</td><td>'+escapePaymentHTML(payment.REFERENCE_NO || payment.referenceNo || "—")+'</td><td class="create-payment-unpaid-balance">'+escapePaymentHTML(formatPaymentCurrency(amount))+'</td><td>'+escapePaymentHTML(status)+'</td></tr>';
     }).join("");
 }
 
@@ -2211,9 +2214,9 @@ function updatePaymentSummary() {
 
     setText(
         "summaryPaymentMethod",
-        getValue(
-            "paymentMethod"
-        ) || "—"
+        (currentPayment <= 0 && currentCustomerCreditApplied > 0)
+            ? "CUSTOMER CREDIT"
+            : (getValue("paymentMethod") || "—")
     );
 
     setText(
