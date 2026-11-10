@@ -106,11 +106,6 @@
 
   function renderErrors() {
     setText("monitorErrorCount", recentErrors.length);
-    setText("monitorMemoryUsage", memory ? formatBytes(memory.used) + " / " + formatBytes(memory.limit) : "Not exposed");
-    setText("monitorDatabaseSize", database.online ? formatBytes(database.databaseSizeBytes) : "Unavailable");
-    setText("monitorDatabaseDetail", database.online ? database.company + " · " + database.sheetCount + " sheets · " + database.databaseName : database.error || "Database metadata unavailable");
-    setText("monitorDatabaseSize", database.online ? formatBytes(database.databaseSizeBytes) : "Unavailable");
-    setText("monitorDatabaseDetail", database.online ? database.company + " · " + database.sheetCount + " sheets · " + database.databaseName : database.error || "Database metadata unavailable");
     const list = byId("monitorErrorList");
     if (!list) return;
     if (!recentErrors.length) {
@@ -266,6 +261,8 @@
     setText("monitorAssetCount", assets.count + " resources loaded");
     setText("monitorLoadTime", loadTime !== null ? (loadTime / 1000).toFixed(2) + " sec" : "Not available");
     setText("monitorMemoryUsage", memory ? formatBytes(memory.used) + " / " + formatBytes(memory.limit) : "Not exposed");
+    setText("monitorDatabaseSize", database.online ? formatBytes(database.databaseSizeBytes) : "Unavailable");
+    setText("monitorDatabaseDetail", database.online ? database.company + " · " + database.sheetCount + " sheets · " + database.databaseName : database.error || "Database metadata unavailable");
     setText("monitorLastChecked", new Date().toLocaleString());
     setText("monitorSystemName", api.system || "LOGIS-TECH SYSTEM");
     renderErrors();
