@@ -1296,7 +1296,8 @@ function createPaymentRow(
                 <button
                     type="button"
                     class="payment-action-btn"
-                    onclick="viewPaymentRecord('${escapeAttribute(paymentNo)}')"
+                    data-payment-view="${escapeHTML(paymentNo)}"
+                    aria-label="View payment ${escapeHTML(paymentNo)}"
                 >
                     VIEW
                 </button>
@@ -2888,6 +2889,29 @@ function escapeAttribute(
 
 
 /* =========================================================
+   RECENT PAYMENT VIEW BUTTON — DELEGATED CLICK HANDLER
+   Works even when the table is re-rendered after filtering.
+========================================================= */
+if (!window.__logitechPaymentViewBound) {
+    window.__logitechPaymentViewBound = true;
+    document.addEventListener('click', function (event) {
+        const button = event.target && event.target.closest
+            ? event.target.closest('[data-payment-view]')
+            : null;
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const paymentNo = button.getAttribute('data-payment-view') || '';
+        if (typeof window.viewPaymentRecord === 'function') {
+            window.viewPaymentRecord(paymentNo);
+        } else {
+            console.error('Payment summary handler is not available.');
+            alert('Payment summary is still loading. Please refresh the Payment section.');
+        }
+    }, true);
+}
+
+/* =========================================================
    AUTO INITIALIZATION
 ========================================================= */
 
@@ -2963,8 +2987,7 @@ window.clearPaymentFilters =
 window.openCreatePaymentPage =
     openCreatePaymentPage;
 
-window.viewPaymentRecord =
-    viewPaymentRecord;
+window.viewPaymentRecord = viewPaymentRecord;
 
 window.viewSalesOrderPayment =
     viewSalesOrderPayment;
