@@ -1888,3 +1888,15 @@ body.sidebar-collapsed .sales-submenu .sidebar-item-icon{font-size:17px!importan
 @media(max-width:900px){.global-so-search{width:clamp(155px,22vw,230px)}}
 @media(max-width:600px){.global-so-search{width:min(42vw,190px);height:33px;padding:0 7px}.global-so-search input{font-size:10px!important}.global-so-search small{display:none}}
 @media(max-width:420px){.global-so-search{width:36vw}.global-so-search input::placeholder{color:transparent}}
+
+
+/* SIDEBAR TYPOGRAPHY — slightly more compact navigation labels */
+.sidebar .menu .menu-btn,
+.sidebar .menu .menu-btn .sidebar-item-label {
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+}
+.sidebar .menu .sales-submenu .sales-submenu-btn,
+.sidebar .menu .sales-submenu .sidebar-item-label {
+    font-size: 10px !important;
+}
