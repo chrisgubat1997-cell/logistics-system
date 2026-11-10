@@ -34,6 +34,29 @@ document.addEventListener(
 
 
         /* =================================================
+           ADMIN-ONLY ACCESS
+        ================================================= */
+        let currentAccount = {};
+        try {
+            currentAccount = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+            currentAccount = currentAccount.account || currentAccount.user || currentAccount;
+        } catch (error) {
+            currentAccount = {};
+        }
+
+        const currentRole = String(
+            currentAccount.role || currentAccount.ROLE || currentAccount.accountType ||
+            currentAccount.account_type || currentAccount.type || ""
+        ).trim().toUpperCase();
+
+        if (localStorage.getItem("logitechLoggedIn") !== "true" ||
+            currentRole !== "ADMIN" ||
+            !currentAccount.sessionToken) {
+            document.body.innerHTML = '<main style="max-width:520px;margin:12vh auto;padding:32px;text-align:center;font-family:Arial,sans-serif;"><h2>Administrator Access Required</h2><p>Only an authenticated ADMIN account can create users.</p><a href="login.html">Return to Login</a></main>';
+            return;
+        }
+
+        /* =================================================
            VALIDATE FORM
         ================================================= */
 
@@ -413,6 +436,9 @@ document.addEventListener(
                         "createAccount",
 
                     data: {
+                        sessionToken: currentAccount.sessionToken,
+                        activeCompany: currentAccount.activeCompany || currentAccount.defaultCompany || "",
+
 
                         fullName:
                             fullName,
