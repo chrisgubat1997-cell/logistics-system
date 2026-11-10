@@ -1071,45 +1071,18 @@ function renderPaymentTable() {
             records.filter(
                 function (payment) {
 
-                    const searchable =
-                        [
+                    // Match the same lightweight contains-search pattern used
+                    // by Unpaid / Outstanding Sales Orders.
+                    const searchable = [
+                        getPaymentNo(payment),
+                        getInvoiceNo(payment),
+                        getSINo(payment),
+                        getSONo(payment),
+                        getClientName(payment),
+                        getProjectName(payment)
+                    ].join(' ').toLowerCase();
 
-                            getPaymentNo(
-                                payment
-                            ),
-
-                            getInvoiceNo(
-                                payment
-                            ),
-
-                            getSINo(
-                                payment
-                            ),
-
-                            getSONo(
-                                payment
-                            ),
-
-                            getClientName(
-                                payment
-                            ),
-
-                            getProjectName(
-                                payment
-                            ),
-
-                            getPaymentStatus(
-                                payment
-                            )
-
-                        ]
-                        .join(' ')
-                        .toLowerCase();
-
-
-                    return searchable.includes(
-                        search
-                    );
+                    return searchable.includes(search);
 
                 }
             );
