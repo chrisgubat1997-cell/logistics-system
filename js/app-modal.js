@@ -16,6 +16,8 @@
     var messageNode = null;
     var iconNode = null;
     var closeButton = null;
+    var cancelButton = null;
+    var currentResolve = null;
 
     function ensureModal() {
         if (modal || !document.body) return;
@@ -32,7 +34,7 @@
                 '</div>' +
                 '<h2 class="app-modal-title" id="appModalTitle">Notification</h2>' +
                 '<div class="app-modal-message" id="appModalMessage"></div>' +
-                '<div class="app-modal-actions"><button type="button" class="app-modal-button" id="appModalClose">Okay</button></div>' +
+                '<div class="app-modal-actions"><button type="button" class="app-modal-button app-modal-cancel" id="appModalCancel">Cancel</button><button type="button" class="app-modal-button" id="appModalClose">Okay</button></div>' +
             '</section>';
 
         document.body.appendChild(modal);
@@ -40,10 +42,12 @@
         messageNode = modal.querySelector("#appModalMessage");
         iconNode = modal.querySelector("#appModalIcon");
         closeButton = modal.querySelector("#appModalClose");
+        cancelButton = modal.querySelector("#appModalCancel");
 
-        closeButton.addEventListener("click", closeCurrent);
+        closeButton.addEventListener("click", function () { closeCurrent(true); });
+        cancelButton.addEventListener("click", function () { closeCurrent(false); });
         modal.addEventListener("click", function (event) {
-            if (event.target === modal) closeCurrent();
+            if (event.target === modal) closeCurrent(false);
         });
         document.addEventListener("keydown", function (event) {
             if (!active) return;
@@ -77,25 +81,30 @@
         }
 
         var item = queue.shift();
-        var style = classify(item.message);
+        var style = item.type ? { type: item.type, title: item.title || "Confirmation", icon: "?" } : classify(item.message);
         active = true;
+        currentResolve = item.resolve || null;
 
-        modal.className = "app-modal-backdrop is-visible " + style.type;
+        modal.className = "app-modal-backdrop is-visible " + style.type + (item.confirm ? " is-confirm" : "");
         modal.setAttribute("aria-hidden", "false");
         titleNode.textContent = style.title;
         messageNode.textContent = item.message;
         iconNode.textContent = style.icon;
-        closeButton.textContent = "Okay";
+        closeButton.textContent = item.confirm ? "Yes, Leave" : "Okay";
+        cancelButton.style.display = item.confirm ? "inline-flex" : "none";
         closeButton.focus();
         document.body.classList.add("app-modal-open");
     }
 
-    function closeCurrent() {
+    function closeCurrent(result) {
         if (!active || !modal) return;
         active = false;
-        modal.classList.remove("is-visible");
+        modal.classList.remove("is-visible", "is-confirm");
         modal.setAttribute("aria-hidden", "true");
         document.body.classList.remove("app-modal-open");
+        var resolve = currentResolve;
+        currentResolve = null;
+        if (resolve) resolve(result === true);
         window.setTimeout(showNext, 160);
     }
 
@@ -109,6 +118,18 @@
         show: function (message, type, title) {
             queue.push({ message: message == null ? "" : String(message), type: type, title: title });
             showNext();
+        },
+        confirm: function (message, title) {
+            return new Promise(function (resolve) {
+                queue.push({
+                    message: message == null ? "" : String(message),
+                    type: "warning",
+                    title: title || "Confirm Action",
+                    confirm: true,
+                    resolve: resolve
+                });
+                showNext();
+            });
         },
         close: closeCurrent
     };
