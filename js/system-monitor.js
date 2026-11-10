@@ -109,6 +109,8 @@
     setText("monitorMemoryUsage", memory ? formatBytes(memory.used) + " / " + formatBytes(memory.limit) : "Not exposed");
     setText("monitorDatabaseSize", database.online ? formatBytes(database.databaseSizeBytes) : "Unavailable");
     setText("monitorDatabaseDetail", database.online ? database.company + " · " + database.sheetCount + " sheets · " + database.databaseName : database.error || "Database metadata unavailable");
+    setText("monitorDatabaseSize", database.online ? formatBytes(database.databaseSizeBytes) : "Unavailable");
+    setText("monitorDatabaseDetail", database.online ? database.company + " · " + database.sheetCount + " sheets · " + database.databaseName : database.error || "Database metadata unavailable");
     const list = byId("monitorErrorList");
     if (!list) return;
     if (!recentErrors.length) {
@@ -151,9 +153,9 @@
 
   async function checkDatabaseHealth() {
     const now = Date.now();
-    if (lastDatabaseHealth && now - lastDatabaseCheckAt < 60000) return lastDatabaseHealth;
-
     const account = getAccount();
+    const requestedCompany = String(account.activeCompany || account.defaultCompany || "").trim().toUpperCase();
+    if (lastDatabaseHealth && lastDatabaseHealth.requestedCompany === requestedCompany && now - lastDatabaseCheckAt < 60000) return lastDatabaseHealth;
     const token = String(account.sessionToken || account.session_token || account.token || "").trim();
     if (!token) {
       lastDatabaseHealth = { online: false, error: "Admin session token unavailable", checked: true };
@@ -180,7 +182,8 @@
       }
       lastDatabaseHealth = {
         online: true,
-        company: result.company || account.activeCompany || "Active company",
+        requestedCompany: requestedCompany,
+        company: result.company || requestedCompany || "Active company",
         databaseName: result.databaseName || "Google Sheets database",
         databaseSizeBytes: Number(result.databaseSizeBytes || 0),
         sheetCount: Number(result.sheetCount || 0),
@@ -190,6 +193,7 @@
     } catch (error) {
       lastDatabaseHealth = {
         online: false,
+        requestedCompany: requestedCompany,
         error: /Unknown action|getSystemHealth/i.test(error.message)
           ? "Deploy the latest Apps Script version to enable database diagnostics."
           : error.message,
