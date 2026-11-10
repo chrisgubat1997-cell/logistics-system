@@ -117,3 +117,18 @@ body.app-modal-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
     .app-modal-backdrop, .app-modal { transition: none; }
 }
+
+/* Confirmation modal buttons */
+.app-modal-actions { gap: 10px; }
+.app-modal-cancel {
+    display: none;
+    background: transparent;
+    color: var(--text-secondary, #59665f);
+    border: 1px solid var(--border-color, #d8dfda);
+}
+.app-modal-cancel:hover {
+    background: rgba(120, 130, 125, .09);
+    color: var(--text-primary, #17251f);
+}
+.app-modal-backdrop.is-confirm .app-modal-button:not(.app-modal-cancel) { background: #9b701e; }
+.app-modal-backdrop.is-confirm .app-modal-button:not(.app-modal-cancel):hover { background: #805b17; }
