@@ -378,7 +378,26 @@ async function populateAnalyticsVehicleFilter() {
     const apiUrl = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
     try {
-        const response = await fetch(apiUrl + "?action=getFleetAnalyticsData&_=" + Date.now(), { method: "GET", cache: "no-store" });
+        const savedUser = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+        const account = savedUser.account || savedUser.user || savedUser;
+        const sessionToken = String(
+            savedUser.sessionToken || savedUser.session_token || savedUser.token ||
+            account.sessionToken || account.session_token || account.token || ""
+        ).trim();
+        if (!sessionToken) {
+            throw new Error("AUTH_REQUIRED: Session token not found. Please log out and log in again.");
+        }
+
+        const response = await fetch(apiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            cache: "no-store",
+            redirect: "follow",
+            body: JSON.stringify({
+                action: "getFleetAnalyticsData",
+                data: { sessionToken: sessionToken }
+            })
+        });
         if (!response.ok) throw new Error("HTTP " + response.status);
         const result = await response.json();
         if (!result || result.success === false) throw new Error((result && (result.message || result.error)) || "Vehicle data could not be loaded.");
