@@ -89,8 +89,13 @@ async function createSOAPI(action, data = {}) {
                         action:
                             action,
 
-                        data:
-                            data
+                        data: Object.assign({}, data || {}, {
+                            sessionToken:
+                                (data && data.sessionToken) ||
+                                getLogisTechSessionAccount().sessionToken ||
+                                getLogisTechSessionAccount().session_token ||
+                                ""
+                        })
 
                     })
                 }
@@ -918,12 +923,31 @@ function handleCustomerSelection(
         email
     );
 
+    updateGPISalesOrderField(clientName);
 
     console.log(
         "CUSTOMER SELECTED:",
         customer
     );
 
+}
+
+
+/* =========================================================
+   GREENLIGHT INTERCOMPANY SO FIELD
+========================================================= */
+function updateGPISalesOrderField(clientName) {
+    const wrapper = document.getElementById("gpiSalesOrderGroup");
+    const input = document.getElementById("gpiSalesOrderNumber");
+    if (!wrapper || !input) return;
+
+    const isGreenlightCustomer =
+        String(clientName || "").trim().toUpperCase() === "GREENLIGHT POWER INC.";
+
+    wrapper.hidden = !isGreenlightCustomer;
+    input.required = isGreenlightCustomer;
+
+    if (!isGreenlightCustomer) input.value = "";
 }
 
 
@@ -1025,6 +1049,8 @@ function setInputValue(
 ========================================================= */
 
 function clearCustomerDetailsOnly() {
+
+    updateGPISalesOrderField("");
 
     setInputValue(
         "clientName",
@@ -1941,6 +1967,19 @@ async function saveSO() {
     }
 
 
+    /* GPI SALES ORDER VALIDATION */
+    const isGreenlightCustomer =
+        String(clientName || "").trim().toUpperCase() === "GREENLIGHT POWER INC.";
+    const gpiSalesOrderNumber =
+        isGreenlightCustomer ? getValue("gpiSalesOrderNumber").trim() : "";
+
+    if (isGreenlightCustomer && !gpiSalesOrderNumber) {
+        alert("Please enter the GPI Sales Order Number for GREENLIGHT POWER INC.");
+        isSavingSO = false;
+        focusElement("gpiSalesOrderNumber");
+        return;
+    }
+
     /* ITEMS */
 
     const items =
@@ -2150,6 +2189,9 @@ async function saveSO() {
 
         customerId:
             customerId,
+
+        gpiSalesOrderNumber:
+            gpiSalesOrderNumber,
 
         clientName:
             clientName,
