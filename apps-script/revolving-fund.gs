@@ -18,7 +18,7 @@ const RF_TX_HEADERS = [
 const RF_SETTING_HEADERS = ["SETTING_KEY", "SETTING_VALUE", "UPDATED_AT", "UPDATED_BY"];
 
 function getRevolvingFundData(payload) {
-  const ss = SpreadsheetApp.openById(CONFIG.DATABASE_SPREADSHEET_ID);
+  const ss = getDatabase();
   const groupRows = rfReadSheet(ss, "REVOLVING_FUND_GROUPS", RF_GROUP_HEADERS);
   const txRows = rfReadSheet(ss, "REVOLVING_FUND_TRANSACTIONS", RF_TX_HEADERS);
   const settings = rfReadSettings(ss);
@@ -96,7 +96,7 @@ function saveRevolvingFundTransaction(payload) {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    const ss = SpreadsheetApp.openById(CONFIG.DATABASE_SPREADSHEET_ID);
+    const ss = getDatabase();
     if (groupNo) {
       const groupRows = rfReadSheet(ss, "REVOLVING_FUND_GROUPS", RF_GROUP_HEADERS);
       const group = groupRows.map(rfGroupObject).find(g=>g.replenishmentNo===groupNo);
@@ -158,7 +158,7 @@ function createRevolvingFundReplenishment(payload) {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    const ss = SpreadsheetApp.openById(CONFIG.DATABASE_SPREADSHEET_ID);
+    const ss = getDatabase();
     const sheet = rfEnsureSheet(ss, "REVOLVING_FUND_GROUPS", RF_GROUP_HEADERS);
     const rows = rfReadSheet(ss, "REVOLVING_FUND_GROUPS", RF_GROUP_HEADERS);
     const groups = rows.map(rfGroupObject);
