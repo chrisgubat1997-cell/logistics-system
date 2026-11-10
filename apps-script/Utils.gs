@@ -422,8 +422,10 @@ function authorizeRole_(payload, allowedRoles) {
     const rowUserId = String(values[i][userIdIndex] || "").trim();
     const rowUsername = String(values[i][usernameIndex] || "").trim().toLowerCase();
     if (
-      (session.userId && rowUserId === String(session.userId)) ||
-      (session.username && rowUsername === String(session.username).trim().toLowerCase())
+      session.userId &&
+      session.username &&
+      rowUserId === String(session.userId).trim() &&
+      rowUsername === String(session.username).trim().toLowerCase()
     ) {
       account = {
         userId: rowUserId,
