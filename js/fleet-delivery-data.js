@@ -116,7 +116,8 @@ async function initializeFleetDataEntry() {
 ========================================================= */
 
 async function loadFleetDeliveryData() {
-    const result = await fleetDeliveryAPI("getFleetAnalyticsData");
+    // Use POST so company-switch authentication can attach the server-issued session token.
+    const result = await fleetDeliveryAPI("getFleetAnalyticsData", {});
     const vehicles = Array.isArray(result.vehicles) ? result.vehicles : [];
     const trips = Array.isArray(result.tripTickets) ? result.tripTickets : [];
     const fuel = Array.isArray(result.fuelTransactions) ? result.fuelTransactions : [];
