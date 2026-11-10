@@ -39,7 +39,7 @@
 
     <link
         rel="stylesheet"
-        href="css/index.css?v=20261110-brand-tables01"
+        href="css/index.css?v=20261111-global-search-fix02"
     >
 
 
@@ -3599,30 +3599,33 @@ document.addEventListener(
 
 
 <script>
-/* GLOBAL SO 360 SEARCH — focus opens the 360° view; Enter runs the search. */
+/* GLOBAL SO 360 SEARCH — always available in the topbar; no sidebar shortcut. */
 (function () {
     const field = document.getElementById('globalSOSearch');
-    if (!field) return;
+    const page = document.getElementById('soMonitoring');
+    if (!field || !page) return;
     let navigating = false;
-    field.addEventListener('focus', function () {
-        if (navigating) return;
-        if (!document.getElementById('soMonitoring').classList.contains('active')) {
-            showPage('soMonitoring', null);
+
+    function openQuickView() {
+        if (!page.classList.contains('active')) showPage('soMonitoring', null);
+        // Ensure the module is initialized even when the page was opened by focus.
+        if (typeof loadSOMonitoringModule === 'function') {
+            loadSOMonitoringModule().catch(function (error) {
+                console.error('Unable to open Sales Order 360 view:', error);
+            });
         }
-    });
+    }
+
+    field.addEventListener('focus', openQuickView);
     field.addEventListener('keydown', async function (event) {
         if (event.key !== 'Enter') return;
         event.preventDefault();
         const query = field.value.trim();
-        if (!query) {
-            showPage('soMonitoring', null);
-            return;
-        }
         navigating = true;
-        showPage('soMonitoring', null);
+        openQuickView();
         try {
             await loadSOMonitoringModule();
-            if (typeof window.searchSOMonitoring === 'function') {
+            if (query && typeof window.searchSOMonitoring === 'function') {
                 await window.searchSOMonitoring(query);
             }
         } catch (error) {
@@ -3686,7 +3689,20 @@ document.addEventListener(
 /* Give every sidebar button the same icon/label layout as Messages.
    Each section keeps its own distinct icon when the sidebar is collapsed. */
 (function () {
+    function removeQuickViewSidebarEntries() {
+        document.querySelectorAll('.sidebar .menu .menu-btn').forEach(function (button) {
+            const action = button.getAttribute('onclick') || '';
+            const pageMatch = action.match(/showPage\\s*\\(\\s*['"]([^'"]+)['"]/i);
+            const label = (button.textContent || '').replace(/\\s+/g, ' ').trim();
+            if ((pageMatch && pageMatch[1] === 'soMonitoring') ||
+                /360\\s*°?\\s*(view|quick\\s*view)|quick\\s*view|so\\s*monitoring/i.test(label)) {
+                button.remove();
+            }
+        });
+    }
+
     function normalizeSidebarItems() {
+        removeQuickViewSidebarEntries();
         const iconByPage = {
             dashboard: '🏠',
             messages: '✉️',
@@ -3750,6 +3766,14 @@ document.addEventListener(
         document.addEventListener('DOMContentLoaded', normalizeSidebarItems);
     } else {
         normalizeSidebarItems();
+    }
+
+    // Some legacy UI scripts may inject an old Quick View menu item later.
+    // Keep the 360° page accessible only through the global topbar search.
+    const sidebarMenu = document.querySelector('.sidebar .menu');
+    if (sidebarMenu) {
+        const quickViewObserver = new MutationObserver(removeQuickViewSidebarEntries);
+        quickViewObserver.observe(sidebarMenu, { childList: true, subtree: true });
     }
 })();
 </script>
