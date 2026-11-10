@@ -230,7 +230,7 @@ html[data-theme="dark"] #mainContent .page table thead th {
   font-weight: 850;
   letter-spacing: -.025em;
 }
-.dashboard-page h1 { font-size: clamp(24px, 3vw, 30px); line-height: 1.15; }
+.dashboard-page h1 { font-size: clamp(21px, 2.6vw, 26px); line-height: 1.15; }
 .dashboard-page h2,
 .dashboard-page .dashboard-panel-title { font-size: 16px; }
 .dashboard-page h3 { color: var(--about-ink); font-size: 11px; font-weight: 800; }
