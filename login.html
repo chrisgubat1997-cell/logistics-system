@@ -59,49 +59,8 @@
 </head>
 
 
-<body class="intro-active">
-
-    <!-- CINEMATIC ELECTRICAL PANELBOARD INTRO -->
-    <section id="introScreen" class="intro-screen" aria-label="LOGIS-TECH electrical panelboard introduction">
-      <div class="panelboard-scene">
-        <div class="panelboard-topbar"><span class="panel-brand">⚡ LOGIS-TECH <small>SYSTEM</small></span><span class="panel-status"><i></i> POWER ON</span></div>
-        <div class="panelboard-cabinet" id="panelboardCabinet">
-          <div class="cabinet-inner">
-            <div class="cabinet-side cabinet-side--left"><div class="wire-bundle"></div><div class="breaker-bank"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>MAIN CIRCUIT</small></div>
-            <div class="cabinet-display"><div class="display-bezel"><div class="display-screen">
-              <div class="screen-standby" id="screenStandby"><b>⚡ LOGIS-TECH</b><small>SYSTEM INITIALIZING</small><i></i></div>
-              <video id="introVideo" class="intro-monitor-video" src="assets/login-intro.mp4" playsinline preload="metadata" aria-label="LOGIS-TECH introduction video"></video>
-            </div></div><div class="display-caption">LOGIS-TECH CONTROL INTERFACE</div></div>
-            <div class="cabinet-side cabinet-side--right"><div class="wire-bundle"></div><div class="breaker-bank"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><small>CONTROL CIRCUIT</small></div>
-          </div>
-          <div class="cabinet-door cabinet-door--left"><div class="door-vent"></div><div class="door-logo">⚡<b>LOGIS-TECH</b><small>SYSTEM</small></div><div class="door-warning">⚠<small>HIGH VOLTAGE</small></div><div class="door-handle"></div></div>
-          <div class="cabinet-door cabinet-door--right"><div class="door-vent"></div><div class="door-indicators"><i></i><i></i><i></i><small>POWER / SYSTEM / ALARM</small></div><div class="door-handle"></div></div>
-        </div>
-        <div class="panelboard-footer"><span>GREENMETAL ELECTRIC MANUFACTURING CORPORATION</span><span>SAFE • EFFICIENT • RELIABLE</span></div>
-        <button type="button" id="introPlayButton" class="intro-play-button"><span class="open-icon">⏻</span><span>OPEN PANEL</span><small>CLICK TO POWER UP SYSTEM</small></button>
-        <div class="intro-hint" id="introHint">INITIALIZE THE CONTROL PANEL TO CONTINUE</div>
-      </div>
-    </section>
-
-    <!-- LOGIN BACKGROUND MUSIC -->
-    <audio
-        id="loginMusic"
-        src="assets/login-music.mp3"
-        preload="auto"
-        loop
-    ></audio>
-
-    <button
-        type="button"
-        id="loginSoundControl"
-        class="login-sound-control"
-        aria-pressed="true"
-        aria-label="Turn background music off"
-        hidden
-    >♫ SOUND ON</button>
-
-
-    <!-- =====================================================
+<body>
+<!-- =====================================================
          LOGIN CONTAINER
     ====================================================== -->
 
@@ -269,25 +228,6 @@
     <script
         src="js/login.js"
     ></script>
-
-    <script>
-(function () {
- const intro=document.getElementById("introScreen"), cabinet=document.getElementById("panelboardCabinet"), video=document.getElementById("introVideo"), music=document.getElementById("loginMusic"), sound=document.getElementById("loginSoundControl"), btn=document.getElementById("introPlayButton"), hint=document.getElementById("introHint");
- if(!intro||!cabinet||!video||!btn){document.body.classList.remove("intro-active");return;}
- let started=false,finished=false,soundOn=true;
- if(music) music.volume=.3;
- function updateSound(){if(!sound)return;sound.textContent=soundOn?"♫ SOUND ON":"♫ SOUND OFF";sound.setAttribute("aria-pressed",String(soundOn));sound.setAttribute("aria-label",soundOn?"Turn background music off":"Turn background music on");}
- function finish(){if(finished)return;finished=true;if(music){music.pause();music.currentTime=0;}if(sound)sound.hidden=true;intro.classList.add("intro-screen--leaving");document.body.classList.remove("intro-active");document.body.classList.add("intro-finished");window.setTimeout(()=>{intro.hidden=true;},1000);}
- btn.addEventListener("click",function(){if(started||finished)return;started=true;btn.disabled=true;btn.classList.add("is-starting");btn.innerHTML='<span class="open-icon">⚡</span><span>POWERING UP...</span><small>OPENING PANEL DOORS</small>';if(hint)hint.textContent="PANEL DOORS OPENING — SYSTEM STARTING";cabinet.classList.add("is-open");if(sound)sound.hidden=false;
- window.setTimeout(async function(){try{const vp=video.play(),mp=music?music.play():Promise.resolve();await vp;cabinet.classList.add("is-playing");btn.hidden=true;if(hint)hint.textContent="LOGIS-TECH SYSTEM ONLINE";try{await mp;soundOn=true;}catch(e){soundOn=false;}updateSound();}catch(e){console.error("Intro playback failed:",e);if(music)music.pause();btn.disabled=false;btn.classList.remove("is-starting");btn.innerHTML='<span class="open-icon">↻</span><span>TRY AGAIN</span><small>RESTART PANEL SEQUENCE</small>';if(hint)hint.textContent="VIDEO COULD NOT START — PLEASE TRY AGAIN";if(sound)sound.hidden=true;started=false;}},1450);
- });
- if(sound&&music)sound.addEventListener("click",async function(){if(soundOn){music.pause();soundOn=false;}else{try{await music.play();soundOn=true;}catch(e){soundOn=false;}}updateSound();});
- video.addEventListener("ended",finish,{once:true});video.addEventListener("error",function(){if(started)finish();},{once:true});
- window.addEventListener("pagehide",function(){video.pause();if(music){music.pause();music.currentTime=0;}},{once:true});
-})();
-</script>
-
-
 </body>
 
 </html>
