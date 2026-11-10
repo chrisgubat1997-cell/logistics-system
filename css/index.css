@@ -1849,3 +1849,31 @@ body.sidebar-collapsed .sidebar .logo-brand {
         scroll-behavior: auto !important;
     }
 }
+
+
+/* SALES ORDER SIDEBAR SUBMENU — 360° QUICK VIEW */
+.sales-menu-group{width:100%;display:flex;flex-direction:column;gap:3px}
+.sales-menu-main{display:flex;align-items:stretch;gap:3px;width:100%}
+.sales-menu-main>.sales-main-btn{flex:1;min-width:0}
+.sales-submenu-toggle{flex:0 0 34px;width:34px;min-height:44px;display:flex;align-items:center;justify-content:center;border:0;border-radius:9px;background:rgba(255,255,255,.07);color:inherit;font-size:20px;font-weight:800;cursor:pointer;transition:background .2s ease,transform .2s ease}
+.sales-submenu-toggle:hover{background:rgba(255,255,255,.15)}
+.sales-submenu-toggle span{display:block;transition:transform .2s ease}
+.sales-submenu-toggle.is-open span{transform:rotate(180deg)}
+.sales-submenu{padding:2px 0 4px 14px}
+.sales-submenu[hidden]{display:none!important}
+.sales-submenu .sales-submenu-btn{width:100%;min-height:40px;padding-top:9px;padding-bottom:9px;font-size:12px!important;background:rgba(255,255,255,.055);border-left:2px solid rgba(96,165,250,.65);border-radius:0 8px 8px 0}
+.sales-submenu .sales-submenu-btn.active{background:linear-gradient(110deg,color-mix(in srgb,var(--section-accent) 88%,#fff 12%),color-mix(in srgb,var(--section-accent) 72%,#102e70 28%))!important}
+.sales-submenu .sidebar-item-icon{font-size:15px!important}
+.sales-submenu .sidebar-item-label{font-size:11px!important}
+body.sidebar-collapsed .sales-menu-group{align-items:center}
+body.sidebar-collapsed .sales-menu-main{flex-direction:column;align-items:center;gap:2px}
+body.sidebar-collapsed .sales-menu-main>.sales-main-btn{width:100%;min-height:42px}
+body.sidebar-collapsed .sales-submenu-toggle{width:100%;min-height:25px;flex-basis:25px;font-size:16px}
+body.sidebar-collapsed .sales-submenu{width:100%;padding:2px 0}
+body.sidebar-collapsed .sales-submenu .sales-submenu-btn{min-height:40px;padding:8px 2px}
+body.sidebar-collapsed .sales-submenu .sidebar-item-label{display:none}
+body.sidebar-collapsed .sales-submenu .sidebar-item-icon{font-size:17px!important}
+@media(max-width:600px){
+ .sales-submenu-toggle{min-height:42px}
+ .sales-submenu{padding-left:9px}
+}
