@@ -1583,8 +1583,8 @@ body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-label{display:none
     width: 100% !important;
     padding: 11px 15px !important;
     text-align: left !important;
-    font-size: 12.88px !important;
-    line-height: 1.35 !important;
+    font-size: 11.5px !important;
+    line-height: 1.3 !important;
     white-space: normal !important;
 }
 .sidebar .menu .menu-btn::first-letter { font-size: inherit !important; }
