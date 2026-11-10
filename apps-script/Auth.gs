@@ -77,6 +77,14 @@ function createAccount(payload) {
     ).trim()
     .toUpperCase();
 
+  const companyAccess = String(payload.companyAccess || "").trim().toUpperCase();
+  const requestedActiveCompany = String(payload.activeCompany || "").trim().toUpperCase();
+  const defaultCompany = companyAccess === "GREENLIGHT"
+    ? "GREENLIGHT"
+    : companyAccess === "BOTH" && ["GREENMETAL", "GREENLIGHT"].includes(requestedActiveCompany)
+      ? requestedActiveCompany
+      : "GREENMETAL";
+
 
   /* =======================================================
      VALIDATION
@@ -161,6 +169,14 @@ function createAccount(payload) {
     "PRODUCTION"
 
   ];
+
+  if (!["GREENMETAL", "GREENLIGHT", "BOTH"].includes(companyAccess)) {
+    return {
+      success: false,
+      code: "INVALID_COMPANY_ACCESS",
+      message: "Select GEMCOR, GPI, or BOTH for company access."
+    };
+  }
 
 
   if (
@@ -417,9 +433,9 @@ function createAccount(payload) {
 
     passwordHash,
 
-    "GREENMETAL",
+    companyAccess,
 
-    "GREENMETAL"
+    defaultCompany
 
   ]);
 
@@ -453,7 +469,19 @@ function createAccount(payload) {
         accountType,
 
       status:
-        "ACTIVE"
+        "ACTIVE",
+
+      companyAccess:
+        companyAccess,
+
+      defaultCompany:
+        defaultCompany,
+
+      activeCompany:
+        defaultCompany,
+
+      allowedCompanies:
+        companyAccess === "BOTH" ? ["GREENMETAL", "GREENLIGHT"] : [companyAccess]
 
     }
 
