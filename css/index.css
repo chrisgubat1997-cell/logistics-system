@@ -1547,3 +1547,26 @@ body.sidebar-collapsed .menu button span[aria-hidden="true"] {
     font-size: 19px !important;
     line-height: 1;
 }
+
+
+/* SIDEBAR CONSISTENCY — use Messages item structure across every section */
+.sidebar .logo{position:relative;display:flex;align-items:center;gap:11px;min-height:78px}
+.sidebar .sidebar-logo-mark{display:block!important;width:38px;height:38px;flex:0 0 38px;object-fit:contain;border-radius:9px;background:#fff;padding:3px;box-sizing:border-box}
+.sidebar .logo-brand{display:flex;align-items:center;min-width:0}
+.sidebar .menu .menu-btn{display:flex;align-items:center;gap:13px;text-align:left}
+.sidebar .menu .menu-btn .sidebar-item-icon{display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px;width:22px;height:22px;font-size:18px;line-height:1;text-align:center}
+.sidebar .menu .menu-btn .sidebar-item-label{display:block;min-width:0;white-space:normal}
+body.sidebar-collapsed .sidebar .logo{min-height:78px;padding:12px 8px;justify-content:center;gap:0}
+body.sidebar-collapsed .sidebar .logo-brand{display:none!important}
+body.sidebar-collapsed .sidebar .sidebar-logo-mark{display:block!important;width:42px;height:42px;flex-basis:42px}
+body.sidebar-collapsed .sidebar .menu .menu-btn{display:flex;align-items:center;justify-content:center;gap:0;min-height:46px;padding:10px 4px;font-size:0!important;overflow:visible}
+body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-icon{display:inline-flex!important;flex:0 0 24px;width:24px;height:24px;font-size:20px!important}
+body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-label{display:none!important}
+@media(max-width:600px){
+ .sidebar .logo{justify-content:center;gap:0}
+ .sidebar .logo-brand{display:none!important}
+ .sidebar .sidebar-logo-mark{display:block!important;width:36px;height:36px}
+ .sidebar .menu .menu-btn{justify-content:center;gap:0}
+ .sidebar .menu .menu-btn .sidebar-item-label{display:none}
+ .sidebar .menu .menu-btn .sidebar-item-icon{font-size:19px}
+}
