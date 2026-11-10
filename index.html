@@ -36,7 +36,7 @@
 
     <link
         rel="stylesheet"
-        href="css/index.css?v=20261110-sidebar-collapse01"
+        href="css/index.css?v=20261110-sidebar-messages-style02"
     >
 
 
@@ -3580,6 +3580,44 @@ document.addEventListener(
 })();
 </script>
 
+
+
+<script>
+/* Normalize every sidebar item to the same icon + label structure as Messages. */
+(function () {
+    function normalizeSidebarItems() {
+        document.querySelectorAll('.sidebar .menu .menu-btn').forEach(function (button) {
+            if (button.classList.contains('messages-menu-btn') || button.dataset.sidebarNormalized === 'true') return;
+            const raw = button.textContent.replace(/\\s+/g, ' ').trim();
+            if (!raw) return;
+            let icon = '';
+            let label = raw;
+            try {
+                const segmenter = new Intl.Segmenter(undefined, {granularity: 'grapheme'});
+                const first = segmenter.segment(raw)[Symbol.iterator]().next().value;
+                if (first && /\\p{Extended_Pictographic}/u.test(first.segment)) {
+                    icon = first.segment;
+                    label = raw.slice(first.index + first.segment.length).trim();
+                }
+            } catch (error) {
+                const match = raw.match(/^(\\p{Extended_Pictographic}\\uFE0F?)/u);
+                if (match) { icon = match[1]; label = raw.slice(icon.length).trim(); }
+            }
+            if (!icon) {
+                const existingIcon = button.querySelector('span[aria-hidden="true"]');
+                if (existingIcon) icon = existingIcon.textContent.trim();
+            }
+            if (!icon) icon = '•';
+            button.innerHTML = '<span class="sidebar-item-icon" aria-hidden="true"></span><span class="sidebar-item-label"></span>';
+            button.querySelector('.sidebar-item-icon').textContent = icon;
+            button.querySelector('.sidebar-item-label').textContent = label || raw;
+            button.dataset.sidebarNormalized = 'true';
+        });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', normalizeSidebarItems);
+    else normalizeSidebarItems();
+})();
+</script>
 
 </body>
 
