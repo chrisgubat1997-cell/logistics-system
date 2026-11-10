@@ -1939,7 +1939,10 @@ function renderOutstandingSOTable() {
     const input=document.getElementById('outstandingSOSearchInput');
     const rows=getOutstandingSORows(input?input.value:'');
     if(!rows.length){body.innerHTML='<tr><td colspan="8" class="payment-empty-state">No unpaid Sales Orders or outstanding balances found.</td></tr>';return;}
-    body.innerHTML=rows.map(function(r,i){
+    // Keep the section compact: show only the 10 highest outstanding balances.
+    // Search still checks the complete outstanding SO list before applying this limit.
+    const visibleRows=rows.slice(0,10);
+    body.innerHTML=visibleRows.map(function(r,i){
         const cl=r.delivery==='FULLY DELIVERED'?'outstanding-delivery-full':r.delivery==='PARTIALLY DELIVERED'?'outstanding-delivery-partial':'outstanding-delivery-none';
         return '<tr class="outstanding-so-row" data-outstanding-index="'+i+'" title="Double-click to view Sales Order balance details"><td>'+escapeHTML(r.soNo)+'</td><td>'+escapeHTML(getClientName(r.so))+'</td><td>'+escapeHTML(getProjectName(r.so))+'</td><td class="payment-amount-cell">'+escapeHTML(formatCurrency(r.total))+'</td><td class="payment-amount-cell">'+escapeHTML(formatCurrency(r.paid))+'</td><td class="payment-amount-cell outstanding-balance-value">'+escapeHTML(formatCurrency(r.balance))+'</td><td><span class="outstanding-delivery-status '+cl+'">'+escapeHTML(r.delivery)+'</span></td><td><button type="button" class="payment-action-btn" data-outstanding-view="'+i+'">VIEW</button></td></tr>';
     }).join('');
