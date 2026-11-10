@@ -763,106 +763,25 @@
 
     function refreshSalesOrderChart() {
 
-        const periodSelect =
-            document.getElementById(
-                "salesOrderPeriod"
-            );
+        const periodSelect = document.getElementById("salesOrderPeriod");
+        const period = periodSelect ? periodSelect.value : "6months";
+        const salesOrders = lastDashboardData
+            ? lastDashboardData.salesOrders
+            : readStorageArray(STORAGE_KEYS.salesOrders);
+        const chartData = buildSalesChartData(salesOrders, period);
+        const chart = document.getElementById("salesOrderMonthlyChart");
+        if (!chart) return;
 
-        const period =
-            periodSelect
-                ? periodSelect.value
-                : "6months";
-
-
-        const salesOrders =
-            lastDashboardData
-                ? lastDashboardData.salesOrders
-                : readStorageArray(STORAGE_KEYS.salesOrders);
-
-
-        const chartData =
-            buildSalesChartData(
-                salesOrders,
-                period
-            );
-
-
-        const fills =
-            document.querySelectorAll(
-                ".bar-fill[data-month]"
-            );
-
-
-        const values =
-            document.querySelectorAll(
-                "[data-bar-value]"
-            );
-
-
-        let maxValue = 1;
-
-
-        chartData.forEach(function (item) {
-
-            if (item.value > maxValue) {
-                maxValue = item.value;
-            }
-
-        });
-
-
-        fills.forEach(function (fill) {
-
-            const month =
-                fill.dataset.month;
-
-            const item =
-                chartData.find(
-                    function (row) {
-                        return row.month === month;
-                    }
-                );
-
-
-            const value =
-                item ? item.value : 0;
-
-
-            const percentage =
-                Math.max(
-                    3,
-                    Math.round(
-                        (value / maxValue) * 100
-                    )
-                );
-
-
-            fill.style.height =
-                percentage + "%";
-
-        });
-
-
-        values.forEach(function (valueElement) {
-
-            const month =
-                valueElement.dataset.barValue;
-
-            const item =
-                chartData.find(
-                    function (row) {
-                        return row.month === month;
-                    }
-                );
-
-
-            valueElement.textContent =
-                item
-                    ? formatNumber(item.value)
-                    : "0";
-
-        });
-
+        const maxValue = Math.max(1, ...chartData.map(function (item) { return item.value; }));
+        chart.innerHTML = chartData.map(function (item) {
+            const height = item.value > 0 ? Math.max(5, Math.round(item.value / maxValue * 100)) : 2;
+            const label = item.month + " " + item.year;
+            return '<div class="bar-item" title="' + escapeHtml(label + ": " + formatNumber(item.value) + " Sales Orders") + '">' +
+                '<strong class="bar-value">' + formatNumber(item.value) + '</strong>' +
+                '<div class="bar-track"><div class="bar-fill" style="height:' + height + '%"></div></div>' +
+                '<span class="bar-month">' + escapeHtml(item.month) + '</span>' +
+                '</div>';
+        }).join("");
     }
 
 
