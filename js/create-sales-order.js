@@ -2724,23 +2724,18 @@ function clearCreateSOForm() {
    CLOSE CREATE SO
 ========================================================= */
 
-function closeCreateSO() {
+async function closeCreateSO() {
 
-    const confirmed =
-        confirm(
-            "Are you sure you want to leave? Unsaved changes will be lost."
-        );
+    const confirmed = window.LogisTechModal
+        ? await window.LogisTechModal.confirm(
+            "Are you sure you want to leave? Unsaved changes will be lost.",
+            "Leave Create Sales Order?"
+        )
+        : confirm("Are you sure you want to leave? Unsaved changes will be lost.");
 
+    if (!confirmed) return;
 
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    window.location.href =
-        "../index.html";
+    window.location.href = "../index.html";
 
 }
 
