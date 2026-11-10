@@ -27,6 +27,16 @@ function createAccount(payload) {
     payload ||
     {};
 
+  // Account creation is restricted server-side to an authenticated ADMIN session.
+  const creator = authorizeRole_(payload, ["ADMIN"]);
+  if (!creator || creator.role !== "ADMIN") {
+    return {
+      success: false,
+      code: "ADMIN_REQUIRED",
+      message: "Only an authenticated ADMIN account can create users."
+    };
+  }
+
 
   /* =======================================================
      GET VALUES
