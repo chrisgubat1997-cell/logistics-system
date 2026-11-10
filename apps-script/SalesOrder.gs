@@ -1333,6 +1333,19 @@ const now =
     ];
 
 
+    // Store the optional Greenlight SO reference without shifting existing columns.
+    const salesOrdersSheet = getSheet(CONFIG.SHEETS.SALES_ORDERS);
+    const currentLastColumn = Math.max(salesOrdersSheet.getLastColumn(), 1);
+    const salesOrderHeaders = salesOrdersSheet.getRange(1, 1, 1, currentLastColumn).getValues()[0]
+      .map(function(header) { return String(header || "").trim().toUpperCase(); });
+    let gpiSoColumn = salesOrderHeaders.indexOf("GPI_SO_NUMBER") + 1;
+    if (!gpiSoColumn) {
+      gpiSoColumn = currentLastColumn + 1;
+      salesOrdersSheet.getRange(1, gpiSoColumn).setValue("GPI_SO_NUMBER");
+    }
+    while (soRow.length < gpiSoColumn) soRow.push("");
+    soRow[gpiSoColumn - 1] = String(payload.gpiSalesOrderNumber || payload.GPI_SO_NUMBER || "").trim();
+
     appendRow(
       CONFIG.SHEETS.SALES_ORDERS,
       soRow
