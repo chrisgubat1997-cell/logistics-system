@@ -945,6 +945,7 @@ function updateGPISalesOrderField(clientName) {
         String(clientName || "").trim().toUpperCase() === "GREENLIGHT POWER INC.";
 
     wrapper.hidden = !isGreenlightCustomer;
+    wrapper.style.display = isGreenlightCustomer ? "" : "none";
     input.required = isGreenlightCustomer;
 
     if (!isGreenlightCustomer) input.value = "";
