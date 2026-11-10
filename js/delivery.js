@@ -47,6 +47,20 @@ function getLogisTechCurrentRole() {
        API
     ===================================================== */
 
+    function getDeliverySessionToken() {
+        try {
+            const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+            const account = saved.account || saved.user || saved;
+            return String(
+                saved.sessionToken || saved.session_token || saved.token ||
+                account.sessionToken || account.session_token || account.token || ""
+            ).trim();
+        } catch (error) {
+            console.warn("Unable to read Delivery session:", error);
+            return "";
+        }
+    }
+
     async function callDeliveryAPI(action) {
         if (
             !DELIVERY_API_URL.startsWith(
@@ -57,31 +71,33 @@ function getLogisTechCurrentRole() {
             throw new Error("Invalid Google Apps Script API URL.");
         }
 
-        const url =
-            DELIVERY_API_URL +
-            "?action=" +
-            encodeURIComponent(action) +
-            "&_=" +
-            Date.now();
+        const sessionToken = getDeliverySessionToken();
+        if (!sessionToken) {
+            throw new Error("AUTH_REQUIRED: Session token not found. Please log out and log in again.");
+        }
 
-        const response = await fetch(url, {
-            method: "GET",
+        const response = await fetch(DELIVERY_API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8"
+            },
             cache: "no-store",
-            redirect: "follow"
+            redirect: "follow",
+            body: JSON.stringify({
+                action: action,
+                data: {
+                    sessionToken: sessionToken
+                }
+            })
         });
 
         if (!response.ok) {
-            throw new Error(
-                action + " failed. HTTP " + response.status
-            );
+            throw new Error(action + " failed. HTTP " + response.status);
         }
 
         const result = await response.json();
 
-        if (
-            result &&
-            result.success === false
-        ) {
+        if (result && result.success === false) {
             throw new Error(
                 result.message ||
                 result.error ||
