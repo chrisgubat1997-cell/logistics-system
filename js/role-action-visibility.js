@@ -21,7 +21,7 @@
         { selector: ".sales-order-module, #salesOrderPage, #salesModule", section: "sales" },
         { selector: "#joRegisterModule, .jo-register-module", section: "jo" },
         { selector: ".delivery-module, #deliveryModule", section: "delivery" },
-        { selector: ".invoicing-container, #invoiceModule", section: "invoice" },
+        { selector: ".invoicing-container, #invoicingModule, #invoiceModule", section: "invoice" },
         { selector: ".payment-module, #paymentModule", section: "payment" }
     ];
 
