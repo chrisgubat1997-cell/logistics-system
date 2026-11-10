@@ -772,9 +772,6 @@ function renderSOSuggestions(query){
         const so=matches[Number(button.dataset.index)];if(!so)return;
         setValue("paymentSONo",getSalesOrderNumber(so));hideSOSuggestions();selectedSalesOrder=so;
         loadSalesOrderInformation(so);updatePaymentSummary();
-        if (currentRemainingBalance <= 0.005 && currentSalesOrderTotal > 0) {
-            alert("This Sales Order is already FULLY PAID.\n\nSO No.: " + getSalesOrderNumber(so) + "\nNo additional payment can be recorded.");
-        }
     });});
 }
 function handleSOSearchKeyboard(event){
@@ -883,11 +880,6 @@ async function checkSalesOrder() {
 
 
     updatePaymentSummary();
-
-    if (currentRemainingBalance <= 0.005 && currentSalesOrderTotal > 0) {
-        alert("This Sales Order is already FULLY PAID.\n\nSO No.: " + getSalesOrderNumber(foundSO) + "\nNo additional payment can be recorded.");
-        return;
-    }
 
     alert(
         "Sales Order found.\n\n" +
@@ -2185,29 +2177,22 @@ function updatePaymentSummary() {
 }
 
 
-/* =========================================================
-   PREVENT PAYMENT FOR A FULLY PAID SALES ORDER
-   ========================================================= */
+/* Overpayments are permitted; the backend allocates excess to Customer Credit. */
 function updatePaymentActionAvailability() {
-    const fullyPaid = !!selectedSalesOrder &&
-        currentSalesOrderTotal > 0 &&
-        currentRemainingBalance <= 0.005;
     const amountInput = document.getElementById("paymentCurrentAmountInput");
     const saveButtons = [
         document.getElementById("savePaymentBtn"),
         document.getElementById("bottomSavePaymentBtn")
     ].filter(Boolean);
-
     if (amountInput) {
-        amountInput.disabled = fullyPaid;
-        amountInput.title = fullyPaid ? "This Sales Order is fully paid. Additional payment is not allowed." : "";
+        amountInput.disabled = false;
+        amountInput.title = "Any amount above the remaining SO balance will be recorded as Customer Credit.";
     }
     saveButtons.forEach(function(button) {
-        button.disabled = fullyPaid;
-        button.title = fullyPaid ? "This Sales Order is fully paid. Additional payment is not allowed." : "";
-        button.setAttribute("aria-disabled", fullyPaid ? "true" : "false");
+        button.title = "Excess payment will be recorded as Customer Credit.";
+        button.setAttribute("aria-disabled", "false");
     });
-    return fullyPaid;
+    return false;
 }
 
 /* =========================================================
@@ -2285,11 +2270,6 @@ function updateStatusBadge(
    ========================================================= */
 
 async function savePayment() {
-    if (selectedSalesOrder && currentSalesOrderTotal > 0 && currentRemainingBalance <= 0.005) {
-        updatePaymentActionAvailability();
-        alert("This Sales Order is already FULLY PAID. No additional payment can be recorded.");
-        return;
-    }
     const validation = validatePayment();
     if (!validation.valid) {
         alert(validation.message);
@@ -2459,10 +2439,6 @@ function validatePayment() {
     if (!getValue("paymentReferenceNo")) {
         return { valid:false, message:"Reference No. is required." };
     }
-    if (currentSalesOrderTotal > 0 && currentRemainingBalance <= 0.005) {
-        return { valid: false, message: "This Sales Order is already FULLY PAID. No additional payment can be recorded." };
-    }
-
     if (!client) {
 
         return {
