@@ -27,7 +27,7 @@
         }
     })();
     </script>
-    <script src="js/app-modal.js?v=20261110-center-modal"></script>
+    <script src="js/app-modal.js?v=20261110-logout-confirm01"></script>
 
 
 
@@ -3455,22 +3455,17 @@ function openProfile() {
    LOGOUT
 ========================================================= */
 
-function logoutUser() {
+async function logoutUser() {
 
-    const confirmLogout =
-        confirm(
-            'Are you sure you want to logout?'
-        );
+    const confirmLogout = window.LogisTechModal
+        ? await window.LogisTechModal.confirm(
+            'Are you sure you want to log out of LOGIS-TECH SYSTEM?',
+            'Logout Confirmation',
+            'Yes, Logout'
+        )
+        : window.confirm('Are you sure you want to logout?');
 
-
-    if (
-        !confirmLogout
-    ) {
-
-        return;
-
-    }
-
+    if (!confirmLogout) return;
 
     localStorage.removeItem(
         'logitechLoggedIn'
