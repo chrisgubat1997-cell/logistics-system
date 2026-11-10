@@ -45,6 +45,7 @@
         <div class="system-monitor-metric"><span>Loaded files / assets</span><strong id="monitorAssetSize">Checking…</strong><small id="monitorAssetCount">Resources loaded</small></div>
         <div class="system-monitor-metric"><span>Page load time</span><strong id="monitorLoadTime">Checking…</strong><small>Current application page</small></div>
         <div class="system-monitor-metric"><span>Browser errors</span><strong id="monitorErrorCount">0</strong><small>Captured in this admin browser session</small></div>
+        <div class="system-monitor-metric"><span>Google Sheets database</span><strong id="monitorDatabaseSize">Checking…</strong><small id="monitorDatabaseDetail">Database file metadata</small></div>
         <div class="system-monitor-metric"><span>JavaScript memory</span><strong id="monitorMemoryUsage">Checking…</strong><small>Available only in supported browsers</small></div>
       </div>
       <div class="system-monitor-lower">
@@ -52,7 +53,7 @@
         <div class="system-monitor-subpanel"><h3>Safe System Maintenance</h3><div class="monitor-error-list"><p class="monitor-empty">Remove temporary browser/app cache only. Google Sheets records, login sessions, settings and IndexedDB business-data cache are protected.</p><button type="button" class="action-btn danger" id="systemMonitorCleanup">⌫ Clear Temporary Cache</button><p id="monitorCleanupResult" role="status" aria-live="polite"></p></div></div>
       </div>
       <div class="system-monitor-foot"><span>Auto-check interval: every 15 seconds</span><span>Last checked: <strong id="monitorLastChecked">—</strong></span></div>
-      <p class="system-monitor-note">Monitoring scope: this browser session and Apps Script API ping. Google Drive spreadsheet file sizes, server-side execution logs, other users' browsers and server CPU/memory are not exposed by the current backend.</p>
+      <p class="system-monitor-note">Monitoring scope: this browser session, Apps Script API, and active-company Google Sheets database file metadata. Server-side execution logs, other users’ browsers and server CPU/memory are not exposed.</p>
     </section>
 
     <section class="settings-card">
