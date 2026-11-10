@@ -2653,3 +2653,354 @@ html[data-theme="dark"] .summary-card-value { color: #e8edf7; }
     .simple-bar-chart .bar-track { max-width:22px; height:92px; }
     .simple-bar-chart .bar-value,.simple-bar-chart .bar-month { font-size:7px; }
 }
+
+
+/* =========================================================
+   RESPONSIVE DASHBOARD FIT — 2026-11-10
+   Fit cards and analytics to the actual iframe viewport.
+   Keep all grid children shrinkable so the right edge never clips.
+========================================================= */
+html,
+body {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+.dashboard-page {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: 100%;
+    padding: clamp(10px, 1.25vw, 18px);
+}
+
+.dashboard-page *,
+.dashboard-summary-grid,
+.dashboard-main-grid,
+.dashboard-lower-grid,
+.dashboard-panel,
+.dashboard-panel-header,
+.sales-performance-layout,
+.production-overview-grid,
+.delivery-performance-content,
+.finance-list,
+.collections-chart,
+.chart-area {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.dashboard-header {
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.dashboard-summary-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.dashboard-summary-card {
+    min-height: 104px;
+    padding: 12px;
+    border-radius: 13px;
+}
+
+.summary-card-value {
+    margin-top: 7px;
+    font-size: clamp(18px, 1.65vw, 24px);
+}
+
+.summary-card-footer {
+    gap: 5px;
+    flex-wrap: wrap;
+    font-size: 9px;
+}
+
+.dashboard-main-grid {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, .9fr);
+    gap: 12px;
+    margin-bottom: 12px;
+    align-items: start;
+}
+
+.dashboard-panel {
+    padding: 14px;
+    border-radius: 13px;
+}
+
+.dashboard-panel-header {
+    gap: 8px;
+    margin-bottom: 11px;
+    flex-wrap: wrap;
+}
+
+.dashboard-panel-header h2 {
+    font-size: clamp(12px, 1.05vw, 15px);
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+.panel-eyebrow {
+    font-size: 8px;
+}
+
+.panel-period,
+.dashboard-period-select {
+    max-width: 100%;
+    font-size: 9px;
+}
+
+.sales-performance-layout {
+    gap: 10px;
+}
+
+.sales-performance-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.mini-stat {
+    min-width: 0;
+    padding: 8px 7px;
+}
+
+.mini-stat strong {
+    font-size: 13px;
+}
+
+.mini-stat span {
+    font-size: 8px;
+}
+
+.chart-area,
+.simple-bar-chart,
+.collections-chart {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.production-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.production-metric {
+    min-width: 0;
+    padding: 9px;
+}
+
+.production-metric strong {
+    font-size: 17px;
+}
+
+.production-metric span:last-child {
+    overflow-wrap: anywhere;
+    font-size: 9px;
+}
+
+.delivery-performance-content {
+    gap: 12px;
+}
+
+.performance-circle {
+    width: clamp(86px, 9vw, 118px);
+    height: clamp(86px, 9vw, 118px);
+    flex: 0 0 auto;
+}
+
+.performance-details {
+    min-width: 0;
+}
+
+.performance-row {
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 9px;
+}
+
+.finance-list {
+    gap: 9px;
+}
+
+.finance-row {
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.finance-row > strong {
+    min-width: 0;
+    text-align: right;
+    overflow-wrap: anywhere;
+    font-size: 10px;
+}
+
+.finance-row small {
+    font-size: 8px;
+}
+
+.collections-summary {
+    gap: 8px;
+}
+
+.collections-summary > div {
+    min-width: 0;
+    padding: 8px;
+}
+
+.collections-summary strong {
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.dashboard-lower-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.attention-list,
+.activity-list {
+    min-width: 0;
+    max-width: 100%;
+}
+
+.quick-actions-section {
+    margin-top: 12px;
+}
+
+.quick-actions-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.quick-action-btn {
+    min-width: 0;
+    padding: 9px;
+}
+
+.quick-action-btn strong,
+.quick-action-btn small {
+    overflow-wrap: anywhere;
+}
+
+.dashboard-footer {
+    margin-top: 14px;
+    padding-bottom: 8px;
+}
+
+@media (max-width: 1100px) {
+    .dashboard-summary-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .dashboard-main-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-lower-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sales-performance-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 850px) {
+    .dashboard-page {
+        padding: 12px;
+    }
+
+    .dashboard-main-grid,
+    .dashboard-lower-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dashboard-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-panel-header {
+        align-items: flex-start;
+    }
+
+    .sales-performance-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sales-performance-stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .delivery-performance-content {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .dashboard-page {
+        padding: 9px;
+    }
+
+    .dashboard-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .dashboard-header-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .dashboard-summary-grid {
+        gap: 7px;
+    }
+
+    .dashboard-summary-card {
+        min-height: 94px;
+        padding: 9px;
+    }
+
+    .summary-card-label {
+        font-size: 8px;
+        letter-spacing: .035em;
+    }
+
+    .summary-card-value {
+        font-size: 18px;
+    }
+
+    .dashboard-panel {
+        padding: 11px;
+    }
+
+    .dashboard-panel-header h2 {
+        font-size: 12px;
+    }
+
+    .sales-performance-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .production-overview-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .delivery-performance-content {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
