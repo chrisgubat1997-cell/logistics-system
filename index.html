@@ -324,6 +324,21 @@
 
         <div class="user-area">
 
+            <span class="company-context" id="companyContext" aria-live="polite">
+                <span class="company-context-dot" aria-hidden="true"></span>
+                <span id="activeCompanyLabel">GREENMETAL</span>
+            </span>
+
+            <button
+                class="company-switch-btn"
+                id="companySwitchButton"
+                type="button"
+                hidden
+                title="Switch between authorized companies"
+            >
+                SWITCH TO GREENLIGHT
+            </button>
+
             <span id="welcomeUser">
 
                 WELCOME, USER
@@ -3525,6 +3540,7 @@ document.addEventListener(
      SALES ORDER JAVASCRIPT
 ========================================================= -->
 
+<script src="js/company-switch.js?v=20261110-switch-theme01"></script>
 <script src="js/cache-manager.js?v=20261110-company01"></script>
 <script src="js/sync-manager.js?v=20261109-maintenance01"></script>
 <script src="js/sales-order.js?v=20261022-posting-errorfix01"></script>
