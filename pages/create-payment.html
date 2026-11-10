@@ -264,9 +264,32 @@
                                 <input type="text" id="paymentReferenceNo" name="paymentReferenceNo" placeholder="Bank / Cheque / Transaction No." required>
                             </div>
                             <div class="create-payment-field">
-                                <label for="paymentCurrentAmountInput">AMOUNT</label>
-                                <input type="number" id="paymentCurrentAmountInput" name="paymentCurrentAmount" min="0" step="0.01" value="0" placeholder="Enter amount to pay">
+                                <label for="paymentCurrentAmountInput">CASH / BANK PAYMENT AMOUNT</label>
+                                <input type="number" id="paymentCurrentAmountInput" name="paymentCurrentAmount" min="0" step="0.01" value="0" placeholder="Enter cash amount received (₱0 allowed when using credit)">
                             </div>
+
+                            <section class="customer-credit-apply-panel create-payment-field-full" id="customerCreditPanel" hidden aria-live="polite">
+                                <div class="customer-credit-apply-heading">
+                                    <div>
+                                        <span class="customer-credit-kicker">CUSTOMER CREDIT</span>
+                                        <strong>Available Credit</strong>
+                                        <small id="customerCreditLookupStatus">Select a Sales Order to check credit.</small>
+                                    </div>
+                                    <strong class="customer-credit-available" id="customerCreditAvailableAmount">₱0.00</strong>
+                                </div>
+                                <div class="customer-credit-apply-controls">
+                                    <div class="create-payment-field">
+                                        <label for="paymentCreditToApplyInput">CREDIT TO APPLY</label>
+                                        <input type="number" id="paymentCreditToApplyInput" name="creditToApply" min="0" step="0.01" value="0" max="0" placeholder="Enter partial or full credit">
+                                    </div>
+                                    <div class="customer-credit-apply-actions">
+                                        <button type="button" class="create-payment-btn create-payment-btn-primary" id="applyCustomerCreditBtn">USE AVAILABLE CREDIT</button>
+                                        <button type="button" class="create-payment-btn create-payment-btn-secondary" id="clearCustomerCreditBtn">CLEAR</button>
+                                    </div>
+                                </div>
+                                <p class="customer-credit-help">Credit is restricted to this customer and the currently selected company database. You may edit the amount for partial use.</p>
+                            </section>
+
                             <div class="create-payment-field create-payment-field-full">
                                 <label for="paymentRemarks">REMARKS</label>
                                 <textarea id="paymentRemarks" name="paymentRemarks" rows="4" placeholder="Enter payment remarks, advance payment details, cheque details, bank reference, etc."></textarea>
@@ -441,6 +464,11 @@
                             <strong id="paymentCreditAmountDisplay">
                                 ₱0.00
                             </strong>
+                        </div>
+
+                        <div class="create-payment-summary-row create-payment-summary-credit-applied">
+                            <span>CUSTOMER CREDIT APPLIED</span>
+                            <strong id="paymentCustomerCreditAppliedDisplay">₱0.00</strong>
                         </div>
 
                         <!-- BALANCE -->
