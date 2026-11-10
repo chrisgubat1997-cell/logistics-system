@@ -287,9 +287,12 @@
     if (report) report.addEventListener("click", downloadReport);
     attachErrorListeners(window, "Main application");
     const dashboard = document.querySelector(".dashboard-frame");
-    if (dashboard) dashboard.addEventListener("load", function () {
+    if (dashboard) {
+      dashboard.addEventListener("load", function () {
+        try { attachErrorListeners(dashboard.contentWindow, "Dashboard iframe"); } catch (error) {}
+      });
       try { attachErrorListeners(dashboard.contentWindow, "Dashboard iframe"); } catch (error) {}
-    });
+    }
     refreshMonitor();
     if (!timer) timer = window.setInterval(refreshMonitor, POLL_MS);
   }
