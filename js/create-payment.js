@@ -2022,9 +2022,7 @@ function getSalesOrderCustomerId(so) {
 
 function getCreditBalance(record) {
     if (!record) return 0;
-    const raw = record.AVAILABLE_CREDIT !== undefined && record.AVAILABLE_CREDIT !== null && record.AVAILABLE_CREDIT !== ""
-        ? record.AVAILABLE_CREDIT : record.CREDIT_BALANCE;
-    return Math.max(0, parseMoney(raw));
+    return Math.max(0, parseMoney(record.AVAILABLE_CREDIT), parseMoney(record.CREDIT_BALANCE));
 }
 
 async function loadCustomerCreditForSO(so) {
