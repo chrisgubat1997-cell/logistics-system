@@ -11,7 +11,7 @@
 ========================================================= */
 
 const AUTH_SPREADSHEET_ID =
-  "1Txaem4xthFohNU_ITQ20AJzPeNpPLIxgbLfcVojYbnQ";
+  "13qyegL8DOnetIQRSG245HwzcpquKVqk-sckG_k3Q1t4";
 
 const USERS_SHEET_NAME =
   "USERS";
@@ -206,7 +206,7 @@ function createAccount(payload) {
         1,
         1,
         1,
-        10
+        12
       )
       .getValues()[0];
 
@@ -222,7 +222,9 @@ function createAccount(payload) {
     "CREATED_AT",
     "UPDATED_AT",
     "LAST_LOGIN",
-    "PASSWORD_HASH"
+    "PASSWORD_HASH",
+    "COMPANY_ACCESS",
+    "DEFAULT_COMPANY"
 
   ];
 
@@ -274,7 +276,7 @@ function createAccount(payload) {
           2,
           1,
           lastRow - 1,
-          10
+          12
         )
         .getValues();
 
@@ -403,7 +405,11 @@ function createAccount(payload) {
 
     "",
 
-    passwordHash
+    passwordHash,
+
+    "",
+
+    ""
 
   ]);
 
@@ -633,7 +639,7 @@ function loginUser(payload) {
         2,
         1,
         lastRow - 1,
-        10
+        12
       )
       .getValues();
 
@@ -751,6 +757,22 @@ function loginUser(payload) {
       ""
     );
 
+  const companyAccess = String(userRecord[10] || "").trim().toUpperCase();
+  const defaultCompany = String(userRecord[11] || "").trim().toUpperCase();
+
+  const allowedCompanies = companyAccess === "BOTH"
+    ? ["GREENMETAL", "GREENLIGHT"]
+    : companyAccess.split(/[,;|]/).map(function(value) { return value.trim(); }).filter(Boolean);
+
+  if (!["GREENMETAL", "GREENLIGHT", "BOTH"].includes(companyAccess) ||
+      !["GREENMETAL", "GREENLIGHT"].includes(defaultCompany) ||
+      allowedCompanies.indexOf(defaultCompany) < 0) {
+    return {
+      success: false,
+      message: "Your account has no valid company assignment. Please contact the administrator to set COMPANY_ACCESS and DEFAULT_COMPANY in the central USERS database."
+    };
+  }
+
 
   /* =======================================================
      CHECK ACCOUNT STATUS
@@ -842,7 +864,10 @@ function loginUser(payload) {
     "LOGISTECH_SESSION_" + sessionToken,
     JSON.stringify({
       userId: userId,
-      username: savedUsername
+      username: savedUsername,
+      companyAccess: companyAccess,
+      defaultCompany: defaultCompany,
+      activeCompany: defaultCompany
     }),
     21600
   );
