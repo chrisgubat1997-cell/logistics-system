@@ -31,6 +31,8 @@ let selectedSO = null;
     let salesOrdersLoaded = false;
     let customerModuleLoaded = false;
     let customerReturnState = null;
+    let customerAreaOriginalParent = null;
+    let customerAreaOriginalNextSibling = null;
     const soDetailsCache = {};
     /* =====================================================
        INITIALIZE
@@ -6036,6 +6038,15 @@ async function openCustomerModule() {
             currentSO: currentSO
         };
 
+        /* Move the overlay directly under <body>. This prevents parent
+           layout/overflow/transform rules in the Sales Order module from
+           clipping the fixed modal and leaving only a small strip visible. */
+        if (customerArea.parentElement !== document.body) {
+            customerAreaOriginalParent = customerArea.parentElement;
+            customerAreaOriginalNextSibling = customerArea.nextSibling;
+            document.body.appendChild(customerArea);
+        }
+
         /* Display the customer form as a centered modal card. */
         customerArea.classList.add("customer-area-modal");
         customerArea.style.display = "flex";
@@ -6628,6 +6639,18 @@ function closeCustomerFromSalesOrder() {
         customerArea.classList.remove("customer-area-modal");
         customerArea.removeAttribute("role");
         customerArea.innerHTML = "";
+
+        /* Return the overlay placeholder to its original module location. */
+        if (customerAreaOriginalParent) {
+            if (customerAreaOriginalNextSibling &&
+                customerAreaOriginalNextSibling.parentNode === customerAreaOriginalParent) {
+                customerAreaOriginalParent.insertBefore(customerArea, customerAreaOriginalNextSibling);
+            } else {
+                customerAreaOriginalParent.appendChild(customerArea);
+            }
+        }
+        customerAreaOriginalParent = null;
+        customerAreaOriginalNextSibling = null;
     }
 
     /* Restore the exact section/view that was active before New Customer opened. */
