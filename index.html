@@ -133,6 +133,7 @@
     <link rel="stylesheet" href="css/gemlight-theme.css?v=20261110-table-layout02">
 
     <link rel="stylesheet" href="css/system-monitor.css?v=20261110-admin-monitor01">
+    <link rel="stylesheet" href="css/so-monitoring.css?v=20261111-quickview01">
 </head>
 
 
@@ -195,6 +196,10 @@
 
         </button>
 
+
+        <button class="menu-btn" type="button" onclick="showPage('soMonitoring', this)">
+            🔎 SO Monitoring
+        </button>
 
         <!-- =================================================
              JO REGISTER (PRODUCTION)
@@ -418,6 +423,10 @@
         </div>
 
 
+
+        <div id="soMonitoring" class="page">
+            <div id="soMonitoringModule"></div>
+        </div>
 
         <!-- =================================================
              JO REGISTER MODULE
@@ -1118,6 +1127,7 @@ function showPage(pageId, button) {
     const sectionAccents = {
         dashboard: '#16865b',
         sales: '#2563eb',
+        soMonitoring: '#16865b',
         joRegister: '#7c3aed',
         delivery: '#0891b2',
         fleetAnalytics: '#0d9488',
@@ -1195,6 +1205,10 @@ function showPage(pageId, button) {
 
     }
 
+
+    if (pageId === 'soMonitoring') {
+        loadSOMonitoringModule();
+    }
 
     /* =====================================================
        JO REGISTER
@@ -3176,6 +3190,30 @@ async function loadRevolvingFundModule() {
 }
 
 /* =========================================================
+   SALES ORDER QUICK VIEW — AVAILABLE TO ALL AUTHENTICATED ROLES
+========================================================= */
+let soMonitoringModuleLoaded = false;
+async function loadSOMonitoringModule() {
+    const container = document.getElementById('soMonitoringModule');
+    if (!container) return;
+    if (!soMonitoringModuleLoaded) {
+        try {
+            await loadScriptOnce('js/so-monitoring.js?v=20261111-quickview01', 'data-so-monitoring-js');
+            soMonitoringModuleLoaded = true;
+        } catch (error) {
+            container.innerHTML = '<div style="padding:16px;color:#b42318">Unable to load SO Monitoring: ' + String(error.message || error) + '</div>';
+            return;
+        }
+    }
+    try {
+        if (typeof window.initializeSOMonitoring === 'function') await window.initializeSOMonitoring();
+    } catch (error) {
+        console.error('SO Monitoring initialization failed:', error);
+        container.insertAdjacentHTML('afterbegin', '<div style="padding:12px;color:#b42318">Unable to initialize SO Monitoring.</div>');
+    }
+}
+
+/* =========================================================
    JO REGISTER MODULE (VISIBLE TO ALL ACCOUNTS; ACTIONS RESTRICTED)
 ========================================================= */
 let joRegisterModuleLoaded = false;
@@ -3627,6 +3665,7 @@ document.addEventListener(
             dashboard: '🏠',
             messages: '✉️',
             sales: '📄',
+            soMonitoring: '🔎',
             joRegister: '🧾',
             delivery: '🚚',
             fleetAnalytics: '📊',
@@ -3642,6 +3681,7 @@ document.addEventListener(
             dashboard: 'Dashboard',
             messages: 'Messages',
             sales: 'Sales Order',
+            soMonitoring: 'SO Monitoring',
             joRegister: 'JO Register',
             delivery: 'Delivery',
             fleetAnalytics: 'Fleet & Delivery Analytics',
