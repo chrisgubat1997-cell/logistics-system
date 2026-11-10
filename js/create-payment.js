@@ -74,6 +74,8 @@ let currentRemainingBalance = 0;
 
 async function initializeCreatePayment() {
 
+    initializePaymentResultModal();
+
     if (createPaymentInitialized) {
         return;
     }
