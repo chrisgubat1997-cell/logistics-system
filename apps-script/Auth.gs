@@ -903,6 +903,15 @@ function loginUser(payload) {
       status:
         status,
 
+      companyAccess:
+        companyAccess,
+
+      defaultCompany:
+        defaultCompany,
+
+      activeCompany:
+        defaultCompany,
+
       sessionToken:
         sessionToken
 
