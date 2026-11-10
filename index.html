@@ -3599,6 +3599,40 @@ document.addEventListener(
 
 
 <script>
+/* GLOBAL SO 360 SEARCH — focus opens the 360° view; Enter runs the search. */
+(function () {
+    const field = document.getElementById('globalSOSearch');
+    if (!field) return;
+    let navigating = false;
+    field.addEventListener('focus', function () {
+        if (navigating) return;
+        if (!document.getElementById('soMonitoring').classList.contains('active')) {
+            showPage('soMonitoring', null);
+        }
+    });
+    field.addEventListener('keydown', async function (event) {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+        const query = field.value.trim();
+        if (!query) {
+            showPage('soMonitoring', null);
+            return;
+        }
+        navigating = true;
+        showPage('soMonitoring', null);
+        try {
+            await loadSOMonitoringModule();
+            if (typeof window.searchSOMonitoring === 'function') {
+                await window.searchSOMonitoring(query);
+            }
+        } catch (error) {
+            console.error('Global SO 360 search failed:', error);
+        } finally {
+            navigating = false;
+        }
+    });
+})();
+
 /* LOGIS-TECH collapsible sidebar */
 (function () {
     const body = document.body;
