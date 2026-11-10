@@ -2277,6 +2277,21 @@ function showPaymentResultModal(type, title, message, details, redirectOnClose) 
         alert(title + "\n\n" + message);
         return;
     }
+
+    // Keep the result dialog as a direct child of BODY so no form/container
+    // layout, overflow, or stacking context can push it to the bottom of page.
+    if (modal.parentElement !== document.body) {
+        document.body.appendChild(modal);
+    }
+    modal.style.position = "fixed";
+    modal.style.inset = "0";
+    modal.style.zIndex = "999999";
+    modal.style.alignItems = "center";
+    modal.style.justifyContent = "center";
+    modal.style.padding = "20px";
+    modal.style.boxSizing = "border-box";
+    modal.style.display = "flex";
+
     const isError = type === "error";
     const icon = document.getElementById("paymentResultIcon");
     const eyebrow = document.getElementById("paymentResultEyebrow");
@@ -2319,6 +2334,7 @@ function closePaymentResultModal() {
     if (!modal) return;
     modal.classList.remove("is-open");
     modal.setAttribute("aria-hidden", "true");
+    modal.style.display = "none";
     document.body.style.overflow = "";
     if (paymentResultRedirectOnClose) {
         paymentResultRedirectOnClose = false;
