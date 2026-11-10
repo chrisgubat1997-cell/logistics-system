@@ -1717,3 +1717,135 @@ tbody tr:last-child td { border-bottom: 0; }
     font-weight: 800;
     letter-spacing: .22em;
 }
+
+
+/* =========================================================
+   SIDEBAR MOTION POLISH — 2026-11-11
+   Smooth desktop collapse/expand without changing behavior.
+========================================================= */
+:root {
+    --sidebar-motion-duration: 480ms;
+    --sidebar-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Keep the sidebar, workspace and fixed topbar moving as one layout. */
+.sidebar {
+    transition:
+        width var(--sidebar-motion-duration) var(--sidebar-motion-ease),
+        min-width var(--sidebar-motion-duration) var(--sidebar-motion-ease),
+        transform var(--sidebar-motion-duration) var(--sidebar-motion-ease);
+    will-change: width;
+}
+
+.main {
+    transition:
+        margin-left var(--sidebar-motion-duration) var(--sidebar-motion-ease),
+        width var(--sidebar-motion-duration) var(--sidebar-motion-ease),
+        max-width var(--sidebar-motion-duration) var(--sidebar-motion-ease);
+}
+
+.topbar {
+    transition:
+        left var(--sidebar-motion-duration) var(--sidebar-motion-ease),
+        width var(--sidebar-motion-duration) var(--sidebar-motion-ease);
+}
+
+/* Animate menu labels instead of removing them instantly with display:none. */
+.sidebar .menu .menu-btn .sidebar-item-label {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: 190px;
+    overflow: hidden;
+    opacity: 1;
+    visibility: visible;
+    white-space: nowrap !important;
+    transition:
+        max-width 300ms var(--sidebar-motion-ease),
+        opacity 240ms ease,
+        flex-basis 300ms var(--sidebar-motion-ease),
+        visibility 0s linear 0s;
+}
+
+body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-label {
+    display: block !important;
+    flex: 0 0 0 !important;
+    max-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition:
+        max-width 300ms var(--sidebar-motion-ease),
+        opacity 180ms ease,
+        flex-basis 300ms var(--sidebar-motion-ease),
+        visibility 0s linear 300ms;
+}
+
+/* Keep the wordmark in the layout while it fades, avoiding an abrupt cut. */
+.sidebar .logo-brand {
+    display: flex !important;
+    min-width: 0;
+    max-width: 170px;
+    overflow: hidden;
+    opacity: 1;
+    visibility: visible;
+    transition:
+        max-width 320ms var(--sidebar-motion-ease),
+        opacity 220ms ease,
+        visibility 0s linear 0s;
+}
+
+body.sidebar-collapsed .sidebar .logo-brand {
+    display: flex !important;
+    max-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    transition:
+        max-width 320ms var(--sidebar-motion-ease),
+        opacity 180ms ease,
+        visibility 0s linear 320ms;
+}
+
+/* A gentle response on the collapse control; no effect on its click behavior. */
+.sidebar-toggle {
+    transition:
+        background 220ms ease,
+        color 220ms ease,
+        transform 280ms var(--sidebar-motion-ease),
+        width var(--sidebar-motion-duration) var(--sidebar-motion-ease),
+        height var(--sidebar-motion-duration) var(--sidebar-motion-ease);
+}
+
+.sidebar .menu .menu-btn .sidebar-item-icon {
+    transition:
+        transform 300ms var(--sidebar-motion-ease),
+        font-size 300ms var(--sidebar-motion-ease);
+}
+
+/* The mobile sidebar is fixed-width and has no collapse toggle. */
+@media (max-width: 600px) {
+    .sidebar,
+    .main,
+    .topbar,
+    .sidebar .menu .menu-btn .sidebar-item-label,
+    .sidebar .logo-brand {
+        transition: none;
+        will-change: auto;
+    }
+}
+
+/* Respect users who request reduced motion at OS/browser level. */
+@media (prefers-reduced-motion: reduce) {
+    .sidebar,
+    .main,
+    .topbar,
+    .sidebar-toggle,
+    .sidebar .logo-brand,
+    .sidebar .menu .menu-btn .sidebar-item-label,
+    .sidebar .menu .menu-btn .sidebar-item-icon {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
