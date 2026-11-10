@@ -832,33 +832,8 @@ function updatePaymentCards(
             );
 
 
-        const pendingPayment =
-            records
-                .filter(
-                    function (payment) {
-
-                        return isPendingPayment(
-                            payment
-                        );
-
-                    }
-                )
-                .reduce(
-                    function (
-                        total,
-                        payment
-                    ) {
-
-                        return (
-                            total +
-                            getPaymentAmount(
-                                payment
-                            )
-                        );
-
-                    },
-                    0
-                );
+        // Pending Payment is the remaining balance of the filtered Sales Orders.
+        const pendingPayment = calculateSalesOrderPendingPayment(filteredPaymentSalesOrders);
 
 
         /*
@@ -985,33 +960,8 @@ function updatePaymentCards(
             );
 
 
-    const pendingPayment =
-        records
-            .filter(
-                function (payment) {
-
-                    return isPendingPayment(
-                        payment
-                    );
-
-                }
-            )
-            .reduce(
-                function (
-                    total,
-                    payment
-                ) {
-
-                    return (
-                        total +
-                        getPaymentAmount(
-                            payment
-                        )
-                    );
-
-                },
-                0
-            );
+    // Total Sales Order amount minus the amount already paid/collected.
+    const pendingPayment = calculateSalesOrderPendingPayment(filteredPaymentSalesOrders);
 
 
     setPaymentCard(
@@ -1034,6 +984,22 @@ function updatePaymentCards(
         pendingPayment
     );
 
+}
+
+
+/* =========================================================
+   SALES ORDER PENDING PAYMENT
+========================================================= */
+function calculateSalesOrderPendingPayment(salesOrders) {
+    const rows = Array.isArray(salesOrders) ? salesOrders : [];
+    return rows.reduce(function (sum, so) {
+        const status = String(creditField(so, ['STATUS', 'status']) || '').trim().toUpperCase();
+        if (['CANCELLED', 'CANCELED', 'VOID', 'VOIDED', 'REJECTED'].includes(status)) return sum;
+        const soNo = getSONo(so);
+        const total = Math.max(0, getSalesOrderTotal(so));
+        const collected = Math.max(0, getOutstandingSOPaid(soNo));
+        return sum + Math.max(0, total - collected);
+    }, 0);
 }
 
 
@@ -1910,8 +1876,10 @@ function getOutstandingSOPaid(soNo) {
         if (normalizePaymentSOKey(getSONo(p)) !== key) return sum;
         const st = String(getPaymentStatus(p)||'').trim().toUpperCase();
         if (['CANCELLED','CANCELED','VOID','VOIDED','REJECTED'].includes(st)) return sum;
-        const applied = creditField(p,['SO_APPLIED_AMOUNT','soAppliedAmount','SO_AMOUNT_APPLIED','soAmountApplied']);
-        return sum + toNumber(applied !== '' ? applied : getPaymentAmount(p));
+        const applied = creditField(p,['SO_APPLIED_AMOUNT','soAppliedAmount','SO_AMOUNT_APPLIED','soAmountApplied','APPLIED_TO_SO','appliedToSO']);
+        const credit = creditField(p,['CUSTOMER_CREDIT_AMOUNT','CUSTOMER_CREDIT','OVERPAYMENT_AMOUNT','OVERPAYMENT','customerCreditAmount','customerCredit','overpaymentAmount']);
+        const amountApplied = applied !== '' ? toNumber(applied) : (credit !== '' ? Math.max(0, getPaymentAmount(p) - toNumber(credit)) : getPaymentAmount(p));
+        return sum + Math.max(0, amountApplied);
     },0);
 }
 function getOutstandingSODeliveryStatus(so) {
