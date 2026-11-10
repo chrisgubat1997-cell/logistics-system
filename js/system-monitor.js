@@ -19,6 +19,8 @@
   let timer = null;
   let boundPanel = null;
   let lastMetrics = {};
+  let lastDatabaseCheckAt = 0;
+  let lastDatabaseHealth = null;
   const recentErrors = [];
 
   function getAccount() {
@@ -105,6 +107,8 @@
   function renderErrors() {
     setText("monitorErrorCount", recentErrors.length);
     setText("monitorMemoryUsage", memory ? formatBytes(memory.used) + " / " + formatBytes(memory.limit) : "Not exposed");
+    setText("monitorDatabaseSize", database.online ? formatBytes(database.databaseSizeBytes) : "Unavailable");
+    setText("monitorDatabaseDetail", database.online ? database.company + " · " + database.sheetCount + " sheets · " + database.databaseName : database.error || "Database metadata unavailable");
     const list = byId("monitorErrorList");
     if (!list) return;
     if (!recentErrors.length) {
@@ -145,6 +149,57 @@
     }
   }
 
+  async function checkDatabaseHealth() {
+    const now = Date.now();
+    if (lastDatabaseHealth && now - lastDatabaseCheckAt < 60000) return lastDatabaseHealth;
+
+    const account = getAccount();
+    const token = String(account.sessionToken || account.session_token || account.token || "").trim();
+    if (!token) {
+      lastDatabaseHealth = { online: false, error: "Admin session token unavailable", checked: true };
+      lastDatabaseCheckAt = now;
+      return lastDatabaseHealth;
+    }
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        cache: "no-store",
+        body: JSON.stringify({
+          action: "getSystemHealth",
+          data: {
+            sessionToken: token,
+            activeCompany: account.activeCompany || account.defaultCompany || ""
+          }
+        })
+      });
+      const result = await response.json();
+      if (!response.ok || !result || result.success !== true) {
+        throw new Error(result && (result.message || result.error) || "Database health endpoint is unavailable.");
+      }
+      lastDatabaseHealth = {
+        online: true,
+        company: result.company || account.activeCompany || "Active company",
+        databaseName: result.databaseName || "Google Sheets database",
+        databaseSizeBytes: Number(result.databaseSizeBytes || 0),
+        sheetCount: Number(result.sheetCount || 0),
+        checkedAt: result.checkedAt || new Date().toISOString(),
+        checked: true
+      };
+    } catch (error) {
+      lastDatabaseHealth = {
+        online: false,
+        error: /Unknown action|getSystemHealth/i.test(error.message)
+          ? "Deploy the latest Apps Script version to enable database diagnostics."
+          : error.message,
+        checked: true
+      };
+    }
+    lastDatabaseCheckAt = now;
+    return lastDatabaseHealth;
+  }
+
   async function refreshMonitor() {
     if (!isAdmin()) {
       const panel = byId("systemMonitorPanel");
@@ -161,6 +216,7 @@
     const assets = resourceStats();
     const online = navigator.onLine !== false;
     const api = await checkApi();
+    const database = await checkDatabaseHealth();
     let storage = null;
     try {
       if (navigator.storage && navigator.storage.estimate) storage = await navigator.storage.estimate();
@@ -187,6 +243,7 @@
       browserStorageQuotaBytes: quota,
       browserStoragePercent: usagePercent,
       javascriptMemory: memory,
+      database: database,
       loadedResourceCount: assets.count,
       measuredAssetBytes: assets.bytes,
       measuredAssetCount: assets.measured,
@@ -213,7 +270,7 @@
     const slowApi = api.online && api.latency >= 2500;
     const highMemory = memory && memory.limit > 0 && memory.used / memory.limit >= 0.85;
     const needsAttention = !online || !api.online;
-    const warning = recentErrors.length > 0 || highStorage || slowApi || highMemory;
+    const warning = recentErrors.length > 0 || highStorage || slowApi || highMemory || !database.online;
     const health = needsAttention ? "Attention required" : warning ? "Operational · warning detected" : "Operational";
     setStatus("monitorOverallStatus", health, needsAttention ? "bad" : warning ? "warn" : "good");
 
