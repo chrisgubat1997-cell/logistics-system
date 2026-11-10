@@ -233,7 +233,7 @@ function fleetEnsureHeader_(sheetName, headerName) {
 }
 
 function fleetGetSheet_(sheetName) {
-  const ss = SpreadsheetApp.openById(CONFIG.DATABASE_SPREADSHEET_ID);
+  const ss = getDatabase();
   const sheet = ss.getSheetByName(sheetName);
   if (!sheet) throw new Error("Sheet not found: " + sheetName);
   return sheet;
