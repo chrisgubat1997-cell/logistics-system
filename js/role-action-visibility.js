@@ -1,7 +1,7 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
    ROLE-BASED MENU AND ACTION PERMISSIONS
-   VERSION: 20261110-role-matrix04
+   VERSION: 20261110-role-matrix05
 
    UI convenience only. Apps Script must enforce the same permissions
    on every create/update/cancel/post operation.
@@ -37,7 +37,7 @@
     function currentRole() {
         try {
             const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
-            const account = saved.account || saved.user || saved;
+            const account = saved.account || saved.user || saved.profile || saved;
             return String(
                 account.role || account.ROLE || account.accountType ||
                 account.account_type || account.accounttype || account.type || ""
@@ -47,6 +47,14 @@
         }
     }
 
+    function roleMatches(allowedRoles, role) {
+        const normalized = String(role || "").toUpperCase().trim();
+        const roleParts = normalized.split(/[\\/|,;]+/).map(function (part) {
+            return part.trim();
+        }).filter(Boolean);
+        return allowedRoles.includes(normalized) ||
+            roleParts.some(function (part) { return allowedRoles.includes(part); });
+    }
     function getActionText(element) {
         return [
             element.innerText,
@@ -74,7 +82,7 @@
     }
 
     function applyToRoot(root, section, role) {
-        const allowed = (ROLE_ACCESS[section] || []).includes(role);
+        const allowed = roleMatches(ROLE_ACCESS[section] || [], role);
         const controls = root.querySelectorAll(
             "button, [role='button'], a.btn, input[type='button'], input[type='submit']"
         );
@@ -124,26 +132,43 @@
     }
 
     function applySidebarVisibility(role) {
-        document.querySelectorAll(".menu-btn").forEach(function (button) {
+        const pageToMenuKey = {
+            fleetAnalytics: "fleetAnalytics",
+            fleetDataEntry: "fleetDataEntry",
+            revolvingFund: "revolvingFund"
+        };
+
+        document.querySelectorAll(".sidebar .menu .menu-btn").forEach(function (button) {
             const action = button.getAttribute("onclick") || "";
-            let menuKey = "";
-            if (action.includes("fleetAnalytics")) menuKey = "fleetAnalytics";
-            else if (action.includes("fleetDataEntry")) menuKey = "fleetDataEntry";
-            else if (action.includes("revolvingFund") || button.matches('[data-role-module="revolving-fund"]')) menuKey = "revolvingFund";
+            const match = action.match(/showPage\\s*\\(\\s*['"]([^'"]+)['"]/i);
+            const page = match ? match[1] : "";
+            const menuKey = button.getAttribute("data-role-module") === "revolving-fund"
+                ? "revolvingFund"
+                : pageToMenuKey[page];
+
             if (!menuKey) return;
 
-            const visible = (ROLE_MENU_ACCESS[menuKey] || []).includes(role);
-            if (!button.hasAttribute("data-role-menu-original-display")) {
-                button.setAttribute("data-role-menu-original-display", button.style.display || "");
+            const visible = roleMatches(ROLE_MENU_ACCESS[menuKey] || [], role);
+            if (visible) {
+                // Remove any old forced hide so the normal sidebar CSS controls layout.
+                button.style.removeProperty("display");
+                button.removeAttribute("aria-hidden");
+                button.removeAttribute("data-role-menu-hidden");
+            } else {
+                // Sidebar CSS uses display:flex !important, so hide with important too.
+                button.style.setProperty("display", "none", "important");
+                button.setAttribute("aria-hidden", "true");
+                button.setAttribute("data-role-menu-hidden", "true");
+                button.classList.remove("active");
             }
-            button.style.display = visible ? (button.getAttribute("data-role-menu-original-display") || "") : "none";
-            button.setAttribute("aria-hidden", String(!visible));
         });
+
         // JO Register is visible to all five roles; only its action buttons are role-restricted.
         document.querySelectorAll("[data-jo-register-menu]").forEach(function (button) {
-            button.style.display = "";
+            button.style.removeProperty("display");
             button.removeAttribute("aria-hidden");
         });
+
         // Shared communication remains visible to every authenticated account.
         document.querySelectorAll("[data-messages-menu]").forEach(function (button) {
             button.style.setProperty("display", "flex", "important");
@@ -153,7 +178,6 @@
             button.removeAttribute("aria-hidden");
         });
     }
-
     function applyRoleActionVisibility() {
         const role = currentRole();
         if (!role) return;
@@ -186,5 +210,6 @@
     observer.observe(document.documentElement, { childList: true, subtree: true });
     window.addEventListener("storage", scheduleApply);
     window.addEventListener("pageshow", scheduleApply);
+    window.addEventListener("focus", scheduleApply);
     scheduleApply();
 })();
