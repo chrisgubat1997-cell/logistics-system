@@ -1443,3 +1443,14 @@
 @keyframes paymentResultFade{from{opacity:0}to{opacity:1}}
 @keyframes paymentResultRise{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(max-width:520px){.payment-result-modal{padding:14px}.payment-result-card{padding:25px 20px 21px;border-radius:16px}.payment-result-card h2{font-size:19px}}
+
+
+/* Payment summary breakdown inside the existing Recent Payment View modal */
+.payment-floating-breakdown{margin:0 0 20px;padding:17px 19px;border:1px solid #e5eaf0;border-radius:12px;background:#f8fafc}
+.payment-floating-breakdown h3{margin:0 0 12px;color:#273449;font-size:12px;font-weight:800;letter-spacing:.2px}
+.payment-floating-breakdown-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid #e8edf3;color:#586579;font-size:11px}
+.payment-floating-breakdown-row:last-child{border-bottom:0}
+.payment-floating-breakdown-row strong{color:#263247;font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;text-align:right}
+.payment-floating-credit-row{margin-top:3px;padding:11px 12px;border:1px solid #b7dfc4;border-radius:8px;background:#f0faf3;color:#176534;font-weight:700}
+.payment-floating-credit-row strong{color:#176534;font-size:13px}
+@media(max-width:520px){.payment-floating-breakdown{padding:14px}.payment-floating-breakdown-row{align-items:flex-start;font-size:10px}.payment-floating-breakdown-row strong{font-size:11px}}
