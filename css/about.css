@@ -258,3 +258,5 @@ html[data-theme="dark"] .about-payload-money { background:#174b30; color:#9ae6b4
   .about-payload-panel { left:10%; opacity:1; }
   .about-payload-box, .about-payload-truck, .about-payload-return { display:none; }
 }
+
+.about-footer-logo { display:block; width:38px; height:38px; flex:0 0 38px; object-fit:contain; padding:3px; border-radius:10px; background:#fff; border:1px solid var(--about-line); }
