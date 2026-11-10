@@ -1792,25 +1792,95 @@ function createSalesOrderRow(
 ========================================================= */
 
 function viewPaymentRecord(paymentNo) {
-    const payment = paymentRecords.find(function (record) { return getPaymentNo(record) === paymentNo; });
-    if (!payment) { console.warn('Payment record not found:', paymentNo); return; }
-    const setText = function (id, value) { const el = document.getElementById(id); if (el) el.textContent = value || '—'; };
-    setText('paymentDetailModalTitle', 'Payment Details');
-    setText('paymentDetailModalSubtitle', 'Saved payment transaction from the LOGIS-TECH database');
-    setText('paymentDetailNo', getPaymentNo(payment));
-    setText('paymentDetailDate', getPaymentDate(payment) ? formatDate(getPaymentDate(payment)) : '—');
-    setText('paymentDetailClient', getClientName(payment)); setText('paymentDetailSO', getSONo(payment));
-    setText('paymentDetailInvoice', getInvoiceNo(payment)); setText('paymentDetailSI', getSINo(payment));
-    setText('paymentDetailProject', getProjectName(payment));
-    setText('paymentDetailMethod', creditField(payment, ['PAYMENT_METHOD','paymentMethod','method']) || '—');
-    setText('paymentDetailReceipt', creditField(payment, ['RECEIPT_NO','receiptNo','receiptNumber']) || '—');
-    setText('paymentDetailReference', creditField(payment, ['REFERENCE_NO','referenceNo','referenceNumber']) || '—');
-    setText('paymentDetailAmount', formatCurrency(getPaymentAmount(payment)));
-    setText('paymentDetailStatus', getPaymentStatus(payment));
-    setText('paymentDetailRemarks', creditField(payment, ['REMARKS','remarks','NOTES','notes']) || '—');
-    const modal = document.getElementById('paymentDetailModal');
-    if (modal) { modal.classList.add('is-open'); modal.setAttribute('aria-hidden','false'); }
+    const normalizePaymentKey = function (value) {
+        return String(value == null ? '' : value).trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    };
+    const requestedKey = normalizePaymentKey(paymentNo);
+    const payment = paymentRecords.find(function (record) {
+        return normalizePaymentKey(getPaymentNo(record)) === requestedKey;
+    });
+    if (!payment) {
+        console.warn('Payment record not found:', paymentNo, paymentRecords);
+        alert('Payment details could not be found. Please refresh the Payment table and try again.');
+        return;
+    }
+
+    // Build the floating card in the document body so it is never clipped by the table/module.
+    let modal = document.getElementById('paymentFloatingSummary');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'paymentFloatingSummary';
+        modal.className = 'payment-floating-summary';
+        modal.setAttribute('aria-hidden', 'true');
+        modal.innerHTML = `
+            <div class="payment-floating-backdrop" data-payment-floating-close></div>
+            <section class="payment-floating-card" role="dialog" aria-modal="true" aria-labelledby="paymentFloatingTitle">
+                <header class="payment-floating-header">
+                    <div>
+                        <span class="payment-floating-eyebrow">LOGIS-TECH SYSTEM · FINANCE</span>
+                        <h2 id="paymentFloatingTitle">Payment Summary</h2>
+                        <p id="paymentFloatingSubtitle">Complete payment transaction details</p>
+                    </div>
+                    <button type="button" class="payment-floating-close" aria-label="Close payment summary" data-payment-floating-close>×</button>
+                </header>
+                <div class="payment-floating-highlight">
+                    <div><span>PAYMENT AMOUNT</span><strong id="floatingPaymentAmount">₱0.00</strong></div>
+                    <span id="floatingPaymentStatus" class="payment-floating-status">—</span>
+                </div>
+                <div class="payment-floating-grid">
+                    <div><span>Payment No.</span><strong id="floatingPaymentNo">—</strong></div>
+                    <div><span>Payment Date</span><strong id="floatingPaymentDate">—</strong></div>
+                    <div><span>Client</span><strong id="floatingPaymentClient">—</strong></div>
+                    <div><span>Project</span><strong id="floatingPaymentProject">—</strong></div>
+                    <div><span>Sales Order No.</span><strong id="floatingPaymentSO">—</strong></div>
+                    <div><span>Invoice No.</span><strong id="floatingPaymentInvoice">—</strong></div>
+                    <div><span>SI No.</span><strong id="floatingPaymentSI">—</strong></div>
+                    <div><span>Payment Method</span><strong id="floatingPaymentMethod">—</strong></div>
+                    <div><span>Receipt No.</span><strong id="floatingPaymentReceipt">—</strong></div>
+                    <div><span>Reference No.</span><strong id="floatingPaymentReference">—</strong></div>
+                    <div class="payment-floating-wide"><span>Remarks</span><strong id="floatingPaymentRemarks">—</strong></div>
+                </div>
+                <footer class="payment-floating-footer"><span>Payment record summary</span><button type="button" data-payment-floating-close> CLOSE </button></footer>
+            </section>`;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function (event) {
+            if (event.target && event.target.hasAttribute('data-payment-floating-close')) closePaymentFloatingSummary();
+        });
+    }
+
+    const setValue = function (id, value) {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value == null || String(value).trim() === '' ? '—' : String(value);
+    };
+    setValue('floatingPaymentNo', getPaymentNo(payment));
+    setValue('floatingPaymentDate', getPaymentDate(payment) ? formatDate(getPaymentDate(payment)) : '—');
+    setValue('floatingPaymentClient', getClientName(payment));
+    setValue('floatingPaymentProject', getProjectName(payment));
+    setValue('floatingPaymentSO', getSONo(payment));
+    setValue('floatingPaymentInvoice', getInvoiceNo(payment));
+    setValue('floatingPaymentSI', getSINo(payment));
+    setValue('floatingPaymentMethod', creditField(payment, ['PAYMENT_METHOD','paymentMethod','method']));
+    setValue('floatingPaymentReceipt', creditField(payment, ['RECEIPT_NO','receiptNo','receiptNumber']));
+    setValue('floatingPaymentReference', creditField(payment, ['REFERENCE_NO','referenceNo','referenceNumber']));
+    setValue('floatingPaymentRemarks', creditField(payment, ['REMARKS','remarks','NOTES','notes']));
+    setValue('floatingPaymentAmount', formatCurrency(getPaymentAmount(payment)));
+    setValue('floatingPaymentStatus', getPaymentStatus(payment));
+    setValue('paymentFloatingSubtitle', 'Transaction ' + getPaymentNo(payment) + ' · Saved payment record');
+
+    modal.classList.add('is-open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('payment-summary-open');
+    const closeButton = modal.querySelector('.payment-floating-close');
+    if (closeButton) closeButton.focus();
 }
+function closePaymentFloatingSummary() {
+    const modal = document.getElementById('paymentFloatingSummary');
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('payment-summary-open');
+}
+window.closePaymentFloatingSummary = closePaymentFloatingSummary;
 function closePaymentDetailModal() {
     const modal = document.getElementById('paymentDetailModal'); if (!modal) return;
     modal.classList.remove('is-open'); modal.setAttribute('aria-hidden','true');
