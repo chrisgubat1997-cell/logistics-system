@@ -1378,3 +1378,30 @@
     .payment-page-actions { width: 100%; }
     .payment-page-actions > button { flex: 1 1 auto; }
 }
+
+
+/* FLOATING PAYMENT SUMMARY — independent of table overflow */
+.payment-floating-summary{position:fixed;inset:0;z-index:20050;display:none;align-items:center;justify-content:center;padding:22px;box-sizing:border-box}
+.payment-floating-summary.is-open{display:flex;animation:paymentFloatingFade .18s ease}
+.payment-floating-backdrop{position:absolute;inset:0;background:rgba(15,23,42,.58);backdrop-filter:blur(3px)}
+.payment-floating-card{position:relative;z-index:1;width:min(760px,100%);max-height:min(88vh,760px);overflow:auto;background:var(--surface-card,#fff);color:var(--text-primary,#263247);border:1px solid rgba(148,163,184,.25);border-radius:18px;box-shadow:0 28px 90px rgba(15,23,42,.32);padding:24px;font-family:inherit}
+.payment-floating-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px}
+.payment-floating-eyebrow{display:block;color:#66809e;font-size:9px;font-weight:800;letter-spacing:1.1px;margin-bottom:7px}
+.payment-floating-header h2{margin:0;color:var(--text-primary,#263247);font-size:20px;font-weight:800}
+.payment-floating-header p{margin:5px 0 0;color:var(--text-muted,#8491a2);font-size:11px}
+.payment-floating-close{flex:0 0 36px;width:36px;height:36px;border:1px solid #dce3eb;border-radius:10px;background:var(--surface-card,#fff);color:#64748b;font-size:23px;line-height:1;cursor:pointer}
+.payment-floating-close:hover{background:#f1f5f9;color:#1e3a5f}
+.payment-floating-highlight{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;margin-bottom:17px;border:1px solid #d8e5f3;border-radius:13px;background:linear-gradient(120deg,#f2f7fc,#f8fbff)}
+.payment-floating-highlight span:first-child{display:block;color:#6b7f97;font-size:9px;font-weight:800;letter-spacing:.7px}
+.payment-floating-highlight strong{display:block;margin-top:5px;color:#214e7c;font-size:26px;font-weight:850;letter-spacing:-.6px}
+.payment-floating-status{display:inline-flex;align-items:center;justify-content:center;padding:7px 12px;border-radius:30px;background:#e8f4ed;color:#26734b;font-size:9px;font-weight:800;text-transform:uppercase}
+.payment-floating-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.payment-floating-grid>div{min-width:0;padding:12px 14px;border:1px solid #e7ecf2;border-radius:10px;background:var(--surface-muted,#fafbfd)}
+.payment-floating-grid span{display:block;margin-bottom:6px;color:#8793a3;font-size:8px;font-weight:800;letter-spacing:.45px;text-transform:uppercase}
+.payment-floating-grid strong{display:block;color:var(--text-primary,#334155);font-size:11px;font-weight:700;overflow-wrap:anywhere;white-space:pre-wrap}
+.payment-floating-grid .payment-floating-wide{grid-column:1/-1}
+.payment-floating-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:18px;padding-top:15px;border-top:1px solid #edf0f4;color:#94a0af;font-size:9px}
+.payment-floating-footer button{height:34px;padding:0 18px;border:0;border-radius:8px;background:#315f9e;color:#fff;font:800 9px inherit;cursor:pointer}
+.payment-floating-footer button:hover{background:#244c80}
+@keyframes paymentFloatingFade{from{opacity:0}to{opacity:1}}
+@media(max-width:600px){.payment-floating-summary{padding:10px}.payment-floating-card{padding:16px;border-radius:14px;max-height:92vh}.payment-floating-header h2{font-size:17px}.payment-floating-highlight{padding:14px}.payment-floating-highlight strong{font-size:21px}.payment-floating-grid{grid-template-columns:1fr}.payment-floating-grid .payment-floating-wide{grid-column:auto}}
