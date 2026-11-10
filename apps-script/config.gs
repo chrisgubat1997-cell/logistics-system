@@ -15,6 +15,12 @@ const CONFIG = {
   DATABASE_SPREADSHEET_ID:
     "1Txaem4xthFohNU_ITQ20AJzPeNpPLIxgbLfcVojYbnQ",
 
+  GREENMETAL_DATABASE_SPREADSHEET_ID:
+    "1Txaem4xthFohNU_ITQ20AJzPeNpPLIxgbLfcVojYbnQ",
+
+  GREENLIGHT_DATABASE_SPREADSHEET_ID:
+    "1aEtv37K3hQuR_MRRoljpc5RUwlrVPr6Xco4SIUKQqjg",
+
 
   // =======================================================
   // MAIN DRIVE FOLDER
