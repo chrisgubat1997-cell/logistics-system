@@ -186,9 +186,10 @@ function _customerCreditAppend_(sheet, data) {
 }
 
 function _customerCreditBalance_(record) {
-  const preferred = record && record.AVAILABLE_CREDIT !== "" && record.AVAILABLE_CREDIT !== undefined && record.AVAILABLE_CREDIT !== null
-    ? record.AVAILABLE_CREDIT : record && record.CREDIT_BALANCE;
-  return _finMoney_(preferred);
+  const available = _finMoney_(record && record.AVAILABLE_CREDIT);
+  const legacyBalance = _finMoney_(record && record.CREDIT_BALANCE);
+  // Keep credits created by the earlier implementation visible while both legacy columns are synchronized.
+  return Math.max(available, legacyBalance);
 }
 
 function _findCustomerCreditRecord_(customerId, customerName) {
@@ -250,6 +251,7 @@ function _recordCustomerCredit_(so, payment, creditAmount) {
   const now = payment.CREATED_AT || new Date();
   let oldBalance = 0;
   let newBalance = creditAmount;
+  let isNewCreditRow = false;
   if (creditRecord) {
     oldBalance = _customerCreditBalance_(creditRecord.record);
     newBalance = Math.round((oldBalance + creditAmount) * 100) / 100;
@@ -267,6 +269,7 @@ function _recordCustomerCredit_(so, payment, creditAmount) {
     row.UPDATED_AT = now;
     const rowIndex = sheets.credits.getLastRow() + 1;
     _customerCreditAppend_(sheets.credits, row);
+    isNewCreditRow = true;
     creditRecord = { sheet: sheets.credits, rowIndex: rowIndex, headers: headers, record: row };
   }
 
@@ -277,8 +280,11 @@ function _recordCustomerCredit_(so, payment, creditAmount) {
     ));
   } catch (error) {
     if (creditRecord && creditRecord.rowIndex > 1) {
-      if (oldBalance > 0) _setCustomerCreditBalance_(creditRecord, oldBalance, now);
-      else if (creditRecord.sheet.getLastRow() >= creditRecord.rowIndex) creditRecord.sheet.deleteRow(creditRecord.rowIndex);
+      if (isNewCreditRow && creditRecord.sheet.getLastRow() >= creditRecord.rowIndex) {
+        creditRecord.sheet.deleteRow(creditRecord.rowIndex);
+      } else {
+        _setCustomerCreditBalance_(creditRecord, oldBalance, now);
+      }
     }
     throw error;
   }
