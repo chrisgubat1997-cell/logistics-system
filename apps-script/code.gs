@@ -139,6 +139,13 @@ function routeRequest(
     payload ||
     {};
 
+  // Resolve and validate company from the authenticated central USERS record.
+  // Only public authentication/bootstrap actions bypass company context.
+  const publicActions = ["ping", "login", "createAccount"];
+  if (publicActions.indexOf(String(action)) === -1) {
+    establishCompanyContext_(payload);
+  }
+
   // Maintenance mode: only authenticated ADMIN accounts may continue.
   // Login, ping, and maintenance control remain available.
   const maintenanceExemptActions = ["ping", "login", "getSystemMaintenanceStatus", "setSystemMaintenanceMode"];
