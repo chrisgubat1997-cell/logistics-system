@@ -2265,6 +2265,81 @@ function updateStatusBadge(
 }
 
 
+
+/* PAYMENT RESULT MODAL */
+let paymentResultRedirectOnClose = false;
+
+function showPaymentResultModal(type, title, message, details, redirectOnClose) {
+    const modal = document.getElementById("paymentResultModal");
+    if (!modal) {
+        alert(title + "\n\n" + message);
+        return;
+    }
+    const isError = type === "error";
+    const icon = document.getElementById("paymentResultIcon");
+    const eyebrow = document.getElementById("paymentResultEyebrow");
+    const titleNode = document.getElementById("paymentResultTitle");
+    const messageNode = document.getElementById("paymentResultMessage");
+    const detailsNode = document.getElementById("paymentResultDetails");
+    const closeButton = document.getElementById("paymentResultCloseBtn");
+
+    modal.classList.toggle("is-error", isError);
+    modal.setAttribute("aria-hidden", "false");
+    icon.textContent = isError ? "!" : "✓";
+    eyebrow.textContent = isError ? "PAYMENT NOT COMPLETED" : "PAYMENT CONFIRMED";
+    titleNode.textContent = title;
+    messageNode.textContent = message;
+    closeButton.textContent = redirectOnClose ? "BACK TO PAYMENT" : "CLOSE";
+    paymentResultRedirectOnClose = !!redirectOnClose;
+
+    detailsNode.innerHTML = "";
+    const entries = Array.isArray(details) ? details : [];
+    entries.forEach(function(item) {
+        const row = document.createElement("div");
+        row.className = "payment-result-detail-row" + (item.highlight ? " credit" : "");
+        const label = document.createElement("span");
+        label.textContent = item.label;
+        const value = document.createElement("strong");
+        value.textContent = item.value;
+        row.appendChild(label);
+        row.appendChild(value);
+        detailsNode.appendChild(row);
+    });
+    detailsNode.hidden = entries.length === 0;
+
+    modal.classList.add("is-open");
+    document.body.style.overflow = "hidden";
+    closeButton.focus();
+}
+
+function closePaymentResultModal() {
+    const modal = document.getElementById("paymentResultModal");
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    if (paymentResultRedirectOnClose) {
+        paymentResultRedirectOnClose = false;
+        window.location.href = "../index.html";
+    }
+}
+
+function initializePaymentResultModal() {
+    const modal = document.getElementById("paymentResultModal");
+    const closeButton = document.getElementById("paymentResultCloseBtn");
+    if (closeButton) closeButton.addEventListener("click", closePaymentResultModal);
+    if (modal) {
+        modal.querySelectorAll("[data-payment-result-close]").forEach(function(node) {
+            node.addEventListener("click", closePaymentResultModal);
+        });
+    }
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape" && modal && modal.classList.contains("is-open")) {
+            closePaymentResultModal();
+        }
+    });
+}
+
 /* =========================================================
    SAVE PAYMENT
    ========================================================= */
@@ -2272,14 +2347,14 @@ function updateStatusBadge(
 async function savePayment() {
     const validation = validatePayment();
     if (!validation.valid) {
-        alert(validation.message);
+        showPaymentResultModal("error", "Payment Cannot Be Saved", validation.message, [], false);
         return;
     }
 
     if (!paymentDataLoaded) {
         const connected = await loadPaymentDataFromDatabase();
         if (!connected) {
-            alert("Hindi makakonekta sa Google Sheets database. Walang na-save na payment. Pakisubukan ulit.");
+            showPaymentResultModal("error", "Database Connection Failed", "Hindi makakonekta sa Google Sheets database. Walang na-save na payment. Pakisubukan ulit.", [], false);
             return;
         }
     }
@@ -2335,21 +2410,31 @@ async function savePayment() {
         paymentDataLoaded = false;
         await loadPaymentDataFromDatabase();
 
-        alert(
-            "Payment successfully saved to the Google Sheets database.\n\n" +
-            "Payment No.: " + (savedPayment.PAYMENT_NO || savedPayment.paymentNo || paymentNo) + "\n" +
-            "SO No.: " + soNo + "\n" +
-            "Amount Received: " + formatCurrency(currentPayment) + "\n" +
-            "Applied to SO: " + formatCurrency(result.soAppliedAmount ?? savedPayment.SO_APPLIED_AMOUNT ?? currentPayment) + "\n" +
-            "Customer Credit: " + formatCurrency(result.creditAmount ?? savedPayment.CREDIT_AMOUNT ?? 0)
+        const appliedAmount = Number(result.soAppliedAmount ?? savedPayment.SO_APPLIED_AMOUNT ?? currentPayment) || 0;
+        const creditAmount = Number(result.creditAmount ?? savedPayment.CREDIT_AMOUNT ?? 0) || 0;
+        showPaymentResultModal(
+            "success",
+            creditAmount > 0 ? "Payment Saved with Customer Credit" : "Payment Successfully Saved",
+            creditAmount > 0
+                ? "The payment was saved successfully. The excess amount has been added to the customer's credit balance."
+                : "The payment has been successfully recorded in the Google Sheets database.",
+            [
+                { label: "Payment No.", value: savedPayment.PAYMENT_NO || savedPayment.paymentNo || paymentNo },
+                { label: "Sales Order", value: soNo },
+                { label: "Amount Received", value: formatCurrency(currentPayment) },
+                { label: "Applied to SO", value: formatCurrency(appliedAmount) },
+                { label: "Customer Credit", value: formatCurrency(creditAmount), highlight: creditAmount > 0 }
+            ],
+            true
         );
-
-        window.location.href = "../index.html";
     } catch (error) {
         console.error("Create Payment API error:", error);
-        alert(
-            "Payment was NOT saved.\n\n" +
-            (error.message || "Hindi makumpleto ang pag-save. Pakisubukan ulit.")
+        showPaymentResultModal(
+            "error",
+            "Payment Was Not Saved",
+            error.message || "Hindi makumpleto ang pag-save. Pakisubukan ulit.",
+            [{ label: "Sales Order", value: soNo }, { label: "Payment No.", value: paymentNo }],
+            false
         );
     } finally {
         saveButtons.forEach(function(button) {
