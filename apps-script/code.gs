@@ -181,6 +181,9 @@ case "getSalesOrderItems":
     case "setSystemMaintenanceMode":
       return setSystemMaintenanceMode_(payload);
 
+    case "getSystemHealth":
+      return getSystemHealth_(payload);
+
     case "ping":
 
       return {
@@ -411,6 +414,54 @@ case "createPayment":
 
   }
 
+}
+
+
+/* =========================================================
+   ADMIN SYSTEM HEALTH — DATABASE FILE METADATA
+   Returns metadata only; does not read or modify business rows.
+========================================================= */
+function getSystemHealth_(payload) {
+  payload = payload || {};
+  const admin = authorizeRole_(payload, ["ADMIN"]);
+  if (!admin || admin.role !== "ADMIN") {
+    return {
+      success: false,
+      code: "ADMIN_REQUIRED",
+      message: "Only an authenticated ADMIN account can view system health."
+    };
+  }
+
+  const company = String(
+    payload.activeCompany || payload.company || admin.activeCompany || admin.defaultCompany || ""
+  ).trim().toUpperCase();
+
+  let spreadsheetId = "";
+  if (company === "GREENLIGHT") {
+    spreadsheetId = CONFIG.GREENLIGHT_DATABASE_SPREADSHEET_ID;
+  } else if (company === "GREENMETAL") {
+    spreadsheetId = CONFIG.GREENMETAL_DATABASE_SPREADSHEET_ID;
+  } else {
+    spreadsheetId = CONFIG.DATABASE_SPREADSHEET_ID;
+  }
+
+  if (!spreadsheetId) {
+    throw new Error("Database spreadsheet is not configured for the active company.");
+  }
+
+  const file = DriveApp.getFileById(spreadsheetId);
+  const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  const sheets = spreadsheet.getSheets();
+
+  return {
+    success: true,
+    system: CONFIG.SYSTEM_NAME,
+    company: company || "DEFAULT",
+    databaseName: file.getName(),
+    databaseSizeBytes: file.getSize(),
+    sheetCount: sheets.length,
+    checkedAt: new Date().toISOString()
+  };
 }
 
 
