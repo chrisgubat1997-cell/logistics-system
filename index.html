@@ -140,13 +140,15 @@
 <div class="sidebar">
 
     <div class="logo">
-
-        LOGIS - TECH
-
-        <span>
-            SYSTEM
-        </span>
-
+        <img class="sidebar-logo-mark" src="assets/logo.png" alt="LOGIS-TECH logo">
+        <div class="logo-brand">
+            LOGIS - TECH
+            <span>SYSTEM</span>
+        </div>
+        <button class="sidebar-toggle" id="sidebarToggle" type="button"
+            aria-label="Collapse sidebar" aria-expanded="true" title="Collapse sidebar">
+            <span aria-hidden="true">‹</span>
+        </button>
     </div>
 
 
@@ -3528,6 +3530,55 @@ document.addEventListener(
 <script src="js/sales-order.js?v=20261022-posting-errorfix01"></script>
 <script src="js/role-action-visibility.js?v=20261016-revolving-fund01"></script>
 <script src="js/messages.js?v=20261109-sendstatus01"></script>\n<script src="js/system-maintenance.js?v=20261109-01"></script>
+
+
+<script>
+/* LOGIS-TECH collapsible sidebar */
+(function () {
+    const body = document.body;
+    const sidebar = document.querySelector(".sidebar");
+    const toggle = document.getElementById("sidebarToggle");
+    if (!body || !sidebar || !toggle) return;
+
+    const storageKey = "logitechSidebarCollapsed";
+    const desktopQuery = window.matchMedia("(min-width: 601px)");
+
+    function setCollapsed(collapsed, persist) {
+        body.classList.toggle("sidebar-collapsed", collapsed);
+        toggle.setAttribute("aria-expanded", String(!collapsed));
+        toggle.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
+        toggle.title = collapsed ? "Expand sidebar" : "Collapse sidebar";
+        toggle.innerHTML = '<span aria-hidden="true">' + (collapsed ? "›" : "‹") + '</span>';
+
+        sidebar.querySelectorAll(".menu-btn").forEach(function (button) {
+            const label = button.textContent.replace(/\\s+/g, " ").trim();
+            if (label) button.title = collapsed ? label : "";
+        });
+
+        if (persist) {
+            try { localStorage.setItem(storageKey, collapsed ? "true" : "false"); } catch (e) {}
+        }
+    }
+
+    let saved = false;
+    try { saved = localStorage.getItem(storageKey) === "true"; } catch (e) {}
+    setCollapsed(desktopQuery.matches && saved, false);
+
+    toggle.addEventListener("click", function () {
+        if (!desktopQuery.matches) return;
+        setCollapsed(!body.classList.contains("sidebar-collapsed"), true);
+    });
+
+    desktopQuery.addEventListener("change", function (event) {
+        if (!event.matches) body.classList.remove("sidebar-collapsed");
+        else {
+            let shouldCollapse = false;
+            try { shouldCollapse = localStorage.getItem(storageKey) === "true"; } catch (e) {}
+            setCollapsed(shouldCollapse, false);
+        }
+    });
+})();
+</script>
 
 
 </body>
