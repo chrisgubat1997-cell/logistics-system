@@ -25,6 +25,35 @@
     </section>
 
 
+    <section class="settings-card system-monitor-card" id="systemMonitorPanel" data-admin-only="true" style="display:none">
+      <div class="card-header system-monitor-head">
+        <div class="header-left">
+          <div class="card-icon maintenance-icon" aria-hidden="true">◉</div>
+          <div><h2>System Monitor</h2><p>Live browser, application and Apps Script connectivity diagnostics</p></div>
+        </div>
+        <div class="system-monitor-actions">
+          <button type="button" class="action-btn secondary" id="systemMonitorRefresh">↻ Check Now</button>
+          <button type="button" class="action-btn secondary" id="systemMonitorReport">↓ Diagnostic Report</button>
+        </div>
+      </div>
+      <div class="system-monitor-grid">
+        <div class="system-monitor-metric"><span>Overall system</span><strong id="monitorOverallStatus" class="monitor-status-value neutral">Checking…</strong><small id="monitorSystemName">LOGIS-TECH SYSTEM</small></div>
+        <div class="system-monitor-metric"><span>Internet connection</span><strong id="monitorNetworkStatus" class="monitor-status-value neutral">Checking…</strong><small>Current browser connection</small></div>
+        <div class="system-monitor-metric"><span>Apps Script API</span><strong id="monitorApiStatus" class="monitor-status-value neutral">Checking…</strong><small id="monitorApiLatency">Waiting for response</small></div>
+        <div class="system-monitor-metric"><span>Browser storage</span><strong id="monitorStorageUsage">Checking…</strong><small id="monitorStoragePercent">Usage estimate</small></div>
+        <div class="system-monitor-metric"><span>LocalStorage</span><strong id="monitorLocalStorage">Checking…</strong><small>Browser key/value data estimate</small></div>
+        <div class="system-monitor-metric"><span>Loaded files / assets</span><strong id="monitorAssetSize">Checking…</strong><small id="monitorAssetCount">Resources loaded</small></div>
+        <div class="system-monitor-metric"><span>Page load time</span><strong id="monitorLoadTime">Checking…</strong><small>Current application page</small></div>
+        <div class="system-monitor-metric"><span>Browser errors</span><strong id="monitorErrorCount">0</strong><small>Captured in this admin browser session</small></div>
+      </div>
+      <div class="system-monitor-lower">
+        <div class="system-monitor-subpanel"><h3>Recent Browser Errors</h3><div class="monitor-error-list" id="monitorErrorList"><div class="monitor-empty">No browser errors captured.</div></div></div>
+        <div class="system-monitor-subpanel"><h3>Safe System Maintenance</h3><div class="monitor-error-list"><p class="monitor-empty">Remove temporary browser/app cache only. Google Sheets records, login sessions, settings and IndexedDB business-data cache are protected.</p><button type="button" class="action-btn danger" id="systemMonitorCleanup">⌫ Clear Temporary Cache</button><p id="monitorCleanupResult" role="status" aria-live="polite"></p></div></div>
+      </div>
+      <div class="system-monitor-foot"><span>Auto-check interval: every 15 seconds</span><span>Last checked: <strong id="monitorLastChecked">—</strong></span></div>
+      <p class="system-monitor-note">Monitoring scope: this browser session and Apps Script API ping. Google Drive spreadsheet file sizes, server-side execution logs, other users' browsers and server CPU/memory are not exposed by the current backend.</p>
+    </section>
+
     <section class="settings-card">
       <div class="card-header">
         <div class="card-icon appearance-icon" aria-hidden="true">◐</div>
