@@ -1,16 +1,17 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
-   ROLE-BASED ACTION VISIBILITY
-   VERSION: 20261015-role03
+   ROLE-BASED MENU AND ACTION PERMISSIONS
+   VERSION: 20261110-role-matrix01
 
-   UI convenience only. Server-side authorization is still
-   required for every create/update/cancel/post operation.
+   UI convenience only. Apps Script must enforce the same permissions
+   on every create/update/cancel/post operation.
 ========================================================= */
 (function () {
     "use strict";
 
     const ROLE_ACCESS = {
         sales: ["ADMIN", "SALES"],
+        jo: ["ADMIN", "PRODUCTION"],
         delivery: ["ADMIN", "LOGISTICS"],
         invoice: ["ADMIN", "FINANCE", "PAYMENT"],
         payment: ["ADMIN", "FINANCE", "PAYMENT"]
@@ -18,13 +19,14 @@
 
     const ROOTS = [
         { selector: ".sales-order-module, #salesOrderPage", section: "sales" },
+        { selector: "#joRegisterModule, .jo-register-module", section: "jo" },
         { selector: ".delivery-module", section: "delivery" },
         { selector: ".invoicing-container", section: "invoice" },
         { selector: ".payment-module", section: "payment" }
     ];
 
-    const ACTION_WORDS = /(^|\b)(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject)(\b|$)/i;
-    const NON_MUTATING_WORDS = /(^|\b)(view|details|refresh|search|filter|back|close|print|download|preview)(\b|$)/i;
+    const ACTION_WORDS = /(^|\\b)(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject|issue|record|assign)(\\b|$)/i;
+    const SAFE_WORDS = /(^|\\b)(view|details|refresh|search|filter|clear|back|close|print|download|preview|sort|export)(\\b|$)/i;
 
     function currentRole() {
         try {
@@ -48,112 +50,118 @@
             element.id,
             typeof element.className === "string" ? element.className : "",
             element.getAttribute("onclick")
-        ].filter(Boolean).join(" ");
+        ].filter(Boolean).join(" ").replace(/[_-]+/g, " ");
     }
 
-    function isActionControl(element) {
+    function isMutationControl(element) {
         if (element.closest("[data-role-visibility-ignore='true']")) return false;
-        const label = getActionText(element).replace(/[_-]+/g, " ");
-        if (!ACTION_WORDS.test(label)) return false;
-
-        // Keep clearly non-mutating controls visible (e.g. View, Refresh, Search).
+        if (element.matches("input[type='search'], input[type='text'], select")) return false;
         const visibleLabel = String(element.innerText || element.value || "").trim();
-        if (NON_MUTATING_WORDS.test(visibleLabel) && !/(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject)/i.test(visibleLabel)) {
+        const fullLabel = getActionText(element);
+        if (!ACTION_WORDS.test(fullLabel)) return false;
+        if (SAFE_WORDS.test(visibleLabel) &&
+            !/(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject|issue|record|assign)/i.test(visibleLabel)) {
             return false;
         }
         return true;
     }
 
     function applyToRoot(root, section, role) {
-        const allowed = ROLE_ACCESS[section] || [];
-        const canMutate = allowed.includes(role);
+        const allowed = (ROLE_ACCESS[section] || []).includes(role);
         const controls = root.querySelectorAll(
             "button, [role='button'], a.btn, input[type='button'], input[type='submit']"
         );
 
         controls.forEach(function (control) {
-            if (!isActionControl(control)) return;
+            if (!isMutationControl(control)) return;
 
-            if (!canMutate) {
-                if (!control.hasAttribute("data-role-original-display")) {
-                    control.setAttribute("data-role-original-display", control.style.display || "");
+            if (!allowed) {
+                if (!control.hasAttribute("data-role-original-disabled")) {
+                    control.setAttribute("data-role-original-disabled", control.disabled ? "true" : "false");
                 }
-                control.style.display = "none";
-                control.setAttribute("aria-hidden", "true");
-                control.setAttribute("data-role-hidden", "true");
-            } else if (control.getAttribute("data-role-hidden") === "true") {
-                control.style.display = control.getAttribute("data-role-original-display") || "";
-                control.removeAttribute("aria-hidden");
-                control.removeAttribute("data-role-hidden");
-                control.removeAttribute("data-role-original-display");
+                control.disabled = true;
+                control.setAttribute("aria-disabled", "true");
+                control.classList.add("role-action-disabled");
+                control.title = control.title || "View only: your account role cannot perform this action.";
+                if (control.tagName === "A") {
+                    control.setAttribute("tabindex", "-1");
+                    control.style.pointerEvents = "none";
+                }
+            } else if (control.hasAttribute("data-role-original-disabled")) {
+                const wasDisabled = control.getAttribute("data-role-original-disabled") === "true";
+                control.disabled = wasDisabled;
+                if (!wasDisabled) {
+                    control.removeAttribute("aria-disabled");
+                    control.classList.remove("role-action-disabled");
+                    if (control.getAttribute("title") === "View only: your account role cannot perform this action.") {
+                        control.removeAttribute("title");
+                    }
+                }
+                control.removeAttribute("data-role-original-disabled");
+                if (control.tagName === "A") {
+                    control.removeAttribute("tabindex");
+                    control.style.pointerEvents = "";
+                }
             }
         });
     }
 
-    function applyFleetSidebarVisibility(role) {
+    function setMenuVisibility(selector, visible) {
+        document.querySelectorAll(selector).forEach(function (button) {
+            if (!button.hasAttribute("data-role-menu-original-display")) {
+                button.setAttribute("data-role-menu-original-display", button.style.display || "");
+            }
+            button.style.display = visible ? (button.getAttribute("data-role-menu-original-display") || "") : "none";
+            button.setAttribute("aria-hidden", String(!visible));
+        });
+    }
+
+    function applySidebarVisibility(role) {
         const canSeeFleet = ["ADMIN", "LOGISTICS"].includes(role);
+        const canSeeFund = ["ADMIN", "LOGISTICS"].includes(role);
+
         document.querySelectorAll(".menu-btn").forEach(function (button) {
             const action = button.getAttribute("onclick") || "";
-            if (!action.includes("fleetAnalytics") && !action.includes("fleetDataEntry")) return;
-            if (!button.hasAttribute("data-fleet-role-original-display")) {
-                button.setAttribute("data-fleet-role-original-display", button.style.display || "");
+            if (action.includes("fleetAnalytics") || action.includes("fleetDataEntry")) {
+                if (!button.hasAttribute("data-fleet-role-original-display")) {
+                    button.setAttribute("data-fleet-role-original-display", button.style.display || "");
+                }
+                button.style.display = canSeeFleet ? (button.getAttribute("data-fleet-role-original-display") || "") : "none";
+                button.setAttribute("aria-hidden", String(!canSeeFleet));
             }
-            button.style.display = canSeeFleet
-                ? (button.getAttribute("data-fleet-role-original-display") || "")
-                : "none";
-            button.setAttribute("aria-hidden", String(!canSeeFleet));
         });
-    }
 
-    function applyRevolvingFundSidebarVisibility(role) {
-        const canSeeRevolvingFund = ["ADMIN", "LOGISTICS"].includes(role);
-        document.querySelectorAll('[data-role-module="revolving-fund"]').forEach(function (button) {
-            button.style.display = canSeeRevolvingFund ? "" : "none";
-            button.setAttribute("aria-hidden", String(!canSeeRevolvingFund));
-            button.disabled = !canSeeRevolvingFund;
+        setMenuVisibility('[data-role-module="revolving-fund"]', canSeeFund);
+        // JO Register is visible to all five roles; only its action buttons are role-restricted.
+        document.querySelectorAll("[data-jo-register-menu]").forEach(function (button) {
+            button.style.display = "";
+            button.removeAttribute("aria-hidden");
         });
-        // If an unauthorized account reaches the module by direct navigation,
-        // return them to Dashboard rather than showing its content.
-        if (!canSeeRevolvingFund) {
-            const page = document.getElementById("revolvingFund");
-            if (page && page.classList.contains("active")) {
-                const dashboardButton = document.querySelector('.menu-btn[onclick*="dashboard"]');
-                if (typeof window.showPage === "function" && dashboardButton) window.showPage("dashboard", dashboardButton);
-            }
-        }
+        // Shared communication remains visible to every authenticated account.
+        document.querySelectorAll("[data-messages-menu]").forEach(function (button) {
+            button.style.setProperty("display", "flex", "important");
+            button.style.setProperty("visibility", "visible", "important");
+            button.style.setProperty("opacity", "1", "important");
+            button.disabled = false;
+            button.removeAttribute("aria-hidden");
+        });
     }
 
     function applyRoleActionVisibility() {
         const role = currentRole();
         if (!role) return;
 
-        applyFleetSidebarVisibility(role);
-        applyRevolvingFundSidebarVisibility(role);
-
-        // Messages is a shared communication module for every registered account.
-        document.querySelectorAll("[data-messages-menu]").forEach(function (button) {
-            // Avoid rewriting the style attribute on every MutationObserver pass.
-            if (button.style.getPropertyValue("display") !== "flex" ||
-                button.style.getPropertyPriority("display") !== "important") {
-                button.style.setProperty("display", "flex", "important");
-            }
-            if (button.style.getPropertyValue("visibility") !== "visible" ||
-                button.style.getPropertyPriority("visibility") !== "important") {
-                button.style.setProperty("visibility", "visible", "important");
-            }
-            if (button.style.getPropertyValue("opacity") !== "1" ||
-                button.style.getPropertyPriority("opacity") !== "important") {
-                button.style.setProperty("opacity", "1", "important");
-            }
-            if (button.disabled) button.disabled = false;
-            if (button.hasAttribute("aria-hidden")) button.removeAttribute("aria-hidden");
-        });
-
+        applySidebarVisibility(role);
         ROOTS.forEach(function (entry) {
             document.querySelectorAll(entry.selector).forEach(function (root) {
                 applyToRoot(root, entry.section, role);
             });
         });
+
+        // JO Register renders its table rows dynamically. Apply the same rule
+        // to its action buttons, while keeping search, refresh and filters active.
+        const joRoot = document.getElementById("joRegisterModule");
+        if (joRoot) applyToRoot(joRoot, "jo", role);
     }
 
     let queued = false;
