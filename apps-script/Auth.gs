@@ -407,9 +407,9 @@ function createAccount(payload) {
 
     passwordHash,
 
-    "",
+    "GREENMETAL",
 
-    ""
+    "GREENMETAL"
 
   ]);
 
@@ -911,6 +911,9 @@ function loginUser(payload) {
 
       activeCompany:
         defaultCompany,
+
+      allowedCompanies:
+        allowedCompanies,
 
       sessionToken:
         sessionToken
