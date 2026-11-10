@@ -140,7 +140,7 @@
 
         document.querySelectorAll(".sidebar .menu .menu-btn").forEach(function (button) {
             const action = button.getAttribute("onclick") || "";
-            const match = action.match(/showPage\\s*\\(\\s*['"]([^'"]+)['"]/i);
+            const match = action.match(/showPage\s*\(\s*['"]([^'"]+)['"]/i);
             const page = match ? match[1] : "";
             const menuKey = button.getAttribute("data-role-module") === "revolving-fund"
                 ? "revolvingFund"
