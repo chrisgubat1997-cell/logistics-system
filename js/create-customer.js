@@ -1577,68 +1577,85 @@
 
     function handleCancel() {
 
-        /*
-         * Notify parent module.
-         */
+        /* Show a confirmation modal; do not leave the form immediately. */
+        if (document.getElementById("customerCancelConfirm")) return;
 
-        try {
+        const overlay = document.createElement("div");
+        overlay.id = "customerCancelConfirm";
+        overlay.setAttribute("role", "dialog");
+        overlay.setAttribute("aria-modal", "true");
+        overlay.innerHTML = `
+            <div class="customer-cancel-confirm-card">
+                <div class="customer-cancel-confirm-icon">?</div>
+                <h3>Cancel New Customer?</h3>
+                <p>Are you sure you want to cancel? Any unsaved changes will be lost.</p>
+                <div class="customer-cancel-confirm-actions">
+                    <button type="button" class="customer-cancel-stay">Continue Editing</button>
+                    <button type="button" class="customer-cancel-leave">Yes, Cancel</button>
+                </div>
+            </div>
+        `;
 
-            window.dispatchEvent(
-                new CustomEvent(
-                    "customerFormCancel"
-                )
-            );
+        Object.assign(overlay.style, {
+            position: "fixed", inset: "0", zIndex: "13000",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px", background: "rgba(15, 23, 42, 0.58)",
+            backdropFilter: "blur(3px)"
+        });
 
-        } catch (error) {
+        const card = overlay.querySelector(".customer-cancel-confirm-card");
+        Object.assign(card.style, {
+            width: "min(420px, 100%)", padding: "26px", borderRadius: "16px",
+            background: "#fff", color: "#1e293b", textAlign: "center",
+            boxShadow: "0 20px 60px rgba(0,0,0,.25)", fontFamily: "inherit"
+        });
+        Object.assign(overlay.querySelector(".customer-cancel-confirm-icon").style, {
+            width: "42px", height: "42px", margin: "0 auto 12px",
+            borderRadius: "50%", display: "grid", placeItems: "center",
+            background: "#fff7ed", color: "#c2410c", fontSize: "22px", fontWeight: "700"
+        });
+        Object.assign(overlay.querySelector("h3").style, { margin: "0 0 8px", fontSize: "19px" });
+        Object.assign(overlay.querySelector("p").style, {
+            margin: "0 0 22px", color: "#64748b", lineHeight: "1.5"
+        });
+        Object.assign(overlay.querySelector(".customer-cancel-confirm-actions").style, {
+            display: "flex", justifyContent: "center", gap: "10px", flexWrap: "wrap"
+        });
 
-            console.warn(
-                "customerFormCancel event failed:",
-                error
-            );
+        overlay.querySelectorAll("button").forEach(button => Object.assign(button.style, {
+            border: "0", borderRadius: "8px", padding: "11px 16px",
+            fontWeight: "600", cursor: "pointer"
+        }));
 
-        }
+        const stayButton = overlay.querySelector(".customer-cancel-stay");
+        Object.assign(stayButton.style, { background: "#e2e8f0", color: "#334155" });
+        const leaveButton = overlay.querySelector(".customer-cancel-leave");
+        Object.assign(leaveButton.style, { background: "#dc2626", color: "#fff" });
 
+        stayButton.addEventListener("click", () => overlay.remove());
+        overlay.addEventListener("click", event => {
+            if (event.target === overlay) overlay.remove();
+        });
+        leaveButton.addEventListener("click", () => {
+            overlay.remove();
 
-        /*
-         * Embedded inside Sales Order.
-         */
-
-        const salesOrderCustomerArea =
-            document.getElementById(
-                "customerArea"
-            );
-
-
-        if (
-            salesOrderCustomerArea
-        ) {
-
-            if (
-                typeof window.closeCustomerFromSalesOrder ===
-                "function"
-            ) {
-
-                window.closeCustomerFromSalesOrder();
-
+            try {
+                window.dispatchEvent(new CustomEvent("customerFormCancel"));
+            } catch (error) {
+                console.warn("customerFormCancel event failed:", error);
             }
 
-            return;
+            const customerArea = document.getElementById("customerArea");
+            if (customerArea && typeof window.closeCustomerFromSalesOrder === "function") {
+                window.closeCustomerFromSalesOrder();
+                return;
+            }
 
-        }
+            if (window.history.length > 1) window.history.back();
+        });
 
-
-        /*
-         * Standalone fallback.
-         */
-
-        if (
-            window.history.length > 1
-        ) {
-
-            window.history.back();
-
-        }
-
+        document.body.appendChild(overlay);
+        stayButton.focus();
     }
 
 
