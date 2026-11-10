@@ -23,6 +23,19 @@
     const DASHBOARD_API_URL =
         "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
+    // The dashboard runs inside its own iframe, so it must attach the
+    // authenticated session token itself (the parent page's fetch wrapper
+    // does not run inside this window).
+    function getDashboardSessionToken() {
+        try {
+            const user = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+            return String(user.sessionToken || user.session_token || user.token || "").trim();
+        } catch (error) {
+            console.warn("Unable to read dashboard session:", error);
+            return "";
+        }
+    }
+
     let lastDashboardData = null;
 
     /* =====================================================
@@ -202,6 +215,11 @@
         const results = await Promise.all(
             actions.map(async function (entry) {
                 try {
+                    const sessionToken = getDashboardSessionToken();
+                    if (!sessionToken) {
+                        throw new Error("AUTH_REQUIRED: Please log out and log in again.");
+                    }
+
                     const response = await fetch(DASHBOARD_API_URL, {
                         method: "POST",
                         headers: {
@@ -209,7 +227,9 @@
                         },
                         body: JSON.stringify({
                             action: entry[1],
-                            data: {}
+                            data: {
+                                sessionToken: sessionToken
+                            }
                         })
                     });
 
