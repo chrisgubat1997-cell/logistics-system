@@ -1,0 +1,69 @@
+/* GEMLIGHT ONE — APP-WIDE CORPORATE COLOR SYSTEM
+   Palette: Navy Blue / Royal Blue / Yellow-Green
+   Applies to every module without changing business logic.
+*/
+:root {
+  --brand-blue: #073B78;
+  --brand-blue-deep: #052B59;
+  --brand-blue-dark: #0A4C91;
+  --brand-blue-soft: #E8F1FC;
+  --brand-blue-pale: #F4F8FD;
+  --brand-green: #A6CE39;
+  --brand-green-dark: #6F9415;
+  --brand-green-soft: #F1F8DE;
+  --primary: var(--brand-blue);
+  --primary-dark: var(--brand-blue-deep);
+  --primary-light: var(--brand-blue-soft);
+  --success: #6F9415;
+  --success-bg: #F1F8DE;
+  --app-bg: #F3F7FC;
+  --surface: #FFFFFF;
+  --surface-subtle: #F8FAFD;
+  --ink: #172B45;
+  --ink-muted: #687B91;
+  --line: #DCE6F1;
+  --line-strong: #C7D6E7;
+  --shadow-card: 0 5px 18px rgba(5,43,89,.07), 0 1px 3px rgba(5,43,89,.04);
+  --shadow-hover: 0 13px 30px rgba(5,43,89,.13);
+}
+body,.main,.content { background-color: var(--app-bg); color: var(--ink); }
+.sidebar { background: linear-gradient(180deg,#052B59 0%,#073B78 62%,#041F43 100%) !important; }
+.logo::before { background: linear-gradient(180deg,#D5F36A,#A6CE39) !important; }
+.logo span { color:#C4E85A !important; }
+.menu button:hover,.menu-btn:hover { background:rgba(166,206,57,.15) !important; color:#fff !important; }
+.menu button.active,.menu-btn.active { background:linear-gradient(105deg,#1266C8,#084B96) !important; color:#fff !important; box-shadow:inset 4px 0 0 #B8E34B,0 5px 15px rgba(0,0,0,.12) !important; }
+.topbar { background:rgba(255,255,255,.96) !important; border-bottom:1px solid #DCE6F1 !important; }
+#welcomeUser { color:#073B78 !important; font-weight:700 !important; }
+.profile-btn { background:#E8F1FC !important; color:#073B78 !important; border:1px solid #C9DDF4 !important; }
+.logout-btn { background:#073B78 !important; border-color:#073B78 !important; color:#fff !important; }
+.logout-btn:hover { background:#052B59 !important; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid rgba(166,206,57,.45) !important; }
+input:not([type=checkbox]):not([type=radio]):focus,select:focus,textarea:focus { border-color:#1266C8 !important; box-shadow:0 0 0 3px rgba(18,102,200,.12) !important; }
+thead th,table thead th { background:#EAF2FC !important; color:#073B78 !important; border-bottom-color:#D2E1F2 !important; }
+tbody tr:nth-child(even) { background-color:#F7FAFE !important; }
+tbody tr:hover { background:#EDF5FF !important; }
+.btn-primary,.primary-btn,.primary-button,.so-primary-btn,.payment-primary-button,button.primary,button[type=submit] { background:#0B58A8 !important; border-color:#0B58A8 !important; color:#fff !important; }
+.btn-primary:hover,.primary-btn:hover,.primary-button:hover,.so-primary-btn:hover,.payment-primary-button:hover,button.primary:hover,button[type=submit]:hover { background:#073B78 !important; border-color:#073B78 !important; }
+.status-completed,.status-paid,.status-posted,.status-active,.badge-success,.status-success { background:#F1F8DE !important; border-color:#D7EAA5 !important; color:#587B0C !important; }
+.status-pending,.status-draft,.status-partial,.badge-warning { background:#FFF6DF !important; border-color:#F2DCA5 !important; color:#916000 !important; }
+.status-cancelled,.status-void,.badge-danger { background:#FFF0F0 !important; border-color:#F2CACA !important; color:#B42318 !important; }
+.status-dot,.fde-status-dot { background:#A6CE39 !important; }
+a { color:#0B58A8; }
+.section,.dashboard-card,.dashboard-kpi-card,.kpi-card,.metric-card,.stat-card,.summary-card,.so-stat-card,.delivery-stat-card,.invoice-stat-card,.payment-stat-card,.report-card,.report-panel,.chart-card,.fde-panel,.fde-card,.fleet-card,.analytics-card,.settings-card,.invoicing-card,.payment-card,.so-card,.dr-card,.table-card,.form-card,.customer-card,.vehicle-card { border-color:#DCE6F1 !important; box-shadow:var(--shadow-card); }
+html[data-theme=dark] {
+ --brand-blue:#2D79D0; --brand-blue-deep:#0B2A50; --brand-blue-dark:#174B80;
+ --brand-blue-soft:#172D49; --brand-blue-pale:#101F33;
+ --brand-green:#B7DF4A; --brand-green-dark:#B7DF4A; --brand-green-soft:#29391B;
+ --primary:#2D79D0; --primary-dark:#174B80; --primary-light:#172D49;
+ --success:#B7DF4A; --success-bg:#29391B;
+ --app-bg:#0A1422; --surface:#121F30; --surface-subtle:#17263A;
+ --ink:#E8F0FA; --ink-muted:#A6B7CC; --line:#293B53; --line-strong:#405875;
+}
+html[data-theme=dark] body,html[data-theme=dark] .main,html[data-theme=dark] .content { background:#0A1422 !important; color:#E8F0FA !important; }
+html[data-theme=dark] .sidebar { background:linear-gradient(180deg,#04172E,#082D55 65%,#031225) !important; }
+html[data-theme=dark] .topbar { background:rgba(15,29,47,.97) !important; border-color:#293B53 !important; }
+html[data-theme=dark] .profile-btn { background:#172D49 !important; color:#DCEBFF !important; border-color:#345577 !important; }
+html[data-theme=dark] thead th,html[data-theme=dark] table thead th { background:#1A304B !important; color:#DCEBFF !important; }
+html[data-theme=dark] tbody tr:nth-child(even) { background:#142338 !important; }
+html[data-theme=dark] tbody tr:hover { background:#1A304B !important; }
+html[data-theme=dark] .status-completed,html[data-theme=dark] .status-paid,html[data-theme=dark] .status-posted,html[data-theme=dark] .status-active,html[data-theme=dark] .badge-success { background:#29391B !important; color:#C8ED75 !important; border-color:#526B2B !important; }
