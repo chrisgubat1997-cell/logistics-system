@@ -150,6 +150,22 @@
                         </div>
 
 
+                        <section class="create-payment-unpaid-section create-payment-history-section" aria-labelledby="selectedSOPaymentHistoryHeading">
+                            <div class="create-payment-unpaid-header">
+                                <div>
+                                    <h2 id="selectedSOPaymentHistoryHeading">Payment Transactions for Selected SO</h2>
+                                    <p id="selectedSOPaymentHistoryCaption">Select a Sales Order to view its saved payment transactions from the database.</p>
+                                </div>
+                            </div>
+                            <div class="create-payment-unpaid-table-wrap">
+                                <table class="create-payment-unpaid-table">
+                                    <thead><tr><th>PAYMENT NO.</th><th>PAYMENT DATE</th><th>METHOD</th><th>RECEIPT NO.</th><th>REFERENCE NO.</th><th>AMOUNT</th><th>STATUS</th></tr></thead>
+                                    <tbody id="selectedSOPaymentHistoryBody"><tr><td colspan="7" class="create-payment-unpaid-empty">No Sales Order selected.</td></tr></tbody>
+                                </table>
+                            </div>
+                        </section>
+
+
                         <!-- =================================================
                              SALES ORDER INFORMATION
                              ================================================= -->
@@ -194,20 +210,7 @@
 
 
 
-                        <section class="create-payment-unpaid-section create-payment-history-section" aria-labelledby="selectedSOPaymentHistoryHeading">
-                            <div class="create-payment-unpaid-header">
-                                <div>
-                                    <h2 id="selectedSOPaymentHistoryHeading">Payment Transactions for Selected SO</h2>
-                                    <p id="selectedSOPaymentHistoryCaption">Select a Sales Order to view its saved payment transactions from the database.</p>
-                                </div>
-                            </div>
-                            <div class="create-payment-unpaid-table-wrap">
-                                <table class="create-payment-unpaid-table">
-                                    <thead><tr><th>PAYMENT NO.</th><th>PAYMENT DATE</th><th>METHOD</th><th>RECEIPT NO.</th><th>REFERENCE NO.</th><th>AMOUNT</th><th>STATUS</th></tr></thead>
-                                    <tbody id="selectedSOPaymentHistoryBody"><tr><td colspan="7" class="create-payment-unpaid-empty">No Sales Order selected.</td></tr></tbody>
-                                </table>
-                            </div>
-                        </section>
+
 
                         <!-- Hidden compatibility fields used by the payment JavaScript -->
                         <input type="hidden" id="paymentClient" name="paymentClient">
