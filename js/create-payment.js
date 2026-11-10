@@ -509,24 +509,44 @@ function cancelPayment() {
 
 /* GOOGLE SHEETS API + SALES ORDER AUTOCOMPLETE */
 function getPaymentSessionToken() {
-    try {
-        const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
-        // Keep token resolution consistent with the main company switch and
-        // Delivery modules. Some login/account responses use "token" or wrap
-        // the account under account/user/auth/session.
-        const account = saved.account || saved.user || saved.profile || saved;
-        const auth = saved.auth || account.auth || {};
-        const session = saved.session || account.session || {};
-        const token =
-            saved.sessionToken || saved.session_token || saved.token ||
-            account.sessionToken || account.session_token || account.token ||
-            auth.sessionToken || auth.session_token || auth.token ||
-            session.sessionToken || session.session_token || session.token || "";
-        return String(token || "").trim();
-    } catch (error) {
-        console.warn("Unable to read Create Payment session:", error);
-        return "";
+    function readAccount(storage) {
+        try {
+            const raw = storage && storage.getItem("logitechUser");
+            if (!raw) return null;
+            const value = JSON.parse(raw);
+            return value && typeof value === "object" ? value : null;
+        } catch (error) {
+            return null;
+        }
     }
+
+    // Normally this page shares the main app's origin and localStorage.
+    // The parent lookup also supports deployments that embed this page.
+    let saved = readAccount(window.localStorage);
+    if (!saved) {
+        try {
+            if (window.parent && window.parent !== window) {
+                saved = readAccount(window.parent.localStorage);
+            }
+        } catch (error) {
+            // Cross-origin parent access is intentionally ignored.
+        }
+    }
+    if (!saved) return "";
+
+    const account = saved.account || saved.user || saved.profile || saved;
+    const auth = saved.auth || account.auth || {};
+    const session = saved.session || account.session || {};
+    const token = [
+        saved.sessionToken, saved.session_token, saved.token,
+        account.sessionToken, account.session_token, account.token,
+        auth.sessionToken, auth.session_token, auth.token,
+        session.sessionToken, session.session_token, session.token
+    ].find(function(value) {
+        return typeof value === "string" && value.trim();
+    });
+
+    return String(token || "").trim();
 }
 
 async function paymentAPIGet(action) {
@@ -558,47 +578,58 @@ async function paymentAPI(action, data = {}) {
     if (!response.ok || !result || result.success === false) throw new Error(result && (result.message || result.error) || "Database request failed.");
     return result;
 }
-async function loadPaymentDataFromDatabase() {
-    try {
-        const results = await Promise.all([
-            paymentAPI("getSalesOrders", {}),
-            paymentAPI("getPayments", {})
-        ]);
-        const soRows = Array.isArray(results[0].salesOrders) ? results[0].salesOrders : (Array.isArray(results[0].records) ? results[0].records : (Array.isArray(results[0].data) ? results[0].data : []));
-        const paymentRows = Array.isArray(results[1].payments) ? results[1].payments : (Array.isArray(results[1].records) ? results[1].records : (Array.isArray(results[1].data) ? results[1].data : []));
-        databaseSalesOrders = soRows.map(function(row) { return Object.assign({}, row, {
-            soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || "", poNo: row.PO_NUMBER || row.poNo || row.poNumber || "",
-            client: row.CLIENT_NAME || row.client || row.clientName || "", project: row.PROJECT || row.project || "",
-            billingAddress: row.BILLING_ADDRESS || row.billingAddress || "",
-            total: row.GRAND_TOTAL ?? row.TOTAL_AMOUNT ?? row.SO_TOTAL ?? row.total ?? row.grandTotal ?? 0,
-            terms: row.TERMS || row.PAYMENT_TERMS || row.terms || "", status: row.STATUS || row.status || ""
-        }); });
-        databasePayments = paymentRows.map(function(row) { return Object.assign({}, row, {
-            soNo: row.SO_NUMBER || row.soNo || "", currentPayment: row.CURRENT_PAYMENT ?? row.currentPayment ?? row.amount ?? 0,
-            status: row.PAYMENT_STATUS || row.status || "RECEIVED"
-        }); });
+let paymentDataLoadPromise = null;
+
+function loadPaymentDataFromDatabase() {
+    if (paymentDataLoaded) return Promise.resolve(true);
+    if (paymentDataLoadPromise) return paymentDataLoadPromise;
+
+    paymentDataLoadPromise = (async function() {
         try {
-            const drResult = await paymentAPIGet("getDeliveryReceipts");
-            databaseDeliveryReceipts = Array.isArray(drResult.deliveryReceipts) ? drResult.deliveryReceipts : (Array.isArray(drResult.records) ? drResult.records : (Array.isArray(drResult.data) ? drResult.data : []));
-            deliveryDataLoaded = true;
-        } catch (deliveryError) {
-            databaseDeliveryReceipts = [];
-            deliveryDataLoaded = false;
-            console.warn("Delivery Receipt records are not available; payment records will still load.", deliveryError);
+            const results = await Promise.all([
+                paymentAPI("getSalesOrders", {}),
+                paymentAPI("getPayments", {})
+            ]);
+            const soRows = Array.isArray(results[0].salesOrders) ? results[0].salesOrders : (Array.isArray(results[0].records) ? results[0].records : (Array.isArray(results[0].data) ? results[0].data : []));
+            const paymentRows = Array.isArray(results[1].payments) ? results[1].payments : (Array.isArray(results[1].records) ? results[1].records : (Array.isArray(results[1].data) ? results[1].data : []));
+            databaseSalesOrders = soRows.map(function(row) { return Object.assign({}, row, {
+                soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || "", poNo: row.PO_NUMBER || row.poNo || row.poNumber || "",
+                client: row.CLIENT_NAME || row.client || row.clientName || "", project: row.PROJECT || row.project || "",
+                billingAddress: row.BILLING_ADDRESS || row.billingAddress || "",
+                total: row.GRAND_TOTAL ?? row.TOTAL_AMOUNT ?? row.SO_TOTAL ?? row.total ?? row.grandTotal ?? 0,
+                terms: row.TERMS || row.PAYMENT_TERMS || row.terms || "", status: row.STATUS || row.status || ""
+            }); });
+            databasePayments = paymentRows.map(function(row) { return Object.assign({}, row, {
+                soNo: row.SO_NUMBER || row.soNo || "", currentPayment: row.CURRENT_PAYMENT ?? row.currentPayment ?? row.amount ?? 0,
+                status: row.PAYMENT_STATUS || row.status || "RECEIVED"
+            }); });
+            try {
+                const drResult = await paymentAPIGet("getDeliveryReceipts");
+                databaseDeliveryReceipts = Array.isArray(drResult.deliveryReceipts) ? drResult.deliveryReceipts : (Array.isArray(drResult.records) ? drResult.records : (Array.isArray(drResult.data) ? drResult.data : []));
+                deliveryDataLoaded = true;
+            } catch (deliveryError) {
+                databaseDeliveryReceipts = [];
+                deliveryDataLoaded = false;
+                console.warn("Delivery Receipt records are not available; payment records will still load.", deliveryError);
+            }
+            paymentDataLoaded = true;
+            renderUnpaidPaymentSOTable();
+            renderSelectedSOPaymentTransactions(selectedSalesOrder ? getSalesOrderNumber(selectedSalesOrder) : getValue("paymentSONo"));
+            return true;
+        } catch(error) {
+            console.error("Could not load payment and sales order data from database:", error);
+            paymentDataLoaded = false;
+            const tbody = document.getElementById("unpaidPaymentSOTableBody");
+            if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="create-payment-unpaid-empty">Unable to load Sales Orders and payment transactions. Check your login session, then refresh.</td></tr>';
+            const historyBody = document.getElementById("selectedSOPaymentHistoryBody");
+            if (historyBody) historyBody.innerHTML = '<tr><td colspan="7" class="create-payment-unpaid-empty">Unable to load payment transactions from the database.</td></tr>';
+            return false;
         }
-        paymentDataLoaded = true;
-        renderUnpaidPaymentSOTable();
-        renderSelectedSOPaymentTransactions(selectedSalesOrder ? getSalesOrderNumber(selectedSalesOrder) : getValue("paymentSONo"));
-        return true;
-    } catch(error) {
-        console.error("Could not load payment and sales order data from database:", error);
-        paymentDataLoaded = false;
-        const tbody = document.getElementById("unpaidPaymentSOTableBody");
-        if (tbody) tbody.innerHTML = '<tr><td colspan="9" class="create-payment-unpaid-empty">Unable to load Sales Orders and payment transactions from the database. Please refresh.</td></tr>';
-        const historyBody = document.getElementById("selectedSOPaymentHistoryBody");
-        if (historyBody) historyBody.innerHTML = '<tr><td colspan="7" class="create-payment-unpaid-empty">Unable to load payment transactions from the database.</td></tr>';
-        return false;
-    }
+    })();
+
+    return paymentDataLoadPromise.finally(function() {
+        paymentDataLoadPromise = null;
+    });
 }
 function paymentSOKey(value) { return String(value || "").trim().toLowerCase(); }
 
