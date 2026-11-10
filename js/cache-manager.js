@@ -22,8 +22,15 @@
        CONFIGURATION
     ===================================================== */
 
-    const DB_NAME =
-        "LOGIS_TECH_LOCAL_CACHE";
+    function getDatabaseName() {
+        try {
+            const account = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+            const company = String(account.activeCompany || account.defaultCompany || "UNASSIGNED").toUpperCase();
+            return "LOGIS_TECH_LOCAL_CACHE_" + company;
+        } catch (error) {
+            return "LOGIS_TECH_LOCAL_CACHE_UNASSIGNED";
+        }
+    }
 
     const DB_VERSION =
         1;
@@ -54,7 +61,7 @@
 
                 const request =
                     indexedDB.open(
-                        DB_NAME,
+                        getDatabaseName(),
                         DB_VERSION
                     );
 
