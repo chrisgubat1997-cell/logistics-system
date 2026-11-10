@@ -994,6 +994,15 @@
 
             </div>
 
+            <div id="adminCreateAccountAction" style="display:none; margin-top:18px;">
+                <a href="signup.html" class="login-btn" style="display:inline-flex; align-items:center; justify-content:center; text-decoration:none; width:auto; min-width:190px; padding:12px 20px;">
+                    + CREATE USER ACCOUNT
+                </a>
+                <p style="margin:8px 0 0; color:var(--text-secondary, #64748b); font-size:12px;">
+                    Administrator access only
+                </p>
+            </div>
+
         </div>
 <!-- =================================================
              SYSTEM SETTINGS MODULE
@@ -3259,6 +3268,14 @@ function loadUserAccount() {
         button.disabled = false;
         button.removeAttribute('aria-hidden');
     });
+
+    const currentRole = String(
+        user.role || user.ROLE || user.accountType || user.account_type || user.type || ''
+    ).trim().toUpperCase();
+    const adminCreateAction = document.getElementById('adminCreateAccountAction');
+    if (adminCreateAction) {
+        adminCreateAction.style.display = currentRole === 'ADMIN' ? 'block' : 'none';
+    }
 
     const fullname =
         user.fullname ||
