@@ -851,7 +851,7 @@ function getLogisTechCurrentRole() {
                     </td>
 
                     <td>
-                        ${canPrepareDeliveryReceiptByRole() ? '<button type="button" class="btn btn-primary btn-small prepare-so-button">＋ PREPARE DR</button>' : '<span class="role-view-only-label">VIEW ONLY</span>'}
+                        <button type="button" class="btn btn-primary btn-small prepare-so-button" ${canPrepareDeliveryReceiptByRole() ? '' : 'disabled aria-disabled="true" title="View only: your account role cannot prepare Delivery Receipts."'}>＋ PREPARE DR</button>
                     </td>
 
                 </tr>
@@ -1619,9 +1619,12 @@ if (dateElement) {
         if (!button) return;
 
         const allowed = canPrepareDeliveryReceiptByRole();
-        button.style.display = allowed ? "" : "none";
+        // Keep the Prepare DR control visible for every role; disable for read-only roles.
+        button.style.display = "";
         button.disabled = !allowed;
         button.setAttribute("aria-disabled", String(!allowed));
+        if (!allowed) button.title = "View only: your account role cannot prepare Delivery Receipts.";
+        else if (button.title === "View only: your account role cannot prepare Delivery Receipts.") button.removeAttribute("title");
 
         button.addEventListener("click", function (event) {
             event.preventDefault();
