@@ -12,7 +12,7 @@
 
     <link
         rel="stylesheet"
-        href="../css/create-payment.css?v=20261110-native-center-dialog01"
+        href="../css/create-payment.css?v=20261110-so-suggestions-under-search01"
     >
 </head>
 
@@ -123,15 +123,18 @@
 
                                 <div class="create-payment-input-group">
 
-                                    <input
-                                        type="text"
-                                        id="paymentSONo"
-                                        name="paymentSONo"
-                                        placeholder="Search Client Name, PO No., or SO No."
-                                        autocomplete="off"
-                                        aria-autocomplete="list"
-                                        aria-controls="paymentSOSuggestions"
-                                    >
+                                    <div class="create-payment-so-input-wrap">
+                                        <input
+                                            type="text"
+                                            id="paymentSONo"
+                                            name="paymentSONo"
+                                            placeholder="Search Client Name, PO No., or SO No."
+                                            autocomplete="off"
+                                            aria-autocomplete="list"
+                                            aria-controls="paymentSOSuggestions"
+                                        >
+                                        <div id="paymentSOSuggestions" class="create-payment-so-suggestions" role="listbox" hidden></div>
+                                    </div>
 
                                     <button
                                         type="button"
@@ -140,8 +143,6 @@
                                     >
                                         CHECK SO
                                     </button>
-
-                                    <div id="paymentSOSuggestions" class="create-payment-so-suggestions" role="listbox" hidden></div>
 
                                 </div>
 
