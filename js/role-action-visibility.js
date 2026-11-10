@@ -18,11 +18,11 @@
     };
 
     const ROOTS = [
-        { selector: ".sales-order-module, #salesOrderPage", section: "sales" },
+        { selector: ".sales-order-module, #salesOrderPage, #salesModule", section: "sales" },
         { selector: "#joRegisterModule, .jo-register-module", section: "jo" },
-        { selector: ".delivery-module", section: "delivery" },
-        { selector: ".invoicing-container", section: "invoice" },
-        { selector: ".payment-module", section: "payment" }
+        { selector: ".delivery-module, #deliveryModule", section: "delivery" },
+        { selector: ".invoicing-container, #invoiceModule", section: "invoice" },
+        { selector: ".payment-module, #paymentModule", section: "payment" }
     ];
 
     const ACTION_WORDS = /(^|\b)(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject|issue|record|assign)(\b|$)/i;
