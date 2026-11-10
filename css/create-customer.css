@@ -1306,3 +1306,50 @@
     }
 
 }
+
+
+/* =========================================================
+   NEW CUSTOMER — CENTERED MODAL CARD WHEN EMBEDDED IN SALES ORDER
+========================================================= */
+#customerArea.customer-area-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 12000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px !important;
+    overflow: auto !important;
+    background: rgba(15, 23, 42, 0.58) !important;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+#customerArea.customer-area-modal .customer-page {
+    width: min(1080px, 100%) !important;
+    max-width: 1080px !important;
+    max-height: min(90vh, 900px) !important;
+    min-height: 0 !important;
+    margin: auto !important;
+    padding: 22px !important;
+    overflow: auto !important;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 18px !important;
+    background: #f5f7fb !important;
+    box-shadow: 0 24px 80px rgba(2, 8, 23, 0.32) !important;
+    animation: customerModalEnter 180ms ease-out both;
+}
+
+@keyframes customerModalEnter {
+    from { opacity: 0; transform: translateY(10px) scale(0.985); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 700px) {
+    #customerArea.customer-area-modal { padding: 10px !important; }
+    #customerArea.customer-area-modal .customer-page {
+        max-height: 94vh !important;
+        padding: 14px !important;
+        border-radius: 13px !important;
+    }
+}
