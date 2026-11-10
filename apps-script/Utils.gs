@@ -304,6 +304,97 @@ function normalizeCompanyAccess_(value) {
   });
 }
 
+/* =========================================================
+   SWITCH ACTIVE COMPANY
+   The selected company is verified against the central USERS
+   record and stored in the server-side session.
+========================================================= */
+function switchCompany_(payload) {
+  payload = payload || {};
+  const token = String(payload.sessionToken || payload.session_token || "").trim();
+  const targetCompany = String(payload.company || payload.targetCompany || "").trim().toUpperCase();
+  if (!token) throw new Error("AUTH_REQUIRED: Please log out and log in again.");
+  if (!["GREENMETAL", "GREENLIGHT"].includes(targetCompany)) {
+    return { success: false, code: "INVALID_COMPANY", message: "Please select a valid company." };
+  }
+
+  const cache = CacheService.getScriptCache();
+  const cacheKey = "LOGISTECH_SESSION_" + token;
+  const sessionJson = cache.get(cacheKey);
+  if (!sessionJson) throw new Error("SESSION_EXPIRED: Your session expired. Please log in again.");
+
+  let session;
+  try { session = JSON.parse(sessionJson); }
+  catch (error) { throw new Error("INVALID_SESSION: Please log in again."); }
+
+  const sheet = getCentralUsersSheet_();
+  const values = sheet.getDataRange().getValues();
+  if (values.length < 2) throw new Error("No user accounts were found in the central USERS database.");
+
+  const headers = values[0].map(function(value) { return String(value || "").trim().toUpperCase(); });
+  const userIdIndex = headers.indexOf("USER_ID");
+  const usernameIndex = headers.indexOf("USERNAME");
+  const statusIndex = headers.indexOf("STATUS");
+  const accessIndex = headers.indexOf("COMPANY_ACCESS");
+  const defaultIndex = headers.indexOf("DEFAULT_COMPANY");
+  if ([userIdIndex, usernameIndex, statusIndex, accessIndex, defaultIndex].some(function(index) { return index < 0; })) {
+    throw new Error("Central USERS is missing a required company authorization header.");
+  }
+
+  let matched = null;
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    if (String(row[userIdIndex] || "").trim() === String(session.userId || "").trim() &&
+        String(row[usernameIndex] || "").trim().toLowerCase() === String(session.username || "").trim().toLowerCase()) {
+      matched = row;
+      break;
+    }
+  }
+  if (!matched) throw new Error("ACCOUNT_NOT_FOUND: Please log in again.");
+  if (String(matched[statusIndex] || "").trim().toUpperCase() !== "ACTIVE") {
+    throw new Error("ACCOUNT_INACTIVE: This account is not active.");
+  }
+
+  const access = normalizeCompanyAccess_(matched[accessIndex]);
+  const defaultCompany = String(matched[defaultIndex] || "").trim().toUpperCase();
+  if (!access.length || !["GREENMETAL", "GREENLIGHT"].includes(defaultCompany) || access.indexOf(defaultCompany) < 0) {
+    throw new Error("COMPANY_NOT_CONFIGURED: Ask the administrator to set a valid COMPANY_ACCESS and DEFAULT_COMPANY.");
+  }
+  if (access.indexOf(targetCompany) < 0) {
+    return {
+      success: false,
+      code: "COMPANY_ACCESS_DENIED",
+      message: "Your account is not authorized to access " + targetCompany + "."
+    };
+  }
+
+  const spreadsheetId = targetCompany === "GREENLIGHT"
+    ? CONFIG.GREENLIGHT_DATABASE_SPREADSHEET_ID
+    : CONFIG.GREENMETAL_DATABASE_SPREADSHEET_ID;
+  if (!spreadsheetId) throw new Error("The operational database for " + targetCompany + " is not configured.");
+
+  session.activeCompany = targetCompany;
+  session.companyAccess = String(matched[accessIndex] || "").trim().toUpperCase();
+  session.defaultCompany = defaultCompany;
+  cache.put(cacheKey, JSON.stringify(session), 21600);
+
+  ACTIVE_COMPANY_CONTEXT_ = {
+    company: targetCompany,
+    companyAccess: access,
+    userId: String(session.userId || ""),
+    username: String(session.username || ""),
+    spreadsheetId: spreadsheetId
+  };
+
+  return {
+    success: true,
+    message: "Company switched successfully.",
+    activeCompany: targetCompany,
+    companyAccess: session.companyAccess,
+    allowedCompanies: access
+  };
+}
+
 function establishCompanyContext_(payload) {
   payload = payload || {};
   const token = String(payload.sessionToken || payload.session_token || "").trim();
@@ -354,13 +445,18 @@ function establishCompanyContext_(payload) {
     throw new Error("COMPANY_NOT_CONFIGURED: Ask the administrator to set a valid COMPANY_ACCESS and DEFAULT_COMPANY for this account.");
   }
 
-  const spreadsheetId = defaultCompany === "GREENLIGHT"
+  const activeCompany = String(session.activeCompany || defaultCompany).trim().toUpperCase();
+  if (["GREENMETAL", "GREENLIGHT"].indexOf(activeCompany) < 0 || access.indexOf(activeCompany) < 0) {
+    throw new Error("COMPANY_ACCESS_DENIED: This session is not authorized for the selected company.");
+  }
+
+  const spreadsheetId = activeCompany === "GREENLIGHT"
     ? CONFIG.GREENLIGHT_DATABASE_SPREADSHEET_ID
     : CONFIG.GREENMETAL_DATABASE_SPREADSHEET_ID;
-  if (!spreadsheetId) throw new Error("The operational database for " + defaultCompany + " is not configured.");
+  if (!spreadsheetId) throw new Error("The operational database for " + activeCompany + " is not configured.");
 
   ACTIVE_COMPANY_CONTEXT_ = {
-    company: defaultCompany,
+    company: activeCompany,
     companyAccess: access,
     userId: String(session.userId || ""),
     username: String(session.username || ""),
