@@ -139,6 +139,11 @@ function routeRequest(
     payload ||
     {};
 
+  // Company switching validates the existing server-side session itself.
+  if (String(action) === "switchCompany") {
+    return switchCompany_(payload);
+  }
+
   // Resolve and validate company from the authenticated central USERS record.
   // Only public authentication/bootstrap actions bypass company context.
   const publicActions = ["ping", "login", "createAccount"];
