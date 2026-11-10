@@ -1828,6 +1828,12 @@ function viewPaymentRecord(paymentNo) {
                     <div><span>PAYMENT AMOUNT</span><strong id="floatingPaymentAmount">₱0.00</strong></div>
                     <span id="floatingPaymentStatus" class="payment-floating-status">—</span>
                 </div>
+                <section class="payment-floating-breakdown" aria-labelledby="floatingPaymentBreakdownTitle">
+                    <h3 id="floatingPaymentBreakdownTitle">Payment Summary</h3>
+                    <div class="payment-floating-breakdown-row"><span>Total Payment Received</span><strong id="floatingTotalReceived">₱0.00</strong></div>
+                    <div class="payment-floating-breakdown-row"><span>Applied to Sales Order</span><strong id="floatingAppliedToSO">₱0.00</strong></div>
+                    <div class="payment-floating-breakdown-row payment-floating-credit-row"><span>Customer Credit (Overpayment)</span><strong id="floatingCustomerCredit">₱0.00</strong></div>
+                </section>
                 <div class="payment-floating-grid">
                     <div><span>Payment No.</span><strong id="floatingPaymentNo">—</strong></div>
                     <div><span>Payment Date</span><strong id="floatingPaymentDate">—</strong></div>
@@ -1864,7 +1870,17 @@ function viewPaymentRecord(paymentNo) {
     setValue('floatingPaymentReceipt', creditField(payment, ['RECEIPT_NO','receiptNo','receiptNumber']));
     setValue('floatingPaymentReference', creditField(payment, ['REFERENCE_NO','referenceNo','referenceNumber']));
     setValue('floatingPaymentRemarks', creditField(payment, ['REMARKS','remarks','NOTES','notes']));
-    setValue('floatingPaymentAmount', formatCurrency(getPaymentAmount(payment)));
+    const totalReceived = Math.max(0, getPaymentAmount(payment));
+    const appliedRaw = creditField(payment, ['SO_APPLIED_AMOUNT','soAppliedAmount','SO_AMOUNT_APPLIED','soAmountApplied','APPLIED_TO_SO','appliedToSO']);
+    const creditRaw = creditField(payment, ['CUSTOMER_CREDIT_AMOUNT','CUSTOMER_CREDIT','OVERPAYMENT_AMOUNT','OVERPAYMENT','customerCreditAmount','customerCredit','overpaymentAmount']);
+    let appliedToSO = appliedRaw !== '' ? Math.max(0, toNumber(appliedRaw)) :
+        (creditRaw !== '' ? Math.max(0, totalReceived - toNumber(creditRaw)) : totalReceived);
+    appliedToSO = Math.min(totalReceived, appliedToSO);
+    const customerCredit = creditRaw !== '' ? Math.max(0, Math.min(totalReceived, toNumber(creditRaw))) : Math.max(0, totalReceived - appliedToSO);
+    setValue('floatingPaymentAmount', formatCurrency(totalReceived));
+    setValue('floatingTotalReceived', formatCurrency(totalReceived));
+    setValue('floatingAppliedToSO', formatCurrency(appliedToSO));
+    setValue('floatingCustomerCredit', formatCurrency(customerCredit));
     setValue('floatingPaymentStatus', getPaymentStatus(payment));
     setValue('paymentFloatingSubtitle', 'Transaction ' + getPaymentNo(payment) + ' · Saved payment record');
 
