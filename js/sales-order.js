@@ -49,10 +49,12 @@ function getLogisTechCurrentRole() {
     function applySalesOrderRolePermissions() {
         const allowed = canCreateSalesOrderByRole();
         document.querySelectorAll('#createSalesOrderButton, [onclick="openCreateSalesOrder()"]').forEach(function (button) {
-            button.style.display = allowed ? "" : "none";
+            // Keep Create visible for read-only roles, but prevent the action.
+            button.style.display = "";
             button.disabled = !allowed;
             button.setAttribute("aria-disabled", String(!allowed));
             if (!allowed) button.title = "View Only: your account role cannot create Sales Orders.";
+            else if (button.title === "View Only: your account role cannot create Sales Orders.") button.removeAttribute("title");
         });
     }
 
