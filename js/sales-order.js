@@ -30,6 +30,7 @@ let selectedSO = null;
     let soDetailsEditMode = false;
     let salesOrdersLoaded = false;
     let customerModuleLoaded = false;
+    let customerReturnState = null;
     const soDetailsCache = {};
     /* =====================================================
        INITIALIZE
@@ -6025,11 +6026,20 @@ async function openCustomerModule() {
         return;
     }
     try {
-        /* =============================================
-           SHOW CUSTOMER AREA
-        ============================================== */
-        customerArea.style.display =
-            "block";
+        /* Save the exact Sales Order view before opening the customer dialog. */
+        const returnList = document.getElementById("salesOrderListView");
+        const returnDetails = document.getElementById("soDetails");
+        customerReturnState = {
+            listDisplay: returnList ? returnList.style.display : "",
+            detailsDisplay: returnDetails ? returnDetails.style.display : "",
+            selectedSO: selectedSO,
+            currentSO: currentSO
+        };
+
+        /* Display the customer form as a centered modal card. */
+        customerArea.classList.add("customer-area-modal");
+        customerArea.style.display = "flex";
+        customerArea.setAttribute("role", "presentation");
         /* =============================================
            HIDE SALES ORDER LIST
         ============================================== */
@@ -6609,87 +6619,31 @@ function bindCustomerBackButton() {
 ===================================================== */
 
 function closeCustomerFromSalesOrder() {
-
-    console.log(
-        "Closing Customer Module..."
-    );
-
-
-    const customerArea =
-        document.getElementById(
-            "customerArea"
-        );
-
-
-    const salesOrderListView =
-        document.getElementById(
-            "salesOrderListView"
-        );
-
-
-    const soDetails =
-        document.getElementById(
-            "soDetails"
-        );
-
-
-    /*
-     * Hide Customer module.
-     */
+    const customerArea = document.getElementById("customerArea");
+    const salesOrderListView = document.getElementById("salesOrderListView");
+    const soDetails = document.getElementById("soDetails");
 
     if (customerArea) {
-
-        customerArea.style.display =
-            "none";
-
-
-        customerArea.innerHTML =
-            "";
-
+        customerArea.style.display = "none";
+        customerArea.classList.remove("customer-area-modal");
+        customerArea.removeAttribute("role");
+        customerArea.innerHTML = "";
     }
 
-
-    /*
-     * Show Sales Order list.
-     */
-
-    if (salesOrderListView) {
-
-        salesOrderListView.style.display =
-            "block";
-
+    /* Restore the exact section/view that was active before New Customer opened. */
+    if (customerReturnState) {
+        if (salesOrderListView) salesOrderListView.style.display = customerReturnState.listDisplay;
+        if (soDetails) soDetails.style.display = customerReturnState.detailsDisplay;
+        selectedSO = customerReturnState.selectedSO;
+        currentSO = customerReturnState.currentSO;
+        customerReturnState = null;
+    } else {
+        if (salesOrderListView) salesOrderListView.style.display = "block";
+        if (soDetails) soDetails.style.display = "none";
     }
-
-
-    /*
-     * Keep SO details hidden.
-     */
-
-    if (soDetails) {
-
-        soDetails.style.display =
-            "none";
-
-    }
-
-
-    /*
-     * Reset selection.
-     */
-
-    selectedSO =
-        null;
-
 
     updateSOSelectionUI();
-
-
-    console.log(
-        "Customer Module closed."
-    );
-
 }
-
 
 /* =====================================================
    CUSTOMER SAVED EVENT
@@ -7401,6 +7355,8 @@ window.addEventListener(
     /* =====================================================
        GLOBAL EXPORTS
     ===================================================== */
+
+    window.closeCustomerFromSalesOrder = closeCustomerFromSalesOrder;
 
     window.loadSOList =
         loadSOList;
