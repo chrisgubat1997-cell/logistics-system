@@ -508,8 +508,23 @@ function cancelPayment() {
 
 
 /* GOOGLE SHEETS API + SALES ORDER AUTOCOMPLETE */
+function getPaymentSessionToken() {
+    try {
+        const saved = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+        const user = saved.account || saved.user || saved;
+        return String(user.sessionToken || user.session_token || saved.sessionToken || saved.session_token || "").trim();
+    } catch (error) {
+        return "";
+    }
+}
+
 async function paymentAPIGet(action) {
-    const response = await fetch(PAYMENT_API_URL + "?action=" + encodeURIComponent(action) + "&_=" + Date.now(), { method: "GET", cache: "no-store", redirect: "follow" });
+    const sessionToken = getPaymentSessionToken();
+    if (!sessionToken) throw new Error("AUTH_REQUIRED: Please log out and log in again.");
+    const query = "?action=" + encodeURIComponent(action) +
+        "&sessionToken=" + encodeURIComponent(sessionToken) +
+        "&_=" + Date.now();
+    const response = await fetch(PAYMENT_API_URL + query, { method: "GET", cache: "no-store", redirect: "follow" });
     const raw = await response.text();
     let result;
     try { result = JSON.parse(raw); } catch (error) { throw new Error("Invalid response from LOGIS-TECH database."); }
@@ -518,11 +533,18 @@ async function paymentAPIGet(action) {
 }
 
 async function paymentAPI(action, data = {}) {
-    const response = await fetch(PAYMENT_API_URL, { method:"POST", headers:{"Content-Type":"text/plain;charset=utf-8"}, body:JSON.stringify({action:action,data:data}) });
+    const sessionToken = getPaymentSessionToken();
+    if (!sessionToken) throw new Error("AUTH_REQUIRED: Please log out and log in again.");
+    const payload = Object.assign({}, data || {}, { sessionToken: sessionToken });
+    const response = await fetch(PAYMENT_API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: action, data: payload })
+    });
     const raw = await response.text();
     let result;
-    try { result=JSON.parse(raw); } catch(error) { throw new Error("Invalid response from LOGIS-TECH database."); }
-    if (!response.ok || !result || result.success===false) throw new Error(result && (result.message||result.error) || "Database request failed.");
+    try { result = JSON.parse(raw); } catch (error) { throw new Error("Invalid response from LOGIS-TECH database."); }
+    if (!response.ok || !result || result.success === false) throw new Error(result && (result.message || result.error) || "Database request failed.");
     return result;
 }
 async function loadPaymentDataFromDatabase() {
