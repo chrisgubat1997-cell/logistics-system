@@ -2331,14 +2331,17 @@ async function savePayment() {
         const savedPayment = result.payment || result.record || result.data || {};
         localStorage.setItem("logitechLastPayment", JSON.stringify(savedPayment));
 
-        // Refresh the database records so the next payment uses current totals and sequence.
+        // Force a fresh read so the next payment uses the latest applied SO amount.
+        paymentDataLoaded = false;
         await loadPaymentDataFromDatabase();
 
         alert(
             "Payment successfully saved to the Google Sheets database.\n\n" +
             "Payment No.: " + (savedPayment.PAYMENT_NO || savedPayment.paymentNo || paymentNo) + "\n" +
             "SO No.: " + soNo + "\n" +
-            "Amount: " + formatCurrency(currentPayment)
+            "Amount Received: " + formatCurrency(currentPayment) + "\n" +
+            "Applied to SO: " + formatCurrency(result.soAppliedAmount ?? savedPayment.SO_APPLIED_AMOUNT ?? currentPayment) + "\n" +
+            "Customer Credit: " + formatCurrency(result.creditAmount ?? savedPayment.CREDIT_AMOUNT ?? 0)
         );
 
         window.location.href = "../index.html";
