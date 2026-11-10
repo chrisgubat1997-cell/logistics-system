@@ -99,9 +99,24 @@ function createPayment(payload) {
       CREATED_BY: String(payload.createdBy || payload.username || payload.CREATED_BY || ""),
       CREATED_AT: timestamp, UPDATED_AT: timestamp
     };
+    // Ensure allocation fields exist so future SO payment totals exclude excess credit.
+    const paymentHeaders = _finGetHeaders_(sheet);
+    ["SO_APPLIED_AMOUNT", "CREDIT_AMOUNT"].forEach(function(header) {
+      if (paymentHeaders.indexOf(header) === -1) {
+        sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
+        paymentHeaders.push(header);
+      }
+    });
+    const paymentRow = sheet.getLastRow() + 1;
     _finAppendObjectByHeaders_(sheet, payment);
     if (creditAmount > 0) {
-      _recordCustomerCredit_(so, payment, creditAmount);
+      try {
+        _recordCustomerCredit_(so, payment, creditAmount);
+      } catch (creditError) {
+        // Keep payment and credit ledger atomic: remove the payment row if credit posting fails.
+        sheet.deleteRow(paymentRow);
+        throw new Error("Payment was not saved because Customer Credit could not be posted: " + creditError.message);
+      }
     }
     if (typeof logActivity === "function") logActivity({
       username: payment.CREATED_BY || "SYSTEM", action: "CREATE", module: "PAYMENT",
