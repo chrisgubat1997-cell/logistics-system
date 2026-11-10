@@ -190,16 +190,35 @@ function _recordCustomerCredit_(so, payment, creditAmount) {
     const updatedCol = headers.indexOf("UPDATED_AT");
     if (updatedCol >= 0) creditSheet.getRange(rowIndex, updatedCol + 1).setValue(now);
     if (createdCol >= 0 && !creditSheet.getRange(rowIndex, createdCol + 1).getValue()) creditSheet.getRange(rowIndex, createdCol + 1).setValue(now);
+    try {
+      appendByHeaders(txnSheet, {
+        CREDIT_TXN_ID: generateId("CRD"), CUSTOMER_ID: customerId, CUSTOMER_NAME: customerName,
+        PAYMENT_ID: payment.PAYMENT_ID, PAYMENT_NO: payment.PAYMENT_NO, SO_NUMBER: payment.SO_NUMBER,
+        TXN_TYPE: "OVERPAYMENT_CREDIT", AMOUNT: creditAmount, BALANCE_AFTER: balance,
+        TXN_DATE: payment.PAYMENT_DATE, REMARKS: "Excess from payment " + payment.PAYMENT_NO + " for " + payment.SO_NUMBER,
+        CREATED_BY: payment.CREATED_BY, CREATED_AT: now
+      });
+    } catch (error) {
+      creditSheet.getRange(rowIndex, balanceCol + 1).setValue(current);
+      if (updatedCol >= 0) creditSheet.getRange(rowIndex, updatedCol + 1).setValue(now);
+      throw error;
+    }
   } else {
+    const newCreditRow = creditSheet.getLastRow() + 1;
     appendByHeaders(creditSheet, { CUSTOMER_ID: customerId, CUSTOMER_NAME: customerName, CREDIT_BALANCE: balance, CREATED_AT: now, UPDATED_AT: now });
+    try {
+      appendByHeaders(txnSheet, {
+        CREDIT_TXN_ID: generateId("CRD"), CUSTOMER_ID: customerId, CUSTOMER_NAME: customerName,
+        PAYMENT_ID: payment.PAYMENT_ID, PAYMENT_NO: payment.PAYMENT_NO, SO_NUMBER: payment.SO_NUMBER,
+        TXN_TYPE: "OVERPAYMENT_CREDIT", AMOUNT: creditAmount, BALANCE_AFTER: balance,
+        TXN_DATE: payment.PAYMENT_DATE, REMARKS: "Excess from payment " + payment.PAYMENT_NO + " for " + payment.SO_NUMBER,
+        CREATED_BY: payment.CREATED_BY, CREATED_AT: now
+      });
+    } catch (error) {
+      creditSheet.deleteRow(newCreditRow);
+      throw error;
+    }
   }
-  appendByHeaders(txnSheet, {
-    CREDIT_TXN_ID: generateId("CRD"), CUSTOMER_ID: customerId, CUSTOMER_NAME: customerName,
-    PAYMENT_ID: payment.PAYMENT_ID, PAYMENT_NO: payment.PAYMENT_NO, SO_NUMBER: payment.SO_NUMBER,
-    TXN_TYPE: "OVERPAYMENT_CREDIT", AMOUNT: creditAmount, BALANCE_AFTER: balance,
-    TXN_DATE: payment.PAYMENT_DATE, REMARKS: "Excess from payment " + payment.PAYMENT_NO + " for " + payment.SO_NUMBER,
-    CREATED_BY: payment.CREATED_BY, CREATED_AT: now
-  });
 }
 
 /* Used by Delivery.gs before a DR can be created. COD permits dispatch without prepayment;
