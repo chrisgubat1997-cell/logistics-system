@@ -186,6 +186,7 @@
       browserStorageBytes: used,
       browserStorageQuotaBytes: quota,
       browserStoragePercent: usagePercent,
+      javascriptMemory: memory,
       loadedResourceCount: assets.count,
       measuredAssetBytes: assets.bytes,
       measuredAssetCount: assets.measured,
@@ -203,12 +204,18 @@
     setText("monitorAssetSize", assets.measured ? formatBytes(assets.bytes) + " measured transfer" : "Size not exposed by browser cache");
     setText("monitorAssetCount", assets.count + " resources loaded");
     setText("monitorLoadTime", loadTime !== null ? (loadTime / 1000).toFixed(2) + " sec" : "Not available");
+    setText("monitorMemoryUsage", memory ? formatBytes(memory.used) + " / " + formatBytes(memory.limit) : "Not exposed");
     setText("monitorLastChecked", new Date().toLocaleString());
     setText("monitorSystemName", api.system || "LOGIS-TECH SYSTEM");
     renderErrors();
 
-    const health = !online || !api.online ? "Attention required" : recentErrors.length ? "Operational · browser errors detected" : "Operational";
-    setStatus("monitorOverallStatus", health, !online || !api.online ? "bad" : recentErrors.length ? "warn" : "good");
+    const highStorage = usagePercent !== null && usagePercent >= 85;
+    const slowApi = api.online && api.latency >= 2500;
+    const highMemory = memory && memory.limit > 0 && memory.used / memory.limit >= 0.85;
+    const needsAttention = !online || !api.online;
+    const warning = recentErrors.length > 0 || highStorage || slowApi || highMemory;
+    const health = needsAttention ? "Attention required" : warning ? "Operational · warning detected" : "Operational";
+    setStatus("monitorOverallStatus", health, needsAttention ? "bad" : warning ? "warn" : "good");
 
     if (refresh) {
       refresh.disabled = false;
