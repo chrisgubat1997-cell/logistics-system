@@ -67,3 +67,103 @@ html[data-theme=dark] thead th,html[data-theme=dark] table thead th { background
 html[data-theme=dark] tbody tr:nth-child(even) { background:#142338 !important; }
 html[data-theme=dark] tbody tr:hover { background:#1A304B !important; }
 html[data-theme=dark] .status-completed,html[data-theme=dark] .status-paid,html[data-theme=dark] .status-posted,html[data-theme=dark] .status-active,html[data-theme=dark] .badge-success { background:#29391B !important; color:#C8ED75 !important; border-color:#526B2B !important; }
+
+
+/* =========================================================
+   COMPANY-SPECIFIC THEMES
+   GREENLIGHT keeps the GEMLIGHT navy/blue + lime identity.
+   GREENMETAL uses a separate forest/emerald green identity.
+========================================================= */
+html[data-company="GREENLIGHT"] {
+  --brand-blue:#073B78; --brand-blue-deep:#052B59; --brand-blue-dark:#0A4C91;
+  --brand-blue-soft:#E8F1FC; --brand-green:#A6CE39; --primary:#073B78;
+  --primary-dark:#052B59; --primary-light:#E8F1FC; --app-bg:#F3F7FC;
+  --surface:#FFFFFF; --ink:#172B45; --ink-muted:#687B91; --line:#DCE6F1;
+}
+html[data-company="GREENMETAL"] {
+  --brand-blue:#176B4A; --brand-blue-deep:#104B36; --brand-blue-dark:#21865B;
+  --brand-blue-soft:#E5F2EA; --brand-blue-pale:#F3F8F4; --brand-green:#65A879;
+  --brand-green-dark:#397B50; --brand-green-soft:#E4F2E8; --primary:#176B4A;
+  --primary-dark:#104B36; --primary-light:#E5F2EA; --success:#397B50;
+  --success-bg:#E4F2E8; --app-bg:#EEF5F0; --surface:#FFFFFF;
+  --surface-subtle:#F7FAF7; --ink:#19372A; --ink-muted:#657B6D;
+  --line:#D8E6DC; --line-strong:#BDD2C3;
+  --shadow-card:0 5px 18px rgba(16,75,54,.07),0 1px 3px rgba(16,75,54,.04);
+  --shadow-hover:0 13px 30px rgba(16,75,54,.13);
+}
+html[data-company="GREENMETAL"] body,
+html[data-company="GREENMETAL"] .main,
+html[data-company="GREENMETAL"] .content { background-color:#EEF5F0 !important; color:#19372A !important; }
+html[data-company="GREENMETAL"] .sidebar { background:linear-gradient(180deg,#103E2D 0%,#176B4A 62%,#0A2B1E 100%) !important; }
+html[data-company="GREENMETAL"] .logo::before { background:linear-gradient(180deg,#BDE4C7,#65A879) !important; }
+html[data-company="GREENMETAL"] .logo span { color:#BDE4C7 !important; }
+html[data-company="GREENMETAL"] .menu button:hover,
+html[data-company="GREENMETAL"] .menu-btn:hover { background:rgba(189,228,199,.14) !important; color:#fff !important; }
+html[data-company="GREENMETAL"] .menu button.active,
+html[data-company="GREENMETAL"] .menu-btn.active {
+  background:linear-gradient(105deg,#21865B,#176B4A) !important; color:#fff !important;
+  box-shadow:inset 4px 0 0 #BDE4C7,0 5px 15px rgba(0,0,0,.12) !important;
+}
+html[data-company="GREENMETAL"] .topbar { background:rgba(255,255,255,.96) !important; border-bottom:1px solid #D8E6DC !important; }
+html[data-company="GREENMETAL"] #welcomeUser { color:#176B4A !important; }
+html[data-company="GREENMETAL"] .profile-btn { background:#E5F2EA !important; color:#176B4A !important; border-color:#C8DFCF !important; }
+html[data-company="GREENMETAL"] .logout-btn { background:#176B4A !important; border-color:#176B4A !important; }
+html[data-company="GREENMETAL"] thead th,
+html[data-company="GREENMETAL"] table thead th { background:#E5F2EA !important; color:#104B36 !important; border-bottom-color:#D0E2D5 !important; }
+html[data-company="GREENMETAL"] tbody tr:nth-child(even) { background:#F5F9F6 !important; }
+html[data-company="GREENMETAL"] tbody tr:hover { background:#EAF4ED !important; }
+html[data-company="GREENMETAL"] .btn-primary,
+html[data-company="GREENMETAL"] .primary-btn,
+html[data-company="GREENMETAL"] .primary-button,
+html[data-company="GREENMETAL"] .so-primary-btn,
+html[data-company="GREENMETAL"] .payment-primary-button,
+html[data-company="GREENMETAL"] button.primary,
+html[data-company="GREENMETAL"] button[type=submit] { background:#21865B !important; border-color:#21865B !important; color:#fff !important; }
+html[data-company="GREENMETAL"] .btn-primary:hover,
+html[data-company="GREENMETAL"] .primary-btn:hover,
+html[data-company="GREENMETAL"] .primary-button:hover,
+html[data-company="GREENMETAL"] .so-primary-btn:hover,
+html[data-company="GREENMETAL"] .payment-primary-button:hover,
+html[data-company="GREENMETAL"] button.primary:hover,
+html[data-company="GREENMETAL"] button[type=submit]:hover { background:#104B36 !important; border-color:#104B36 !important; }
+html[data-company="GREENMETAL"] a { color:#176B4A; }
+html[data-company="GREENMETAL"] button:focus-visible,
+html[data-company="GREENMETAL"] a:focus-visible,
+html[data-company="GREENMETAL"] input:focus-visible,
+html[data-company="GREENMETAL"] select:focus-visible,
+html[data-company="GREENMETAL"] textarea:focus-visible { outline:3px solid rgba(101,168,121,.4) !important; }
+html[data-company="GREENMETAL"] input:not([type=checkbox]):not([type=radio]):focus,
+html[data-company="GREENMETAL"] select:focus,
+html[data-company="GREENMETAL"] textarea:focus { border-color:#21865B !important; box-shadow:0 0 0 3px rgba(33,134,91,.12) !important; }
+html[data-company="GREENMETAL"] .status-dot,
+html[data-company="GREENMETAL"] .fde-status-dot { background:#65A879 !important; }
+
+.company-context {
+  display:inline-flex; align-items:center; gap:8px; padding:8px 12px;
+  border:1px solid var(--line,#DCE6F1); border-radius:999px;
+  background:var(--primary-light,#E8F1FC); color:var(--primary,#073B78);
+  font-size:11px; font-weight:800; letter-spacing:.08em; white-space:nowrap;
+}
+.company-context-dot { width:8px; height:8px; border-radius:50%; background:currentColor; box-shadow:0 0 0 3px rgba(128,160,140,.14); }
+.company-switch-btn {
+  border:1px solid var(--primary,#073B78); border-radius:999px; padding:9px 13px;
+  background:var(--primary,#073B78); color:#fff; font-size:10px; font-weight:800;
+  letter-spacing:.04em; cursor:pointer; transition:transform .18s ease,filter .18s ease,opacity .18s ease;
+  white-space:nowrap;
+}
+.company-switch-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
+.company-switch-btn:disabled { opacity:.6; cursor:wait; transform:none; }
+.company-switch-btn[hidden] { display:none !important; }
+html[data-company="GREENMETAL"] .company-context { background:#E5F2EA; color:#176B4A; border-color:#C8DFCF; }
+html[data-company="GREENLIGHT"] .company-context { background:#E8F1FC; color:#073B78; border-color:#C9DDF4; }
+html[data-theme="dark"] .company-context { background:var(--surface-subtle); border-color:var(--line); color:var(--ink); }
+html[data-theme="dark"] .company-switch-btn { filter:brightness(1.12); }
+html[data-theme="dark"][data-company="GREENMETAL"] body,
+html[data-theme="dark"][data-company="GREENMETAL"] .main,
+html[data-theme="dark"][data-company="GREENMETAL"] .content { background:#0C1913 !important; color:#E6F2E9 !important; }
+html[data-theme="dark"][data-company="GREENMETAL"] .sidebar { background:linear-gradient(180deg,#071F16,#103E2D 65%,#04130D) !important; }
+html[data-theme="dark"][data-company="GREENMETAL"] .topbar { background:rgba(13,31,22,.97) !important; border-color:#294A36 !important; }
+html[data-theme="dark"][data-company="GREENMETAL"] thead th,
+html[data-theme="dark"][data-company="GREENMETAL"] table thead th { background:#1A3828 !important; color:#DDF0E2 !important; }
+html[data-theme="dark"][data-company="GREENMETAL"] tbody tr:nth-child(even) { background:#142A1E !important; }
+html[data-theme="dark"][data-company="GREENMETAL"] tbody tr:hover { background:#1A3828 !important; }
