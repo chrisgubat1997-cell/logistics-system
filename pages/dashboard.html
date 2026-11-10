@@ -8,11 +8,11 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>LOGIS-TECH Dashboard</title>
+    <title>LOGIS-TECH SYSTEM | Dashboard</title>
 
     <link
         rel="stylesheet"
-        href="../css/dashboard.css?v=20261110-gemlight-dashboard01"
+        href="../css/dashboard.css?v=20261110-brand-graph01"
     >
     <link rel="stylesheet" href="../css/about-design-system.css?v=20261109-about-reference01">
 </head>
@@ -28,19 +28,14 @@
     <div class="dashboard-header">
 
         <div class="dashboard-header-left">
-
-            <div class="dashboard-eyebrow">
-                LOGIS-TECH SYSTEM
+            <div class="dashboard-header-brand">
+                <img src="../assets/logo.png" alt="LOGIS-TECH SYSTEM logo" class="dashboard-logo-image">
+                <div>
+                    <div class="dashboard-eyebrow">LOGIS-TECH SYSTEM</div>
+                    <h1>Dashboard</h1>
+                    <p>Overview of sales, logistics, delivery and finance operations.</p>
+                </div>
             </div>
-
-            <h1>
-                Dashboard
-            </h1>
-
-            <p>
-                Overview of sales, logistics, delivery and finance operations.
-            </p>
-
         </div>
 
 
@@ -415,12 +410,11 @@
                 </div>
 
 
-                <span
-                    class="panel-period"
-                    id="salesOrderPeriod"
-                >
-                    This Year
-                </span>
+                <select class="panel-period dashboard-period-select" id="salesOrderPeriod" aria-label="Sales order chart period">
+                    <option value="3months">Last 3 months</option>
+                    <option value="6months" selected>Last 6 months</option>
+                    <option value="12months">Last 12 months</option>
+                </select>
 
             </div>
 
@@ -485,134 +479,7 @@
 
                 <div class="chart-area">
 
-                    <div class="simple-bar-chart">
-
-                        <div class="bar-item">
-
-                            <span>
-                                Jan
-                            </span>
-
-                            <div class="bar-track">
-                                <div
-                                    class="bar-fill"
-                                    data-month="0"
-                                    style="width:0%"
-                                ></div>
-                            </div>
-
-                            <strong data-bar-value="0">
-                                0
-                            </strong>
-
-                        </div>
-
-
-                        <div class="bar-item">
-
-                            <span>
-                                Feb
-                            </span>
-
-                            <div class="bar-track">
-                                <div
-                                    class="bar-fill"
-                                    data-month="1"
-                                    style="width:0%"
-                                ></div>
-                            </div>
-
-                            <strong data-bar-value="1">
-                                0
-                            </strong>
-
-                        </div>
-
-
-                        <div class="bar-item">
-
-                            <span>
-                                Mar
-                            </span>
-
-                            <div class="bar-track">
-                                <div
-                                    class="bar-fill"
-                                    data-month="2"
-                                    style="width:0%"
-                                ></div>
-                            </div>
-
-                            <strong data-bar-value="2">
-                                0
-                            </strong>
-
-                        </div>
-
-
-                        <div class="bar-item">
-
-                            <span>
-                                Apr
-                            </span>
-
-                            <div class="bar-track">
-                                <div
-                                    class="bar-fill"
-                                    data-month="3"
-                                    style="width:0%"
-                                ></div>
-                            </div>
-
-                            <strong data-bar-value="3">
-                                0
-                            </strong>
-
-                        </div>
-
-
-                        <div class="bar-item">
-
-                            <span>
-                                May
-                            </span>
-
-                            <div class="bar-track">
-                                <div
-                                    class="bar-fill"
-                                    data-month="4"
-                                    style="width:0%"
-                                ></div>
-                            </div>
-
-                            <strong data-bar-value="4">
-                                0
-                            </strong>
-
-                        </div>
-
-
-                        <div class="bar-item">
-
-                            <span>
-                                Jun
-                            </span>
-
-                            <div class="bar-track">
-                                <div
-                                    class="bar-fill"
-                                    data-month="5"
-                                    style="width:0%"
-                                ></div>
-                            </div>
-
-                            <strong data-bar-value="5">
-                                0
-                            </strong>
-
-                        </div>
-
-                    </div>
+                    <div class="simple-bar-chart" id="salesOrderMonthlyChart" aria-label="Monthly Sales Order graph"></div>
 
                 </div>
 
