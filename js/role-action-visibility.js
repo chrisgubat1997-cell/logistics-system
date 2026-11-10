@@ -1,7 +1,7 @@
 /* =========================================================
    LOGIS-TECH SYSTEM
    ROLE-BASED MENU AND ACTION PERMISSIONS
-   VERSION: 20261110-role-matrix01
+   VERSION: 20261110-role-matrix04
 
    UI convenience only. Apps Script must enforce the same permissions
    on every create/update/cancel/post operation.
@@ -15,6 +15,12 @@
         delivery: ["ADMIN", "LOGISTICS"],
         invoice: ["ADMIN", "FINANCE", "PAYMENT"],
         payment: ["ADMIN", "FINANCE", "PAYMENT"]
+    };
+
+    const ROLE_MENU_ACCESS = {
+        fleetAnalytics: ["ADMIN", "LOGISTICS"],
+        fleetDataEntry: ["ADMIN", "LOGISTICS"],
+        revolvingFund: ["ADMIN", "LOGISTICS"]
     };
 
     const ROOTS = [
@@ -58,7 +64,8 @@
         if (element.matches("input[type='search'], input[type='text'], select")) return false;
         const visibleLabel = String(element.innerText || element.value || "").trim();
         const fullLabel = getActionText(element);
-        if (!ACTION_WORDS.test(fullLabel)) return false;
+        const isNewCustomerAction = /\b(new\s+customer|add\s+customer|create\s+customer)\b/i.test(fullLabel);
+        if (!ACTION_WORDS.test(fullLabel) && !isNewCustomerAction) return false;
         if (SAFE_WORDS.test(visibleLabel) &&
             !/(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject|issue|record|assign)/i.test(visibleLabel)) {
             return false;
@@ -117,21 +124,21 @@
     }
 
     function applySidebarVisibility(role) {
-        const canSeeFleet = ["ADMIN", "LOGISTICS"].includes(role);
-        const canSeeFund = ["ADMIN", "LOGISTICS"].includes(role);
-
         document.querySelectorAll(".menu-btn").forEach(function (button) {
             const action = button.getAttribute("onclick") || "";
-            if (action.includes("fleetAnalytics") || action.includes("fleetDataEntry")) {
-                if (!button.hasAttribute("data-fleet-role-original-display")) {
-                    button.setAttribute("data-fleet-role-original-display", button.style.display || "");
-                }
-                button.style.display = canSeeFleet ? (button.getAttribute("data-fleet-role-original-display") || "") : "none";
-                button.setAttribute("aria-hidden", String(!canSeeFleet));
-            }
-        });
+            let menuKey = "";
+            if (action.includes("fleetAnalytics")) menuKey = "fleetAnalytics";
+            else if (action.includes("fleetDataEntry")) menuKey = "fleetDataEntry";
+            else if (action.includes("revolvingFund") || button.matches('[data-role-module="revolving-fund"]')) menuKey = "revolvingFund";
+            if (!menuKey) return;
 
-        setMenuVisibility('[data-role-module="revolving-fund"]', canSeeFund);
+            const visible = (ROLE_MENU_ACCESS[menuKey] || []).includes(role);
+            if (!button.hasAttribute("data-role-menu-original-display")) {
+                button.setAttribute("data-role-menu-original-display", button.style.display || "");
+            }
+            button.style.display = visible ? (button.getAttribute("data-role-menu-original-display") || "") : "none";
+            button.setAttribute("aria-hidden", String(!visible));
+        });
         // JO Register is visible to all five roles; only its action buttons are role-restricted.
         document.querySelectorAll("[data-jo-register-menu]").forEach(function (button) {
             button.style.display = "";
