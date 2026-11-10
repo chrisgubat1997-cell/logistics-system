@@ -2610,3 +2610,46 @@ html[data-theme="dark"] .summary-card-value { color: #e8edf7; }
 .quick-action-btn{border-color:#DCE6F1!important;background:#fff!important}.quick-action-btn:hover{border-color:#A6CE39!important;background:#F7FBEF!important}.quick-action-icon{background:#E8F1FC!important;color:#0B58A8!important}
 .dashboard-footer{color:#687B91!important;border-color:#DCE6F1!important}
 @media(prefers-reduced-motion:reduce){.dashboard-summary-card,.dashboard-panel{transition:none!important}}
+
+/* LOGIS-TECH SYSTEM dashboard identity and responsive monthly graph */
+.dashboard-header-brand { display:flex; align-items:center; gap:14px; }
+.dashboard-logo-image {
+    width:48px; height:48px; flex:0 0 48px; object-fit:contain;
+    padding:4px; border-radius:13px; background:#fff;
+    border:1px solid #DCE6F1; box-shadow:0 7px 18px rgba(5,43,89,.10);
+}
+.dashboard-header-brand h1 { margin:2px 0 3px; }
+.dashboard-header-brand p { margin:0; }
+.dashboard-period-select { min-width:118px; cursor:pointer; }
+.simple-bar-chart {
+    display:flex; align-items:stretch; justify-content:space-between;
+    gap:clamp(4px,1vw,12px); width:100%; min-height:170px;
+    padding:10px 4px 0; border-bottom:1px solid #E3EAF3;
+}
+.simple-bar-chart .bar-item {
+    display:flex; flex:1 1 0; min-width:0; flex-direction:column;
+    align-items:center; justify-content:flex-end; gap:7px;
+}
+.simple-bar-chart .bar-value {
+    min-height:13px; color:#31577F; font-size:9px; font-weight:800;
+}
+.simple-bar-chart .bar-track {
+    display:flex; align-items:flex-end; justify-content:center;
+    width:100%; max-width:34px; height:112px; overflow:hidden;
+    border-radius:7px 7px 3px 3px; background:#EEF3F9;
+}
+.simple-bar-chart .bar-fill {
+    width:100%; min-height:2px; border-radius:7px 7px 3px 3px;
+    background:linear-gradient(180deg,#A6CE39,#0B58A8);
+    transition:height .45s ease;
+}
+.simple-bar-chart .bar-month {
+    color:#687B91; font-size:8px; font-weight:750; letter-spacing:.02em;
+}
+@media(max-width:600px) {
+    .dashboard-header-brand { gap:10px; }
+    .dashboard-logo-image { width:40px; height:40px; flex-basis:40px; }
+    .simple-bar-chart { gap:3px; }
+    .simple-bar-chart .bar-track { max-width:22px; height:92px; }
+    .simple-bar-chart .bar-value,.simple-bar-chart .bar-month { font-size:7px; }
+}
