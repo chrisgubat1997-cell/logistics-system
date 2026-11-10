@@ -39,5 +39,16 @@
   async function initialize(){if(initialized)return;initialized=true;const root=$("soMonitoringModule");if(!root)return;root.innerHTML='<div class="som-page"><div class="som-intro"><div><span class="som-eyebrow">SALES ORDER MANAGEMENT</span><h1>SO Monitoring</h1><p>Search once to view the complete Sales Order, JO, delivery, invoice and payment history.</p></div><button type="button" class="som-refresh" id="soMonitorReload">↻ Reload SO List</button></div><div class="som-search-card"><label for="soMonitorSearch">Search Sales Order</label><div class="som-search-control"><span>⌕</span><input id="soMonitorSearch" type="search" autocomplete="off" placeholder="Enter SO No., Client, Project or PO No."><small id="soMonitorCount">Loading…</small></div><div id="soMonitorSuggestions" class="som-suggestions" hidden></div></div><div id="soMonitorResult" hidden></div></div>';
     $("soMonitorSearch").addEventListener("input",renderSuggestions);$("soMonitorSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){const first=$("soMonitorSuggestions").querySelector("[data-so]");if(first)loadDetails(first.dataset.so);}if(e.key==="Escape")$("soMonitorSuggestions").hidden=true;});$("soMonitorSuggestions").addEventListener("click",e=>{const b=e.target.closest("[data-so]");if(b)loadDetails(b.dataset.so);});$("soMonitorReload").addEventListener("click",async()=>{try{await loadOrders();$("soMonitorCount").textContent=orders.length+" Sales Orders";renderSuggestions();}catch(e){$("soMonitorCount").textContent="Unable to load";}});
     try{await loadOrders();$("soMonitorCount").textContent=orders.length+" Sales Orders";}catch(e){$("soMonitorCount").textContent="Unable to load";$("soMonitorResult").hidden=false;$("soMonitorResult").innerHTML='<div class="som-error">'+safe(e.message)+'</div>';}}
+  window.searchSOMonitoring=async function(query){
+    const term=String(query||"").trim().toLowerCase();
+    if(!term)return;
+    if(!initialized)await initialize();
+    if(!orders.length)await loadOrders();
+    const match=orders.find(o=>getSO(o).toLowerCase()===term)||
+      orders.find(o=>[getSO(o),o.CLIENT_NAME,o.CLIENT,o.PROJECT,o.PO_NUMBER,o.PO].some(v=>String(v||"").toLowerCase().includes(term)));
+    if(match){await loadDetails(getSO(match));return;}
+    const result=$("soMonitorResult");
+    if(result){result.hidden=false;result.innerHTML='<div class="som-error">No matching Sales Order found. Check the SO number, client, project or PO number.</div>';}
+  };
   window.initializeSOMonitoring=initialize;
 })();
