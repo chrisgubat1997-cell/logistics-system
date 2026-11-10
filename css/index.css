@@ -1570,3 +1570,68 @@ body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-label{display:none
  .sidebar .menu .menu-btn .sidebar-item-label{display:none}
  .sidebar .menu .menu-btn .sidebar-item-icon{font-size:19px}
 }
+
+
+/* FINAL SIDEBAR FIX — identical Messages-style button layout for every item */
+.sidebar .menu .menu-btn {
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 13px !important;
+    min-height: 46px !important;
+    width: 100% !important;
+    padding: 11px 15px !important;
+    text-align: left !important;
+    font-size: 12.88px !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+}
+.sidebar .menu .menu-btn::first-letter { font-size: inherit !important; }
+.sidebar .menu .menu-btn::before { pointer-events: none; }
+.sidebar .menu .menu-btn .sidebar-item-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 22px !important;
+    width: 22px !important;
+    height: 22px !important;
+    margin: 0 !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    text-align: center !important;
+}
+.sidebar .menu .menu-btn .sidebar-item-label {
+    display: block !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap !important;
+}
+body.sidebar-collapsed .sidebar .menu .menu-btn {
+    justify-content: center !important;
+    gap: 0 !important;
+    min-height: 48px !important;
+    padding: 10px 4px !important;
+    font-size: 0 !important;
+    text-align: center !important;
+}
+body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-icon {
+    display: inline-flex !important;
+    flex: 0 0 26px !important;
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 21px !important;
+}
+body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-label {
+    display: none !important;
+}
+body.sidebar-collapsed .sidebar .menu .menu-btn::first-letter { font-size: 0 !important; }
+body.sidebar-collapsed .sidebar .menu .menu-btn:hover { transform: none !important; }
+body.sidebar-collapsed .sidebar .menu .menu-btn.active::before { left: -9px !important; }
+@media (max-width: 600px) {
+    .sidebar .menu .menu-btn { justify-content: center !important; gap: 0 !important; }
+    .sidebar .menu .menu-btn .sidebar-item-label { display: none !important; }
+    .sidebar .menu .menu-btn .sidebar-item-icon { font-size: 20px !important; }
+}
