@@ -85,6 +85,13 @@
       account.companyAccess = result.companyAccess || account.companyAccess;
       account.allowedCompanies = result.allowedCompanies || allowed;
       localStorage.setItem("logitechUser", JSON.stringify(account));
+
+      // Remove legacy shared caches so data from the previous company
+      // cannot briefly appear while the new company's modules initialize.
+      ["logitechSalesOrders", "logitechDeliveryReceipts", "logitechInvoices", "logitechCustomers"].forEach(function (key) {
+        localStorage.removeItem(key);
+      });
+
       applyCompanyTheme(account.activeCompany);
       button.textContent = "LOADING " + account.activeCompany + "...";
       window.location.reload();
