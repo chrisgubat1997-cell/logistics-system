@@ -985,3 +985,72 @@ body {
     .payment-result-card { padding: 25px 20px 21px; border-radius: 16px; }
     .payment-result-card h2 { font-size: 19px; }
 }
+
+
+/* CUSTOMER CREDIT APPLICATION */
+.customer-credit-apply-panel {
+    grid-column: 1 / -1;
+    margin: 2px 0 4px;
+    padding: 15px;
+    border: 1px solid #b7dfc4;
+    border-radius: 11px;
+    background: #f4fbf6;
+}
+.customer-credit-apply-panel[hidden] { display: none !important; }
+.customer-credit-apply-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 13px;
+}
+.customer-credit-apply-heading > div { display: grid; gap: 3px; }
+.customer-credit-kicker {
+    color: #21804b;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .09em;
+}
+.customer-credit-apply-heading strong { color: #203b2b; font-size: 14px; }
+.customer-credit-apply-heading small {
+    color: #647568;
+    font-size: 11px;
+    line-height: 1.45;
+}
+.customer-credit-apply-heading .customer-credit-available {
+    color: #16743b;
+    font-size: 19px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.customer-credit-apply-controls {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) auto;
+    align-items: end;
+    gap: 12px;
+}
+.customer-credit-apply-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.customer-credit-apply-actions .create-payment-btn { min-height: 40px; }
+.customer-credit-help {
+    margin: 10px 0 0;
+    color: #66756a;
+    font-size: 10px;
+    line-height: 1.5;
+}
+.create-payment-summary-credit-applied {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 0;
+    color: #176534;
+}
+.create-payment-summary-credit-applied span { font-size: 10px; font-weight: 800; }
+.create-payment-summary-credit-applied strong { font-size: 13px; font-weight: 900; font-variant-numeric: tabular-nums; }
+@media (max-width: 700px) {
+    .customer-credit-apply-controls { grid-template-columns: 1fr; }
+    .customer-credit-apply-actions { display: grid; grid-template-columns: 1fr 1fr; }
+    .customer-credit-apply-actions .create-payment-btn { width: 100%; }
+    .customer-credit-apply-heading { align-items: flex-start; }
+    .customer-credit-apply-heading .customer-credit-available { font-size: 16px; }
+}
