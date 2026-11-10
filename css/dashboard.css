@@ -2585,3 +2585,28 @@ html[data-theme="dark"] .dashboard-panel-title { color: #dce8ff; }
 html[data-theme="dark"] .dashboard-header p,
 html[data-theme="dark"] .dashboard-panel-subtitle { color: #a4b2c8; }
 html[data-theme="dark"] .summary-card-value { color: #e8edf7; }
+
+
+/* GEMLIGHT ONE DASHBOARD — NAVY / ROYAL BLUE / YELLOW-GREEN */
+.dashboard-page{--db-blue:#073B78;--db-blue-dark:#052B59;--db-blue-bright:#1266C8;--db-lime:#A6CE39;--db-lime-dark:#6F9415;--db-ink:#172B45;--db-muted:#687B91;background:radial-gradient(circle at 8% 0%,rgba(18,102,200,.10),transparent 30%),linear-gradient(180deg,#F6F9FD 0%,#EEF4FB 100%)!important;color:var(--db-ink)!important}
+.dashboard-brand-mark{background:linear-gradient(145deg,#052B59,#1266C8)!important;color:#D8F56B!important;box-shadow:0 10px 25px rgba(5,43,89,.22)!important}
+.dashboard-brand-text h1,.dashboard-header-left h1,.dashboard-header h1{color:#073B78!important}
+.dashboard-brand-text p,.dashboard-header p,.dashboard-date-label{color:#687B91!important}
+.dashboard-eyebrow,.panel-eyebrow{color:#6F9415!important}
+.dashboard-summary-card{border-color:#DCE6F1!important;background:linear-gradient(145deg,#fff,#F7FAFE)!important;box-shadow:0 6px 20px rgba(5,43,89,.07)!important}
+.dashboard-summary-card::after{background:linear-gradient(90deg,transparent,#A6CE39,transparent)!important;opacity:.75!important}
+.summary-card-label{color:#687B91!important}.summary-card-value{color:#073B78!important}.summary-card-sub{color:#8291A5!important}
+.summary-card-icon{background:linear-gradient(145deg,#E8F1FC,#D9E9FA)!important;color:#0B58A8!important}
+.sales-card .summary-card-icon,.jo-card .summary-card-icon,.production-card .summary-card-icon,.fleet-card .summary-card-icon{background:linear-gradient(145deg,#E8F1FC,#CFE3FA)!important;color:#0B58A8!important}
+.delivery-card .summary-card-icon,.invoice-card .summary-card-icon,.payment-card .summary-card-icon{background:linear-gradient(145deg,#F1F8DE,#E1F0B8)!important;color:#668C12!important}
+.dashboard-panel{background:rgba(255,255,255,.98)!important;border-color:#DCE6F1!important;box-shadow:0 6px 22px rgba(5,43,89,.065)!important}
+.dashboard-panel-header h2,.dashboard-panel h2{color:#073B78!important}.panel-period,.dashboard-date-box{background:#F1F6FC!important;border-color:#DCE6F1!important;color:#31577F!important}
+.dashboard-refresh-btn{background:#073B78!important;color:#fff!important;border-color:#073B78!important}.dashboard-refresh-btn:hover{background:#1266C8!important}
+.bar-fill,.dashboard-bar-fill,.collections-month-bar{background:linear-gradient(180deg,#1266C8,#073B78)!important}
+.dashboard-chart-panel,.collections-panel{border-top:3px solid #A6CE39!important}
+.activity-panel,.attention-panel{border-top:3px solid #1266C8!important}
+.activity-count,.activity-icon{background:#E8F1FC!important;color:#0B58A8!important}
+.summary-card-highlight{color:#6F9415!important}.summary-card-highlight.warning{color:#B7791F!important}
+.quick-action-btn{border-color:#DCE6F1!important;background:#fff!important}.quick-action-btn:hover{border-color:#A6CE39!important;background:#F7FBEF!important}.quick-action-icon{background:#E8F1FC!important;color:#0B58A8!important}
+.dashboard-footer{color:#687B91!important;border-color:#DCE6F1!important}
+@media(prefers-reduced-motion:reduce){.dashboard-summary-card,.dashboard-panel{transition:none!important}}
