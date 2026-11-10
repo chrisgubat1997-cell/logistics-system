@@ -2278,20 +2278,6 @@ function showPaymentResultModal(type, title, message, details, redirectOnClose) 
         return;
     }
 
-    // Keep the result dialog as a direct child of BODY so no form/container
-    // layout, overflow, or stacking context can push it to the bottom of page.
-    if (modal.parentElement !== document.body) {
-        document.body.appendChild(modal);
-    }
-    modal.style.position = "fixed";
-    modal.style.inset = "0";
-    modal.style.zIndex = "999999";
-    modal.style.alignItems = "center";
-    modal.style.justifyContent = "center";
-    modal.style.padding = "20px";
-    modal.style.boxSizing = "border-box";
-    modal.style.display = "flex";
-
     const isError = type === "error";
     const icon = document.getElementById("paymentResultIcon");
     const eyebrow = document.getElementById("paymentResultEyebrow");
@@ -2301,7 +2287,6 @@ function showPaymentResultModal(type, title, message, details, redirectOnClose) 
     const closeButton = document.getElementById("paymentResultCloseBtn");
 
     modal.classList.toggle("is-error", isError);
-    modal.setAttribute("aria-hidden", "false");
     icon.textContent = isError ? "!" : "✓";
     eyebrow.textContent = isError ? "PAYMENT NOT COMPLETED" : "PAYMENT CONFIRMED";
     titleNode.textContent = title;
@@ -2324,7 +2309,9 @@ function showPaymentResultModal(type, title, message, details, redirectOnClose) 
     });
     detailsNode.hidden = entries.length === 0;
 
-    modal.classList.add("is-open");
+    // Native dialog enters the browser top layer, so the notice is centered
+    // over the active page and cannot be pushed below the payment form.
+    if (!modal.open) modal.showModal();
     document.body.style.overflow = "hidden";
     closeButton.focus();
 }
@@ -2332,9 +2319,7 @@ function showPaymentResultModal(type, title, message, details, redirectOnClose) 
 function closePaymentResultModal() {
     const modal = document.getElementById("paymentResultModal");
     if (!modal) return;
-    modal.classList.remove("is-open");
-    modal.setAttribute("aria-hidden", "true");
-    modal.style.display = "none";
+    if (modal.open) modal.close();
     document.body.style.overflow = "";
     if (paymentResultRedirectOnClose) {
         paymentResultRedirectOnClose = false;
