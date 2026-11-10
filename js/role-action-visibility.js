@@ -25,8 +25,8 @@
         { selector: ".payment-module", section: "payment" }
     ];
 
-    const ACTION_WORDS = /(^|\\b)(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject|issue|record|assign)(\\b|$)/i;
-    const SAFE_WORDS = /(^|\\b)(view|details|refresh|search|filter|clear|back|close|print|download|preview|sort|export)(\\b|$)/i;
+    const ACTION_WORDS = /(^|\b)(edit|update|cancel|delete|remove|void|post|save|create|prepare|add|submit|approve|reject|issue|record|assign)(\b|$)/i;
+    const SAFE_WORDS = /(^|\b)(view|details|refresh|search|filter|clear|back|close|print|download|preview|sort|export)(\b|$)/i;
 
     function currentRole() {
         try {
