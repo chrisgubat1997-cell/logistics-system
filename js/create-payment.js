@@ -2615,11 +2615,18 @@ function validatePayment() {
     }
 
 
-    if (!paymentMethod) {
-        return { valid:false, message:"Please select the payment method." };
+    const creditToApply = Math.max(0, getNumericInput("paymentCreditToApplyInput"));
+    if (currentPayment <= 0 && creditToApply <= 0) {
+        return { valid:false, message:"Enter a cash payment or apply available customer credit." };
+    }
+    if (currentPayment > 0 && !paymentMethod) {
+        return { valid:false, message:"Please select the payment method for the cash collection." };
     }
     if (currentPayment > 0 && !getValue("paymentReferenceNo")) {
         return { valid:false, message:"Reference No. is required for a cash collection." };
+    }
+    if (creditToApply > 0 && (!currentCustomerCreditRecord || creditToApply > currentCustomerCreditBalance + 0.005)) {
+        return { valid:false, message:"The selected customer does not have enough available credit. Refresh the credit balance and try again." };
     }
     if (!client) {
 
@@ -2632,16 +2639,8 @@ function validatePayment() {
     }
 
 
-    if (
-        currentPayment <= 0
-    ) {
-
-        return {
-            valid: false,
-            message:
-                "Please enter a payment amount greater than ₱0.00."
-        };
-
+    if (currentPayment < 0) {
+        return { valid:false, message:"Payment amount cannot be negative." };
     }
 
 
