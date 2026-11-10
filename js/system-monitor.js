@@ -103,7 +103,8 @@
   }
 
   function renderErrors() {
-    setText("monitorErrorCount", recentErrors.length);\n    setText("monitorMemoryUsage", memory ? formatBytes(memory.used) + " / " + formatBytes(memory.limit) : "Not exposed");
+    setText("monitorErrorCount", recentErrors.length);
+    setText("monitorMemoryUsage", memory ? formatBytes(memory.used) + " / " + formatBytes(memory.limit) : "Not exposed");
     const list = byId("monitorErrorList");
     if (!list) return;
     if (!recentErrors.length) {
@@ -169,7 +170,10 @@
 
     const used = storage && Number.isFinite(storage.usage) ? storage.usage : null;
     const quota = storage && Number.isFinite(storage.quota) ? storage.quota : null;
-    const usagePercent = used !== null && quota ? Math.min(100, Math.round(used / quota * 100)) : null;\n    const memory = performance.memory && Number.isFinite(performance.memory.usedJSHeapSize)\n      ? { used: performance.memory.usedJSHeapSize, total: performance.memory.totalJSHeapSize, limit: performance.memory.jsHeapSizeLimit }\n      : null;
+    const usagePercent = used !== null && quota ? Math.min(100, Math.round(used / quota * 100)) : null;
+    const memory = performance.memory && Number.isFinite(performance.memory.usedJSHeapSize)
+      ? { used: performance.memory.usedJSHeapSize, total: performance.memory.totalJSHeapSize, limit: performance.memory.jsHeapSizeLimit }
+      : null;
     const loadTime = performance.timing && performance.timing.loadEventEnd && performance.timing.navigationStart
       ? Math.max(0, performance.timing.loadEventEnd - performance.timing.navigationStart)
       : null;
