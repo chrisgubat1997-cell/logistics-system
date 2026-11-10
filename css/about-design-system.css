@@ -27,8 +27,8 @@
 }
 #mainContent .page {
   color: var(--about-ink);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 /* Page titles: navy, strong weight, compact tracking. */
@@ -42,7 +42,7 @@
 #mainContent .page .report-title,
 #mainContent .page .fde-title {
   color: var(--about-blue-deep);
-  font-size: clamp(24px, 3vw, 30px);
+  font-size: clamp(21px, 2.6vw, 26px);
   font-weight: 850;
   line-height: 1.15;
   letter-spacing: -.035em;
@@ -52,7 +52,7 @@
 #mainContent .page .card-header h2,
 #mainContent .page .panel-title {
   color: var(--about-blue-deep);
-  font-size: 19px;
+  font-size: 16px;
   font-weight: 850;
   line-height: 1.3;
   letter-spacing: -.025em;
@@ -60,7 +60,7 @@
 #mainContent .page h3,
 #mainContent .page .subsection-title {
   color: var(--about-ink);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   line-height: 1.4;
 }
@@ -70,8 +70,8 @@
 #mainContent .page .page-subtitle,
 #mainContent .page .section-description {
   color: var(--about-muted);
-  font-size: 11px;
-  line-height: 1.65;
+  font-size: 10px;
+  line-height: 1.55;
 }
 
 /* Green kicker/eyebrow accents, matching About section headings. */
@@ -80,9 +80,9 @@
 #mainContent .page .page-kicker,
 #mainContent .page .panel-eyebrow {
   color: var(--about-green);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
-  letter-spacing: .16em;
+  letter-spacing: .14em;
 }
 
 /* Consistent card surface and borders from About info/feature cards. */
@@ -120,7 +120,7 @@
 #mainContent .page .helper-text,
 #mainContent .page .hint {
   color: var(--about-muted);
-  font-size: 10px;
+  font-size: 9px;
 }
 #mainContent .page strong,
 #mainContent .page b {
@@ -132,7 +132,7 @@
 #mainContent .page select,
 #mainContent .page textarea {
   font-family: var(--about-font);
-  font-size: 11px;
+  font-size: 10px;
   color: var(--about-ink);
   border-color: var(--about-line);
 }
@@ -148,19 +148,19 @@
 #mainContent .page table th,
 #mainContent .page table thead th {
   color: var(--about-blue-deep);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
 }
 #mainContent .page table td {
   color: var(--about-ink);
-  font-size: 11px;
+  font-size: 10px;
 }
 
 /* Buttons: retain their existing semantic backgrounds, normalize type. */
 #mainContent .page button,
 #mainContent .page .btn {
   font-family: var(--about-font);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 750;
 }
 
@@ -220,8 +220,8 @@ html[data-theme="dark"] #mainContent .page table thead th {
 /* Dashboard lives in its own iframe, so mirror the same About palette there. */
 .dashboard-page {
   color: var(--about-ink);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 11px;
+  line-height: 1.5;
 }
 .dashboard-page h1,
 .dashboard-page h2,
@@ -232,13 +232,13 @@ html[data-theme="dark"] #mainContent .page table thead th {
 }
 .dashboard-page h1 { font-size: clamp(24px, 3vw, 30px); line-height: 1.15; }
 .dashboard-page h2,
-.dashboard-page .dashboard-panel-title { font-size: 19px; }
-.dashboard-page h3 { color: var(--about-ink); font-size: 12px; font-weight: 800; }
+.dashboard-page .dashboard-panel-title { font-size: 16px; }
+.dashboard-page h3 { color: var(--about-ink); font-size: 11px; font-weight: 800; }
 .dashboard-page p,
 .dashboard-page .dashboard-panel-subtitle {
   color: var(--about-muted);
-  font-size: 11px;
-  line-height: 1.65;
+  font-size: 10px;
+  line-height: 1.55;
 }
 .dashboard-page button,
 .dashboard-page input,
@@ -252,5 +252,5 @@ html[data-theme="dark"] .dashboard-page .dashboard-panel-subtitle { color: #a4b2
 
 @media (max-width: 700px) {
   #mainContent .page h1,
-  #mainContent .page .page-header h1 { font-size: 24px; }
+  #mainContent .page .page-header h1 { font-size: 21px; }
 }
