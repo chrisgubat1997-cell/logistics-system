@@ -43,8 +43,6 @@ function createPayment(payload) {
     const total = _finSoTotal_(so);
     const previousPaid = _finPaidForSO_(soNumber);
     const remainingBefore = Math.max(0, Math.round((total - previousPaid) * 100) / 100);
-    if (remainingBefore <= 0.005) throw new Error("This Sales Order is already FULLY PAID. No additional payment can be recorded.");
-    if (amount > remainingBefore + 0.005) throw new Error("Payment exceeds the remaining Sales Order balance of " + remainingBefore.toFixed(2) + ".");
     const terms = _finTerms_(so);
     const requiredDP = _finRequiredDP_(so);
     const statusInput = String(payload.paymentStatus || payload.status || payload.PAYMENT_STATUS || "RECEIVED").trim().toUpperCase();
@@ -52,7 +50,10 @@ function createPayment(payload) {
     if (!allowedStatuses.includes(statusInput)) throw new Error("Invalid payment status.");
     if (statusInput === "CANCELLED") throw new Error("Create the payment as a separate record; do not use this endpoint to record a cancelled collection.");
     const counted = ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(statusInput);
-    const totalPaid = previousPaid + (counted ? amount : 0);
+    // Allocate confirmed collections to the SO first; any excess becomes customer credit.
+    const soAppliedAmount = counted ? Math.min(amount, remainingBefore) : 0;
+    const creditAmount = counted ? Math.max(0, Math.round((amount - soAppliedAmount) * 100) / 100) : 0;
+    const totalPaid = previousPaid + soAppliedAmount;
     const remaining = Math.max(0, Math.round((total - totalPaid) * 100) / 100);
 
     const sheet = getSheet(CONFIG.SHEETS.PAYMENTS);
@@ -89,8 +90,8 @@ function createPayment(payload) {
       DR_ID: dr ? dr.DR_ID : "", DR_NUMBER: drNo,
       PAYMENT_METHOD: String(payload.paymentMethod || payload.PAYMENT_METHOD || ""),
       PAYMENT_STATUS: statusInput, SO_TOTAL: total, REQUIRED_DP: requiredDP,
-      PREVIOUS_PAID: previousPaid, CURRENT_PAYMENT: amount, TOTAL_PAID: totalPaid,
-      REMAINING_BALANCE: remaining,
+      PREVIOUS_PAID: previousPaid, CURRENT_PAYMENT: amount, SO_APPLIED_AMOUNT: soAppliedAmount,
+      CREDIT_AMOUNT: creditAmount, TOTAL_PAID: totalPaid, REMAINING_BALANCE: remaining,
       RECEIPT_TYPE: String(payload.receiptType || payload.RECEIPT_TYPE || ""),
       RECEIPT_NO: String(payload.receiptNo || payload.RECEIPT_NO || ""),
       REFERENCE_NO: String(payload.referenceNo || payload.REFERENCE_NO || ""),
@@ -99,16 +100,91 @@ function createPayment(payload) {
       CREATED_AT: timestamp, UPDATED_AT: timestamp
     };
     _finAppendObjectByHeaders_(sheet, payment);
+    if (creditAmount > 0) {
+      _recordCustomerCredit_(so, payment, creditAmount);
+    }
     if (typeof logActivity === "function") logActivity({
       username: payment.CREATED_BY || "SYSTEM", action: "CREATE", module: "PAYMENT",
       recordId: paymentId, recordNumber: paymentNo,
       details: "Recorded payment for " + soNumber + ": " + amount.toFixed(2) + " (" + statusInput + ")", status: "SUCCESS"
     });
     if (typeof touchSyncVersion === "function") touchSyncVersion();
-    return { success: true, message: "Payment saved to the database.", payment: payment };
+    return { success: true, message: creditAmount > 0
+      ? "Payment saved. Excess amount was added to Customer Credit."
+      : "Payment saved to the database.", payment: payment, soAppliedAmount: soAppliedAmount, creditAmount: creditAmount };
   } finally {
     lock.releaseLock();
   }
+}
+
+
+/* Create/update the per-company customer credit ledger for confirmed overpayments. */
+function _recordCustomerCredit_(so, payment, creditAmount) {
+  const ss = getDatabase();
+  const creditHeaders = ["CUSTOMER_ID", "CUSTOMER_NAME", "CREDIT_BALANCE", "CREATED_AT", "UPDATED_AT"];
+  const txnHeaders = ["CREDIT_TXN_ID", "CUSTOMER_ID", "CUSTOMER_NAME", "PAYMENT_ID", "PAYMENT_NO", "SO_NUMBER", "TXN_TYPE", "AMOUNT", "BALANCE_AFTER", "TXN_DATE", "REMARKS", "CREATED_BY", "CREATED_AT"];
+
+  function ensureSheet(name, requiredHeaders) {
+    let sh = ss.getSheetByName(name);
+    if (!sh) sh = ss.insertSheet(name);
+    if (sh.getLastColumn() === 0) {
+      sh.getRange(1, 1, 1, requiredHeaders.length).setValues([requiredHeaders]);
+      return sh;
+    }
+    const existing = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0].map(v => String(v).trim());
+    requiredHeaders.forEach(h => {
+      if (existing.indexOf(h) === -1) {
+        sh.getRange(1, sh.getLastColumn() + 1).setValue(h);
+        existing.push(h);
+      }
+    });
+    return sh;
+  }
+  function appendByHeaders(sh, data) {
+    const headers = sh.getRange(1, 1, 1, sh.getLastColumn()).getDisplayValues()[0].map(v => String(v).trim());
+    sh.appendRow(headers.map(h => data[h] === undefined ? "" : data[h]));
+  }
+
+  const customerId = String(so.CUSTOMER_ID || payment.CUSTOMER_ID || "").trim();
+  const customerName = String(payment.CLIENT_NAME || so.CLIENT_NAME || so.CUSTOMER_NAME || "").trim();
+  if (!customerId && !customerName) throw new Error("Cannot create Customer Credit: Sales Order has no customer identifier or name.");
+
+  const creditSheet = ensureSheet("CUSTOMER_CREDITS", creditHeaders);
+  const txnSheet = ensureSheet("CUSTOMER_CREDIT_TRANSACTIONS", txnHeaders);
+  const lastRow = creditSheet.getLastRow();
+  const headers = creditSheet.getRange(1, 1, 1, creditSheet.getLastColumn()).getDisplayValues()[0].map(v => String(v).trim());
+  const idCol = headers.indexOf("CUSTOMER_ID");
+  const nameCol = headers.indexOf("CUSTOMER_NAME");
+  const balanceCol = headers.indexOf("CREDIT_BALANCE");
+  let rowIndex = 0;
+  if (lastRow > 1) {
+    const rows = creditSheet.getRange(2, 1, lastRow - 1, creditSheet.getLastColumn()).getValues();
+    for (let i = 0; i < rows.length; i++) {
+      const idMatch = customerId && idCol >= 0 && String(rows[i][idCol] || "").trim() === customerId;
+      const nameMatch = !customerId && nameCol >= 0 && String(rows[i][nameCol] || "").trim().toLowerCase() === customerName.toLowerCase();
+      if (idMatch || nameMatch) { rowIndex = i + 2; break; }
+    }
+  }
+  const now = payment.CREATED_AT || new Date();
+  let balance = creditAmount;
+  if (rowIndex) {
+    const current = _finMoney_(creditSheet.getRange(rowIndex, balanceCol + 1).getValue());
+    balance = Math.round((current + creditAmount) * 100) / 100;
+    creditSheet.getRange(rowIndex, balanceCol + 1).setValue(balance);
+    const createdCol = headers.indexOf("CREATED_AT");
+    const updatedCol = headers.indexOf("UPDATED_AT");
+    if (updatedCol >= 0) creditSheet.getRange(rowIndex, updatedCol + 1).setValue(now);
+    if (createdCol >= 0 && !creditSheet.getRange(rowIndex, createdCol + 1).getValue()) creditSheet.getRange(rowIndex, createdCol + 1).setValue(now);
+  } else {
+    appendByHeaders(creditSheet, { CUSTOMER_ID: customerId, CUSTOMER_NAME: customerName, CREDIT_BALANCE: balance, CREATED_AT: now, UPDATED_AT: now });
+  }
+  appendByHeaders(txnSheet, {
+    CREDIT_TXN_ID: generateId("CRD"), CUSTOMER_ID: customerId, CUSTOMER_NAME: customerName,
+    PAYMENT_ID: payment.PAYMENT_ID, PAYMENT_NO: payment.PAYMENT_NO, SO_NUMBER: payment.SO_NUMBER,
+    TXN_TYPE: "OVERPAYMENT_CREDIT", AMOUNT: creditAmount, BALANCE_AFTER: balance,
+    TXN_DATE: payment.PAYMENT_DATE, REMARKS: "Excess from payment " + payment.PAYMENT_NO + " for " + payment.SO_NUMBER,
+    CREATED_BY: payment.CREATED_BY, CREATED_AT: now
+  });
 }
 
 /* Used by Delivery.gs before a DR can be created. COD permits dispatch without prepayment;
