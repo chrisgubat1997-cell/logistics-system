@@ -844,26 +844,36 @@ body {
 .create-payment-delivery-status.is-status-unavailable { color:#475467; background:#e4e7ec; }
 
 
-/* PAYMENT RESULT MODAL — centered overlay for validation and save feedback */
+/* PAYMENT RESULT MODAL — native top-layer dialog centered in the active page */
 .payment-result-modal {
     position: fixed;
     inset: 0;
-    z-index: 30000;
-    display: none;
-    align-items: center;
-    justify-content: center;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
     padding: 20px;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    overflow: auto;
     box-sizing: border-box;
 }
-.payment-result-modal.is-open {
+.payment-result-modal:not([open]) { display: none; }
+.payment-result-modal[open] {
     display: flex;
-    animation: paymentResultFade .18s ease;
+    align-items: center;
+    justify-content: center;
 }
-.payment-result-backdrop {
-    position: absolute;
-    inset: 0;
+.payment-result-modal::backdrop {
     background: rgba(15, 23, 42, .62);
     backdrop-filter: blur(4px);
+}
+.payment-result-backdrop {
+    position: fixed;
+    inset: 0;
+    background: transparent;
 }
 .payment-result-card {
     position: relative;
@@ -965,7 +975,6 @@ body {
 }
 .payment-result-modal.is-error .payment-result-button { background: #344054; }
 .payment-result-modal.is-error .payment-result-button:hover { background: #1d2939; }
-@keyframes paymentResultFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes paymentResultRise {
     from { opacity: 0; transform: translateY(10px) scale(.98); }
     to { opacity: 1; transform: translateY(0) scale(1); }
