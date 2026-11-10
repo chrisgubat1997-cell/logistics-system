@@ -1941,21 +1941,87 @@ function renderOutstandingSOTable() {
     if(!rows.length){body.innerHTML='<tr><td colspan="8" class="payment-empty-state">No unpaid Sales Orders or outstanding balances found.</td></tr>';return;}
     body.innerHTML=rows.map(function(r,i){
         const cl=r.delivery==='FULLY DELIVERED'?'outstanding-delivery-full':r.delivery==='PARTIALLY DELIVERED'?'outstanding-delivery-partial':'outstanding-delivery-none';
-        return '<tr class="outstanding-so-row" data-outstanding-index="'+i+'" title="Double-click to view Sales Order balance details"><td>'+escapeHTML(r.soNo)+'</td><td>'+escapeHTML(getClientName(r.so))+'</td><td>'+escapeHTML(getProjectName(r.so))+'</td><td class="payment-amount-cell">'+escapeHTML(formatCurrency(r.total))+'</td><td class="payment-amount-cell">'+escapeHTML(formatCurrency(r.paid))+'</td><td class="payment-amount-cell outstanding-balance-value">'+escapeHTML(formatCurrency(r.balance))+'</td><td><span class="outstanding-delivery-status '+cl+'">'+escapeHTML(r.delivery)+'</span></td><td><button type="button" class="payment-action-btn" onclick="viewOutstandingSO('+i+')">VIEW</button></td></tr>';
+        return '<tr class="outstanding-so-row" data-outstanding-index="'+i+'" title="Double-click to view Sales Order balance details"><td>'+escapeHTML(r.soNo)+'</td><td>'+escapeHTML(getClientName(r.so))+'</td><td>'+escapeHTML(getProjectName(r.so))+'</td><td class="payment-amount-cell">'+escapeHTML(formatCurrency(r.total))+'</td><td class="payment-amount-cell">'+escapeHTML(formatCurrency(r.paid))+'</td><td class="payment-amount-cell outstanding-balance-value">'+escapeHTML(formatCurrency(r.balance))+'</td><td><span class="outstanding-delivery-status '+cl+'">'+escapeHTML(r.delivery)+'</span></td><td><button type="button" class="payment-action-btn" data-outstanding-view="'+i+'">VIEW</button></td></tr>';
     }).join('');
     body.querySelectorAll('.outstanding-so-row').forEach(function(tr){tr.addEventListener('dblclick',function(ev){if(ev.target&&ev.target.closest('button'))return;viewOutstandingSO(Number(tr.getAttribute('data-outstanding-index')));});});
 }
-function viewOutstandingSO(index) {
-    const input=document.getElementById('outstandingSOSearchInput');
-    const r=getOutstandingSORows(input?input.value:'')[index]; if(!r)return;
-    const set=function(id,val){const el=document.getElementById(id);if(el)el.textContent=val||'—';};
-    set('outstandingSOModalTitle',r.soNo+' — Outstanding Balance');set('outstandingSODetailClient',getClientName(r.so));
-    set('outstandingSODetailProject',getProjectName(r.so));set('outstandingSODetailTotal',formatCurrency(r.total));
-    set('outstandingSODetailPaid',formatCurrency(r.paid));set('outstandingSODetailBalance',formatCurrency(r.balance));set('outstandingSODetailDelivery',r.delivery);
-    const modal=document.getElementById('outstandingSOModal');if(modal){modal.classList.add('is-open');modal.setAttribute('aria-hidden','false');}
+function getPaymentsForOutstandingSO(soNo) {
+    const key = normalizePaymentSOKey(soNo);
+    return paymentRecords.filter(function (payment) {
+        const status = String(getPaymentStatus(payment) || '').trim().toUpperCase();
+        return normalizePaymentSOKey(getSONo(payment)) === key &&
+            !['CANCELLED','CANCELED','VOID','VOIDED','REJECTED'].includes(status);
+    }).sort(function (a, b) {
+        return getDateTime(getPaymentDate(b)) - getDateTime(getPaymentDate(a));
+    });
 }
-function closeOutstandingSOModal(){const modal=document.getElementById('outstandingSOModal');if(!modal)return;modal.classList.remove('is-open');modal.setAttribute('aria-hidden','true');}
-window.viewOutstandingSO=viewOutstandingSO;
+function renderOutstandingSOPaymentHistory(soNo) {
+    const section = document.getElementById('outstandingSOPaymentHistory');
+    const body = document.getElementById('outstandingSOPaymentHistoryBody');
+    if (!section || !body) return;
+    const payments = getPaymentsForOutstandingSO(soNo);
+    if (!payments.length) {
+        section.hidden = true;
+        body.innerHTML = '';
+        return;
+    }
+    section.hidden = false;
+    body.innerHTML = payments.map(function (payment) {
+        const applied = creditField(payment, ['SO_APPLIED_AMOUNT','soAppliedAmount','SO_AMOUNT_APPLIED','soAmountApplied']);
+        const amount = applied !== '' ? toNumber(applied) : getPaymentAmount(payment);
+        const method = creditField(payment, ['PAYMENT_METHOD','paymentMethod','method']) || '—';
+        const reference = creditField(payment, ['REFERENCE_NO','referenceNo','referenceNumber']) || '—';
+        return '<tr>' +
+            '<td>' + escapeHTML(getPaymentDate(payment) ? formatDate(getPaymentDate(payment)) : '—') + '</td>' +
+            '<td>' + escapeHTML(getPaymentNo(payment) || '—') + '</td>' +
+            '<td>' + escapeHTML(method) + '</td>' +
+            '<td>' + escapeHTML(reference) + '</td>' +
+            '<td class="payment-amount-cell">' + escapeHTML(formatCurrency(amount)) + '</td>' +
+            '<td>' + escapeHTML(getPaymentStatus(payment) || '—') + '</td>' +
+            '</tr>';
+    }).join('');
+}
+function viewOutstandingSO(index) {
+    const input = document.getElementById('outstandingSOSearchInput');
+    const r = getOutstandingSORows(input ? input.value : '')[Number(index)];
+    if (!r) return;
+    const set = function (id, val) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val == null || val === '' ? '—' : String(val);
+    };
+    set('outstandingSOModalTitle', r.soNo + ' — Sales Order Details');
+    set('outstandingSODetailClient', getClientName(r.so));
+    set('outstandingSODetailProject', getProjectName(r.so));
+    set('outstandingSODetailDelivery', r.delivery);
+    set('outstandingSODetailTotal', formatCurrency(r.total));
+    set('outstandingSODetailPaid', formatCurrency(r.paid));
+    set('outstandingSODetailBalance', formatCurrency(r.balance));
+    renderOutstandingSOPaymentHistory(r.soNo);
+    const modal = document.getElementById('outstandingSOModal');
+    if (modal) {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('payment-summary-open');
+    }
+}
+function closeOutstandingSOModal() {
+    const modal = document.getElementById('outstandingSOModal');
+    if (!modal) return;
+    modal.classList.remove('is-open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('payment-summary-open');
+}
+window.viewOutstandingSO = viewOutstandingSO;
+if (!window.__logitechOutstandingSOViewBound) {
+    window.__logitechOutstandingSOViewBound = true;
+    document.addEventListener('click', function (event) {
+        const button = event.target && event.target.closest ? event.target.closest('[data-outstanding-view]') : null;
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+        viewOutstandingSO(button.getAttribute('data-outstanding-view'));
+    }, true);
+}
 
 /* =========================================================
    VIEW SALES ORDER PAYMENT
