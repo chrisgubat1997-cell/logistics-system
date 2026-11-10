@@ -36,7 +36,7 @@
 
     <link
         rel="stylesheet"
-        href="css/index.css?v=20261110-sidebar-messages-style02"
+        href="css/index.css?v=20261110-sidebar-unified-icons03"
     >
 
 
@@ -3583,39 +3583,72 @@ document.addEventListener(
 
 
 <script>
-/* Normalize every sidebar item to the same icon + label structure as Messages. */
+/* Give every sidebar button the same icon/label layout as Messages.
+   Each section keeps its own distinct icon when the sidebar is collapsed. */
 (function () {
     function normalizeSidebarItems() {
+        const iconByPage = {
+            dashboard: '🏠',
+            messages: '✉️',
+            sales: '📄',
+            joRegister: '🧾',
+            delivery: '🚚',
+            fleetAnalytics: '📊',
+            fleetDataEntry: '📝',
+            invoice: '🧾',
+            payment: '💳',
+            revolvingFund: '💰',
+            reports: '📈',
+            settings: '⚙️',
+            about: 'ⓘ'
+        };
+        const labelByPage = {
+            dashboard: 'Dashboard',
+            messages: 'Messages',
+            sales: 'Sales Order',
+            joRegister: 'JO Register',
+            delivery: 'Delivery',
+            fleetAnalytics: 'Fleet & Delivery Analytics',
+            fleetDataEntry: 'Fleet & Delivery Data Entry',
+            invoice: 'Invoice',
+            payment: 'Payment',
+            revolvingFund: 'Revolving Fund',
+            reports: 'Reports',
+            settings: 'Settings',
+            about: 'About LOGIS-TECH'
+        };
+
         document.querySelectorAll('.sidebar .menu .menu-btn').forEach(function (button) {
-            if (button.classList.contains('messages-menu-btn') || button.dataset.sidebarNormalized === 'true') return;
-            const raw = button.textContent.replace(/\\s+/g, ' ').trim();
-            if (!raw) return;
-            let icon = '';
-            let label = raw;
-            try {
-                const segmenter = new Intl.Segmenter(undefined, {granularity: 'grapheme'});
-                const first = segmenter.segment(raw)[Symbol.iterator]().next().value;
-                if (first && /\\p{Extended_Pictographic}/u.test(first.segment)) {
-                    icon = first.segment;
-                    label = raw.slice(first.index + first.segment.length).trim();
-                }
-            } catch (error) {
-                const match = raw.match(/^(\\p{Extended_Pictographic}\\uFE0F?)/u);
-                if (match) { icon = match[1]; label = raw.slice(icon.length).trim(); }
-            }
-            if (!icon) {
-                const existingIcon = button.querySelector('span[aria-hidden="true"]');
-                if (existingIcon) icon = existingIcon.textContent.trim();
-            }
-            if (!icon) icon = '•';
-            button.innerHTML = '<span class="sidebar-item-icon" aria-hidden="true"></span><span class="sidebar-item-label"></span>';
-            button.querySelector('.sidebar-item-icon').textContent = icon;
-            button.querySelector('.sidebar-item-label').textContent = label || raw;
+            const action = button.getAttribute('onclick') || '';
+            const match = action.match(/showPage\(['"]([^'"]+)['"]/);
+            const page = match ? match[1] : '';
+            const raw = (button.textContent || '').replace(/\s+/g, ' ').trim();
+            const icon = iconByPage[page] || '•';
+            const label = labelByPage[page] || raw.replace(/^\S+\s*/, '') || raw;
+
+            button.innerHTML = '';
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'sidebar-item-icon';
+            iconSpan.setAttribute('aria-hidden', 'true');
+            iconSpan.textContent = icon;
+
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'sidebar-item-label';
+            labelSpan.textContent = label;
+
+            button.appendChild(iconSpan);
+            button.appendChild(labelSpan);
             button.dataset.sidebarNormalized = 'true';
+            button.setAttribute('aria-label', label);
+            button.title = label;
         });
     }
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', normalizeSidebarItems);
-    else normalizeSidebarItems();
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', normalizeSidebarItems);
+    } else {
+        normalizeSidebarItems();
+    }
 })();
 </script>
 
