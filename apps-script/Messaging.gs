@@ -431,9 +431,10 @@ function getMessagingUsers(payload) {
     name: headers.indexOf("FULL_NAME"),
     email: headers.indexOf("EMAIL"),
     role: headers.indexOf("ROLE"),
-    status: headers.indexOf("STATUS")
+    status: headers.indexOf("STATUS"),
+    companyAccess: headers.indexOf("COMPANY_ACCESS")
   };
-  if ([index.id,index.username,index.name,index.email,index.role,index.status].some(function(i){return i<0;})) {
+  if ([index.id,index.username,index.name,index.email,index.role,index.status,index.companyAccess].some(function(i){return i<0;})) {
     throw new Error("USERS sheet is missing required columns.");
   }
 
@@ -441,6 +442,7 @@ function getMessagingUsers(payload) {
   for (let i=1;i<values.length;i++) {
     const row=values[i];
     if (String(row[index.status] || "").trim().toUpperCase() !== "ACTIVE") continue;
+    if (normalizeCompanyAccess_(row[index.companyAccess]).indexOf(account.company) < 0) continue;
     const userId=String(row[index.id] || "").trim();
     if (!userId || userId === account.userId) continue;
     users.push({
@@ -493,7 +495,8 @@ function createPrivateMessageThread(payload) {
 
 function getMessagingUsersInternal_() {
   const cache = CacheService.getScriptCache();
-  const cacheKey = "MESSAGING_ACTIVE_USERS_V1";
+  const company = ACTIVE_COMPANY_CONTEXT_ ? ACTIVE_COMPANY_CONTEXT_.company : "UNKNOWN";
+  const cacheKey = "MESSAGING_ACTIVE_USERS_V2_" + company;
   const cached = cache.get(cacheKey);
   if (cached) {
     try { return JSON.parse(cached); } catch (e) { cache.remove(cacheKey); }
@@ -509,9 +512,12 @@ function getMessagingUsersInternal_() {
     name:headers.indexOf("FULL_NAME"),
     email:headers.indexOf("EMAIL"),
     role:headers.indexOf("ROLE"),
-    status:headers.indexOf("STATUS")
+    status:headers.indexOf("STATUS"),
+    companyAccess:headers.indexOf("COMPANY_ACCESS")
   };
-  const users = values.slice(1).filter(function(row){return String(row[idx.status]||"").toUpperCase()==="ACTIVE";}).map(function(row){
+  if ([idx.id, idx.username, idx.name, idx.status, idx.companyAccess].some(function(i) { return i < 0; })) throw new Error("Central USERS sheet is missing company messaging columns.");
+  const activeCompany = ACTIVE_COMPANY_CONTEXT_ ? ACTIVE_COMPANY_CONTEXT_.company : "";
+  const users = values.slice(1).filter(function(row){return String(row[idx.status]||"").toUpperCase()==="ACTIVE" && normalizeCompanyAccess_(row[idx.companyAccess]).indexOf(activeCompany) >= 0;}).map(function(row){
     return {
       userId:String(row[idx.id]||""),
       username:String(row[idx.username]||""),
