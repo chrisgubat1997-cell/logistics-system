@@ -6344,7 +6344,7 @@ function loadCustomerStyles() {
              */
 
             link.href =
-                "css/create-customer.css?v=20261008-01";
+                "css/create-customer.css?v=20261110-customer-modal01";
 
 
             link.onload =
@@ -6391,7 +6391,7 @@ async function loadCustomerScript() {
         "logistech-customer-js";
 
     const SCRIPT_SRC =
-        "js/create-customer.js?v=20261008-02";
+        "js/create-customer.js?v=20261110-customer-modal01";
 
 
     /*
