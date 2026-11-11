@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    SALES ORDER MODULE
    sales-order.js
-   VERSION: 20261007-01
+   VERSION: 20261111-SEARCHFAST01
 ========================================================= */
 (function () {
     "use strict";
@@ -85,20 +85,12 @@ function getLogisTechCurrentRole() {
     function bindSalesOrderEvents() {
         const searchInput =
             document.getElementById("soSearchInput");
-        if (searchInput) {
-            searchInput.addEventListener(
-                "input",
-                function () {
-                    soSummaryFilter = "all";
-                    if (soSearchDebounceTimer) {
-                        clearTimeout(soSearchDebounceTimer);
-                    }
-                    soSearchDebounceTimer = setTimeout(function () {
-                        soSearchDebounceTimer = null;
-                        renderSOList();
-                    }, 90);
-                }
-            );
+        if (searchInput && searchInput.dataset.searchBound !== "true") {
+            searchInput.dataset.searchBound = "true";
+            searchInput.addEventListener("input", function () {
+                soSummaryFilter = "all";
+                renderSOList();
+            });
         }
         const statusFilter =
             document.getElementById("soStatusFilter");
@@ -1052,14 +1044,19 @@ async function loadSOList(
             return String(value == null ? "" : value).trim().toLowerCase();
         };
 
+        const soNumber = lower(getSOValue(so, ["SO_NUMBER", "soNumber", "so_number"]));
+        const client = lower(getSOValue(so, ["CLIENT_NAME", "clientName"]));
+        const project = lower(getSOValue(so, ["PROJECT", "project"]));
+        const po = lower(getSOValue(so, ["PO_NUMBER", "poNumber"]));
+        const jobOrder = lower(getSOValue(so, ["JOB_ORDER", "jobOrder", "job_order", "JO"]));
+
         indexed = {
-            soNumber: lower(getSOValue(so, ["SO_NUMBER", "soNumber", "so_number"])),
-            client: lower(getSOValue(so, ["CLIENT_NAME", "clientName"])),
-            project: lower(getSOValue(so, ["PROJECT", "project"])),
-            po: lower(getSOValue(so, ["PO_NUMBER", "poNumber"])),
+            // Build one searchable string once per record, then use one includes()
+            // check per keystroke instead of checking each field separately.
+            searchText: [soNumber, client, project, po, jobOrder].join(" "),
             status: lower(getSOValue(so, ["STATUS", "status"])),
             payment: lower(getSOValue(so, ["PAYMENT_STATUS", "paymentStatus", "PAYMENT"])),
-            jobOrder: String(getSOValue(so, ["JOB_ORDER", "jobOrder", "job_order", "JO"]) || "").trim()
+            jobOrder: jobOrder
         };
 
         soSearchIndex.set(so, indexed);
@@ -1081,12 +1078,7 @@ async function loadSOList(
             const indexed = getSOSearchIndex(so);
             const matchesSummary = soSummaryFilter !== "without-jo" || !indexed.jobOrder;
 
-            const matchesSearch =
-                !search ||
-                indexed.soNumber.includes(search) ||
-                indexed.client.includes(search) ||
-                indexed.project.includes(search) ||
-                indexed.po.includes(search);
+            const matchesSearch = !search || indexed.searchText.includes(search);
 
             const matchesStatus = !status || indexed.status === status;
             const matchesPayment = !payment || indexed.payment === payment;
