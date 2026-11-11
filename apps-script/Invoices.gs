@@ -283,14 +283,8 @@ function createInvoice(payload) {
       if (Math.abs(submittedAmount - dpPaymentAmount) > 0.01) {
         throw new Error("The Down Payment amount does not match the selected Payment record. Refresh Payment records and try again.");
       }
-      if (requestedItems.length !== 1) {
-        throw new Error("A Down Payment Invoice must contain only its selected Payment record amount.");
-      }
-      const lineQty = Number(requestedItems[0].qtyInvoice ?? requestedItems[0].QTY_INVOICE ?? 0);
-      const linePrice = Number(requestedItems[0].unitPrice ?? requestedItems[0].UNIT_PRICE ?? 0);
-      if (Math.abs(lineQty - 1) > 0.0001 || Math.abs(linePrice - dpPaymentAmount) > 0.01) {
-        throw new Error("The Down Payment invoice line must match the selected Payment record amount.");
-      }
+      // The selected DP remains a permanent source reference even if its Pick Item line is removed.
+      // Invoice computation is based only on the remaining requestedItems.
     }
 
     // Full Payment can optionally identify the exact saved Payment transaction.
@@ -324,12 +318,8 @@ function createInvoice(payload) {
         if (Math.abs(submittedFPAmount - fpPaymentAmount) > 0.01) {
           throw new Error("The Full Payment amount does not match the selected Payment record. Refresh Payment records and try again.");
         }
-        if (requestedItems.length !== 1) throw new Error("A Full Payment Invoice must contain only its selected Payment record amount.");
-        const fpQty = Number(requestedItems[0].qtyInvoice ?? requestedItems[0].QTY_INVOICE ?? 0);
-        const fpPrice = Number(requestedItems[0].unitPrice ?? requestedItems[0].UNIT_PRICE ?? 0);
-        if (Math.abs(fpQty - 1) > 0.0001 || Math.abs(fpPrice - fpPaymentAmount) > 0.01) {
-          throw new Error("The Full Payment invoice line must match the selected Payment record amount.");
-        }
+        // The selected FP remains a permanent source reference even if its Pick Item line is removed.
+        // Invoice computation is based only on the remaining requestedItems.
       }
     }
 
@@ -522,7 +512,16 @@ function createInvoice(payload) {
       recordId: invoiceId, recordNumber: invoiceNo, details: "Created invoice for " + soNumber + " / " + drNumber, status: "SUCCESS"
     });
     if (typeof touchSyncVersion === "function") touchSyncVersion();
-    return { success: true, message: "Invoice saved to the database.", invoice: Object.assign({}, header, { ITEMS: prepared }) };
+    const savedSourceReferences = _finGetInvoiceSources_(invoiceId, invoiceNo);
+    return {
+      success: true,
+      message: "Invoice saved to the database.",
+      invoice: Object.assign({}, header, {
+        ITEMS: prepared,
+        SOURCE_REFERENCES: savedSourceReferences,
+        sourceReferences: savedSourceReferences
+      })
+    };
   } finally {
     lock.releaseLock();
   }
