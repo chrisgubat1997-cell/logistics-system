@@ -1269,6 +1269,15 @@
     min-height:27px !important; height:27px !important; padding:0 10px !important;
     border-radius:5px !important; font-size:8px !important; letter-spacing:.2px;
 }
+.invoicing-container .invoice-bulk-actions { display:inline-flex; align-items:center; gap:6px; }
+.invoicing-container .invoice-bulk-actions .invoice-bulk-btn {
+    min-height:27px !important; height:27px !important; padding:0 10px !important;
+    border-radius:5px !important; font-size:8px !important; line-height:1 !important;
+    font-weight:700 !important; letter-spacing:.2px !important; white-space:nowrap;
+}
+.invoicing-container .invoice-bulk-actions .invoice-bulk-btn:disabled {
+    opacity:.42; cursor:not-allowed; filter:grayscale(.2);
+}
 .invoicing-container .invoice-release-selected-btn:disabled {
     opacity:.42; cursor:not-allowed; filter:grayscale(.2);
 }
