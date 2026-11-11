@@ -167,6 +167,7 @@ let isSaving = false;
 let salesOrderRecords = [];
 let deliveryReceiptRecords = [];
 let paymentRecords = [];
+let customerRecords = [];
 let selectedDPPayment = null;
 let invoiceHistoryRecords = [];
 let selectedDeliveryReceipts = [];
@@ -211,7 +212,8 @@ async function initializeCreateInvoice() {
         loadSalesOrdersFromDatabase(),
         loadDeliveryReceiptsFromDatabase(),
         loadPaymentRecordsFromDatabase(),
-        loadInvoiceHistoryFromDatabase()
+        loadInvoiceHistoryFromDatabase(),
+        loadCustomersFromDatabase()
     ]);
     bindSalesOrderPicker();
     bindDeliveryReceiptPicker();
@@ -1864,6 +1866,38 @@ async function loadInvoiceHistoryFromDatabase() {
     }
 }
 
+async function loadCustomersFromDatabase() {
+    try {
+        customerRecords = await invoiceGetRecords("getCustomers", ["customers", "records", "data"]);
+        console.log("[CREATE INVOICE] Customer master records loaded:", customerRecords.length);
+    } catch (error) {
+        console.error("[CREATE INVOICE] Failed to load Customer master records:", error);
+        customerRecords = [];
+    }
+}
+
+function findInvoiceCustomer(salesOrder) {
+    const customerId = String(getObjectValue(salesOrder, [
+        "CUSTOMER_ID", "customerId", "CUSTOMERID", "customer_id"
+    ]) || "").trim().toLowerCase();
+    const clientName = String(getObjectValue(salesOrder, [
+        "CLIENT_NAME", "clientName", "client", "customerName", "customer"
+    ]) || "").trim().replace(/\\s+/g, " ").toLowerCase();
+
+    if (customerId) {
+        const byId = customerRecords.find(customer =>
+            String(getObjectValue(customer, ["CUSTOMER_ID", "customerId", "customer_id"]) || "")
+                .trim().toLowerCase() === customerId
+        );
+        if (byId) return byId;
+    }
+
+    return customerRecords.find(customer =>
+        String(getObjectValue(customer, ["CLIENT_NAME", "clientName", "client", "customerName"]) || "")
+            .trim().replace(/\\s+/g, " ").toLowerCase() === clientName
+    ) || null;
+}
+
 async function loadPaymentRecordsFromDatabase() {
     try {
         paymentRecords = await invoiceGetRecords("getPayments", ["payments", "records", "data"]);
@@ -2567,16 +2601,13 @@ async function populateFromSalesOrder(
         );
 
 
+    // Billing Address and TIN must come from the Customer master.
+    // Use the SO snapshot only as a fallback for legacy customers not found in the master.
+    const customerRecord = findInvoiceCustomer(salesOrder);
     const billingAddress =
-        getObjectValue(
-            salesOrder,
-            [
-                "BILLING_ADDRESS",
-                "billingAddress",
-                "billTo",
-                "billing"
-            ]
-        );
+        getObjectValue(customerRecord, ["BILLING_ADDRESS", "billingAddress", "billTo", "billing"]) ||
+        getObjectValue(salesOrder, ["BILLING_ADDRESS", "billingAddress", "billTo", "billing"]) ||
+        "";
 
 
     const project =
@@ -2604,15 +2635,9 @@ async function populateFromSalesOrder(
 
 
     const tinNo =
-        getObjectValue(
-            salesOrder,
-            [
-                "TIN",
-                "tinNo",
-                "tin",
-                "tinNumber"
-            ]
-        );
+        getObjectValue(customerRecord, ["TIN", "tinNo", "tin", "tinNumber"]) ||
+        getObjectValue(salesOrder, ["TIN", "tinNo", "tin", "tinNumber"]) ||
+        "";
 
 
     // Terms are inherited from the selected Sales Order.
