@@ -378,6 +378,50 @@ function createInvoice(payload) {
       _finValidateInvoicePaymentRequirement_(so);
     }
 
+    // Resolve every selected DP/FP source against the authoritative Payments sheet.
+    // These references remain permanent even if their printable Pick Item rows are removed.
+    const additionalPaymentSources = [];
+    const paymentSourceSeen = new Set();
+    (Array.isArray(payload.sourceReferences) ? payload.sourceReferences : []).forEach(function(source) {
+      const type = String(source.SOURCE_TYPE || source.sourceType || source.type || "").trim().toUpperCase();
+      if (type !== "DP" && type !== "FP") return;
+      const sourceId = String(source.SOURCE_ID || source.sourceId || source.id || "").trim();
+      const sourceNo = String(source.SOURCE_NUMBER || source.sourceNumber || source.number || "").trim();
+      if (!sourceId && !sourceNo) throw new Error("A selected payment source is missing its Payment ID or Payment Number.");
+      const key = type + "|" + (sourceId || sourceNo).toLowerCase();
+      if (paymentSourceSeen.has(key)) return;
+      paymentSourceSeen.add(key);
+      const match = getAllRecords(CONFIG.SHEETS.PAYMENTS).find(function(payment) {
+        return (sourceId && String(payment.PAYMENT_ID || "").trim() === sourceId) ||
+          (sourceNo && String(payment.PAYMENT_NO || "").trim() === sourceNo);
+      });
+      if (!match) throw new Error(type + " payment record could not be found: " + (sourceNo || sourceId));
+      if (String(match.SO_NUMBER || "").trim() !== soNumber) {
+        throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " does not belong to Sales Order " + soNumber + ".");
+      }
+      const status = String(match.PAYMENT_STATUS || "").trim().toUpperCase();
+      if (!["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(status)) {
+        throw new Error("Only confirmed/received Payment records can be linked to an invoice: " + (match.PAYMENT_NO || sourceNo));
+      }
+      const actualType = String(match.PAYMENT_TYPE || "").trim().toUpperCase();
+      const validType = type === "DP"
+        ? ["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(actualType)
+        : ["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(actualType);
+      if (!validType) {
+        throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " is not classified as " + (type === "DP" ? "Down Payment" : "Full Payment") + ".");
+      }
+      const amount = Number(match.SO_APPLIED_AMOUNT !== "" && match.SO_APPLIED_AMOUNT !== undefined && match.SO_APPLIED_AMOUNT !== null
+        ? match.SO_APPLIED_AMOUNT : match.CURRENT_PAYMENT) || 0;
+      if (amount <= 0) throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " has no amount applied to this Sales Order.");
+      _finAssertSourceNotAlreadyInvoiced_(type, match.PAYMENT_ID || match.PAYMENT_NO, match.PAYMENT_NO);
+      additionalPaymentSources.push({
+        type: type,
+        id: String(match.PAYMENT_ID || match.PAYMENT_NO),
+        number: String(match.PAYMENT_NO || sourceNo),
+        payment: match
+      });
+    });
+
     const invoiceSheet = getSheet(CONFIG.SHEETS.INVOICES);
     const itemSheet = getSheet(CONFIG.SHEETS.INVOICE_ITEMS);
     const now = new Date();
@@ -462,49 +506,6 @@ function createInvoice(payload) {
         type: "DR",
         id: String(record.DR_ID || record.DR_NUMBER || ""),
         number: String(record.DR_NUMBER || "")
-      });
-    });
-    // Resolve every selected DP/FP source against the authoritative Payments sheet.
-    // These references remain permanent even if their printable Pick Item rows are removed.
-    const additionalPaymentSources = [];
-    const paymentSourceSeen = new Set();
-    (Array.isArray(payload.sourceReferences) ? payload.sourceReferences : []).forEach(function(source) {
-      const type = String(source.SOURCE_TYPE || source.sourceType || source.type || "").trim().toUpperCase();
-      if (type !== "DP" && type !== "FP") return;
-      const sourceId = String(source.SOURCE_ID || source.sourceId || source.id || "").trim();
-      const sourceNo = String(source.SOURCE_NUMBER || source.sourceNumber || source.number || "").trim();
-      if (!sourceId && !sourceNo) throw new Error("A selected payment source is missing its Payment ID or Payment Number.");
-      const key = type + "|" + (sourceId || sourceNo).toLowerCase();
-      if (paymentSourceSeen.has(key)) return;
-      paymentSourceSeen.add(key);
-      const match = getAllRecords(CONFIG.SHEETS.PAYMENTS).find(function(payment) {
-        return (sourceId && String(payment.PAYMENT_ID || "").trim() === sourceId) ||
-          (sourceNo && String(payment.PAYMENT_NO || "").trim() === sourceNo);
-      });
-      if (!match) throw new Error(type + " payment record could not be found: " + (sourceNo || sourceId));
-      if (String(match.SO_NUMBER || "").trim() !== soNumber) {
-        throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " does not belong to Sales Order " + soNumber + ".");
-      }
-      const status = String(match.PAYMENT_STATUS || "").trim().toUpperCase();
-      if (!["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(status)) {
-        throw new Error("Only confirmed/received Payment records can be linked to an invoice: " + (match.PAYMENT_NO || sourceNo));
-      }
-      const actualType = String(match.PAYMENT_TYPE || "").trim().toUpperCase();
-      const validType = type === "DP"
-        ? ["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(actualType)
-        : ["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(actualType);
-      if (!validType) {
-        throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " is not classified as " + (type === "DP" ? "Down Payment" : "Full Payment") + ".");
-      }
-      const amount = Number(match.SO_APPLIED_AMOUNT !== "" && match.SO_APPLIED_AMOUNT !== undefined && match.SO_APPLIED_AMOUNT !== null
-        ? match.SO_APPLIED_AMOUNT : match.CURRENT_PAYMENT) || 0;
-      if (amount <= 0) throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " has no amount applied to this Sales Order.");
-      _finAssertSourceNotAlreadyInvoiced_(type, match.PAYMENT_ID || match.PAYMENT_NO, match.PAYMENT_NO);
-      additionalPaymentSources.push({
-        type: type,
-        id: String(match.PAYMENT_ID || match.PAYMENT_NO),
-        number: String(match.PAYMENT_NO || sourceNo),
-        payment: match
       });
     });
     if (dpPayment) invoiceSources.push({
