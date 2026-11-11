@@ -626,3 +626,112 @@ function _finValidateInvoicePaymentRequirement_(so) {
     throw new Error("Invoice blocked: required DP has not been recorded. Paid: " + paid.toFixed(2) + "; required DP: " + dp.toFixed(2) + ".");
   }
 }
+
+
+/* =========================================================
+   PENDING INVOICE QUEUE
+   Returns eligible, not-yet-invoiced Full Payment, Down Payment
+   and Delivery Receipt transactions from the shared Sheets DB.
+========================================================= */
+function getPendingInvoiceQueue(payload) {
+  payload = payload || {};
+  const validPaymentStatuses = ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"];
+  const activeInvoices = getAllRecords(CONFIG.SHEETS.INVOICES).filter(invoice =>
+    !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(
+      String(invoice.STATUS || "").trim().toUpperCase()
+    )
+  );
+  const salesOrders = getAllRecords(CONFIG.SHEETS.SALES_ORDERS).filter(so =>
+    String(so.SO_NUMBER || "").trim() &&
+    !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(String(so.STATUS || "").trim().toUpperCase())
+  );
+  const payments = getAllRecords(CONFIG.SHEETS.PAYMENTS).filter(payment =>
+    validPaymentStatuses.includes(String(payment.PAYMENT_STATUS || "").trim().toUpperCase())
+  );
+  const deliveryReceipts = getAllRecords(CONFIG.SHEETS.DELIVERY_RECEIPTS).filter(dr =>
+    String(dr.DR_NUMBER || "").trim() &&
+    !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(String(dr.STATUS || "").trim().toUpperCase())
+  );
+
+  const invoicedDPIds = new Set();
+  const invoicedDPNumbers = new Set();
+  const invoicedDRNumbers = new Set();
+  const invoicedFullPaymentSOs = new Set();
+
+  activeInvoices.forEach(invoice => {
+    const type = String(invoice.INVOICE_TYPE || "").trim().toUpperCase();
+    const soNo = String(invoice.SO_NUMBER || "").trim();
+    if (type === "FULL_PAYMENT" && soNo) invoicedFullPaymentSOs.add(soNo);
+
+    if (type === "DOWN_PAYMENT") {
+      const paymentId = String(invoice.DP_PAYMENT_ID || "").trim().toLowerCase();
+      const paymentNo = String(invoice.DP_PAYMENT_NO || "").trim().toLowerCase();
+      if (paymentId) invoicedDPIds.add(paymentId);
+      if (paymentNo) invoicedDPNumbers.add(paymentNo);
+    }
+
+    if (type === "DELIVERY_RECEIPT" || (!type && invoice.DR_NUMBER)) {
+      String(invoice.DR_NUMBER || "").split(",").map(v => v.trim().toLowerCase()).filter(Boolean)
+        .forEach(number => invoicedDRNumbers.add(number));
+    }
+  });
+
+  const fullPayments = [];
+  salesOrders.forEach(so => {
+    const soNo = String(so.SO_NUMBER || "").trim();
+    const total = _finSoTotal_(so);
+    if (!soNo || total <= 0 || invoicedFullPaymentSOs.has(soNo)) return;
+    const paid = _finPaidForSO_(soNo);
+    if (paid + 0.005 < total) return;
+    fullPayments.push({
+      referenceNo: soNo, soNumber: soNo,
+      clientName: String(so.CLIENT_NAME || ""), project: String(so.PROJECT || ""),
+      date: so.DATE_CREATION || so.SO_DATE || so.DATE || "",
+      amount: total, paidAmount: paid, invoiceType: "FULL_PAYMENT"
+    });
+  });
+
+  const soByNumber = new Map(salesOrders.map(so => [String(so.SO_NUMBER || "").trim(), so]));
+  const downPayments = [];
+  payments.forEach(payment => {
+    const soNo = String(payment.SO_NUMBER || "").trim();
+    const so = soByNumber.get(soNo);
+    const paymentNo = String(payment.PAYMENT_NO || "").trim();
+    const paymentId = String(payment.PAYMENT_ID || "").trim();
+    const amount = _finMoney_(payment.SO_APPLIED_AMOUNT !== "" && payment.SO_APPLIED_AMOUNT !== undefined && payment.SO_APPLIED_AMOUNT !== null
+      ? payment.SO_APPLIED_AMOUNT : payment.CURRENT_PAYMENT);
+    if (!so || !paymentNo || amount <= 0) return;
+    if (invoicedDPIds.has(paymentId.toLowerCase()) || invoicedDPNumbers.has(paymentNo.toLowerCase())) return;
+    downPayments.push({
+      referenceNo: paymentNo, paymentNo: paymentNo, soNumber: soNo,
+      clientName: String(payment.CLIENT_NAME || so.CLIENT_NAME || ""),
+      project: String(payment.PROJECT || so.PROJECT || ""),
+      date: payment.PAYMENT_DATE || payment.DATE || payment.CREATED_AT || "",
+      amount: amount, invoiceType: "DOWN_PAYMENT"
+    });
+  });
+
+  const deliveryReceiptQueue = deliveryReceipts.filter(dr =>
+    !invoicedDRNumbers.has(String(dr.DR_NUMBER || "").trim().toLowerCase())
+  ).map(dr => ({
+    referenceNo: String(dr.DR_NUMBER || ""), drNumber: String(dr.DR_NUMBER || ""),
+    soNumber: String(dr.SO_NUMBER || ""),
+    clientName: String(dr.CLIENT_NAME || dr.CLIENT || ""),
+    project: String(dr.PROJECT || ""),
+    date: dr.DATE_OF_TRANSFER || dr.DR_DATE || dr.CREATED_AT || "",
+    amount: _finMoney_(dr.DR_TOTAL || dr.TOTAL_AMOUNT || 0),
+    invoiceType: "DELIVERY_RECEIPT"
+  }));
+
+  return {
+    success: true,
+    fullPayments: fullPayments,
+    downPayments: downPayments,
+    deliveryReceipts: deliveryReceiptQueue,
+    counts: {
+      fullPayment: fullPayments.length,
+      downPayment: downPayments.length,
+      deliveryReceipt: deliveryReceiptQueue.length
+    }
+  };
+}
