@@ -140,10 +140,7 @@ async function fetchPendingInvoiceQueueFromDatabase() {
             throw new Error(result?.message || result?.error || "Could not load pending invoice queue.");
         }
         // Accept the unified response and legacy response shape during deployment rollout.
-        const legacyPayments = [
-            ...(Array.isArray(result.downPayments) ? result.downPayments : []),
-            ...(Array.isArray(result.fullPayments) ? result.fullPayments : [])
-        ];
+        const legacyPayments = Array.isArray(result.downPayments) ? result.downPayments : [];
         pendingInvoiceQueue = {
             PAYMENT: Array.isArray(result.payments) ? result.payments : legacyPayments,
             DELIVERY_RECEIPT: Array.isArray(result.deliveryReceipts) ? result.deliveryReceipts : []
