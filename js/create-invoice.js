@@ -52,15 +52,71 @@ const SALES_ORDER_STORAGE_KEY =
 const INVOICE_API_URL =
     "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
 
+/* Read the authenticated account on standalone pages and embedded views. */
+function getInvoiceSessionAccount() {
+    function readAccount(storage) {
+        try {
+            const raw = storage && storage.getItem("logitechUser");
+            if (!raw) return null;
+            const value = JSON.parse(raw);
+            return value && typeof value === "object" ? value : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    let saved = readAccount(window.localStorage);
+    if (!saved) {
+        try {
+            if (window.parent && window.parent !== window) {
+                saved = readAccount(window.parent.localStorage);
+            }
+        } catch (error) {
+            // Cross-origin parent access is intentionally ignored.
+        }
+    }
+    return saved || {};
+}
+
+function getInvoiceSessionToken() {
+    const saved = getInvoiceSessionAccount();
+    const account = saved.account || saved.user || saved.profile || saved;
+    const auth = saved.auth || account.auth || {};
+    const session = saved.session || account.session || {};
+    const values = [
+        saved.sessionToken, saved.session_token, saved.token,
+        account.sessionToken, account.session_token, account.token,
+        auth.sessionToken, auth.session_token, auth.token,
+        session.sessionToken, session.session_token, session.token
+    ];
+    const token = values.find(value =>
+        typeof value === "string" && value.trim()
+    );
+    return String(token || "").trim();
+}
+
 async function invoiceAPI(action, data = {}) {
+    const sessionToken = getInvoiceSessionToken();
+    if (!sessionToken) {
+        throw new Error("AUTH_REQUIRED: Session token not found. Please log out and log in again.");
+    }
+
+    const payload = Object.assign(
+        {},
+        data && typeof data === "object" ? data : {},
+        { sessionToken: sessionToken }
+    );
+
     const response = await fetch(INVOICE_API_URL, {
         method: "POST",
+        cache: "no-store",
+        redirect: "follow",
         headers: {
             "Content-Type": "text/plain;charset=utf-8"
         },
         body: JSON.stringify({
             action: action,
-            data: data
+            data: payload
         })
     });
 
@@ -74,21 +130,16 @@ async function invoiceAPI(action, data = {}) {
         throw new Error("Invalid server response. Please try again.");
     }
 
-    if (!response.ok) {
-        throw new Error("Invoice API request failed (HTTP " + response.status + ").");
-    }
-
-    if (!result || result.success === false) {
+    if (!response.ok || !result || result.success === false) {
         throw new Error(
             result && (result.message || result.error)
                 ? (result.message || result.error)
-                : "Unable to save invoice to the database."
+                : "Invoice API request failed (HTTP " + response.status + ")."
         );
     }
 
     return result;
 }
-
 
 /* =====================================================
    CONSTANTS
@@ -1772,14 +1823,7 @@ function printInvoice() {
 ====================================================== */
 
 async function invoiceGetRecords(action, keys, params = {}) {
-    const query = new URLSearchParams({ action, ...params, _: String(Date.now()) });
-    const url = INVOICE_API_URL + "?" + query.toString();
-    const response = await fetch(url, { method: "GET", cache: "no-store", redirect: "follow" });
-    if (!response.ok) throw new Error(action + " failed. HTTP " + response.status);
-    const result = await response.json();
-    if (!result || result.success === false) {
-        throw new Error(result && (result.message || result.error) || action + " failed.");
-    }
+    const result = await invoiceAPI(action, params || {});
     for (const key of keys) {
         if (Array.isArray(result[key])) return result[key];
     }
