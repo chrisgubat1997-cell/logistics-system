@@ -704,42 +704,44 @@ function getPendingInvoiceQueue(payload) {
     !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(String(dr.STATUS || "").trim().toUpperCase())
   );
 
-  // A payment is invoiced only when its own transaction is linked to an active invoice.
-  // Keep the legacy DP fields supported so existing invoices continue to prevent duplicates.
+  // Preserve the original invoice-to-DR and DP-payment matching rules.
   const invoicedPaymentIds = new Set();
   const invoicedPaymentNumbers = new Set();
   const invoicedDRNumbers = new Set();
-  const activeInvoiceNumbers = new Set(activeInvoices.map(invoice =>
-    String(invoice.INVOICE_NO || "").trim().toLowerCase()
-  ).filter(Boolean));
 
   activeInvoices.forEach(invoice => {
-    const paymentId = String(invoice.DP_PAYMENT_ID || "").trim().toLowerCase();
-    const paymentNo = String(invoice.DP_PAYMENT_NO || "").trim().toLowerCase();
-    if (paymentId) invoicedPaymentIds.add(paymentId);
-    if (paymentNo) invoicedPaymentNumbers.add(paymentNo);
+    const type = String(invoice.INVOICE_TYPE || "").trim().toUpperCase();
 
-    if (invoice.DR_NUMBER) {
-      String(invoice.DR_NUMBER).split(",").map(v => v.trim().toLowerCase()).filter(Boolean)
+    if (type === "DOWN_PAYMENT") {
+      const paymentId = String(invoice.DP_PAYMENT_ID || "").trim().toLowerCase();
+      const paymentNo = String(invoice.DP_PAYMENT_NO || "").trim().toLowerCase();
+      if (paymentId) invoicedPaymentIds.add(paymentId);
+      if (paymentNo) invoicedPaymentNumbers.add(paymentNo);
+    }
+
+    if (type === "DELIVERY_RECEIPT" || (!type && invoice.DR_NUMBER)) {
+      String(invoice.DR_NUMBER || "").split(",").map(v => v.trim().toLowerCase()).filter(Boolean)
         .forEach(number => invoicedDRNumbers.add(number));
     }
   });
 
   const soByNumber = new Map(salesOrders.map(so => [String(so.SO_NUMBER || "").trim(), so]));
   const paymentQueue = [];
+
   payments.forEach(payment => {
     const soNo = String(payment.SO_NUMBER || "").trim();
     const so = soByNumber.get(soNo);
     const paymentNo = String(payment.PAYMENT_NO || "").trim();
     const paymentId = String(payment.PAYMENT_ID || "").trim();
-    const amount = _finMoney_(payment.SO_APPLIED_AMOUNT !== "" && payment.SO_APPLIED_AMOUNT !== undefined && payment.SO_APPLIED_AMOUNT !== null
-      ? payment.SO_APPLIED_AMOUNT : payment.CURRENT_PAYMENT);
-    const linkedInvoiceNo = String(payment.INVOICE_NO || "").trim().toLowerCase();
+    const amount = _finMoney_(
+      payment.SO_APPLIED_AMOUNT !== "" && payment.SO_APPLIED_AMOUNT !== undefined && payment.SO_APPLIED_AMOUNT !== null
+        ? payment.SO_APPLIED_AMOUNT
+        : payment.CURRENT_PAYMENT
+    );
 
     if (!so || !paymentNo || amount <= 0) return;
     if (invoicedPaymentIds.has(paymentId.toLowerCase()) ||
-        invoicedPaymentNumbers.has(paymentNo.toLowerCase()) ||
-        (linkedInvoiceNo && activeInvoiceNumbers.has(linkedInvoiceNo))) return;
+        invoicedPaymentNumbers.has(paymentNo.toLowerCase())) return;
 
     paymentQueue.push({
       referenceNo: paymentNo,
@@ -750,14 +752,15 @@ function getPendingInvoiceQueue(payload) {
       project: String(payment.PROJECT || so.PROJECT || ""),
       date: payment.PAYMENT_DATE || payment.DATE || payment.CREATED_AT || "",
       amount: amount,
-      invoiceType: "DOWN_PAYMENT"
+      invoiceType: "PAYMENT"
     });
   });
 
   const deliveryReceiptQueue = deliveryReceipts.filter(dr =>
     !invoicedDRNumbers.has(String(dr.DR_NUMBER || "").trim().toLowerCase())
   ).map(dr => ({
-    referenceNo: String(dr.DR_NUMBER || ""), drNumber: String(dr.DR_NUMBER || ""),
+    referenceNo: String(dr.DR_NUMBER || ""),
+    drNumber: String(dr.DR_NUMBER || ""),
     soNumber: String(dr.SO_NUMBER || ""),
     clientName: String(dr.CLIENT_NAME || dr.CLIENT || ""),
     project: String(dr.PROJECT || ""),
