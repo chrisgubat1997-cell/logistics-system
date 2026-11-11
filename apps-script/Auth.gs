@@ -779,6 +779,16 @@ function loginUser(payload) {
       ""
     );
 
+  // Enforce maintenance mode on the server before issuing any session.
+  // ADMIN remains able to sign in and restore the system.
+  if (isSystemMaintenanceEnabled_() && role.trim().toUpperCase() !== "ADMIN") {
+    return {
+      success: false,
+      code: "MAINTENANCE_MODE",
+      message: "System Under Maintenance. Please check back later."
+    };
+  }
+
 
   const status =
     String(
