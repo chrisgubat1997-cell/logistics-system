@@ -2109,3 +2109,73 @@
         max-width: 120px !important;
     }
 }
+
+
+/* SALES ORDER TABLE HEADER TOOLBAR — integrated controls, no extra card */
+.so-table-header {
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 14px;
+}
+.so-table-header .so-table-title {
+    flex: 0 0 auto;
+    min-width: 130px;
+}
+.so-table-header .so-toolbar {
+    width: auto;
+    flex: 1 1 680px;
+    min-width: 0;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+.so-table-header .so-search-wrapper {
+    flex: 1 1 260px;
+    min-width: 190px;
+}
+.so-table-header .so-search-input,
+.so-table-header .so-filter-select {
+    height: 36px;
+    font-size: 10.5px;
+}
+.so-table-header .so-filter-wrapper {
+    width: 132px;
+    flex: 0 0 132px;
+    gap: 3px;
+}
+.so-table-header .so-filter-wrapper label {
+    font-size: 9px;
+}
+.so-table-header .so-refresh-button {
+    min-height: 36px;
+    padding: 0 11px;
+    white-space: nowrap;
+}
+@media (max-width: 760px) {
+    .so-table-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .so-table-header .so-toolbar {
+        width: 100%;
+        flex: 1 1 auto;
+        flex-wrap: wrap;
+    }
+    .so-table-header .so-search-wrapper {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+    .so-table-header .so-filter-wrapper {
+        flex: 1 1 calc(50% - 4px);
+        width: auto;
+        min-width: 0;
+    }
+    .so-table-header .so-refresh-button {
+        flex: 0 0 auto;
+    }
+}
