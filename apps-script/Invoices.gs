@@ -100,6 +100,15 @@ function _finInvoiceSourceSheet_() {
   return sheet;
 }
 
+function _finPaymentClassification_(payment) {
+  const saved = String(payment && payment.PAYMENT_TYPE || "").trim().toUpperCase();
+  if (["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(saved)) return "DP";
+  if (["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(saved)) return "FP";
+  const total = Number(payment && payment.SO_TOTAL) || 0;
+  const paid = Number(payment && payment.TOTAL_PAID) || 0;
+  return total > 0 && paid + 0.005 >= total ? "FP" : "DP";
+}
+
 function _finActiveInvoiceStatus_(status) {
   return !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(String(status || "").trim().toUpperCase());
 }
@@ -403,10 +412,8 @@ function createInvoice(payload) {
       if (!["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(status)) {
         throw new Error("Only confirmed/received Payment records can be linked to an invoice: " + (match.PAYMENT_NO || sourceNo));
       }
-      const actualType = String(match.PAYMENT_TYPE || "").trim().toUpperCase();
-      const validType = type === "DP"
-        ? ["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(actualType)
-        : ["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(actualType);
+      const actualType = _finPaymentClassification_(match);
+      const validType = actualType === type;
       if (!validType) {
         throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " is not classified as " + (type === "DP" ? "Down Payment" : "Full Payment") + ".");
       }
@@ -1086,7 +1093,7 @@ function getPendingInvoiceQueue(payload) {
     if (invoicedPaymentIds.has(paymentId.toLowerCase()) ||
         invoicedPaymentNumbers.has(paymentNo.toLowerCase())) return;
 
-    const paymentType = String(payment.PAYMENT_TYPE || "").trim().toUpperCase();
+    const paymentType = _finPaymentClassification_(payment);
     const paymentRow = {
       referenceNo: paymentNo,
       paymentNo: paymentNo,
