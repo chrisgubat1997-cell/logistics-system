@@ -325,6 +325,8 @@
 
         <div class="user-area">
 
+            <span id="welcomeUser" class="topbar-greeting" aria-live="polite">GOOD MORNING, USER</span>
+
             <span class="company-context" id="companyContext" aria-live="polite">
                 <span class="company-context-dot" aria-hidden="true"></span>
                 <span id="activeCompanyLabel">GREENMETAL</span>
@@ -339,8 +341,6 @@
             >
                 SWITCH TO GREENLIGHT
             </button>
-
-            <span id="welcomeUser">WELCOME, USER</span>
 
             <button
                 class="profile-btn"
@@ -3330,14 +3330,15 @@ function loadUserAccount() {
         );
 
 
-    if (
-        welcomeUser
-    ) {
-
-        welcomeUser.innerText =
-            'WELCOME, ' +
-            fullname;
-
+    if (welcomeUser) {
+        const updateGreeting = function () {
+            const hour = new Date().getHours();
+            const greeting = hour < 12 ? 'GOOD MORNING' : 'GOOD AFTERNOON';
+            welcomeUser.textContent = greeting + ', ' + fullname;
+        };
+        updateGreeting();
+        if (window.__logitechGreetingInterval) clearInterval(window.__logitechGreetingInterval);
+        window.__logitechGreetingInterval = setInterval(updateGreeting, 60000);
     }
 
 
