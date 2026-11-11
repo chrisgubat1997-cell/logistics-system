@@ -235,6 +235,14 @@
                                 <input type="date" id="paymentDate" name="paymentDate">
                             </div>
                             <div class="create-payment-field">
+                                <label for="paymentType">PAYMENT CLASSIFICATION</label>
+                                <select id="paymentType" name="paymentType" required>
+                                    <option value="">Select Payment Type</option>
+                                    <option value="DOWN_PAYMENT">Down Payment</option>
+                                    <option value="FULL_PAYMENT">Full Payment</option>
+                                </select>
+                            </div>
+                            <div class="create-payment-field">
                                 <label for="paymentMethod">PAYMENT METHOD</label>
                                 <select id="paymentMethod" name="paymentMethod">
                                     <option value="">Select Payment Method</option>
