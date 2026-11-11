@@ -1289,3 +1289,9 @@
     .invoicing-container .invoice-date-range-filter { flex:1; }
     .invoicing-container .invoice-release-toolbar { padding:7px 10px; gap:7px; }
 }
+
+
+/* INVOICE TRANSACTION RECORDS */
+.invoicing-container .invoice-transaction-table { min-width: 780px !important; }
+.invoicing-container .invoice-transaction-table td:nth-child(1),
+.invoicing-container .invoice-transaction-table td:nth-child(3) { font-weight: 700; }
