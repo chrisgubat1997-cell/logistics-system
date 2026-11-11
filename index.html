@@ -133,7 +133,7 @@
     <link rel="stylesheet" href="css/gemlight-theme.css?v=20261111-company-colors02">
 
     <link rel="stylesheet" href="css/system-monitor.css?v=20261110-admin-monitor01">
-    <link rel="stylesheet" href="css/so-monitoring.css?v=20261111-customer-36001">
+    <link rel="stylesheet" href="css/so-monitoring.css?v=20261111-customer-36002">
 </head>
 
 
@@ -3191,7 +3191,7 @@ async function loadSOMonitoringModule() {
     if (!container) return;
     if (!soMonitoringModuleLoaded) {
         try {
-            await loadScriptOnce('js/so-monitoring.js?v=20261111-customer-36001', 'data-so-monitoring-js');
+            await loadScriptOnce('js/so-monitoring.js?v=20261111-customer-36002', 'data-so-monitoring-js');
             soMonitoringModuleLoaded = true;
         } catch (error) {
             container.innerHTML = '<div style="padding:16px;color:#b42318">Unable to load SO Monitoring: ' + String(error.message || error) + '</div>';
