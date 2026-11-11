@@ -140,15 +140,16 @@ async function fetchPendingInvoiceQueueFromDatabase() {
             throw new Error(result?.message || result?.error || "Could not load pending invoice queue.");
         }
         // Accept the unified response and legacy response shape during deployment rollout.
-        const legacyPayments = Array.isArray(result.downPayments) ? result.downPayments : [];
+        const legacyPayments = Array.isArray(result.payments) ? result.payments : [];
         pendingInvoiceQueue = {
-            PAYMENT: Array.isArray(result.payments) ? result.payments : legacyPayments,
+            DOWN_PAYMENT: Array.isArray(result.downPayments) ? result.downPayments : legacyPayments.filter(row => ["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(String(row.paymentType || "").toUpperCase())),
+            FULL_PAYMENT: Array.isArray(result.fullPayments) ? result.fullPayments : legacyPayments.filter(row => ["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(String(row.paymentType || "").toUpperCase())),
             DELIVERY_RECEIPT: Array.isArray(result.deliveryReceipts) ? result.deliveryReceipts : []
         };
         return true;
     } catch (error) {
         console.error("LOGIS-TECH: Failed to load pending invoice queue.", error);
-        pendingInvoiceQueue = { PAYMENT: [], DELIVERY_RECEIPT: [] };
+        pendingInvoiceQueue = { DOWN_PAYMENT: [], FULL_PAYMENT: [], DELIVERY_RECEIPT: [] };
         return false;
     }
 }
@@ -160,8 +161,8 @@ async function fetchPendingInvoiceQueueFromDatabase() {
 let invoicingInitialized = false;
 
 let invoiceRecords = [];
-let pendingInvoiceQueue = { PAYMENT: [], DELIVERY_RECEIPT: [] };
-let activePendingInvoiceType = "PAYMENT";
+let pendingInvoiceQueue = { DOWN_PAYMENT: [], FULL_PAYMENT: [], DELIVERY_RECEIPT: [] };
+let activePendingInvoiceType = "DOWN_PAYMENT";
 let pendingInvoiceSearchTimer = null;
 
 let invoiceSearchTimer = null;
@@ -1580,9 +1581,11 @@ function renderPendingInvoiceQueue() {
     const body = document.getElementById("pendingInvoiceTableBody");
     if (!body) return;
 
-    const paymentCount = document.getElementById("pendingPaymentCount");
+    const dpCount = document.getElementById("pendingDownPaymentCount");
+    const fpCount = document.getElementById("pendingFullPaymentCount");
     const drCount = document.getElementById("pendingDeliveryReceiptCount");
-    if (paymentCount) paymentCount.textContent = (pendingInvoiceQueue.PAYMENT || []).length;
+    if (dpCount) dpCount.textContent = (pendingInvoiceQueue.DOWN_PAYMENT || []).length;
+    if (fpCount) fpCount.textContent = (pendingInvoiceQueue.FULL_PAYMENT || []).length;
     if (drCount) drCount.textContent = (pendingInvoiceQueue.DELIVERY_RECEIPT || []).length;
 
     const query = String(document.getElementById("pendingInvoiceSearchInput")?.value || "").trim().toLowerCase();
@@ -1595,7 +1598,7 @@ function renderPendingInvoiceQueue() {
 
     if (!records.length) {
         body.innerHTML = '<tr class="empty-row"><td colspan="6">No pending ' +
-            (activePendingInvoiceType === "PAYMENT" ? "payment" : "delivery receipt") +
+            (activePendingInvoiceType === "DOWN_PAYMENT" ? "down payment" : activePendingInvoiceType === "FULL_PAYMENT" ? "full payment" : "delivery receipt") +
             ' records found.</td></tr>';
         return;
     }
