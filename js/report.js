@@ -55,12 +55,14 @@ function initializeReport() {
 
     populateClientFilter();
 
+    populateProjectFilter();
+
     populateStatusFilter();
 
     bindReportEvents();
 
     loadAllReportData().then(function() {
-        populateClientFilter(false); populateStatusFilter(false); applyReportFilters(); showReport("executive"); setGeneratedDate();
+        populateClientFilter(false); populateProjectFilter(false); populateStatusFilter(false); applyReportFilters(); showReport("executive"); setGeneratedDate();
     }).catch(function(error) { console.error("Reports initialization failed:",error); applyReportFilters(); showReport("executive"); });
 
 }
@@ -419,6 +421,23 @@ function bindReportEvents() {
     }
 
 
+    const quickPeriod = document.getElementById("reportQuickPeriod");
+    if (quickPeriod) quickPeriod.addEventListener("change", function () {
+        const value = quickPeriod.value;
+        if (!value) return;
+        const now = new Date();
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        if (value === "30" || value === "90") start.setDate(start.getDate() - (Number(value) - 1));
+        else if (value === "month") start.setDate(1);
+        else if (value === "quarter") start.setMonth(Math.floor(now.getMonth() / 3) * 3, 1);
+        else if (value === "ytd" || value === "year") start.setMonth(0, 1);
+        const from = document.getElementById("reportDateFrom");
+        const to = document.getElementById("reportDateTo");
+        if (from) from.value = formatDateForInput(start);
+        if (to) to.value = formatDateForInput(now);
+        applyReportFilters();
+    });
+
     const chartPeriod =
         document.getElementById(
             "summaryChartPeriod"
@@ -631,6 +650,7 @@ function applyReportFilters() {
                     from,
                     to,
                     client,
+                    project: document.getElementById("reportProjectFilter")?.value || "",
                     status,
                     search,
                     dateFields: [
@@ -661,6 +681,7 @@ function applyReportFilters() {
                     from,
                     to,
                     client,
+                    project: document.getElementById("reportProjectFilter")?.value || "",
                     status,
                     search,
                     dateFields: [
@@ -689,6 +710,7 @@ function applyReportFilters() {
                     from,
                     to,
                     client,
+                    project: document.getElementById("reportProjectFilter")?.value || "",
                     status,
                     search,
                     dateFields: [
@@ -717,6 +739,7 @@ function applyReportFilters() {
                     from,
                     to,
                     client,
+                    project: document.getElementById("reportProjectFilter")?.value || "",
                     status,
                     search,
                     dateFields: [
@@ -746,6 +769,7 @@ function applyReportFilters() {
                     from,
                     to,
                     client,
+                    project: document.getElementById("reportProjectFilter")?.value || "",
                     status,
                     search,
                     dateFields: [
@@ -880,6 +904,12 @@ function filterRecords(records, options) {
 
         }
 
+
+        /* PROJECT */
+        if (options.project) {
+            const recordProject = getFirstValue(record, ["project","projectName","PROJECT","PROJECT_NAME"]);
+            if (String(recordProject || "").trim().toLowerCase() !== String(options.project).trim().toLowerCase()) return false;
+        }
 
         /* STATUS */
 
@@ -1063,6 +1093,26 @@ function populateClientFilter(
    STATUS FILTER
 ========================================================= */
 
+function populateProjectFilter(preserveValue = true) {
+    const select = document.getElementById("reportProjectFilter");
+    if (!select) return;
+    const currentValue = preserveValue ? select.value : "";
+    const projects = new Set();
+    [...reportData.salesOrders, ...reportData.deliveries, ...reportData.deliveryReceipts, ...reportData.invoices].forEach(record => {
+        const value = getFirstValue(record, ["project","projectName","PROJECT","PROJECT_NAME"]);
+        if (value) projects.add(String(value).trim());
+    });
+    const sorted = [...projects].sort((a,b) => a.localeCompare(b));
+    select.innerHTML = '<option value="">All Projects</option>';
+    sorted.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+    });
+    if (currentValue && sorted.includes(currentValue)) select.value = currentValue;
+}
+
 function populateStatusFilter(
     preserveValue = true
 ) {
@@ -1179,6 +1229,8 @@ function clearReportFilters() {
         document.getElementById(
             "reportSearch"
         );
+    const project = document.getElementById("reportProjectFilter");
+    const quickPeriod = document.getElementById("reportQuickPeriod");
 
 
     if (from) {
@@ -1200,6 +1252,8 @@ function clearReportFilters() {
     if (search) {
         search.value = "";
     }
+    if (project) project.value = "";
+    if (quickPeriod) quickPeriod.value = "";
 
 
     filteredReportData =
@@ -4226,7 +4280,7 @@ function renderExecutiveCharts(){
             const w=720,h=260,l=62,r=18,t=18,b=46,max=Math.max(1,...rows.flatMap(x=>[x.sales,x.collections]));
             const X=i=>l+(rows.length===1?(w-l-r)/2:i*(w-l-r)/(rows.length-1)),Y=v=>h-b-(v/max)*(h-t-b);
             const grid=[0,.25,.5,.75,1].map(p=>{const y=h-b-p*(h-t-b);return '<line x1="'+l+'" y1="'+y+'" x2="'+(w-r)+'" y2="'+y+'" stroke="#e7edf5"/><text x="'+(l-8)+'" y="'+(y+4)+'" text-anchor="end" fill="#78859a" font-size="10">'+reportEscChart(reportCompactMoney(max*p))+'</text>';}).join("");
-            const path=k=>rows.map((m,i)=>(i?"L":"M")+X(i).toFixed(1)+" "+Y(m[k]).toFixed(1)).join(" ");
+            const path=k=>{const pts=rows.map((m,i)=>[X(i),Y(m[k])]);if(pts.length<3)return pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");let d="M"+pts[0][0].toFixed(1)+" "+pts[0][1].toFixed(1);for(let i=0;i<pts.length-1;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)],c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6,c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;d+=" C"+c1x.toFixed(1)+" "+c1y.toFixed(1)+" "+c2x.toFixed(1)+" "+c2y.toFixed(1)+" "+p2[0].toFixed(1)+" "+p2[1].toFixed(1);}return d;};
             const dots=k=>rows.map((m,i)=>'<circle cx="'+X(i)+'" cy="'+Y(m[k])+'" r="3.5" fill="'+(k==="sales"?"#2457d6":"#12a594")+'"><title>'+reportEscChart(m.label+": "+formatCurrency(m[k]))+'</title></circle>').join("");
             const labels=rows.map((m,i)=>'<text x="'+X(i)+'" y="'+(h-17)+'" text-anchor="middle" fill="#68758a" font-size="10">'+reportEscChart(m.label)+'</text>').join("");
             host.innerHTML='<svg class="report-svg-chart" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Monthly sales and collection">'+grid+'<path d="'+path("sales")+'" fill="none" stroke="#2457d6" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/><path d="'+path("collections")+'" fill="none" stroke="#12a594" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>'+dots("sales")+dots("collections")+labels+'</svg><div class="report-chart-legend"><span><i class="sales-dot"></i>SO Amount</span><span><i class="collection-dot"></i>Collected</span></div>';
@@ -4262,6 +4316,24 @@ function reportMonthlyBars(rows,dateFields,valueFields,countOnly){
     const sums={};(rows||[]).forEach(r=>{const m=reportMonthKey(getFirstValue(r,dateFields));if(!m)return;sums[m]=(sums[m]||0)+(countOnly?1:getNumber(r,valueFields));});
     return Object.keys(sums).sort().slice(-8).map(m=>({label:formatMonth(m),value:sums[m]}));
 }
+function renderReportTrendLine(id, items, format, color) {
+    const host = document.getElementById(id);
+    if (!host) return;
+    const rows = (items || []).filter(x => x && Number.isFinite(Number(x.value))).slice(-12);
+    if (!rows.length) { host.innerHTML = '<div class="report-chart-empty">No trend data available for this period.</div>'; return; }
+    const w=680,h=230,left=58,right=18,top=18,bottom=42,max=Math.max(1,...rows.map(x=>Number(x.value)||0));
+    const X=i=>left+(rows.length===1?(w-left-right)/2:i*(w-left-right)/(rows.length-1));
+    const Y=v=>h-bottom-(Number(v)||0)/max*(h-top-bottom);
+    const pts=rows.map((r,i)=>[X(i),Y(r.value)]);
+    let path="M"+pts[0][0].toFixed(1)+" "+pts[0][1].toFixed(1);
+    for(let i=0;i<pts.length-1;i++){const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)],c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6,c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;path+=" C"+c1x.toFixed(1)+" "+c1y.toFixed(1)+" "+c2x.toFixed(1)+" "+c2y.toFixed(1)+" "+p2[0].toFixed(1)+" "+p2[1].toFixed(1);}
+    const area=path+" L"+pts[pts.length-1][0].toFixed(1)+" "+(h-bottom)+" L"+pts[0][0].toFixed(1)+" "+(h-bottom)+" Z";
+    const grid=[0,.25,.5,.75,1].map(p=>{const yy=Y(max*p);return '<line x1="'+left+'" y1="'+yy+'" x2="'+(w-right)+'" y2="'+yy+'" stroke="#e9eef5" stroke-dasharray="4 5"/><text x="'+(left-9)+'" y="'+(yy+4)+'" text-anchor="end" fill="#8290a5" font-size="10">'+reportEscChart(format?format(max*p):formatNumber(max*p))+'</text>';}).join("");
+    const dots=rows.map((r,i)=>'<circle class="report-trend-point" cx="'+X(i)+'" cy="'+Y(r.value)+'" r="4" fill="'+(color||"#2457d6")+'"><title>'+reportEscChart(r.label+": "+(format?format(r.value):formatNumber(r.value)))+'</title></circle>').join("");
+    const labels=rows.map((r,i)=>'<text x="'+X(i)+'" y="'+(h-14)+'" text-anchor="middle" fill="#738198" font-size="10">'+reportEscChart(r.label)+'</text>').join("");
+    host.innerHTML='<svg class="report-svg-chart report-trend-svg" viewBox="0 0 '+w+' '+h+'" role="img" aria-label="Monthly performance trend">'+grid+'<defs><linearGradient id="reportTrendFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="'+(color||"#2457d6")+'" stop-opacity=".22"/><stop offset="100%" stop-color="'+(color||"#2457d6")+'" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#reportTrendFill)"/><path class="report-trend-line" d="'+path+'" fill="none" stroke="'+(color||"#2457d6")+'" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>'+dots+labels+'</svg>';
+}
+
 function renderAdditionalReportCharts(name){
     if(!name||name==="executive")return;
     const panel=ensureReportCharts(name);if(!panel)return;
@@ -4282,7 +4354,7 @@ function renderAdditionalReportCharts(name){
     }
     setText(name+"GraphTitleA",titleA);setText(name+"GraphTitleB",titleB);
     renderReportBars(name+"StatusGraph",reportStatusBreakdown(rows),formatNumber);
-    renderReportBars(name+"MonthlyGraph",reportMonthlyBars(rows,dateFields,amountFields,countOnly),countOnly?formatNumber:reportCompactMoney);
+    renderReportTrendLine(name+"MonthlyGraph",reportMonthlyBars(rows,dateFields,amountFields,countOnly),countOnly?formatNumber:reportCompactMoney,name==="payment"?"#0d9b83":"#315ed5");
 }
 /* =========================================================
    GLOBAL EXPORTS
