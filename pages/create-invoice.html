@@ -200,6 +200,15 @@
 
             </div>
 
+            <section class="dp-payment-picker" id="dpPaymentPicker" hidden aria-labelledby="dpPaymentHeading">
+                <div class="dp-payment-picker-heading">
+                    <strong id="dpPaymentHeading">Select Down Payment Record</strong>
+                    <span>Choose the saved Payment transaction to invoice. The amount will be taken directly from its record.</span>
+                </div>
+                <div class="dp-payment-options" id="dpPaymentOptions"></div>
+                <div class="dp-payment-selected" id="selectedDPPaymentSummary" hidden></div>
+            </section>
+
 
             <div class="form-group">
 
@@ -1273,7 +1282,7 @@
 
 </div>
 
-<script src="../js/create-invoice.js?v=20261111-dr-discount01"></script>
+<script src="../js/create-invoice.js?v=20261111-dp-payment01"></script>
 
 </body>
 </html>
