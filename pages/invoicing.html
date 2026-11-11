@@ -72,286 +72,32 @@
     ====================================================== -->
 
     <section class="invoice-summary">
-
-
-        <!-- TOTAL INVOICE -->
-
         <div class="summary-card total-invoice-card">
-
-            <div class="summary-card-icon">
-                INV
-            </div>
-
-
+            <div class="summary-card-icon">INV</div>
             <div class="summary-card-content">
-
-                <span class="summary-label">
-                    TOTAL INVOICE
-                </span>
-
-
-                <strong
-                    class="summary-value"
-                    id="totalInvoice"
-                >
-                    0
-                </strong>
-
-
-                <small>
-                    All invoices
-                </small>
-
+                <span class="summary-label">TOTAL INVOICE</span>
+                <strong class="summary-value" id="totalInvoice">0</strong>
+                <small>All invoices</small>
             </div>
-
         </div>
-
-
-
-        <!-- TODAY'S INVOICED -->
-
         <div class="summary-card todays-invoice-card">
-
-            <div class="summary-card-icon">
-                TODAY
-            </div>
-
-
+            <div class="summary-card-icon">TODAY</div>
             <div class="summary-card-content">
-
-                <span class="summary-label">
-                    TODAY'S INVOICED
-                </span>
-
-
-                <strong
-                    class="summary-value"
-                    id="todaysInvoiced"
-                >
-                    0
-                </strong>
-
-
-                <small>
-                    Invoices today
-                </small>
-
+                <span class="summary-label">TODAY'S INVOICED</span>
+                <strong class="summary-value" id="todaysInvoiced">0</strong>
+                <small>Invoices today</small>
             </div>
-
         </div>
-
-
-
-        <!-- ONGOING -->
-
-        <div class="summary-card ongoing-invoice-card">
-
-            <div class="summary-card-icon">
-                ...
-            </div>
-
-
-            <div class="summary-card-content">
-
-                <span class="summary-label">
-                    ONGOING INVOICE
-                </span>
-
-
-                <strong
-                    class="summary-value"
-                    id="ongoingInvoice"
-                >
-                    0
-                </strong>
-
-
-                <small>
-                    Draft / ongoing
-                </small>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- CANCELLED -->
-
         <div class="summary-card cancelled-invoice-card">
-
-            <div class="summary-card-icon">
-                ×
-            </div>
-
-
+            <div class="summary-card-icon">×</div>
             <div class="summary-card-content">
-
-                <span class="summary-label">
-                    CANCELLED INVOICE
-                </span>
-
-
-                <strong
-                    class="summary-value"
-                    id="cancelledInvoice"
-                >
-                    0
-                </strong>
-
-
-                <small>
-                    Cancelled invoices
-                </small>
-
+                <span class="summary-label">CANCELLED INVOICE</span>
+                <strong class="summary-value" id="cancelledInvoice">0</strong>
+                <small>Cancelled invoices</small>
             </div>
-
         </div>
-
-
     </section>
 
-
-
-    <!-- =====================================================
-         RECENT INVOICE
-    ====================================================== -->
-
-    <section class="invoice-section">
-
-
-        <div class="section-header">
-
-
-            <div class="section-title">
-
-                <h2>
-                    RECENT INVOICE
-                </h2>
-
-                <span>
-                    Latest invoice transactions
-                </span>
-
-            </div>
-
-
-            <!-- SECTION SEARCH -->
-
-            <div class="section-actions">
-
-                <button
-                    type="button"
-                    class="section-search-btn"
-                    id="invoiceSearchBtn"
-                >
-                    🔍 SEARCH
-                </button>
-
-            </div>
-
-        </div>
-
-
-
-        <!-- INVOICE SEARCH AREA -->
-
-        <div
-            class="section-search-box"
-            id="invoiceSearchBox"
-            hidden
-        >
-
-            <input
-                type="text"
-                id="invoiceSearchInput"
-                placeholder="Search Invoice No., SO No., Client, Project, DR No., PO No."
-            >
-
-
-            <button
-                type="button"
-                id="invoiceSearchClearBtn"
-            >
-                CLEAR
-            </button>
-
-        </div>
-
-
-
-        <!-- RECENT INVOICE TABLE -->
-
-        <div class="table-wrapper">
-
-            <table class="invoice-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>
-                            INVOICE NO.
-                        </th>
-
-                        <th>
-                            SO NO.
-                        </th>
-
-                        <th>
-                            CLIENT
-                        </th>
-
-                        <th>
-                            PROJECT
-                        </th>
-
-                        <th>
-                            DATE
-                        </th>
-
-                        <th>
-                            AMOUNT
-                        </th>
-
-                        <th>
-                            STATUS
-                        </th>
-
-                        <th>
-                            ACTIONS
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody id="recentInvoiceTableBody">
-
-                    <tr class="empty-row">
-
-                        <td colspan="8">
-
-                            No invoice records found.
-
-                        </td>
-
-                    </tr>
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- =====================================================
-         PENDING FOR INVOICE
-    ====================================================== -->
     <section class="invoice-section pending-invoice-section">
         <div class="section-header">
             <div class="section-title">
@@ -364,7 +110,6 @@
                     aria-label="Search pending invoices">
             </div>
         </div>
-
         <div class="pending-invoice-tabs" role="tablist" aria-label="Pending invoice types">
             <button type="button" class="pending-invoice-tab active" data-pending-invoice-type="FULL_PAYMENT" role="tab" aria-selected="true">
                 FULL PAYMENT <span id="pendingFullPaymentCount">0</span>
@@ -376,7 +121,6 @@
                 DELIVERY RECEIPT <span id="pendingDeliveryReceiptCount">0</span>
             </button>
         </div>
-
         <div class="table-wrapper">
             <table class="sales-order-table pending-invoice-table">
                 <thead>
@@ -395,14 +139,6 @@
             </table>
         </div>
     </section>
-
-</div>
-
-
-
-<!-- =========================================================
-     PREPARE INVOICE MODAL
-========================================================= -->
 
 <div
     class="modal-overlay"
