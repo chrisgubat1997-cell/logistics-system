@@ -1188,3 +1188,42 @@
 .invoicing-container .invoice-table, .invoicing-container .sales-order-table { width: max-content !important; min-width: 900px !important; max-width: none !important; table-layout: auto; }
 .invoicing-container .invoice-items-table { width: max-content !important; min-width: 850px !important; max-width: none !important; table-layout: auto; }
 
+
+
+/* PENDING FOR INVOICE */
+.pending-invoice-section .section-header { flex-wrap: wrap; }
+.pending-invoice-search { width: min(390px, 100%); }
+.pending-invoice-search input {
+    width: 100%; height: 35px; padding: 0 11px;
+    border: 1px solid #d9dfe8; border-radius: 7px;
+    outline: none; background: #fff; color: #263142;
+    font: inherit; font-size: 10.12px;
+}
+.pending-invoice-search input:focus {
+    border-color: #8fb5eb; box-shadow: 0 0 0 3px rgba(31,111,235,.08);
+}
+.pending-invoice-tabs {
+    display: flex; align-items: stretch; gap: 7px;
+    padding: 11px 17px; border-bottom: 1px solid #edf0f4;
+    background: #fff; overflow-x: auto;
+}
+.pending-invoice-tab {
+    min-height: 34px; display: inline-flex; align-items: center; gap: 8px;
+    padding: 0 12px; border: 1px solid #dce2ea; border-radius: 7px;
+    background: #fff; color: #596579; font-size: 8.5px;
+    font-weight: 900; white-space: nowrap; cursor: pointer;
+}
+.pending-invoice-tab span {
+    min-width: 19px; height: 19px; display: inline-flex;
+    align-items: center; justify-content: center; border-radius: 10px;
+    background: #eef2f6; color: #596579; font-size: 8px;
+}
+.pending-invoice-tab.active {
+    border-color: #176b45; background: #edf8f1; color: #176b45;
+}
+.pending-invoice-tab.active span { background: #d6efdf; color: #176b45; }
+.pending-invoice-table { min-width: 850px !important; }
+@media (max-width: 760px) {
+    .pending-invoice-search { width: 100%; }
+    .pending-invoice-tabs { padding: 10px 12px; }
+}
