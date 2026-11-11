@@ -1930,6 +1930,15 @@ function getDPPaymentAmount(payment) {
     return Math.max(0, cash + credit);
 }
 
+function getPaymentSourceType(payment) {
+    const saved = String(getObjectValue(payment, ["PAYMENT_TYPE", "paymentType"]) || "").trim().toUpperCase();
+    if (["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(saved)) return "DP";
+    if (["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(saved)) return "FP";
+    const total = toNumber(getObjectValue(payment, ["SO_TOTAL", "soTotal"]));
+    const paid = toNumber(getObjectValue(payment, ["TOTAL_PAID", "totalPaid"]));
+    return total > 0 && paid + 0.005 >= total ? "FP" : "DP";
+}
+
 function getPreviouslyInvoicedPaymentNumbers(sourceType) {
     const type = String(sourceType || "").trim().toUpperCase();
     const used = new Set();
@@ -1993,8 +2002,8 @@ function renderDPPaymentPicker() {
         const status = String(getObjectValue(payment, ["PAYMENT_STATUS", "paymentStatus", "STATUS", "status"]) || "RECEIVED").trim().toUpperCase();
         const number = getDPPaymentNumber(payment);
         const id = getDPPaymentId(payment).toLowerCase();
-        const paymentType = String(getObjectValue(payment, ["PAYMENT_TYPE", "paymentType"]) || "").trim().toUpperCase();
-        const typeMatches = isDP ? ["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(paymentType) : ["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(paymentType);
+        const paymentType = getPaymentSourceType(payment);
+        const typeMatches = paymentType === sourceType;
         const alreadySelected = selectedRows.some(row => getDPPaymentId(row).toLowerCase() === id);
         return paymentSO === soNo && number && typeMatches &&
             ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(status) &&
