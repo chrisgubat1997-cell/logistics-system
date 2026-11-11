@@ -353,6 +353,16 @@ function createInvoice(payload) {
     // Prevent reusing the same original source on another active invoice.
     drRecords.forEach(function(record) {
       _finAssertSourceNotAlreadyInvoiced_("DR", record.DR_ID || record.DR_NUMBER, record.DR_NUMBER);
+      // Legacy invoices may predate INVOICE_SOURCE_REFERENCES; retain their DR guard too.
+      const legacyDRInvoice = getAllRecords(CONFIG.SHEETS.INVOICES).find(function(invoice) {
+        if (!_finActiveInvoiceStatus_(invoice.STATUS)) return false;
+        return String(invoice.DR_NUMBER || "").split(",").some(function(value) {
+          return String(value || "").trim().toLowerCase() === String(record.DR_NUMBER || "").trim().toLowerCase();
+        });
+      });
+      if (legacyDRInvoice) {
+        throw new Error("Delivery Receipt " + record.DR_NUMBER + " is already linked to Invoice " + String(legacyDRInvoice.INVOICE_NO || "") + ".");
+      }
     });
     if (dpPayment) {
       _finAssertSourceNotAlreadyInvoiced_("DP", dpPayment.PAYMENT_ID || dpPayment.PAYMENT_NO, dpPayment.PAYMENT_NO);
@@ -462,6 +472,16 @@ function createInvoice(payload) {
         type: "DR",
         id: String(record.DR_ID || record.DR_NUMBER || ""),
         number: String(record.DR_NUMBER || "")
+      });
+    });
+    // Optional multi-source payload supports combined DR/DP/FP Pick Item workflows.
+    (Array.isArray(payload.sourceReferences) ? payload.sourceReferences : []).forEach(function(source) {
+      const type = String(source.SOURCE_TYPE || source.sourceType || source.type || "").trim().toUpperCase();
+      if (!["SO", "DR", "DP", "FP"].includes(type)) return;
+      invoiceSources.push({
+        type: type,
+        id: String(source.SOURCE_ID || source.sourceId || source.id || source.SOURCE_NUMBER || source.sourceNumber || source.number || ""),
+        number: String(source.SOURCE_NUMBER || source.sourceNumber || source.number || "")
       });
     });
     if (dpPayment) invoiceSources.push({
