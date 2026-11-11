@@ -1048,6 +1048,50 @@ function bindInvoicedRecordSelection() {
             openInvoiceReleaseModal(selected);
         });
     }
+    const getSelectedInvoiceNumbers = () => [...document.querySelectorAll("[data-invoice-select]:checked")].map(el => el.dataset.invoiceSelect).filter(Boolean);
+    const viewBtn = document.getElementById("viewSelectedInvoiceBtn");
+    if (viewBtn && viewBtn.dataset.bound !== "true") {
+        viewBtn.dataset.bound = "true";
+        viewBtn.addEventListener("click", () => {
+            const selected = getSelectedInvoiceNumbers();
+            if (selected.length !== 1) return;
+            const invoice = findInvoiceByNumber(selected[0]);
+            if (invoice) openInvoicePreview(invoice);
+        });
+    }
+    const editBtn = document.getElementById("editSelectedInvoiceBtn");
+    if (editBtn && editBtn.dataset.bound !== "true") {
+        editBtn.dataset.bound = "true";
+        editBtn.addEventListener("click", () => {
+            const selected = getSelectedInvoiceNumbers();
+            if (selected.length !== 1) return;
+            const invoice = findInvoiceByNumber(selected[0]);
+            if (invoice) openInvoiceEditModal(invoice);
+        });
+    }
+    const cancelBtn = document.getElementById("cancelSelectedInvoicesBtn");
+    if (cancelBtn && cancelBtn.dataset.bound !== "true") {
+        cancelBtn.dataset.bound = "true";
+        cancelBtn.addEventListener("click", async () => {
+            const selected = getSelectedInvoiceNumbers();
+            if (!selected.length) return;
+            if (!window.confirm("Cancel " + selected.length + " selected invoice(s)?\\n\\nThe invoices will remain in the database with CANCELLED status.")) return;
+            cancelBtn.disabled = true;
+            try {
+                for (const invoiceNo of selected) {
+                    const invoice = findInvoiceByNumber(invoiceNo);
+                    if (!invoice || String(invoice.status || "").toUpperCase() === "CANCELLED") continue;
+                    await sendInvoiceAction("cancelInvoice", { invoiceId: invoice.invoiceId, invoiceNo: invoice.invoiceNo });
+                }
+                await refreshInvoicing();
+                window.alert(selected.length + " selected invoice(s) cancelled.");
+            } catch (error) {
+                window.alert("Could not cancel selected invoices: " + error.message);
+            } finally {
+                cancelBtn.disabled = false;
+            }
+        });
+    }
     const search = document.getElementById("invoicedRecordsSearch");
     if (search && search.dataset.bound !== "true") {
         search.dataset.bound = "true";
@@ -1066,7 +1110,17 @@ function updateInvoiceSelectionCount() {
     const btn = document.getElementById("releaseSelectedInvoicesBtn");
     const all = document.getElementById("selectAllInvoicedRecords");
     if (label) label.textContent = selected + " selected";
+    const viewBtn = document.getElementById("viewSelectedInvoiceBtn");
+    const editBtn = document.getElementById("editSelectedInvoiceBtn");
+    const cancelBtn = document.getElementById("cancelSelectedInvoicesBtn");
+    const selectedNumbers = [...document.querySelectorAll("[data-invoice-select]:checked")].map(el => el.dataset.invoiceSelect);
+    const selectedInvoices = selectedNumbers.map(findInvoiceByNumber).filter(Boolean);
+    const canViewOrEdit = selectedInvoices.length === 1;
+    const canCancel = selectedInvoices.length > 0 && selectedInvoices.some(inv => String(inv.status || "").toUpperCase() !== "CANCELLED");
     if (btn) btn.disabled = selected === 0;
+    if (viewBtn) viewBtn.disabled = !canViewOrEdit;
+    if (editBtn) editBtn.disabled = !canViewOrEdit || String(selectedInvoices[0]?.status || "").toUpperCase() === "CANCELLED";
+    if (cancelBtn) cancelBtn.disabled = !canCancel;
     if (all) {
         const available = [...document.querySelectorAll("[data-invoice-select]:not(:disabled)")];
         all.checked = available.length > 0 && available.every(el => el.checked);
