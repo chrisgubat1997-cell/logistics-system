@@ -22,7 +22,9 @@
        STATE
     ===================================================== */
     let salesOrders = [];
-let soSummaryFilter = "all";
+    let soSummaryFilter = "all";
+    let soSearchDebounceTimer = null;
+    const soSearchIndex = new WeakMap();
 let customers = [];
 let customersLoaded = false;
 let selectedSO = null;
@@ -88,7 +90,13 @@ function getLogisTechCurrentRole() {
                 "input",
                 function () {
                     soSummaryFilter = "all";
-                    renderSOList();
+                    if (soSearchDebounceTimer) {
+                        clearTimeout(soSearchDebounceTimer);
+                    }
+                    soSearchDebounceTimer = setTimeout(function () {
+                        soSearchDebounceTimer = null;
+                        renderSOList();
+                    }, 90);
                 }
             );
         }
@@ -1032,162 +1040,60 @@ async function loadSOList(
        FILTER
     ===================================================== */
 
-    function getFilteredSalesOrders() {
+    function getSOSearchIndex(so) {
+        if (!so || typeof so !== "object") {
+            return { soNumber: "", client: "", project: "", po: "", status: "", payment: "", jobOrder: "" };
+        }
 
-        const searchInput =
-            document.getElementById(
-                "soSearchInput"
-            );
+        let indexed = soSearchIndex.get(so);
+        if (indexed) return indexed;
 
-        const statusFilter =
-            document.getElementById(
-                "soStatusFilter"
-            );
+        const lower = function (value) {
+            return String(value == null ? "" : value).trim().toLowerCase();
+        };
 
-        const paymentFilter =
-            document.getElementById(
-                "soPaymentFilter"
-            );
+        indexed = {
+            soNumber: lower(getSOValue(so, ["SO_NUMBER", "soNumber", "so_number"])),
+            client: lower(getSOValue(so, ["CLIENT_NAME", "clientName"])),
+            project: lower(getSOValue(so, ["PROJECT", "project"])),
+            po: lower(getSOValue(so, ["PO_NUMBER", "poNumber"])),
+            status: lower(getSOValue(so, ["STATUS", "status"])),
+            payment: lower(getSOValue(so, ["PAYMENT_STATUS", "paymentStatus", "PAYMENT"])),
+            jobOrder: String(getSOValue(so, ["JOB_ORDER", "jobOrder", "job_order", "JO"]) || "").trim()
+        };
 
-
-        const search =
-            (
-                searchInput?.value ||
-                ""
-            )
-                .trim()
-                .toLowerCase();
-
-
-        const status =
-            (
-                statusFilter?.value ||
-                ""
-            )
-                .trim()
-                .toLowerCase();
-
-
-        const payment =
-            (
-                paymentFilter?.value ||
-                ""
-            )
-                .trim()
-                .toLowerCase();
-
-
-        return salesOrders.filter(
-            function (so) {
-
-                const soNumber =
-                    String(
-                        getSOValue(
-                            so,
-                            [
-                                "SO_NUMBER",
-                                "soNumber"
-                            ]
-                        ) || ""
-                    ).toLowerCase();
-
-
-                const client =
-                    String(
-                        getSOValue(
-                            so,
-                            [
-                                "CLIENT_NAME",
-                                "clientName"
-                            ]
-                        ) || ""
-                    ).toLowerCase();
-
-
-                const project =
-                    String(
-                        getSOValue(
-                            so,
-                            [
-                                "PROJECT",
-                                "project"
-                            ]
-                        ) || ""
-                    ).toLowerCase();
-
-
-                const po =
-                    String(
-                        getSOValue(
-                            so,
-                            [
-                                "PO_NUMBER",
-                                "poNumber"
-                            ]
-                        ) || ""
-                    ).toLowerCase();
-
-
-                const currentStatus =
-                    String(
-                        getSOValue(
-                            so,
-                            [
-                                "STATUS",
-                                "status"
-                            ]
-                        ) || ""
-                    ).toLowerCase();
-
-
-                const currentPayment =
-                    String(
-                        getSOValue(
-                            so,
-                            [
-                                "PAYMENT_STATUS",
-                                "paymentStatus",
-                                "PAYMENT"
-                            ]
-                        ) || ""
-                    ).toLowerCase();
-
-                const jobOrder = String(
-                    getSOValue(so, ["JOB_ORDER", "jobOrder", "job_order", "JO"]) || ""
-                ).trim();
-                const matchesSummary = soSummaryFilter !== "without-jo" || !jobOrder;
-
-
-                const matchesSearch =
-                    !search ||
-                    soNumber.includes(search) ||
-                    client.includes(search) ||
-                    project.includes(search) ||
-                    po.includes(search);
-
-
-                const matchesStatus =
-                    !status ||
-                    currentStatus === status;
-
-
-                const matchesPayment =
-                    !payment ||
-                    currentPayment === payment;
-
-
-                return (
-                    matchesSearch &&
-                    matchesStatus &&
-                    matchesPayment &&
-                    matchesSummary
-                );
-
-            }
-        );
-
+        soSearchIndex.set(so, indexed);
+        return indexed;
     }
 
+
+    function getFilteredSalesOrders() {
+        const searchInput = document.getElementById("soSearchInput");
+        const statusFilter = document.getElementById("soStatusFilter");
+        const paymentFilter = document.getElementById("soPaymentFilter");
+
+        const search = String(searchInput?.value || "").trim().toLowerCase();
+        const status = String(statusFilter?.value || "").trim().toLowerCase();
+        const payment = String(paymentFilter?.value || "").trim().toLowerCase();
+
+        // Search the complete local dataset; only the five matching rows are rendered.
+        return salesOrders.filter(function (so) {
+            const indexed = getSOSearchIndex(so);
+            const matchesSummary = soSummaryFilter !== "without-jo" || !indexed.jobOrder;
+
+            const matchesSearch =
+                !search ||
+                indexed.soNumber.includes(search) ||
+                indexed.client.includes(search) ||
+                indexed.project.includes(search) ||
+                indexed.po.includes(search);
+
+            const matchesStatus = !status || indexed.status === status;
+            const matchesPayment = !payment || indexed.payment === payment;
+
+            return matchesSearch && matchesStatus && matchesPayment && matchesSummary;
+        });
+    }
 
     /* =====================================================
        SUMMARY
