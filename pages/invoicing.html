@@ -53,13 +53,13 @@
             </button>
 
 
-            <button
-                type="button"
-                class="btn btn-filter"
-                id="invoiceFilterBtn"
-            >
-                FILTER
-            </button>
+            <select id="invoiceDateRangeFilter" class="invoice-date-range-filter" aria-label="Filter invoices by date">
+                <option value="ALL">ALL DATES</option>
+                <option value="MONTH">THIS MONTH</option>
+                <option value="3M">LAST 3 MONTHS</option>
+                <option value="6M">LAST 6 MONTHS</option>
+                <option value="12M">LAST 12 MONTHS</option>
+            </select>
 
         </div>
 
@@ -106,19 +106,12 @@
             </div>
             <div class="invoiced-records-controls">
                 <input type="search" id="invoicedRecordsSearch" placeholder="Search invoice, SI, SO, client or project" aria-label="Search invoiced records">
-                <select id="invoicedRecordsDateRange" aria-label="Filter invoice date">
-                    <option value="ALL">All dates</option>
-                    <option value="12M">Last 12 months</option>
-                    <option value="6M">Last 6 months</option>
-                    <option value="3M">Last 3 months</option>
-                    <option value="MONTH">This month</option>
-                </select>
             </div>
         </div>
         <div class="invoice-release-toolbar">
-            <label><input type="checkbox" id="selectAllInvoicedRecords"> Select all</label>
+            <label class="invoice-select-all"><input type="checkbox" id="selectAllInvoicedRecords"> Select all</label>
             <span id="selectedInvoiceCount">0 selected</span>
-            <button type="button" class="btn btn-primary" id="releaseSelectedInvoicesBtn" disabled>RELEASE SELECTED</button>
+            <button type="button" class="btn btn-primary invoice-release-selected-btn" id="releaseSelectedInvoicesBtn" disabled>RELEASE SELECTED</button>
         </div>
         <div class="table-wrapper">
             <table class="sales-order-table invoiced-records-table">
