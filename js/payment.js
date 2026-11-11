@@ -1782,6 +1782,7 @@ function viewPaymentRecord(paymentNo) {
                     <div><span>Client</span><strong id="floatingPaymentClient">—</strong></div>
                     <div><span>Project</span><strong id="floatingPaymentProject">—</strong></div>
                     <div><span>Sales Order No.</span><strong id="floatingPaymentSO">—</strong></div>
+                    <div><span>Payment Classification</span><strong id="floatingPaymentType">—</strong></div>
                     <div><span>Invoice No.</span><strong id="floatingPaymentInvoice">—</strong></div>
                     <div><span>SI No.</span><strong id="floatingPaymentSI">—</strong></div>
                     <div><span>Payment Method</span><strong id="floatingPaymentMethod">—</strong></div>
@@ -1806,6 +1807,7 @@ function viewPaymentRecord(paymentNo) {
     setValue('floatingPaymentClient', getClientName(payment));
     setValue('floatingPaymentProject', getProjectName(payment));
     setValue('floatingPaymentSO', getSONo(payment));
+    setValue('floatingPaymentType', String(payment.PAYMENT_TYPE || payment.paymentType || '').replace(/_/g, ' ') || '—');
     setValue('floatingPaymentInvoice', getInvoiceNo(payment));
     setValue('floatingPaymentSI', getSINo(payment));
     setValue('floatingPaymentMethod', creditField(payment, ['PAYMENT_METHOD','paymentMethod','method']));
