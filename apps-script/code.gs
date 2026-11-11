@@ -351,6 +351,9 @@ case "deleteFleetRecord":
     case "createDeliveryReceipt":
       return createDeliveryReceipt(payload);
 
+    case "markDeliveryReceiptDelivered":
+      return markDeliveryReceiptDelivered(payload);
+
 
 case "getInvoices":
   return getInvoices(payload);
