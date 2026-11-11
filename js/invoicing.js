@@ -1067,7 +1067,7 @@ function renderInvoiceTable(records) {
     tbody.innerHTML = records.map(invoice => {
         const status = String(invoice.status || "ONGOING").toUpperCase();
         const released = String(invoice.releaseStatus || "").toUpperCase() === "RELEASED";
-        const disabled = status === "CANCELLED" || released;
+        const disabled = status === "CANCELLED";
         return `<tr>
             <td><input type="checkbox" class="invoiced-record-select" data-invoice-select="${escapeHtml(invoice.invoiceNo)}" ${disabled ? "disabled" : ""} aria-label="Select invoice ${escapeHtml(invoice.invoiceNo)}"></td>
             <td><strong>${escapeHtml(invoice.invoiceNo || "—")}</strong></td>
@@ -1104,8 +1104,16 @@ function bindInvoicedRecordSelection() {
     if (release && release.dataset.bound !== "true") {
         release.dataset.bound = "true";
         release.addEventListener("click", () => {
-            const selected = [...document.querySelectorAll("[data-invoice-select]:checked")].map(el => el.dataset.invoiceSelect);
-            openInvoiceReleaseModal(selected);
+            const selected = [...document.querySelectorAll("[data-invoice-select]:checked")]
+                .map(el => el.dataset.invoiceSelect)
+                .filter(Boolean)
+                .filter(invoiceNo => {
+                    const invoice = findInvoiceByNumber(invoiceNo);
+                    return invoice &&
+                        String(invoice.status || "").toUpperCase() !== "CANCELLED" &&
+                        String(invoice.releaseStatus || "").toUpperCase() !== "RELEASED";
+                });
+            if (selected.length) openInvoiceReleaseModal(selected);
         });
     }
     const getSelectedInvoiceNumbers = () => [...document.querySelectorAll("[data-invoice-select]:checked")].map(el => el.dataset.invoiceSelect).filter(Boolean);
@@ -1126,7 +1134,10 @@ function bindInvoicedRecordSelection() {
             const selected = getSelectedInvoiceNumbers();
             if (selected.length !== 1) return;
             const invoice = findInvoiceByNumber(selected[0]);
-            if (invoice) openInvoiceEditModal(invoice);
+            if (!invoice) return;
+            const isReleased = String(invoice.releaseStatus || "").toUpperCase() === "RELEASED";
+            const isCancelled = String(invoice.status || "").toUpperCase() === "CANCELLED";
+            if (!isReleased && !isCancelled) openInvoiceEditModal(invoice);
         });
     }
     const cancelBtn = document.getElementById("cancelSelectedInvoicesBtn");
@@ -1176,10 +1187,17 @@ function updateInvoiceSelectionCount() {
     const selectedNumbers = [...document.querySelectorAll("[data-invoice-select]:checked")].map(el => el.dataset.invoiceSelect);
     const selectedInvoices = selectedNumbers.map(findInvoiceByNumber).filter(Boolean);
     const canViewOrEdit = selectedInvoices.length === 1;
+    const selectedInvoice = selectedInvoices[0];
+    const selectedIsReleased = String(selectedInvoice?.releaseStatus || "").toUpperCase() === "RELEASED";
+    const selectedIsCancelled = String(selectedInvoice?.status || "").toUpperCase() === "CANCELLED";
+    const hasUnreleasedSelection = selectedInvoices.some(inv =>
+        String(inv.status || "").toUpperCase() !== "CANCELLED" &&
+        String(inv.releaseStatus || "").toUpperCase() !== "RELEASED"
+    );
     const canCancel = selectedInvoices.length > 0 && selectedInvoices.some(inv => String(inv.status || "").toUpperCase() !== "CANCELLED");
-    if (btn) btn.disabled = selected === 0;
+    if (btn) btn.disabled = !hasUnreleasedSelection;
     if (viewBtn) viewBtn.disabled = !canViewOrEdit;
-    if (editBtn) editBtn.disabled = !canViewOrEdit || String(selectedInvoices[0]?.status || "").toUpperCase() === "CANCELLED";
+    if (editBtn) editBtn.disabled = !canViewOrEdit || selectedIsCancelled || selectedIsReleased;
     if (cancelBtn) cancelBtn.disabled = !canCancel;
     if (all) {
         const available = [...document.querySelectorAll("[data-invoice-select]:not(:disabled)")];
