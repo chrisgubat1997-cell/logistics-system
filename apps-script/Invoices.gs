@@ -560,6 +560,57 @@ function cancelInvoice(payload) {
 }
 
 
+
+/* RELEASE INVOICES — records destination, date and releasing user. */
+function releaseInvoices(payload) {
+  payload = payload || {};
+  const numbers = Array.isArray(payload.invoiceNumbers)
+    ? [...new Set(payload.invoiceNumbers.map(v => String(v || "").trim()).filter(Boolean))]
+    : [];
+  const destination = String(payload.destination || "").trim().toUpperCase();
+  const releaseDate = String(payload.releaseDate || "").trim();
+  if (!numbers.length) throw new Error("Select at least one invoice.");
+  if (!["HEAD OFFICE - FOR COUNTER", "HEAD OFFICE – FOR COUNTER", "LOGISTICS"].includes(destination)) {
+    throw new Error("Choose a valid release destination.");
+  }
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(releaseDate)) throw new Error("A valid release date is required.");
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const sheet = getSheet(CONFIG.SHEETS.INVOICES);
+    let headers = _finGetHeaders_(sheet);
+    ["RELEASE_STATUS", "RELEASE_DESTINATION", "RELEASE_DATE", "RELEASED_AT", "RELEASED_BY"].forEach(h => {
+      if (headers.indexOf(h) < 0) {
+        sheet.getRange(1, headers.length + 1).setValue(h);
+        headers.push(h);
+      }
+    });
+    const records = getAllRecords(CONFIG.SHEETS.INVOICES);
+    const releasedBy = String(payload.releasedBy || payload.username || "SYSTEM").trim();
+    const now = formatDateTime(new Date());
+    const results = [];
+    numbers.forEach(number => {
+      const record = records.find(r => String(r.INVOICE_NO || "").trim() === number);
+      if (!record) throw new Error("Invoice not found: " + number);
+      if (String(record.STATUS || "").toUpperCase() === "CANCELLED") throw new Error("Cannot release cancelled invoice: " + number);
+      if (String(record.RELEASE_STATUS || "").toUpperCase() === "RELEASED") throw new Error("Invoice already released: " + number);
+      const row = records.findIndex(r => String(r.INVOICE_NO || "").trim() === number) + 2;
+      const values = {
+        RELEASE_STATUS: "RELEASED",
+        RELEASE_DESTINATION: destination,
+        RELEASE_DATE: releaseDate,
+        RELEASED_AT: now,
+        RELEASED_BY: releasedBy
+      };
+      Object.keys(values).forEach(key => sheet.getRange(row, headers.indexOf(key) + 1).setValue(values[key]));
+      results.push(number);
+    });
+    if (typeof logActivity === "function") logActivity({ username: releasedBy, action: "RELEASE", module: "INVOICE", recordNumber: results.join(", "), details: "Released " + results.length + " invoice(s) to " + destination + " dated " + releaseDate, status: "SUCCESS" });
+    if (typeof touchSyncVersion === "function") touchSyncVersion();
+    return { success: true, released: results, destination: destination, releaseDate: releaseDate };
+  } finally { lock.releaseLock(); }
+}
+
 /* Shared finance helpers. Prefix _fin avoids collisions with existing project functions. */
 function _finGetHeaders_(sheet) {
   const n = sheet.getLastColumn();
