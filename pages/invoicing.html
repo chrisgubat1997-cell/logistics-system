@@ -83,9 +83,9 @@
         <div class="summary-card todays-invoice-card">
             <div class="summary-card-icon">TODAY</div>
             <div class="summary-card-content">
-                <span class="summary-label">TODAY'S INVOICED</span>
-                <strong class="summary-value" id="todaysInvoiced">0</strong>
-                <small>Invoices today</small>
+                <span class="summary-label">TOTAL AMOUNT INVOICE</span>
+                <strong class="summary-value" id="todaysInvoiced">₱0.00</strong>
+                <small>Total invoiced amount</small>
             </div>
         </div>
         <div class="summary-card cancelled-invoice-card">
@@ -95,6 +95,38 @@
                 <strong class="summary-value" id="cancelledInvoice">0</strong>
                 <small>Cancelled invoices</small>
             </div>
+        </div>
+    </section>
+
+    <section class="invoice-section invoiced-records-section">
+        <div class="section-header">
+            <div class="section-title">
+                <h2>INVOICED RECORDS</h2>
+                <span>Search, review, update, cancel and release issued invoices</span>
+            </div>
+            <div class="invoiced-records-controls">
+                <input type="search" id="invoicedRecordsSearch" placeholder="Search invoice, SI, SO, client or project" aria-label="Search invoiced records">
+                <select id="invoicedRecordsDateRange" aria-label="Filter invoice date">
+                    <option value="ALL">All dates</option>
+                    <option value="12M">Last 12 months</option>
+                    <option value="6M">Last 6 months</option>
+                    <option value="3M">Last 3 months</option>
+                    <option value="MONTH">This month</option>
+                </select>
+            </div>
+        </div>
+        <div class="invoice-release-toolbar">
+            <label><input type="checkbox" id="selectAllInvoicedRecords"> Select all</label>
+            <span id="selectedInvoiceCount">0 selected</span>
+            <button type="button" class="btn btn-primary" id="releaseSelectedInvoicesBtn" disabled>RELEASE SELECTED</button>
+        </div>
+        <div class="table-wrapper">
+            <table class="sales-order-table invoiced-records-table">
+                <thead><tr>
+                    <th>Select</th><th>Invoice No.</th><th>SI No.</th><th>SO No.</th><th>Client</th><th>Project</th><th>Date</th><th>Amount</th><th>Status</th><th>Release Destination</th><th>Release Date</th><th>Actions</th>
+                </tr></thead>
+                <tbody id="recentInvoiceTableBody"><tr class="empty-row"><td colspan="12">Loading invoice records...</td></tr></tbody>
+            </table>
         </div>
     </section>
 
