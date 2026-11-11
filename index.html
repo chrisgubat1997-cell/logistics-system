@@ -3191,7 +3191,7 @@ async function loadSOMonitoringModule() {
     if (!container) return;
     if (!soMonitoringModuleLoaded) {
         try {
-            await loadScriptOnce('js/so-monitoring.js?v=20261111-click-result01', 'data-so-monitoring-js');
+            await loadScriptOnce('js/so-monitoring.js?v=20261111-item-delivery-summary02', 'data-so-monitoring-js');
             soMonitoringModuleLoaded = true;
         } catch (error) {
             container.innerHTML = '<div style="padding:16px;color:#b42318">Unable to load SO Monitoring: ' + String(error.message || error) + '</div>';
