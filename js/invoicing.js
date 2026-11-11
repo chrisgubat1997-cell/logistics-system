@@ -98,6 +98,9 @@ async function fetchInvoicesFromDatabase() {
                 amountDue: record.AMOUNT_DUE || 0,
                 finalAmountDue: record.FINAL_AMOUNT_DUE || 0,
                 status: record.STATUS || "",
+                releaseStatus: record.RELEASE_STATUS || "",
+                releaseDestination: record.RELEASE_DESTINATION || "",
+                releaseDate: record.RELEASE_DATE || "",
                 createdAt: record.CREATED_AT || "",
                 items: rawItems.map(item => ({
                     itemNo: item.ITEM_NO || "",
@@ -961,249 +964,168 @@ function removeInvoiceSuggestions() {
 ========================================================= */
 
 function renderInvoiceSummary() {
-    const totalInvoice = document.getElementById("totalInvoice");
-    const todaysInvoiced = document.getElementById("todaysInvoiced");
-    const cancelledInvoice = document.getElementById("cancelledInvoice");
-
-    if (totalInvoice) {
-        totalInvoice.textContent = invoiceRecords.length;
-    }
-
-    const today = getTodayString();
-    const todayCount = invoiceRecords.filter(invoice => {
-        const date = getRecordValue(invoice, ["invoiceDate", "date", "Invoice Date"]);
-        return normalizeDate(date) === today;
-    }).length;
-
-    if (todaysInvoiced) {
-        todaysInvoiced.textContent = todayCount;
-    }
-
-    const cancelledCount = invoiceRecords.filter(invoice => {
-        const status = String(
-            getRecordValue(invoice, ["status", "invoiceStatus", "Status"]) || ""
-        ).trim().toUpperCase();
-        return status === "CANCELLED";
-    }).length;
-
-    if (cancelledInvoice) {
-        cancelledInvoice.textContent = cancelledCount;
-    }
+    const total = document.getElementById("totalInvoice");
+    const amount = document.getElementById("todaysInvoiced");
+    const cancelled = document.getElementById("cancelledInvoice");
+    if (total) total.textContent = invoiceRecords.length;
+    if (amount) amount.textContent = formatCurrency(invoiceRecords
+        .filter(x => String(x.status || "").toUpperCase() !== "CANCELLED")
+        .reduce((sum, x) => sum + Number(x.finalAmountDue || x.amountDue || x.totalAmount || 0), 0));
+    if (cancelled) cancelled.textContent = invoiceRecords.filter(x => String(x.status || "").toUpperCase() === "CANCELLED").length;
 }
 
-/* =========================================================
-   RENDER RECENT INVOICES
-========================================================= */
-
-function renderRecentInvoices() {
-
-    renderInvoiceTable(
-        invoiceRecords.slice(0, 30)
-    );
-
+function getInvoicedRecordsFiltered() {
+    const q = String(document.getElementById("invoicedRecordsSearch")?.value || "").trim().toLowerCase();
+    const range = document.getElementById("invoicedRecordsDateRange")?.value || "ALL";
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    if (range === "12M") start.setMonth(now.getMonth() - 11);
+    if (range === "6M") start.setMonth(now.getMonth() - 5);
+    if (range === "3M") start.setMonth(now.getMonth() - 2);
+    return invoiceRecords.filter(inv => {
+        const haystack = [inv.invoiceNo, inv.siNo, inv.soNo, inv.client, inv.project].join(" ").toLowerCase();
+        if (q && !haystack.includes(q)) return false;
+        if (range !== "ALL") {
+            const d = new Date(inv.invoiceDate);
+            if (Number.isNaN(d.getTime()) || d < start || d > now) return false;
+        }
+        return true;
+    });
 }
 
-
-/* =========================================================
-   RENDER INVOICE TABLE
-========================================================= */
+function renderRecentInvoices() { renderInvoiceTable(getInvoicedRecordsFiltered()); }
 
 function renderInvoiceTable(records) {
-
-    const tbody =
-        document.getElementById(
-            "recentInvoiceTableBody"
-        );
-
-
-    if (!tbody) {
-        return;
-    }
-
-
+    const tbody = document.getElementById("recentInvoiceTableBody");
+    if (!tbody) return;
     if (!records.length) {
-
-        tbody.innerHTML = `
-
-            <tr class="empty-row">
-
-                <td colspan="8">
-                    No invoice records found.
-                </td>
-
-            </tr>
-
-        `;
-
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="12">No invoice records found.</td></tr>';
+        updateInvoiceSelectionCount();
         return;
-
     }
-
-
-    tbody.innerHTML =
-        records
-            .slice(0, 30)
-            .map(invoice => {
-
-                const invoiceNo =
-                    getRecordValue(
-                        invoice,
-                        [
-                            "invoiceNo",
-                            "invoiceNumber",
-                            "invoice_no"
-                        ]
-                    ) || "—";
-
-
-                const soNo =
-                    getRecordValue(
-                        invoice,
-                        [
-                            "soNo",
-                            "salesOrderNo"
-                        ]
-                    ) || "—";
-
-
-                const client =
-                    getRecordValue(
-                        invoice,
-                        [
-                            "client",
-                            "clientName"
-                        ]
-                    ) || "—";
-
-
-                const project =
-                    getRecordValue(
-                        invoice,
-                        [
-                            "project",
-                            "projectName"
-                        ]
-                    ) || "—";
-
-
-                const date =
-                    getRecordValue(
-                        invoice,
-                        [
-                            "invoiceDate",
-                            "date"
-                        ]
-                    ) || "—";
-
-
-                const amount =
-                    getRecordValue(
-                        invoice,
-                        [
-                            "totalAmount",
-                            "total",
-                            "grandTotal",
-                            "amount"
-                        ]
-                    );
-
-
-                const status =
-                    getRecordValue(
-                        invoice,
-                        [
-                            "status",
-                            "invoiceStatus"
-                        ]
-                    ) || "ONGOING";
-
-
-                return `
-
-                    <tr>
-
-                        <td>
-                            <strong>
-                                ${escapeHtml(invoiceNo)}
-                            </strong>
-                        </td>
-
-                        <td>
-                            ${escapeHtml(soNo)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(client)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(project)}
-                        </td>
-
-                        <td>
-                            ${escapeHtml(
-                                formatDisplayDate(date)
-                            )}
-                        </td>
-
-                        <td>
-                            <strong>
-                                ${formatCurrency(amount)}
-                            </strong>
-                        </td>
-
-                        <td>
-                            <span
-                                class="status-badge
-                                ${getStatusClass(status)}"
-                            >
-                                ${escapeHtml(status)}
-                            </span>
-                        </td>
-
-                        <td class="invoice-row-actions">
-
-                            <button
-                                type="button"
-                                class="table-action"
-                                data-invoice-view="${escapeHtml(invoiceNo)}"
-                            >
-                                VIEW
-                            </button>
-
-                            ${String(status).toUpperCase() === "CANCELLED" ? "" : `
-                                <button
-                                    type="button"
-                                    class="table-action primary"
-                                    data-invoice-edit="${escapeHtml(invoiceNo)}"
-                                >
-                                    UPDATE
-                                </button>
-                                <button
-                                    type="button"
-                                    class="table-action danger"
-                                    data-invoice-cancel="${escapeHtml(invoiceNo)}"
-                                >
-                                    CANCEL
-                                </button>
-                            `}
-
-                        </td>
-
-                    </tr>
-
-                `;
-
-            })
-            .join("");
-
-
+    tbody.innerHTML = records.map(invoice => {
+        const status = String(invoice.status || "ONGOING").toUpperCase();
+        const released = String(invoice.releaseStatus || "").toUpperCase() === "RELEASED";
+        const disabled = status === "CANCELLED" || released;
+        return `<tr>
+            <td><input type="checkbox" class="invoiced-record-select" data-invoice-select="${escapeHtml(invoice.invoiceNo)}" ${disabled ? "disabled" : ""} aria-label="Select invoice ${escapeHtml(invoice.invoiceNo)}"></td>
+            <td><strong>${escapeHtml(invoice.invoiceNo || "—")}</strong></td>
+            <td>${escapeHtml(invoice.siNo || "—")}</td>
+            <td>${escapeHtml(invoice.soNo || "—")}</td>
+            <td>${escapeHtml(invoice.client || "—")}</td>
+            <td>${escapeHtml(invoice.project || "—")}</td>
+            <td>${escapeHtml(formatDisplayDate(invoice.invoiceDate))}</td>
+            <td><strong>${formatCurrency(invoice.finalAmountDue || invoice.amountDue || invoice.totalAmount || 0)}</strong></td>
+            <td><span class="status-badge ${getStatusClass(status)}">${escapeHtml(status)}</span></td>
+            <td>${escapeHtml(invoice.releaseDestination || "—")}</td>
+            <td>${escapeHtml(invoice.releaseDate ? formatDisplayDate(invoice.releaseDate) : "—")}</td>
+            <td class="invoice-row-actions">
+                <button type="button" class="table-action" data-invoice-view="${escapeHtml(invoice.invoiceNo)}">VIEW</button>
+                ${status === "CANCELLED" ? "" : `<button type="button" class="table-action primary" data-invoice-edit="${escapeHtml(invoice.invoiceNo)}">EDIT</button><button type="button" class="table-action danger" data-invoice-cancel="${escapeHtml(invoice.invoiceNo)}">CANCEL</button>`}
+                ${status === "CANCELLED" || released ? "" : `<button type="button" class="table-action primary" data-invoice-release="${escapeHtml(invoice.invoiceNo)}">RELEASE</button>`}
+            </td>
+        </tr>`;
+    }).join("");
     bindInvoiceViewButtons();
     bindInvoiceEditButtons();
     bindInvoiceCancelButtons();
-
+    bindInvoiceReleaseButtons();
+    bindInvoicedRecordSelection();
+    updateInvoiceSelectionCount();
 }
 
+function bindInvoicedRecordSelection() {
+    document.querySelectorAll("[data-invoice-select]").forEach(el => {
+        if (el.dataset.bound === "true") return;
+        el.dataset.bound = "true";
+        el.addEventListener("change", updateInvoiceSelectionCount);
+    });
+    const all = document.getElementById("selectAllInvoicedRecords");
+    if (all && all.dataset.bound !== "true") {
+        all.dataset.bound = "true";
+        all.addEventListener("change", () => {
+            document.querySelectorAll("[data-invoice-select]:not(:disabled)").forEach(el => el.checked = all.checked);
+            updateInvoiceSelectionCount();
+        });
+    }
+    const release = document.getElementById("releaseSelectedInvoicesBtn");
+    if (release && release.dataset.bound !== "true") {
+        release.dataset.bound = "true";
+        release.addEventListener("click", () => {
+            const selected = [...document.querySelectorAll("[data-invoice-select]:checked")].map(el => el.dataset.invoiceSelect);
+            openInvoiceReleaseModal(selected);
+        });
+    }
+    const search = document.getElementById("invoicedRecordsSearch");
+    if (search && search.dataset.bound !== "true") {
+        search.dataset.bound = "true";
+        search.addEventListener("input", renderRecentInvoices);
+    }
+    const range = document.getElementById("invoicedRecordsDateRange");
+    if (range && range.dataset.bound !== "true") {
+        range.dataset.bound = "true";
+        range.addEventListener("change", renderRecentInvoices);
+    }
+}
+
+function updateInvoiceSelectionCount() {
+    const selected = document.querySelectorAll("[data-invoice-select]:checked").length;
+    const label = document.getElementById("selectedInvoiceCount");
+    const btn = document.getElementById("releaseSelectedInvoicesBtn");
+    const all = document.getElementById("selectAllInvoicedRecords");
+    if (label) label.textContent = selected + " selected";
+    if (btn) btn.disabled = selected === 0;
+    if (all) {
+        const available = [...document.querySelectorAll("[data-invoice-select]:not(:disabled)")];
+        all.checked = available.length > 0 && available.every(el => el.checked);
+        all.indeterminate = available.some(el => el.checked) && !all.checked;
+    }
+}
+
+function openInvoiceReleaseModal(invoiceNos) {
+    const selected = [...new Set(invoiceNos)].filter(Boolean);
+    if (!selected.length) return;
+    let modal = document.getElementById("invoiceReleaseModal");
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "invoiceReleaseModal";
+        modal.className = "modal-overlay";
+        modal.hidden = true;
+        modal.innerHTML = `<div class="modal"><div class="modal-header"><div><h2>RELEASE INVOICES</h2><p id="invoiceReleaseCount"></p></div><button type="button" class="modal-close" id="closeInvoiceReleaseModal">×</button></div><div class="modal-body"><div class="form-group"><label for="invoiceReleaseDestination">RELEASE TO</label><select id="invoiceReleaseDestination"><option value="HEAD OFFICE - FOR COUNTER">HEAD OFFICE – FOR COUNTER</option><option value="LOGISTICS">LOGISTICS</option></select></div><div class="form-group"><label for="invoiceReleaseDate">RELEASE DATE</label><input type="date" id="invoiceReleaseDate" required></div><div class="form-group"><label>SELECTED INVOICES</label><div id="invoiceReleaseList"></div></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" id="cancelInvoiceRelease">CANCEL</button><button type="button" class="btn btn-primary" id="confirmInvoiceRelease">CONFIRM RELEASE</button></div></div>`;
+        document.querySelector(".invoicing-container")?.appendChild(modal);
+        const close = () => { modal.hidden = true; modal.classList.remove("active"); };
+        modal.querySelector("#closeInvoiceReleaseModal").addEventListener("click", close);
+        modal.querySelector("#cancelInvoiceRelease").addEventListener("click", close);
+        modal.querySelector("#confirmInvoiceRelease").addEventListener("click", async () => {
+            const date = modal.querySelector("#invoiceReleaseDate").value;
+            if (!date) { window.alert("Please select the release date."); return; }
+            const destination = modal.querySelector("#invoiceReleaseDestination").value;
+            const btn = modal.querySelector("#confirmInvoiceRelease");
+            btn.disabled = true;
+            try {
+                await sendInvoiceAction("releaseInvoices", { invoiceNumbers: selected, destination, releaseDate: date });
+                close();
+                await refreshInvoicing();
+                window.alert(selected.length + " invoice(s) released successfully.");
+            } catch (error) {
+                window.alert("Could not release invoices: " + error.message);
+            } finally { btn.disabled = false; }
+        });
+    }
+    modal.querySelector("#invoiceReleaseCount").textContent = selected.length + " invoice(s) selected";
+    modal.querySelector("#invoiceReleaseList").textContent = selected.join(", ");
+    modal.querySelector("#invoiceReleaseDate").value = getTodayString();
+    modal.hidden = false;
+    modal.classList.add("active");
+}
+
+function bindInvoiceReleaseButtons() {
+    document.querySelectorAll("[data-invoice-release]").forEach(button => {
+        if (button.dataset.bound === "true") return;
+        button.dataset.bound = "true";
+        button.addEventListener("click", () => openInvoiceReleaseModal([button.dataset.invoiceRelease]));
+    });
+}
 
 /* =========================================================
    INVOICE VIEW BUTTONS
