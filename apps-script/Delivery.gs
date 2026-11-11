@@ -347,24 +347,36 @@ function createDeliveryReceipt(payload) {
         ""
       ).trim();
 
-      const soItem = soItems.find(function (item) {
-        if (
-          soItemId &&
-          String(item.SO_ITEM_ID || "") === soItemId
-        ) {
-          return true;
-        }
+      // Resolve the item against the selected SO. Prefer the unique SO_ITEM_ID.
+      // If the browser is holding an older/legacy item ID, safely fall back to
+      // ITEM_NUMBER only when that number identifies exactly one row in this SO.
+      let soItem = soItemId
+        ? soItems.find(function (item) {
+            return String(item.SO_ITEM_ID || "").trim() === soItemId;
+          })
+        : null;
 
-        return (
-          !soItemId &&
-          itemNumber &&
-          String(item.ITEM_NUMBER || "") === itemNumber
-        );
-      });
+      if (!soItem && itemNumber) {
+        const matchingNumberItems = soItems.filter(function (item) {
+          return String(item.ITEM_NUMBER || "").trim() === itemNumber;
+        });
+
+        if (matchingNumberItems.length === 1) {
+          soItem = matchingNumberItems[0];
+        } else if (matchingNumberItems.length > 1) {
+          throw new Error(
+            "Ambiguous Item Number " + itemNumber +
+            " in Sales Order " + soNumber +
+            ". Please ensure each SO item has a unique SO_ITEM_ID."
+          );
+        }
+      }
 
       if (!soItem) {
         throw new Error(
-          "An item does not belong to Sales Order " + soNumber
+          "Unable to match item " + (itemNumber || soItemId || "(unknown)") +
+          " to Sales Order " + soNumber +
+          ". Please reload the Sales Order items and try again."
         );
       }
 
