@@ -99,71 +99,73 @@ let isLoadingSOSelection = false;
    GOOGLE APPS SCRIPT API
 ========================================================= */
 
-async function callDeliveryAPI(action, data = null) {
+function getDeliverySessionToken() {
+    const saved = getLogisTechSessionAccount();
+    const account = saved.account || saved.user || saved.profile || saved;
+    const auth = saved.auth || account.auth || {};
+    const session = saved.session || account.session || {};
+    const values = [
+        saved.sessionToken, saved.session_token, saved.token,
+        account.sessionToken, account.session_token, account.token,
+        auth.sessionToken, auth.session_token, auth.token,
+        session.sessionToken, session.session_token, session.token
+    ];
+    const token = values.find(value =>
+        typeof value === "string" && value.trim()
+    );
+    return String(token || "").trim();
+}
 
+async function callDeliveryAPI(action, data = {}) {
     if (
         !DELIVERY_API_URL ||
-        !DELIVERY_API_URL.startsWith(
-            "https://script.google.com/macros/s/"
-        ) ||
+        !DELIVERY_API_URL.startsWith("https://script.google.com/macros/s/") ||
         !DELIVERY_API_URL.endsWith("/exec")
     ) {
-        throw new Error(
-            "Invalid Apps Script Web App URL. Check DELIVERY_API_URL."
-        );
+        throw new Error("Invalid Apps Script Web App URL. Check DELIVERY_API_URL.");
     }
 
-    const url = new URL(DELIVERY_API_URL);
-
-    if (data === null) {
-        url.searchParams.set("action", action);
+    const sessionToken = getDeliverySessionToken();
+    if (!sessionToken) {
+        throw new Error("AUTH_REQUIRED: Session token not found. Please log out and log in again.");
     }
 
-    const response = await fetch(
-        data === null ? url.toString() : DELIVERY_API_URL,
-        data === null
-            ? {
-                method: "GET",
-                redirect: "follow"
-            }
-            : {
-                method: "POST",
-                redirect: "follow",
-                headers: {
-                    "Content-Type": "text/plain;charset=utf-8"
-                },
-                body: JSON.stringify({
-                    action: action,
-                    data: data
-                })
-            }
-    );
+    // The create-DR page runs separately from index.html, so it cannot rely
+    // on the main app's fetch interceptor to attach the authenticated token.
+    const payload = Object.assign({}, data && typeof data === "object" ? data : {}, {
+        sessionToken: sessionToken
+    });
 
-    if (!response.ok) {
-        throw new Error(
-            "API request failed: HTTP " + response.status
-        );
-    }
+    const response = await fetch(DELIVERY_API_URL, {
+        method: "POST",
+        cache: "no-store",
+        redirect: "follow",
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+            action: action,
+            data: payload
+        })
+    });
 
+    const raw = await response.text();
     let result;
-
     try {
-        result = await response.json();
+        result = JSON.parse(raw);
     } catch (error) {
-        throw new Error(
-            "Hindi valid JSON ang response ng Apps Script. I-check ang deployment at access permissions."
-        );
+        throw new Error("Hindi valid JSON ang response ng Apps Script. I-check ang deployment at access permissions.");
     }
 
-    if (result.success === false) {
+    if (!response.ok || !result || result.success === false) {
         throw new Error(
-            result.error || result.message || "API request failed."
+            result && (result.message || result.error) ||
+            action + " failed. HTTP " + response.status
         );
     }
 
     return result;
 }
-
 
 
 
