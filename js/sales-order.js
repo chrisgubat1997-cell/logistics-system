@@ -94,7 +94,8 @@ function getLogisTechCurrentRole() {
         }
         const statusFilter =
             document.getElementById("soStatusFilter");
-        if (statusFilter) {
+        if (statusFilter && statusFilter.dataset.changeBound !== "true") {
+            statusFilter.dataset.changeBound = "true";
             statusFilter.addEventListener(
                 "change",
                 function () {
@@ -105,7 +106,8 @@ function getLogisTechCurrentRole() {
         }
         const paymentFilter =
             document.getElementById("soPaymentFilter");
-        if (paymentFilter) {
+        if (paymentFilter && paymentFilter.dataset.changeBound !== "true") {
+            paymentFilter.dataset.changeBound = "true";
             paymentFilter.addEventListener(
                 "change",
                 function () {
@@ -115,7 +117,8 @@ function getLogisTechCurrentRole() {
         }
         const fileInput =
             document.getElementById("detailSOFileInput");
-        if (fileInput) {
+        if (fileInput && fileInput.dataset.changeBound !== "true") {
+            fileInput.dataset.changeBound = "true";
             fileInput.addEventListener(
                 "change",
                 handleDetailFileSelected
@@ -7256,6 +7259,9 @@ window.addEventListener(
     ===================================================== */
 
     window.closeCustomerFromSalesOrder = closeCustomerFromSalesOrder;
+    // The Sales Order HTML is injected after DOMContentLoaded. Expose the
+    // initializer so the dynamically-created search and filter controls bind.
+    window.initializeSalesOrderModule = initializeSalesOrderModule;
 
     window.loadSOList =
         loadSOList;
