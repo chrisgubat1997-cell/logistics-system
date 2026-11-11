@@ -1968,99 +1968,6 @@ function getPreviouslyInvoicedDPPaymentNumbers() {
     return getPreviouslyInvoicedPaymentNumbers("DP");
 }
 
-function renderDPPaymentPicker() {
-    const panel = $("dpPaymentPicker");
-    const list = $("dpPaymentOptions");
-    const selected = $("selectedDPPaymentSummary");
-    const heading = $("dpPaymentHeading");
-    if (!panel || !list) return;
-    const soNo = getValue("soNo").trim().toLowerCase();
-    panel.hidden = !soNo;
-    if (!soNo) { list.innerHTML = ""; if (selected) selected.hidden = true; return; }
-
-    const isDP = activePaymentSourceType === "DP";
-    const sourceType = isDP ? "DP" : "FP";
-    const selectedRows = isDP ? selectedDPPayments : selectedFPPayments;
-    if (heading) heading.textContent = isDP ? "Select Down Payment Records" : "Select Full Payment Records";
-    panel.querySelectorAll("[data-payment-source-type]").forEach(tab => {
-        const active = tab.dataset.paymentSourceType === sourceType;
-        tab.classList.toggle("active", active);
-        tab.setAttribute("aria-pressed", active ? "true" : "false");
-    });
-    panel.querySelectorAll("[data-payment-source-type]").forEach(tab => {
-        if (tab.dataset.bound === "true") return;
-        tab.dataset.bound = "true";
-        tab.addEventListener("click", () => {
-            activePaymentSourceType = tab.dataset.paymentSourceType;
-
-        });
-    });
-
-    const used = getPreviouslyInvoicedPaymentNumbers(sourceType);
-    const rows = paymentRecords.filter(payment => {
-        const paymentSO = String(getObjectValue(payment, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo"]) || "").trim().toLowerCase();
-        const status = String(getObjectValue(payment, ["PAYMENT_STATUS", "paymentStatus", "STATUS", "status"]) || "RECEIVED").trim().toUpperCase();
-        const number = getDPPaymentNumber(payment);
-        const id = getDPPaymentId(payment).toLowerCase();
-        const paymentType = getPaymentSourceType(payment);
-        const typeMatches = paymentType === sourceType;
-        const alreadySelected = selectedRows.some(row => getDPPaymentId(row).toLowerCase() === id);
-        return paymentSO === soNo && number && typeMatches &&
-            ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(status) &&
-            getDPPaymentAmount(payment) > 0 && (alreadySelected || (!used.has(number.toLowerCase()) && !used.has(id)));
-    });
-
-    list.innerHTML = "";
-    if (!rows.length) {
-        const empty = document.createElement("div");
-        empty.className = "dp-payment-empty";
-        empty.textContent = isDP ? "No unused confirmed Down Payment records are available for this Sales Order." : "No unused confirmed Full Payment records are available for this Sales Order.";
-        list.appendChild(empty);
-    }
-    rows.forEach(payment => {
-        const number = getDPPaymentNumber(payment), amount = getDPPaymentAmount(payment);
-        const date = getObjectValue(payment, ["PAYMENT_DATE", "paymentDate", "DATE", "date"]) || "Date not recorded";
-        const id = getDPPaymentId(payment).toLowerCase();
-        const isSelected = selectedRows.some(row => getDPPaymentId(row).toLowerCase() === id);
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "dp-payment-option" + (isSelected ? " is-selected" : "");
-        const title = document.createElement("strong"); title.textContent = (isSelected ? "✓ " : "") + number;
-        const meta = document.createElement("span"); meta.textContent = String(date);
-        const value = document.createElement("b"); value.textContent = formatCurrency(amount);
-        button.append(title, meta, value);
-        button.addEventListener("click", () => {
-            const target = isDP ? selectedDPPayments : selectedFPPayments;
-            const index = target.findIndex(row => getDPPaymentId(row).toLowerCase() === id);
-            if (index >= 0) {
-                target.splice(index, 1);
-                invoiceItems = invoiceItems.filter(item => String(item.sourcePaymentId || "").toLowerCase() !== id);
-            } else {
-                target.push(payment);
-                const label = isDP ? "Down Payment - " : "Full Payment - ";
-                invoiceItems.push({
-                    id: Date.now() + Math.random(), itemNo: isDP ? "DP" : "FP",
-                    itemName: label + number, description: label + number,
-                    soQty: 1, invoicedQty: 0, balance: 1, qtyInvoice: 1,
-                    unit: "LOT", unitPrice: amount, remarks: "Payment No. " + number,
-                    checked: true, sourceDRNo: "", sourceDRNumbers: [], sourceItemNo: "",
-                    sourceSONo: getValue("soNo"), sourcePaymentType: sourceType,
-                    sourcePaymentId: getDPPaymentId(payment), isManual: false
-                });
-            }
-            selectedDPPayment = selectedDPPayments[0] || null;
-            selectedFPPayment = selectedFPPayments[0] || null;
-            updateSelectedInvoiceType();
-            renderItems(); updateCalculations(); renderDPPaymentPicker();
-        });
-        list.appendChild(button);
-    });
-    const selectedLabels = [].concat(selectedDPPayments.map(row => "DP: " + getDPPaymentNumber(row)), selectedFPPayments.map(row => "FP: " + getDPPaymentNumber(row)));
-    if (selected) {
-        selected.hidden = selectedLabels.length === 0;
-        selected.textContent = selectedLabels.length ? "Linked payment sources: " + selectedLabels.join(" · ") : "No Payment records selected.";
-    }
-}
 
 function updateSelectedInvoiceType() {
     if (selectedDeliveryReceipts.length) selectedInvoiceType = "DELIVERY_RECEIPT";
@@ -2377,7 +2284,34 @@ function renderSelectedDeliveryReceiptChips() {
         chip.append(label, remove);
         list.appendChild(chip);
     });
-    list.hidden = selectedDeliveryReceipts.length === 0;
+    const paymentChip = (payment, type) => {
+        const number = getDPPaymentNumber(payment);
+        const chip = document.createElement("span");
+        chip.className = "selected-dr-chip";
+        const label = document.createElement("span");
+        label.textContent = (type === "DP" ? "DP · " : "FP · ") + number;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "selected-dr-remove";
+        remove.textContent = "×";
+        remove.title = "Remove " + number;
+        remove.setAttribute("aria-label", "Remove payment " + number);
+        remove.addEventListener("click", () => {
+            const id = getDPPaymentId(payment).toLowerCase();
+            if (type === "DP") selectedDPPayments = selectedDPPayments.filter(row => getDPPaymentId(row).toLowerCase() !== id);
+            else selectedFPPayments = selectedFPPayments.filter(row => getDPPaymentId(row).toLowerCase() !== id);
+            invoiceItems = invoiceItems.filter(item => String(item.sourcePaymentId || "").toLowerCase() !== id);
+            selectedDPPayment = selectedDPPayments[0] || null;
+            selectedFPPayment = selectedFPPayments[0] || null;
+            syncSelectedDeliveryReceipts();
+            if ($("drSuggestions") && !$("drSuggestions").hidden) renderDeliveryReceiptSuggestions();
+        });
+        chip.append(label, remove);
+        list.appendChild(chip);
+    };
+    selectedDPPayments.forEach(payment => paymentChip(payment, "DP"));
+    selectedFPPayments.forEach(payment => paymentChip(payment, "FP"));
+    list.hidden = selectedDeliveryReceipts.length + selectedDPPayments.length + selectedFPPayments.length === 0;
 }
 
 function rebuildInvoiceItemsFromSelectedDRs() {
