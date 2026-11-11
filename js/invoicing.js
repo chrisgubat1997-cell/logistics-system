@@ -961,132 +961,35 @@ function removeInvoiceSuggestions() {
 ========================================================= */
 
 function renderInvoiceSummary() {
-
-    const totalInvoice =
-        document.getElementById(
-            "totalInvoice"
-        );
-
-    const todaysInvoiced =
-        document.getElementById(
-            "todaysInvoiced"
-        );
-
-    const ongoingInvoice =
-        document.getElementById(
-            "ongoingInvoice"
-        );
-
-    const cancelledInvoice =
-        document.getElementById(
-            "cancelledInvoice"
-        );
-
+    const totalInvoice = document.getElementById("totalInvoice");
+    const todaysInvoiced = document.getElementById("todaysInvoiced");
+    const cancelledInvoice = document.getElementById("cancelledInvoice");
 
     if (totalInvoice) {
-
-        totalInvoice.textContent =
-            invoiceRecords.length;
-
+        totalInvoice.textContent = invoiceRecords.length;
     }
 
-
-    const today =
-        getTodayString();
-
-
-    const todayCount =
-        invoiceRecords.filter(invoice => {
-
-            const date =
-                getRecordValue(
-                    invoice,
-                    [
-                        "invoiceDate",
-                        "date",
-                        "Invoice Date"
-                    ]
-                );
-
-            return normalizeDate(date) === today;
-
-        }).length;
-
+    const today = getTodayString();
+    const todayCount = invoiceRecords.filter(invoice => {
+        const date = getRecordValue(invoice, ["invoiceDate", "date", "Invoice Date"]);
+        return normalizeDate(date) === today;
+    }).length;
 
     if (todaysInvoiced) {
-
-        todaysInvoiced.textContent =
-            todayCount;
-
+        todaysInvoiced.textContent = todayCount;
     }
 
-
-    const ongoingCount =
-        invoiceRecords.filter(invoice => {
-
-            const status =
-                String(
-                    getRecordValue(
-                        invoice,
-                        [
-                            "status",
-                            "invoiceStatus",
-                            "Status"
-                        ]
-                    ) || ""
-                )
-                    .trim()
-                    .toUpperCase();
-
-
-            return (
-                status === "ONGOING" ||
-                status === "DRAFT"
-            );
-
-        }).length;
-
-
-    if (ongoingInvoice) {
-
-        ongoingInvoice.textContent =
-            ongoingCount;
-
-    }
-
-
-    const cancelledCount =
-        invoiceRecords.filter(invoice => {
-
-            const status =
-                String(
-                    getRecordValue(
-                        invoice,
-                        [
-                            "status",
-                            "invoiceStatus",
-                            "Status"
-                        ]
-                    ) || ""
-                )
-                    .trim()
-                    .toUpperCase();
-
-
-            return status === "CANCELLED";
-
-        }).length;
-
+    const cancelledCount = invoiceRecords.filter(invoice => {
+        const status = String(
+            getRecordValue(invoice, ["status", "invoiceStatus", "Status"]) || ""
+        ).trim().toUpperCase();
+        return status === "CANCELLED";
+    }).length;
 
     if (cancelledInvoice) {
-
-        cancelledInvoice.textContent =
-            cancelledCount;
-
+        cancelledInvoice.textContent = cancelledCount;
     }
-
 }
-
 
 /* =========================================================
    RENDER RECENT INVOICES
