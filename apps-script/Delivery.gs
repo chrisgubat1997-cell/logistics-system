@@ -755,7 +755,7 @@ const netUnitPrice = unitPrice * (1 - discountRate);
         DELIVERED_QTY: item.pickQty,
         BALANCE: item.balance,
         PICK_QTY: item.pickQty,
-        UNIT_PRICE: item.unitPrice,
+        UNIT_PRICE: item.netUnitPrice,
         ORIGINAL_UNIT_PRICE: item.unitPrice,
         NET_UNIT_PRICE: item.netUnitPrice,
         DISCOUNT_AMOUNT: item.discountAmount,
