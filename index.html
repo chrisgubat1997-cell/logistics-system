@@ -133,7 +133,7 @@
     <link rel="stylesheet" href="css/gemlight-theme.css?v=20261111-company-colors02">
 
     <link rel="stylesheet" href="css/system-monitor.css?v=20261110-admin-monitor01">
-    <link rel="stylesheet" href="css/so-monitoring.css?v=20261111-quickview01">
+    <link rel="stylesheet" href="css/so-monitoring.css?v=20261111-customer-36001">
 </head>
 
 
@@ -364,7 +364,7 @@
             <div class="global-so-search" id="globalSOSearchWrap">
                 <span aria-hidden="true">⌕</span>
                 <input id="globalSOSearch" type="search" autocomplete="off"
-                    placeholder="Search SO / Client / Project..." aria-label="Search Sales Order 360 degree quick view">
+                    placeholder="Search SO / Customer / Project..." aria-label="Search Sales Order or Customer 360 degree quick view">
                 <small>360°</small>
                 <div class="global-so-search-results" id="globalSOSearchResults" hidden></div>
             </div>
@@ -3191,7 +3191,7 @@ async function loadSOMonitoringModule() {
     if (!container) return;
     if (!soMonitoringModuleLoaded) {
         try {
-            await loadScriptOnce('js/so-monitoring.js?v=20261111-item-delivery-summary02', 'data-so-monitoring-js');
+            await loadScriptOnce('js/so-monitoring.js?v=20261111-customer-36001', 'data-so-monitoring-js');
             soMonitoringModuleLoaded = true;
         } catch (error) {
             container.innerHTML = '<div style="padding:16px;color:#b42318">Unable to load SO Monitoring: ' + String(error.message || error) + '</div>';
@@ -3615,11 +3615,13 @@ document.addEventListener(
     function showResults(items, query) {
         if (!query) { closeResults(); return; }
         results.innerHTML = items.length ? items.map(function (item) {
-            return '<button type="button" class="global-so-result" data-so="' +
-                String(item.soNumber || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') +
-                '"><strong>' + (item.soNumber || '') + '</strong><span>' +
-                (item.client || '') + '</span><small>' + (item.project || 'No project') + '</small></button>';
-        }).join('') : '<div class="global-so-no-result">No matching Sales Order found.</div>';
+            const isCustomer = item.type === 'customer';
+            const key = isCustomer ? item.customerId : item.soNumber;
+            const esc = function (value) { return String(value || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); };
+            return '<button type="button" class="global-so-result" data-type="' + (isCustomer ? 'customer' : 'so') + '" data-key="' + esc(key) +
+                '"><strong>' + (isCustomer ? 'CUSTOMER' : esc(item.soNumber)) + '</strong><span>' + esc(item.client) +
+                '</span><small>' + esc(item.project || (isCustomer ? 'Open Customer 360°' : 'No project')) + '</small></button>';
+        }).join('') : '<div class="global-so-no-result">No matching Sales Order or Customer found.</div>';
         results.hidden = false;
     }
     async function updateResults() {
@@ -3649,17 +3651,17 @@ document.addEventListener(
         if (event.key === 'Enter') event.preventDefault();
     });
     results.addEventListener('click', async function (event) {
-        const button = event.target.closest('[data-so]');
+        const button = event.target.closest('[data-type][data-key]');
         if (!button) return;
-        const soNumber = button.getAttribute('data-so');
+        const type = button.getAttribute('data-type');
+        const key = button.getAttribute('data-key');
         closeResults();
         if (!page.classList.contains('active')) showPage('soMonitoring', null);
         try {
             await loadSOMonitoringModule();
-            if (typeof window.openSOMonitoringSO === 'function') await window.openSOMonitoringSO(soNumber);
-        } catch (error) {
-            console.error('Unable to open selected Sales Order:', error);
-        }
+            if (type === 'customer' && typeof window.openSOMonitoringCustomer === 'function') await window.openSOMonitoringCustomer(key);
+            else if (typeof window.openSOMonitoringSO === 'function') await window.openSOMonitoringSO(key);
+        } catch (error) { console.error('Unable to open selected 360° view:', error); }
     });
     document.addEventListener('click', function (event) {
         if (!wrap.contains(event.target)) closeResults();
