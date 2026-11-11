@@ -970,7 +970,7 @@ function renderInvoiceSummary() {
     if (total) total.textContent = invoiceRecords.length;
     if (amount) amount.textContent = formatCurrency(invoiceRecords
         .filter(x => String(x.status || "").toUpperCase() !== "CANCELLED")
-         .reduce((sum, x) => sum + (Number(String(x.amount ?? x.amountDue ?? x.finalAmountDue ?? x.totalAmount ?? 0).replace(/[₱,\\s]/g, "")) || 0), 0));
+         .reduce((sum, x) => sum + (Number(String(x.amount ?? x.amountDue ?? x.finalAmountDue ?? x.totalAmount ?? 0).replace(/[₱,\s]/g, "")) || 0), 0));
     if (cancelled) cancelled.textContent = invoiceRecords.filter(x => String(x.status || "").toUpperCase() === "CANCELLED").length;
 }
 
