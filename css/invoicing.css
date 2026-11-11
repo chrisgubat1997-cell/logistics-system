@@ -1272,17 +1272,9 @@
 .invoicing-container .invoice-release-selected-btn:disabled {
     opacity:.42; cursor:not-allowed; filter:grayscale(.2);
 }
-.invoicing-container .invoiced-records-table { min-width:1120px !important; }
+.invoicing-container .invoiced-records-table { min-width:1040px !important; }
 .invoicing-container .invoiced-records-table th:first-child,
 .invoicing-container .invoiced-records-table td:first-child { width:42px; text-align:center; padding-left:10px; padding-right:10px; }
-.invoicing-container .invoiced-records-table th:last-child { text-align:right; }
-.invoicing-container .invoiced-records-table td.invoice-row-actions {
-    text-align:right; white-space:nowrap; padding-left:8px; padding-right:12px;
-}
-.invoicing-container .invoice-row-actions .table-action {
-    height:24px; min-width:42px; padding:0 6px; margin:0 0 0 3px;
-    border-radius:5px; font-size:7.4px; line-height:1;
-}
 @media (max-width:760px) {
     .invoicing-container .invoicing-header .header-actions { flex-wrap:wrap; }
     .invoicing-container .invoice-date-range-filter { flex:1; }
