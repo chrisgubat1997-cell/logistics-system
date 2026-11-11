@@ -300,8 +300,12 @@
                         ONGOING DELIVERY
                     </option>
 
+                    <option value="DELIVERED">
+                        DELIVERED
+                    </option>
+
                     <option value="COMPLETED">
-                        COMPLETED
+                        COMPLETED (LEGACY)
                     </option>
 
                     <option value="CANCELLED">
@@ -374,7 +378,7 @@
                         id="postDRButton"
                         disabled>
 
-                        🟢 POST DR
+                        🟢 MARK AS DELIVERED
 
                     </button>
 
@@ -1060,9 +1064,11 @@
 
             <button
                 type="button"
-                class="btn btn-success">
+                class="btn btn-success"
+                id="detailMarkDeliveredButton"
+                disabled>
 
-                🟢 POST DR
+                🟢 MARK AS DELIVERED
 
             </button>
 
@@ -1188,7 +1194,39 @@
 </div>
 
 
+<!-- MARK AS DELIVERED MODAL -->
+<div id="markDeliveredModal" class="delivery-modal" hidden aria-hidden="true">
+    <div class="delivery-modal-card" role="dialog" aria-modal="true" aria-labelledby="markDeliveredTitle">
+        <div class="delivery-modal-header">
+            <div>
+                <span class="delivery-modal-eyebrow">DELIVERY COMPLETION</span>
+                <h2 id="markDeliveredTitle">Mark as Delivered</h2>
+                <p>Confirm that the client has received or picked up the items.</p>
+            </div>
+            <button type="button" class="delivery-modal-close" data-close-mark-delivered aria-label="Close">×</button>
+        </div>
+        <div class="delivery-modal-dr-ref">DR Number: <strong id="markDeliveredDRNumber">—</strong></div>
+        <form id="markDeliveredForm">
+            <div class="delivery-modal-fields">
+                <div class="form-group">
+                    <label for="deliveredDateInput">Delivery Date <span class="required">*</span></label>
+                    <input type="date" id="deliveredDateInput" name="deliveryDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="deliveredRemarksInput">Remarks <span class="field-note">(Optional)</span></label>
+                    <textarea id="deliveredRemarksInput" name="remarks" rows="3" placeholder="Enter delivery or client pickup remarks..."></textarea>
+                </div>
+            </div>
+            <p id="markDeliveredError" class="delivery-modal-error" role="alert"></p>
+            <div class="delivery-modal-actions">
+                <button type="button" class="btn btn-outline" data-close-mark-delivered>CANCEL</button>
+                <button type="submit" class="btn btn-success" id="confirmMarkDeliveredButton">CONFIRM DELIVERED</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- =========================================================
      DELIVERY JAVASCRIPT
 ========================================================= -->
-<script src="../js/delivery.js?v=20261020-12"></script>
+<script src="../js/delivery.js?v=20261111-01"></script>
