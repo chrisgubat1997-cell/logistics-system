@@ -79,7 +79,7 @@
       // When a customer has a permanent ID, never mix in SOs by name.
       // Legacy name fallback is allowed only if the customer itself has no ID.
       if(id)return !!soId&&soId===id;
-      return !soId&&name&&normalizedName(so.CLIENT_NAME||so.CLIENT_NAME||so.CUSTOMER_NAME)===name;
+      return !soId&&name&&normalizedName(so.CLIENT_NAME||so.CUSTOMER_NAME)===name;
     });
   }
   function soAmount(so){return Number(so.GRAND_TOTAL??so.TOTAL_AMOUNT??so.SO_TOTAL??so.AMOUNT??0)||0;}
