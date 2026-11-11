@@ -125,6 +125,31 @@ async function fetchInvoicesFromDatabase() {
 
 
 
+async function fetchPendingInvoiceQueueFromDatabase() {
+    try {
+        const response = await fetch(INVOICE_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: "getPendingInvoiceQueue", data: {} })
+        });
+        const raw = await response.text();
+        const result = JSON.parse(raw);
+        if (!response.ok || !result || result.success === false) {
+            throw new Error(result?.message || result?.error || "Could not load pending invoice queue.");
+        }
+        pendingInvoiceQueue = {
+            FULL_PAYMENT: Array.isArray(result.fullPayments) ? result.fullPayments : [],
+            DOWN_PAYMENT: Array.isArray(result.downPayments) ? result.downPayments : [],
+            DELIVERY_RECEIPT: Array.isArray(result.deliveryReceipts) ? result.deliveryReceipts : []
+        };
+        return true;
+    } catch (error) {
+        console.error("LOGIS-TECH: Failed to load pending invoice queue.", error);
+        pendingInvoiceQueue = { FULL_PAYMENT: [], DOWN_PAYMENT: [], DELIVERY_RECEIPT: [] };
+        return false;
+    }
+}
+
 /* =========================================================
    MODULE STATE
 ========================================================= */
@@ -133,6 +158,9 @@ let invoicingInitialized = false;
 
 let invoiceRecords = [];
 let salesOrderRecords = [];
+let pendingInvoiceQueue = { FULL_PAYMENT: [], DOWN_PAYMENT: [], DELIVERY_RECEIPT: [] };
+let activePendingInvoiceType = "FULL_PAYMENT";
+let pendingInvoiceSearchTimer = null;
 
 let invoiceSearchTimer = null;
 let salesOrderSearchTimer = null;
@@ -225,14 +253,19 @@ function initializeInvoicing() {
 
     renderRecentInvoices();
 
-    renderRecentSalesOrders();
+    renderPendingInvoiceQueue();
+    bindPendingInvoiceControls();
 
     invoicingInitialized = true;
 
     // Invoice history is loaded only from Google Sheets.
-    fetchInvoicesFromDatabase().then(function () {
+    Promise.all([
+        fetchInvoicesFromDatabase(),
+        fetchPendingInvoiceQueueFromDatabase()
+    ]).then(function () {
         renderInvoiceSummary();
         renderRecentInvoices();
+        renderPendingInvoiceQueue();
     });
 
 
@@ -501,17 +534,17 @@ async function refreshInvoicing() {
          * Refresh the module's data only.
          * Do not reload the browser page or navigate away.
          */
-        salesOrderRecords =
-            getLocalStorageArray(SALES_ORDER_STORAGE_KEY);
-
-        await fetchInvoicesFromDatabase();
+        await Promise.all([
+            fetchInvoicesFromDatabase(),
+            fetchPendingInvoiceQueueFromDatabase()
+        ]);
 
         renderInvoiceSummary();
         renderRecentInvoices();
-        renderRecentSalesOrders();
+        renderPendingInvoiceQueue();
 
         clearInvoiceSearch(false);
-        clearSalesOrderSearch(false);
+        clearPendingInvoiceSearch();
 
         console.log(
             "LOGIS-TECH: Invoice tables refreshed without reloading the page."
@@ -2126,6 +2159,80 @@ function renderPreviewItems(invoice) {
 
 }
 
+
+/* =========================================================
+   PENDING FOR INVOICE — TYPE TABS, SEARCH AND TABLE
+========================================================= */
+function bindPendingInvoiceControls() {
+    document.querySelectorAll("[data-pending-invoice-type]").forEach(button => {
+        if (button.dataset.bound === "true") return;
+        button.dataset.bound = "true";
+        button.addEventListener("click", () => {
+            activePendingInvoiceType = button.dataset.pendingInvoiceType;
+            document.querySelectorAll("[data-pending-invoice-type]").forEach(tab => {
+                const active = tab === button;
+                tab.classList.toggle("active", active);
+                tab.setAttribute("aria-selected", active ? "true" : "false");
+            });
+            renderPendingInvoiceQueue();
+        });
+    });
+
+    const search = document.getElementById("pendingInvoiceSearchInput");
+    if (search && search.dataset.bound !== "true") {
+        search.dataset.bound = "true";
+        search.addEventListener("input", () => {
+            clearTimeout(pendingInvoiceSearchTimer);
+            pendingInvoiceSearchTimer = setTimeout(renderPendingInvoiceQueue, 120);
+        });
+    }
+}
+
+function clearPendingInvoiceSearch() {
+    const search = document.getElementById("pendingInvoiceSearchInput");
+    if (search) search.value = "";
+}
+
+function renderPendingInvoiceQueue() {
+    const body = document.getElementById("pendingInvoiceTableBody");
+    if (!body) return;
+
+    const fullCount = document.getElementById("pendingFullPaymentCount");
+    const dpCount = document.getElementById("pendingDownPaymentCount");
+    const drCount = document.getElementById("pendingDeliveryReceiptCount");
+    if (fullCount) fullCount.textContent = (pendingInvoiceQueue.FULL_PAYMENT || []).length;
+    if (dpCount) dpCount.textContent = (pendingInvoiceQueue.DOWN_PAYMENT || []).length;
+    if (drCount) drCount.textContent = (pendingInvoiceQueue.DELIVERY_RECEIPT || []).length;
+
+    const query = String(document.getElementById("pendingInvoiceSearchInput")?.value || "").trim().toLowerCase();
+    const records = (pendingInvoiceQueue[activePendingInvoiceType] || []).filter(record => {
+        return [
+            record.referenceNo, record.soNumber, record.clientName,
+            record.project, record.paymentNo, record.drNumber
+        ].join(" ").toLowerCase().includes(query);
+    });
+
+    if (!records.length) {
+        body.innerHTML = '<tr class="empty-row"><td colspan="6">No pending ' +
+            (activePendingInvoiceType === "FULL_PAYMENT" ? "full payment" :
+             activePendingInvoiceType === "DOWN_PAYMENT" ? "down payment" : "delivery receipt") +
+            ' records found.</td></tr>';
+        return;
+    }
+
+    body.innerHTML = records.slice(0, 100).map(record => {
+        const ref = record.referenceNo || record.paymentNo || record.drNumber || record.soNumber || "—";
+        const date = record.date || "";
+        return `<tr>
+            <td><strong>${escapeHtml(ref)}</strong></td>
+            <td>${escapeHtml(record.soNumber || "—")}</td>
+            <td>${escapeHtml(record.clientName || "—")}</td>
+            <td>${escapeHtml(record.project || "—")}</td>
+            <td>${escapeHtml(date ? formatDisplayDate(date) : "—")}</td>
+            <td><strong>${formatCurrency(record.amount || 0)}</strong></td>
+        </tr>`;
+    }).join("");
+}
 
 /* =========================================================
    RENDER RECENT SALES ORDERS
