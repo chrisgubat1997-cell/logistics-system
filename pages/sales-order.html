@@ -188,7 +188,65 @@
              TOOLBAR
         ================================================== -->
 
-        <div class="so-toolbar">
+
+        <!-- =================================================
+             SELECTION ACTION BAR
+        ================================================== -->
+
+        <div
+            id="soSelectionActionBar"
+            class="so-selection-action-bar"
+        >
+
+            <div class="so-selection-info">
+
+                <span id="soSelectionText">
+                    No sales order selected
+                </span>
+
+            </div>
+
+
+            <div class="so-selection-actions">
+
+                <button
+                    type="button"
+                    id="updateSOButton"
+                    class="so-secondary-button"
+                    onclick="updateSelectedSO()"
+                    disabled
+                >
+                    Edit / Update
+                </button>
+
+
+                <button
+                    type="button"
+                    id="cancelSOButton"
+                    class="so-danger-button"
+                    onclick="cancelSelectedSO()"
+                    disabled
+                >
+                    Cancel SO
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================================
+             SALES ORDER TABLE
+        ================================================== -->
+
+        <div class="so-table-card">
+
+            <div class="so-table-header">
+                <div class="so-table-title">
+                    <h2>Sales Orders</h2>
+                    <p>Showing the 5 most recently created Sales Orders. Search or filter to find any loaded Sales Order.</p>
+                </div>
+                <div class="so-toolbar">
 
             <div class="so-search-wrapper">
 
@@ -254,65 +312,7 @@
             </button>
 
         </div>
-
-
-        <!-- =================================================
-             SELECTION ACTION BAR
-        ================================================== -->
-
-        <div
-            id="soSelectionActionBar"
-            class="so-selection-action-bar"
-        >
-
-            <div class="so-selection-info">
-
-                <span id="soSelectionText">
-                    No sales order selected
-                </span>
-
             </div>
-
-
-            <div class="so-selection-actions">
-
-                <button
-                    type="button"
-                    id="updateSOButton"
-                    class="so-secondary-button"
-                    onclick="updateSelectedSO()"
-                    disabled
-                >
-                    Edit / Update
-                </button>
-
-
-                <button
-                    type="button"
-                    id="cancelSOButton"
-                    class="so-danger-button"
-                    onclick="cancelSelectedSO()"
-                    disabled
-                >
-                    Cancel SO
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             SALES ORDER TABLE
-        ================================================== -->
-
-        <div class="so-table-card">
-
-            <div class="so-table-header">
-                <div class="so-table-title">
-                    <h2>Sales Orders</h2>
-                    <p>Showing the 5 most recently created Sales Orders. Use search or filters to narrow the results.</p>
-                </div>
             </div>
 
             <div class="so-table-wrapper">
