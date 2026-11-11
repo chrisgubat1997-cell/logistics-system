@@ -2577,6 +2577,8 @@ function renderSalesOrderSuggestions(query) {
         selectedDeliveryReceipts = [];
         selectedDPPayment = null;
         selectedFPPayment = null;
+        selectedDPPayments = [];
+        selectedFPPayments = [];
         setValue("soNo", number);
         setValue("drNo", "");
         renderSelectedDeliveryReceiptChips();
