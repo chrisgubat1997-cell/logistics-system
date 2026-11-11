@@ -1025,7 +1025,8 @@ function getPendingInvoiceQueue(payload) {
   });
 
   const soByNumber = new Map(salesOrders.map(so => [String(so.SO_NUMBER || "").trim(), so]));
-  const paymentQueue = [];
+  const downPaymentQueue = [];
+  const fullPaymentQueue = [];
 
   payments.forEach(payment => {
     const soNo = String(payment.SO_NUMBER || "").trim();
@@ -1042,7 +1043,8 @@ function getPendingInvoiceQueue(payload) {
     if (invoicedPaymentIds.has(paymentId.toLowerCase()) ||
         invoicedPaymentNumbers.has(paymentNo.toLowerCase())) return;
 
-    paymentQueue.push({
+    const paymentType = String(payment.PAYMENT_TYPE || "").trim().toUpperCase();
+    const paymentRow = {
       referenceNo: paymentNo,
       paymentNo: paymentNo,
       paymentId: paymentId,
@@ -1051,8 +1053,15 @@ function getPendingInvoiceQueue(payload) {
       project: String(payment.PROJECT || so.PROJECT || ""),
       date: payment.PAYMENT_DATE || payment.DATE || payment.CREATED_AT || "",
       amount: amount,
-      invoiceType: "PAYMENT"
-    });
+      paymentType: paymentType
+    };
+    if (["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(paymentType)) {
+      paymentRow.invoiceType = "DOWN_PAYMENT";
+      downPaymentQueue.push(paymentRow);
+    } else if (["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(paymentType)) {
+      paymentRow.invoiceType = "FULL_PAYMENT";
+      fullPaymentQueue.push(paymentRow);
+    }
   });
 
   const deliveryReceiptQueue = deliveryReceipts.filter(dr =>
@@ -1070,10 +1079,14 @@ function getPendingInvoiceQueue(payload) {
 
   return {
     success: true,
-    payments: paymentQueue,
+    payments: downPaymentQueue.concat(fullPaymentQueue),
+    downPayments: downPaymentQueue,
+    fullPayments: fullPaymentQueue,
     deliveryReceipts: deliveryReceiptQueue,
     counts: {
-      payments: paymentQueue.length,
+      payments: downPaymentQueue.length + fullPaymentQueue.length,
+      downPayments: downPaymentQueue.length,
+      fullPayments: fullPaymentQueue.length,
       deliveryReceipt: deliveryReceiptQueue.length
     }
   };
