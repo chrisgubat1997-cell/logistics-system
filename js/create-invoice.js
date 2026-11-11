@@ -2120,7 +2120,14 @@ function rebuildInvoiceItemsFromSelectedDRs() {
                 );
                 const itemName = String((soItem && soItem.itemName) || normalized.itemName || normalized.description || "").trim();
                 const unit = String((soItem && soItem.unit) || normalized.unit || "").trim();
-                const unitPrice = toNumber((soItem && soItem.unitPrice) || normalized.unitPrice);
+                // The DR carries the allocated SO discount in its net unit price.
+                // Prefer that saved DR price over the original SO unit price.
+                const unitPrice = toNumber(
+                    getObjectValue(rawItem, [
+                        "NET_UNIT_PRICE", "netUnitPrice",
+                        "UNIT_PRICE", "unitPrice"
+                    ]) ?? normalized.unitPrice ?? (soItem && soItem.unitPrice)
+                );
                 const qty = toNumber(normalized.qtyInvoice);
                 const key = sourceItemNo ? "ITEM:" + sourceItemNo.toLowerCase() : "DETAIL:" + [itemName.toLowerCase(), unit.toLowerCase(), unitPrice].join("|");
 
