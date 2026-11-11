@@ -2473,6 +2473,7 @@ async function savePayment() {
     const payload = {
         paymentNo: paymentNo,
         paymentDate: paymentDate,
+        paymentType: getValue("paymentType"),
         paymentMethod: paymentMethod,
         soNumber: soNo,
         clientName: client,
@@ -2558,6 +2559,10 @@ function validatePayment() {
             "paymentDate"
         );
 
+    const paymentType = getValue("paymentType");
+    if (!["DOWN_PAYMENT", "FULL_PAYMENT"].includes(paymentType)) {
+        return { valid: false, message: "Please select Down Payment or Full Payment classification." };
+    }
 
     const paymentMethod =
         getValue(
