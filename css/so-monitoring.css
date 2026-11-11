@@ -25,3 +25,9 @@
 .som-status{display:inline-flex;align-items:center;padding:4px 7px;border-radius:20px;background:#eef2f6;color:#475569;font-size:9px;font-weight:800;white-space:nowrap}.som-status.paid,.som-status.completed,.som-status.delivered,.som-status.received,.som-status.active{background:#e8f7ef;color:#167044}.som-status.partial,.som-status.pending,.som-status.in-progress{background:#fff5dc;color:#946200}.som-status.cancelled,.som-status.overdue,.som-status.rejected{background:#fff0ef;color:#b42318}
 @media(max-width:760px){.som-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.som-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.som-intro{align-items:flex-start}.som-intro p{max-width:440px}}
 @media(max-width:480px){.som-intro{flex-direction:column}.som-refresh{align-self:flex-start}.som-search-control small{display:none}.som-panel{padding:11px}.som-summary-grid>div{padding:10px}.som-detail-grid{gap:11px}}
+
+.som-customer-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
+.som-customer-name{font-size:13px;margin:0 0 14px;color:var(--text-primary,#172b4d)}
+.som-customer-footnote{font-size:10px;color:#64748b;padding:4px 2px 14px}
+.som-link{border:0;background:transparent;color:#16865b;font:inherit;font-weight:800;text-decoration:underline;cursor:pointer;padding:0}
+@media(max-width:900px){.som-customer-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
