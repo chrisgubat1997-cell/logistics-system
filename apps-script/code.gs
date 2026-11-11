@@ -367,6 +367,9 @@ case "getInvoice":
 case "createInvoice":
   return createInvoice(payload);
 
+case "releaseInvoices":
+  return releaseInvoices(payload);
+
 case "getPayments":
   return getPayments(payload);
 
