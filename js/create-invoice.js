@@ -115,6 +115,8 @@ let isSaving = false;
 
 let salesOrderRecords = [];
 let deliveryReceiptRecords = [];
+let paymentRecords = [];
+let selectedDPPayment = null;
 let invoiceHistoryRecords = [];
 let selectedDeliveryReceipts = [];
 let salesOrderBaseItems = [];
@@ -157,6 +159,7 @@ async function initializeCreateInvoice() {
     await Promise.all([
         loadSalesOrdersFromDatabase(),
         loadDeliveryReceiptsFromDatabase(),
+        loadPaymentRecordsFromDatabase(),
         loadInvoiceHistoryFromDatabase()
     ]);
     bindSalesOrderPicker();
@@ -1034,6 +1037,15 @@ function collectInvoiceData() {
         invoiceType:
             selectedInvoiceType,
 
+        dpPaymentNo:
+            selectedInvoiceType === "DOWN_PAYMENT" && selectedDPPayment ? getDPPaymentNumber(selectedDPPayment) : "",
+
+        dpPaymentId:
+            selectedInvoiceType === "DOWN_PAYMENT" && selectedDPPayment ? getDPPaymentId(selectedDPPayment) : "",
+
+        dpPaymentAmount:
+            selectedInvoiceType === "DOWN_PAYMENT" && selectedDPPayment ? getDPPaymentAmount(selectedDPPayment) : 0,
+
         poNo:
             getValue(
                 "poNo"
@@ -1167,6 +1179,8 @@ async function saveInvoice() {
             invoiceDate: saved.INVOICE_DATE || saved.invoiceDate || invoice.invoiceDate,
             soNo: saved.SO_NUMBER || saved.soNo || invoice.soNo,
             drNo: saved.DR_NUMBER || saved.drNo || invoice.drNo,
+            dpPaymentNo: saved.DP_PAYMENT_NO || saved.dpPaymentNo || invoice.dpPaymentNo,
+            dpPaymentId: saved.DP_PAYMENT_ID || saved.dpPaymentId || invoice.dpPaymentId,
             status: saved.STATUS || saved.status || invoice.status,
             createdAt: saved.CREATED_AT || saved.createdAt || invoice.createdAt,
             updatedAt: saved.UPDATED_AT || saved.updatedAt || new Date().toISOString()
@@ -1249,6 +1263,12 @@ function validateInvoice() {
             valid: false,
             message: "Please select at least one actual Delivery Receipt for a DR Invoice."
         };
+    }
+
+    if (selectedInvoiceType === "DOWN_PAYMENT") {
+        if (!selectedDPPayment) return { valid: false, message: "Please select an existing Payment record for the Down Payment Invoice." };
+        const selectedNo = getDPPaymentNumber(selectedDPPayment).toLowerCase();
+        if (getPreviouslyInvoicedDPPaymentNumbers().has(selectedNo)) return { valid: false, message: "This Payment record has already been invoiced. Please select another Payment record." };
     }
 
     if (!["DELIVERY_RECEIPT", "ADVANCE", "DOWN_PAYMENT", "FULL_PAYMENT"].includes(selectedInvoiceType)) {
@@ -1800,6 +1820,131 @@ async function loadInvoiceHistoryFromDatabase() {
     }
 }
 
+async function loadPaymentRecordsFromDatabase() {
+    try {
+        paymentRecords = await invoiceGetRecords("getPayments", ["payments", "records", "data"]);
+        console.log("[CREATE INVOICE] Payment records loaded from database:", paymentRecords.length);
+    } catch (error) {
+        console.error("[CREATE INVOICE] Failed to load Payment records:", error);
+        paymentRecords = [];
+    }
+}
+
+function getDPPaymentNumber(payment) {
+    return String(getObjectValue(payment, ["PAYMENT_NO", "paymentNo", "PAYMENT_NUMBER", "paymentNumber"]) || "").trim();
+}
+
+function getDPPaymentId(payment) {
+    return String(getObjectValue(payment, ["PAYMENT_ID", "paymentId", "ID", "id"]) || getDPPaymentNumber(payment)).trim();
+}
+
+function getDPPaymentAmount(payment) {
+    const applied = getObjectValue(payment, ["SO_APPLIED_AMOUNT", "soAppliedAmount"]);
+    if (applied !== undefined && applied !== null && applied !== "") return Math.max(0, toNumber(applied));
+    const cash = toNumber(getObjectValue(payment, ["CURRENT_PAYMENT", "currentPayment", "AMOUNT", "amount"]));
+    const credit = toNumber(getObjectValue(payment, ["CUSTOMER_CREDIT_APPLIED", "customerCreditApplied"]));
+    return Math.max(0, cash + credit);
+}
+
+function getPreviouslyInvoicedDPPaymentNumbers() {
+    return new Set(invoiceHistoryRecords
+        .filter(invoice => !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(
+            String(getObjectValue(invoice, ["STATUS", "status"]) || "").trim().toUpperCase()
+        ))
+        .map(invoice => String(getObjectValue(invoice, ["DP_PAYMENT_NO", "dpPaymentNo"]) || "").trim().toLowerCase())
+        .filter(Boolean));
+}
+
+function renderDPPaymentPicker() {
+    const panel = $("dpPaymentPicker");
+    const list = $("dpPaymentOptions");
+    const selected = $("selectedDPPaymentSummary");
+    if (!panel || !list) return;
+    const isDP = selectedInvoiceType === "DOWN_PAYMENT";
+    panel.hidden = !isDP;
+    if (!isDP) {
+        list.innerHTML = "";
+        if (selected) selected.hidden = true;
+        return;
+    }
+
+    const soNo = getValue("soNo").trim().toLowerCase();
+    const used = getPreviouslyInvoicedDPPaymentNumbers();
+    const rows = paymentRecords.filter(payment => {
+        const paymentSO = String(getObjectValue(payment, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo"]) || "").trim().toLowerCase();
+        const status = String(getObjectValue(payment, ["PAYMENT_STATUS", "paymentStatus", "STATUS", "status"]) || "RECEIVED").trim().toUpperCase();
+        const number = getDPPaymentNumber(payment);
+        return soNo && paymentSO === soNo && number &&
+            ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(status) &&
+            getDPPaymentAmount(payment) > 0;
+    });
+
+    list.innerHTML = "";
+    if (!rows.length) {
+        const empty = document.createElement("div");
+        empty.className = "dp-payment-empty";
+        empty.textContent = soNo
+            ? "No completed Payment record is available for this Sales Order."
+            : "Select a Sales Order first to load its Payment records.";
+        list.appendChild(empty);
+    }
+
+    rows.forEach(payment => {
+        const number = getDPPaymentNumber(payment);
+        const alreadyUsed = used.has(number.toLowerCase());
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dp-payment-option";
+        button.disabled = alreadyUsed;
+        const date = getObjectValue(payment, ["PAYMENT_DATE", "paymentDate", "DATE", "date"]) || "Date not recorded";
+        const amount = getDPPaymentAmount(payment);
+        const isSelected = selectedDPPayment && getDPPaymentNumber(selectedDPPayment).toLowerCase() === number.toLowerCase();
+        if (isSelected) button.classList.add("is-selected");
+        const title = document.createElement("strong");
+        title.textContent = number;
+        const meta = document.createElement("span");
+        meta.textContent = String(date) + (alreadyUsed ? " · ALREADY INVOICED" : "");
+        const value = document.createElement("b");
+        value.textContent = formatCurrency(amount);
+        button.append(title, meta, value);
+        if (!alreadyUsed) {
+            button.addEventListener("click", () => {
+                selectedDPPayment = payment;
+                invoiceItems = [{
+                    id: Date.now() + Math.random(),
+                    itemNo: "DP",
+                    itemName: "Down Payment - " + number,
+                    description: "Down Payment - " + number,
+                    soQty: 1,
+                    invoicedQty: 0,
+                    balance: 1,
+                    qtyInvoice: 1,
+                    unit: "LOT",
+                    unitPrice: amount,
+                    remarks: "Payment No. " + number,
+                    checked: true,
+                    sourceDRNo: "",
+                    sourceDRNumbers: [],
+                    sourceItemNo: "",
+                    sourceSONo: getValue("soNo"),
+                    isManual: false
+                }];
+                renderItems();
+                updateCalculations();
+                renderDPPaymentPicker();
+            });
+        }
+        list.appendChild(button);
+    });
+
+    if (selected) {
+        selected.hidden = !selectedDPPayment;
+        selected.textContent = selectedDPPayment
+            ? "Selected Payment: " + getDPPaymentNumber(selectedDPPayment) + " · " + formatCurrency(getDPPaymentAmount(selectedDPPayment))
+            : "No Payment record selected.";
+    }
+}
+
 function getPreviouslyInvoicedQty(soNumber, itemNo) {
     const targetSO = String(soNumber || "").trim().toLowerCase();
     const targetItem = String(itemNo || "").trim().toLowerCase();
@@ -2004,11 +2149,21 @@ function renderDeliveryReceiptSuggestions() {
             setValue("drNo", type.label);
             selectedDeliveryReceipts = [];
             renderSelectedDeliveryReceiptChips();
-            if (type.value === "DOWN_PAYMENT" || type.value === "FULL_PAYMENT") {
+            if (type.value === "DOWN_PAYMENT") {
+                selectedDPPayment = null;
                 invoiceItems = [];
                 renderItems();
                 updateCalculations();
+                renderDPPaymentPicker();
+            } else if (type.value === "FULL_PAYMENT") {
+                selectedDPPayment = null;
+                invoiceItems = [];
+                renderItems();
+                updateCalculations();
+                renderDPPaymentPicker();
             } else {
+                selectedDPPayment = null;
+                renderDPPaymentPicker();
                 rebuildInvoiceItemsFromSelectedDRs();
             }
             hideDeliveryReceiptSuggestions();
@@ -2288,6 +2443,7 @@ function renderSalesOrderSuggestions(query) {
     function inputSetSalesOrder(number, salesOrder) {
         selectedInvoiceType = "DELIVERY_RECEIPT";
         selectedDeliveryReceipts = [];
+        selectedDPPayment = null;
         setValue("soNo", number);
         setValue("drNo", "");
         renderSelectedDeliveryReceiptChips();
@@ -2300,6 +2456,7 @@ function renderSalesOrderSuggestions(query) {
         hideSalesOrderSuggestions();
         hideDeliveryReceiptSuggestions();
         populateFromSalesOrder(salesOrder);
+        renderDPPaymentPicker();
     }
 }
 
@@ -2309,6 +2466,7 @@ function loadSalesOrderFromUrl() {
     if (!soNo) return;
 
     selectedDeliveryReceipts = [];
+    selectedDPPayment = null;
     setValue("soNo", soNo);
     setValue("drNo", "");
     renderSelectedDeliveryReceiptChips();
@@ -2320,7 +2478,7 @@ function loadSalesOrderFromUrl() {
     }
     const salesOrder = findSalesOrderByNumber(soNo);
     if (salesOrder) {
-        populateFromSalesOrder(salesOrder);
+        populateFromSalesOrder(salesOrder).then(renderDPPaymentPicker);
         return;
     }
 
@@ -2328,7 +2486,7 @@ function loadSalesOrderFromUrl() {
     // not be in the browser cache. Refresh once from the database.
     loadSalesOrdersFromDatabase().then(() => {
         const found = findSalesOrderByNumber(soNo);
-        if (found) populateFromSalesOrder(found);
+        if (found) populateFromSalesOrder(found).then(renderDPPaymentPicker);
     });
 }
 
