@@ -318,9 +318,9 @@ function createDeliveryReceipt(payload) {
       );
     }
 
-    if (typeof validateDeliveryPaymentTerms_ === "function") {
-  validateDeliveryPaymentTerms_(so);
-}
+    // Delivery is an operations workflow and must not be blocked by
+    // down-payment or collection status. Payment-term validation remains
+    // applicable to invoicing/payment workflows, not DR preparation.
 
 
     /* -----------------------------------------------------
@@ -339,6 +339,26 @@ function createDeliveryReceipt(payload) {
       throw new Error(
         "No items were found for Sales Order " + soNumber
       );
+    }
+
+    // Allocate the SO-level discount proportionally across all item lines.
+    // This ensures every partial DR carries only its fair share of the discount.
+    const calculatedSOSubtotal = soItems.reduce(function (sum, item) {
+      const qty = Number(item.QTY || item.SO_QTY || 0);
+      const price = Number(item.UNIT_PRICE ?? item.unitPrice ?? 0);
+      return sum + (Number.isFinite(qty) && Number.isFinite(price) ? qty * price : 0);
+    }, 0);
+    const soSubtotal = Number(so.SUBTOTAL) > 0
+      ? Number(so.SUBTOTAL)
+      : calculatedSOSubtotal;
+    const soDiscount = Math.min(
+      Math.max(0, Number(so.DISCOUNT || 0)),
+      Math.max(0, soSubtotal)
+    );
+    const discountRate = soSubtotal > 0 ? soDiscount / soSubtotal : 0;
+
+    function roundDRAmount_(value) {
+      return Math.round((Number(value || 0) + Number.EPSILON) * 100) / 100;
     }
 
 
@@ -577,9 +597,10 @@ if (!Number.isFinite(unitPrice) || unitPrice < 0) {
   );
 }
 
-const drAmount = Math.round(
-  (pickQty * unitPrice + Number.EPSILON) * 100
-) / 100;
+const originalAmount = roundDRAmount_(pickQty * unitPrice);
+const drAmount = roundDRAmount_(originalAmount * (1 - discountRate));
+const discountAmount = roundDRAmount_(originalAmount - drAmount);
+const netUnitPrice = unitPrice * (1 - discountRate);
 
 
       
@@ -593,6 +614,8 @@ const drAmount = Math.round(
         previouslyDelivered: previouslyDelivered,
         pickQty: pickQty,
         unitPrice: unitPrice,
+        netUnitPrice: netUnitPrice,
+        discountAmount: discountAmount,
         drAmount: drAmount,
         balance: balance - pickQty,
         remarks: String(
@@ -639,6 +662,11 @@ const drAmount = Math.round(
       DR_ID: drId,
       DR_NUMBER: drNumber,
       DR_TOTAL: drTotal,
+      SO_SUBTOTAL: soSubtotal,
+      SO_DISCOUNT: soDiscount,
+      DR_DISCOUNT_TOTAL: roundDRAmount_(preparedItems.reduce(function (sum, item) {
+        return sum + item.discountAmount;
+      }, 0)),
       SO_ID: so.SO_ID || "",
       SO_NUMBER: so.SO_NUMBER || soNumber,
       CUSTOMER_ID: so.CUSTOMER_ID || "",
@@ -728,6 +756,9 @@ const drAmount = Math.round(
         BALANCE: item.balance,
         PICK_QTY: item.pickQty,
         UNIT_PRICE: item.unitPrice,
+        ORIGINAL_UNIT_PRICE: item.unitPrice,
+        NET_UNIT_PRICE: item.netUnitPrice,
+        DISCOUNT_AMOUNT: item.discountAmount,
         DR_AMOUNT: item.drAmount,
         REMARKS: item.remarks,
         CREATED_AT: timestamp
@@ -806,7 +837,10 @@ const drAmount = Math.round(
             soQty: item.soQty,
             previouslyDelivered: item.previouslyDelivered,
             pickQty: item.pickQty,
-            unitPrice: item.unitPrice,
+            unitPrice: item.netUnitPrice,
+            originalUnitPrice: item.unitPrice,
+            netUnitPrice: item.netUnitPrice,
+            discountAmount: item.discountAmount,
             drAmount: item.drAmount,
             balance: item.balance,
             remarks: item.remarks
