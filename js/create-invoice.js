@@ -2425,7 +2425,15 @@ function rebuildInvoiceItemsFromSelectedDRs() {
                         : (normalized.unitPrice || (soItem && soItem.unitPrice) || 0)
                 );
                 const qty = toNumber(normalized.qtyInvoice);
-                const key = sourceItemNo ? "ITEM:" + sourceItemNo.toLowerCase() : "DETAIL:" + [itemName.toLowerCase(), unit.toLowerCase(), unitPrice].join("|");
+                const rawLineAmount = getObjectValue(rawItem, [
+                    "AMOUNT", "amount", "TOTAL_AMOUNT", "totalAmount",
+                    "LINE_TOTAL", "lineTotal", "NET_AMOUNT", "netAmount"
+                ]);
+                const lineAmount = rawLineAmount !== undefined &&
+                    rawLineAmount !== null && String(rawLineAmount).trim() !== ""
+                    ? toNumber(rawLineAmount)
+                    : qty * unitPrice;
+                const key = sourceItemNo ? "ITEM:" + sourceItemNo.toLowerCase() : "DETAIL:" + [itemName.toLowerCase(), unit.toLowerCase()].join("|");
 
                 if (!groupedItems.has(key)) {
                     const soQty = soItem ? toNumber(soItem.soQty) : getSOItemQty(sourceItemNo);
@@ -2440,7 +2448,8 @@ function rebuildInvoiceItemsFromSelectedDRs() {
                         balance: Math.max(0, soQty - invoicedQty),
                         qtyInvoice: 0,
                         unit,
-                        unitPrice,
+                        unitPrice: 0,
+                        sourceAmountTotal: 0,
                         remarks: "",
                         checked: true,
                         sourceDRNo: drNo,
@@ -2452,6 +2461,12 @@ function rebuildInvoiceItemsFromSelectedDRs() {
                 }
                 const row = groupedItems.get(key);
                 row.qtyInvoice += qty;
+                row.sourceAmountTotal += lineAmount;
+                // Recalculate a weighted unit price from the actual saved DR line amounts.
+                // This preserves discounts and differing DR prices when the same item is merged.
+                row.unitPrice = row.qtyInvoice > 0
+                    ? Math.round((row.sourceAmountTotal / row.qtyInvoice) * 10000) / 10000
+                    : 0;
                 if (!row.itemName && itemName) {
                     row.itemName = itemName;
                     row.description = itemName;
