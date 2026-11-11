@@ -1561,6 +1561,12 @@ async function loadSalesOrderModule() {
         container.innerHTML =
             html;
 
+        // Bind search and filter events only after the dynamically loaded
+        // Sales Order controls exist in the document.
+        if (typeof window.initializeSalesOrderModule === 'function') {
+            window.initializeSalesOrderModule();
+        }
+
         // Start Customer rendering immediately after its table exists.
         // Cached Customer data can appear while Sales Orders are loading.
         if (
@@ -3593,7 +3599,7 @@ document.addEventListener(
 <script src="js/company-switch.js?v=20261110-switch-theme01"></script>
 <script src="js/cache-manager.js?v=20261110-company01"></script>
 <script src="js/sync-manager.js?v=20261109-maintenance01"></script>
-<script src="js/sales-order.js?v=20261111-searchfast01"></script>
+<script src="js/sales-order.js?v=20261111-searchfix01"></script>
 <script src="js/role-action-visibility.js?v=20261110-role-matrix05"></script>
 <script src="js/messages.js?v=20261109-sendstatus01"></script>
 <script src="js/system-maintenance.js?v=20261110-brand02"></script>
