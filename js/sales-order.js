@@ -1076,17 +1076,26 @@ async function loadSOList(
         const status = String(statusFilter?.value || "").trim().toLowerCase();
         const payment = String(paymentFilter?.value || "").trim().toLowerCase();
 
-        // Search the complete local dataset; only the five matching rows are rendered.
+        // Search the complete local dataset, then show the five newest
+        // records based on creation date rather than cache/API array order.
         return salesOrders.filter(function (so) {
             const indexed = getSOSearchIndex(so);
             const matchesSummary = soSummaryFilter !== "without-jo" || !indexed.jobOrder;
-
             const matchesSearch = !search || indexed.searchText.includes(search);
-
             const matchesStatus = !status || indexed.status === status;
             const matchesPayment = !payment || indexed.payment === payment;
-
             return matchesSearch && matchesStatus && matchesPayment && matchesSummary;
+        }).sort(function (a, b) {
+            function creationTime(record) {
+                const raw = getSOValue(record, [
+                    "CREATED_AT", "createdAt", "DATE_CREATION",
+                    "dateCreation", "CREATION_DATE", "created_at", "DATE", "date"
+                ]);
+                if (raw === null || raw === undefined || raw === "") return 0;
+                const parsed = new Date(raw).getTime();
+                return Number.isFinite(parsed) ? parsed : 0;
+            }
+            return creationTime(b) - creationTime(a);
         });
     }
 
