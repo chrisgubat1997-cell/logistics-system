@@ -676,13 +676,20 @@ function getPendingInvoiceQueue(payload) {
     }
   });
 
+  const paidBySO = new Map();
+  payments.forEach(payment => {
+    const soNo = String(payment.SO_NUMBER || "").trim();
+    const applied = _finMoney_(payment.SO_APPLIED_AMOUNT !== "" && payment.SO_APPLIED_AMOUNT !== undefined && payment.SO_APPLIED_AMOUNT !== null
+      ? payment.SO_APPLIED_AMOUNT : payment.CURRENT_PAYMENT);
+    if (soNo && applied > 0) paidBySO.set(soNo, (paidBySO.get(soNo) || 0) + applied);
+  });
+
   const fullPayments = [];
   salesOrders.forEach(so => {
     const soNo = String(so.SO_NUMBER || "").trim();
     const total = _finSoTotal_(so);
-    if (!soNo || total <= 0 || invoicedFullPaymentSOs.has(soNo)) return;
-    const paid = _finPaidForSO_(soNo);
-    if (paid + 0.005 < total) return;
+    const paid = _finMoney_(paidBySO.get(soNo) || 0);
+    if (!soNo || total <= 0 || invoicedFullPaymentSOs.has(soNo) || paid + 0.005 < total) return;
     fullPayments.push({
       referenceNo: soNo, soNumber: soNo,
       clientName: String(so.CLIENT_NAME || ""), project: String(so.PROJECT || ""),
