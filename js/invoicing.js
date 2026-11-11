@@ -970,13 +970,13 @@ function renderInvoiceSummary() {
     if (total) total.textContent = invoiceRecords.length;
     if (amount) amount.textContent = formatCurrency(invoiceRecords
         .filter(x => String(x.status || "").toUpperCase() !== "CANCELLED")
-        .reduce((sum, x) => sum + Number(x.finalAmountDue || x.amountDue || x.totalAmount || 0), 0));
+         .reduce((sum, x) => sum + (Number(String(x.amount ?? x.amountDue ?? x.finalAmountDue ?? x.totalAmount ?? 0).replace(/[₱,\\s]/g, "")) || 0), 0));
     if (cancelled) cancelled.textContent = invoiceRecords.filter(x => String(x.status || "").toUpperCase() === "CANCELLED").length;
 }
 
 function getInvoicedRecordsFiltered() {
     const q = String(document.getElementById("invoicedRecordsSearch")?.value || "").trim().toLowerCase();
-    const range = document.getElementById("invoicedRecordsDateRange")?.value || "ALL";
+    const range = document.getElementById("invoiceDateRangeFilter")?.value || "ALL";
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1);
     if (range === "12M") start.setMonth(now.getMonth() - 11);
@@ -1061,7 +1061,7 @@ function bindInvoicedRecordSelection() {
         search.dataset.bound = "true";
         search.addEventListener("input", renderRecentInvoices);
     }
-    const range = document.getElementById("invoicedRecordsDateRange");
+    const range = document.getElementById("invoiceDateRangeFilter");
     if (range && range.dataset.bound !== "true") {
         range.dataset.bound = "true";
         range.addEventListener("change", renderRecentInvoices);
@@ -1103,15 +1103,16 @@ function openInvoiceReleaseModal(invoiceNos) {
             const btn = modal.querySelector("#confirmInvoiceRelease");
             btn.disabled = true;
             try {
-                await sendInvoiceAction("releaseInvoices", { invoiceNumbers: selected, destination, releaseDate: date });
+                await sendInvoiceAction("releaseInvoices", { invoiceNumbers: (modal.dataset.invoiceNumbers || "").split("|").filter(Boolean), destination, releaseDate: date });
                 close();
                 await refreshInvoicing();
-                window.alert(selected.length + " invoice(s) released successfully.");
+                window.alert((modal.dataset.invoiceNumbers || "").split("|").filter(Boolean).length + " invoice(s) released successfully.");
             } catch (error) {
                 window.alert("Could not release invoices: " + error.message);
             } finally { btn.disabled = false; }
         });
     }
+    modal.dataset.invoiceNumbers = selected.join("|");
     modal.querySelector("#invoiceReleaseCount").textContent = selected.length + " invoice(s) selected";
     modal.querySelector("#invoiceReleaseList").textContent = selected.join(", ");
     modal.querySelector("#invoiceReleaseDate").value = getTodayString();
