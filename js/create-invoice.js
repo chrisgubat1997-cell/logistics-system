@@ -1978,6 +1978,14 @@ function renderDPPaymentPicker() {
         tab.classList.toggle("active", active);
         tab.setAttribute("aria-pressed", active ? "true" : "false");
     });
+    panel.querySelectorAll("[data-payment-source-type]").forEach(tab => {
+        if (tab.dataset.bound === "true") return;
+        tab.dataset.bound = "true";
+        tab.addEventListener("click", () => {
+            activePaymentSourceType = tab.dataset.paymentSourceType;
+            renderDPPaymentPicker();
+        });
+    });
 
     const used = getPreviouslyInvoicedPaymentNumbers(sourceType);
     const rows = paymentRecords.filter(payment => {
@@ -2253,28 +2261,15 @@ function renderDeliveryReceiptSuggestions() {
         option.append(primary, secondary);
         option.addEventListener("mousedown", event => event.preventDefault());
         option.addEventListener("click", () => {
-            selectedInvoiceType = type.value;
-            setValue("drNo", type.label);
-            selectedDeliveryReceipts = [];
-            renderSelectedDeliveryReceiptChips();
-            if (type.value === "DOWN_PAYMENT") {
-                selectedDPPayment = null;
-                selectedFPPayment = null;
-                invoiceItems = [];
-                renderItems();
-                updateCalculations();
-                renderDPPaymentPicker();
-            } else if (type.value === "FULL_PAYMENT") {
-                selectedDPPayment = null;
-                selectedFPPayment = null;
-                invoiceItems = [];
-                renderItems();
-                updateCalculations();
+            if (type.value === "DOWN_PAYMENT" || type.value === "FULL_PAYMENT") {
+                activePaymentSourceType = type.value === "DOWN_PAYMENT" ? "DP" : "FP";
+                updateSelectedInvoiceType();
                 renderDPPaymentPicker();
             } else {
-                selectedDPPayment = null;
-                selectedFPPayment = null;
-                renderDPPaymentPicker();
+                selectedInvoiceType = "ADVANCE";
+                selectedDeliveryReceipts = [];
+                setValue("drNo", type.label);
+                renderSelectedDeliveryReceiptChips();
                 rebuildInvoiceItemsFromSelectedDRs();
             }
             hideDeliveryReceiptSuggestions();
