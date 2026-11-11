@@ -1000,7 +1000,7 @@ function renderInvoiceTable(records) {
     const tbody = document.getElementById("recentInvoiceTableBody");
     if (!tbody) return;
     if (!records.length) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="12">No invoice records found.</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="11">No invoice records found.</td></tr>';
         updateInvoiceSelectionCount();
         return;
     }
@@ -1020,17 +1020,8 @@ function renderInvoiceTable(records) {
             <td><span class="status-badge ${getStatusClass(status)}">${escapeHtml(status)}</span></td>
             <td>${escapeHtml(invoice.releaseDestination || "—")}</td>
             <td>${escapeHtml(invoice.releaseDate ? formatDisplayDate(invoice.releaseDate) : "—")}</td>
-            <td class="invoice-row-actions">
-                <button type="button" class="table-action" data-invoice-view="${escapeHtml(invoice.invoiceNo)}">VIEW</button>
-                ${status === "CANCELLED" ? "" : `<button type="button" class="table-action primary" data-invoice-edit="${escapeHtml(invoice.invoiceNo)}">EDIT</button><button type="button" class="table-action danger" data-invoice-cancel="${escapeHtml(invoice.invoiceNo)}">CANCEL</button>`}
-                ${status === "CANCELLED" || released ? "" : `<button type="button" class="table-action primary" data-invoice-release="${escapeHtml(invoice.invoiceNo)}">RELEASE</button>`}
-            </td>
         </tr>`;
     }).join("");
-    bindInvoiceViewButtons();
-    bindInvoiceEditButtons();
-    bindInvoiceCancelButtons();
-    bindInvoiceReleaseButtons();
     bindInvoicedRecordSelection();
     updateInvoiceSelectionCount();
 }
