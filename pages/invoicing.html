@@ -141,8 +141,11 @@
             </div>
         </div>
         <div class="pending-invoice-tabs" role="tablist" aria-label="Pending invoice records">
-            <button type="button" class="pending-invoice-tab active" data-pending-invoice-type="PAYMENT" role="tab" aria-selected="true">
-                PAYMENTS <span id="pendingPaymentCount">0</span>
+            <button type="button" class="pending-invoice-tab active" data-pending-invoice-type="DOWN_PAYMENT" role="tab" aria-selected="true">
+                DOWN PAYMENTS <span id="pendingDownPaymentCount">0</span>
+            </button>
+            <button type="button" class="pending-invoice-tab" data-pending-invoice-type="FULL_PAYMENT" role="tab" aria-selected="false">
+                FULL PAYMENTS <span id="pendingFullPaymentCount">0</span>
             </button>
             <button type="button" class="pending-invoice-tab" data-pending-invoice-type="DELIVERY_RECEIPT" role="tab" aria-selected="false">
                 DELIVERY RECEIPTS <span id="pendingDeliveryReceiptCount">0</span>
