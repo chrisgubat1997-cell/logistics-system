@@ -2,7 +2,7 @@
    LOGIS-TECH SYSTEM
    INVOICING MODULE
    =========================================================
-   VERSION: 20261006-01
+   VERSION: 20261111-02
 
    FUNCTIONS:
    01. Load invoice module
@@ -79,6 +79,17 @@ async function fetchInvoicesFromDatabase() {
                 siNo: record.SI_NO || "",
                 soNo: record.SO_NUMBER || "",
                 drNo: record.DR_NUMBER || "",
+                sourceReferences: Array.isArray(record.SOURCE_REFERENCES)
+                    ? record.SOURCE_REFERENCES.map(source => ({
+                        sourceType: source.SOURCE_TYPE || "",
+                        sourceId: source.SOURCE_ID || "",
+                        sourceNumber: source.SOURCE_NUMBER || ""
+                    }))
+                    : (Array.isArray(record.sourceReferences) ? record.sourceReferences : []),
+                linkedPaymentNumbers: (Array.isArray(record.SOURCE_REFERENCES) ? record.SOURCE_REFERENCES : [])
+                    .filter(source => ["DP", "FP"].includes(String(source.SOURCE_TYPE || "").toUpperCase()))
+                    .map(source => source.SOURCE_NUMBER || source.SOURCE_ID || "")
+                    .filter(Boolean),
                 poNo: record.PO_NUMBER || "",
                 terms: record.TERMS || "",
                 se: record.SALES_ENGINEER || "",
@@ -985,7 +996,7 @@ function getInvoicedRecordsFiltered() {
     if (range === "6M") start.setMonth(now.getMonth() - 5);
     if (range === "3M") start.setMonth(now.getMonth() - 2);
     return invoiceRecords.filter(inv => {
-        const haystack = [inv.invoiceNo, inv.siNo, inv.soNo, inv.client, inv.project].join(" ").toLowerCase();
+        const haystack = [inv.invoiceNo, inv.siNo, inv.soNo, inv.client, inv.project, inv.drNo, ...(inv.linkedPaymentNumbers || [])].join(" ").toLowerCase();
         if (q && !haystack.includes(q)) return false;
         if (range !== "ALL") {
             const d = new Date(inv.invoiceDate);
@@ -1302,16 +1313,20 @@ function openInvoicePreview(invoice) {
     );
 
 
-    setText(
-        "previewDRNo",
-        getRecordValue(
-            invoice,
-            [
-                "drNo",
-                "deliveryReceiptNo"
-            ]
-        ) || "—"
-    );
+    const sourceReferences = Array.isArray(invoice.sourceReferences) ? invoice.sourceReferences : [];
+    const linkedReferences = sourceReferences
+        .filter(source => ["DR", "DP", "FP"].includes(String(source.sourceType || source.SOURCE_TYPE || "").toUpperCase()))
+        .map(source => {
+            const type = String(source.sourceType || source.SOURCE_TYPE || "").toUpperCase();
+            const number = source.sourceNumber || source.SOURCE_NUMBER || source.sourceId || source.SOURCE_ID || "";
+            return number ? (type === "DR" ? number : type + " · " + number) : "";
+        })
+        .filter(Boolean);
+    const fallbackReferences = [
+        getRecordValue(invoice, ["drNo", "deliveryReceiptNo"]),
+        ...(invoice.linkedPaymentNumbers || [])
+    ].filter(Boolean);
+    setText("previewDRNo", [...new Set(linkedReferences.length ? linkedReferences : fallbackReferences)].join(", ") || "—");
 
 
     setText(
