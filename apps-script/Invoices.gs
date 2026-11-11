@@ -158,7 +158,12 @@ function createInvoice(payload) {
     const drNumber = drNumbers.join(", ");
     const drId = drRecords.map(record => String(record.DR_ID || "")).filter(Boolean).join(", ");
 
-    _finValidateInvoicePaymentRequirement_(so);
+    // A Down Payment invoice is tied to the exact confirmed Payment record selected above.
+    // Do not require the customer's entire contractual DP threshold to be collected first;
+    // invoice the actual recorded/applied amount for this specific transaction.
+    if (invoiceType !== "DOWN_PAYMENT") {
+      _finValidateInvoicePaymentRequirement_(so);
+    }
 
     const invoiceSheet = getSheet(CONFIG.SHEETS.INVOICES);
     const itemSheet = getSheet(CONFIG.SHEETS.INVOICE_ITEMS);
