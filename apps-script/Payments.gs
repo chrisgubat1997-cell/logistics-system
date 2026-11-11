@@ -10,9 +10,18 @@ function getPayments(payload) {
   payload = payload || {};
   const soNumber = String(payload.soNumber || payload.SO_NUMBER || "").trim();
   const invoiceNo = String(payload.invoiceNo || payload.INVOICE_NO || "").trim();
+  const paymentNo = String(payload.paymentNo || payload.PAYMENT_NO || payload.sourceNumber || "").trim();
+  const paymentId = String(payload.paymentId || payload.PAYMENT_ID || "").trim();
   let records = getAllRecords(CONFIG.SHEETS.PAYMENTS);
   if (soNumber) records = records.filter(p => String(p.SO_NUMBER || "") === soNumber);
   if (invoiceNo) records = records.filter(p => String(p.INVOICE_NO || "") === invoiceNo);
+  if (paymentNo) records = records.filter(p => String(p.PAYMENT_NO || "") === paymentNo);
+  if (paymentId) records = records.filter(p => String(p.PAYMENT_ID || "") === paymentId);
+  records = records.map(function(payment) {
+    return typeof _finAttachPaymentInvoiceLinks_ === "function"
+      ? _finAttachPaymentInvoiceLinks_(payment)
+      : payment;
+  });
   return { success: true, payments: records, records: records, count: records.length };
 }
 
@@ -24,6 +33,9 @@ function getPayment(payload) {
   const found = getAllRecords(CONFIG.SHEETS.PAYMENTS).find(p =>
     (no && String(p.PAYMENT_NO || "") === no) || (id && String(p.PAYMENT_ID || "") === id)
   );
+  if (found && typeof _finAttachPaymentInvoiceLinks_ === "function") {
+    _finAttachPaymentInvoiceLinks_(found);
+  }
   return found ? { success: true, payment: found } : { success: false, message: "Payment not found." };
 }
 
