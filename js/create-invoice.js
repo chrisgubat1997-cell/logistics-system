@@ -2580,6 +2580,7 @@ function renderSalesOrderSuggestions(query) {
         selectedInvoiceType = "DELIVERY_RECEIPT";
         selectedDeliveryReceipts = [];
         selectedDPPayment = null;
+        selectedFPPayment = null;
         setValue("soNo", number);
         setValue("drNo", "");
         renderSelectedDeliveryReceiptChips();
