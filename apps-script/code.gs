@@ -139,6 +139,9 @@ function routeRequest(
     payload ||
     {};
 
+  // Normalize action names before routing API requests.
+  action = String(action || "").trim();
+
   // Company switching validates the existing server-side session itself.
   if (String(action) === "switchCompany") {
     return switchCompany_(payload);
