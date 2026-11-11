@@ -39,6 +39,17 @@
   async function initialize(){if(initialized)return;initialized=true;const root=$("soMonitoringModule");if(!root)return;root.innerHTML='<div class="som-page"><div class="som-intro"><div><span class="som-eyebrow">SALES ORDER MANAGEMENT</span><h1>SO Monitoring</h1><p>Search once to view the complete Sales Order, JO, delivery, invoice and payment history.</p></div><button type="button" class="som-refresh" id="soMonitorReload">↻ Reload SO List</button></div><div class="som-search-card"><label for="soMonitorSearch">Search Sales Order</label><div class="som-search-control"><span>⌕</span><input id="soMonitorSearch" type="search" autocomplete="off" placeholder="Enter SO No., Client, Project or PO No."><small id="soMonitorCount">Loading…</small></div><div id="soMonitorSuggestions" class="som-suggestions" hidden></div></div><div id="soMonitorResult" hidden></div></div>';
     $("soMonitorSearch").addEventListener("input",renderSuggestions);$("soMonitorSearch").addEventListener("keydown",e=>{if(e.key==="Enter"){const first=$("soMonitorSuggestions").querySelector("[data-so]");if(first)loadDetails(first.dataset.so);}if(e.key==="Escape")$("soMonitorSuggestions").hidden=true;});$("soMonitorSuggestions").addEventListener("click",e=>{const b=e.target.closest("[data-so]");if(b)loadDetails(b.dataset.so);});$("soMonitorReload").addEventListener("click",async()=>{try{await loadOrders();$("soMonitorCount").textContent=orders.length+" Sales Orders";renderSuggestions();}catch(e){$("soMonitorCount").textContent="Unable to load";}});
     try{await loadOrders();$("soMonitorCount").textContent=orders.length+" Sales Orders";}catch(e){$("soMonitorCount").textContent="Unable to load";$("soMonitorResult").hidden=false;$("soMonitorResult").innerHTML='<div class="som-error">'+safe(e.message)+'</div>';}}
+  window.getSOMonitoringSuggestions=async function(query){
+    const term=String(query||"").trim().toLowerCase();
+    if(!term)return [];
+    if(!initialized)await initialize();
+    if(!orders.length)await loadOrders();
+    return orders.filter(o=>[getSO(o),o.CLIENT_NAME,o.CLIENT,o.PROJECT,o.PO_NUMBER,o.PO]
+      .some(v=>String(v||"").toLowerCase().includes(term))).slice(0,10).map(o=>({
+        soNumber:getSO(o),client:String(o.CLIENT_NAME||o.CLIENT||""),project:String(o.PROJECT||"")
+      }));
+  };
+  window.openSOMonitoringSO=async function(no){if(!initialized)await initialize();return loadDetails(String(no||"").trim());};
   window.searchSOMonitoring=async function(query){
     const term=String(query||"").trim().toLowerCase();
     if(!term)return;
