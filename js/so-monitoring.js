@@ -22,13 +22,36 @@
     const rdd=so.REQUIRED_DELIVERY_DATE||so.REQUIRED_DEL_DATE||so.RDD||"";
     const adjusted=so.RDD_ADJUSTED_AT||so.DELIVERY_DATE_ADJUSTED_AT||"";
     $("soMonitorResult").hidden=false;
+    function deliveredQtyFor(soItem){
+      const soItemId=String(soItem.SO_ITEM_ID||soItem.ITEM_ID||"").trim();
+      const itemNumber=String(soItem.ITEM_NUMBER||"").trim();
+      return drs.reduce((total,dr)=>{
+        if(String(dr.STATUS||"").toUpperCase()==="CANCELLED")return total;
+        const drItems=Array.isArray(dr.items)?dr.items:(Array.isArray(dr.ITEMS)?dr.ITEMS:[]);
+        const delivered=drItems.reduce((sum,drItem)=>{
+          const drSoItemId=String(drItem.SO_ITEM_ID||drItem.ITEM_ID||"").trim();
+          const drItemNumber=String(drItem.ITEM_NUMBER||"").trim();
+          const matches=soItemId ? drSoItemId===soItemId : (!drSoItemId && itemNumber && drItemNumber===itemNumber);
+          if(!matches)return sum;
+          return sum+Number(drItem.PICK_QTY??drItem.DELIVERED_QTY??drItem.QTY??drItem.QUANTITY??0);
+        },0);
+        return total+delivered;
+      },0);
+    }
+    const deliveredValue=Number(summary.deliveredAmount||0);
+    const invoicedValue=Number(summary.invoicedAmount||0);
     $("soMonitorResult").innerHTML=
       '<div class="som-so-heading"><div><span class="som-eyebrow">SALES ORDER QUICK VIEW</span><h2>'+safe(getSO(so))+'</h2><p>'+safe(so.CLIENT_NAME||so.CLIENT||"—")+' · '+safe(so.PROJECT||"No project specified")+'</p></div><button type="button" class="som-refresh" id="soMonitorRefresh">↻ Refresh</button></div>'+
       '<div class="som-summary-grid">'+
-      '<div><small>SO TOTAL</small><strong>'+money(total)+'</strong></div><div><small>TOTAL PAID</small><strong>'+money(paid)+'</strong></div><div><small>REMAINING BALANCE</small><strong>'+money(balance)+'</strong></div><div><small>PAYMENT STATUS</small>'+status(summary.paymentStatus||so.PAYMENT_STATUS||"UNPAID")+'</div></div>'+
+      '<div><small>SO TOTAL</small><strong>'+money(total)+'</strong></div><div><small>TOTAL PAID</small><strong>'+money(paid)+'</strong></div><div><small>REMAINING BALANCE</small><strong>'+money(balance)+'</strong></div><div><small>PAYMENT STATUS</small>'+status(summary.paymentStatus||so.PAYMENT_STATUS||"UNPAID")+'</div><div><small>TOTAL DELIVERED VALUE</small><strong>'+money(deliveredValue)+'</strong></div><div><small>TOTAL INVOICED AMOUNT</small><strong>'+money(invoicedValue)+'</strong></div></div>'+
       '<section class="som-panel som-details"><div class="som-panel-head"><h3>Sales Order Details</h3>'+status(so.STATUS||"ACTIVE")+'</div><div class="som-detail-grid">'+
-      '<div><small>PO NUMBER</small><b>'+safe(so.PO_NUMBER||so.PO||"—")+'</b></div><div><small>SO DATE</small><b>'+date(so.DATE_CREATION||so.SO_DATE||so.DATE||"")+'</b></div><div><small>PAYMENT TERMS</small><b>'+safe(so.TERMS||so.PAYMENT_TERMS||"—")+'</b></div><div><small>JO NUMBER</small><b>'+safe(jo||"Not assigned")+'</b></div><div><small>REQUIRED DELIVERY DATE</small><b>'+date(rdd)+'</b></div><div><small>RDD ADJUSTMENT</small><b>'+(adjusted?'Original '+date(so.RDD_ORIGINAL_DATE||'')+' → '+date(rdd)+' · '+date(adjusted)+' · '+safe(so.RDD_ADJUSTED_BY||'User not recorded'):'No adjustment recorded')+'</b></div></div></section>'+
-      section("Sales Order Items",items.length,["ITEM / DESCRIPTION","QTY","UNIT","UNIT PRICE","AMOUNT"],items.map(i=>row([safe(i.ITEM_NAME||i.DESCRIPTION||i.ITEM_NUMBER||"—"),safe(i.QTY??i.QUANTITY??"—"),safe(i.UNIT||"—"),money(i.UNIT_PRICE||0),money(i.AMOUNT||i.TOTAL||0)])),"No item records found.")+
+      '<div><small>PO NUMBER</small><b>'+safe(so.PO_NUMBER||so.PO||"—")+'</b></div><div><small>SO DATE</small><b>'+date(so.DATE_CREATION||so.SO_DATE||so.DATE||"")+'</b></div><div><small>PAYMENT TERMS</small><b>'+safe(so.TERMS||so.PAYMENT_TERMS||"—")+'</b></div><div><small>JO NUMBER</small><b>'+safe(jo||"Not assigned")+'</b></div><div><small>REQUIRED DELIVERY DATE</small><b>'+date(rdd)+'</b></div><div><small>ADJUSTMENT DATE</small><b>'+date(adjusted)+'</b></div></div></section>'+
+      section("Sales Order Items",items.length,["ITEM / DESCRIPTION","QTY","DELIVERED QTY","BALANCE QTY","UNIT","UNIT PRICE","AMOUNT"],items.map(i=>{
+        const orderedQty=Number(i.QTY??i.QUANTITY??0);
+        const deliveredQty=deliveredQtyFor(i);
+        const remainingQty=Math.max(0,orderedQty-deliveredQty);
+        return row([safe(i.ITEM_NAME||i.DESCRIPTION||i.ITEM_NUMBER||"—"),safe(i.QTY??i.QUANTITY??"—"),safe(deliveredQty),safe(remainingQty),safe(i.UNIT||"—"),money(i.UNIT_PRICE||0),money(i.AMOUNT||i.TOTAL||0)]);
+      }),"No item records found.")+
       section("Delivery Receipts",drs.length,["DR NO.","DR DATE","STATUS","DELIVERY / REMARKS"],drs.map(d=>row([safe(d.DR_NUMBER||"—"),date(d.DATE_OF_TRANSFER||d.DR_DATE||d.DATE),status(d.STATUS||"—"),safe(d.REMARKS||d.DELIVERY_ADDRESS||"—")])),"No Delivery Receipt linked to this SO.")+
       section("Invoices",invoices.length,["INVOICE NO.","SI NO.","DATE","TYPE","AMOUNT","STATUS"],invoices.map(i=>row([safe(i.INVOICE_NO||i.INVOICE_NUMBER||"—"),safe(i.SI_NO||i.SALES_INVOICE_NO||"—"),date(i.INVOICE_DATE||i.DATE_CREATED||i.DATE),safe(i.INVOICE_TYPE||"—"),money(i.TOTAL_AMOUNT||i.GRAND_TOTAL||i.AMOUNT||0),status(i.STATUS||"—")])),"No invoice linked to this SO.")+
       section("Payments",payments.length,["PAYMENT NO.","DATE","INVOICE NO.","PAYMENT METHOD","AMOUNT","STATUS"],payments.map(p=>row([safe(p.PAYMENT_NO||"—"),date(p.PAYMENT_DATE||p.DATE||p.CREATED_AT),safe(p.INVOICE_NO||"—"),safe(p.PAYMENT_METHOD||p.METHOD||"—"),money(p.CURRENT_PAYMENT??p.AMOUNT??p.PAYMENT_AMOUNT??0),status(p.PAYMENT_STATUS||p.STATUS||"—")])),"No payment record linked to this SO.");
