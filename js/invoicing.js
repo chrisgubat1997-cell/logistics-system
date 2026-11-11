@@ -1067,8 +1067,8 @@ function renderInvoiceTable(records) {
     tbody.innerHTML = records.map(invoice => {
         const status = String(invoice.status || "ONGOING").toUpperCase();
         const released = String(invoice.releaseStatus || "").toUpperCase() === "RELEASED";
-        const disabled = status === "CANCELLED";
-        return `<tr>
+        const disabled = status === "CANCELLED" || released;
+        return `<tr data-invoice-row="${escapeHtml(invoice.invoiceNo)}" tabindex="0" aria-label="Select invoice ${escapeHtml(invoice.invoiceNo)}">
             <td><input type="checkbox" class="invoiced-record-select" data-invoice-select="${escapeHtml(invoice.invoiceNo)}" ${disabled ? "disabled" : ""} aria-label="Select invoice ${escapeHtml(invoice.invoiceNo)}"></td>
             <td><strong>${escapeHtml(invoice.invoiceNo || "—")}</strong></td>
             <td>${escapeHtml(invoice.siNo || "—")}</td>
@@ -1087,10 +1087,43 @@ function renderInvoiceTable(records) {
 }
 
 function bindInvoicedRecordSelection() {
+    const invoiceTbody = document.getElementById("recentInvoiceTableBody");
+    if (invoiceTbody && invoiceTbody.dataset.rowSelectBound !== "true") {
+        invoiceTbody.dataset.rowSelectBound = "true";
+        invoiceTbody.addEventListener("click", event => {
+            if (event.target.closest("input, button, a, select, textarea, label")) return;
+            const row = event.target.closest("tr[data-invoice-row]");
+            if (!row) return;
+            const checkbox = row.querySelector("[data-invoice-select]");
+            if (!checkbox) return;
+            document.querySelectorAll("#recentInvoiceTableBody tr[data-invoice-row]").forEach(other => {
+                other.classList.remove("selected");
+                const otherCheckbox = other.querySelector("[data-invoice-select]");
+                if (otherCheckbox) otherCheckbox.checked = false;
+            });
+            row.classList.add("selected");
+            // Disabled checkbox on released/cancelled invoices is set programmatically:
+            // users select the row, but cannot tick its checkbox or bulk-select it.
+            checkbox.checked = true;
+            updateInvoiceSelectionCount();
+        });
+        invoiceTbody.addEventListener("keydown", event => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            const row = event.target.closest("tr[data-invoice-row]");
+            if (!row || event.target !== row) return;
+            event.preventDefault();
+            row.click();
+        });
+    }
     document.querySelectorAll("[data-invoice-select]").forEach(el => {
         if (el.dataset.bound === "true") return;
         el.dataset.bound = "true";
-        el.addEventListener("change", updateInvoiceSelectionCount);
+        el.addEventListener("click", event => event.stopPropagation());
+        el.addEventListener("change", () => {
+            const row = el.closest("tr[data-invoice-row]");
+            if (row) row.classList.toggle("selected", el.checked);
+            updateInvoiceSelectionCount();
+        });
     });
     const all = document.getElementById("selectAllInvoicedRecords");
     if (all && all.dataset.bound !== "true") {
@@ -1190,11 +1223,12 @@ function updateInvoiceSelectionCount() {
     const selectedInvoice = selectedInvoices[0];
     const selectedIsReleased = String(selectedInvoice?.releaseStatus || "").toUpperCase() === "RELEASED";
     const selectedIsCancelled = String(selectedInvoice?.status || "").toUpperCase() === "CANCELLED";
-    const hasUnreleasedSelection = selectedInvoices.some(inv =>
+    const allSelectedAreEditable = selectedInvoices.length > 0 && selectedInvoices.every(inv =>
         String(inv.status || "").toUpperCase() !== "CANCELLED" &&
         String(inv.releaseStatus || "").toUpperCase() !== "RELEASED"
     );
-    const canCancel = selectedInvoices.length > 0 && selectedInvoices.some(inv => String(inv.status || "").toUpperCase() !== "CANCELLED");
+    const hasUnreleasedSelection = allSelectedAreEditable;
+    const canCancel = allSelectedAreEditable;
     if (btn) btn.disabled = !hasUnreleasedSelection;
     if (viewBtn) viewBtn.disabled = !canViewOrEdit;
     if (editBtn) editBtn.disabled = !canViewOrEdit || selectedIsCancelled || selectedIsReleased;
