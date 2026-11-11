@@ -87,6 +87,19 @@
 
         <div class="report-filters">
 
+            <div class="report-filter-field report-period-preset-field">
+                <label for="reportQuickPeriod">PERIOD</label>
+                <select id="reportQuickPeriod">
+                    <option value="">Custom range</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="month">This Month</option>
+                    <option value="quarter">This Quarter</option>
+                    <option value="ytd">Year to Date</option>
+                    <option value="year">This Year</option>
+                </select>
+            </div>
+
             <div class="report-filter-field">
 
                 <label for="reportDateFrom">
@@ -129,6 +142,11 @@
 
             </div>
 
+
+            <div class="report-filter-field report-project-field">
+                <label for="reportProjectFilter">Project</label>
+                <select id="reportProjectFilter"><option value="">All Projects</option></select>
+            </div>
 
             <div class="report-filter-field">
 
@@ -2307,7 +2325,7 @@
 <!-- =====================================================
      REPORT JS
 ====================================================== -->
-<script src="../js/report.js?v=20261015-02"></script>
+<script src="../js/report.js?v=20261111-visualrefresh01"></script>
 
 </body>
 </html>
