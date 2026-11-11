@@ -61,7 +61,7 @@ function getLogisTechCurrentRole() {
         }
     }
 
-    async function callDeliveryAPI(action) {
+    async function callDeliveryAPI(action, data = {}) {
         if (
             !DELIVERY_API_URL.startsWith(
                 "https://script.google.com/macros/s/"
@@ -85,9 +85,9 @@ function getLogisTechCurrentRole() {
             redirect: "follow",
             body: JSON.stringify({
                 action: action,
-                data: {
+                data: Object.assign({}, data || {}, {
                     sessionToken: sessionToken
-                }
+                })
             })
         });
 
@@ -287,6 +287,10 @@ function getLogisTechCurrentRole() {
         ])).trim();
     }
 
+    function getDRId(dr) {
+        return String(getValue(dr, ["DR_ID", "drId", "deliveryReceiptId"], "")).trim();
+    }
+
     function getSONumber(record) {
         return String(getValue(record, [
             "SO_NUMBER",
@@ -390,11 +394,11 @@ function getLogisTechCurrentRole() {
             return "CANCELLED";
         }
 
-        if ([
-            "COMPLETED",
-            "DELIVERED",
-            "FULLY_DELIVERED"
-        ].includes(raw)) {
+        if (["DELIVERED", "FULLY_DELIVERED"].includes(raw)) {
+            return "DELIVERED";
+        }
+
+        if (raw === "COMPLETED") {
             return "COMPLETED";
         }
 
@@ -442,6 +446,7 @@ function getLogisTechCurrentRole() {
             PREPARED: "prepared",
             ONGOING: "ongoing",
             COMPLETED: "posted",
+            DELIVERED: "posted",
             CANCELLED: "cancelled",
             FOR_INVOICE: "invoice",
             POSTED: "posted"
@@ -1044,11 +1049,11 @@ function getLogisTechCurrentRole() {
         [
             "previewDRButton",
             "updateDRButton",
-            "cancelDRButton",
-            "postDRButton"
+            "cancelDRButton"
         ].forEach(function (id) {
             enableElement(id, true);
         });
+        syncDeliveryActionButtons();
     }
 
 
@@ -1127,6 +1132,7 @@ async function openDRDetails(row) {
 
         // I-update ang selected record mula sa database.
         selectedDRRecord = activeDR;
+        syncDeliveryActionButtons();
 
         // LocalStorage ay selection reference lamang, hindi data source.
         localStorage.setItem(
@@ -1678,45 +1684,105 @@ if (dateElement) {
         });
     }
 
+    function syncDeliveryActionButtons() {
+        const canMarkDelivered = Boolean(selectedDRRecord && getDRStatus(selectedDRRecord) === "PREPARED" && canPrepareDeliveryReceiptByRole());
+        ["postDRButton", "detailMarkDeliveredButton"].forEach(function (id) {
+            const button = document.getElementById(id);
+            if (button) button.disabled = !canMarkDelivered;
+        });
+    }
+
+    function openMarkDeliveredModal() {
+        if (!selectedDRRecord) { alert("Please select a Delivery Receipt first."); return; }
+        if (!canPrepareDeliveryReceiptByRole()) { alert("Access denied. Only ADMIN and LOGISTICS roles can mark a DR as delivered."); return; }
+        if (getDRStatus(selectedDRRecord) !== "PREPARED") { alert("Only PREPARED Delivery Receipts can be marked as delivered."); return; }
+        const modal = document.getElementById("markDeliveredModal");
+        const dateInput = document.getElementById("deliveredDateInput");
+        const remarksInput = document.getElementById("deliveredRemarksInput");
+        const error = document.getElementById("markDeliveredError");
+        const drLabel = document.getElementById("markDeliveredDRNumber");
+        if (!modal || !dateInput || !remarksInput) { alert("The Mark as Delivered form is unavailable. Please refresh the page."); return; }
+        dateInput.value = getTodayKey();
+        remarksInput.value = "";
+        if (error) error.textContent = "";
+        if (drLabel) drLabel.textContent = getDRNumber(selectedDRRecord);
+        modal.hidden = false;
+        modal.setAttribute("aria-hidden", "false");
+        dateInput.focus();
+    }
+
+    function closeMarkDeliveredModal() {
+        const modal = document.getElementById("markDeliveredModal");
+        const form = document.getElementById("markDeliveredForm");
+        if (!modal) return;
+        modal.hidden = true;
+        modal.setAttribute("aria-hidden", "true");
+        if (form) form.reset();
+        const error = document.getElementById("markDeliveredError");
+        if (error) error.textContent = "";
+    }
+
+    async function submitMarkDelivered(event) {
+        event.preventDefault();
+        if (!selectedDRRecord) return;
+        const dateInput = document.getElementById("deliveredDateInput");
+        const remarksInput = document.getElementById("deliveredRemarksInput");
+        const submitButton = document.getElementById("confirmMarkDeliveredButton");
+        const error = document.getElementById("markDeliveredError");
+        const deliveryDate = String(dateInput?.value || "").trim();
+        const remarks = String(remarksInput?.value || "").trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) {
+            if (error) error.textContent = "Please select a valid delivery date.";
+            dateInput?.focus();
+            return;
+        }
+        if (error) error.textContent = "";
+        if (submitButton) { submitButton.disabled = true; submitButton.textContent = "SAVING..."; }
+        try {
+            const drNumber = getDRNumber(selectedDRRecord);
+            const result = await callDeliveryAPI("markDeliveryReceiptDelivered", {
+                drId: getDRId(selectedDRRecord),
+                drNumber: drNumber,
+                deliveryDate: deliveryDate,
+                remarks: remarks
+            });
+            if (!result || result.success !== true) throw new Error(result?.message || result?.error || "Unable to update Delivery Receipt.");
+            closeMarkDeliveredModal();
+            await loadDeliveryData();
+            selectedDRRecord = deliveryReceiptsCache.find(function(dr) { return getDRNumber(dr) === drNumber; }) || null;
+            syncDeliveryActionButtons();
+            alert("Delivery Receipt " + drNumber + " marked as DELIVERED successfully.");
+        } catch (requestError) {
+            console.error("Mark as Delivered failed:", requestError);
+            if (error) error.textContent = requestError.message || "Unable to save delivery completion.";
+        } finally {
+            if (submitButton) { submitButton.disabled = false; submitButton.textContent = "CONFIRM DELIVERED"; }
+        }
+    }
+
     function setupActionButtons() {
         const preview = document.getElementById("previewDRButton");
         const update = document.getElementById("updateDRButton");
         const cancel = document.getElementById("cancelDRButton");
-        const post = document.getElementById("postDRButton");
-
-        if (preview) {
-            preview.addEventListener("click", showDRPreview);
-        }
-
-        if (update) {
-            update.addEventListener("click", showDRPrepareView);
-        }
-
-        if (cancel) {
-            cancel.addEventListener("click", function () {
-                if (!selectedDRRecord) {
-                    alert("Please select a DR first.");
-                    return;
-                }
-
-                alert(
-                    "Cancel DR still requires a connected backend action. No database record was changed."
-                );
-            });
-        }
-
-        if (post) {
-            post.addEventListener("click", function () {
-                if (!selectedDRRecord) {
-                    alert("Please select a DR first.");
-                    return;
-                }
-
-                alert(
-                    "Post DR still requires a connected backend action. No database record was changed."
-                );
-            });
-        }
+        const markDelivered = document.getElementById("postDRButton");
+        const detailMarkDelivered = document.getElementById("detailMarkDeliveredButton");
+        if (preview) preview.addEventListener("click", showDRPreview);
+        if (update) update.addEventListener("click", showDRPrepareView);
+        if (cancel) cancel.addEventListener("click", function() {
+            if (!selectedDRRecord) { alert("Please select a DR first."); return; }
+            alert("Cancel DR still requires a connected backend action. No database record was changed.");
+        });
+        if (markDelivered) markDelivered.addEventListener("click", openMarkDeliveredModal);
+        if (detailMarkDelivered) detailMarkDelivered.addEventListener("click", openMarkDeliveredModal);
+        const form = document.getElementById("markDeliveredForm");
+        if (form) form.addEventListener("submit", submitMarkDelivered);
+        document.querySelectorAll("[data-close-mark-delivered]").forEach(function(button) {
+            button.addEventListener("click", closeMarkDeliveredModal);
+        });
+        const modal = document.getElementById("markDeliveredModal");
+        if (modal) modal.addEventListener("click", function(event) { if (event.target === modal) closeMarkDeliveredModal(); });
+        document.addEventListener("keydown", function(event) { if (event.key === "Escape" && modal && !modal.hidden) closeMarkDeliveredModal(); });
+        syncDeliveryActionButtons();
     }
 
     /* =====================================================
@@ -1805,6 +1871,7 @@ if (dateElement) {
             renderRecentDR();
             renderPostedSO();
             applyFilters();
+            syncDeliveryActionButtons();
 
         } catch (error) {
             console.error("Delivery data loading failed:", error);
