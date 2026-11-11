@@ -2184,3 +2184,27 @@ REDUCED MOTION
     background: #f8fafc;
     color: var(--text);
 }
+
+
+/* Down Payment invoice: source amount from an existing Payment record */
+.dp-payment-picker {
+    grid-column: 1 / -1;
+    border: 1px solid #d9e5dc;
+    border-radius: 12px;
+    background: #f8fbf8;
+    padding: 16px;
+    margin-top: 2px;
+}
+.dp-payment-picker[hidden] { display: none !important; }
+.dp-payment-picker-heading { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.dp-payment-picker-heading strong { color: #203b2a; font-size: 14px; }
+.dp-payment-picker-heading span { color: #66756a; font-size: 12px; line-height: 1.5; }
+.dp-payment-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 9px; }
+.dp-payment-option { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; align-items: center; text-align: left; padding: 12px; border: 1px solid #d5dfd7; border-radius: 9px; background: #fff; color: #24352a; cursor: pointer; }
+.dp-payment-option strong { font-size: 13px; }
+.dp-payment-option span { grid-column: 1; color: #718076; font-size: 11px; }
+.dp-payment-option b { grid-column: 2; grid-row: 1 / span 2; color: #176b3a; font-size: 14px; white-space: nowrap; }
+.dp-payment-option:hover:not(:disabled), .dp-payment-option.is-selected { border-color: #27834b; background: #eff8f1; }
+.dp-payment-option:disabled { cursor: not-allowed; opacity: .55; }
+.dp-payment-empty { grid-column: 1 / -1; padding: 12px; color: #778078; background: #fff; border: 1px dashed #d5dfd7; border-radius: 8px; font-size: 12px; }
+.dp-payment-selected { margin-top: 10px; padding: 10px 12px; border-radius: 8px; background: #e9f5ec; color: #205c34; font-size: 12px; font-weight: 700; }
