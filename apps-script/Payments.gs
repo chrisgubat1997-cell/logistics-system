@@ -61,6 +61,10 @@ function createPayment(payload) {
     const remainingBefore = Math.max(0, Math.round((total - previousPaid) * 100) / 100);
     const terms = _finTerms_(so);
     const requiredDP = _finRequiredDP_(so);
+    const paymentType = String(payload.paymentType || payload.PAYMENT_TYPE || "").trim().toUpperCase();
+    if (!["DOWN_PAYMENT", "FULL_PAYMENT"].includes(paymentType)) {
+      throw new Error("Payment classification is required. Select Down Payment or Full Payment.");
+    }
     const statusInput = String(payload.paymentStatus || payload.status || payload.PAYMENT_STATUS || "RECEIVED").trim().toUpperCase();
     const allowedStatuses = ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED", "PENDING", "DRAFT", "CANCELLED"];
     if (!allowedStatuses.includes(statusInput)) throw new Error("Invalid payment status.");
@@ -120,6 +124,7 @@ function createPayment(payload) {
       PAYMENT_ID: paymentId, PAYMENT_NO: paymentNo, PAYMENT_DATE: payload.paymentDate || payload.date || payload.PAYMENT_DATE || now,
       SO_ID: so.SO_ID || "", SO_NUMBER: soNumber, CUSTOMER_ID: customerId,
       CLIENT_NAME: customerName, PROJECT: String(payload.project || payload.PROJECT || so.PROJECT || ""),
+      PAYMENT_TYPE: paymentType,
       INVOICE_ID: invoice ? invoice.INVOICE_ID : "", INVOICE_NO: invoiceNo,
       SI_NO: String(payload.siNo || payload.SI_NO || (invoice && invoice.SI_NO) || ""),
       DR_ID: dr ? dr.DR_ID : "", DR_NUMBER: drNo,
@@ -137,7 +142,7 @@ function createPayment(payload) {
     };
 
     const paymentHeaders = _finGetHeaders_(sheet);
-    ["SO_APPLIED_AMOUNT", "CREDIT_AMOUNT", "CASH_APPLIED_AMOUNT", "CUSTOMER_CREDIT_APPLIED"].forEach(function(header) {
+    ["PAYMENT_TYPE", "SO_APPLIED_AMOUNT", "CREDIT_AMOUNT", "CASH_APPLIED_AMOUNT", "CUSTOMER_CREDIT_APPLIED"].forEach(function(header) {
       if (paymentHeaders.indexOf(header) === -1) {
         sheet.getRange(1, sheet.getLastColumn() + 1).setValue(header);
         paymentHeaders.push(header);
