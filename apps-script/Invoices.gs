@@ -525,6 +525,9 @@ function createInvoice(payload) {
       id: String(fpPayment.PAYMENT_ID || fpPayment.PAYMENT_NO || ""),
       number: String(fpPayment.PAYMENT_NO || "")
     });
+    additionalPaymentSources.forEach(function(source) {
+      invoiceSources.push({ type: source.type, id: source.id, number: source.number });
+    });
     _finAppendInvoiceSources_(
       invoiceId, invoiceNo, invoiceSources,
       header.CREATED_BY || "SYSTEM", timestamp
