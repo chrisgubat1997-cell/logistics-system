@@ -1992,7 +1992,7 @@ function renderDPPaymentPicker() {
         tab.dataset.bound = "true";
         tab.addEventListener("click", () => {
             activePaymentSourceType = tab.dataset.paymentSourceType;
-            renderDPPaymentPicker();
+
         });
     });
 
@@ -2205,41 +2205,55 @@ function renderDeliveryReceiptSuggestions() {
         return;
     }
 
-    const results = deliveryReceiptRecords.filter(dr => {
+    const drRows = deliveryReceiptRecords.filter(dr => {
         const linkedSO = String(getObjectValue(dr, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo", "salesOrderNumber"]) || "").trim().toLowerCase();
-        const drNo = String(getObjectValue(dr, ["DR_NUMBER", "drNumber", "drNo", "deliveryReceiptNo", "deliveryReceiptNumber"]) || "").trim();
+        const number = getDRPickerNumber(dr);
         const status = String(getObjectValue(dr, ["STATUS", "status"]) || "").trim().toUpperCase();
-        return linkedSO === soNumber && drNo && status !== "CANCELLED";
+        return linkedSO === soNumber && number && status !== "CANCELLED";
+    });
+    const usedDP = getPreviouslyInvoicedPaymentNumbers("DP");
+    const usedFP = getPreviouslyInvoicedPaymentNumbers("FP");
+    const paymentRows = paymentRecords.filter(payment => {
+        const linkedSO = String(getObjectValue(payment, ["SO_NUMBER", "soNumber", "soNo", "salesOrderNo"]) || "").trim().toLowerCase();
+        const number = getDPPaymentNumber(payment);
+        const id = getDPPaymentId(payment).toLowerCase();
+        const type = getPaymentSourceType(payment);
+        const status = String(getObjectValue(payment, ["PAYMENT_STATUS", "paymentStatus", "STATUS", "status"]) || "RECEIVED").trim().toUpperCase();
+        const selected = (type === "DP" ? selectedDPPayments : selectedFPPayments).some(row =>
+            getDPPaymentId(row).toLowerCase() === id || getDPPaymentNumber(row).toLowerCase() === number.toLowerCase()
+        );
+        const used = type === "DP" ? usedDP : usedFP;
+        return linkedSO === soNumber && number && ["DP", "FP"].includes(type) &&
+            ["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(status) &&
+            getDPPaymentAmount(payment) > 0 && (selected || (!used.has(number.toLowerCase()) && !used.has(id)));
     });
 
-    if (!results.length) {
+    if (!drRows.length && !paymentRows.length) {
         const empty = document.createElement("div");
         empty.className = "so-suggestion-empty";
-        empty.textContent = "No active DR found for this Sales Order. You can still choose an invoice type below.";
+        empty.textContent = "No available Delivery Receipt or Payment records found for this Sales Order.";
         box.appendChild(empty);
     }
 
-    results.forEach(dr => {
+    drRows.forEach(dr => {
         const number = getDRPickerNumber(dr);
-        const alreadySelected = selectedDeliveryReceipts.some(selected => getDRPickerNumber(selected).toLowerCase() === number.toLowerCase());
+        const alreadySelected = selectedDeliveryReceipts.some(row => getDRPickerNumber(row).toLowerCase() === number.toLowerCase());
         const date = getObjectValue(dr, ["DATE_DELIVERED", "DATE_OF_TRANSFER", "DR_DATE", "drDate", "date"]) || "";
         const status = getObjectValue(dr, ["STATUS", "status"]) || "—";
         const option = document.createElement("button");
         option.type = "button";
         option.className = "so-suggestion-option" + (alreadySelected ? " is-active" : "");
-        option.dataset.drIndex = String(box.querySelectorAll("[data-dr-index]").length);
         const primary = document.createElement("strong");
         primary.textContent = (alreadySelected ? "✓ " : "") + number;
         const secondary = document.createElement("span");
-        secondary.textContent = (date ? String(date) + " · " : "") + "Sales Order " + getValue("soNo");
+        secondary.textContent = (date ? String(date) + " · " : "") + "Delivery Receipt";
         const badge = document.createElement("small");
         badge.textContent = alreadySelected ? "SELECTED" : String(status);
         option.append(primary, secondary, badge);
         option.addEventListener("mousedown", event => event.preventDefault());
         option.addEventListener("click", () => {
-            selectedInvoiceType = "DELIVERY_RECEIPT";
             if (alreadySelected) {
-                selectedDeliveryReceipts = selectedDeliveryReceipts.filter(selected => getDRPickerNumber(selected).toLowerCase() !== number.toLowerCase());
+                selectedDeliveryReceipts = selectedDeliveryReceipts.filter(row => getDRPickerNumber(row).toLowerCase() !== number.toLowerCase());
             } else {
                 selectedDeliveryReceipts.push(dr);
             }
@@ -2249,43 +2263,69 @@ function renderDeliveryReceiptSuggestions() {
         box.appendChild(option);
     });
 
-    const divider = document.createElement("div");
-    divider.className = "so-suggestion-section-label";
-    divider.textContent = "OTHER INVOICE TYPES";
-    box.appendChild(divider);
-
-    [
-        { value: "DOWN_PAYMENT", label: "Down Payment Invoice", detail: "Invoice for the down payment" },
-        { value: "FULL_PAYMENT", label: "Full Payment Invoice", detail: "Invoice for the full payment" },
-        { value: "ADVANCE", label: "Advance Invoice", detail: "Invoice issued in advance" }
-    ].forEach(type => {
+    paymentRows.forEach(payment => {
+        const type = getPaymentSourceType(payment);
+        const target = type === "DP" ? selectedDPPayments : selectedFPPayments;
+        const number = getDPPaymentNumber(payment);
+        const id = getDPPaymentId(payment).toLowerCase();
+        const alreadySelected = target.some(row => getDPPaymentId(row).toLowerCase() === id || getDPPaymentNumber(row).toLowerCase() === number.toLowerCase());
+        const date = getObjectValue(payment, ["PAYMENT_DATE", "paymentDate", "DATE", "date"]) || "";
         const option = document.createElement("button");
         option.type = "button";
-        option.className = "so-suggestion-option invoice-type-option";
-        option.dataset.invoiceType = type.value;
+        option.className = "so-suggestion-option" + (alreadySelected ? " is-active" : "");
         const primary = document.createElement("strong");
-        primary.textContent = type.label;
+        primary.textContent = (alreadySelected ? "✓ " : "") + number;
         const secondary = document.createElement("span");
-        secondary.textContent = type.detail;
-        option.append(primary, secondary);
+        secondary.textContent = (date ? String(date) + " · " : "") + (type === "DP" ? "Down Payment" : "Full Payment") + " · " + formatCurrency(getDPPaymentAmount(payment));
+        const badge = document.createElement("small");
+        badge.textContent = alreadySelected ? "SELECTED" : type;
+        option.append(primary, secondary, badge);
         option.addEventListener("mousedown", event => event.preventDefault());
         option.addEventListener("click", () => {
-            if (type.value === "DOWN_PAYMENT" || type.value === "FULL_PAYMENT") {
-                activePaymentSourceType = type.value === "DOWN_PAYMENT" ? "DP" : "FP";
-                updateSelectedInvoiceType();
-                renderDPPaymentPicker();
+            const index = target.findIndex(row => getDPPaymentId(row).toLowerCase() === id || getDPPaymentNumber(row).toLowerCase() === number.toLowerCase());
+            if (index >= 0) {
+                target.splice(index, 1);
+                invoiceItems = invoiceItems.filter(item => String(item.sourcePaymentId || "").toLowerCase() !== id);
             } else {
-                selectedInvoiceType = "ADVANCE";
-                selectedDeliveryReceipts = [];
-                setValue("drNo", type.label);
-                renderSelectedDeliveryReceiptChips();
-                rebuildInvoiceItemsFromSelectedDRs();
+                target.push(payment);
+                invoiceItems.push({
+                    id: Date.now() + Math.random(), itemNo: type, itemName: (type === "DP" ? "Down Payment - " : "Full Payment - ") + number,
+                    description: (type === "DP" ? "Down Payment - " : "Full Payment - ") + number,
+                    soQty: 1, invoicedQty: 0, balance: 1, qtyInvoice: 1, unit: "LOT",
+                    unitPrice: getDPPaymentAmount(payment), remarks: "Payment No. " + number,
+                    checked: true, sourceDRNo: "", sourceDRNumbers: [], sourceItemNo: "",
+                    sourceSONo: getValue("soNo"), sourcePaymentType: type,
+                    sourcePaymentId: getDPPaymentId(payment), isManual: false
+                });
             }
-            hideDeliveryReceiptSuggestions();
+            selectedDPPayment = selectedDPPayments[0] || null;
+            selectedFPPayment = selectedFPPayments[0] || null;
+            updateSelectedInvoiceType();
+            renderSelectedDeliveryReceiptChips();
+            rebuildInvoiceItemsFromSelectedDRs();
+            renderDeliveryReceiptSuggestions();
         });
         box.appendChild(option);
     });
 
+    const advance = document.createElement("button");
+    advance.type = "button";
+    advance.className = "so-suggestion-option invoice-type-option";
+    const advanceTitle = document.createElement("strong");
+    advanceTitle.textContent = "Advance Invoice";
+    const advanceDetail = document.createElement("span");
+    advanceDetail.textContent = "Invoice issued in advance";
+    advance.append(advanceTitle, advanceDetail);
+    advance.addEventListener("mousedown", event => event.preventDefault());
+    advance.addEventListener("click", () => {
+        selectedInvoiceType = "ADVANCE";
+        selectedDeliveryReceipts = [];
+        setValue("drNo", "Advance Invoice");
+        renderSelectedDeliveryReceiptChips();
+        rebuildInvoiceItemsFromSelectedDRs();
+        hideDeliveryReceiptSuggestions();
+    });
+    box.appendChild(advance);
     box.hidden = false;
 }
 
@@ -2295,13 +2335,12 @@ function getDRPickerNumber(dr) {
 
 function syncSelectedDeliveryReceipts() {
     const input = $("drNo");
-    if (selectedDeliveryReceipts.length) {
-        selectedInvoiceType = "DELIVERY_RECEIPT";
-        if (input) input.value = selectedDeliveryReceipts.map(getDRPickerNumber).join(", ");
-    } else if (input && selectedInvoiceType === "DELIVERY_RECEIPT") {
-        input.value = "";
-    }
     updateSelectedInvoiceType();
+    const labels = []
+        .concat(selectedDeliveryReceipts.map(getDRPickerNumber))
+        .concat(selectedDPPayments.map(getDPPaymentNumber))
+        .concat(selectedFPPayments.map(getDPPaymentNumber));
+    if (input && selectedInvoiceType !== "ADVANCE") input.value = labels.join(", ");
     renderSelectedDeliveryReceiptChips();
     rebuildInvoiceItemsFromSelectedDRs();
 }
@@ -2591,7 +2630,7 @@ function renderSalesOrderSuggestions(query) {
         hideSalesOrderSuggestions();
         hideDeliveryReceiptSuggestions();
         populateFromSalesOrder(salesOrder);
-        renderDPPaymentPicker();
+
     }
 }
 
@@ -2616,7 +2655,7 @@ function loadSalesOrderFromUrl() {
     }
     const salesOrder = findSalesOrderByNumber(soNo);
     if (salesOrder) {
-        populateFromSalesOrder(salesOrder).then(renderDPPaymentPicker);
+        populateFromSalesOrder(salesOrder);
         return;
     }
 
@@ -2624,7 +2663,7 @@ function loadSalesOrderFromUrl() {
     // not be in the browser cache. Refresh once from the database.
     loadSalesOrdersFromDatabase().then(() => {
         const found = findSalesOrderByNumber(soNo);
-        if (found) populateFromSalesOrder(found).then(renderDPPaymentPicker);
+        if (found) populateFromSalesOrder(found);
     });
 }
 
