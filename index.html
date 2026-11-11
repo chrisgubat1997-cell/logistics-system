@@ -39,7 +39,7 @@
 
     <link
         rel="stylesheet"
-        href="css/index.css?v=20261111-global-search-fix02"
+        href="css/index.css?v=20261111-global-so-dropdown01"
     >
 
 
@@ -366,6 +366,7 @@
                 <input id="globalSOSearch" type="search" autocomplete="off"
                     placeholder="Search SO / Client / Project..." aria-label="Search Sales Order 360 degree quick view">
                 <small>360°</small>
+                <div class="global-so-search-results" id="globalSOSearchResults" hidden></div>
             </div>
 
         </div>
@@ -3190,7 +3191,7 @@ async function loadSOMonitoringModule() {
     if (!container) return;
     if (!soMonitoringModuleLoaded) {
         try {
-            await loadScriptOnce('js/so-monitoring.js?v=20261111-quickview01', 'data-so-monitoring-js');
+            await loadScriptOnce('js/so-monitoring.js?v=20261111-click-result01', 'data-so-monitoring-js');
             soMonitoringModuleLoaded = true;
         } catch (error) {
             container.innerHTML = '<div style="padding:16px;color:#b42318">Unable to load SO Monitoring: ' + String(error.message || error) + '</div>';
@@ -3600,40 +3601,68 @@ document.addEventListener(
 
 
 <script>
-/* GLOBAL SO 360 SEARCH — always available in the topbar; no sidebar shortcut. */
+/* GLOBAL SO SEARCH — show matches first; open 360° only after a result is clicked. */
 (function () {
     const field = document.getElementById('globalSOSearch');
+    const wrap = document.getElementById('globalSOSearchWrap');
+    const results = document.getElementById('globalSOSearchResults');
     const page = document.getElementById('soMonitoring');
-    if (!field || !page) return;
-    let navigating = false;
+    if (!field || !wrap || !results || !page) return;
+    let searchTimer = null;
+    let requestId = 0;
 
-    function openQuickView() {
-        if (!page.classList.contains('active')) showPage('soMonitoring', null);
-        // Ensure the module is initialized even when the page was opened by focus.
-        if (typeof loadSOMonitoringModule === 'function') {
-            loadSOMonitoringModule().catch(function (error) {
-                console.error('Unable to open Sales Order 360 view:', error);
-            });
-        }
+    function closeResults() { results.hidden = true; results.innerHTML = ''; }
+    function showResults(items, query) {
+        if (!query) { closeResults(); return; }
+        results.innerHTML = items.length ? items.map(function (item) {
+            return '<button type="button" class="global-so-result" data-so="' +
+                String(item.soNumber || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;') +
+                '"><strong>' + (item.soNumber || '') + '</strong><span>' +
+                (item.client || '') + '</span><small>' + (item.project || 'No project') + '</small></button>';
+        }).join('') : '<div class="global-so-no-result">No matching Sales Order found.</div>';
+        results.hidden = false;
     }
-
-    field.addEventListener('focus', openQuickView);
-    field.addEventListener('keydown', async function (event) {
-        if (event.key !== 'Enter') return;
-        event.preventDefault();
+    async function updateResults() {
         const query = field.value.trim();
-        navigating = true;
-        openQuickView();
+        const current = ++requestId;
+        if (!query) { closeResults(); return; }
         try {
             await loadSOMonitoringModule();
-            if (query && typeof window.searchSOMonitoring === 'function') {
-                await window.searchSOMonitoring(query);
-            }
+            if (typeof window.getSOMonitoringSuggestions !== 'function') return;
+            const matches = await window.getSOMonitoringSuggestions(query);
+            if (current === requestId && field.value.trim() === query) showResults(matches, query);
         } catch (error) {
-            console.error('Global SO 360 search failed:', error);
-        } finally {
-            navigating = false;
+            console.error('Global SO search failed:', error);
+            if (current === requestId) showResults([], query);
         }
+    }
+    field.addEventListener('input', function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(updateResults, 180);
+    });
+    field.addEventListener('focus', function () {
+        if (field.value.trim()) updateResults();
+    });
+    field.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') closeResults();
+        // Enter deliberately does not navigate; user must click a matching SO.
+        if (event.key === 'Enter') event.preventDefault();
+    });
+    results.addEventListener('click', async function (event) {
+        const button = event.target.closest('[data-so]');
+        if (!button) return;
+        const soNumber = button.getAttribute('data-so');
+        closeResults();
+        if (!page.classList.contains('active')) showPage('soMonitoring', null);
+        try {
+            await loadSOMonitoringModule();
+            if (typeof window.openSOMonitoringSO === 'function') await window.openSOMonitoringSO(soNumber);
+        } catch (error) {
+            console.error('Unable to open selected Sales Order:', error);
+        }
+    });
+    document.addEventListener('click', function (event) {
+        if (!wrap.contains(event.target)) closeResults();
     });
 })();
 
