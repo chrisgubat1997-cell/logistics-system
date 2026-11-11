@@ -91,6 +91,56 @@ function createInvoice(payload) {
     if (!so) throw new Error("Sales Order not found: " + soNumber);
     if (String(so.STATUS || "").toUpperCase() === "CANCELLED") throw new Error("Cannot invoice a cancelled Sales Order.");
 
+    let dpPayment = null;
+    let dpPaymentNo = "";
+    let dpPaymentId = "";
+    let dpPaymentAmount = 0;
+    if (invoiceType === "DOWN_PAYMENT") {
+      dpPaymentNo = String(payload.dpPaymentNo || payload.DP_PAYMENT_NO || "").trim();
+      dpPaymentId = String(payload.dpPaymentId || payload.DP_PAYMENT_ID || "").trim();
+      if (!dpPaymentNo && !dpPaymentId) {
+        throw new Error("Select the saved Payment record for this Down Payment Invoice.");
+      }
+      const paymentRecords = getAllRecords(CONFIG.SHEETS.PAYMENTS);
+      dpPayment = paymentRecords.find(p =>
+        (dpPaymentNo && String(p.PAYMENT_NO || "").trim() === dpPaymentNo) ||
+        (dpPaymentId && String(p.PAYMENT_ID || "").trim() === dpPaymentId)
+      ) || null;
+      if (!dpPayment) throw new Error("The selected Payment record could not be found.");
+      if (String(dpPayment.SO_NUMBER || "").trim() !== soNumber) {
+        throw new Error("The selected Payment record does not belong to this Sales Order.");
+      }
+      const paymentStatus = String(dpPayment.PAYMENT_STATUS || "").trim().toUpperCase();
+      if (!["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(paymentStatus)) {
+        throw new Error("Only confirmed/received Payment records can be invoiced as Down Payment.");
+      }
+      dpPaymentNo = String(dpPayment.PAYMENT_NO || dpPaymentNo).trim();
+      dpPaymentId = String(dpPayment.PAYMENT_ID || dpPaymentId).trim();
+      dpPaymentAmount = Number(dpPayment.SO_APPLIED_AMOUNT ?? dpPayment.CURRENT_PAYMENT ?? 0) || 0;
+      if (dpPaymentAmount <= 0) throw new Error("The selected Payment record has no amount applied to this Sales Order.");
+
+      const existingDPInvoice = getAllRecords(CONFIG.SHEETS.INVOICES).find(invoice =>
+        String(invoice.DP_PAYMENT_NO || "").trim() === dpPaymentNo &&
+        !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(String(invoice.STATUS || "").trim().toUpperCase())
+      );
+      if (existingDPInvoice) {
+        throw new Error("Payment " + dpPaymentNo + " has already been used in Invoice " + String(existingDPInvoice.INVOICE_NO || "") + ".");
+      }
+
+      const submittedAmount = Number(payload.dpPaymentAmount ?? payload.DP_PAYMENT_AMOUNT ?? 0) || 0;
+      if (Math.abs(submittedAmount - dpPaymentAmount) > 0.01) {
+        throw new Error("The Down Payment amount does not match the selected Payment record. Refresh Payment records and try again.");
+      }
+      if (requestedItems.length !== 1) {
+        throw new Error("A Down Payment Invoice must contain only its selected Payment record amount.");
+      }
+      const lineQty = Number(requestedItems[0].qtyInvoice ?? requestedItems[0].QTY_INVOICE ?? 0);
+      const linePrice = Number(requestedItems[0].unitPrice ?? requestedItems[0].UNIT_PRICE ?? 0);
+      if (Math.abs(lineQty - 1) > 0.0001 || Math.abs(linePrice - dpPaymentAmount) > 0.01) {
+        throw new Error("The Down Payment invoice line must match the selected Payment record amount.");
+      }
+    }
+
     // Non-DR invoice types (Down Payment, Full Payment, Advance) do not require a DR.
     const drRecords = invoiceType === "DELIVERY_RECEIPT"
       ? drNumbers.map(number => {
@@ -153,6 +203,9 @@ function createInvoice(payload) {
       SI_NO: String(payload.siNo || payload.SI_NO || ""),
       SO_ID: so.SO_ID || "", SO_NUMBER: soNumber, DR_ID: drId, DR_NUMBER: drNumber,
       INVOICE_TYPE: invoiceType,
+      DP_PAYMENT_ID: dpPaymentId,
+      DP_PAYMENT_NO: dpPaymentNo,
+      DP_PAYMENT_AMOUNT: dpPaymentAmount,
       PO_NUMBER: String(payload.poNo || payload.PO_NUMBER || so.PO_NUMBER || ""),
       TERMS: String(payload.terms || payload.TERMS || so.TERMS || so.PAYMENT_TERMS || ""),
       SALES_ENGINEER: String(payload.se || payload.salesEngineer || payload.SALES_ENGINEER || so.SALES_ENGINEER || ""),
@@ -166,6 +219,13 @@ function createInvoice(payload) {
       CREATED_BY: String(payload.createdBy || payload.username || payload.CREATED_BY || ""),
       CREATED_AT: timestamp, UPDATED_AT: timestamp
     };
+    const invoiceHeaders = _finGetHeaders_(invoiceSheet);
+    ["DP_PAYMENT_ID", "DP_PAYMENT_NO", "DP_PAYMENT_AMOUNT"].forEach(function(field) {
+      if (invoiceHeaders.indexOf(field) === -1) {
+        invoiceSheet.getRange(1, invoiceSheet.getLastColumn() + 1).setValue(field);
+        invoiceHeaders.push(field);
+      }
+    });
     _finAppendObjectByHeaders_(invoiceSheet, header);
     const itemHeaders = _finGetHeaders_(itemSheet);
     const start = itemSheet.getLastRow() + 1;
