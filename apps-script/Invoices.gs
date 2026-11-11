@@ -484,7 +484,7 @@ function createInvoice(payload) {
       id: String(fpPayment.PAYMENT_ID || fpPayment.PAYMENT_NO || ""),
       number: String(fpPayment.PAYMENT_NO || "")
     });
-    _finAppendInvoiceSources(
+    _finAppendInvoiceSources_(
       invoiceId, invoiceNo, invoiceSources,
       header.CREATED_BY || "SYSTEM", timestamp
     );
