@@ -72,11 +72,14 @@
   }
   function normalizedName(v){return String(v||"").trim().toLowerCase().replace(/\s+/g," ");}
   function customerOrders(customer){
-    const id=String(customer.CUSTOMER_ID||"").trim(), name=normalizedName(customer.CLIENT_NAME||customer.CUSTOMER_NAME);
+    const id=String(customer.CUSTOMER_ID||"").trim();
+    const name=normalizedName(customer.CLIENT_NAME||customer.CUSTOMER_NAME);
     return orders.filter(so=>{
       const soId=String(so.CUSTOMER_ID||"").trim();
-      if(id&&soId)return soId===id;
-      return !soId&&name&&normalizedName(so.CLIENT_NAME||so.CLIENT||so.CUSTOMER_NAME)===name;
+      // When a customer has a permanent ID, never mix in SOs by name.
+      // Legacy name fallback is allowed only if the customer itself has no ID.
+      if(id)return !!soId&&soId===id;
+      return !soId&&name&&normalizedName(so.CLIENT_NAME||so.CLIENT_NAME||so.CUSTOMER_NAME)===name;
     });
   }
   function soAmount(so){return Number(so.GRAND_TOTAL??so.TOTAL_AMOUNT??so.SO_TOTAL??so.AMOUNT??0)||0;}
@@ -98,11 +101,19 @@
   }
   function customerCreditRows(customer){
     const id=String(customer.CUSTOMER_ID||"").trim(), name=normalizedName(customer.CLIENT_NAME||customer.CUSTOMER_NAME);
-    return customerCredits.filter(r=>{const rid=String(r.CUSTOMER_ID||"").trim();if(id&&rid)return id===rid;return !rid&&name&&normalizedName(r.CLIENT_NAME||r.CUSTOMER_NAME)===name;});
+    return customerCredits.filter(r=>{
+      const rid=String(r.CUSTOMER_ID||"").trim();
+      if(id)return !!rid&&rid===id;
+      return !rid&&name&&normalizedName(r.CLIENT_NAME||r.CUSTOMER_NAME)===name;
+    });
   }
   function customerCreditTxns(customer){
     const id=String(customer.CUSTOMER_ID||"").trim(), name=normalizedName(customer.CLIENT_NAME||customer.CUSTOMER_NAME);
-    return creditTransactions.filter(r=>{const rid=String(r.CUSTOMER_ID||"").trim();if(id&&rid)return id===rid;return !rid&&name&&normalizedName(r.CLIENT_NAME||r.CUSTOMER_NAME)===name;});
+    return creditTransactions.filter(r=>{
+      const rid=String(r.CUSTOMER_ID||"").trim();
+      if(id)return !!rid&&rid===id;
+      return !rid&&name&&normalizedName(r.CLIENT_NAME||r.CUSTOMER_NAME)===name;
+    });
   }
   function renderCustomerDetails(customer){
     const projects=customerOrders(customer), paidBySO=customerPaidBySO(projects);
