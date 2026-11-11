@@ -324,7 +324,7 @@ function createInvoice(payload) {
     }
 
     // Non-DR invoice types (Down Payment, Full Payment, Advance) do not require a DR.
-    const drRecords = invoiceType === "DELIVERY_RECEIPT"
+    const drRecords = drNumbers.length
       ? drNumbers.map(number => {
           const record = findRecord(CONFIG.SHEETS.DELIVERY_RECEIPTS, "DR_NUMBER", number);
           if (!record) throw new Error("Delivery Receipt not found: " + number);
@@ -464,14 +464,47 @@ function createInvoice(payload) {
         number: String(record.DR_NUMBER || "")
       });
     });
-    // Optional multi-source payload supports combined DR/DP/FP Pick Item workflows.
+    // Resolve every selected DP/FP source against the authoritative Payments sheet.
+    // These references remain permanent even if their printable Pick Item rows are removed.
+    const additionalPaymentSources = [];
+    const paymentSourceSeen = new Set();
     (Array.isArray(payload.sourceReferences) ? payload.sourceReferences : []).forEach(function(source) {
       const type = String(source.SOURCE_TYPE || source.sourceType || source.type || "").trim().toUpperCase();
-      if (!["SO", "DR", "DP", "FP"].includes(type)) return;
-      invoiceSources.push({
+      if (type !== "DP" && type !== "FP") return;
+      const sourceId = String(source.SOURCE_ID || source.sourceId || source.id || "").trim();
+      const sourceNo = String(source.SOURCE_NUMBER || source.sourceNumber || source.number || "").trim();
+      if (!sourceId && !sourceNo) throw new Error("A selected payment source is missing its Payment ID or Payment Number.");
+      const key = type + "|" + (sourceId || sourceNo).toLowerCase();
+      if (paymentSourceSeen.has(key)) return;
+      paymentSourceSeen.add(key);
+      const match = getAllRecords(CONFIG.SHEETS.PAYMENTS).find(function(payment) {
+        return (sourceId && String(payment.PAYMENT_ID || "").trim() === sourceId) ||
+          (sourceNo && String(payment.PAYMENT_NO || "").trim() === sourceNo);
+      });
+      if (!match) throw new Error(type + " payment record could not be found: " + (sourceNo || sourceId));
+      if (String(match.SO_NUMBER || "").trim() !== soNumber) {
+        throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " does not belong to Sales Order " + soNumber + ".");
+      }
+      const status = String(match.PAYMENT_STATUS || "").trim().toUpperCase();
+      if (!["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(status)) {
+        throw new Error("Only confirmed/received Payment records can be linked to an invoice: " + (match.PAYMENT_NO || sourceNo));
+      }
+      const actualType = String(match.PAYMENT_TYPE || "").trim().toUpperCase();
+      const validType = type === "DP"
+        ? ["DP", "DOWN_PAYMENT", "DOWN PAYMENT"].includes(actualType)
+        : ["FP", "FULL_PAYMENT", "FULL PAYMENT"].includes(actualType);
+      if (!validType) {
+        throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " is not classified as " + (type === "DP" ? "Down Payment" : "Full Payment") + ".");
+      }
+      const amount = Number(match.SO_APPLIED_AMOUNT !== "" && match.SO_APPLIED_AMOUNT !== undefined && match.SO_APPLIED_AMOUNT !== null
+        ? match.SO_APPLIED_AMOUNT : match.CURRENT_PAYMENT) || 0;
+      if (amount <= 0) throw new Error("Payment " + (match.PAYMENT_NO || sourceNo) + " has no amount applied to this Sales Order.");
+      _finAssertSourceNotAlreadyInvoiced_(type, match.PAYMENT_ID || match.PAYMENT_NO, match.PAYMENT_NO);
+      additionalPaymentSources.push({
         type: type,
-        id: String(source.SOURCE_ID || source.sourceId || source.id || source.SOURCE_NUMBER || source.sourceNumber || source.number || ""),
-        number: String(source.SOURCE_NUMBER || source.sourceNumber || source.number || "")
+        id: String(match.PAYMENT_ID || match.PAYMENT_NO),
+        number: String(match.PAYMENT_NO || sourceNo),
+        payment: match
       });
     });
     if (dpPayment) invoiceSources.push({
@@ -489,22 +522,31 @@ function createInvoice(payload) {
       header.CREATED_BY || "SYSTEM", timestamp
     );
 
-    // Keep the existing PAYMENTS invoice fields populated for quick lookup.
-    const linkedPayment = dpPayment || fpPayment;
-    if (linkedPayment) {
+    // Keep every linked Payment record searchable by its invoice number.
+    const linkedPayments = [dpPayment, fpPayment]
+      .concat(additionalPaymentSources.map(function(source) { return source.payment; }))
+      .filter(function(payment, index, all) {
+        if (!payment) return false;
+        const key = String(payment.PAYMENT_ID || payment.PAYMENT_NO || "");
+        return all.findIndex(function(other) {
+          return other && String(other.PAYMENT_ID || other.PAYMENT_NO || "") === key;
+        }) === index;
+      });
+    if (linkedPayments.length) {
       const paymentSheet = getSheet(CONFIG.SHEETS.PAYMENTS);
       const paymentHeaders = _finGetHeaders_(paymentSheet);
       const paymentRecords = getAllRecords(CONFIG.SHEETS.PAYMENTS);
-      const paymentIndex = paymentRecords.findIndex(function(row) {
-        return String(row.PAYMENT_ID || "") === String(linkedPayment.PAYMENT_ID || "") ||
-          String(row.PAYMENT_NO || "") === String(linkedPayment.PAYMENT_NO || "");
-      });
-      if (paymentIndex >= 0) {
+      linkedPayments.forEach(function(linkedPayment) {
+        const paymentIndex = paymentRecords.findIndex(function(row) {
+          return String(row.PAYMENT_ID || "") === String(linkedPayment.PAYMENT_ID || "") ||
+            String(row.PAYMENT_NO || "") === String(linkedPayment.PAYMENT_NO || "");
+        });
+        if (paymentIndex < 0) return;
         ["INVOICE_ID", "INVOICE_NO"].forEach(function(field) {
           const col = paymentHeaders.indexOf(field);
           if (col >= 0) paymentSheet.getRange(paymentIndex + 2, col + 1).setValue(field === "INVOICE_ID" ? invoiceId : invoiceNo);
         });
-      }
+      });
     }
 
     if (typeof logActivity === "function") logActivity({
