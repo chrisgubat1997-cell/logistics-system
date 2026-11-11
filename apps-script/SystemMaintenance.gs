@@ -10,9 +10,16 @@ function isSystemMaintenanceEnabled_() {
 }
 
 function getSystemMaintenanceStatus_(payload) {
-  const account = authorizeRole_(payload, [
-    "ADMIN", "SALES", "LOGISTICS", "FINANCE", "PAYMENT", "PRODUCTION"
-  ]);
+  // Maintenance status is intentionally readable without a session so the
+  // login page can show the maintenance screen before anyone signs in.
+  // When a session is supplied, still resolve its role for the admin indicator.
+  payload = payload || {};
+  let account = null;
+  if (payload.sessionToken) {
+    account = authorizeRole_(payload, [
+      "ADMIN", "SALES", "LOGISTICS", "FINANCE", "PAYMENT", "PRODUCTION"
+    ]);
+  }
   const props = PropertiesService.getScriptProperties();
   return {
     success: true,
@@ -21,7 +28,7 @@ function getSystemMaintenanceStatus_(payload) {
       "The system is temporarily unavailable while we perform maintenance.",
     updatedAt: props.getProperty("SYSTEM_MAINTENANCE_UPDATED_AT") || "",
     updatedBy: props.getProperty("SYSTEM_MAINTENANCE_UPDATED_BY") || "",
-    isAdmin: account.role === "ADMIN"
+    isAdmin: !!account && account.role === "ADMIN"
   };
 }
 
