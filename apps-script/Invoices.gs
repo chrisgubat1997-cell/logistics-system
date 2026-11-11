@@ -969,6 +969,26 @@ function getPendingInvoiceQueue(payload) {
   const invoicedPaymentNumbers = new Set();
   const invoicedDRNumbers = new Set();
 
+  // The source-reference ledger is authoritative for DP/FP/DR usage.
+  // It remains effective even when invoice item lines are removed.
+  let permanentSources = [];
+  try { permanentSources = getAllRecords("INVOICE_SOURCE_REFERENCES"); } catch (error) { permanentSources = []; }
+  const activeInvoiceIds = new Set(activeInvoices.map(function(invoice) {
+    return String(invoice.INVOICE_ID || "");
+  }));
+  permanentSources.forEach(function(ref) {
+    const type = String(ref.SOURCE_TYPE || "").trim().toUpperCase();
+    const linkedId = String(ref.INVOICE_ID || "").trim();
+    if (!activeInvoiceIds.has(linkedId)) return;
+    const sourceId = String(ref.SOURCE_ID || "").trim().toLowerCase();
+    const sourceNo = String(ref.SOURCE_NUMBER || "").trim().toLowerCase();
+    if (type === "DP" || type === "FP") {
+      if (sourceId) invoicedPaymentIds.add(sourceId);
+      if (sourceNo) invoicedPaymentNumbers.add(sourceNo);
+    }
+    if (type === "DR" && sourceNo) invoicedDRNumbers.add(sourceNo);
+  });
+
   activeInvoices.forEach(invoice => {
     const type = String(invoice.INVOICE_TYPE || "").trim().toUpperCase();
 
