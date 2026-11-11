@@ -432,7 +432,10 @@ async function loadPaymentData() {
         paymentRecords = paymentDashboardRows(results[0], ['payments']).map(function (row) {
             return Object.assign({}, row, {
                 paymentNo: row.PAYMENT_NO || row.PAYMENT_ID || row.paymentNo || row.paymentNumber || '',
-                invoiceNo: row.INVOICE_NO || row.invoiceNo || '', siNo: row.SI_NO || row.siNo || '',
+                invoiceNo: row.LINKED_INVOICE_NO || row.INVOICE_NO || row.invoiceNo || '',
+                linkedInvoiceNo: row.LINKED_INVOICE_NO || row.INVOICE_NO || row.invoiceNo || '',
+                paymentType: row.PAYMENT_TYPE || row.paymentType || '',
+                siNo: row.SI_NO || row.siNo || '',
                 soNo: row.SO_NUMBER || row.soNo || row.salesOrderNo || '', client: row.CLIENT_NAME || row.client || row.clientName || '',
                 project: row.PROJECT || row.project || '', date: row.PAYMENT_DATE || row.paymentDate || row.date || row.CREATED_AT || '',
                 amount: row.CURRENT_PAYMENT ?? row.currentPayment ?? row.AMOUNT ?? row.amount ?? 0,
@@ -2367,7 +2370,10 @@ function getInvoiceNo(
 ) {
 
     return String(
+        record?.LINKED_INVOICE_NO ??
+        record?.linkedInvoiceNo ??
         record?.invoiceNo ??
+        record?.INVOICE_NO ??
         record?.invoiceNumber ??
         record?.invoice ??
         record?.siNo ??
