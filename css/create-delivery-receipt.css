@@ -949,10 +949,16 @@ textarea.form-control {
 .review-items-table,
 .preview-table {
     width: 100%;
-
     border-collapse: collapse;
-
     min-width: 1050px;
+}
+
+/* Keep the Prepare DR picking grid aligned when some SO lines
+   are already fully delivered. Fixed layout prevents intrinsic
+   content widths from pushing individual columns out of line. */
+.items-table {
+    table-layout: fixed;
+    min-width: 1045px;
 }
 
 .items-table thead th,
@@ -1028,31 +1034,38 @@ textarea.form-control {
    TABLE COLUMNS
    ========================================================= */
 
-.check-column {
-    width: 58px;
+.items-table .check-column {
+    width: 48px;
     text-align: center !important;
 }
 
-.item-no-column {
+.items-table .item-no-column {
+    width: 70px;
+}
+
+.items-table .description-column {
+    width: 220px;
+    min-width: 0;
+}
+
+.items-table .qty-column {
     width: 85px;
-}
-
-.description-column {
-    min-width: 250px;
-}
-
-.qty-column {
-    width: 115px;
     text-align: center !important;
 }
 
-.pick-qty-column {
-    width: 135px;
+.items-table .unit-amount-column,
+.items-table .dr-amount-column {
+    width: 95px;
+}
+
+.items-table .pick-qty-column {
+    width: 100px;
     text-align: center !important;
 }
 
-.remarks-column {
-    min-width: 220px;
+.items-table .remarks-column {
+    width: 160px;
+    min-width: 0;
 }
 
 
@@ -1262,21 +1275,25 @@ textarea.form-control {
 }
 
 
-/* FULLY DELIVERED */
+/* FULLY DELIVERED
+   This class is applied to the TABLE ROW (<tr>), never to an inline badge.
+   Keep the row in native table layout and use a neutral background. */
 
-.fully-delivered {
-    display: inline-flex;
+.items-table tbody tr.fully-delivered {
+    display: table-row;
+    background: #f8fafc;
+}
 
-    padding: 5px 8px;
+.items-table tbody tr.fully-delivered:hover {
+    background: #f1f5f9;
+}
 
-    border-radius: 5px;
+.items-table tbody tr.fully-delivered td {
+    color: #64748b;
+}
 
-    background: #edf8f1;
-    color: #15803d;
-
-    font-size: 8px;
-    font-weight: 900;
-    letter-spacing: 0.4px;
+.items-table tbody tr.fully-delivered .balance-zero {
+    color: #64748b;
 }
 
 
