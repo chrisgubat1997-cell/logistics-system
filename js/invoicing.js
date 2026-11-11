@@ -1006,7 +1006,55 @@ function getInvoicedRecordsFiltered() {
     });
 }
 
-function renderRecentInvoices() { renderInvoiceTable(getInvoicedRecordsFiltered()); }
+function renderRecentInvoices() {
+    renderInvoiceTable(getInvoicedRecordsFiltered());
+    renderInvoiceTransactionRecords();
+}
+
+function getInvoiceSourceReferences(invoice) {
+    const raw = Array.isArray(invoice.sourceReferences) ? invoice.sourceReferences : [];
+    const refs = raw.map(source => ({
+        sourceType: String(source.sourceType || source.SOURCE_TYPE || "").trim().toUpperCase(),
+        sourceNumber: String(source.sourceNumber || source.SOURCE_NUMBER || source.sourceId || source.SOURCE_ID || "").trim()
+    })).filter(source => source.sourceNumber);
+
+    // Legacy fallback for invoices created before the source-reference list was returned.
+    if (!refs.length && invoice.drNo) {
+        String(invoice.drNo).split(/[,;\\n]+/).map(value => value.trim()).filter(Boolean)
+            .forEach(value => refs.push({ sourceType: "DR", sourceNumber: value }));
+    }
+    return refs;
+}
+
+function renderInvoiceTransactionRecords() {
+    const tbody = document.getElementById("invoiceTransactionTableBody");
+    if (!tbody) return;
+
+    const rows = [];
+    invoiceRecords.forEach(invoice => {
+        getInvoiceSourceReferences(invoice).forEach(source => {
+            const type = ["DR", "DELIVERY_RECEIPT", "DELIVERY RECEIPT"].includes(source.sourceType)
+                ? "DELIVERY RECEIPT"
+                : (["DP", "FP", "PAYMENT", "DOWN_PAYMENT", "FULL_PAYMENT"].includes(source.sourceType)
+                    ? "PAYMENT"
+                    : source.sourceType.replace(/_/g, " "));
+            rows.push({ invoice, type: type || "TRANSACTION", reference: source.sourceNumber });
+        });
+    });
+
+    if (!rows.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No invoice transaction references found.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = rows.map(({ invoice, type, reference }) => `<tr>
+        <td><strong>${escapeHtml(invoice.invoiceNo || "—")}</strong></td>
+        <td>${escapeHtml(type)}</td>
+        <td><strong>${escapeHtml(reference)}</strong></td>
+        <td>${escapeHtml(invoice.client || "—")}</td>
+        <td>${escapeHtml(formatDisplayDate(invoice.invoiceDate))}</td>
+    </tr>`).join("");
+}
 
 function renderInvoiceTable(records) {
     const tbody = document.getElementById("recentInvoiceTableBody");
