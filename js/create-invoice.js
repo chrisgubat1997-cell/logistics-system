@@ -2207,9 +2207,7 @@ function renderDeliveryReceiptSuggestions() {
             }
             selectedDPPayment = selectedDPPayments[0] || null;
             selectedFPPayment = selectedFPPayments[0] || null;
-            updateSelectedInvoiceType();
-            renderSelectedDeliveryReceiptChips();
-            rebuildInvoiceItemsFromSelectedDRs();
+            syncSelectedDeliveryReceipts();
             renderDeliveryReceiptSuggestions();
         });
         box.appendChild(option);
@@ -2227,6 +2225,11 @@ function renderDeliveryReceiptSuggestions() {
     advance.addEventListener("click", () => {
         selectedInvoiceType = "ADVANCE";
         selectedDeliveryReceipts = [];
+        selectedDPPayments = [];
+        selectedFPPayments = [];
+        selectedDPPayment = null;
+        selectedFPPayment = null;
+        invoiceItems = invoiceItems.filter(item => !item.sourcePaymentType);
         setValue("drNo", "Advance Invoice");
         renderSelectedDeliveryReceiptChips();
         rebuildInvoiceItemsFromSelectedDRs();
