@@ -817,6 +817,10 @@ function normalizeSalesOrder(so) {
             so.status ||
             "",
 
+        subtotal: toNumber(so.SUBTOTAL ?? so.subtotal ?? 0),
+        discount: toNumber(so.DISCOUNT ?? so.discount ?? 0),
+        grandTotal: toNumber(so.GRAND_TOTAL ?? so.grandTotal ?? 0),
+
         items: [],
 
         original: so
@@ -1554,6 +1558,30 @@ function getEditedSalesOrderDetails() {
    BUILD ITEM STATE
    ========================================================= */
 
+function getSelectedSODiscountRate() {
+    if (!selectedSO) return 0;
+
+    const items = Array.isArray(selectedSO.items) ? selectedSO.items : [];
+    const calculatedSubtotal = items.reduce(function (sum, item) {
+        return sum + (
+            toNumber(item.totalOrder) * toNumber(item.unitPrice)
+        );
+    }, 0);
+
+    const subtotal = toNumber(selectedSO.subtotal) > 0
+        ? toNumber(selectedSO.subtotal)
+        : calculatedSubtotal;
+    const discount = Math.min(
+        Math.max(0, toNumber(selectedSO.discount)),
+        Math.max(0, subtotal)
+    );
+
+    return subtotal > 0 ? discount / subtotal : 0;
+}
+
+function roundDRMoney(value) {
+    return Math.round((toNumber(value) + Number.EPSILON) * 100) / 100;
+}
 
 function buildItemState() {
     if (!selectedSO) {
@@ -1566,12 +1594,15 @@ function buildItemState() {
         ? selectedSO.items
         : [];
 
+    const discountRate = getSelectedSODiscountRate();
+
     itemState = items.map(function (item, index) {
         const previousDelivered =
             getPreviouslyDeliveredQty(selectedSO, item);
 
         const totalOrder = toNumber(item.totalOrder);
-        const unitPrice = toNumber(item.unitPrice);
+        const originalUnitPrice = toNumber(item.unitPrice);
+        const netUnitPrice = originalUnitPrice * (1 - discountRate);
 
         const balance = Math.max(
             totalOrder - previousDelivered,
@@ -1586,7 +1617,11 @@ function buildItemState() {
             itemName: item.itemName,
             itemDescription: item.itemDescription,
             unit: item.unit,
-            unitPrice: unitPrice,
+            unitPrice: netUnitPrice,
+            originalUnitPrice: originalUnitPrice,
+            netUnitPrice: netUnitPrice,
+            discountRate: discountRate,
+            discountAmount: 0,
             drAmount: 0,
             totalOrder: totalOrder,
             totalDelivered: previousDelivered,
@@ -2023,7 +2058,7 @@ function renderItemsTable() {
                 </td>
 
 <td class="qty-column unit-amount-column">
-    ${formatCurrency(item.unitPrice)}
+    ${formatCurrency(item.netUnitPrice ?? item.unitPrice)}
 </td>
 
 <td
@@ -2164,6 +2199,7 @@ function setupItemEvents() {
 
                         item.pickQty = 0;
                         item.drAmount = 0;
+                        item.discountAmount = 0;
 
                         const amountCell = document.querySelector(
                             `[data-dr-amount-index="${index}"]`
@@ -2257,12 +2293,12 @@ function setupItemEvents() {
                         ? qty
                         : 0;
 
-                    item.drAmount = Math.round(
-                        (
-                            item.pickQty * item.unitPrice +
-                            Number.EPSILON
-                        ) * 100
-                    ) / 100;
+                    item.drAmount = roundDRMoney(
+                        item.pickQty * item.netUnitPrice
+                    );
+                    item.discountAmount = roundDRMoney(
+                        item.pickQty * item.originalUnitPrice - item.drAmount
+                    );
 
                     const amountCell = document.querySelector(
                         `[data-dr-amount-index="${index}"]`
@@ -2827,10 +2863,16 @@ function buildCurrentDeliveryReceipt() {
     description: item.itemDescription || item.itemName || "",
 
     unit: item.unit,
-    unitPrice: toNumber(item.unitPrice),
-    drAmount: Math.round(
-        (toNumber(item.pickQty) * toNumber(item.unitPrice) + Number.EPSILON) * 100
-    ) / 100,
+    unitPrice: toNumber(item.netUnitPrice),
+    netUnitPrice: toNumber(item.netUnitPrice),
+    originalUnitPrice: toNumber(item.originalUnitPrice),
+    discountAmount: roundDRMoney(
+        toNumber(item.pickQty) * toNumber(item.originalUnitPrice) -
+        toNumber(item.pickQty) * toNumber(item.netUnitPrice)
+    ),
+    drAmount: roundDRMoney(
+        toNumber(item.pickQty) * toNumber(item.netUnitPrice)
+    ),
     totalOrder: item.totalOrder,
     soQty: item.totalOrder,
 
@@ -3104,7 +3146,7 @@ function renderReview(dr) {
                 </td>
 
                 <td>
-                    ${formatCurrency(item.unitPrice)}
+                    ${formatCurrency(item.netUnitPrice ?? item.unitPrice)}
                 </td>
 
                 <td>
@@ -3618,8 +3660,8 @@ function renderPreview(dr) {
     for (let i=0; i<20; i++) {
         const item = items[i] || {};
         const qty = toNumber(item.pickQty ?? item.qty ?? item.quantity ?? 0);
-        const priceRaw = item.unitAmount ?? item.unitPrice ?? item.unitPriceAmount ?? null;
-        const amountRaw = item.amount ?? item.lineTotal ?? item.totalAmount ?? null;
+        const priceRaw = item.netUnitPrice ?? item.unitAmount ?? item.unitPrice ?? item.unitPriceAmount ?? null;
+        const amountRaw = item.drAmount ?? item.amount ?? item.lineTotal ?? item.totalAmount ?? null;
         const price = priceRaw === null || priceRaw === "" ? null : toNumber(priceRaw);
         const amount = amountRaw === null || amountRaw === "" ? (price === null ? null : price * qty) : toNumber(amountRaw);
         if (amount === null) allAmountsKnown = false; else total += amount;
