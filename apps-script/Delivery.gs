@@ -281,18 +281,24 @@ function createDeliveryReceipt(payload) {
     }
 
 
-    function _drPreviouslyDelivered(soItemId) {
+    function _drPreviouslyDelivered(soItemId, itemNumber) {
       let total = 0;
+      const targetId = String(soItemId || "").trim();
+      const targetNumber = String(itemNumber || "").trim();
 
       existingDRItems.forEach(function (item) {
         if (_drIsCancelled(item)) return;
 
-        if (
-          String(item.SO_ITEM_ID || "") !==
-          String(soItemId || "")
-        ) {
-          return;
-        }
+        const existingItemId = String(item.SO_ITEM_ID || "").trim();
+        const existingItemNumber = String(item.ITEM_NUMBER || "").trim();
+
+        // Prefer the unique SO item ID. When legacy SO rows have no ID,
+        // use ITEM_NUMBER so different panel numbers remain independent.
+        const sameItem = targetId
+          ? existingItemId === targetId
+          : (!existingItemId && targetNumber && existingItemNumber === targetNumber);
+
+        if (!sameItem) return;
 
         const parentDR = existingDRs.find(function (dr) {
           const sameId =
@@ -310,17 +316,10 @@ function createDeliveryReceipt(payload) {
 
         if (!parentDR) return;
 
-        const status = String(
-          parentDR.STATUS || ""
-        ).toUpperCase();
-
+        const status = String(parentDR.STATUS || "").toUpperCase();
         if (status === "CANCELLED") return;
 
-        total += Number(
-          item.PICK_QTY ||
-          item.DELIVERED_QTY ||
-          0
-        );
+        total += Number(item.PICK_QTY || item.DELIVERED_QTY || 0);
       });
 
       return total;
@@ -371,16 +370,30 @@ function createDeliveryReceipt(payload) {
 
       const resolvedItemId = String(
         soItem.SO_ITEM_ID || ""
-      );
+      ).trim();
 
-      if (seenItemIds[resolvedItemId]) {
+      const resolvedItemNumber = String(
+        soItem.ITEM_NUMBER || itemNumber || ""
+      ).trim();
+
+      // Some legacy SO item rows do not have SO_ITEM_ID. Do not treat
+      // all blank IDs as the same item: use the distinct item number.
+      const itemIdentity = resolvedItemId
+        ? "ID:" + resolvedItemId
+        : "ITEM:" + resolvedItemNumber;
+
+      if (!resolvedItemId && !resolvedItemNumber) {
+        throw new Error("Unable to identify a Sales Order item. Please check its Item Number.");
+      }
+
+      if (seenItemIds[itemIdentity]) {
         throw new Error(
-          "Duplicate item selected: " +
-          String(soItem.ITEM_NAME || itemNumber)
+          "The same Sales Order item was selected more than once: " +
+          resolvedItemNumber
         );
       }
 
-      seenItemIds[resolvedItemId] = true;
+      seenItemIds[itemIdentity] = true;
 
       const pickQty = Number(
         requested.pickQty ??
@@ -394,7 +407,7 @@ function createDeliveryReceipt(payload) {
       );
 
       const previouslyDelivered =
-        _drPreviouslyDelivered(resolvedItemId);
+        _drPreviouslyDelivered(resolvedItemId, resolvedItemNumber);
 
       const balance = Math.max(
         0,
