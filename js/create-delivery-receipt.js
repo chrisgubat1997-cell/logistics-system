@@ -3429,16 +3429,8 @@ async function saveDeliveryReceipt() {
 
         currentDR = savedDR;
 
-        // Refresh saved records from Google Sheets.
-        const drResult = await callDeliveryAPI(
-            "getDeliveryReceipts"
-        );
-
-        deliveryReceiptsCache =
-            drResult.deliveryReceipts ||
-            drResult.records ||
-            [];
-
+        // The server has confirmed the DR was created. Complete the UI now;
+        // a secondary refresh failure must never be reported as "Save Failed".
         renderCompleted(savedDR);
 
         hideElement("prepareView");
@@ -3447,10 +3439,10 @@ async function saveDeliveryReceipt() {
 
         try {
             localStorage.removeItem(SELECTED_SO_KEY);
-        } catch (error) {
+        } catch (storageError) {
             console.warn(
                 "Unable to clear selected Sales Order.",
-                error
+                storageError
             );
         }
 
@@ -3461,6 +3453,21 @@ async function saveDeliveryReceipt() {
             top: 0,
             behavior: "smooth"
         });
+
+        // Refresh the local DR cache separately. If this fails, the saved
+        // receipt remains successful and the user must not retry the save.
+        try {
+            const drResult = await callDeliveryAPI("getDeliveryReceipts");
+            deliveryReceiptsCache =
+                drResult.deliveryReceipts ||
+                drResult.records ||
+                [];
+        } catch (refreshError) {
+            console.warn(
+                "DR was saved, but the delivery receipt list could not refresh:",
+                refreshError
+            );
+        }
 
     } catch (error) {
         console.error(
