@@ -14,6 +14,8 @@ function getInvoices(payload) {
   if (soNumber) records = records.filter(r => String(r.SO_NUMBER || "") === soNumber);
   if (invoiceNo) records = records.filter(r => String(r.INVOICE_NO || "") === invoiceNo);
   const items = getAllRecords(CONFIG.SHEETS.INVOICE_ITEMS);
+  let sourceReferences = [];
+  try { sourceReferences = getAllRecords("INVOICE_SOURCE_REFERENCES"); } catch (error) { sourceReferences = []; }
   records = records.map(r => {
     const child = items.filter(i =>
       (r.INVOICE_ID && String(i.INVOICE_ID) === String(r.INVOICE_ID)) ||
@@ -21,6 +23,12 @@ function getInvoices(payload) {
     );
     r.ITEMS = child;
     r.items = child;
+    const sources = sourceReferences.filter(ref =>
+      (r.INVOICE_ID && String(ref.INVOICE_ID || "") === String(r.INVOICE_ID)) ||
+      (r.INVOICE_NO && String(ref.INVOICE_NO || "") === String(r.INVOICE_NO))
+    );
+    r.SOURCE_REFERENCES = sources;
+    r.sourceReferences = sources;
     return r;
   });
   return { success: true, invoices: records, records: records, count: records.length };
@@ -68,8 +76,149 @@ function getInvoice(payload) {
     String(i.INVOICE_ID || "") === String(found.INVOICE_ID || "") ||
     String(i.INVOICE_NO || "") === String(found.INVOICE_NO || "")
   );
+  _finAttachInvoiceSources_(found);
   return { success: true, invoice: found };
 }
+
+
+/* =========================================================
+   PERMANENT INVOICE SOURCE REFERENCES
+   INVOICE_ITEMS may change when a line is removed. This
+   relationship ledger must never be changed by item edits.
+========================================================= */
+function _finInvoiceSourceSheet_() {
+  const sheet = getSheet("INVOICE_SOURCE_REFERENCES");
+  const required = [
+    "SOURCE_REFERENCE_ID", "INVOICE_ID", "INVOICE_NO",
+    "SOURCE_TYPE", "SOURCE_ID", "SOURCE_NUMBER", "CREATED_AT", "CREATED_BY"
+  ];
+  const headers = _finGetHeaders_(sheet);
+  const missing = required.filter(function(h) { return headers.indexOf(h) < 0; });
+  if (missing.length) {
+    throw new Error("INVOICE_SOURCE_REFERENCES is missing required headers: " + missing.join(", "));
+  }
+  return sheet;
+}
+
+function _finActiveInvoiceStatus_(status) {
+  return !["CANCELLED", "CANCELED", "VOID", "VOIDED"].includes(String(status || "").trim().toUpperCase());
+}
+
+function _finGetInvoiceSources_(invoiceId, invoiceNo) {
+  return getAllRecords("INVOICE_SOURCE_REFERENCES").filter(function(row) {
+    return (invoiceId && String(row.INVOICE_ID || "").trim() === String(invoiceId).trim()) ||
+      (invoiceNo && String(row.INVOICE_NO || "").trim() === String(invoiceNo).trim());
+  });
+}
+
+function _finAppendInvoiceSources_(invoiceId, invoiceNo, sources, createdBy, timestamp) {
+  const sheet = _finInvoiceSourceSheet_();
+  const headers = _finGetHeaders_(sheet);
+  const existing = _finGetInvoiceSources_(invoiceId, invoiceNo);
+  const seen = new Set(existing.map(function(row) {
+    return String(row.SOURCE_TYPE || "").toUpperCase() + "|" +
+      String(row.SOURCE_ID || row.SOURCE_NUMBER || "").toUpperCase();
+  }));
+  const rows = [];
+  (sources || []).forEach(function(source) {
+    const type = String(source.type || source.SOURCE_TYPE || "").trim().toUpperCase();
+    const id = String(source.id || source.SOURCE_ID || source.number || source.SOURCE_NUMBER || "").trim();
+    const number = String(source.number || source.SOURCE_NUMBER || "").trim();
+    if (!type || !id) return;
+    const key = type + "|" + id.toUpperCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    const record = {
+      SOURCE_REFERENCE_ID: generateId("INVSR"),
+      INVOICE_ID: invoiceId,
+      INVOICE_NO: invoiceNo,
+      SOURCE_TYPE: type,
+      SOURCE_ID: id,
+      SOURCE_NUMBER: number || id,
+      CREATED_AT: timestamp,
+      CREATED_BY: createdBy || "SYSTEM"
+    };
+    rows.push(headers.map(function(header) {
+      return record[header] === undefined ? "" : record[header];
+    }));
+  });
+  if (rows.length) {
+    sheet.getRange(sheet.getLastRow() + 1, 1, rows.length, headers.length).setValues(rows);
+  }
+  return rows.length;
+}
+
+function _finAssertSourceNotAlreadyInvoiced_(sourceType, sourceId, sourceNumber, currentInvoiceId) {
+  const type = String(sourceType || "").trim().toUpperCase();
+  const id = String(sourceId || sourceNumber || "").trim().toLowerCase();
+  const number = String(sourceNumber || "").trim().toLowerCase();
+  if (!type || (!id && !number)) return;
+  const refs = getAllRecords("INVOICE_SOURCE_REFERENCES");
+  const invoices = getAllRecords(CONFIG.SHEETS.INVOICES);
+  const activeById = new Map(invoices.filter(function(invoice) {
+    return _finActiveInvoiceStatus_(invoice.STATUS);
+  }).map(function(invoice) {
+    return [String(invoice.INVOICE_ID || ""), invoice];
+  }));
+  const match = refs.find(function(ref) {
+    if (String(ref.SOURCE_TYPE || "").trim().toUpperCase() !== type) return false;
+    const refId = String(ref.SOURCE_ID || "").trim().toLowerCase();
+    const refNo = String(ref.SOURCE_NUMBER || "").trim().toLowerCase();
+    if (refId !== id && (!number || refNo !== number)) return false;
+    const linkedId = String(ref.INVOICE_ID || "").trim();
+    return linkedId !== String(currentInvoiceId || "") && activeById.has(linkedId);
+  });
+  if (match) {
+    const invoice = activeById.get(String(match.INVOICE_ID || "").trim());
+    throw new Error(type + " " + (match.SOURCE_NUMBER || match.SOURCE_ID) +
+      " is already linked to Invoice " + String(invoice.INVOICE_NO || match.INVOICE_NO || "") + ".");
+  }
+}
+
+function _finAttachInvoiceSources_(invoice) {
+  if (!invoice) return invoice;
+  const refs = _finGetInvoiceSources_(invoice.INVOICE_ID, invoice.INVOICE_NO);
+  invoice.SOURCE_REFERENCES = refs;
+  invoice.sourceReferences = refs;
+  return invoice;
+}
+
+function _finAttachPaymentInvoiceLinks_(payment) {
+  if (!payment) return payment;
+  const paymentId = String(payment.PAYMENT_ID || "").trim();
+  const paymentNo = String(payment.PAYMENT_NO || "").trim();
+  const refs = getAllRecords("INVOICE_SOURCE_REFERENCES").filter(function(ref) {
+    const type = String(ref.SOURCE_TYPE || "").trim().toUpperCase();
+    if (type !== "DP" && type !== "FP") return false;
+    const sourceId = String(ref.SOURCE_ID || "").trim();
+    const sourceNo = String(ref.SOURCE_NUMBER || "").trim();
+    return (paymentId && sourceId === paymentId) || (paymentNo && sourceNo === paymentNo);
+  });
+  const activeInvoices = getAllRecords(CONFIG.SHEETS.INVOICES);
+  const linked = refs.map(function(ref) {
+    const invoice = activeInvoices.find(function(row) {
+      return String(row.INVOICE_ID || "").trim() === String(ref.INVOICE_ID || "").trim() ||
+        String(row.INVOICE_NO || "").trim() === String(ref.INVOICE_NO || "").trim();
+    });
+    return {
+      INVOICE_ID: ref.INVOICE_ID || (invoice && invoice.INVOICE_ID) || "",
+      INVOICE_NO: ref.INVOICE_NO || (invoice && invoice.INVOICE_NO) || "",
+      SOURCE_TYPE: ref.SOURCE_TYPE,
+      STATUS: invoice ? invoice.STATUS || "" : ""
+    };
+  }).filter(function(row) { return row.INVOICE_NO; });
+  payment.LINKED_INVOICES = linked;
+  payment.LINKED_INVOICE_NOS = linked.map(function(row) { return row.INVOICE_NO; });
+  if (linked.length) {
+    payment.INVOICE_ID = linked[linked.length - 1].INVOICE_ID || payment.INVOICE_ID || "";
+    payment.INVOICE_NO = linked[linked.length - 1].INVOICE_NO || payment.INVOICE_NO || "";
+    payment.LINKED_INVOICE_NO = linked.map(function(row) { return row.INVOICE_NO; }).join(", ");
+  } else {
+    payment.LINKED_INVOICE_NO = String(payment.INVOICE_NO || "");
+  }
+  return payment;
+}
+
 
 function createInvoice(payload) {
   payload = payload || {};
@@ -90,6 +239,9 @@ function createInvoice(payload) {
     const so = findRecord(CONFIG.SHEETS.SALES_ORDERS, "SO_NUMBER", soNumber);
     if (!so) throw new Error("Sales Order not found: " + soNumber);
     if (String(so.STATUS || "").toUpperCase() === "CANCELLED") throw new Error("Cannot invoice a cancelled Sales Order.");
+
+    // Validate the permanent source-reference sheet before writing any invoice data.
+    _finInvoiceSourceSheet_();
 
     let dpPayment = null;
     let dpPaymentNo = "";
@@ -141,6 +293,46 @@ function createInvoice(payload) {
       }
     }
 
+    // Full Payment can optionally identify the exact saved Payment transaction.
+    // The frontend sends these fields when an FP record is selected.
+    let fpPayment = null;
+    let fpPaymentNo = "";
+    let fpPaymentId = "";
+    let fpPaymentAmount = 0;
+    if (invoiceType === "FULL_PAYMENT") {
+      fpPaymentNo = String(payload.fpPaymentNo || payload.FP_PAYMENT_NO || payload.paymentNo || "").trim();
+      fpPaymentId = String(payload.fpPaymentId || payload.FP_PAYMENT_ID || payload.paymentId || "").trim();
+      if (fpPaymentNo || fpPaymentId) {
+        const paymentRecords = getAllRecords(CONFIG.SHEETS.PAYMENTS);
+        fpPayment = paymentRecords.find(function(p) {
+          return (fpPaymentNo && String(p.PAYMENT_NO || "").trim() === fpPaymentNo) ||
+            (fpPaymentId && String(p.PAYMENT_ID || "").trim() === fpPaymentId);
+        }) || null;
+        if (!fpPayment) throw new Error("The selected Full Payment record could not be found.");
+        if (String(fpPayment.SO_NUMBER || "").trim() !== soNumber) {
+          throw new Error("The selected Full Payment record does not belong to this Sales Order.");
+        }
+        const fpStatus = String(fpPayment.PAYMENT_STATUS || "").trim().toUpperCase();
+        if (!["RECEIVED", "PAID", "CONFIRMED", "COMPLETED", "POSTED"].includes(fpStatus)) {
+          throw new Error("Only confirmed/received Payment records can be invoiced as Full Payment.");
+        }
+        fpPaymentNo = String(fpPayment.PAYMENT_NO || fpPaymentNo).trim();
+        fpPaymentId = String(fpPayment.PAYMENT_ID || fpPaymentId).trim();
+        fpPaymentAmount = Number(fpPayment.SO_APPLIED_AMOUNT ?? fpPayment.CURRENT_PAYMENT ?? 0) || 0;
+        if (fpPaymentAmount <= 0) throw new Error("The selected Full Payment record has no amount applied to this Sales Order.");
+        const submittedFPAmount = Number(payload.fpPaymentAmount ?? payload.FP_PAYMENT_AMOUNT ?? fpPaymentAmount) || 0;
+        if (Math.abs(submittedFPAmount - fpPaymentAmount) > 0.01) {
+          throw new Error("The Full Payment amount does not match the selected Payment record. Refresh Payment records and try again.");
+        }
+        if (requestedItems.length !== 1) throw new Error("A Full Payment Invoice must contain only its selected Payment record amount.");
+        const fpQty = Number(requestedItems[0].qtyInvoice ?? requestedItems[0].QTY_INVOICE ?? 0);
+        const fpPrice = Number(requestedItems[0].unitPrice ?? requestedItems[0].UNIT_PRICE ?? 0);
+        if (Math.abs(fpQty - 1) > 0.0001 || Math.abs(fpPrice - fpPaymentAmount) > 0.01) {
+          throw new Error("The Full Payment invoice line must match the selected Payment record amount.");
+        }
+      }
+    }
+
     // Non-DR invoice types (Down Payment, Full Payment, Advance) do not require a DR.
     const drRecords = invoiceType === "DELIVERY_RECEIPT"
       ? drNumbers.map(number => {
@@ -157,6 +349,27 @@ function createInvoice(payload) {
       : [];
     const drNumber = drNumbers.join(", ");
     const drId = drRecords.map(record => String(record.DR_ID || "")).filter(Boolean).join(", ");
+
+    // Prevent reusing the same original source on another active invoice.
+    drRecords.forEach(function(record) {
+      _finAssertSourceNotAlreadyInvoiced_("DR", record.DR_ID || record.DR_NUMBER, record.DR_NUMBER);
+    });
+    if (dpPayment) {
+      _finAssertSourceNotAlreadyInvoiced_("DP", dpPayment.PAYMENT_ID || dpPayment.PAYMENT_NO, dpPayment.PAYMENT_NO);
+    }
+    if (fpPayment) {
+      _finAssertSourceNotAlreadyInvoiced_("FP", fpPayment.PAYMENT_ID || fpPayment.PAYMENT_NO, fpPayment.PAYMENT_NO);
+    }
+    if (invoiceType === "FULL_PAYMENT" && !fpPayment) {
+      const priorFullPayment = getAllRecords(CONFIG.SHEETS.INVOICES).find(function(invoice) {
+        return _finActiveInvoiceStatus_(invoice.STATUS) &&
+          String(invoice.SO_NUMBER || "").trim() === soNumber &&
+          String(invoice.INVOICE_TYPE || "").trim().toUpperCase() === "FULL_PAYMENT";
+      });
+      if (priorFullPayment) {
+        throw new Error("This Sales Order already has a Full Payment Invoice: " + String(priorFullPayment.INVOICE_NO || "") + ".");
+      }
+    }
 
     // A Down Payment invoice is tied to the exact confirmed Payment record selected above.
     // Do not require the customer's entire contractual DP threshold to be collected first;
@@ -237,6 +450,53 @@ function createInvoice(payload) {
     itemSheet.getRange(start, 1, prepared.length, itemHeaders.length).setValues(
       prepared.map(item => itemHeaders.map(h => item[h] === undefined ? "" : item[h]))
     );
+
+    // Record every source selected for this invoice, independent of the printable item rows.
+    const invoiceSources = [{
+      type: "SO",
+      id: String(so.SO_ID || so.SO_NUMBER || soNumber),
+      number: soNumber
+    }];
+    drRecords.forEach(function(record) {
+      invoiceSources.push({
+        type: "DR",
+        id: String(record.DR_ID || record.DR_NUMBER || ""),
+        number: String(record.DR_NUMBER || "")
+      });
+    });
+    if (dpPayment) invoiceSources.push({
+      type: "DP",
+      id: String(dpPayment.PAYMENT_ID || dpPayment.PAYMENT_NO || ""),
+      number: String(dpPayment.PAYMENT_NO || "")
+    });
+    if (fpPayment) invoiceSources.push({
+      type: "FP",
+      id: String(fpPayment.PAYMENT_ID || fpPayment.PAYMENT_NO || ""),
+      number: String(fpPayment.PAYMENT_NO || "")
+    });
+    _finAppendInvoiceSources(
+      invoiceId, invoiceNo, invoiceSources,
+      header.CREATED_BY || "SYSTEM", timestamp
+    );
+
+    // Keep the existing PAYMENTS invoice fields populated for quick lookup.
+    const linkedPayment = dpPayment || fpPayment;
+    if (linkedPayment) {
+      const paymentSheet = getSheet(CONFIG.SHEETS.PAYMENTS);
+      const paymentHeaders = _finGetHeaders_(paymentSheet);
+      const paymentRecords = getAllRecords(CONFIG.SHEETS.PAYMENTS);
+      const paymentIndex = paymentRecords.findIndex(function(row) {
+        return String(row.PAYMENT_ID || "") === String(linkedPayment.PAYMENT_ID || "") ||
+          String(row.PAYMENT_NO || "") === String(linkedPayment.PAYMENT_NO || "");
+      });
+      if (paymentIndex >= 0) {
+        ["INVOICE_ID", "INVOICE_NO"].forEach(function(field) {
+          const col = paymentHeaders.indexOf(field);
+          if (col >= 0) paymentSheet.getRange(paymentIndex + 2, col + 1).setValue(field === "INVOICE_ID" ? invoiceId : invoiceNo);
+        });
+      }
+    }
+
     if (typeof logActivity === "function") logActivity({
       username: header.CREATED_BY || "SYSTEM", action: "CREATE", module: "INVOICE",
       recordId: invoiceId, recordNumber: invoiceNo, details: "Created invoice for " + soNumber + " / " + drNumber, status: "SUCCESS"
