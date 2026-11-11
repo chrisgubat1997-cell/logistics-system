@@ -2082,3 +2082,32 @@ body.sidebar-collapsed .sales-submenu .sidebar-item-icon{font-size:17px!importan
     .global-so-search:focus-within input { width: 100% !important; min-width: 0 !important; opacity: 1 !important; }
     .global-so-search small { display: none !important; }
 }
+
+
+/* TOP-LEFT PERSONAL GREETING — 2026-11-11 */
+.topbar .user-area { justify-content: flex-start !important; }
+.topbar .topbar-greeting {
+    order: -1 !important;
+    margin: 0 auto 0 0 !important;
+    padding: 0 20px 0 2px !important;
+    min-height: 44px !important;
+    border-left: 0 !important;
+    border-right: 1px solid #e5eaf0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    color: #183b32 !important;
+    font: 850 17px/1.2 "Inter","Segoe UI",Arial,sans-serif !important;
+    letter-spacing: .035em !important;
+    white-space: nowrap !important;
+    text-align: left !important;
+}
+@media (max-width: 900px) {
+    .topbar .topbar-greeting { font-size: 14px !important; padding-right: 12px !important; }
+}
+@media (max-width: 600px) {
+    .topbar .topbar-greeting { font-size: 11px !important; padding-right: 7px !important; letter-spacing: 0 !important; }
+}
+@media (max-width: 420px) {
+    .topbar .topbar-greeting { font-size: 9px !important; }
+}
