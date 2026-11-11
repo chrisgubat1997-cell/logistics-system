@@ -111,7 +111,12 @@
         <div class="invoice-release-toolbar">
             <label class="invoice-select-all"><input type="checkbox" id="selectAllInvoicedRecords"> Select all</label>
             <span id="selectedInvoiceCount">0 selected</span>
-            <button type="button" class="btn btn-primary invoice-release-selected-btn" id="releaseSelectedInvoicesBtn" disabled>RELEASE SELECTED</button>
+            <div class="invoice-bulk-actions">
+                <button type="button" class="btn btn-secondary invoice-bulk-btn" id="viewSelectedInvoiceBtn" disabled>VIEW</button>
+                <button type="button" class="btn btn-secondary invoice-bulk-btn" id="editSelectedInvoiceBtn" disabled>EDIT</button>
+                <button type="button" class="btn btn-danger invoice-bulk-btn" id="cancelSelectedInvoicesBtn" disabled>CANCEL</button>
+                <button type="button" class="btn btn-primary invoice-release-selected-btn" id="releaseSelectedInvoicesBtn" disabled>RELEASE SELECTED</button>
+            </div>
         </div>
         <div class="table-wrapper">
             <table class="sales-order-table invoiced-records-table">
