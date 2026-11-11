@@ -350,135 +350,51 @@
 
 
     <!-- =====================================================
-         RECENT SALES ORDER
+         PENDING FOR INVOICE
     ====================================================== -->
-
-    <section class="invoice-section sales-order-section">
-
-
+    <section class="invoice-section pending-invoice-section">
         <div class="section-header">
-
-
             <div class="section-title">
-
-                <h2>
-                    RECENT SALES ORDER
-                </h2>
-
-                <span>
-                    Sales orders available for invoicing
-                </span>
-
+                <h2>PENDING FOR INVOICE</h2>
+                <span>Payments and delivery receipts ready for invoicing</span>
             </div>
-
-
-            <!-- SECTION SEARCH -->
-
-            <div class="section-actions">
-
-                <button
-                    type="button"
-                    class="section-search-btn"
-                    id="salesOrderSearchBtn"
-                >
-                    🔍 SEARCH
-                </button>
-
+            <div class="pending-invoice-search">
+                <input type="search" id="pendingInvoiceSearchInput"
+                    placeholder="Search SO No., Payment No., DR No., Client or Project"
+                    aria-label="Search pending invoices">
             </div>
-
         </div>
 
-
-
-        <!-- SALES ORDER SEARCH AREA -->
-
-        <div
-            class="section-search-box"
-            id="salesOrderSearchBox"
-            hidden
-        >
-
-            <input
-                type="text"
-                id="salesOrderSearchInput"
-                placeholder="Search SO No., Client, Project, PO No."
-            >
-
-
-            <button
-                type="button"
-                id="salesOrderSearchClearBtn"
-            >
-                CLEAR
+        <div class="pending-invoice-tabs" role="tablist" aria-label="Pending invoice types">
+            <button type="button" class="pending-invoice-tab active" data-pending-invoice-type="FULL_PAYMENT" role="tab" aria-selected="true">
+                FULL PAYMENT <span id="pendingFullPaymentCount">0</span>
             </button>
-
+            <button type="button" class="pending-invoice-tab" data-pending-invoice-type="DOWN_PAYMENT" role="tab" aria-selected="false">
+                DOWN PAYMENT <span id="pendingDownPaymentCount">0</span>
+            </button>
+            <button type="button" class="pending-invoice-tab" data-pending-invoice-type="DELIVERY_RECEIPT" role="tab" aria-selected="false">
+                DELIVERY RECEIPT <span id="pendingDeliveryReceiptCount">0</span>
+            </button>
         </div>
-
-
-
-        <!-- RECENT SALES ORDER TABLE -->
 
         <div class="table-wrapper">
-
-            <table class="sales-order-table">
-
+            <table class="sales-order-table pending-invoice-table">
                 <thead>
-
                     <tr>
-
-                        <th>
-                            SO NO.
-                        </th>
-
-                        <th>
-                            CLIENT
-                        </th>
-
-                        <th>
-                            PROJECT
-                        </th>
-
-                        <th>
-                            DATE
-                        </th>
-
-                        <th>
-                            STATUS
-                        </th>
-
-                        <th>
-                            BALANCE
-                        </th>
-
-                        <th>
-                            ACTION
-                        </th>
-
+                        <th>REFERENCE NO.</th>
+                        <th>SO NO.</th>
+                        <th>CLIENT</th>
+                        <th>PROJECT</th>
+                        <th>DATE</th>
+                        <th>AMOUNT</th>
                     </tr>
-
                 </thead>
-
-
-                <tbody id="recentSalesOrderTableBody">
-
-                    <tr class="empty-row">
-
-                        <td colspan="7">
-
-                            No sales order records found.
-
-                        </td>
-
-                    </tr>
-
+                <tbody id="pendingInvoiceTableBody">
+                    <tr class="empty-row"><td colspan="6">Loading pending invoice records...</td></tr>
                 </tbody>
-
             </table>
-
         </div>
-
     </section>
-
 
 </div>
 
