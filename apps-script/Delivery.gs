@@ -130,6 +130,120 @@ function getDeliveryReceipts(payload) {
    02. CREATE DELIVERY RECEIPT
 ========================================================= */
 
+
+/* =====================================================
+   MARK DELIVERY RECEIPT AS DELIVERED
+   Updates DELIVERY_RECEIPTS and upserts DR_MONITORING.
+===================================================== */
+function markDeliveryReceiptDelivered(payload) {
+  payload = payload || {};
+  authorizeRole_(payload, ["ADMIN", "LOGISTICS"]);
+
+  const drId = String(payload.drId || payload.DR_ID || "").trim();
+  const drNumber = String(payload.drNumber || payload.DR_NUMBER || "").trim();
+  const deliveryDate = String(payload.deliveryDate || payload.DATE_DELIVERED || "").trim();
+  const remarks = String(payload.remarks || payload.REMARKS || "").trim();
+  if (!drId && !drNumber) throw new Error("Delivery Receipt ID or number is required.");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(deliveryDate)) throw new Error("A valid Delivery Date is required.");
+
+  const parts = deliveryDate.split("-").map(Number);
+  const checkedDate = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
+  if (checkedDate.getUTCFullYear() !== parts[0] || checkedDate.getUTCMonth() !== parts[1] - 1 || checkedDate.getUTCDate() !== parts[2]) throw new Error("Delivery Date is invalid.");
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    const drSheet = getSheet(CONFIG.SHEETS.DELIVERY_RECEIPTS);
+    const monitoringSheet = getSheet("DR_MONITORING");
+    const drValues = drSheet.getDataRange().getValues();
+    if (drValues.length < 2) throw new Error("Delivery Receipt was not found.");
+    const drHeaders = drValues[0].map(function(v) { return String(v).trim(); });
+    const drIdCol = drHeaders.indexOf("DR_ID");
+    const drNumberCol = drHeaders.indexOf("DR_NUMBER");
+    const statusCol = drHeaders.indexOf("STATUS");
+    const updatedCol = drHeaders.indexOf("UPDATED_AT");
+    if (statusCol < 0) throw new Error("DELIVERY_RECEIPTS is missing STATUS.");
+
+    let drIndex = -1;
+    for (let i = 1; i < drValues.length; i++) {
+      const rowId = drIdCol >= 0 ? String(drValues[i][drIdCol] || "").trim() : "";
+      const rowNumber = drNumberCol >= 0 ? String(drValues[i][drNumberCol] || "").trim() : "";
+      if ((drId && rowId === drId) || (!drId && drNumber && rowNumber === drNumber)) { drIndex = i; break; }
+    }
+    if (drIndex < 0) throw new Error("Delivery Receipt was not found in the database.");
+    const drRow = drValues[drIndex];
+    const resolvedId = drIdCol >= 0 ? String(drRow[drIdCol] || "").trim() : drId;
+    const resolvedNumber = drNumberCol >= 0 ? String(drRow[drNumberCol] || "").trim() : drNumber;
+    if (drNumber && resolvedNumber && resolvedNumber !== drNumber) throw new Error("The selected DR number does not match the Delivery Receipt ID.");
+
+    const currentStatus = String(drRow[statusCol] || "").trim().toUpperCase().replace(/[\s-]+/g, "_");
+    if (["DELIVERED", "COMPLETED", "FULLY_DELIVERED"].indexOf(currentStatus) >= 0) throw new Error("This Delivery Receipt is already marked as delivered.");
+    if (["CANCELLED", "CANCELED", "VOID", "VOIDED"].indexOf(currentStatus) >= 0) throw new Error("A cancelled or voided Delivery Receipt cannot be marked as delivered.");
+
+    const timestamp = formatDateTime(new Date());
+    const monitoringValues = monitoringSheet.getDataRange().getValues();
+    if (!monitoringValues.length) throw new Error("DR_MONITORING is missing its header row.");
+    const monHeaders = monitoringValues[0].map(function(v) { return String(v).trim(); });
+    const monIdCol = monHeaders.indexOf("DR_ID");
+    const monNumberCol = monHeaders.indexOf("DR_NUMBER");
+    if (monIdCol < 0 && monNumberCol < 0) throw new Error("DR_MONITORING is missing DR_ID and DR_NUMBER columns.");
+
+    let monIndex = -1;
+    for (let i = 1; i < monitoringValues.length; i++) {
+      const rowId = monIdCol >= 0 ? String(monitoringValues[i][monIdCol] || "").trim() : "";
+      const rowNumber = monNumberCol >= 0 ? String(monitoringValues[i][monNumberCol] || "").trim() : "";
+      if ((resolvedId && rowId === resolvedId) || (!resolvedId && resolvedNumber && rowNumber === resolvedNumber)) { monIndex = i; break; }
+    }
+
+    const valueAt = function(header) { const index = drHeaders.indexOf(header); return index >= 0 ? drRow[index] : ""; };
+    const monitoringData = {
+      DR_MONITORING_ID: "DRMON-" + Utilities.getUuid(),
+      DR_ID: resolvedId,
+      DR_NUMBER: resolvedNumber,
+      SO_ID: valueAt("SO_ID"),
+      SO_NUMBER: valueAt("SO_NUMBER"),
+      CLIENT_NAME: valueAt("CLIENT_NAME"),
+      PROJECT: valueAt("PROJECT"),
+      DATE_DELIVERED: deliveryDate,
+      STATUS: "DELIVERED",
+      REMARKS: remarks,
+      CREATED_AT: timestamp,
+      UPDATED_AT: timestamp
+    };
+
+    if (monIndex >= 0) {
+      const monRow = monitoringValues[monIndex];
+      monHeaders.forEach(function(header, index) {
+        if (["DATE_DELIVERED", "STATUS", "REMARKS", "UPDATED_AT"].indexOf(header) >= 0) monRow[index] = monitoringData[header];
+      });
+      monitoringSheet.getRange(monIndex + 1, 1, 1, monHeaders.length).setValues([monRow]);
+    } else {
+      monitoringSheet.appendRow(monHeaders.map(function(header) { return monitoringData[header] !== undefined ? monitoringData[header] : ""; }));
+    }
+
+    drRow[statusCol] = "DELIVERED";
+    if (updatedCol >= 0) drRow[updatedCol] = timestamp;
+    drSheet.getRange(drIndex + 1, 1, 1, drHeaders.length).setValues([drRow]);
+
+    if (typeof logActivity === "function") {
+      logActivity({
+        username: payload.username || payload.createdBy || "SYSTEM",
+        action: "UPDATE",
+        module: "DELIVERY_RECEIPT",
+        recordId: resolvedId,
+        recordNumber: resolvedNumber,
+        details: "Marked Delivery Receipt as DELIVERED. Delivery date: " + deliveryDate,
+        status: "SUCCESS"
+      });
+    }
+    if (typeof touchSyncVersion === "function") touchSyncVersion();
+    return { success: true, message: "Delivery Receipt marked as delivered.", drId: resolvedId, drNumber: resolvedNumber, deliveryDate: deliveryDate, status: "DELIVERED" };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+
 function createDeliveryReceipt(payload) {
   payload = payload || {};
   authorizeRole_(payload, ["ADMIN", "LOGISTICS"]);
