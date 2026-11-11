@@ -1227,3 +1227,64 @@
     .pending-invoice-search { width: 100%; }
     .pending-invoice-tabs { padding: 10px 12px; }
 }
+
+
+/* INVOICED RECORDS — compact toolbar and aligned actions */
+.invoicing-container .invoice-date-range-filter {
+    height: 36px;
+    min-width: 142px;
+    padding: 0 30px 0 10px;
+    border: 1px solid #dce2ea;
+    border-radius: 7px;
+    background: #fff;
+    color: #465164;
+    font: inherit;
+    font-size: 9px;
+    font-weight: 800;
+    cursor: pointer;
+}
+.invoicing-container .invoiced-records-controls { display:flex; align-items:center; gap:8px; }
+.invoicing-container .invoiced-records-controls input {
+    width: min(390px, 100%); height:35px; padding:0 11px;
+    border:1px solid #d9dfe8; border-radius:7px; outline:none;
+    background:#fff; color:#263142; font:inherit; font-size:10px;
+}
+.invoicing-container .invoice-release-toolbar {
+    display:flex; align-items:center; justify-content:flex-end; gap:9px;
+    min-height:44px; padding:7px 14px; border-bottom:1px solid #edf0f4;
+    background:#fff;
+}
+.invoicing-container .invoice-select-all {
+    display:inline-flex; align-items:center; gap:6px; margin-right:2px;
+    color:#596579; font-size:9px; font-weight:700; white-space:nowrap;
+}
+.invoicing-container .invoice-select-all input,
+.invoicing-container .invoiced-records-table input[type="checkbox"] {
+    width:14px; height:14px; margin:0; accent-color:#176b45; cursor:pointer;
+}
+.invoicing-container #selectedInvoiceCount {
+    color:#7a8493; font-size:9px; font-weight:700; white-space:nowrap;
+}
+.invoicing-container .invoice-release-selected-btn {
+    min-height:27px !important; height:27px !important; padding:0 10px !important;
+    border-radius:5px !important; font-size:8px !important; letter-spacing:.2px;
+}
+.invoicing-container .invoice-release-selected-btn:disabled {
+    opacity:.42; cursor:not-allowed; filter:grayscale(.2);
+}
+.invoicing-container .invoiced-records-table { min-width:1120px !important; }
+.invoicing-container .invoiced-records-table th:first-child,
+.invoicing-container .invoiced-records-table td:first-child { width:42px; text-align:center; padding-left:10px; padding-right:10px; }
+.invoicing-container .invoiced-records-table th:last-child { text-align:right; }
+.invoicing-container .invoiced-records-table td.invoice-row-actions {
+    text-align:right; white-space:nowrap; padding-left:8px; padding-right:12px;
+}
+.invoicing-container .invoice-row-actions .table-action {
+    height:24px; min-width:42px; padding:0 6px; margin:0 0 0 3px;
+    border-radius:5px; font-size:7.4px; line-height:1;
+}
+@media (max-width:760px) {
+    .invoicing-container .invoicing-header .header-actions { flex-wrap:wrap; }
+    .invoicing-container .invoice-date-range-filter { flex:1; }
+    .invoicing-container .invoice-release-toolbar { padding:7px 10px; gap:7px; }
+}
