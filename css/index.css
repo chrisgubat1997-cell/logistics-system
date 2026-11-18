@@ -2307,3 +2307,14 @@ html[data-company="GREENMETAL"] body .topbar .company-switch-btn,
 html[data-company="GREENMETAL"] body .topbar .logout-btn { background:#A6CE39 !important; background-color:#A6CE39 !important; border-color:#A6CE39 !important; color:#052B59 !important; -webkit-text-fill-color:#052B59 !important; }
 html[data-company="GREENMETAL"] body .topbar .company-switch-btn:hover,
 html[data-company="GREENMETAL"] body .topbar .logout-btn:hover { background:#C4E85A !important; background-color:#C4E85A !important; border-color:#C4E85A !important; }
+
+
+/* SIDEBAR ICON VISIBILITY FIX — ensure every menu item keeps its icon when collapsed */
+.sidebar .menu .menu-btn .sidebar-item-icon { display:inline-flex!important; align-items:center!important; justify-content:center!important; flex:0 0 26px!important; width:26px!important; height:26px!important; font-size:20px!important; line-height:1!important; }
+.sidebar .menu .menu-btn .sidebar-item-label { display:block!important; min-width:0!important; }
+body.sidebar-collapsed .sidebar .menu .menu-btn { justify-content:center!important; gap:0!important; padding-left:4px!important; padding-right:4px!important; }
+body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-icon { display:inline-flex!important; opacity:1!important; visibility:visible!important; flex:0 0 26px!important; width:26px!important; height:26px!important; font-size:21px!important; }
+body.sidebar-collapsed .sidebar .menu .menu-btn .sidebar-item-label { max-width:0!important; flex:0 0 0!important; opacity:0!important; visibility:hidden!important; overflow:hidden!important; }
+body.sidebar-collapsed .sidebar .menu .menu-btn[title] { position:relative; }
+body.sidebar-collapsed .sidebar .menu .menu-btn[title]:hover::after { content:attr(title); position:absolute; left:calc(100% + 12px); top:50%; transform:translateY(-50%); z-index:2500; padding:8px 11px; border-radius:8px; background:#0f172a; color:#fff; font-size:12px; line-height:1.2; font-weight:600; white-space:nowrap; box-shadow:0 6px 18px rgba(0,0,0,.22); pointer-events:none; }
+body.sidebar-collapsed .sidebar .menu .menu-btn[title]:hover { overflow:visible!important; }
