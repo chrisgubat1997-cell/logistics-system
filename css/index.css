@@ -2208,3 +2208,39 @@ html[data-company="GREENLIGHT"] body .topbar .company-context { background: rgba
 html[data-company="GREENLIGHT"] body .topbar .profile-btn { background: rgba(255,255,255,.12) !important; color: #FFFFFF !important; border-color: rgba(255,255,255,.25) !important; }
 html[data-company="GREENLIGHT"] body .topbar .company-switch-btn { background: #B9E5C7 !important; color: #104B36 !important; border-color: #B9E5C7 !important; }
 html[data-company="GREENLIGHT"] body .topbar .logout-btn { background: #B9E5C7 !important; color: #104B36 !important; border-color: #B9E5C7 !important; }
+
+
+/* GREETING UPPERCASE + SEARCH 360 LABEL BLACK */
+html[data-company="GREENMETAL"] .topbar .topbar-greeting,
+html[data-company="GREENLIGHT"] .topbar .topbar-greeting {
+  color: #FFFFFF !important;
+  text-transform: uppercase !important;
+}
+html[data-company="GREENMETAL"] .topbar .topbar-greeting *,
+html[data-company="GREENLIGHT"] .topbar .topbar-greeting * {
+  color: #FFFFFF !important;
+  text-transform: uppercase !important;
+}
+/* Preserve the search field's white surface; make the 360° label dark */
+html[data-company="GREENMETAL"] .topbar .global-so-search,
+html[data-company="GREENLIGHT"] .topbar .global-so-search {
+  background: #FFFFFF !important;
+  border-color: rgba(255,255,255,.65) !important;
+}
+html[data-company="GREENMETAL"] .topbar .global-so-search small,
+html[data-company="GREENLIGHT"] .topbar .global-so-search small {
+  color: #000000 !important;
+  background: #FFFFFF !important;
+}
+html[data-company="GREENMETAL"] .topbar .global-so-search input,
+html[data-company="GREENLIGHT"] .topbar .global-so-search input {
+  color: #000000 !important;
+}
+html[data-company="GREENMETAL"] .topbar .global-so-search input::placeholder,
+html[data-company="GREENLIGHT"] .topbar .global-so-search input::placeholder {
+  color: #555555 !important;
+}
+html[data-company="GREENMETAL"] .topbar .global-so-search > span,
+html[data-company="GREENLIGHT"] .topbar .global-so-search > span {
+  color: #000000 !important;
+}
