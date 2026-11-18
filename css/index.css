@@ -2125,3 +2125,50 @@ body.sidebar-collapsed .sales-submenu .sidebar-item-icon{font-size:17px!importan
 html[data-company="GREENLIGHT"] .global-so-result strong{color:#073b78}
 html[data-company="GREENMETAL"] .global-so-result strong{color:#176b4a}
 @media(max-width:600px){.global-so-search-results{right:-4px;width:min(340px,88vw)}}
+
+
+/* =========================================================
+   COMPANY-COLOR TOPBAR + SIDEBAR MATCH
+   Keep topbar shell consistent with active company sidebar.
+========================================================= */
+html[data-company="GREENMETAL"] .topbar {
+  background: linear-gradient(90deg, #052B59 0%, #073B78 60%, #0A4C91 100%) !important;
+  border-bottom: 1px solid #174B83 !important;
+  box-shadow: 0 3px 16px rgba(5,43,89,.16) !important;
+}
+html[data-company="GREENMETAL"] .topbar .topbar-greeting,
+html[data-company="GREENMETAL"] #welcomeUser,
+html[data-company="GREENMETAL"] .company-context,
+html[data-company="GREENMETAL"] .company-context #activeCompanyLabel {
+  color: #fff !important;
+}
+html[data-company="GREENMETAL"] .topbar .topbar-greeting { border-right-color: rgba(255,255,255,.25) !important; }
+html[data-company="GREENMETAL"] .company-context { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.2) !important; }
+html[data-company="GREENMETAL"] .company-context-dot { background: #A6CE39 !important; }
+html[data-company="GREENMETAL"] .company-switch-btn { background: #A6CE39 !important; color: #052B59 !important; border-color: #A6CE39 !important; }
+html[data-company="GREENMETAL"] .profile-btn { background: rgba(255,255,255,.12) !important; color: #fff !important; border-color: rgba(255,255,255,.25) !important; }
+html[data-company="GREENMETAL"] .profile-btn:hover { background: rgba(255,255,255,.2) !important; }
+html[data-company="GREENMETAL"] .logout-btn { background: #A6CE39 !important; color: #052B59 !important; border-color: #A6CE39 !important; }
+html[data-company="GREENMETAL"] .logout-btn:hover { background: #C4E85A !important; }
+html[data-company="GREENMETAL"] .global-so-search { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.25) !important; color: #fff !important; }
+html[data-company="GREENMETAL"] .global-so-search input, html[data-company="GREENMETAL"] .global-so-search input::placeholder, html[data-company="GREENMETAL"] .global-so-search small { color: #fff !important; }
+
+html[data-company="GREENLIGHT"] .topbar {
+  background: linear-gradient(90deg, #104B36 0%, #176B4A 60%, #21865B 100%) !important;
+  border-bottom: 1px solid #267653 !important;
+  box-shadow: 0 3px 16px rgba(16,75,54,.16) !important;
+}
+html[data-company="GREENLIGHT"] .topbar .topbar-greeting,
+html[data-company="GREENLIGHT"] #welcomeUser,
+html[data-company="GREENLIGHT"] .company-context,
+html[data-company="GREENLIGHT"] .company-context #activeCompanyLabel { color: #fff !important; }
+html[data-company="GREENLIGHT"] .topbar .topbar-greeting { border-right-color: rgba(255,255,255,.25) !important; }
+html[data-company="GREENLIGHT"] .company-context { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.2) !important; }
+html[data-company="GREENLIGHT"] .company-context-dot { background: #B9E5C7 !important; }
+html[data-company="GREENLIGHT"] .company-switch-btn { background: #B9E5C7 !important; color: #104B36 !important; border-color: #B9E5C7 !important; }
+html[data-company="GREENLIGHT"] .profile-btn { background: rgba(255,255,255,.12) !important; color: #fff !important; border-color: rgba(255,255,255,.25) !important; }
+html[data-company="GREENLIGHT"] .profile-btn:hover { background: rgba(255,255,255,.2) !important; }
+html[data-company="GREENLIGHT"] .logout-btn { background: #B9E5C7 !important; color: #104B36 !important; border-color: #B9E5C7 !important; }
+html[data-company="GREENLIGHT"] .logout-btn:hover { background: #D2F0DC !important; }
+html[data-company="GREENLIGHT"] .global-so-search { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.25) !important; color: #fff !important; }
+html[data-company="GREENLIGHT"] .global-so-search input, html[data-company="GREENLIGHT"] .global-so-search input::placeholder, html[data-company="GREENLIGHT"] .global-so-search small { color: #fff !important; }
