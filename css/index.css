@@ -2244,3 +2244,19 @@ html[data-company="GREENMETAL"] .topbar .global-so-search > span,
 html[data-company="GREENLIGHT"] .topbar .global-so-search > span {
   color: #000000 !important;
 }
+
+
+/* GREENLIGHT: greeting white and 360-degree search label black */
+html[data-company="GREENLIGHT"] .topbar .topbar-greeting,
+html[data-company="GREENLIGHT"] .topbar .topbar-greeting * {
+  color: #FFFFFF !important;
+  text-transform: uppercase !important;
+}
+html[data-company="GREENLIGHT"] .topbar .global-so-search {
+  background: #FFFFFF !important;
+}
+html[data-company="GREENLIGHT"] .topbar .global-so-search small,
+html[data-company="GREENLIGHT"] .topbar .global-so-search > span {
+  color: #000000 !important;
+  background: #FFFFFF !important;
+}
