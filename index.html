@@ -170,17 +170,17 @@
         <button
             class="menu-btn active"
             onclick="showPage('dashboard', this)"
-        >
+         title="Dashboard" aria-label="Dashboard">
 
-            🏠 Dashboard
+            <span class="sidebar-item-icon" aria-hidden="true">🏠</span><span class="sidebar-item-label">Dashboard</span>
 
         </button>
 
 
         <!-- MESSAGES -->
         <button class="menu-btn messages-menu-btn" data-messages-menu onclick="showPage('messages', this)" type="button" style="display:flex !important; visibility:visible !important; opacity:1 !important;">
-            <span class="messages-menu-icon">✉</span>
-            <span>Messages</span>
+            <span class="sidebar-item-icon messages-menu-icon" aria-hidden="true">✉</span>
+            <span class="sidebar-item-label">Messages</span>
             
         </button>
 
@@ -188,15 +188,15 @@
              SALES ORDER
         ================================================== -->
 
-        <button class="menu-btn" type="button" onclick="showPage('sales', this)">
-            📄 Sales Order
+        <button class="menu-btn" type="button" onclick="showPage('sales', this)" title="Sales Order" aria-label="Sales Order">
+            <span class="sidebar-item-icon" aria-hidden="true">📄</span><span class="sidebar-item-label">Sales Order</span>
         </button>
 
         <!-- =================================================
              JO REGISTER (PRODUCTION)
         ================================================== -->
-        <button class="menu-btn" data-jo-register-menu onclick="showPage('joRegister', this)" style="display:none">
-            🧾 JO Register
+        <button class="menu-btn" data-jo-register-menu onclick="showPage('joRegister', this)" style="display:none" title="JO Register" aria-label="JO Register">
+            <span class="sidebar-item-icon" aria-hidden="true">🧾</span><span class="sidebar-item-label">JO Register</span>
         </button>
 
         <!-- =================================================
@@ -206,9 +206,9 @@
         <button
             class="menu-btn"
             onclick="showPage('delivery', this)"
-        >
+         title="Delivery" aria-label="Delivery">
 
-            🚚 Delivery
+            <span class="sidebar-item-icon" aria-hidden="true">🚚</span><span class="sidebar-item-label">Delivery</span>
 
         </button>
 
@@ -220,9 +220,9 @@
         <button
             class="menu-btn"
             onclick="showPage('fleetAnalytics', this)"
-        >
+         title="Fleet & Delivery Analytics" aria-label="Fleet & Delivery Analytics">
 
-            📊 Fleet & Delivery Analytics
+            <span class="sidebar-item-icon" aria-hidden="true">📊</span><span class="sidebar-item-label">Fleet & Delivery Analytics</span>
 
         </button>
 
@@ -233,9 +233,9 @@
 <button
     class="menu-btn"
     onclick="showPage('fleetDataEntry', this)"
->
+ title="Fleet & Delivery Data Entry" aria-label="Fleet & Delivery Data Entry">
 
-    📝 Fleet & Delivery Data Entry
+    <span class="sidebar-item-icon" aria-hidden="true">📝</span><span class="sidebar-item-label">Fleet & Delivery Data Entry</span>
 
 </button>
 
@@ -247,9 +247,9 @@
         <button
             class="menu-btn"
             onclick="showPage('invoice', this)"
-        >
+         title="Invoice" aria-label="Invoice">
 
-            🧾 Invoice
+            <span class="sidebar-item-icon" aria-hidden="true">🧾</span><span class="sidebar-item-label">Invoice</span>
 
         </button>
 
@@ -261,9 +261,9 @@
         <button
             class="menu-btn"
             onclick="showPage('payment', this)"
-        >
+         title="Payment" aria-label="Payment">
 
-            💳 Payment
+            <span class="sidebar-item-icon" aria-hidden="true">💳</span><span class="sidebar-item-label">Payment</span>
 
         </button>
 
@@ -271,8 +271,8 @@
         <!-- =================================================
              REVOLVING FUND MANAGEMENT (ADMIN / LOGISTICS ONLY)
         ================================================== -->
-        <button class="menu-btn" data-role-module="revolving-fund" onclick="showPage('revolvingFund', this)">
-            💰 Revolving Fund
+        <button class="menu-btn" data-role-module="revolving-fund" onclick="showPage('revolvingFund', this)" title="Revolving Fund" aria-label="Revolving Fund">
+            <span class="sidebar-item-icon" aria-hidden="true">💰</span><span class="sidebar-item-label">Revolving Fund</span>
         </button>
 
         <!-- =================================================
@@ -282,9 +282,9 @@
         <button
             class="menu-btn"
             onclick="showPage('reports', this)"
-        >
+         title="Reports" aria-label="Reports">
 
-            📊 Reports
+            <span class="sidebar-item-icon" aria-hidden="true">📊</span><span class="sidebar-item-label">Reports</span>
 
         </button>
 <!-- =================================================
@@ -294,17 +294,17 @@
         <button
             class="menu-btn"
             onclick="showPage('settings', this)"
-        >
+         title="Settings" aria-label="Settings">
 
-            ⚙️ Settings
+            <span class="sidebar-item-icon" aria-hidden="true">⚙️</span><span class="sidebar-item-label">Settings</span>
 
         </button>
 
         <!-- PRODUCTIVITY CUP PROJECT -->
-        <button class="menu-btn" type="button" onclick="showPage('productivityCup', this)">🏆 Productivity Cup</button>
+        <button class="menu-btn" type="button" onclick="showPage('productivityCup', this)" title="Productivity Cup" aria-label="Productivity Cup"><span class="sidebar-item-icon" aria-hidden="true">🏆</span><span class="sidebar-item-label">Productivity Cup</span></button>
 
         <!-- ABOUT LOGIS-TECH -->
-        <button class="menu-btn" type="button" onclick="showPage('about', this)">
+        <button class="menu-btn" type="button" onclick="showPage('about', this)" title="About LOGIS-TECH" aria-label="About LOGIS-TECH">
             <span aria-hidden="true">ⓘ</span> About LOGIS-TECH
         </button>
 
