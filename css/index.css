@@ -2189,3 +2189,22 @@ html[data-company="GREENMETAL"] .logout-btn { color:#052B59 !important; font-wei
 html[data-company="GREENLIGHT"] .logout-btn { color:#104B36 !important; font-weight:800 !important; }
 html[data-company="GREENMETAL"] .profile-btn, html[data-company="GREENLIGHT"] .profile-btn { color:#FFFFFF !important; font-weight:750 !important; }
 html[data-company="GREENMETAL"] .topbar svg, html[data-company="GREENMETAL"] .topbar i, html[data-company="GREENLIGHT"] .topbar svg, html[data-company="GREENLIGHT"] .topbar i { color:#FFFFFF !important; fill:currentColor; }
+
+
+/* GREENLIGHT TOPBAR BACKGROUND HARD FIX */
+html[data-company="GREENLIGHT"] body .topbar,
+html[data-company="GREENLIGHT"] .main > .topbar,
+html[data-company="GREENLIGHT"] body header.topbar {
+  background: linear-gradient(90deg, #104B36 0%, #176B4A 60%, #21865B 100%) !important;
+  background-color: #176B4A !important;
+  border-bottom: 1px solid #267653 !important;
+  box-shadow: 0 3px 16px rgba(16,75,54,.16) !important;
+  color: #FFFFFF !important;
+}
+html[data-company="GREENLIGHT"] body .topbar *:not(.company-switch-btn):not(.logout-btn) { color: #FFFFFF !important; }
+html[data-company="GREENLIGHT"] body .topbar .global-so-search { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.25) !important; }
+html[data-company="GREENLIGHT"] body .topbar .global-so-search input::placeholder { color: rgba(255,255,255,.82) !important; }
+html[data-company="GREENLIGHT"] body .topbar .company-context { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.2) !important; }
+html[data-company="GREENLIGHT"] body .topbar .profile-btn { background: rgba(255,255,255,.12) !important; color: #FFFFFF !important; border-color: rgba(255,255,255,.25) !important; }
+html[data-company="GREENLIGHT"] body .topbar .company-switch-btn { background: #B9E5C7 !important; color: #104B36 !important; border-color: #B9E5C7 !important; }
+html[data-company="GREENLIGHT"] body .topbar .logout-btn { background: #B9E5C7 !important; color: #104B36 !important; border-color: #B9E5C7 !important; }
