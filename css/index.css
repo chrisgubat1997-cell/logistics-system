@@ -2266,3 +2266,33 @@ html[data-company="GREENLIGHT"] .topbar .global-so-search > span {
 html[data-company="GREENLIGHT"] body .topbar #welcomeUser,
 html[data-company="GREENLIGHT"] body .topbar span# welcomeUser { color:#FFFFFF !important; }
 html[data-company="GREENLIGHT"] body .topbar #welcomeUser { -webkit-text-fill-color:#FFFFFF !important; }
+
+
+/* GREENLIGHT GLOBAL SO SEARCH — MATCH GREENMETAL SEARCH COLORS */
+html[data-company="GREENLIGHT"] body .topbar .global-so-search {
+  background: #FFFFFF !important;
+  background-color: #FFFFFF !important;
+  border-color: rgba(255,255,255,.65) !important;
+  color: #000000 !important;
+}
+html[data-company="GREENLIGHT"] body .topbar .global-so-search small,
+html[data-company="GREENLIGHT"] body .topbar .global-so-search small * {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+  background: #FFFFFF !important;
+}
+html[data-company="GREENLIGHT"] body .topbar .global-so-search input,
+html[data-company="GREENLIGHT"] body .topbar .global-so-search input * {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
+html[data-company="GREENLIGHT"] body .topbar .global-so-search input::placeholder {
+  color: #555555 !important;
+  -webkit-text-fill-color: #555555 !important;
+  opacity: 1 !important;
+}
+html[data-company="GREENLIGHT"] body .topbar .global-so-search > span,
+html[data-company="GREENLIGHT"] body .topbar .global-so-search > span * {
+  color: #000000 !important;
+  -webkit-text-fill-color: #000000 !important;
+}
