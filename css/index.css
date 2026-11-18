@@ -2296,3 +2296,14 @@ html[data-company="GREENLIGHT"] body .topbar .global-so-search > span * {
   color: #000000 !important;
   -webkit-text-fill-color: #000000 !important;
 }
+
+
+/* TOPBAR COMPANY SWITCH + LOGOUT COLOR ALIGNMENT */
+html[data-company="GREENLIGHT"] body .topbar .company-switch-btn,
+html[data-company="GREENLIGHT"] body .topbar .logout-btn { background:#052B59 !important; background-color:#052B59 !important; border-color:#052B59 !important; color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important; }
+html[data-company="GREENLIGHT"] body .topbar .company-switch-btn:hover,
+html[data-company="GREENLIGHT"] body .topbar .logout-btn:hover { background:#073B78 !important; background-color:#073B78 !important; border-color:#073B78 !important; }
+html[data-company="GREENMETAL"] body .topbar .company-switch-btn,
+html[data-company="GREENMETAL"] body .topbar .logout-btn { background:#A6CE39 !important; background-color:#A6CE39 !important; border-color:#A6CE39 !important; color:#052B59 !important; -webkit-text-fill-color:#052B59 !important; }
+html[data-company="GREENMETAL"] body .topbar .company-switch-btn:hover,
+html[data-company="GREENMETAL"] body .topbar .logout-btn:hover { background:#C4E85A !important; background-color:#C4E85A !important; border-color:#C4E85A !important; }
