@@ -2172,3 +2172,20 @@ html[data-company="GREENLIGHT"] .logout-btn { background: #B9E5C7 !important; co
 html[data-company="GREENLIGHT"] .logout-btn:hover { background: #D2F0DC !important; }
 html[data-company="GREENLIGHT"] .global-so-search { background: rgba(255,255,255,.12) !important; border-color: rgba(255,255,255,.25) !important; color: #fff !important; }
 html[data-company="GREENLIGHT"] .global-so-search input, html[data-company="GREENLIGHT"] .global-so-search input::placeholder, html[data-company="GREENLIGHT"] .global-so-search small { color: #fff !important; }
+
+
+/* TOPBAR READABILITY FIX — TEXT/ICONS CONTRAST */
+html[data-company="GREENMETAL"] .topbar, html[data-company="GREENLIGHT"] .topbar { color:#FFFFFF !important; }
+html[data-company="GREENMETAL"] .topbar-greeting, html[data-company="GREENLIGHT"] .topbar-greeting,
+html[data-company="GREENMETAL"] #welcomeUser, html[data-company="GREENLIGHT"] #welcomeUser,
+html[data-company="GREENMETAL"] .company-context, html[data-company="GREENLIGHT"] .company-context,
+html[data-company="GREENMETAL"] .company-context *, html[data-company="GREENLIGHT"] .company-context *,
+html[data-company="GREENMETAL"] .global-so-search, html[data-company="GREENLIGHT"] .global-so-search,
+html[data-company="GREENMETAL"] .global-so-search *, html[data-company="GREENLIGHT"] .global-so-search * { color:#FFFFFF !important; }
+html[data-company="GREENMETAL"] .global-so-search input::placeholder, html[data-company="GREENLIGHT"] .global-so-search input::placeholder { color:rgba(255,255,255,.82) !important; }
+html[data-company="GREENMETAL"] .company-switch-btn { color:#052B59 !important; font-weight:800 !important; }
+html[data-company="GREENLIGHT"] .company-switch-btn { color:#104B36 !important; font-weight:800 !important; }
+html[data-company="GREENMETAL"] .logout-btn { color:#052B59 !important; font-weight:800 !important; }
+html[data-company="GREENLIGHT"] .logout-btn { color:#104B36 !important; font-weight:800 !important; }
+html[data-company="GREENMETAL"] .profile-btn, html[data-company="GREENLIGHT"] .profile-btn { color:#FFFFFF !important; font-weight:750 !important; }
+html[data-company="GREENMETAL"] .topbar svg, html[data-company="GREENMETAL"] .topbar i, html[data-company="GREENLIGHT"] .topbar svg, html[data-company="GREENLIGHT"] .topbar i { color:#FFFFFF !important; fill:currentColor; }
