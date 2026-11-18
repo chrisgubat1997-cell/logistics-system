@@ -2260,3 +2260,9 @@ html[data-company="GREENLIGHT"] .topbar .global-so-search > span {
   color: #000000 !important;
   background: #FFFFFF !important;
 }
+
+
+/* GREENLIGHT greeting: override inherited topbar wildcard using the actual greeting ID */
+html[data-company="GREENLIGHT"] body .topbar #welcomeUser,
+html[data-company="GREENLIGHT"] body .topbar span# welcomeUser { color:#FFFFFF !important; }
+html[data-company="GREENLIGHT"] body .topbar #welcomeUser { -webkit-text-fill-color:#FFFFFF !important; }
