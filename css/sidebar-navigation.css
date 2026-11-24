@@ -740,58 +740,67 @@ body.sidebar-collapsed .sidebar .nav-group-toggle {
 
 
 /* =========================================================
-   SIDEBAR / TOPBAR COLOR MATCH
-   Match the sidebar surface to the topbar surface.
-   Keep readable company-specific navigation contrast.
+   GEMCOR / GREENMETAL — OFFICIAL NAVY SIDEBAR
+   Palette sourced from gemlight-theme.css:
+   #052B59 / #073B78 / #041F43 with lime accents.
 ========================================================= */
 :root {
-    --nav-sidebar-muted: #53657b;
-    --nav-sidebar-hover: rgba(7, 59, 120, .075);
+    --nav-sidebar-muted: #D7E3F2;
+    --nav-sidebar-hover: rgba(255,255,255,.09);
 }
-
-/* GREENMETAL — same clean light surface as the topbar */
 html[data-company="GREENMETAL"] .sidebar,
 html:not([data-company]) .sidebar {
-    background: rgba(255,255,255,.96) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    backdrop-filter: blur(12px) !important;
-    border-right: 1px solid #DCE6F1 !important;
-    box-shadow: 5px 0 24px rgba(5,43,89,.055) !important;
+    background: linear-gradient(180deg,#052B59 0%,#073B78 62%,#041F43 100%) !important;
+    border-right: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 5px 0 24px rgba(4,31,67,.22) !important;
 }
 html[data-company="GREENMETAL"] .sidebar .logo,
 html:not([data-company]) .sidebar .logo {
-    border-bottom: 1px solid #DCE6F1 !important;
+    border-bottom: 1px solid rgba(255,255,255,.14) !important;
 }
 html[data-company="GREENMETAL"] .sidebar .logo-brand strong,
 html:not([data-company]) .sidebar .logo-brand strong {
-    color: #073B78 !important;
+    color: #FFFFFF !important;
+}
+html[data-company="GREENMETAL"] .sidebar .logo-brand span,
+html:not([data-company]) .sidebar .logo-brand span {
+    color: #C4E85A !important;
 }
 html[data-company="GREENMETAL"] .sidebar .nav-group-toggle,
 html:not([data-company]) .sidebar .nav-group-toggle {
-    color: #073B78 !important;
+    color: #F0F5FC !important;
 }
 html[data-company="GREENMETAL"] .sidebar .nav-group-toggle:hover,
 html[data-company="GREENMETAL"] .sidebar .nav-group.is-open > .nav-group-toggle,
 html:not([data-company]) .sidebar .nav-group-toggle:hover,
 html:not([data-company]) .sidebar .nav-group.is-open > .nav-group-toggle {
-    background: rgba(7,59,120,.065) !important;
-    border-color: rgba(7,59,120,.07) !important;
-    color: #052B59 !important;
+    background: rgba(255,255,255,.085) !important;
+    border-color: rgba(255,255,255,.09) !important;
+    color: #FFFFFF !important;
+}
+html[data-company="GREENMETAL"] .sidebar .menu .menu-btn,
+html:not([data-company]) .sidebar .menu .menu-btn {
+    color: #D7E3F2 !important;
+}
+html[data-company="GREENMETAL"] .sidebar .menu .menu-btn:hover,
+html:not([data-company]) .sidebar .menu .menu-btn:hover {
+    color: #FFFFFF !important;
+    background: rgba(255,255,255,.09) !important;
 }
 html[data-company="GREENMETAL"] .sidebar .menu .menu-btn.active,
 html:not([data-company]) .sidebar .menu .menu-btn.active {
-    color: #073B78 !important;
-    background: linear-gradient(100deg, rgba(18,102,200,.13), rgba(18,102,200,.045)) !important;
-    border-color: rgba(18,102,200,.16) !important;
-    box-shadow: inset 3px 0 0 #A6CE39 !important;
+    color: #FFFFFF !important;
+    background: linear-gradient(100deg,rgba(18,102,200,.48),rgba(18,102,200,.20)) !important;
+    border-color: rgba(196,232,90,.28) !important;
+    box-shadow: inset 3px 0 0 #B8E34B !important;
 }
 html[data-company="GREENMETAL"] .sidebar .nav-group-items,
 html:not([data-company]) .sidebar .nav-group-items {
-    border-left-color: rgba(7,59,120,.16) !important;
+    border-left-color: rgba(255,255,255,.20) !important;
 }
 html[data-company="GREENMETAL"] .sidebar .nav-group-chevron,
 html:not([data-company]) .sidebar .nav-group-chevron {
-    color: #7890aa !important;
+    color: #B8CBE0 !important;
 }
 
 /* GREENLIGHT — same light topbar surface, with forest-green accents */
