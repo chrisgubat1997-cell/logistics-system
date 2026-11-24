@@ -277,6 +277,12 @@ case "deleteFleetRecord":
     case "getProductionQueue":
       return getProductionQueue(payload);
 
+    case "getPlantMonitoringData":
+      return getPlantMonitoringData(payload);
+
+    case "savePlantItemProgress":
+      return savePlantItemProgress(payload);
+
     case "markProductionNotificationsRead":
       return markProductionNotificationsRead(payload);
 
