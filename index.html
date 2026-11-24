@@ -135,7 +135,7 @@
     <link rel="stylesheet" href="css/system-monitor.css?v=20261110-admin-monitor01">
     <link rel="stylesheet" href="css/so-monitoring.css?v=20261111-customer-36002">
     <link rel="stylesheet" href="css/productivity-cup.css?v=20261118-01">
-    <link rel="stylesheet" href="css/sidebar-navigation.css?v=20261124-01">
+    <link rel="stylesheet" href="css/sidebar-navigation.css?v=20261124-02">
 </head>
 
 
@@ -304,91 +304,7 @@
         <!-- PRODUCTIVITY CUP PROJECT -->
         <button class="menu-btn" type="button" onclick="showPage('productivityCup', this)" title="Productivity Cup" aria-label="Productivity Cup"><span class="sidebar-item-icon" aria-hidden="true">🏆</span><span class="sidebar-item-label">Productivity Cup</span></button>
 
-        <!-- =================================================
-     REQUEST CENTER — FRONTEND ONLY
-================================================= -->
-<div id="requestCenter" class="page">
-    <section class="request-center-page">
-        <div class="request-center-heading">
-            <div>
-                <span class="request-eyebrow">WORKFLOW HUB</span>
-                <h1>Request Center</h1>
-                <p>Choose a request type to start. Forms and database saving will be connected in a later phase.</p>
-            </div>
-            <span class="request-preview-tag">FRONTEND PREVIEW</span>
-        </div>
-
-        <div class="request-type-grid">
-            <article class="request-type-card request-card-payment">
-                <div class="request-card-icon"><span aria-hidden="true">₱</span></div>
-                <div class="request-card-copy">
-                    <span class="request-card-category">FINANCE</span>
-                    <h2>Payment Request</h2>
-                    <p>Supplier payments, reimbursements and other payment-related requests.</p>
-                </div>
-                <button type="button" class="request-card-action" data-request-launch="payment">
-                    Open Payment Request <span aria-hidden="true">→</span>
-                </button>
-            </article>
-
-            <article class="request-type-card request-card-cash">
-                <div class="request-card-icon"><span aria-hidden="true">CA</span></div>
-                <div class="request-card-copy">
-                    <span class="request-card-category">ALL REQUESTING DEPARTMENTS</span>
-                    <h2>Cash Advance</h2>
-                    <p>For authorized activities and expenses requested by Sales, JO Register and Logistics.</p>
-                </div>
-                <button type="button" class="request-card-action" data-request-launch="cash-advance">
-                    View Request Setup <span aria-hidden="true">→</span>
-                </button>
-            </article>
-
-            <article class="request-type-card request-card-fund">
-                <div class="request-card-icon"><span aria-hidden="true">RF</span></div>
-                <div class="request-card-copy">
-                    <span class="request-card-category">LOGISTICS</span>
-                    <h2>Revolving Fund</h2>
-                    <p>Future request entry point for fund replenishment and related transactions.</p>
-                </div>
-                <button type="button" class="request-card-action" data-request-launch="revolving-fund">
-                    View Request Setup <span aria-hidden="true">→</span>
-                </button>
-            </article>
-        </div>
-
-        <div class="request-center-note" id="requestCenterFeedback" role="status" aria-live="polite">
-            <span class="request-note-dot" aria-hidden="true"></span>
-            <span>Select a request type. This preview does not submit or save any information.</span>
-        </div>
-    </section>
-</div>
-
-<!-- PAYMENT REQUEST — FRONTEND PLACEHOLDER -->
-<div id="paymentRequest" class="page">
-    <section class="request-placeholder-page">
-        <button type="button" class="request-back-button" onclick="showPage('requestCenter', document.querySelector('[data-request-center-menu]'))">
-            <span aria-hidden="true">←</span> Back to Request Center
-        </button>
-        <div class="request-placeholder-card">
-            <span class="request-eyebrow">FINANCE / RFP</span>
-            <h1>Payment Request</h1>
-            <p class="request-placeholder-lead">The Payment Request module is reserved for the Plant-to-Head-Office workflow.</p>
-            <div class="request-workflow-preview">
-                <div><strong>01</strong><span>Request preparation</span></div>
-                <div><strong>02</strong><span>Plant Manager / VP approval</span></div>
-                <div><strong>03</strong><span>Hard-copy transmittal</span></div>
-                <div><strong>04</strong><span>Head Office receiving logbook</span></div>
-                <div><strong>05</strong><span>Finance verification and processing</span></div>
-                <div><strong>06</strong><span>Payment release</span></div>
-            </div>
-            <div class="request-placeholder-warning">
-                Frontend setup only. No request form is submitted and no information is saved to Google Sheets or Apps Script.
-            </div>
-        </div>
-    </section>
-</div>
-
-<!-- ABOUT LOGIS-TECH -->
+        <!-- ABOUT LOGIS-TECH -->
         <button class="menu-btn" type="button" onclick="showPage('about', this)" title="About LOGIS-TECH" aria-label="About LOGIS-TECH">
             <span class="sidebar-item-icon" aria-hidden="true">ⓘ</span><span class="sidebar-item-label">About LOGIS-TECH</span>
         </button>
@@ -947,6 +863,123 @@
 </div>
 
 
+
+
+        <!-- =================================================
+             REQUEST CENTER — FRONTEND WORKSPACE
+        ================================================== -->
+        <div id="requestCenter" class="page">
+            <section class="request-center-page">
+                <div class="request-center-heading">
+                    <div>
+                        <span class="request-eyebrow">WORKFLOW HUB</span>
+                        <h1>Request Center</h1>
+                        <p>Centralized entry point for department requests. Select a request type below or use the Request Center submenu.</p>
+                    </div>
+                    <span class="request-preview-tag">FRONTEND PREVIEW</span>
+                </div>
+                <div class="request-center-intro">
+                    <h2>What would you like to request?</h2>
+                    <p>Prepare a request, track the approval and document hand-off process, then let the responsible team process it.</p>
+                </div>
+                <div class="request-type-grid">
+                    <article class="request-type-card request-card-payment">
+                        <div class="request-card-icon"><span aria-hidden="true">₱</span></div>
+                        <div class="request-card-copy">
+                            <span class="request-card-category">ALL REQUESTING DEPARTMENTS</span>
+                            <h2>Payment Request (RFP)</h2>
+                            <p>Supplier payments, reimbursements, utilities and other company payment requests.</p>
+                        </div>
+                        <button type="button" class="request-card-action" data-request-open="paymentRequest">Open Payment Request <span aria-hidden="true">→</span></button>
+                    </article>
+                    <article class="request-type-card request-card-cash">
+                        <div class="request-card-icon"><span aria-hidden="true">CA</span></div>
+                        <div class="request-card-copy">
+                            <span class="request-card-category">SALES · JO REGISTER · LOGISTICS</span>
+                            <h2>Cash Advance</h2>
+                            <p>Request funds for approved business activities, trips and operational expenses.</p>
+                        </div>
+                        <button type="button" class="request-card-action" data-request-open="cashAdvanceRequest">Open Cash Advance <span aria-hidden="true">→</span></button>
+                    </article>
+                    <article class="request-type-card request-card-fund">
+                        <div class="request-card-icon"><span aria-hidden="true">RF</span></div>
+                        <div class="request-card-copy">
+                            <span class="request-card-category">LOGISTICS</span>
+                            <h2>Revolving Fund Request</h2>
+                            <p>Request revolving-fund replenishment or fund-related adjustments for review.</p>
+                        </div>
+                        <button type="button" class="request-card-action" data-request-open="revolvingFundRequest">Open Revolving Fund Request <span aria-hidden="true">→</span></button>
+                    </article>
+                </div>
+                <div class="request-center-note" role="status">
+                    <span class="request-note-dot" aria-hidden="true"></span>
+                    <span>Preview only: forms, approvals, attachments, receiving logbook and Google Sheets saving are not connected yet.</span>
+                </div>
+            </section>
+        </div>
+
+        <!-- PAYMENT REQUEST (RFP) -->
+        <div id="paymentRequest" class="page">
+            <section class="request-detail-page">
+                <button type="button" class="request-back-button" onclick="showPage('requestCenter', document.querySelector('[data-request-page=\'requestCenter\']'))">← Back to Request Center</button>
+                <div class="request-detail-header">
+                    <span class="request-eyebrow">REQUEST CENTER / FINANCE</span>
+                    <h1>Payment Request (RFP)</h1>
+                    <p>For supplier payments, reimbursements and other obligations that need approval before Finance prepares the payment.</p>
+                </div>
+                <div class="request-detail-grid">
+                    <section class="request-info-panel">
+                        <h2>Request preparation</h2>
+                        <p>Requester prepares the request and attaches the supporting documents.</p>
+                        <ul><li>Payee / supplier and purpose</li><li>Requested amount and due date</li><li>Invoice, quotation, billing or other supporting documents</li></ul>
+                    </section>
+                    <section class="request-info-panel">
+                        <h2>Approval and document hand-off</h2>
+                        <ol><li>Plant Manager or Vice President approval</li><li>Signed hard copy sent to Head Office</li><li>Plant records the transmittal in its logbook</li><li>Head Office logs the received hard copy</li></ol>
+                    </section>
+                    <section class="request-info-panel request-info-wide">
+                        <h2>Finance processing</h2>
+                        <div class="request-process-line"><span>01 · Submitted</span><span>02 · Plant approved</span><span>03 · Sent to Head Office</span><span>04 · Received</span><span>05 · Finance review</span><span>06 · Payment prepared / released</span></div>
+                        <p class="request-small-note">The existing Finance → Payment → Prepare Payment function remains the payment preparation workspace. This RFP area is for the request and approval trail only.</p>
+                    </section>
+                </div>
+                <div class="request-preview-warning">Frontend preview only. No RFP number, attachment, approval, receiving-logbook entry or payment record is saved.</div>
+            </section>
+        </div>
+
+        <!-- CASH ADVANCE REQUEST -->
+        <div id="cashAdvanceRequest" class="page">
+            <section class="request-detail-page">
+                <button type="button" class="request-back-button" onclick="showPage('requestCenter', document.querySelector('[data-request-page=\'requestCenter\']'))">← Back to Request Center</button>
+                <div class="request-detail-header">
+                    <span class="request-eyebrow">REQUEST CENTER / CASH ADVANCE</span>
+                    <h1>Cash Advance</h1>
+                    <p>Central request entry for authorized activities and operating expenses requested by Sales, JO Register and Logistics.</p>
+                </div>
+                <div class="request-detail-grid">
+                    <section class="request-info-panel"><h2>Request details to capture</h2><ul><li>Requesting department and employee</li><li>Purpose / activity and requested date</li><li>Amount requested and intended use</li><li>Expected liquidation date</li><li>Supporting documents or activity approval</li></ul></section>
+                    <section class="request-info-panel"><h2>Suggested review flow</h2><ol><li>Requester submits cash advance details</li><li>Department head reviews the purpose and amount</li><li>Authorized approver approves or returns the request</li><li>Finance reviews and prepares release</li><li>Requester submits liquidation documents</li></ol></section>
+                </div>
+                <div class="request-preview-warning">Frontend preview only. Cash Advance policy, approver matrix, form submission and saving are not yet connected.</div>
+            </section>
+        </div>
+
+        <!-- REVOLVING FUND REQUEST -->
+        <div id="revolvingFundRequest" class="page">
+            <section class="request-detail-page">
+                <button type="button" class="request-back-button" onclick="showPage('requestCenter', document.querySelector('[data-request-page=\'requestCenter\']'))">← Back to Request Center</button>
+                <div class="request-detail-header">
+                    <span class="request-eyebrow">REQUEST CENTER / LOGISTICS</span>
+                    <h1>Revolving Fund Request</h1>
+                    <p>Request replenishment or a fund adjustment with a clear breakdown of expenses and supporting receipts.</p>
+                </div>
+                <div class="request-detail-grid">
+                    <section class="request-info-panel"><h2>Request details to capture</h2><ul><li>Fund group / custodian</li><li>Replenishment or adjustment type</li><li>Amount requested and expense period</li><li>Expense summary and remaining balance</li><li>Receipts and supporting documents</li></ul></section>
+                    <section class="request-info-panel"><h2>Suggested review flow</h2><ol><li>Custodian prepares replenishment request</li><li>Logistics / authorized approver checks completeness</li><li>Finance verifies receipts and fund balance</li><li>Approved replenishment is recorded in Revolving Fund</li></ol></section>
+                </div>
+                <div class="request-preview-warning">Frontend preview only. The existing Revolving Fund module is unchanged; this request page does not alter fund balances or transactions.</div>
+            </section>
+        </div>
 
         <!-- =================================================
              PROFILE
@@ -3933,7 +3966,7 @@ document.addEventListener(
 </script>
 
 <script src="js/productivity-cup-presentation.js?v=20261118-present01"></script>
-<script src="js/sidebar-navigation.js?v=20261124-01"></script>
+<script src="js/sidebar-navigation.js?v=20261124-02"></script>
 
 </body>
 

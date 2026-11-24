@@ -1,6 +1,6 @@
 /* =========================================================
    LOGIS-TECH — SIDEBAR NAVIGATION DESIGN SYSTEM
-   Version: 20261124-01
+   Version: 20261124-02
    Consistent typography, Lucide-style SVG icons and grouped navigation.
 ========================================================= */
 
@@ -705,4 +705,35 @@ body.sidebar-collapsed .sidebar .nav-group-toggle {
         animation: none !important;
         transition: none !important;
     }
+}
+
+
+/* Request Center submenu pages */
+.request-center-intro {
+    margin: 0 0 16px;
+    padding: 17px 19px;
+    border: 1px solid #e3eaf0;
+    border-radius: 13px;
+    background: linear-gradient(120deg, #f7faf8, #fff);
+}
+.request-center-intro h2 { margin: 0 0 5px; color: #203148; font-size: 15px; font-weight: 800; }
+.request-center-intro p { margin: 0; color: #718096; font-size: 11.5px; line-height: 1.6; }
+.request-detail-page { width: 100%; max-width: 1120px; margin: 0 auto; color: #172338; font-family: var(--nav-font); }
+.request-detail-header { margin: 3px 0 22px; }
+.request-detail-header h1 { margin: 0 0 8px; color: #172338; font-size: clamp(24px, 3vw, 32px); font-weight: 800; letter-spacing: -.04em; }
+.request-detail-header p { max-width: 760px; margin: 0; color: #68778c; font-size: 13px; line-height: 1.65; }
+.request-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 15px; }
+.request-info-panel { padding: 21px; border: 1px solid #e2e8ef; border-radius: 14px; background: #fff; box-shadow: 0 7px 22px rgba(15,23,42,.04); }
+.request-info-panel h2 { margin: 0 0 10px; color: #203148; font-size: 15px; font-weight: 800; }
+.request-info-panel p, .request-info-panel li { color: #64748b; font-size: 11.5px; line-height: 1.75; }
+.request-info-panel ul, .request-info-panel ol { margin: 8px 0 0; padding-left: 19px; }
+.request-info-wide { grid-column: 1 / -1; }
+.request-process-line { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin: 12px 0; }
+.request-process-line span { padding: 11px; border: 1px solid #e4eaf0; border-radius: 9px; background: #f8fafc; color: #43536a; font-size: 10.5px; font-weight: 700; line-height: 1.45; }
+.request-small-note { margin: 13px 0 0; padding-top: 12px; border-top: 1px solid #edf0f3; }
+.request-preview-warning { margin-top: 17px; padding: 13px 15px; border: 1px solid #f0e4c8; border-radius: 10px; background: #fffbf2; color: #86621e; font-size: 11px; line-height: 1.6; }
+@media (max-width: 700px) {
+    .request-detail-grid { grid-template-columns: 1fr; }
+    .request-info-wide { grid-column: auto; }
+    .request-process-line { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
