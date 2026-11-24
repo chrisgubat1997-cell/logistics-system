@@ -880,24 +880,63 @@
              REQUEST CENTER — FRONTEND WORKSPACE
         ================================================== -->
         <div id="requestCenter" class="page">
-            <section class="request-center-page request-center-simple">
-                <header class="request-center-heading">
-                    <div><span class="request-eyebrow">REQUEST CENTER</span><h1>Request Center</h1><p>Choose the service you need.</p></div>
-                </header>
-                <div class="request-type-grid request-type-grid-simple">
-                    <article class="request-type-card request-card-payment">
+            <section class="request-center-page">
+                <div class="request-center-heading">
+                    <div>
+                        <span class="request-eyebrow">WORKFLOW HUB</span>
+                        <h1>Request Center</h1>
+                        <p>Centralized entry point for department requests. Select a request type below or use the Request Center submenu.</p>
+                    </div>
+                    <span class="request-preview-tag">FRONTEND PREVIEW</span>
+                </div>
+                <div class="request-center-intro">
+                    <h2>What would you like to request?</h2>
+                    <p>Prepare a request, track the approval and document hand-off process, then let the responsible team process it.</p>
+                </div>
+                <section class="request-my-work">
+                    <div class="request-my-work-heading">
+                        <div><span class="request-eyebrow">PERSONAL WORKSPACE</span><h2>My Requests</h2><p>Request history and status for the signed-in account.</p></div>
+                        <span class="request-private-label">MY ACCOUNT</span>
+                    </div>
+                    <div class="request-my-work-grid">
+                        <article class="request-list-panel">
+                            <div class="request-list-title"><div><h3>My Submitted Requests</h3><p>Payment Request, Cash Advance and Revolving Fund</p></div><span class="request-list-count">0</span></div>
+                            <div class="request-empty-state"><span class="request-empty-icon">▤</span><strong>No submitted requests yet</strong><p>Your requests will appear here after request submission and backend connection.</p></div>
+                        </article>
+                        <article class="request-list-panel">
+                            <div class="request-list-title"><div><h3>My Cash Advances</h3><p>Personal CA balance and liquidation tracking</p></div><span class="request-list-count">0</span></div>
+                            <div class="request-ca-summary">
+                                <div><span>Not Yet Liquidated</span><strong>₱0.00</strong></div>
+                                <div><span>Remaining Balance</span><strong>₱0.00</strong></div>
+                            </div>
+                            <div class="request-empty-state request-empty-compact"><strong>No cash advance records</strong><p>Only cash advances belonging to your account should appear in this list.</p></div>
+                        </article>
+                    </div>
+                    <div class="request-display-note">Display preview: these are empty personal lists. Live request records, account-level filtering and accounting access controls will be connected to Apps Script later.</div>
+                </section>
+                <div class="request-type-grid"><article class="request-type-card request-card-payment">
                         <div class="request-card-icon"><span aria-hidden="true">₱</span></div>
-                        <div class="request-card-copy"><span class="request-card-category">ALL DEPARTMENTS</span><h2>Request for Payment</h2><p>Submit supplier payments, reimbursements and other company payment requests.</p></div>
-                        <button type="button" class="request-card-action" data-request-open="paymentRequest">Open Request for Payment <span aria-hidden="true">→</span></button>
+                        <div class="request-card-copy">
+                            <span class="request-card-category">ALL REQUESTING DEPARTMENTS</span>
+                            <h2>Payment Request (RFP)</h2>
+                            <p>Supplier payments, reimbursements, utilities and other company payment requests.</p>
+                        </div>
+                        <button type="button" class="request-card-action" data-request-open="paymentRequest">Open Payment Request <span aria-hidden="true">→</span></button>
                     </article>
                     <article class="request-type-card request-card-liquidation">
                         <div class="request-card-icon"><span aria-hidden="true">✓</span></div>
-                        <div class="request-card-copy"><span class="request-card-category">CASH ADVANCE SETTLEMENT</span><h2>Liquidation</h2><p>Submit expense details and supporting receipts for an outstanding cash advance.</p></div>
+                        <div class="request-card-copy">
+                            <span class="request-card-category">CASH ADVANCE SETTLEMENT</span>
+                            <h2>Liquidation</h2>
+                            <p>Submit expense details and supporting receipts for an outstanding cash advance.</p>
+                        </div>
                         <button type="button" class="request-card-action" data-request-open="liquidation">Open Liquidation <span aria-hidden="true">→</span></button>
-                    </article>
+                    </article></div>
+                <div class="request-center-note" role="status">
+                    <span class="request-note-dot" aria-hidden="true"></span>
+                    <span>Preview only: forms, approvals, attachments, receiving logbook and Google Sheets saving are not connected yet.</span>
                 </div>
-
-                <section id="accountingRequestMonitoring" class="accounting-monitoring" hidden>
+            <section id="accountingRequestMonitoring" class="accounting-monitoring" hidden>
                     <header class="accounting-monitoring-header">
                         <div><span class="request-eyebrow">ACCOUNTING WORKSPACE</span><h2>Request Monitoring</h2><p>Monitor submitted payment requests and liquidation records.</p></div>
                         <span class="accounting-only-tag">ACCOUNTING ONLY</span>
@@ -930,6 +969,8 @@
                 </section>
             </section>
         </div>
+
+        
 
         <!-- PAYMENT REQUEST (RFP) -->
         <div id="paymentRequest" class="page">
