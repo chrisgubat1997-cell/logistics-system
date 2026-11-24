@@ -288,7 +288,7 @@
 
         const requestPage = document.getElementById("requestCenter");
         const feedback = document.getElementById("requestCenterFeedback");
-        menu.addEventListener("click", function (event) {
+        if (requestPage) requestPage.addEventListener("click", function (event) {
             const cardButton = event.target.closest("[data-request-launch]");
             if (!cardButton || !feedback) return;
             const type = cardButton.dataset.requestLaunch;
