@@ -45,6 +45,7 @@
     const ICONS = {
         dashboard: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
         messages: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+        customer: '<circle cx="9" cy="8" r="3"/><path d="M3 20v-1a6 6 0 0 1 12 0v1M16 11h5M18.5 8.5v5"/>',
         sales: '<path d="M4 19V5"/><path d="M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/><path d="M16 6h4v4"/>',
         joRegister: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
         plantMonitoring: '<path d="M3 20h18M5 17V9h4v8M10 17V4h4v13M15 17v-6h4v6"/>',
@@ -241,6 +242,13 @@
             const children = definition.pages.map(function (page) {
                 return byPage[page];
             }).filter(Boolean);
+
+            if (definition.key === "sales") {
+                const customerButton = createMenuButton("sales", "Customer", "customer");
+                customerButton.setAttribute("onclick", "openSalesCustomerList(this)");
+                customerButton.dataset.customerNav = "true";
+                children.push(customerButton);
+            }
 
             if (definition.key === "production" && !byPage.plantMonitoring) {
                 byPage.plantMonitoring = createMenuButton("plantMonitoring", LABELS.plantMonitoring, "plantMonitoring");
