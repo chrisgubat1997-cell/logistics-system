@@ -127,7 +127,7 @@
     <link rel="stylesheet" href="css/brand-theme.css?v=20261109-about-typography02">
     <link rel="stylesheet" href="css/revolving-fund.css?v=20261109-font-small01">
     <link rel="stylesheet" href="css/messages.css?v=20261109-sendstatus01">
-    <link rel="stylesheet" href="css/request-center.css?v=20261124-01">
+    <link rel="stylesheet" href="css/request-center.css?v=20261124-02">
     <link rel="stylesheet" href="css/about.css?v=20261110-about-logo01">
     <link rel="stylesheet" href="css/jo-register.css?v=20261109-font-small01">
     <link rel="stylesheet" href="css/plant-monitoring.css?v=20261124-05">
@@ -1010,20 +1010,55 @@
             </section>
         </div>
 
-        <!-- LIQUIDATION -->
+        <!-- LIQUIDATION WORKSPACE -->
         <div id="liquidation" class="page">
-            <section class="request-detail-page">
+            <section class="request-detail-page liquidation-page">
                 <button type="button" class="request-back-button" onclick="showPage('requestCenter', document.querySelector('[data-request-page=\\'requestCenter\\']'))">← Back to Overview</button>
-                <div class="request-detail-header">
-                    <span class="request-eyebrow">REQUEST CENTER / FINANCE</span>
-                    <h1>Liquidation</h1>
-                    <p>Review and prepare liquidation details for released cash advances, including expense records and supporting documents.</p>
-                </div>
-                <div class="request-detail-grid">
-                    <section class="request-info-panel"><h2>Liquidation details</h2><ul><li>Cash advance reference number</li><li>Requestor and department</li><li>Approved cash advance amount</li><li>Actual expenses and returned cash, if applicable</li><li>Liquidation date and remarks</li></ul></section>
-                    <section class="request-info-panel"><h2>Supporting documents</h2><ul><li>Liquidation report / expense breakdown</li><li>Official receipts and invoices</li><li>Proof of returned unused cash, if applicable</li><li>Required signatures and hard-copy originals</li></ul></section>
-                </div>
-                <div class="request-preview-warning">Frontend preview only. Cash advance records, liquidation submission, Finance review and Google Sheets saving are not yet connected.</div>
+                <header class="liquidation-heading">
+                    <div><span class="request-eyebrow">REQUEST CENTER / FINANCE</span><h1>Cash Advance Liquidation</h1><p>Select an outstanding cash advance from your account, then record the actual expenses and supporting receipts.</p></div>
+                    <span class="liquidation-status-chip"><i></i> PERSONAL LIQUIDATION</span>
+                </header>
+
+                <section class="liquidation-select-section">
+                    <div class="liquidation-section-heading"><div><span class="liquidation-step">01</span><div><h2>Select Cash Advance</h2><p>Only advances assigned to your account and not yet fully liquidated should appear here.</p></div></div><span class="liquidation-count" id="liquidationAdvanceCount">0 outstanding</span></div>
+                    <div class="liquidation-advance-list" id="liquidationAdvanceList">
+                        <div class="liquidation-empty"><span>₱</span><strong>Loading your outstanding advances…</strong><p>Your available cash advances will appear here.</p></div>
+                    </div>
+                    <div class="liquidation-selected-summary" id="liquidationSelectedSummary" hidden></div>
+                </section>
+
+                <form id="liquidationForm" class="liquidation-form" novalidate>
+                    <section class="liquidation-form-section">
+                        <div class="liquidation-section-heading"><div><span class="liquidation-step">02</span><div><h2>Liquidation Details</h2><p>Confirm the advance reference and provide the liquidation information.</p></div></div></div>
+                        <div class="liquidation-fields">
+                            <label class="liquidation-field"><span>Cash Advance Reference</span><input id="liqReference" name="reference" readonly placeholder="Select a cash advance above" required></label>
+                            <label class="liquidation-field"><span>Cash Advance Date</span><input id="liqAdvanceDate" name="advanceDate" readonly placeholder="—"></label>
+                            <label class="liquidation-field"><span>Approved Amount (PHP)</span><input id="liqApprovedAmount" name="approvedAmount" readonly placeholder="₱0.00"></label>
+                            <label class="liquidation-field"><span>Liquidation Date <b>*</b></span><input id="liqDate" name="liquidationDate" type="date" required></label>
+                            <label class="liquidation-field"><span>Purpose / Activity</span><input id="liqPurpose" name="purpose" readonly placeholder="Auto-filled from selected advance"></label>
+                        </div>
+                    </section>
+
+                    <section class="liquidation-form-section">
+                        <div class="liquidation-section-heading"><div><span class="liquidation-step">03</span><div><h2>Expense Breakdown</h2><p>Add each expense based on the actual receipts. You can add multiple rows.</p></div></div><button type="button" class="liquidation-add-row" id="liqAddExpense">＋ Add expense</button></div>
+                        <div class="liquidation-expense-wrap"><table class="liquidation-expense-table"><thead><tr><th>Expense Description</th><th>Receipt / Reference No.</th><th>Date</th><th>Amount (₱)</th><th></th></tr></thead><tbody id="liqExpenseRows"><tr class="liq-expense-row"><td><input name="expenseDescription" aria-label="Expense description" placeholder="e.g. Transportation" required></td><td><input name="receiptReference" aria-label="Receipt reference" placeholder="OR / receipt no."></td><td><input name="expenseDate" aria-label="Expense date" type="date"></td><td><input name="expenseAmount" aria-label="Expense amount" type="number" min="0" step="0.01" placeholder="0.00" required></td><td><button type="button" class="liq-remove-row" aria-label="Remove expense" disabled>×</button></td></tr></tbody></table></div>
+                        <label class="liquidation-field liquidation-notes"><span>Remarks / Explanation</span><textarea id="liqRemarks" name="remarks" rows="3" placeholder="Add notes for Finance, if needed."></textarea></label>
+                    </section>
+
+                    <section class="liquidation-form-section">
+                        <div class="liquidation-section-heading"><div><span class="liquidation-step">04</span><div><h2>Supporting Documents</h2><p>Attach scanned receipts, invoices and other liquidation documents.</p></div></div></div>
+                        <label class="liquidation-file-drop" for="liqFiles"><span class="liquidation-file-icon">↑</span><strong>Upload receipts and supporting files</strong><span>Choose multiple images or PDF files</span><input id="liqFiles" name="files" type="file" accept="image/*,application/pdf" multiple><small id="liqFileNames">No files selected</small></label>
+                        <div class="liquidation-hardcopy-note"><strong>Hard-copy reminder</strong><span>Submit the required original receipts and signed liquidation documents to Finance according to company procedure.</span></div>
+                    </section>
+
+                    <aside class="liquidation-total-panel">
+                        <div class="liquidation-total-title"><span>LIQUIDATION SUMMARY</span><strong id="liqSummaryReference">No advance selected</strong></div>
+                        <div class="liquidation-total-grid"><div><span>Approved Cash Advance</span><strong id="liqSummaryApproved">₱0.00</strong></div><div><span>Total Actual Expenses</span><strong id="liqSummaryExpenses">₱0.00</strong></div><div><span>Cash to Return</span><strong id="liqSummaryReturn">₱0.00</strong></div><div><span>Excess / For Review</span><strong id="liqSummaryExcess">₱0.00</strong></div></div>
+                        <p id="liqCalculationNote">Select a cash advance and enter expenses to calculate the liquidation balance.</p>
+                    </aside>
+                    <div class="liquidation-submit-row"><div id="liqFormMessage" role="status" aria-live="polite"></div><button type="submit" class="liquidation-submit" id="liqSubmit" disabled>Submit Liquidation <span>→</span></button></div>
+                    <p class="liquidation-preview-note">Interface preview: records are read from the available local account cache when present. Submission, attachment upload and Finance review still require Apps Script integration.</p>
+                </form>
             </section>
         </div>
 
@@ -3899,6 +3934,7 @@ document.addEventListener(
 <script src="js/role-action-visibility.js?v=20261124-menu-visible01"></script>
 <script src="js/messages.js?v=20261109-sendstatus01"></script>
 <script src="js/request-center.js?v=20261124-01"></script>
+<script src="js/liquidation.js?v=20261124-01"></script>
 <script src="js/system-maintenance.js?v=20261110-brand02"></script>
 <script src="js/system-monitor.js?v=20261110-admin-monitor03"></script>
 
