@@ -803,42 +803,50 @@ html:not([data-company]) .sidebar .nav-group-chevron {
     color: #B8CBE0 !important;
 }
 
-/* GREENLIGHT — same light topbar surface, with forest-green accents */
+/* GREENLIGHT — forest-green sidebar using the official brand palette */
 html[data-company="GREENLIGHT"] {
-    --nav-sidebar-muted: #587365;
-    --nav-sidebar-hover: rgba(23,107,74,.075);
+    --nav-sidebar-muted: #D8E9DE;
+    --nav-sidebar-hover: rgba(255,255,255,.095);
 }
 html[data-company="GREENLIGHT"] .sidebar {
-    background: rgba(255,255,255,.96) !important;
-    -webkit-backdrop-filter: blur(12px) !important;
-    backdrop-filter: blur(12px) !important;
-    border-right: 1px solid #D8E6DC !important;
-    box-shadow: 5px 0 24px rgba(16,75,54,.055) !important;
+    background: linear-gradient(180deg,#176B4A 0%,#104B36 62%,#0B3828 100%) !important;
+    border-right: 1px solid rgba(255,255,255,.13) !important;
+    box-shadow: 5px 0 24px rgba(16,75,54,.18) !important;
 }
 html[data-company="GREENLIGHT"] .sidebar .logo {
-    border-bottom: 1px solid #D8E6DC !important;
+    border-bottom: 1px solid rgba(255,255,255,.16) !important;
 }
 html[data-company="GREENLIGHT"] .sidebar .logo-brand strong,
 html[data-company="GREENLIGHT"] .sidebar .nav-group-toggle {
-    color: #176B4A !important;
+    color: #FFFFFF !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .logo-brand span {
+    color: #B9E3C4 !important;
 }
 html[data-company="GREENLIGHT"] .sidebar .nav-group-toggle:hover,
 html[data-company="GREENLIGHT"] .sidebar .nav-group.is-open > .nav-group-toggle {
-    background: rgba(23,107,74,.065) !important;
-    border-color: rgba(23,107,74,.08) !important;
-    color: #104B36 !important;
+    background: rgba(255,255,255,.10) !important;
+    border-color: rgba(255,255,255,.13) !important;
+    color: #FFFFFF !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .menu .menu-btn {
+    color: #D8E9DE !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .menu .menu-btn:hover {
+    color: #FFFFFF !important;
+    background: rgba(255,255,255,.095) !important;
 }
 html[data-company="GREENLIGHT"] .sidebar .menu .menu-btn.active {
-    color: #176B4A !important;
-    background: linear-gradient(100deg, rgba(33,134,91,.13), rgba(33,134,91,.045)) !important;
-    border-color: rgba(33,134,91,.16) !important;
-    box-shadow: inset 3px 0 0 #65A879 !important;
+    color: #FFFFFF !important;
+    background: linear-gradient(100deg,rgba(101,168,121,.38),rgba(101,168,121,.15)) !important;
+    border-color: rgba(185,227,196,.28) !important;
+    box-shadow: inset 3px 0 0 #B9E3C4 !important;
 }
 html[data-company="GREENLIGHT"] .sidebar .nav-group-items {
-    border-left-color: rgba(23,107,74,.17) !important;
+    border-left-color: rgba(255,255,255,.22) !important;
 }
 html[data-company="GREENLIGHT"] .sidebar .nav-group-chevron {
-    color: #789787 !important;
+    color: #C4DDCC !important;
 }
 
 /* Dark appearance: follow the dark topbar instead of forcing a white rail. */
