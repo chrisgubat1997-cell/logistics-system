@@ -4,7 +4,7 @@ ready(function(){
  const panel=document.getElementById("accountingRequestMonitoring");if(!panel)return;
  function getAccount(){try{const s=JSON.parse(localStorage.getItem("logitechUser")||"{}");return s.account||s.user||s.profile||s;}catch(e){return {};}}
  const a=getAccount(),role=String(a.role||a.ROLE||a.accountType||a.account_type||"").trim().toUpperCase();
- const allowed=["ACCOUNTING","FINANCE","PAYMENT"].includes(role);
+ const allowed=role==="ACCOUNTING";
  panel.hidden=!allowed;
  if(!allowed)return;
  const rows=document.getElementById("acctRequestRows");
