@@ -42,3 +42,20 @@
 .plant-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}.plant-cancel{border:1px solid #dce3eb;background:#fff;border-radius:8px;padding:9px 13px;font-size:10px;font-weight:700;cursor:pointer}
 @media(max-width:900px){.plant-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.plant-mode{grid-column:1/-1;width:max-content}.plant-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:560px){.plant-header{align-items:flex-start}.plant-header h1{font-size:21px}.plant-toolbar{grid-template-columns:1fr 1fr}.plant-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.plant-card{padding:11px}.plant-card-value{font-size:21px}.plant-panel-head{align-items:flex-start}}
+
+/* Bulk item update controls */
+.plant-panel-actions{display:flex;align-items:center;gap:14px}
+.plant-bulk-update{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:8px;background:#176b4a;color:#fff;padding:9px 13px;font-size:10px;font-weight:800;cursor:pointer}
+.plant-bulk-update span{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#ffffff30}
+.plant-bulk-update:disabled{background:#9aa5b1;color:#fff;cursor:not-allowed;opacity:.75}
+.plant-item-select,#plantSelectVisible{width:15px;height:15px;accent-color:#176b4a;cursor:pointer}
+.plant-bulk-items{display:grid;gap:12px;max-height:min(58vh,560px);overflow:auto;padding:2px 4px 2px 0}
+.plant-bulk-item{border:1px solid #e5eaf0;border-radius:10px;padding:13px;background:#fbfcfd}
+.plant-bulk-item-head{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.plant-bulk-item-head strong{font-size:12px;color:#172338}
+.plant-bulk-item-head span{font-size:9px;color:#64748b}
+.plant-item-validation{font-size:9px;color:#16865b;margin:8px 0 0}
+.plant-item-validation.invalid{color:#b42318}
+.plant-modal-card{width:min(760px,100%);max-height:calc(100vh - 36px);overflow:hidden;display:flex;flex-direction:column}
+.plant-modal-card h2,.plant-modal-card>p,.plant-modal-card>.plant-eyebrow,.plant-modal-actions{flex-shrink:0}
+@media(max-width:560px){.plant-panel-actions{align-items:flex-end;flex-direction:column;gap:7px}.plant-bulk-items{max-height:55vh}.plant-qty-grid{grid-template-columns:1fr 1fr}}
