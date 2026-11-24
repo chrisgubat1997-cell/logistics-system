@@ -421,6 +421,11 @@
 
         </div>
 
+        <!-- Dedicated Customer directory page -->
+        <div id="customer" class="page">
+            <div id="customerModule" class="customer-directory-page"></div>
+        </div>
+
 
 
         <div id="soMonitoring" class="page">
@@ -1250,6 +1255,7 @@ function showPage(pageId, button) {
     const sectionAccents = {
         dashboard: '#16865b',
         sales: '#2563eb',
+        customer: '#2563eb',
         soMonitoring: '#16865b',
         joRegister: '#7c3aed',
         plantMonitoring: '#16865b',
@@ -3424,12 +3430,32 @@ async function loadPlantMonitoringModule() {
     }
 }
 
-/* Sales > Customer shortcut: open the existing Customer Master section. */
+/* Sales > Customer: open the Customer directory as its own full page. */
 async function openSalesCustomerList(button) {
-    showPage('sales', button);
     await loadSalesOrderModule();
-    const target = document.querySelector('#salesModule .customer-table-wrapper') || document.getElementById('customerTable');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    const customerPage = document.getElementById('customer');
+    const customerHost = document.getElementById('customerModule');
+    const customerSection = document.querySelector('#salesModule .customer-table-card');
+
+    if (!customerPage || !customerHost || !customerSection) {
+        console.error('Customer directory could not be mounted.');
+        return;
+    }
+
+    // Move the existing live table so its search, filters and row actions keep working.
+    if (customerSection.parentElement !== customerHost) {
+        customerHost.replaceChildren();
+        customerHost.appendChild(customerSection);
+    }
+
+    showPage('customer', button);
+
+    if (typeof loadCustomerTable === 'function') {
+        await loadCustomerTable();
+    }
+
+    customerHost.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 /* =========================================================
