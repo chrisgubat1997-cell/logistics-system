@@ -81,3 +81,9 @@
  .plant-bulk-items{padding-right:2px}
  .plant-modal-actions{padding-bottom:max(2px,env(safe-area-inset-bottom))}
 }
+
+/* Shared completion date for a bulk update */
+.plant-completion-date{display:flex;flex-direction:column;gap:5px;margin:0 0 14px;padding:11px 12px;border:1px solid #dce7e1;border-radius:9px;background:#f7fbf8;color:#24364b;font-size:11px;font-weight:800;flex:0 0 auto}
+.plant-completion-date span{font-size:9px;font-weight:500;color:#64748b}
+.plant-completion-date input{width:min(260px,100%);border:1px solid #dce3eb;border-radius:7px;padding:9px 10px;background:#fff;color:#172338;font:inherit;font-size:12px}
+.plant-completion-date input:focus{outline:none;border-color:#16865b;box-shadow:0 0 0 3px rgba(22,134,91,.1)}
