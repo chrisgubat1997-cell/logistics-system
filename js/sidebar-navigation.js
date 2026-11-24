@@ -14,7 +14,13 @@
             key: "sales",
             label: "Sales",
             icon: "chart",
-            pages: ["sales", "joRegister"]
+            pages: ["sales"]
+        },
+        {
+            key: "production",
+            label: "Production",
+            icon: "production",
+            pages: ["joRegister", "plantMonitoring"]
         },
         {
             key: "logistics",
@@ -41,6 +47,8 @@
         messages: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
         sales: '<path d="M4 19V5"/><path d="M4 19h17"/><path d="m7 15 4-4 3 2 6-7"/><path d="M16 6h4v4"/>',
         joRegister: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+        plantMonitoring: '<path d="M3 20h18M5 17V9h4v8M10 17V4h4v13M15 17v-6h4v6"/>',
+        production: '<path d="M3 21V8l6 3V8l6 3V4h6v17z"/><path d="M7 15h2M12 15h2M17 15h2"/>',
         delivery: '<path d="M3 7h11v11H3z"/><path d="M14 11h4l3 3v4h-7z"/><circle cx="7.5" cy="19" r="1.5"/><circle cx="17.5" cy="19" r="1.5"/>',
         fleetAnalytics: '<path d="M4 19V5M4 19h17"/><rect x="7" y="11" width="3" height="5" rx=".5"/><rect x="13" y="7" width="3" height="9" rx=".5"/><rect x="19" y="4" width="2" height="12" rx=".5"/>',
         fleetDataEntry: '<path d="M4 20h4l11-11a2.1 2.1 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
@@ -64,7 +72,8 @@
         dashboard: "Dashboard",
         messages: "Messages",
         sales: "Sales Order",
-        joRegister: "JO Register",
+        joRegister: "Job Register",
+        plantMonitoring: "Plant Monitoring",
         delivery: "Delivery",
         fleetAnalytics: "Fleet & Delivery Analytics",
         fleetDataEntry: "Fleet & Delivery Data Entry",
