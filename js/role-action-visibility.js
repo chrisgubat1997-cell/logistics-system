@@ -20,7 +20,8 @@
     const ROLE_MENU_ACCESS = {
         fleetAnalytics: ["ADMIN", "LOGISTICS"],
         fleetDataEntry: ["ADMIN", "LOGISTICS"],
-        revolvingFund: ["ADMIN", "LOGISTICS"]
+        revolvingFund: ["ADMIN", "LOGISTICS"],
+        plantMonitoring: ["ADMIN", "PRODUCTION"]
     };
 
     const ROOTS = [
@@ -135,7 +136,8 @@
         const pageToMenuKey = {
             fleetAnalytics: "fleetAnalytics",
             fleetDataEntry: "fleetDataEntry",
-            revolvingFund: "revolvingFund"
+            revolvingFund: "revolvingFund",
+            plantMonitoring: "plantMonitoring"
         };
 
         document.querySelectorAll(".sidebar .menu .menu-btn").forEach(function (button) {
