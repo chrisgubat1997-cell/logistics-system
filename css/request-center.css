@@ -28,3 +28,7 @@ html[data-theme="dark"] .request-list-panel{background:#172438;border-color:#405
 html[data-theme="dark"] .request-ca-summary>div{background:#1e3047}
 html[data-theme="dark"] .request-ca-summary strong{color:#dceafa}
 @media(max-width:760px){.request-my-work{padding:15px}.request-my-work-grid{grid-template-columns:1fr}.request-my-work-heading{flex-direction:column}.request-private-label{align-self:flex-start}}
+
+/* Sales Order lookup in RFP */
+#rfpSalesOrder{font-variant-numeric:tabular-nums}
+.rfp-so-lookup-note{color:#718096;font-size:9px}
