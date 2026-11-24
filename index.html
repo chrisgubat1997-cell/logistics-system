@@ -3436,14 +3436,21 @@ async function openSalesCustomerList(button) {
 
     const customerPage = document.getElementById('customer');
     const customerHost = document.getElementById('customerModule');
-    const customerSection = document.querySelector('#salesModule .customer-table-card');
+
+    // The live Customer table is moved into customerModule on the first visit.
+    // Reuse it there on every later visit instead of searching only salesModule.
+    let customerSection =
+        customerHost && customerHost.querySelector('.customer-table-card');
+
+    if (!customerSection) {
+        customerSection = document.querySelector('#salesModule .customer-table-card');
+    }
 
     if (!customerPage || !customerHost || !customerSection) {
         console.error('Customer directory could not be mounted.');
         return;
     }
 
-    // Move the existing live table so its search, filters and row actions keep working.
     if (customerSection.parentElement !== customerHost) {
         customerHost.replaceChildren();
         customerHost.appendChild(customerSection);
@@ -3451,8 +3458,9 @@ async function openSalesCustomerList(button) {
 
     showPage('customer', button);
 
-    if (typeof loadCustomerTable === 'function') {
-        await loadCustomerTable();
+    // Always call the exported loader so the list refreshes on each visit.
+    if (typeof window.loadCustomerTable === 'function') {
+        await window.loadCustomerTable();
     }
 
     customerHost.scrollIntoView({ behavior: 'smooth', block: 'start' });
