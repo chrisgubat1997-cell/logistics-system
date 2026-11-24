@@ -930,30 +930,59 @@
 
         <!-- PAYMENT REQUEST (RFP) -->
         <div id="paymentRequest" class="page">
-            <section class="request-detail-page">
+            <section class="request-detail-page rfp-page">
                 <button type="button" class="request-back-button" onclick="showPage('requestCenter', document.querySelector('[data-request-page=\'requestCenter\']'))">← Back to Request Center</button>
-                <div class="request-detail-header">
+                <div class="request-detail-header rfp-header">
                     <span class="request-eyebrow">REQUEST CENTER / FINANCE</span>
-                    <h1>Payment Request (RFP)</h1>
-                    <p>For supplier payments, reimbursements and other obligations that need approval before Finance prepares the payment.</p>
+                    <h1>Payment Request</h1>
+                    <p>New RFP request</p>
+                    <div class="rfp-cutoff-notice" role="note">
+                        <strong>After 3:00 PM cutoff (Philippine time).</strong>
+                        <span>You can submit your request at any time, but requests received at or after 3:00 PM begin Day 1 tomorrow.</span>
+                        <span>Three-day processing schedule: <b>Day 1 — November 25, 2026</b> · <b>Day 3 — November 27, 2026</b>.</span>
+                        <small>Processing begins after the required approvals and hard-copy receipt.</small>
+                    </div>
                 </div>
-                <div class="request-detail-grid">
-                    <section class="request-info-panel">
-                        <h2>Request preparation</h2>
-                        <p>Requester prepares the request and attaches the supporting documents.</p>
-                        <ul><li>Payee / supplier and purpose</li><li>Requested amount and due date</li><li>Invoice, quotation, billing or other supporting documents</li></ul>
+                <form id="rfpRequestForm" class="rfp-form" novalidate>
+                    <section class="rfp-section">
+                        <div class="rfp-section-heading"><span>1</span><div><h2>Requestor &amp; organization</h2><p>Tell us who is requesting payment and which company and department own the request.</p></div></div>
+                        <div class="rfp-fields">
+                            <label class="rfp-field"><span>Requestor Full Name (First and Last) <b>*</b></span><input id="rfpRequestorName" name="requestorName" type="text" placeholder="First name and last name" autocomplete="name" required></label>
+                            <label class="rfp-field"><span>Requestor Email <b>*</b></span><input id="rfpRequestorEmail" name="requestorEmail" type="email" placeholder="name@company.com" autocomplete="email" required></label>
+                            <label class="rfp-field"><span>Company <b>*</b></span><select id="rfpCompany" name="company" required><option value="">Select...</option><option value="GREENMETAL">Greenmetal Electric Manufacturing Corporation</option><option value="GREENLIGHT">Greenlight</option></select></label>
+                            <label class="rfp-field"><span>Department <b>*</b></span><select id="rfpDepartment" name="department" required><option value="">Select...</option><option>Administration</option><option>Sales</option><option>Production</option><option>Logistics</option><option>Finance</option><option>Purchasing</option><option>Human Resources</option><option>Engineering</option><option>Other</option></select></label>
+                        </div>
                     </section>
-                    <section class="request-info-panel">
-                        <h2>Approval and document hand-off</h2>
-                        <ol><li>Plant Manager or Vice President approval</li><li>Signed hard copy sent to Head Office</li><li>Plant records the transmittal in its logbook</li><li>Head Office logs the received hard copy</li></ol>
+                    <section class="rfp-section">
+                        <div class="rfp-section-heading"><span>2</span><div><h2>Payment details</h2><p>Classify the request, identify the payee, and provide the amount and date needed.</p></div></div>
+                        <div class="rfp-fields">
+                            <label class="rfp-field"><span>Project / Class <b>*</b></span><input name="projectClass" type="text" placeholder="Enter project name or class" required></label>
+                            <label class="rfp-field"><span>Type <b>*</b></span><select id="rfpType" name="type" required><option value="">Select...</option><option>Goods / Materials</option><option>Services</option><option>Utilities</option><option>Freight / Transportation</option><option>Other</option></select></label>
+                            <label class="rfp-field"><span>Type of Request <b>*</b></span><select id="rfpRequestType" name="requestType" required><option value="">Select...</option><option>Supplier Payment</option><option>Employee Reimbursement</option><option>Utility Payment</option><option>Advance / Deposit</option><option>Other</option></select></label>
+                            <label class="rfp-field"><span>Supplier / Payee <b>*</b></span><input name="payee" type="text" placeholder="Supplier or payee full name" required></label>
+                            <label class="rfp-field"><span>Amount (PHP) <b>*</b></span><div class="rfp-currency-input"><span>₱</span><input name="amount" type="number" min="0.01" step="0.01" placeholder="0.00" required></div></label>
+                            <label class="rfp-field"><span>Date Needed <b>*</b></span><input name="dateNeeded" type="date" required></label>
+                            <label class="rfp-field"><span>Approving Head <b>*</b></span><select id="rfpApprovingHead" name="approvingHead" required disabled><option value="">Select department first</option></select><small>Selected from the active department approver.</small></label>
+                            <label class="rfp-field rfp-field-wide"><span>Purpose / Description <b>*</b></span><textarea name="purpose" rows="4" placeholder="Explain the purpose and details of this payment request." required></textarea></label>
+                        </div>
                     </section>
-                    <section class="request-info-panel request-info-wide">
-                        <h2>Finance processing</h2>
-                        <div class="request-process-line"><span>01 · Submitted</span><span>02 · Plant approved</span><span>03 · Sent to Head Office</span><span>04 · Received</span><span>05 · Finance review</span><span>06 · Payment prepared / released</span></div>
-                        <p class="request-small-note">The existing Finance → Payment → Prepare Payment function remains the payment preparation workspace. This RFP area is for the request and approval trail only.</p>
+                    <section class="rfp-section">
+                        <div class="rfp-section-heading"><span>3</span><div><h2>Supporting documents</h2><p>Review the required and optional documents for the selected Type, including whether a hard copy is required. Upload the applicable supporting files below.</p></div></div>
+                        <div class="rfp-doc-guide" id="rfpDocumentGuide">
+                            <div><strong>Internal documents</strong><p>Select a Type to review the applicable internal document requirements.</p></div>
+                            <div><strong>External documents</strong><p>Select a Type to review supplier / payee supporting documents.</p></div>
+                            <div class="rfp-hardcopy"><strong>Hard-copy requirement</strong><p>Requirements will be shown for the selected Type.</p></div>
+                        </div>
+                        <label class="rfp-upload" for="rfpFiles">
+                            <span class="rfp-upload-icon">↑</span><strong>Supporting Documents</strong>
+                            <span>Drag images or PDFs here, or choose files</span>
+                            <input id="rfpFiles" name="supportingDocuments" type="file" accept="image/*,application/pdf" multiple>
+                            <small id="rfpFileNames">Images and PDF files only · Multiple files allowed</small>
+                        </label>
                     </section>
-                </div>
-                <div class="request-preview-warning">Frontend preview only. No RFP number, attachment, approval, receiving-logbook entry or payment record is saved.</div>
+                    <div class="rfp-submit-row"><p>All fields are required. Please review your details before submitting.</p><button type="submit" class="rfp-submit-button">Submit request <span>→</span></button></div>
+                    <div id="rfpFormMessage" class="rfp-form-message" role="status" aria-live="polite"></div>
+                </form>
             </section>
         </div>
 
