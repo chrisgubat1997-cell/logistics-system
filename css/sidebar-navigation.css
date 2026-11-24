@@ -737,3 +737,136 @@ body.sidebar-collapsed .sidebar .nav-group-toggle {
     .request-info-wide { grid-column: auto; }
     .request-process-line { grid-template-columns: repeat(2,minmax(0,1fr)); }
 }
+
+
+/* =========================================================
+   SIDEBAR / TOPBAR COLOR MATCH
+   Match the sidebar surface to the topbar surface.
+   Keep readable company-specific navigation contrast.
+========================================================= */
+:root {
+    --nav-sidebar-muted: #53657b;
+    --nav-sidebar-hover: rgba(7, 59, 120, .075);
+}
+
+/* GREENMETAL — same clean light surface as the topbar */
+html[data-company="GREENMETAL"] .sidebar,
+html:not([data-company]) .sidebar {
+    background: rgba(255,255,255,.96) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(12px) !important;
+    border-right: 1px solid #DCE6F1 !important;
+    box-shadow: 5px 0 24px rgba(5,43,89,.055) !important;
+}
+html[data-company="GREENMETAL"] .sidebar .logo,
+html:not([data-company]) .sidebar .logo {
+    border-bottom: 1px solid #DCE6F1 !important;
+}
+html[data-company="GREENMETAL"] .sidebar .logo-brand strong,
+html:not([data-company]) .sidebar .logo-brand strong {
+    color: #073B78 !important;
+}
+html[data-company="GREENMETAL"] .sidebar .nav-group-toggle,
+html:not([data-company]) .sidebar .nav-group-toggle {
+    color: #073B78 !important;
+}
+html[data-company="GREENMETAL"] .sidebar .nav-group-toggle:hover,
+html[data-company="GREENMETAL"] .sidebar .nav-group.is-open > .nav-group-toggle,
+html:not([data-company]) .sidebar .nav-group-toggle:hover,
+html:not([data-company]) .sidebar .nav-group.is-open > .nav-group-toggle {
+    background: rgba(7,59,120,.065) !important;
+    border-color: rgba(7,59,120,.07) !important;
+    color: #052B59 !important;
+}
+html[data-company="GREENMETAL"] .sidebar .menu .menu-btn.active,
+html:not([data-company]) .sidebar .menu .menu-btn.active {
+    color: #073B78 !important;
+    background: linear-gradient(100deg, rgba(18,102,200,.13), rgba(18,102,200,.045)) !important;
+    border-color: rgba(18,102,200,.16) !important;
+    box-shadow: inset 3px 0 0 #A6CE39 !important;
+}
+html[data-company="GREENMETAL"] .sidebar .nav-group-items,
+html:not([data-company]) .sidebar .nav-group-items {
+    border-left-color: rgba(7,59,120,.16) !important;
+}
+html[data-company="GREENMETAL"] .sidebar .nav-group-chevron,
+html:not([data-company]) .sidebar .nav-group-chevron {
+    color: #7890aa !important;
+}
+
+/* GREENLIGHT — same light topbar surface, with forest-green accents */
+html[data-company="GREENLIGHT"] {
+    --nav-sidebar-muted: #587365;
+    --nav-sidebar-hover: rgba(23,107,74,.075);
+}
+html[data-company="GREENLIGHT"] .sidebar {
+    background: rgba(255,255,255,.96) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(12px) !important;
+    border-right: 1px solid #D8E6DC !important;
+    box-shadow: 5px 0 24px rgba(16,75,54,.055) !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .logo {
+    border-bottom: 1px solid #D8E6DC !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .logo-brand strong,
+html[data-company="GREENLIGHT"] .sidebar .nav-group-toggle {
+    color: #176B4A !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .nav-group-toggle:hover,
+html[data-company="GREENLIGHT"] .sidebar .nav-group.is-open > .nav-group-toggle {
+    background: rgba(23,107,74,.065) !important;
+    border-color: rgba(23,107,74,.08) !important;
+    color: #104B36 !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .menu .menu-btn.active {
+    color: #176B4A !important;
+    background: linear-gradient(100deg, rgba(33,134,91,.13), rgba(33,134,91,.045)) !important;
+    border-color: rgba(33,134,91,.16) !important;
+    box-shadow: inset 3px 0 0 #65A879 !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .nav-group-items {
+    border-left-color: rgba(23,107,74,.17) !important;
+}
+html[data-company="GREENLIGHT"] .sidebar .nav-group-chevron {
+    color: #789787 !important;
+}
+
+/* Dark appearance: follow the dark topbar instead of forcing a white rail. */
+html[data-theme="dark"][data-company="GREENMETAL"] .sidebar,
+html[data-theme="dark"]:not([data-company]) .sidebar {
+    background: rgba(15,29,47,.97) !important;
+    border-right-color: #293B53 !important;
+}
+html[data-theme="dark"][data-company="GREENMETAL"] .sidebar .logo,
+html[data-theme="dark"]:not([data-company]) .sidebar .logo {
+    border-bottom-color: #293B53 !important;
+}
+html[data-theme="dark"][data-company="GREENMETAL"] .sidebar .logo-brand strong,
+html[data-theme="dark"]:not([data-company]) .sidebar .logo-brand strong,
+html[data-theme="dark"][data-company="GREENMETAL"] .sidebar .nav-group-toggle,
+html[data-theme="dark"]:not([data-company]) .sidebar .nav-group-toggle {
+    color: #E8F0FA !important;
+}
+html[data-theme="dark"][data-company="GREENMETAL"] .sidebar .menu .menu-btn.active,
+html[data-theme="dark"]:not([data-company]) .sidebar .menu .menu-btn.active {
+    color: #fff !important;
+    background: linear-gradient(100deg, rgba(166,206,57,.2), rgba(166,206,57,.075)) !important;
+    border-color: rgba(166,206,57,.23) !important;
+}
+html[data-theme="dark"][data-company="GREENLIGHT"] .sidebar {
+    background: rgba(13,31,22,.97) !important;
+    border-right-color: #294A36 !important;
+}
+html[data-theme="dark"][data-company="GREENLIGHT"] .sidebar .logo {
+    border-bottom-color: #294A36 !important;
+}
+html[data-theme="dark"][data-company="GREENLIGHT"] .sidebar .logo-brand strong,
+html[data-theme="dark"][data-company="GREENLIGHT"] .sidebar .nav-group-toggle {
+    color: #E6F2E9 !important;
+}
+html[data-theme="dark"][data-company="GREENLIGHT"] .sidebar .menu .menu-btn.active {
+    color: #fff !important;
+    background: linear-gradient(100deg, rgba(101,168,121,.22), rgba(101,168,121,.08)) !important;
+    border-color: rgba(101,168,121,.24) !important;
+}
