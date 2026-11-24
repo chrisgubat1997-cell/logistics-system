@@ -16,7 +16,7 @@
   <div class="plant-cards" id="plantCards"></div>
   <div class="plant-message" id="plantMessage" role="status">Loading production records…</div>
   <section class="plant-panel">
-    <div class="plant-panel-head"><div><h2 id="plantTableTitle">Sales Order Progress</h2><p id="plantCount">0 records</p></div><span class="plant-live"><i></i> Live database</span></div>
+    <div class="plant-panel-head"><div><h2 id="plantTableTitle">Sales Order Progress</h2><p id="plantCount">0 records</p></div><div class="plant-panel-actions"><button type="button" class="plant-bulk-update" id="plantBulkUpdate" disabled>Update Selected Items <span id="plantSelectedCount">0</span></button><span class="plant-live"><i></i> Live database</span></div></div>
     <div class="plant-table-wrap"><table class="plant-table"><thead id="plantHead"></thead><tbody id="plantRows"><tr><td>Loading…</td></tr></tbody></table></div>
   </section>
 </section>
@@ -24,14 +24,8 @@
   <form class="plant-modal-card" id="plantProgressForm">
     <button type="button" class="plant-modal-close" id="plantModalClose" aria-label="Close">×</button>
     <span class="plant-eyebrow">UPDATE PRODUCTION</span><h2 id="plantModalTitle">Item Progress</h2><p id="plantModalMeta"></p>
-    <div class="plant-qty-grid">
-      <label>Completed Qty<input id="plantCompletedQty" type="number" min="0" step="any" required></label>
-      <label>Ongoing Qty<input id="plantOngoingQty" type="number" min="0" step="any" required></label>
-      <label>On-Hold Qty<input id="plantHoldQty" type="number" min="0" step="any" required></label>
-      <label>Pending Qty<input id="plantPendingQty" type="number" readonly></label>
-    </div>
-    <label class="plant-remarks">Remarks<textarea id="plantRemarks" rows="3" maxlength="500" placeholder="Reason for hold, production update, etc."></textarea></label>
-    <p class="plant-validation" id="plantValidation">Total allocated quantity must not exceed ordered quantity.</p>
+    <div class="plant-bulk-items" id="plantBulkItems"></div>
+    <p class="plant-validation" id="plantValidation">Total allocated quantity per item must not exceed its ordered quantity.</p>
     <div class="plant-modal-actions"><button type="button" class="plant-cancel" id="plantModalCancel">Cancel</button><button type="submit" class="plant-save" id="plantSave">Save Progress</button></div>
   </form>
 </div>
