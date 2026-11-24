@@ -399,7 +399,7 @@
         >
 
             <iframe
-                src="pages/dashboard.html?v=20261110-responsive-fit02"
+                src="pages/dashboard.html?v=20261124-workflow01"
                 class="dashboard-frame"
                 title="LOGI-TECH Dashboard"
                 scrolling="yes"
@@ -3215,7 +3215,7 @@ async function loadAboutModule() {
     if (!container || aboutModuleLoaded) return;
 
     try {
-        const response = await fetch('pages/about.html?v=20261109-about01', { cache: 'no-store' });
+        const response = await fetch('pages/about.html?v=20261124-workflow01', { cache: 'no-store' });
         if (!response.ok) throw new Error('HTTP ' + response.status + ' - ' + response.statusText);
         const html = await response.text();
         if (!html || !html.trim()) throw new Error('about.html is empty.');
