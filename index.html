@@ -135,6 +135,7 @@
     <link rel="stylesheet" href="css/system-monitor.css?v=20261110-admin-monitor01">
     <link rel="stylesheet" href="css/so-monitoring.css?v=20261111-customer-36002">
     <link rel="stylesheet" href="css/productivity-cup.css?v=20261118-01">
+    <link rel="stylesheet" href="css/sidebar-navigation.css?v=20261124-01">
 </head>
 
 
@@ -303,7 +304,91 @@
         <!-- PRODUCTIVITY CUP PROJECT -->
         <button class="menu-btn" type="button" onclick="showPage('productivityCup', this)" title="Productivity Cup" aria-label="Productivity Cup"><span class="sidebar-item-icon" aria-hidden="true">🏆</span><span class="sidebar-item-label">Productivity Cup</span></button>
 
-        <!-- ABOUT LOGIS-TECH -->
+        <!-- =================================================
+     REQUEST CENTER — FRONTEND ONLY
+================================================= -->
+<div id="requestCenter" class="page">
+    <section class="request-center-page">
+        <div class="request-center-heading">
+            <div>
+                <span class="request-eyebrow">WORKFLOW HUB</span>
+                <h1>Request Center</h1>
+                <p>Choose a request type to start. Forms and database saving will be connected in a later phase.</p>
+            </div>
+            <span class="request-preview-tag">FRONTEND PREVIEW</span>
+        </div>
+
+        <div class="request-type-grid">
+            <article class="request-type-card request-card-payment">
+                <div class="request-card-icon"><span aria-hidden="true">₱</span></div>
+                <div class="request-card-copy">
+                    <span class="request-card-category">FINANCE</span>
+                    <h2>Payment Request</h2>
+                    <p>Supplier payments, reimbursements and other payment-related requests.</p>
+                </div>
+                <button type="button" class="request-card-action" data-request-launch="payment">
+                    Open Payment Request <span aria-hidden="true">→</span>
+                </button>
+            </article>
+
+            <article class="request-type-card request-card-cash">
+                <div class="request-card-icon"><span aria-hidden="true">CA</span></div>
+                <div class="request-card-copy">
+                    <span class="request-card-category">ALL REQUESTING DEPARTMENTS</span>
+                    <h2>Cash Advance</h2>
+                    <p>For authorized activities and expenses requested by Sales, JO Register and Logistics.</p>
+                </div>
+                <button type="button" class="request-card-action" data-request-launch="cash-advance">
+                    View Request Setup <span aria-hidden="true">→</span>
+                </button>
+            </article>
+
+            <article class="request-type-card request-card-fund">
+                <div class="request-card-icon"><span aria-hidden="true">RF</span></div>
+                <div class="request-card-copy">
+                    <span class="request-card-category">LOGISTICS</span>
+                    <h2>Revolving Fund</h2>
+                    <p>Future request entry point for fund replenishment and related transactions.</p>
+                </div>
+                <button type="button" class="request-card-action" data-request-launch="revolving-fund">
+                    View Request Setup <span aria-hidden="true">→</span>
+                </button>
+            </article>
+        </div>
+
+        <div class="request-center-note" id="requestCenterFeedback" role="status" aria-live="polite">
+            <span class="request-note-dot" aria-hidden="true"></span>
+            <span>Select a request type. This preview does not submit or save any information.</span>
+        </div>
+    </section>
+</div>
+
+<!-- PAYMENT REQUEST — FRONTEND PLACEHOLDER -->
+<div id="paymentRequest" class="page">
+    <section class="request-placeholder-page">
+        <button type="button" class="request-back-button" onclick="showPage('requestCenter', document.querySelector('[data-request-center-menu]'))">
+            <span aria-hidden="true">←</span> Back to Request Center
+        </button>
+        <div class="request-placeholder-card">
+            <span class="request-eyebrow">FINANCE / RFP</span>
+            <h1>Payment Request</h1>
+            <p class="request-placeholder-lead">The Payment Request module is reserved for the Plant-to-Head-Office workflow.</p>
+            <div class="request-workflow-preview">
+                <div><strong>01</strong><span>Request preparation</span></div>
+                <div><strong>02</strong><span>Plant Manager / VP approval</span></div>
+                <div><strong>03</strong><span>Hard-copy transmittal</span></div>
+                <div><strong>04</strong><span>Head Office receiving logbook</span></div>
+                <div><strong>05</strong><span>Finance verification and processing</span></div>
+                <div><strong>06</strong><span>Payment release</span></div>
+            </div>
+            <div class="request-placeholder-warning">
+                Frontend setup only. No request form is submitted and no information is saved to Google Sheets or Apps Script.
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- ABOUT LOGIS-TECH -->
         <button class="menu-btn" type="button" onclick="showPage('about', this)" title="About LOGIS-TECH" aria-label="About LOGIS-TECH">
             <span class="sidebar-item-icon" aria-hidden="true">ⓘ</span><span class="sidebar-item-label">About LOGIS-TECH</span>
         </button>
@@ -3848,6 +3933,7 @@ document.addEventListener(
 </script>
 
 <script src="js/productivity-cup-presentation.js?v=20261118-present01"></script>
+<script src="js/sidebar-navigation.js?v=20261124-01"></script>
 
 </body>
 
