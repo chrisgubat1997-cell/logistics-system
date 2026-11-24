@@ -65,7 +65,7 @@ function getPlantMonitoringData(payload) {
         remarks:String(pvalues[r][ph.REMARKS]||""),
         updatedAt:String(pvalues[r][ph.UPDATED_AT]||""),
         updatedBy:String(pvalues[r][ph.UPDATED_BY]||""),
-        completedDate:ph.COMPLETED_DATE!=null?productionOrdersDate_(pvalues[r][ph.COMPLETED_DATE]):""
+        completedDate:ph.COMPLETED_DATE!=null?(pvalues[r][ph.COMPLETED_DATE] instanceof Date?Utilities.formatDate(pvalues[r][ph.COMPLETED_DATE],Session.getScriptTimeZone(),"yyyy-MM-dd"):String(pvalues[r][ph.COMPLETED_DATE]||"").slice(0,10)):""
       };
     }
     const postedOrders={};
