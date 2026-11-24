@@ -1,6 +1,6 @@
 /* =========================================================
    LOGIS-TECH — GROUPED SIDEBAR NAVIGATION
-   Version: 20261124-01
+   Version: 20261124-02
    Frontend only. No API or database writes.
 ========================================================= */
 (function () {
@@ -26,7 +26,13 @@
             key: "finance",
             label: "Finance",
             icon: "finance",
-            pages: ["invoice", "payment", "paymentRequest"]
+            pages: ["invoice", "payment"]
+        }
+        ,{
+            key: "request-center",
+            label: "Request Center",
+            icon: "requestCenter",
+            pages: ["requestCenter", "paymentRequest", "cashAdvanceRequest", "revolvingFundRequest"]
         }
     ];
 
@@ -42,6 +48,8 @@
         payment: '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M7 15h4"/>',
         revolvingFund: '<path d="M20 7v5h-5"/><path d="M4 17v-5h5"/><path d="M5.5 9a7 7 0 0 1 12-2L20 12M4 12l2.5 5a7 7 0 0 0 12-2"/>',
         paymentRequest: '<path d="M5 3h10l4 4v14H5z"/><path d="M14 3v5h5M8 12h8M8 16h5"/><path d="M12 9v6"/>',
+        cashAdvanceRequest: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M12 8v8M9 11h6M3 10h18"/>',
+        revolvingFundRequest: '<path d="M4 7h16v13H4z"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M8 13h8M12 10v6"/>',
         reports: '<path d="M4 19V5M4 19h17"/><path d="m7 15 3-4 3 2 5-7"/>',
         settings: '<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a7 7 0 0 1 0 1.8z"/>',
         productivityCup: '<path d="M8 4h8v4a4 4 0 0 1-8 0z"/><path d="M8 6H5v2a4 4 0 0 0 4 4M16 6h3v2a4 4 0 0 1-4 4M12 12v5M8 21h8M10 17h4"/>',
@@ -62,6 +70,10 @@
         fleetDataEntry: "Fleet & Delivery Data Entry",
         invoice: "Invoice",
         payment: "Payment",
+        requestCenter: "Overview",
+        paymentRequest: "Payment Request (RFP)",
+        cashAdvanceRequest: "Cash Advance",
+        revolvingFundRequest: "Revolving Fund Request",
         revolvingFund: "Revolving Fund",
         reports: "Reports",
         settings: "Settings",
@@ -221,28 +233,18 @@
                 return byPage[page];
             }).filter(Boolean);
 
-            if (definition.key === "finance" && !byPage.paymentRequest) {
-                const paymentRequestButton = createMenuButton(
-                    "paymentRequest",
-                    "Payment Request",
-                    "paymentRequest",
-                    { "data-finance-rfp-menu": "true" }
-                );
-                paymentRequestButton.dataset.navPage = "paymentRequest";
-                byPage.paymentRequest = paymentRequestButton;
-                children.push(paymentRequestButton);
+            if (definition.key === "request-center") {
+                ["requestCenter", "paymentRequest", "cashAdvanceRequest", "revolvingFundRequest"].forEach(function (page) {
+                    if (!byPage[page]) {
+                        byPage[page] = createMenuButton(page, LABELS[page], page);
+                        byPage[page].dataset.requestPage = page;
+                    }
+                    children.push(byPage[page]);
+                });
             }
 
             if (children.length) fragment.appendChild(makeGroup(definition, children));
         });
-
-        const requestCenterButton = createMenuButton(
-            "requestCenter",
-            "Request Center",
-            "requestCenter",
-            { "data-request-center-menu": "true" }
-        );
-        fragment.appendChild(requestCenterButton);
 
         ["reports", "settings", "productivityCup", "about"].forEach(function (page) {
             if (byPage[page]) fragment.appendChild(byPage[page]);
@@ -287,22 +289,12 @@
         });
 
         const requestPage = document.getElementById("requestCenter");
-        const feedback = document.getElementById("requestCenterFeedback");
         if (requestPage) requestPage.addEventListener("click", function (event) {
-            const cardButton = event.target.closest("[data-request-launch]");
-            if (!cardButton || !feedback) return;
-            const type = cardButton.dataset.requestLaunch;
-            if (type === "payment") {
-                const paymentMenuButton = menu.querySelector('[data-finance-rfp-menu="true"]');
-                if (paymentMenuButton) paymentMenuButton.click();
-                return;
-            }
-            const messages = {
-                "cash-advance": "Cash Advance is planned as a shared request type for Sales, JO Register and Logistics. The form and approval rules will be added in a later phase. Nothing has been saved.",
-                "revolving-fund": "The Revolving Fund request entry point will be connected after its request workflow is defined. The existing Revolving Fund module remains unchanged. Nothing has been saved."
-            };
-            feedback.querySelector("span:last-child").textContent =
-                messages[type] || "This request type is not configured yet. Nothing has been saved.";
+            const cardButton = event.target.closest("[data-request-open]");
+            if (!cardButton) return;
+            const targetPage = cardButton.dataset.requestOpen;
+            const targetButton = menu.querySelector('[data-request-page="' + targetPage + '"]');
+            if (targetButton) targetButton.click();
         });
     }
 
