@@ -1,0 +1,44 @@
+/* LOGIS-TECH Plant Monitoring */
+.plant-monitoring{--pm-ink:#172338;--pm-muted:#64748b;--pm-line:#e5eaf0;--pm-green:#16865b;color:var(--pm-ink);font-family:Inter,"Segoe UI",Arial,sans-serif;padding:4px 2px 28px}
+.plant-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:4px 0 20px}
+.plant-eyebrow{font-size:9px;font-weight:800;letter-spacing:.16em;color:#16865b}
+.plant-header h1{font-size:25px;margin:5px 0 4px;font-weight:800;letter-spacing:-.03em}
+.plant-header p,.plant-panel-head p{margin:0;color:var(--pm-muted);font-size:12px}
+.plant-refresh,.plant-save{border:0;border-radius:9px;background:#142238;color:#fff;padding:10px 15px;font-weight:700;font-size:11px;cursor:pointer}
+.plant-toolbar{display:grid;grid-template-columns:auto repeat(4,minmax(130px,1fr));gap:10px;align-items:end;background:#fff;border:1px solid var(--pm-line);border-radius:12px;padding:13px;margin-bottom:14px}
+.plant-toolbar label,.plant-qty-grid label,.plant-remarks{display:flex;flex-direction:column;gap:6px;color:#526176;font-size:10px;font-weight:700}
+.plant-toolbar input,.plant-toolbar select,.plant-qty-grid input,.plant-remarks textarea{width:100%;min-width:0;border:1px solid #dce3eb;border-radius:7px;padding:9px 10px;background:#fff;color:#172338;font:inherit;font-size:11px;outline:none}
+.plant-toolbar input:focus,.plant-toolbar select:focus,.plant-qty-grid input:focus,.plant-remarks textarea:focus{border-color:#16865b;box-shadow:0 0 0 3px rgba(22,134,91,.1)}
+.plant-mode{display:flex;background:#f0f3f6;border-radius:8px;padding:3px;min-height:34px}
+.plant-mode button{border:0;background:transparent;padding:0 13px;border-radius:6px;color:#64748b;font-size:10px;font-weight:800;cursor:pointer}
+.plant-mode button.active{background:#fff;color:#142238;box-shadow:0 1px 4px #0f172a1a}
+.plant-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:13px}
+.plant-card{border:1px solid var(--pm-line);background:#fff;border-radius:11px;padding:13px 14px;text-align:left;cursor:pointer;min-width:0;transition:.15s}
+.plant-card:hover,.plant-card.active{border-color:#16865b;box-shadow:0 0 0 2px #16865b12}
+.plant-card-label{display:block;font-size:10px;color:#64748b;font-weight:700}
+.plant-card-value{display:block;font-size:24px;font-weight:800;letter-spacing:-.04em;margin:5px 0 2px;color:#172338}
+.plant-card-note{display:block;font-size:9px;color:#8290a2}
+.plant-card[data-status="COMPLETED"] .plant-card-value{color:#16865b}.plant-card[data-status="ONGOING"] .plant-card-value{color:#2563eb}.plant-card[data-status="PENDING"] .plant-card-value{color:#c18416}.plant-card[data-status="ON HOLD"] .plant-card-value{color:#c2413b}
+.plant-message{font-size:11px;color:#64748b;padding:8px 2px;min-height:30px}.plant-message.error{color:#b42318}.plant-message.success{color:#16865b}
+.plant-panel{background:#fff;border:1px solid var(--pm-line);border-radius:12px;overflow:hidden}
+.plant-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 17px;border-bottom:1px solid var(--pm-line)}
+.plant-panel-head h2{font-size:14px;margin:0 0 4px;font-weight:800}
+.plant-live{font-size:9px;color:#16865b;font-weight:800;display:flex;align-items:center;gap:6px}.plant-live i{width:6px;height:6px;border-radius:50%;background:#16865b}
+.plant-table-wrap{overflow:auto}.plant-table{width:100%;border-collapse:collapse;min-width:850px}
+.plant-table th{background:#f7f9fb;color:#64748b;text-align:left;padding:10px 12px;font-size:9px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.plant-table td{padding:11px 12px;border-top:1px solid #edf0f4;font-size:10px;vertical-align:middle}
+.plant-table tbody tr:hover{background:#fafcfd}.plant-primary{font-weight:800;color:#172338}.plant-secondary{font-size:9px;color:#8491a2;margin-top:3px}
+.plant-progress{height:6px;width:92px;border-radius:20px;background:#edf1f4;overflow:hidden;margin-top:5px}.plant-progress span{display:block;height:100%;background:#16865b;border-radius:20px}
+.plant-status{display:inline-flex;border-radius:20px;padding:4px 7px;font-size:8px;font-weight:800;white-space:nowrap;background:#f1f5f9;color:#64748b}
+.plant-status.completed{background:#e8f7ef;color:#16865b}.plant-status.ongoing{background:#eaf2ff;color:#2563eb}.plant-status.pending{background:#fff6df;color:#a66d0c}.plant-status.on-hold{background:#fff0ee;color:#c2413b}
+.plant-edit{border:1px solid #dce5e9;background:#fff;color:#176b50;border-radius:6px;padding:6px 9px;font-size:9px;font-weight:800;cursor:pointer}.plant-edit:disabled{opacity:.45;cursor:not-allowed}
+.plant-empty{text-align:center!important;color:#8491a2;padding:28px!important}
+.plant-modal[hidden]{display:none}.plant-modal{position:fixed;inset:0;z-index:10000;background:#101b2bb8;display:flex;align-items:center;justify-content:center;padding:18px}
+.plant-modal-card{position:relative;width:min(510px,100%);background:#fff;border-radius:15px;padding:24px;box-shadow:0 20px 60px #0003}
+.plant-modal-card h2{font-size:19px;margin:5px 0}.plant-modal-card>p{font-size:11px;color:#64748b;margin:0 0 18px}
+.plant-modal-close{position:absolute;right:15px;top:12px;border:0;background:transparent;font-size:25px;color:#64748b;cursor:pointer}
+.plant-qty-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.plant-remarks{margin-top:13px}.plant-remarks textarea{resize:vertical}
+.plant-validation{font-size:10px!important;color:#a66d0c!important;margin:10px 0!important}
+.plant-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:17px}.plant-cancel{border:1px solid #dce3eb;background:#fff;border-radius:8px;padding:9px 13px;font-size:10px;font-weight:700;cursor:pointer}
+@media(max-width:900px){.plant-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.plant-mode{grid-column:1/-1;width:max-content}.plant-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:560px){.plant-header{align-items:flex-start}.plant-header h1{font-size:21px}.plant-toolbar{grid-template-columns:1fr 1fr}.plant-cards{grid-template-columns:repeat(2,minmax(0,1fr))}.plant-card{padding:11px}.plant-card-value{font-size:21px}.plant-panel-head{align-items:flex-start}}
