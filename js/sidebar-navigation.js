@@ -239,7 +239,11 @@
         });
 
         GROUPS.forEach(function (definition) {
-            // Create Plant Monitoring before collecting the Production submenu items.
+            // Ensure Plant Monitoring exists before collecting Production children.
+            if (definition.key === "production" && !byPage.plantMonitoring) {
+                byPage.plantMonitoring = createMenuButton("plantMonitoring", LABELS.plantMonitoring, "plantMonitoring");
+            }
+
             const children = definition.pages.map(function (page) {
                 return byPage[page];
             }).filter(Boolean);
