@@ -61,22 +61,23 @@
 @media(max-width:560px){.plant-panel-actions{align-items:flex-end;flex-direction:column;gap:7px}.plant-bulk-items{max-height:55vh}.plant-qty-grid{grid-template-columns:1fr 1fr}}
 
 
-/* Full-screen bulk editor: keep controls visible and scroll only the item list */
-.plant-modal{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;padding:0;align-items:stretch;justify-content:stretch;overflow:hidden}
-.plant-modal-card{width:100%;height:100vh;height:100dvh;max-height:none;min-height:0;border-radius:0;padding:clamp(16px,2.4vw,30px);box-shadow:none;overflow:hidden;display:flex;flex-direction:column;gap:0}
-.plant-modal-card>.plant-eyebrow{display:block;padding-right:42px;margin-bottom:4px}
-.plant-modal-card h2{font-size:clamp(19px,2vw,25px);margin:3px 0 5px}
-.plant-modal-card>p#plantModalMeta{margin:0 0 12px}
-.plant-bulk-items{flex:1 1 auto;min-height:0;max-height:none;overflow-y:auto;overscroll-behavior:contain;padding:2px 8px 14px 0;grid-auto-rows:max-content}
-.plant-bulk-item{padding:clamp(10px,1.3vw,16px)}
+/* Centered modal overlay: preserve the Plant Monitoring page behind it.
+   The modal is portaled to body so it stays viewport-centered while the page scrolls. */
+.plant-modal[hidden]{display:none!important}
+.plant-modal{position:fixed!important;inset:0!important;z-index:100000!important;width:100vw;height:100vh;height:100dvh;padding:20px!important;display:flex;align-items:center!important;justify-content:center!important;overflow:hidden;background:rgba(8,20,35,.30)!important;backdrop-filter:blur(2px)}
+.plant-modal-card{position:relative;width:min(780px,calc(100vw - 40px))!important;height:auto!important;max-height:min(88vh,900px)!important;max-height:min(88dvh,900px)!important;min-height:0;overflow:hidden!important;display:flex!important;flex-direction:column!important;gap:0;background:#fff;border:1px solid #e5eaf0;border-radius:16px!important;padding:24px!important;box-shadow:0 24px 80px rgba(0,0,0,.28)!important}
+.plant-modal-card>.plant-eyebrow,.plant-modal-card h2,.plant-modal-card>p#plantModalMeta{flex:0 0 auto}
+.plant-modal-card>.plant-eyebrow{padding-right:42px;margin-bottom:4px}
+.plant-modal-card h2{font-size:21px;margin:4px 0}
+.plant-modal-card>p#plantModalMeta{margin:0 0 14px}
+.plant-bulk-items{flex:1 1 auto;min-height:100px;max-height:none!important;overflow-y:auto!important;overscroll-behavior:contain;padding:2px 8px 12px 0;grid-auto-rows:max-content}
+.plant-bulk-item{padding:13px}
 .plant-modal-card>.plant-validation{flex:0 0 auto;margin:8px 0!important}
-.plant-modal-actions{flex:0 0 auto;position:sticky;bottom:0;background:#fff;border-top:1px solid #e5eaf0;padding:12px 0 2px;margin:0;z-index:2}
-.plant-modal-close{position:fixed;top:14px;right:20px;z-index:5;width:38px;height:38px;border-radius:50%;background:#f1f5f9;font-size:26px}
-@media(max-width:700px){
- .plant-modal-card{padding:14px}
- .plant-modal-close{top:9px;right:10px}
+.plant-modal-actions{flex:0 0 auto;position:sticky;bottom:0;background:#fff;border-top:1px solid #e5eaf0;padding:12px 0 0;margin:0;z-index:2}
+.plant-modal-close{position:absolute;top:13px;right:16px;z-index:3;width:34px;height:34px;border-radius:50%;background:#f1f5f9;font-size:25px}
+@media(max-width:600px){
+ .plant-modal{padding:10px!important}
+ .plant-modal-card{width:100%!important;max-height:92vh!important;max-height:92dvh!important;padding:16px!important;border-radius:13px!important}
  .plant-bulk-items{padding-right:2px}
- .plant-bulk-item-head strong{font-size:11px}
- .plant-qty-grid{gap:8px}
- .plant-modal-actions{padding:10px 0 max(8px,env(safe-area-inset-bottom))}
+ .plant-modal-actions{padding-bottom:max(2px,env(safe-area-inset-bottom))}
 }
