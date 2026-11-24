@@ -33,7 +33,7 @@
                 <div>
                     <div class="dashboard-eyebrow">LOGIS-TECH SYSTEM</div>
                     <h1>Dashboard</h1>
-                    <p>Overview of sales, logistics, delivery and finance operations.</p>
+                    <p>Overview of Sales, Job Orders, Production, Delivery, Fleet and Finance workflows.</p>
                 </div>
             </div>
         </div>
@@ -496,7 +496,7 @@
             <div class="dashboard-panel-header">
                 <div>
                     <span class="panel-eyebrow">SALES → PRODUCTION</span>
-                    <h2>JO Register & Production Overview</h2>
+                    <h2>JO Register & Plant Monitoring Overview</h2>
                 </div>
                 <span class="panel-period">Live SO records</span>
             </div>
@@ -522,7 +522,7 @@
                     <span>Posted to Production</span>
                 </div>
             </div>
-            <p class="dashboard-data-note">Counts are based on the Sales Order records currently returned by the system.</p>
+            <p class="dashboard-data-note">Sales Orders are posted to Production after JO coordination. Item-level completed, ongoing, on-hold and pending quantities are maintained in Plant Monitoring.</p>
         </div>
 
         <!-- =================================================
@@ -760,6 +760,21 @@
         </div>
 
 
+
+        
+
+        <!-- REQUEST CENTER WORKFLOW OVERVIEW -->
+        <div class="dashboard-panel request-workflow-panel" data-role-scope="finance">
+            <div class="dashboard-panel-header">
+                <div><span class="panel-eyebrow">REQUEST CENTER</span><h2>Payment & Liquidation Workflow</h2></div>
+                <span class="panel-period">Department requests</span>
+            </div>
+            <div class="finance-list">
+                <div class="finance-row"><div><span>Request for Payment (RFP)</span><small>Supplier payments, reimbursements, utilities and other payment requests.</small></div><strong>RFP</strong></div>
+                <div class="finance-row"><div><span>Liquidation</span><small>Expense breakdown, receipt submission and cash return review for released advances.</small></div><strong>LIQ</strong></div>
+            </div>
+            <p class="dashboard-data-note">Request tracking and Accounting monitoring will display live totals once the Request Center records are connected to the database.</p>
+        </div>
 
         <!-- =================================================
              MONTHLY COLLECTIONS
