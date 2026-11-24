@@ -3422,7 +3422,7 @@ async function loadPlantMonitoringModule() {
         }
     }
     try {
-        await loadScriptOnce('js/plant-monitoring.js?v=20261124-03', 'data-plant-monitoring-js');
+        await loadScriptOnce('js/plant-monitoring.js?v=20261124-04', 'data-plant-monitoring-js');
         if (typeof window.initializePlantMonitoring === 'function') await window.initializePlantMonitoring();
     } catch (error) {
         console.error('Plant Monitoring initialization failed:', error);
