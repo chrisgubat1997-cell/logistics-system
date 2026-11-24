@@ -5,7 +5,7 @@
 ========================================================= */
 const PLANT_PROGRESS_HEADERS_ = [
   "SO_ITEM_ID","SO_NUMBER","JO_NUMBER","ITEM_NUMBER","ITEM_NAME","ORDERED_QTY",
-  "COMPLETED_QTY","ONGOING_QTY","ON_HOLD_QTY","REMARKS","UPDATED_AT","UPDATED_BY"
+  "COMPLETED_QTY","ONGOING_QTY","ON_HOLD_QTY","REMARKS","UPDATED_AT","UPDATED_BY","COMPLETED_DATE"
 ];
 
 function getPlantProgressSheet_() {
@@ -64,7 +64,8 @@ function getPlantMonitoringData(payload) {
         onHoldQty:Number(pvalues[r][ph.ON_HOLD_QTY]||0),
         remarks:String(pvalues[r][ph.REMARKS]||""),
         updatedAt:String(pvalues[r][ph.UPDATED_AT]||""),
-        updatedBy:String(pvalues[r][ph.UPDATED_BY]||"")
+        updatedBy:String(pvalues[r][ph.UPDATED_BY]||""),
+        completedDate:ph.COMPLETED_DATE!=null?productionOrdersDate_(pvalues[r][ph.COMPLETED_DATE]):""
       };
     }
     const postedOrders={};
@@ -86,7 +87,7 @@ function getPlantMonitoringData(payload) {
         const id=itemIdIdx>=0?String(row[itemIdIdx]||"").trim():"";
         if(!id) continue;
         const ordered=Math.max(0,Number(row[qtyIdx]||0));
-        const p=progressById[id]||{completedQty:0,ongoingQty:0,onHoldQty:0,remarks:"",updatedAt:"",updatedBy:""};
+        const p=progressById[id]||{completedQty:0,ongoingQty:0,onHoldQty:0,remarks:"",updatedAt:"",updatedBy:"",completedDate:""};
         const completed=Math.max(0,Number(p.completedQty)||0), ongoing=Math.max(0,Number(p.ongoingQty)||0), hold=Math.max(0,Number(p.onHoldQty)||0);
         const pending=Math.max(0,ordered-completed-ongoing-hold);
         let status="PENDING";
@@ -100,7 +101,7 @@ function getPlantMonitoringData(payload) {
           description:descIdx>=0?String(row[descIdx]||""):"",
           unit:unitIdx>=0?String(row[unitIdx]||""):"",
           orderedQty:ordered,completedQty:completed,ongoingQty:ongoing,onHoldQty:hold,pendingQty:pending,
-          remarks:String(p.remarks||""),updatedAt:String(p.updatedAt||""),updatedBy:String(p.updatedBy||""),status:status
+          remarks:String(p.remarks||""),updatedAt:String(p.updatedAt||""),updatedBy:String(p.updatedBy||""),completedDate:String(p.completedDate||""),status:status
         });
       }
     });
@@ -149,7 +150,8 @@ function savePlantItemsProgress(payload) {
       completedQty: item.completedQty,
       ongoingQty: item.ongoingQty,
       onHoldQty: item.onHoldQty,
-      remarks: item.remarks
+      remarks: item.remarks,
+      completedDate: item.completedDate
     });
     const ok = !!(result && result.success);
     results.push({
@@ -206,10 +208,23 @@ function savePlantItemProgress(payload) {
     let target=-1;
     for(let r=1;r<rows.length;r++) if(String(rows[r][map.SO_ITEM_ID]||"").trim()===id){target=r+1;break;}
     const now=formatDateTime(new Date());
-    const record=[
-      id,item.soNumber,"",item.itemNumber,item.itemName,item.orderedQty,
-      completed,ongoing,hold,String(payload.remarks||"").trim(),now,user.username
-    ];
+    const completedDate=String(payload.completedDate||"").trim();
+    if(completedDate && !/^\d{4}-\d{2}-\d{2}$/.test(completedDate)) throw new Error("Invalid Date Completed. Please select a valid date.");
+    const record=target<0?Array(progress.getLastColumn()).fill(""):rows[target-1].slice();
+    const setField=(name,value)=>{if(map[name]==null) throw new Error("Missing PRODUCTION_PROGRESS column: "+name);record[map[name]]=value;};
+    setField("SO_ITEM_ID",id);
+    setField("SO_NUMBER",item.soNumber);
+    setField("JO_NUMBER","");
+    setField("ITEM_NUMBER",item.itemNumber);
+    setField("ITEM_NAME",item.itemName);
+    setField("ORDERED_QTY",item.orderedQty);
+    setField("COMPLETED_QTY",completed);
+    setField("ONGOING_QTY",ongoing);
+    setField("ON_HOLD_QTY",hold);
+    setField("REMARKS",String(payload.remarks||"").trim());
+    setField("UPDATED_AT",now);
+    setField("UPDATED_BY",user.username);
+    if(completedDate) setField("COMPLETED_DATE",completedDate);
     if(target<0) progress.appendRow(record);
     else progress.getRange(target,1,1,record.length).setValues([record]);
     try{if(typeof logActivity==="function")logActivity({userId:user.userId,username:user.username,action:"UPDATE",module:"Plant Monitoring",recordId:id,recordNumber:item.soNumber,details:"Production progress updated for "+item.itemName,status:"SUCCESS"});}catch(logError){}
