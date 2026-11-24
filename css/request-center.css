@@ -162,3 +162,22 @@ html[data-theme="dark"] .accounting-monitoring-table th{background:#1b2b40;color
 html[data-theme="dark"] .accounting-monitoring-table td{color:#c4d0df;border-color:#35465d}
 @media(max-width:850px){.accounting-monitoring-toolbar{flex-direction:column}.accounting-monitoring-filters{justify-content:flex-start}.accounting-monitoring-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.request-type-grid-simple{grid-template-columns:1fr}.accounting-monitoring{padding:14px}.accounting-monitoring-header{flex-direction:column}.accounting-monitoring-footer{flex-direction:column}}
+
+
+/* Request Center workspace tabs */
+.request-workspace-tabs{display:flex;align-items:center;gap:8px;margin:2px 0 18px;padding:5px;border:1px solid #dce5ee;border-radius:12px;background:#f3f6fa;width:fit-content;max-width:100%}
+.request-workspace-tab{min-height:39px;padding:0 18px;border:1px solid transparent;border-radius:8px;background:transparent;color:#53677e;font-size:10px;font-weight:900;letter-spacing:.055em;cursor:pointer;transition:background .15s,border-color .15s,color .15s,box-shadow .15s}
+.request-workspace-tab:hover{background:#fff;color:#173b60}
+.request-workspace-tab.is-active{border-color:#d8e2ec;background:#fff;color:#073b78;box-shadow:0 2px 7px #0f233c0c}
+.request-workspace-tab[hidden],.request-workspace-view[hidden]{display:none!important}
+.request-workspace-view{min-width:0}
+.request-workspace-view>#accountingRequestMonitoring{margin-top:0}
+.request-card-liquidation .request-card-action{background:#fff!important;color:#173b60!important;border:1px solid #d7e0e9!important;box-shadow:none}
+.request-card-liquidation .request-card-action:hover{background:#f3f7fb!important;color:#073b78!important;border-color:#b8c9da!important}
+.request-card-liquidation .request-card-icon{background:#edf3f9!important;color:#315a80!important}
+html[data-theme="dark"] .request-workspace-tabs{background:#172438;border-color:#40516b}
+html[data-theme="dark"] .request-workspace-tab{color:#c4d0df}
+html[data-theme="dark"] .request-workspace-tab:hover,html[data-theme="dark"] .request-workspace-tab.is-active{background:#24364d;color:#e4ebf5;border-color:#52667e}
+html[data-theme="dark"] .request-card-liquidation .request-card-action{background:#172438!important;color:#e4ebf5!important;border-color:#52667e!important}
+html[data-theme="dark"] .request-card-liquidation .request-card-action:hover{background:#24364d!important}
+@media(max-width:520px){.request-workspace-tabs{width:100%}.request-workspace-tab{flex:1;padding:0 10px;font-size:9px}}
