@@ -395,6 +395,7 @@ document.addEventListener(
 
                     "SALES",
                     "LOGISTICS",
+                    "ACCOUNTING",
                     "FINANCE",
                     "PAYMENT",
                     "PRODUCTION"
