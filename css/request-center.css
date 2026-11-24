@@ -118,3 +118,47 @@ html[data-theme="dark"] .liquidation-total-grid>div{background:#1e3047}
 html[data-theme="dark"] .liquidation-total-grid strong{color:#dceafa}
 html[data-theme="dark"] .liquidation-file-drop{background:#142238;border-color:#52667e;color:#e4ebf5}
 @media(max-width:760px){.liquidation-heading{flex-direction:column}.liquidation-heading h1{font-size:23px}.liquidation-advance-list{grid-template-columns:1fr}.liquidation-fields{grid-template-columns:1fr}.liquidation-total-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.liquidation-section-heading{align-items:flex-start}.liquidation-submit-row{align-items:stretch;flex-direction:column}.liquidation-submit{width:100%}.liquidation-select-section,.liquidation-form-section{padding:15px}}
+
+
+/* Simplified Request Center */
+.request-center-simple{max-width:1180px;margin:0 auto;padding:12px 2px 36px}
+.request-center-simple .request-center-heading{margin:4px 0 20px}
+.request-center-simple .request-center-heading h1{margin:5px 0;font-size:27px;font-weight:850;color:#102b4c}
+.request-center-simple .request-center-heading p{margin:0;color:#718096;font-size:12px}
+.request-type-grid-simple{grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.request-type-grid-simple .request-type-card{min-height:205px}
+.request-card-liquidation .request-card-icon{background:#eaf5ed;color:#277342}
+.request-card-liquidation .request-card-action{background:#176b4a}
+.request-card-liquidation .request-card-action:hover{background:#104b36}
+.accounting-monitoring{margin-top:28px;padding:20px;border:1px solid #dce5ee;border-radius:15px;background:#f8fbff}
+.accounting-monitoring-header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.accounting-monitoring-header h2{margin:4px 0;font-size:20px;font-weight:850;color:#102b4c}
+.accounting-monitoring-header p{margin:0;color:#718096;font-size:11px}
+.accounting-only-tag{padding:6px 10px;border:1px solid #c9d9e9;border-radius:20px;background:#edf5fc;color:#24547d;font-size:9px;font-weight:900;letter-spacing:.06em;white-space:nowrap}
+.accounting-monitoring-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.accounting-monitoring-cards article{display:flex;flex-direction:column;gap:6px;padding:14px;border:1px solid #e1e8ef;border-radius:11px;background:#fff}
+.accounting-monitoring-cards span{color:#718096;font-size:10px;font-weight:700}
+.accounting-monitoring-cards strong{color:#173b60;font-size:25px;font-weight:900;font-variant-numeric:tabular-nums}
+.accounting-monitoring-cards small{color:#8a97a6;font-size:9px}
+.accounting-monitoring-table-panel{overflow:hidden;border:1px solid #e1e8ef;border-radius:12px;background:#fff}
+.accounting-monitoring-toolbar{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:15px;border-bottom:1px solid #e8edf2}
+.accounting-monitoring-toolbar h3{margin:0 0 4px;color:#20364f;font-size:13px}
+.accounting-monitoring-toolbar p{margin:0;color:#8290a2;font-size:10px}
+.accounting-monitoring-filters{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end}
+.accounting-monitoring-filters input,.accounting-monitoring-filters select{min-height:34px;max-width:190px;border:1px solid #d7e0e9;border-radius:7px;background:#fff;color:#34465d;padding:7px 9px;font:inherit;font-size:10px}
+.accounting-monitoring-table-wrap{overflow-x:auto}
+.accounting-monitoring-table{width:100%;min-width:900px;border-collapse:collapse}
+.accounting-monitoring-table th{padding:10px 11px;background:#f3f7fb;color:#64758a;text-align:left;font-size:9px;font-weight:850;white-space:nowrap}
+.accounting-monitoring-table td{padding:13px 11px;border-top:1px solid #edf1f5;color:#43566b;font-size:10px}
+.accounting-monitoring-empty{text-align:center!important;color:#8290a2!important;padding:28px!important}
+.accounting-monitoring-footer{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;border-top:1px solid #e8edf2;color:#8290a2;font-size:9px}
+.accounting-monitoring-note{margin:10px 0 0;color:#8290a2;font-size:9px;line-height:1.5}
+html[data-theme="dark"] .request-center-simple .request-center-heading h1,html[data-theme="dark"] .accounting-monitoring-header h2{color:#e4ebf5}
+html[data-theme="dark"] .accounting-monitoring{background:#111d2d;border-color:#35465d}
+html[data-theme="dark"] .accounting-monitoring-cards article,html[data-theme="dark"] .accounting-monitoring-table-panel{background:#172438;border-color:#40516b}
+html[data-theme="dark"] .accounting-monitoring-cards strong,html[data-theme="dark"] .accounting-monitoring-toolbar h3{color:#e4ebf5}
+html[data-theme="dark"] .accounting-monitoring-filters input,html[data-theme="dark"] .accounting-monitoring-filters select{background:#101827;color:#e8edf7;border-color:#40516b}
+html[data-theme="dark"] .accounting-monitoring-table th{background:#1b2b40;color:#dce5ef}
+html[data-theme="dark"] .accounting-monitoring-table td{color:#c4d0df;border-color:#35465d}
+@media(max-width:850px){.accounting-monitoring-toolbar{flex-direction:column}.accounting-monitoring-filters{justify-content:flex-start}.accounting-monitoring-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.request-type-grid-simple{grid-template-columns:1fr}.accounting-monitoring{padding:14px}.accounting-monitoring-header{flex-direction:column}.accounting-monitoring-footer{flex-direction:column}}
