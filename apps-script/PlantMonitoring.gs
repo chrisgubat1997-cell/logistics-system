@@ -129,6 +129,52 @@ function getPlantMonitoringData(payload) {
   }
 }
 
+
+/* Bulk endpoint: one browser request for all selected production items. */
+function savePlantItemsProgress(payload) {
+  payload = payload || {};
+  const items = Array.isArray(payload.items) ? payload.items : [];
+  if (!items.length) return { success:false, message:"No selected production items were submitted." };
+  if (items.length > 100) return { success:false, message:"Please update no more than 100 items at a time." };
+
+  const results = [];
+  let saved = 0;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i] || {};
+    const result = savePlantItemProgress({
+      sessionToken: payload.sessionToken,
+      activeCompany: payload.activeCompany,
+      company: payload.company,
+      soItemId: item.soItemId,
+      completedQty: item.completedQty,
+      ongoingQty: item.ongoingQty,
+      onHoldQty: item.onHoldQty,
+      remarks: item.remarks
+    });
+    const ok = !!(result && result.success);
+    results.push({
+      soItemId: String(item.soItemId || ""),
+      success: ok,
+      message: result && result.message ? result.message : (ok ? "Saved." : "Update failed.")
+    });
+    if (ok) saved++;
+  }
+
+  const failed = results.length - saved;
+  return {
+    success: failed === 0,
+    partial: saved > 0 && failed > 0,
+    saved: saved,
+    failed: failed,
+    total: results.length,
+    results: results,
+    message: failed === 0
+      ? saved + " production item(s) updated successfully."
+      : saved + " item(s) saved; " + failed + " item(s) failed. Review the item-level results and retry."
+  };
+}
+
+
 function savePlantItemProgress(payload) {
   const lock=LockService.getScriptLock();
   try {
