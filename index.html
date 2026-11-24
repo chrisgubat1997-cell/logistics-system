@@ -1010,6 +1010,23 @@
             </section>
         </div>
 
+        <!-- LIQUIDATION -->
+        <div id="liquidation" class="page">
+            <section class="request-detail-page">
+                <button type="button" class="request-back-button" onclick="showPage('requestCenter', document.querySelector('[data-request-page=\\'requestCenter\\']'))">← Back to Overview</button>
+                <div class="request-detail-header">
+                    <span class="request-eyebrow">REQUEST CENTER / FINANCE</span>
+                    <h1>Liquidation</h1>
+                    <p>Review and prepare liquidation details for released cash advances, including expense records and supporting documents.</p>
+                </div>
+                <div class="request-detail-grid">
+                    <section class="request-info-panel"><h2>Liquidation details</h2><ul><li>Cash advance reference number</li><li>Requestor and department</li><li>Approved cash advance amount</li><li>Actual expenses and returned cash, if applicable</li><li>Liquidation date and remarks</li></ul></section>
+                    <section class="request-info-panel"><h2>Supporting documents</h2><ul><li>Liquidation report / expense breakdown</li><li>Official receipts and invoices</li><li>Proof of returned unused cash, if applicable</li><li>Required signatures and hard-copy originals</li></ul></section>
+                </div>
+                <div class="request-preview-warning">Frontend preview only. Cash advance records, liquidation submission, Finance review and Google Sheets saving are not yet connected.</div>
+            </section>
+        </div>
+
         <!-- CASH ADVANCE REQUEST -->
         <div id="cashAdvanceRequest" class="page">
             <section class="request-detail-page">
@@ -4099,7 +4116,7 @@ document.addEventListener(
 </script>
 
 <script src="js/productivity-cup-presentation.js?v=20261118-present01"></script>
-<script src="js/sidebar-navigation.js?v=20261124-05"></script>
+<script src="js/sidebar-navigation.js?v=20261124-06"></script>
 
 </body>
 
