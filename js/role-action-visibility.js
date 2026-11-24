@@ -132,40 +132,18 @@
         });
     }
 
-    function applySidebarVisibility(role) {
-        const pageToMenuKey = {
-            fleetAnalytics: "fleetAnalytics",
-            fleetDataEntry: "fleetDataEntry",
-            revolvingFund: "revolvingFund",
-            plantMonitoring: "plantMonitoring"
-        };
-
+    function applySidebarVisibility() {
+        // Navigation visibility is not an authorization boundary.
+        // Keep all department submenu items visible for every role.
         document.querySelectorAll(".sidebar .menu .menu-btn").forEach(function (button) {
-            const action = button.getAttribute("onclick") || "";
-            const match = action.match(/showPage\s*\(\s*['"]([^'"]+)['"]/i);
-            const page = match ? match[1] : "";
-            const menuKey = button.getAttribute("data-role-module") === "revolving-fund"
-                ? "revolvingFund"
-                : pageToMenuKey[page];
-
-            if (!menuKey) return;
-
-            const visible = roleMatches(ROLE_MENU_ACCESS[menuKey] || [], role);
-            if (visible) {
-                // Remove any old forced hide so the normal sidebar CSS controls layout.
+            if (button.hasAttribute("data-role-menu-hidden")) {
                 button.style.removeProperty("display");
-                button.removeAttribute("aria-hidden");
                 button.removeAttribute("data-role-menu-hidden");
-            } else {
-                // Sidebar CSS uses display:flex !important, so hide with important too.
-                button.style.setProperty("display", "none", "important");
-                button.setAttribute("aria-hidden", "true");
-                button.setAttribute("data-role-menu-hidden", "true");
-                button.classList.remove("active");
             }
+            button.removeAttribute("aria-hidden");
         });
 
-        // JO Register is visible to all five roles; only its action buttons are role-restricted.
+        // JO Register remains visible to all roles; action permissions are handled separately.
         document.querySelectorAll("[data-jo-register-menu]").forEach(function (button) {
             button.style.removeProperty("display");
             button.removeAttribute("aria-hidden");
@@ -184,7 +162,7 @@
         const role = currentRole();
         if (!role) return;
 
-        applySidebarVisibility(role);
+        applySidebarVisibility();
         ROOTS.forEach(function (entry) {
             document.querySelectorAll(entry.selector).forEach(function (root) {
                 applyToRoot(root, entry.section, role);
