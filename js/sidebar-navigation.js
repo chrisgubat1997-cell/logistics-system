@@ -242,6 +242,10 @@
                 return byPage[page];
             }).filter(Boolean);
 
+            if (definition.key === "production" && !byPage.plantMonitoring) {
+                byPage.plantMonitoring = createMenuButton("plantMonitoring", LABELS.plantMonitoring, "plantMonitoring");
+            }
+
             if (definition.key === "request-center") {
                 ["requestCenter", "paymentRequest", "cashAdvanceRequest", "revolvingFundRequest"].forEach(function (page) {
                     if (!byPage[page]) {
