@@ -283,6 +283,9 @@ case "deleteFleetRecord":
     case "savePlantItemProgress":
       return savePlantItemProgress(payload);
 
+    case "savePlantItemsProgress":
+      return savePlantItemsProgress(payload);
+
     case "markProductionNotificationsRead":
       return markProductionNotificationsRead(payload);
 
