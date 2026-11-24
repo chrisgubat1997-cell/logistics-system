@@ -5235,8 +5235,7 @@ function renderCustomerTable() {
                     return match ? Number(match[1]) : 0;
                 }
                 return customerRecency(b) - customerRecency(a);
-            })
-            .slice(0, 5);
+            });
 
 
     if (!filteredCustomers.length) {
