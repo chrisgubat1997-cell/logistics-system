@@ -3424,6 +3424,14 @@ async function loadPlantMonitoringModule() {
     }
 }
 
+/* Sales > Customer shortcut: open the existing Customer Master section. */
+async function openSalesCustomerList(button) {
+    showPage('sales', button);
+    await loadSalesOrderModule();
+    const target = document.querySelector('#salesModule .customer-table-wrapper') || document.getElementById('customerTable');
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 /* =========================================================
    USER ACCOUNT
 ========================================================= */
