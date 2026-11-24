@@ -239,6 +239,8 @@
         });
 
         GROUPS.forEach(function (definition) {
+            // Create the Plant Monitoring entry before collecting Production children.
+
             const children = definition.pages.map(function (page) {
                 return byPage[page];
             }).filter(Boolean);
