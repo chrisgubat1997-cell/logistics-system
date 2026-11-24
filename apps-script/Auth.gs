@@ -164,6 +164,7 @@ function createAccount(payload) {
 
     "SALES",
     "LOGISTICS",
+    "ACCOUNTING",
     "FINANCE",
     "PAYMENT",
     "PRODUCTION"
