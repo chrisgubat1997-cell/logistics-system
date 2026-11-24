@@ -1,6 +1,6 @@
 /* =========================================================
    LOGIS-TECH — GROUPED SIDEBAR NAVIGATION
-   Version: 20261124-02
+   Version: 20261124-03
    Frontend only. No API or database writes.
 ========================================================= */
 (function () {
@@ -38,7 +38,7 @@
             key: "request-center",
             label: "Request Center",
             icon: "requestCenter",
-            pages: ["requestCenter", "paymentRequest", "cashAdvanceRequest", "revolvingFundRequest"]
+            pages: ["requestCenter", "paymentRequest", "liquidation"]
         }
     ];
 
@@ -81,9 +81,8 @@
         invoice: "Invoice",
         payment: "Payment",
         requestCenter: "Overview",
-        paymentRequest: "Payment Request (RFP)",
-        cashAdvanceRequest: "Cash Advance",
-        revolvingFundRequest: "Revolving Fund Request",
+        paymentRequest: "Request for Payment",
+        liquidation: "Liquidation",
         revolvingFund: "Revolving Fund",
         reports: "Reports",
         settings: "Settings",
@@ -260,7 +259,7 @@
             }
 
             if (definition.key === "request-center") {
-                ["requestCenter", "paymentRequest", "cashAdvanceRequest", "revolvingFundRequest"].forEach(function (page) {
+                ["requestCenter", "paymentRequest", "liquidation"].forEach(function (page) {
                     if (!byPage[page]) {
                         byPage[page] = createMenuButton(page, LABELS[page], page);
                         byPage[page].dataset.requestPage = page;
