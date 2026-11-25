@@ -96,7 +96,7 @@ function helpFeedbackGet(payload) {
       const r=rowToObject(headers,row);
       if(!admin && String(r.SUBMITTED_BY_USER_ID)!==String(actor.userId))return;
       records.push({
-        id:String(r.FEEDBACK_ID),referenceNo:String(r.REFERENCE_NO),company:String(r.COMPANY),
+        id:String(r.FEEDBACK_ID),referenceNo:String(r.REFERENCE_NO),company:String(r.COMPANY),userId:String(r.SUBMITTED_BY_USER_ID),
         submitter:String(r.SUBMITTED_BY_NAME),username:String(r.SUBMITTED_BY_USERNAME),
         role:String(r.SUBMITTED_BY_ROLE),department:String(r.DEPARTMENT),type:String(r.FEEDBACK_TYPE),
         module:String(r.MODULE),subject:String(r.SUBJECT),description:String(r.DESCRIPTION),
@@ -107,7 +107,7 @@ function helpFeedbackGet(payload) {
     });
   });
   records.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
-  return {success:true,records:records,isAdmin:admin};
+  return {success:true,records:records,isAdmin:admin,actorUserId:actor.userId};
 }
 
 function helpFeedbackUpdate(payload) {
