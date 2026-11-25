@@ -29,3 +29,34 @@ ready(function(){
 });
 window.LogisTechRequestCenterAPI={api:api,account:account,token:token,filePayload:filePayload};
 })();
+
+/* Personal Request Center workspace: records are returned only for the authenticated account. */
+(function(){
+ "use strict";
+ function ready(fn){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",fn);else fn();}
+ ready(async function(){
+  const api=window.LogisTechRequestCenterAPI&&window.LogisTechRequestCenterAPI.api;
+  const requestList=document.getElementById("myRequestList"),caList=document.getElementById("myCaList");
+  if(!api||!requestList||!caList)return;
+  const money=n=>"₱"+(Number(n)||0).toLocaleString("en-PH",{minimumFractionDigits:2,maximumFractionDigits:2});
+  const date=v=>{if(!v)return "—";const d=new Date(v);return isNaN(d.getTime())?String(v):d.toLocaleDateString("en-PH");};
+  function card(title,subtitle,status){const el=document.createElement("div");el.className="request-personal-record";const h=document.createElement("strong");h.textContent=title;const p=document.createElement("p");p.textContent=subtitle;const b=document.createElement("span");b.textContent=status||"SUBMITTED";el.append(h,p,b);return el;}
+  async function load(){
+   try{
+    const [mine,ca]=await Promise.all([api("requestCenterGetMyRequests"),api("requestCenterGetCashAdvances")]);
+    const records=mine.records||[],advances=ca.advances||[];
+    document.getElementById("myRequestCount").textContent=records.length;
+    requestList.innerHTML="";
+    if(!records.length){requestList.innerHTML='<span class="request-empty-icon">▤</span><strong>No submitted requests yet</strong><p>Your requests will appear here after submission.</p>';}
+    else records.forEach(r=>requestList.appendChild(card(r.REQUEST_NO||r.LIQUIDATION_NO||"Request",date(r.REQUEST_DATE||r.LIQUIDATION_DATE)+" · "+(r.REQUEST_TYPE||"Liquidation")+" · "+money(r.AMOUNT||r.TOTAL_EXPENSES),r.STATUS)));
+    document.getElementById("myCaCount").textContent=advances.length;
+    document.getElementById("myCaOutstanding").textContent=money(advances.reduce((s,x)=>s+Number(x.approvedAmount||0),0));
+    document.getElementById("myCaBalance").textContent=money(advances.reduce((s,x)=>s+Number(x.remainingBalance||0),0));
+    caList.innerHTML="";
+    if(!advances.length){caList.innerHTML="<strong>No cash advance records</strong><p>Only approved and released cash advances belonging to your account appear here.</p>";}
+    else advances.forEach(x=>caList.appendChild(card(x.requestNo||"Cash Advance",money(x.remainingBalance)+" remaining · "+(x.purpose||""),"FOR LIQUIDATION")));
+   }catch(err){requestList.innerHTML="";const p=document.createElement("p");p.textContent=err.message;requestList.appendChild(p);}
+  }
+  load();document.addEventListener("logistech:request-center-updated",load);document.addEventListener("logistech:data-updated",load);
+ });
+})();
