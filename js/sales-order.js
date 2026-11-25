@@ -5915,9 +5915,48 @@ function renderCustomerTableError(
 }  
 /* Open the existing customer creation form from Sales > Customer. */
 async function openCustomerFromDirectory() {
+    console.log("[Customer] + New Customer clicked.");
+
     // Keep the Customer directory visible behind the centered create modal.
     window.__returnToCustomerDirectory = true;
-    await openCustomerModule();
+
+    // Fail-safe: create the mount point if the dynamically loaded Sales Order
+    // page did not provide it for any reason.
+    let customerArea = document.getElementById("customerArea");
+    if (!customerArea) {
+        customerArea = document.createElement("section");
+        customerArea.id = "customerArea";
+        document.body.appendChild(customerArea);
+        console.warn("[Customer] customerArea was missing; created fallback mount.");
+    }
+
+    // Show the overlay immediately so the click always produces visible feedback,
+    // even while the existing Customer HTML and JavaScript are loading.
+    Object.assign(customerArea.style, {
+        position: "fixed",
+        inset: "0",
+        zIndex: "2147483000",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100vw",
+        height: "100vh",
+        padding: "24px",
+        boxSizing: "border-box",
+        overflow: "auto",
+        background: "rgba(3, 16, 34, .68)",
+        color: "#ffffff"
+    });
+    customerArea.classList.add("customer-area-modal");
+    customerArea.innerHTML = '<div style="background:#fff;color:#17324f;padding:28px 34px;border-radius:14px;box-shadow:0 20px 70px rgba(0,0,0,.35);font:600 15px Arial,sans-serif">Opening Customer Form...</div>';
+
+    try {
+        await openCustomerModule();
+    } catch (error) {
+        console.error("[Customer] Unable to open form:", error);
+        customerArea.style.display = "flex";
+        customerArea.innerHTML = '<div style="background:#fff;color:#991b1b;padding:28px;border-radius:14px;max-width:600px"><h2>Unable to Open Customer Form</h2><p>' + escapeHTML(error && error.message ? error.message : String(error)) + '</p><button type="button" onclick="closeCustomerFromSalesOrder()">Close</button></div>';
+    }
 }
 
 /* =====================================================
