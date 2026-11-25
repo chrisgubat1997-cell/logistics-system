@@ -127,7 +127,7 @@
     <link rel="stylesheet" href="css/brand-theme.css?v=20261109-about-typography02">
     <link rel="stylesheet" href="css/revolving-fund.css?v=20261109-font-small01">
     <link rel="stylesheet" href="css/messages.css?v=20261109-sendstatus01">
-    <link rel="stylesheet" href="css/request-center.css?v=20261124-workspace01">
+    <link rel="stylesheet" href="css/request-center.css?v=20261125-live01">
     <link rel="stylesheet" href="css/about.css?v=20261110-about-logo01">
     <link rel="stylesheet" href="css/jo-register.css?v=20261109-font-small01">
     <link rel="stylesheet" href="css/plant-monitoring.css?v=20261124-05">
@@ -917,7 +917,7 @@
                             <div class="request-empty-state request-empty-compact" id="myCaList"><strong>No cash advance records</strong><p>Only approved and released cash advances belonging to your account appear here.</p></div>
                         </article>
                     </div>
-                    <div class="request-display-note">Display preview: these are empty personal lists. Live request records, account-level filtering and accounting access controls will be connected to Apps Script later.</div>
+                    <div class="request-display-note">Live personal workspace: your submitted requests and approved, released cash advances are loaded from your company database.</div>
                 </section>
                 <div class="request-type-grid"><article class="request-type-card request-card-payment">
                         <div class="request-card-icon"><span aria-hidden="true">₱</span></div>
@@ -939,7 +939,7 @@
                     </article></div>
                 <div class="request-center-note" role="status">
                     <span class="request-note-dot" aria-hidden="true"></span>
-                    <span>Preview only: forms, approvals, attachments, receiving logbook and Google Sheets saving are not connected yet.</span>
+                    <span>Request submissions and supporting-file uploads are saved to the company database and Request Center Drive folder.</span>
                 </div>
                 </div>
                 <div id="requestAccountingView" class="request-workspace-view" hidden>
@@ -972,7 +972,7 @@
                         </div>
                         <div class="accounting-monitoring-footer"><span id="acctRequestResultCount">0 records</span><span>Visible only to Accounting-authorized roles in this interface.</span></div>
                     </div>
-                    <p class="accounting-monitoring-note">Access note: this screen is role-gated in the interface. Actual record confidentiality must also be enforced by the Apps Script API before live company data is connected.</p>
+                    <p class="accounting-monitoring-note">Access is enforced by the Apps Script API. Only ADMIN and ACCOUNTING roles can retrieve and update Accounting monitoring records.</p>
                 </section>
                 </div>
             </section>
@@ -1087,7 +1087,7 @@
                         <p id="liqCalculationNote">Select a cash advance and enter expenses to calculate the liquidation balance.</p>
                     </aside>
                     <div class="liquidation-submit-row"><div id="liqFormMessage" role="status" aria-live="polite"></div><button type="submit" class="liquidation-submit" id="liqSubmit" disabled>Submit Liquidation <span>→</span></button></div>
-                    <p class="liquidation-preview-note">Interface preview: records are read from the available local account cache when present. Submission, attachment upload and Finance review still require Apps Script integration.</p>
+                    <p class="liquidation-preview-note">Live records: only approved and released cash advances assigned to your account are available for liquidation.</p>
                 </form>
             </section>
         </div>
