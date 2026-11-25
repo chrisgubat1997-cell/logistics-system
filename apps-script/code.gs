@@ -158,7 +158,7 @@ function routeRequest(
   // Login, ping, and maintenance control remain available.
   const maintenanceExemptActions = ["ping", "login", "getSystemMaintenanceStatus", "setSystemMaintenanceMode"];
   if (maintenanceExemptActions.indexOf(String(action)) === -1 && isSystemMaintenanceEnabled_()) {
-    const maintenanceAccount = authorizeRole_(payload, ["ADMIN", "SALES", "LOGISTICS", "FINANCE", "PAYMENT", "PRODUCTION"]);
+    const maintenanceAccount = authorizeRole_(payload, ["ADMIN", "SALES", "LOGISTICS", "FINANCE", "PAYMENT", "PRODUCTION", "ACCOUNTING"]);
     if (maintenanceAccount.role !== "ADMIN") {
       return {
         success: false,
