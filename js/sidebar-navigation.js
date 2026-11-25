@@ -87,7 +87,8 @@
         reports: "Reports",
         settings: "Settings",
         productivityCup: "Productivity Cup",
-        about: "About LOGIS-TECH"
+        about: "About LOGIS-TECH",
+        helpFeedback: "Help & Feedback"
     };
 
     function svgIcon(name) {
@@ -271,7 +272,7 @@
             if (children.length) fragment.appendChild(makeGroup(definition, children));
         });
 
-        ["reports", "settings", "productivityCup", "about"].forEach(function (page) {
+        ["reports", "settings", "productivityCup", "about", "helpFeedback"].forEach(function (page) {
             if (byPage[page]) fragment.appendChild(byPage[page]);
         });
 
