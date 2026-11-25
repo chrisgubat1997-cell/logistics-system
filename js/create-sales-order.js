@@ -222,6 +222,9 @@ async function initializeCreateSO() {
 
 }
 
+// Expose initializer for the in-app modal, loaded after DOMContentLoaded.
+window.initializeCreateSO = initializeCreateSO;
+
 
 /* =========================================================
    LOAD CUSTOMERS
@@ -2563,6 +2566,10 @@ async function saveSO() {
         false;
 
 
+    if (window.__LOGISTECH_CREATE_SO_MODAL__ && typeof window.closeCreateSalesOrderModal === "function") {
+        window.closeCreateSalesOrderModal();
+        return;
+    }
     window.location.href =
         "../index.html";
 
@@ -2735,6 +2742,10 @@ async function closeCreateSO() {
 
     if (!confirmed) return;
 
+    if (window.__LOGISTECH_CREATE_SO_MODAL__ && typeof window.closeCreateSalesOrderModal === "function") {
+        window.closeCreateSalesOrderModal();
+        return;
+    }
     window.location.href = "../index.html";
 
 }
