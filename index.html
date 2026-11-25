@@ -59,7 +59,7 @@
 
     <link
         rel="stylesheet"
-        href="css/sales-order.css?v=20261125-customer-directory04"
+        href="css/sales-order.css?v=20261125-customer-directory05"
     >
 
 
@@ -3613,6 +3613,57 @@ async function openSalesCustomerList(button) {
     }
 
     showPage('customer', button);
+
+    // Guarantee the New Customer action exists in the live Customer page.
+    // This is intentionally created after the directory card is mounted so
+    // other page initializers cannot leave the directory with table-only UI.
+    const customerHeader = customerSection.querySelector('.customer-table-header');
+    const customerControls = customerSection.querySelector('.customer-table-controls');
+    if (customerHeader && customerControls) {
+        let createButton = customerControls.querySelector('.customer-new-button');
+        if (!createButton) {
+            createButton = document.createElement('button');
+            createButton.type = 'button';
+            createButton.className = 'customer-new-button';
+            createButton.textContent = '+ New Customer';
+            customerControls.appendChild(createButton);
+        }
+        createButton.style.setProperty('display', 'inline-flex', 'important');
+        createButton.style.setProperty('visibility', 'visible', 'important');
+        createButton.style.setProperty('opacity', '1', 'important');
+        createButton.style.setProperty('align-items', 'center', 'important');
+        createButton.style.setProperty('justify-content', 'center', 'important');
+        createButton.style.setProperty('min-height', '40px', 'important');
+        createButton.style.setProperty('padding', '0 16px', 'important');
+        createButton.style.setProperty('border', '1px solid #073b78', 'important');
+        createButton.style.setProperty('border-radius', '9px', 'important');
+        createButton.style.setProperty('background', '#073b78', 'important');
+        createButton.style.setProperty('color', '#ffffff', 'important');
+        createButton.style.setProperty('font-weight', '700', 'important');
+        createButton.style.setProperty('cursor', 'pointer', 'important');
+        createButton.style.setProperty('white-space', 'nowrap', 'important');
+        createButton.onclick = function () {
+            if (typeof window.openCustomerFromDirectory === 'function') {
+                window.openCustomerFromDirectory();
+            } else {
+                console.error('New Customer form handler is not available.');
+            }
+        };
+    }
+
+    // Make the table occupy the complete Customer content width.
+    const customerTable = customerSection.querySelector('.customer-table');
+    const customerWrapper = customerSection.querySelector('.customer-table-wrapper');
+    if (customerWrapper) {
+        customerWrapper.style.setProperty('width', '100%', 'important');
+        customerWrapper.style.setProperty('max-width', 'none', 'important');
+        customerWrapper.style.setProperty('display', 'block', 'important');
+    }
+    if (customerTable) {
+        customerTable.style.setProperty('width', '100%', 'important');
+        customerTable.style.setProperty('min-width', '100%', 'important');
+        customerTable.style.setProperty('table-layout', 'fixed', 'important');
+    }
 
     // Always call the exported loader so the list refreshes on each visit.
     if (typeof window.loadCustomerTable === 'function') {
