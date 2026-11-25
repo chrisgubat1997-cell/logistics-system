@@ -11,7 +11,7 @@
 ========================================================= */
 
 const AUTH_SPREADSHEET_ID =
-  "13qyegL8DOnetIQRSG245HwzcpquKVqk-sckG_k3Q1t4";
+  "1pddE_22DUbvOv25gA87MTHXcxgai0c_l1XabHJg-QdQ";
 
 const USERS_SHEET_NAME =
   "USERS";

@@ -1,7 +1,7 @@
 /* LOGIS-TECH SYSTEM — Maintenance Mode client control */
 (function () {
   "use strict";
-  const API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
   let lastEnabled = false, pollHandle = null, controlsBound = false;
   function getAccount() {
     try { const raw = JSON.parse(localStorage.getItem("logitechUser") || "{}"); return raw.account || raw.user || raw; }

@@ -5,7 +5,7 @@
 (function () {
   "use strict";
 
-  const API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
   const POLL_MS = 15000;
   const SAFE_CACHE_KEYS = [
     "logitechSOListCache",
