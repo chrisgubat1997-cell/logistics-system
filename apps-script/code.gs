@@ -418,6 +418,29 @@ case "createPayment":
 
 
     /* =====================================================
+       REQUEST CENTER
+    ===================================================== */
+
+    case "requestCenterSubmitRfp":
+      return requestCenterSubmitRfp(payload);
+
+    case "requestCenterGetMyRequests":
+      return requestCenterGetMyRequests(payload);
+
+    case "requestCenterGetCashAdvances":
+      return requestCenterGetCashAdvances(payload);
+
+    case "requestCenterSubmitLiquidation":
+      return requestCenterSubmitLiquidation(payload);
+
+    case "requestCenterGetAccountingRequests":
+      return requestCenterGetAccountingRequests(payload);
+
+    case "requestCenterUpdateStatus":
+      return requestCenterUpdateStatus(payload);
+
+
+    /* =====================================================
        UNKNOWN ACTION
     ===================================================== */
 
