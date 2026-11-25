@@ -230,7 +230,7 @@ function requestCenterSubmitLiquidation(payload) {
 }
 
 function requestCenterGetAccountingRequests(payload) {
-  const actor = rcActor_(payload, ["ADMIN","ACCOUNTING"]);
+  const actor = rcActor_(payload, ["ACCOUNTING"]);
   const companies = actor.companyAccess.length ? actor.companyAccess : [actor.company];
   let records = [];
   companies.forEach(company => {
