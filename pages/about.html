@@ -1,61 +1,80 @@
 <main class="about-page">
   <section class="about-hero">
-    <div class="about-hero-brand">
-      <div class="about-logo-wrap">
-        <img src="assets/logo.png" alt="LOGIS-TECH SYSTEM logo" class="about-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
-        <span class="about-logo-fallback" aria-hidden="true">LT</span>
-      </div>
-      <div class="about-hero-copy">
-        <span class="about-eyebrow">SYSTEM OVERVIEW</span>
-        <h1>LOGIS-TECH SYSTEM</h1>
-        <p class="about-tagline">Connected operations. Clearer workflows.</p>
-        <p class="about-intro">A unified workspace connecting Sales Orders, Job Orders, Plant Monitoring, delivery operations, fleet activities, payment requests and liquidation workflows across Greenmetal Electric Manufacturing Corporation and Greenlight Power Inc.</p>
-        <div class="about-version-row">
-          <span class="about-version-pill">Build 2026.11.24</span>
-          <span class="about-status"><i></i> Pre-release</span>
+    <div class="about-hero-glow" aria-hidden="true"></div>
+    <div class="about-hero-top">
+      <div class="about-brand">
+        <div class="about-logo-wrap">
+          <img src="assets/logo.png" alt="LOGIS-TECH SYSTEM" class="about-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'">
+          <span class="about-logo-fallback" aria-hidden="true">LT</span>
         </div>
+        <span class="about-brand-label">GREENMETAL • GREENLIGHT</span>
+      </div>
+      <span class="about-status"><i></i> SYSTEM OVERVIEW</span>
+    </div>
+    <div class="about-hero-copy">
+      <span class="about-eyebrow">ONE WORKSPACE. CONNECTED OPERATIONS.</span>
+      <h1>LOGIS-TECH <span>SYSTEM</span></h1>
+      <p class="about-tagline">Connected operations. Clearer workflows. Better visibility.</p>
+      <p class="about-intro">A centralized digital workspace that brings together sales, production, logistics, fleet and finance workflows—helping teams coordinate daily operations with clearer information and organized records.</p>
+      <div class="about-hero-meta">
+        <span class="about-version-pill">BUILD 2026.11.25</span>
+        <span class="about-release-pill"><i></i> Pre-release</span>
       </div>
     </div>
+    <div class="about-hero-foot"><span>OPERATIONS PLATFORM</span><span>GREENMETAL ELECTRIC MANUFACTURING CORPORATION</span></div>
   </section>
 
-  <section class="about-section">
+  <section class="about-section about-modules">
     <div class="about-section-heading">
-      <span class="about-section-kicker">MODULES</span>
-      <h2>Operations in one workspace</h2>
-      <p>Tools organized to support connected day-to-day work.</p>
+      <div><span class="about-section-kicker">01 / WORKSPACE</span><h2>Everything working together.</h2><p>Core areas designed to support connected day-to-day operations.</p></div>
+      <span class="about-heading-mark" aria-hidden="true">✳</span>
     </div>
     <div class="about-feature-grid">
-      <article class="about-feature-card"><span class="about-feature-icon">▦</span><div><h3>Sales & Production</h3><p>Sales Orders, JO Register, Production posting and item-level Plant Monitoring.</p></div></article>
-      <article class="about-feature-card"><span class="about-feature-icon">↗</span><div><h3>Delivery Operations</h3><p>Delivery documentation and tracking.</p></div></article>
-      <article class="about-feature-card"><span class="about-feature-icon">◉</span><div><h3>Fleet & Analytics</h3><p>Fleet records, trips, fuel and delivery analytics.</p></div></article>
-      <article class="about-feature-card"><span class="about-feature-icon">₱</span><div><h3>Finance</h3><p>Invoices, payment processing and Accounting review of Request for Payment and liquidation.</p></div></article>
-      <article class="about-feature-card"><span class="about-feature-icon">▤</span><div><h3>Reports</h3><p>Management summaries for Sales, Production, Delivery, Finance and Fleet.</p></div></article>
-      <article class="about-feature-card"><span class="about-feature-icon">⇄</span><div><h3>Request Center</h3><p>Request for Payment and Liquidation workflows, with personal tracking and Accounting monitoring.</p></div></article>
-      <article class="about-feature-card"><span class="about-feature-icon">✉</span><div><h3>Internal Messaging</h3><p>Communication among system users.</p></div></article>
+      <article class="about-feature-card"><span class="about-feature-icon">01</span><div><h3>Sales & Customer Records</h3><p>Sales Orders, customer information and order documentation in one organized workflow.</p></div><span class="about-card-arrow">↗</span></article>
+      <article class="about-feature-card"><span class="about-feature-icon">02</span><div><h3>Production Coordination</h3><p>JO Register, production posting and Plant Monitoring for job progress visibility.</p></div><span class="about-card-arrow">↗</span></article>
+      <article class="about-feature-card"><span class="about-feature-icon">03</span><div><h3>Delivery Operations</h3><p>Delivery Receipt documentation and operational records supporting dispatch activities.</p></div><span class="about-card-arrow">↗</span></article>
+      <article class="about-feature-card"><span class="about-feature-icon">04</span><div><h3>Fleet & Analytics</h3><p>Vehicle, trip and fuel records with fleet and delivery performance views.</p></div><span class="about-card-arrow">↗</span></article>
+      <article class="about-feature-card"><span class="about-feature-icon">05</span><div><h3>Finance & Accounting</h3><p>Invoice and payment workflows, plus Accounting review and monitoring.</p></div><span class="about-card-arrow">↗</span></article>
+      <article class="about-feature-card"><span class="about-feature-icon">06</span><div><h3>Request Center</h3><p>Centralized Request for Payment and Liquidation workflows with status tracking.</p></div><span class="about-card-arrow">↗</span></article>
+      <article class="about-feature-card"><span class="about-feature-icon">07</span><div><h3>Reports & Communication</h3><p>Operational summaries, internal messaging, system settings and user support.</p></div><span class="about-card-arrow">↗</span></article>
     </div>
   </section>
 
-  <section class="about-info-grid">
-    <article class="about-info-card">
-      <div class="about-info-heading"><span>⌘</span><div><h2>System Architecture</h2><p>Platform and services</p></div></div>
-      <dl class="about-details">
-        <div><dt>Frontend</dt><dd>GitHub Pages</dd></div>
-        <div><dt>Backend</dt><dd>Google Apps Script</dd></div>
-        <div><dt>Database</dt><dd>Google Sheets</dd></div>
-        <div><dt>File storage</dt><dd>Google Drive</dd></div>
-      </dl>
+  <section class="about-architecture">
+    <div class="about-section-heading">
+      <div><span class="about-section-kicker">02 / TECHNOLOGY</span><h2>Simple. Connected. Cloud-based.</h2><p>The system uses a lightweight frontend connected to Google services.</p></div>
+    </div>
+    <div class="about-stack">
+      <article class="about-stack-card"><span class="about-stack-icon">⌘</span><div><span class="about-stack-label">USER INTERFACE</span><h3>GitHub Pages</h3><p>System interface and frontend hosting</p></div></article>
+      <span class="about-stack-link" aria-hidden="true">↔</span>
+      <article class="about-stack-card"><span class="about-stack-icon">⚙</span><div><span class="about-stack-label">APPLICATION SERVICES</span><h3>Google Apps Script</h3><p>Backend functions and data processing</p></div></article>
+      <span class="about-stack-link" aria-hidden="true">↔</span>
+      <article class="about-stack-card"><span class="about-stack-icon">▤</span><div><span class="about-stack-label">DATA & DOCUMENTS</span><h3>Google Sheets + Drive</h3><p>Operational records and file storage</p></div></article>
+    </div>
+  </section>
+
+  <section class="about-bottom-grid">
+    <article class="about-info-card about-purpose-card">
+      <span class="about-section-kicker">03 / OUR DIRECTION</span>
+      <h2>Built around the way teams work.</h2>
+      <p>LOGIS-TECH aims to reduce scattered records, make information easier to follow and provide a more consistent workflow across departments.</p>
+      <div class="about-principles">
+        <span><i>✓</i> Organized information</span>
+        <span><i>✓</i> Connected departments</span>
+        <span><i>✓</i> Clear process visibility</span>
+      </div>
     </article>
-    <article class="about-info-card">
-      <div class="about-info-heading"><span>✦</span><div><h2>Release Information</h2><p>System identification</p></div></div>
+    <article class="about-info-card about-release-card">
+      <span class="about-section-kicker">04 / SYSTEM DETAILS</span>
+      <h2>Release information</h2>
       <dl class="about-details">
         <div><dt>System</dt><dd>LOGIS-TECH SYSTEM</dd></div>
-        <div><dt>Build</dt><dd>2026.11.24</dd></div>
-        <div><dt>Release status</dt><dd><span class="about-release-status">Pre-release</span></dd></div>
-        <div><dt>Official release</dt><dd>Not yet released</dd></div>
+        <div><dt>Build</dt><dd>2026.11.25</dd></div>
+        <div><dt>Status</dt><dd><span class="about-release-status">Pre-release</span></dd></div>
         <div><dt>Developer</dt><dd>Chris Gubat</dd></div>
         <div><dt>Organization</dt><dd>Greenmetal Electric Manufacturing Corporation</dd></div>
       </dl>
     </article>
   </section>
-  <div class="about-copyright">© 2026 LOGIS-TECH SYSTEM</div>
+  <footer class="about-footer"><span>LOGIS-TECH SYSTEM</span><span>© 2026 • INTERNAL OPERATIONS PLATFORM</span></footer>
 </main>
