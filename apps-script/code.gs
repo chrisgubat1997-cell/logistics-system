@@ -149,7 +149,7 @@ function routeRequest(
 
   // Resolve and validate company from the authenticated central USERS record.
   // Only public authentication/bootstrap actions bypass company context.
-  const publicActions = ["ping", "login"];
+  const publicActions = ["ping", "login", "getSystemMaintenanceStatus"];
   if (publicActions.indexOf(String(action)) === -1) {
     establishCompanyContext_(payload);
   }
