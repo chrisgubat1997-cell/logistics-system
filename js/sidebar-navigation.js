@@ -61,7 +61,6 @@
         revolvingFundRequest: '<path d="M4 7h16v13H4z"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M8 13h8M12 10v6"/>',
         reports: '<path d="M4 19V5M4 19h17"/><path d="m7 15 3-4 3 2 5-7"/>',
         settings: '<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.5.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.5-.9l-1.7.6-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.8l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.5-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.5.9l1.7-.6 1.4 2.4-1.4 1.1a7 7 0 0 1 0 1.8z"/>',
-        productivityCup: '<path d="M8 4h8v4a4 4 0 0 1-8 0z"/><path d="M8 6H5v2a4 4 0 0 0 4 4M16 6h3v2a4 4 0 0 1-4 4M12 12v5M8 21h8M10 17h4"/>',
         about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
         helpFeedback: '<path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/>',
         requestCenter: '<path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/><path d="m15 16 2 2 4-4"/>',
@@ -87,7 +86,6 @@
         revolvingFund: "Revolving Fund",
         reports: "Reports",
         settings: "Settings",
-        productivityCup: "Productivity Cup",
         about: "About LOGIS-TECH",
         helpFeedback: "Help & Feedback"
     };
@@ -273,7 +271,7 @@
             if (children.length) fragment.appendChild(makeGroup(definition, children));
         });
 
-        ["reports", "settings", "productivityCup", "about", "helpFeedback"].forEach(function (page) {
+        ["reports", "settings", "about", "helpFeedback"].forEach(function (page) {
             if (!byPage[page] && LABELS[page]) {
                 byPage[page] = createMenuButton(page, LABELS[page], page);
             }
