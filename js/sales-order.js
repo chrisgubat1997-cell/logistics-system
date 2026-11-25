@@ -5911,6 +5911,14 @@ function renderCustomerTableError(
         </tr>    
     `;
 }  
+/* Open the existing customer creation form from Sales > Customer. */
+async function openCustomerFromDirectory() {
+    window.__returnToCustomerDirectory = true;
+    const customerButton = document.querySelector('[data-customer-nav="true"]');
+    showPage('sales', customerButton || null);
+    await openCustomerModule();
+}
+
 /* =====================================================
    CUSTOMER MODULE
 ===================================================== */
@@ -6553,6 +6561,12 @@ function closeCustomerFromSalesOrder() {
     }
 
     updateSOSelectionUI();
+
+    if (window.__returnToCustomerDirectory) {
+        window.__returnToCustomerDirectory = false;
+        const customerButton = document.querySelector('[data-customer-nav="true"]');
+        if (typeof openSalesCustomerList === "function") openSalesCustomerList(customerButton || null);
+    }
 }
 
 /* =====================================================
