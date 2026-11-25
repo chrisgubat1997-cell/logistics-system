@@ -4941,16 +4941,80 @@ await openSODetails(
        CREATE SALES ORDER
     ===================================================== */
 
-    function openCreateSalesOrder() {
-
+    async function openCreateSalesOrder() {
         if (!canCreateSalesOrderByRole()) {
             alert("Access denied. Only ADMIN and SALES roles can create Sales Orders.");
             return;
         }
+        const salesPage = document.getElementById("sales");
+        if (!salesPage) { console.error("[Create SO] Sales content page not found."); return; }
 
-        window.location.href =
-            CREATE_SALES_ORDER_PAGE;
+        let overlay = document.getElementById("createSalesOrderModal");
+        if (!overlay) {
+            overlay = document.createElement("section");
+            overlay.id = "createSalesOrderModal";
+            overlay.className = "create-so-modal-overlay";
+            overlay.setAttribute("role", "dialog");
+            overlay.setAttribute("aria-modal", "true");
+            overlay.setAttribute("aria-label", "Create Sales Order");
+            overlay.innerHTML = '<div class="create-so-modal-panel"><div class="create-so-modal-loading">Loading Create Sales Order form...</div></div>';
+            salesPage.appendChild(overlay);
+        } else { overlay.style.display = "flex"; }
 
+        window.__LOGISTECH_CREATE_SO_MODAL__ = true;
+        document.body.classList.add("create-so-modal-open");
+        try {
+            const panel = overlay.querySelector(".create-so-modal-panel");
+            const results = await Promise.all([
+                fetch(CREATE_SALES_ORDER_PAGE, { cache: "no-store" }),
+                fetch("css/create-sales-order.css?v=20261125-modal01", { cache: "no-store" })
+            ]);
+            const pageResponse = results[0], cssResponse = results[1];
+            if (!pageResponse.ok) throw new Error("Unable to load Create Sales Order page (HTTP " + pageResponse.status + ").");
+            if (!cssResponse.ok) throw new Error("Unable to load Create Sales Order styles (HTTP " + cssResponse.status + ").");
+            const parsed = new DOMParser().parseFromString(await pageResponse.text(), "text/html");
+            if (!parsed.body) throw new Error("Invalid Create Sales Order page.");
+
+            let style = document.getElementById("create-sales-order-modal-styles");
+            if (!style) { style = document.createElement("style"); style.id = "create-sales-order-modal-styles"; document.head.appendChild(style); }
+            let scopedCSS = await cssResponse.text();
+            scopedCSS = scopedCSS.replace(/(^|})\s*html\s*\{[^}]*\}/gi, "$1");
+            scopedCSS = scopedCSS.replace(/(^|})\s*body\s*\{[^}]*\}/gi, "$1");
+            style.textContent = scopedCSS;
+
+            panel.innerHTML = parsed.body.innerHTML.replace(/<script[\s\S]*?<\/script>/gi, "");
+            let script = document.getElementById("create-sales-order-modal-script");
+            if (!script || typeof window.initializeCreateSO !== "function") {
+                if (script) script.remove();
+                script = document.createElement("script");
+                script.id = "create-sales-order-modal-script";
+                script.src = "js/create-sales-order.js?v=20261125-modal01";
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error("Unable to load Create Sales Order JavaScript."));
+                    document.body.appendChild(script);
+                });
+            }
+            if (typeof window.initializeCreateSO !== "function") throw new Error("Create Sales Order initializer is unavailable.");
+            await window.initializeCreateSO();
+            const formScroll = panel.querySelector(".create-so-container");
+            if (formScroll) formScroll.scrollTop = 0;
+        } catch (error) {
+            console.error("[Create SO] Modal failed:", error);
+            const panel = overlay.querySelector(".create-so-modal-panel");
+            if (panel) panel.innerHTML = '<div class="create-so-modal-error"><h2>Unable to Open Create Sales Order</h2><p>' +
+                (typeof escapeHTML === "function" ? escapeHTML(error.message) : String(error.message || error)) +
+                '</p><button type="button" onclick="closeCreateSalesOrderModal()">Close</button></div>';
+        }
+    }
+
+    function closeCreateSalesOrderModal() {
+        const overlay = document.getElementById("createSalesOrderModal");
+        if (overlay) overlay.remove();
+        document.body.classList.remove("create-so-modal-open");
+        window.__LOGISTECH_CREATE_SO_MODAL__ = false;
+        const createButton = document.getElementById("createSalesOrderButton");
+        if (createButton) createButton.focus();
     }
 
 /* =========================================================
@@ -7416,6 +7480,8 @@ window.addEventListener(
 
     window.openCreateSalesOrder =
         openCreateSalesOrder;
+    window.closeCreateSalesOrderModal =
+        closeCreateSalesOrderModal;
 
     window.openCustomerModule =
         openCustomerModule;
