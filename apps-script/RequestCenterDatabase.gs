@@ -128,7 +128,11 @@ function setupRequestCenterDatabase() {
       const lastRow = sheet.getLastRow();
       const lastColumn = sheet.getLastColumn();
 
-      if (lastRow === 0 || lastColumn === 0) {
+      const currentLastRow = sheet.getLastRow();
+      const currentLastColumn = sheet.getLastColumn();
+
+      if (currentLastRow === 0 || currentLastColumn === 0) {
+        // Empty tab: safe to write the complete header row.
         sheet.getRange(1, 1, 1, expectedHeaders.length)
           .setValues([expectedHeaders]);
         sheet.setFrozenRows(1);
@@ -136,35 +140,68 @@ function setupRequestCenterDatabase() {
           .setFontWeight("bold");
         sheet.autoResizeColumns(1, expectedHeaders.length);
       } else {
+        const headerWidth = Math.max(currentLastColumn, expectedHeaders.length);
         const actualHeaders = sheet
-          .getRange(1, 1, 1, Math.max(sheet.getLastColumn(), expectedHeaders.length))
+          .getRange(1, 1, 1, headerWidth)
           .getDisplayValues()[0]
           .map(function(value) { return String(value).trim(); });
 
-        // Safe forward-only migration: add newly introduced trailing columns
-        // when all existing headers match the expected prefix.
-        const existingHeaderCount = sheet.getLastColumn();
-        const prefixMatches = actualHeaders.slice(0, Math.min(existingHeaderCount, expectedHeaders.length))
-          .every(function(header, index) {
-            return header === expectedHeaders[index];
-          });
+        const hasAnyHeaderText = actualHeaders.some(function(value) {
+          return value !== "";
+        });
 
-        if (!prefixMatches || existingHeaderCount > expectedHeaders.length) {
-          throw new Error(
-            database.company + " / " + sheetName +
-            ": existing headers do not match the expected structure. " +
-            "No existing data was changed."
-          );
-        }
+        if (!hasAnyHeaderText) {
+          // A blank header row is initialized only if rows below it contain
+          // no values. Never write over a sheet that already has records.
+          const hasExistingData = currentLastRow > 1 &&
+            sheet.getRange(2, 1, currentLastRow - 1, currentLastColumn)
+              .getDisplayValues()
+              .some(function(row) {
+                return row.some(function(value) { return String(value).trim() !== ""; });
+              });
 
-        if (existingHeaderCount < expectedHeaders.length) {
-          const newHeaders = expectedHeaders.slice(existingHeaderCount);
-          sheet.getRange(1, existingHeaderCount + 1, 1, newHeaders.length)
-            .setValues([newHeaders])
+          if (hasExistingData) {
+            throw new Error(
+              database.company + " / " + sheetName +
+              ": row 1 is blank but data exists below it. " +
+              "Please inspect this sheet and add/confirm its headers manually. " +
+              "No existing data was changed."
+            );
+          }
+
+          sheet.getRange(1, 1, 1, expectedHeaders.length)
+            .setValues([expectedHeaders]);
+          sheet.setFrozenRows(1);
+          sheet.getRange(1, 1, 1, expectedHeaders.length)
             .setFontWeight("bold");
-          sheet.autoResizeColumns(existingHeaderCount + 1, newHeaders.length);
+          sheet.autoResizeColumns(1, expectedHeaders.length);
+        } else {
+          // Safe forward-only migration: add missing trailing columns only
+          // when every existing header matches the expected prefix.
+          const existingHeaderCount = currentLastColumn;
+          const prefixMatches = actualHeaders
+            .slice(0, Math.min(existingHeaderCount, expectedHeaders.length))
+            .every(function(header, index) {
+              return header === expectedHeaders[index];
+            });
+
+          if (!prefixMatches || existingHeaderCount > expectedHeaders.length) {
+            throw new Error(
+              database.company + " / " + sheetName +
+              ": existing headers do not match the expected structure. " +
+              "No existing data was changed."
+            );
+          }
+
+          if (existingHeaderCount < expectedHeaders.length) {
+            const newHeaders = expectedHeaders.slice(existingHeaderCount);
+            sheet.getRange(1, existingHeaderCount + 1, 1, newHeaders.length)
+              .setValues([newHeaders])
+              .setFontWeight("bold");
+            sheet.autoResizeColumns(existingHeaderCount + 1, newHeaders.length);
+          }
+          sheet.setFrozenRows(1);
         }
-        sheet.setFrozenRows(1);
       }
 
       companyResult.sheets.push({
