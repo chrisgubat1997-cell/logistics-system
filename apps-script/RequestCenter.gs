@@ -128,10 +128,18 @@ function requestCenterSubmitRfp(payload) {
     RELEASED_DATE: "", CREATED_AT: now, UPDATED_AT: now
   };
   rcAppend_(ss, CONFIG.SHEETS.REQUESTS_MASTER, record);
-  const attachments = rcUploadFiles_(payload.files, company, requestNo, actor, {
-    requestId: requestId, requestNo: requestNo, documentType: "RFP_SUPPORTING_DOCUMENT"
-  });
-  return { success: true, message: "Request submitted successfully.", requestId: requestId, requestNo: requestNo, attachments: attachments };
+  let attachments = [], attachmentWarning = "";
+  try {
+    attachments = rcUploadFiles_(payload.files, company, requestNo, actor, {
+      requestId: requestId, requestNo: requestNo, documentType: "RFP_SUPPORTING_DOCUMENT"
+    });
+  } catch (uploadError) {
+    attachmentWarning = uploadError.message || String(uploadError);
+  }
+  return { success: true, message: attachmentWarning
+    ? "Request " + requestNo + " was saved, but an attachment could not be uploaded: " + attachmentWarning
+    : "Request submitted successfully.", requestId: requestId, requestNo: requestNo,
+    attachments: attachments, attachmentWarning: attachmentWarning };
 }
 
 function requestCenterGetMyRequests(payload) {
@@ -221,12 +229,20 @@ function requestCenterSubmitLiquidation(payload) {
     EXPENSE_DATE: e.date || "", RECEIPT_NO: String(e.receiptReference || ""),
     DESCRIPTION: String(e.description).trim(), AMOUNT: Number(e.amount), ATTACHMENT_NO: ""
   }));
-  const attachments = rcUploadFiles_(payload.files, company, liquidationNo, actor, {
-    requestId: request.REQUEST_ID, requestNo: request.REQUEST_NO,
-    liquidationId: liquidationId, liquidationNo: liquidationNo,
-    documentType: "LIQUIDATION_RECEIPT"
-  });
-  return { success: true, message: "Liquidation submitted successfully.", liquidationNo: liquidationNo, attachments: attachments, totalExpenses: total, cashReturned: cashReturned, excessAmount: excess };
+  let attachments = [], attachmentWarning = "";
+  try {
+    attachments = rcUploadFiles_(payload.files, company, liquidationNo, actor, {
+      requestId: request.REQUEST_ID, requestNo: request.REQUEST_NO,
+      liquidationId: liquidationId, liquidationNo: liquidationNo,
+      documentType: "LIQUIDATION_RECEIPT"
+    });
+  } catch (uploadError) {
+    attachmentWarning = uploadError.message || String(uploadError);
+  }
+  return { success: true, message: attachmentWarning
+    ? "Liquidation " + liquidationNo + " was saved, but an attachment could not be uploaded: " + attachmentWarning
+    : "Liquidation submitted successfully.", liquidationNo: liquidationNo, attachments: attachments,
+    attachmentWarning: attachmentWarning, totalExpenses: total, cashReturned: cashReturned, excessAmount: excess };
 }
 
 function requestCenterGetAccountingRequests(payload) {
