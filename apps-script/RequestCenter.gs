@@ -286,10 +286,17 @@ function requestCenterUpdateStatus(payload) {
   const rowIndex = values.findIndex((r,i) => i > 0 && String(r[numberCol]) === requestNo);
   if (rowIndex < 1) throw new Error("Record not found.");
   sh.getRange(rowIndex + 1, headers.indexOf("STATUS") + 1).setValue(status);
+  let approvedValue = Number(values[rowIndex][headers.indexOf("APPROVED_AMOUNT")] || 0);
   if (!isLiq && payload.approvedAmount !== undefined && payload.approvedAmount !== "") {
     const amount = Number(payload.approvedAmount);
     if (!isFinite(amount) || amount <= 0) throw new Error("Approved amount must be greater than zero.");
+    approvedValue = amount;
     sh.getRange(rowIndex + 1, headers.indexOf("APPROVED_AMOUNT") + 1).setValue(amount);
+  }
+  const requestTypeIndex = headers.indexOf("REQUEST_TYPE");
+  const isCashAdvance = !isLiq && requestTypeIndex >= 0 && String(values[rowIndex][requestTypeIndex]).toUpperCase() === "CASH ADVANCE (CA)";
+  if (isCashAdvance && ["APPROVED","RELEASED"].includes(status) && approvedValue <= 0) {
+    throw new Error("Enter the approved cash advance amount before approving or releasing this request.");
   }
   if (headers.indexOf("UPDATED_AT") >= 0) sh.getRange(rowIndex + 1, headers.indexOf("UPDATED_AT") + 1).setValue(new Date());
   if (isLiq) {
