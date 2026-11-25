@@ -2218,3 +2218,86 @@
     width: 100%;
     min-width: 850px;
 }
+
+
+/* =========================================================
+   SALES ORDER TABLE — CLEANER, READABLE LAYOUT
+========================================================= */
+.so-table-card {
+    min-width: 0;
+    width: 100%;
+    overflow: hidden;
+}
+.so-table-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+.so-table-title {
+    min-width: 220px;
+}
+.so-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    max-height: min(62vh, 680px);
+    scrollbar-width: thin;
+    scrollbar-color: #aeb8c7 #f1f4f8;
+}
+.so-table {
+    width: 100% !important;
+    min-width: 1120px !important;
+    table-layout: auto;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.so-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    height: 44px;
+    padding: 0 12px;
+    background: #f3f6fa;
+    color: #475467;
+    font-size: 9px;
+    letter-spacing: .45px;
+    border-bottom: 1px solid #d8e0ea;
+}
+.so-table tbody td {
+    height: 48px;
+    padding: 9px 12px;
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: #344054;
+    border-bottom: 1px solid #edf1f5;
+    white-space: nowrap;
+}
+.so-table tbody tr:nth-child(even) {
+    background: #fbfcfe;
+}
+.so-table tbody tr:hover {
+    background: #f0f6ff;
+}
+.so-table tbody tr.selected {
+    background: #e8f1ff;
+}
+.so-table th:last-child,
+.so-table td:last-child {
+    text-align: center;
+}
+.so-table th:first-child,
+.so-table td:first-child {
+    padding-left: 16px;
+}
+.so-table-wrapper:focus-within {
+    outline: 2px solid rgba(37, 99, 235, .12);
+    outline-offset: -2px;
+}
+@media (max-width: 760px) {
+    .so-table-wrapper {
+        max-height: 65vh;
+    }
+    .so-table {
+        min-width: 1080px !important;
+    }
+}
