@@ -5969,7 +5969,30 @@ async function openCustomerModule() {
         customerArea.setAttribute("aria-modal", "true");
         customerArea.setAttribute("aria-label", "Create New Customer");
         document.body.classList.add("customer-form-modal-open");
-        customerArea.style.display = "flex";
+
+        // Apply the overlay geometry directly before any async loading.
+        // This prevents the form from remaining hidden if its stylesheet is cached
+        // or if the module HTML takes time to load.
+        Object.assign(customerArea.style, {
+            position: "fixed",
+            inset: "0",
+            zIndex: "2147483000",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100vw",
+            height: "100vh",
+            maxWidth: "none",
+            padding: "24px",
+            overflow: "auto",
+            boxSizing: "border-box",
+            background: "rgba(3, 16, 34, .68)",
+            backdropFilter: "blur(4px)"
+        });
+        customerArea.style.setProperty("position", "fixed", "important");
+        customerArea.style.setProperty("z-index", "2147483000", "important");
+        customerArea.style.setProperty("display", "flex", "important");
+        customerArea.style.setProperty("inset", "0", "important");
         /* =============================================
            HIDE SALES ORDER LIST
         ============================================== */
@@ -6274,7 +6297,7 @@ function loadCustomerStyles() {
              */
 
             link.href =
-                "css/create-customer.css?v=20261110-customer-modal01";
+                "css/create-customer.css?v=20261125-customer-modal02";
 
 
             link.onload =
@@ -6321,7 +6344,7 @@ async function loadCustomerScript() {
         "logistech-customer-js";
 
     const SCRIPT_SRC =
-        "js/create-customer.js?v=20261110-customer-modal01";
+        "js/create-customer.js?v=20261125-customer-modal02";
 
 
     /*
