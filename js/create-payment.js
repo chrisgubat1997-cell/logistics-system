@@ -39,7 +39,7 @@ const PAYMENT_STORAGE_KEYS = [
 ];
 
 const PAYMENT_PRIMARY_STORAGE_KEY = "logitechPayments";
-const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+const PAYMENT_API_URL = "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
 let databaseSalesOrders = [];
 let databasePayments = [];
 let databaseDeliveryReceipts = [];
