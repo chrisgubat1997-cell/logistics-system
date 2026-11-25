@@ -5932,20 +5932,17 @@ async function openCustomerFromDirectory() {
 
     // Show the overlay immediately so the click always produces visible feedback,
     // even while the existing Customer HTML and JavaScript are loading.
+    const directoryPageHost = document.getElementById("customer");
+    if (directoryPageHost) {
+        directoryPageHost.style.position = "relative";
+        if (customerArea.parentNode !== directoryPageHost) directoryPageHost.appendChild(customerArea);
+    }
     Object.assign(customerArea.style, {
-        position: "fixed",
-        inset: "0",
-        zIndex: "2147483000",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100vw",
-        height: "100vh",
-        padding: "24px",
-        boxSizing: "border-box",
-        overflow: "auto",
-        background: "rgba(3, 16, 34, .68)",
-        color: "#ffffff"
+        position: "absolute", inset: "0", zIndex: "50",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        width: "100%", height: "100%", minHeight: "100%",
+        padding: "24px", boxSizing: "border-box", overflow: "auto",
+        background: "rgba(3, 16, 34, .68)", color: "#ffffff"
     });
     customerArea.classList.add("customer-area-modal");
     customerArea.innerHTML = '<div style="background:#fff;color:#17324f;padding:28px 34px;border-radius:14px;box-shadow:0 20px 70px rgba(0,0,0,.35);font:600 15px Arial,sans-serif">Opening Customer Form...</div>';
@@ -6000,9 +5997,11 @@ async function openCustomerModule() {
             customerAreaOriginalParent = customerArea.parentNode;
             customerAreaOriginalNextSibling = customerArea.nextSibling;
         }
-        if (customerArea.parentNode !== document.body) {
-            document.body.appendChild(customerArea);
-        }
+        // Keep the dialog inside the Customer content page so the sidebar stays visible.
+        const modalContentHost = document.getElementById("customer");
+        if (!modalContentHost) throw new Error("Customer page container not found.");
+        modalContentHost.style.position = "relative";
+        if (customerArea.parentNode !== modalContentHost) modalContentHost.appendChild(customerArea);
         customerArea.classList.add("customer-area-modal");
         customerArea.setAttribute("role", "dialog");
         customerArea.setAttribute("aria-modal", "true");
@@ -6012,24 +6011,17 @@ async function openCustomerModule() {
         // Apply the overlay geometry directly before any async loading.
         // This prevents the form from remaining hidden if its stylesheet is cached
         // or if the module HTML takes time to load.
+        const modalPage = document.getElementById("customer");
+        if (modalPage) modalPage.style.position = "relative";
         Object.assign(customerArea.style, {
-            position: "fixed",
-            inset: "0",
-            zIndex: "2147483000",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "100vw",
-            height: "100vh",
-            maxWidth: "none",
-            padding: "24px",
-            overflow: "auto",
-            boxSizing: "border-box",
-            background: "rgba(3, 16, 34, .68)",
-            backdropFilter: "blur(4px)"
+            position: "absolute", inset: "0", zIndex: "50",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            width: "100%", height: "100%", minHeight: "100%", maxWidth: "none",
+            padding: "24px", overflow: "auto", boxSizing: "border-box",
+            background: "rgba(3, 16, 34, .68)", backdropFilter: "blur(4px)"
         });
-        customerArea.style.setProperty("position", "fixed", "important");
-        customerArea.style.setProperty("z-index", "2147483000", "important");
+        customerArea.style.setProperty("position", "absolute", "important");
+        customerArea.style.setProperty("z-index", "50", "important");
         customerArea.style.setProperty("display", "flex", "important");
         customerArea.style.setProperty("inset", "0", "important");
         /* =============================================
