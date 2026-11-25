@@ -239,13 +239,13 @@ function requestCenterGetAccountingRequests(payload) {
       requestNo:r.REQUEST_NO, date:r.REQUEST_DATE, requestor:r.REQUESTOR_NAME,
       amount:r.AMOUNT, details:r.DETAILS_PURPOSE, salesOrder:r.SO_NUMBER,
       projectClass:r.PROJECT_CLASS, department:r.DEPARTMENT, company:r.COMPANY,
-      type:r.REQUEST_TYPE, status:r.STATUS, requestId:r.REQUEST_ID
+      type:r.REQUEST_TYPE, status:r.STATUS, requestId:r.REQUEST_ID, recordType:"REQUEST"
     }));
     rcRows_(ss.getSheetByName(CONFIG.SHEETS.LIQUIDATION_MASTER)).forEach(r => records.push({
       requestNo:r.LIQUIDATION_NO, date:r.LIQUIDATION_DATE, requestor:r.REQUESTOR_NAME,
       amount:r.TOTAL_EXPENSES, details:"Liquidation for " + r.REQUEST_NO,
       salesOrder:"", projectClass:"", department:r.DEPARTMENT, company:r.COMPANY,
-      type:"LIQUIDATION", status:r.STATUS, requestId:r.LIQUIDATION_ID
+      type:"LIQUIDATION", status:r.STATUS, requestId:r.LIQUIDATION_ID, recordType:"LIQUIDATION"
     }));
   });
   records.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
@@ -256,18 +256,32 @@ function requestCenterUpdateStatus(payload) {
   const actor = rcActor_(payload, ["ADMIN","ACCOUNTING"]);
   const company = rcCompany_(payload.company, actor);
   const requestNo = String(payload.requestNo || "").trim();
+  const recordType = String(payload.recordType || "REQUEST").toUpperCase();
   const status = String(payload.status || "").trim().toUpperCase();
-  const allowed = ["FOR APPROVAL","FOR ACCOUNTING","PROCESSING","FOR PAYMENT","COMPLETED","RETURNED","REJECTED","APPROVED","RELEASED"];
-  if (!requestNo || allowed.indexOf(status) < 0) throw new Error("Invalid request number or status.");
-  const ss = rcDb_(company), sh = ss.getSheetByName(CONFIG.SHEETS.REQUESTS_MASTER);
-  const rows = rcRows_(sh), found = rows.find(r => String(r.REQUEST_NO) === requestNo);
-  if (!found) throw new Error("Request not found.");
+  const allowed = ["SUBMITTED","FOR APPROVAL","FOR ACCOUNTING","PROCESSING","FOR PAYMENT","COMPLETED","RETURNED","REJECTED","APPROVED","RELEASED"];
+  if (!requestNo || allowed.indexOf(status) < 0) throw new Error("Invalid record number or status.");
+  const ss = rcDb_(company);
+  const isLiq = recordType === "LIQUIDATION";
+  const sheetName = isLiq ? CONFIG.SHEETS.LIQUIDATION_MASTER : CONFIG.SHEETS.REQUESTS_MASTER;
+  const numberHeader = isLiq ? "LIQUIDATION_NO" : "REQUEST_NO";
+  const sh = ss.getSheetByName(sheetName);
   const values = sh.getDataRange().getValues(), headers = values[0].map(String);
-  const rowIndex = values.findIndex((r,i) => i>0 && String(r[headers.indexOf("REQUEST_NO")]) === requestNo) + 1;
-  const statusCol = headers.indexOf("STATUS")+1, updatedCol = headers.indexOf("UPDATED_AT")+1;
-  sh.getRange(rowIndex,statusCol).setValue(status);
-  sh.getRange(rowIndex,updatedCol).setValue(new Date());
-  if (status === "APPROVED" && headers.indexOf("APPROVED_DATE") >= 0) sh.getRange(rowIndex,headers.indexOf("APPROVED_DATE")+1).setValue(new Date());
-  if (status === "RELEASED" && headers.indexOf("RELEASED_DATE") >= 0) sh.getRange(rowIndex,headers.indexOf("RELEASED_DATE")+1).setValue(new Date());
-  return { success:true, message:"Request status updated.", requestNo:requestNo, status:status };
+  const numberCol = headers.indexOf(numberHeader);
+  const rowIndex = values.findIndex((r,i) => i > 0 && String(r[numberCol]) === requestNo);
+  if (rowIndex < 1) throw new Error("Record not found.");
+  sh.getRange(rowIndex + 1, headers.indexOf("STATUS") + 1).setValue(status);
+  if (!isLiq && payload.approvedAmount !== undefined && payload.approvedAmount !== "") {
+    const amount = Number(payload.approvedAmount);
+    if (!isFinite(amount) || amount <= 0) throw new Error("Approved amount must be greater than zero.");
+    sh.getRange(rowIndex + 1, headers.indexOf("APPROVED_AMOUNT") + 1).setValue(amount);
+  }
+  if (headers.indexOf("UPDATED_AT") >= 0) sh.getRange(rowIndex + 1, headers.indexOf("UPDATED_AT") + 1).setValue(new Date());
+  if (isLiq) {
+    if (headers.indexOf("REVIEWED_BY") >= 0) sh.getRange(rowIndex + 1, headers.indexOf("REVIEWED_BY") + 1).setValue(actor.name);
+    if (headers.indexOf("REVIEWED_AT") >= 0) sh.getRange(rowIndex + 1, headers.indexOf("REVIEWED_AT") + 1).setValue(new Date());
+  } else {
+    if (status === "APPROVED" && headers.indexOf("APPROVED_DATE") >= 0) sh.getRange(rowIndex + 1, headers.indexOf("APPROVED_DATE") + 1).setValue(new Date());
+    if (status === "RELEASED" && headers.indexOf("RELEASED_DATE") >= 0) sh.getRange(rowIndex + 1, headers.indexOf("RELEASED_DATE") + 1).setValue(new Date());
+  }
+  return { success:true, message:"Record status updated.", requestNo:requestNo, status:status };
 }
