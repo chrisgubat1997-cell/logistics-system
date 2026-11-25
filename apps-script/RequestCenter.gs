@@ -285,7 +285,6 @@ function requestCenterUpdateStatus(payload) {
   const numberCol = headers.indexOf(numberHeader);
   const rowIndex = values.findIndex((r,i) => i > 0 && String(r[numberCol]) === requestNo);
   if (rowIndex < 1) throw new Error("Record not found.");
-  sh.getRange(rowIndex + 1, headers.indexOf("STATUS") + 1).setValue(status);
   let approvedValue = Number(values[rowIndex][headers.indexOf("APPROVED_AMOUNT")] || 0);
   if (!isLiq && payload.approvedAmount !== undefined && payload.approvedAmount !== "") {
     const amount = Number(payload.approvedAmount);
@@ -298,6 +297,7 @@ function requestCenterUpdateStatus(payload) {
   if (isCashAdvance && ["APPROVED","RELEASED"].includes(status) && approvedValue <= 0) {
     throw new Error("Enter the approved cash advance amount before approving or releasing this request.");
   }
+  sh.getRange(rowIndex + 1, headers.indexOf("STATUS") + 1).setValue(status);
   if (headers.indexOf("UPDATED_AT") >= 0) sh.getRange(rowIndex + 1, headers.indexOf("UPDATED_AT") + 1).setValue(new Date());
   if (isLiq) {
     if (headers.indexOf("REVIEWED_BY") >= 0) sh.getRange(rowIndex + 1, headers.indexOf("REVIEWED_BY") + 1).setValue(actor.name);
