@@ -181,3 +181,13 @@ html[data-theme="dark"] .request-workspace-tab:hover,html[data-theme="dark"] .re
 html[data-theme="dark"] .request-card-liquidation .request-card-action{background:#172438!important;color:#e4ebf5!important;border-color:#52667e!important}
 html[data-theme="dark"] .request-card-liquidation .request-card-action:hover{background:#24364d!important}
 @media(max-width:520px){.request-workspace-tabs{width:100%}.request-workspace-tab{flex:1;padding:0 10px;font-size:9px}}
+
+
+/* Live Request Center records */
+.request-personal-record{display:flex;flex-direction:column;gap:5px;padding:12px 14px;margin-top:8px;border:1px solid rgba(100,116,139,.2);border-radius:10px;background:rgba(148,163,184,.06)}
+.request-personal-record strong{font-size:13px;color:var(--text-primary,#172033);overflow-wrap:anywhere}
+.request-personal-record p{margin:0;font-size:12px;color:var(--text-secondary,#64748b);line-height:1.45}
+.request-personal-record span{align-self:flex-start;padding:3px 8px;border-radius:20px;background:rgba(22,163,74,.1);color:#15803d;font-size:10px;font-weight:700;letter-spacing:.04em}
+.accounting-monitoring-table td select{max-width:150px;min-width:115px;padding:6px 7px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#172033;font-size:11px}
+.accounting-monitoring-table td button{margin-left:5px;padding:6px 9px;border:0;border-radius:7px;background:#073b78;color:#fff;font-size:11px;font-weight:700;cursor:pointer}
+.accounting-monitoring-table td button:disabled{opacity:.55;cursor:wait}
