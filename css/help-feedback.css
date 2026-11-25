@@ -1,4 +1,4 @@
-/* LOGIS-TECH Help & Feedback — frontend-only stage */
+/* LOGIS-TECH Help & Feedback — shared workflow */
 .helpfb{--hf-navy:#052B59;--hf-lime:#A6CE39;color:var(--text-primary,#172536);font-family:Inter,"Segoe UI",Arial,sans-serif;padding:clamp(16px,2.5vw,30px);max-width:1500px;margin:auto}
 .helpfb-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:22px;flex-wrap:wrap}
 .helpfb h1{font-size:clamp(22px,2.3vw,30px);margin:0 0 6px;font-weight:750}.helpfb p{color:var(--text-secondary,#718096);margin:0;line-height:1.55}
@@ -19,3 +19,5 @@
 .hf-detail{background:var(--surface-muted,#f7f9fc);border-radius:10px;padding:14px;margin-top:12px}
 @media(max-width:1000px){.hf-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.hf-grid,.hf-form-grid{grid-template-columns:1fr}.hf-field.full{grid-column:auto}.helpfb{padding:14px}.hf-panel{padding:14px}}
+
+.hf-message{display:none;border-radius:9px;padding:10px 13px;margin:0 0 14px;font-size:13px;background:#eaf4ff;color:#174b7b}.hf-message.show{display:block}.hf-message.error{background:#fff0ef;color:#a22d25}.hf-subline{display:block;color:var(--text-secondary,#718096);margin-top:3px;font-size:11px}
