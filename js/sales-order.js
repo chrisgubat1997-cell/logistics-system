@@ -5913,6 +5913,9 @@ function renderCustomerTableError(
 }  
 /* Open the existing customer creation form from Sales > Customer. */
 async function openCustomerFromDirectory() {
+    // Open the existing registration form from the dedicated Customer directory.
+    // The form is hosted by the Sales module; after save/cancel the existing
+    // return handler sends the user back to Sales > Customer.
     window.__returnToCustomerDirectory = true;
     const customerButton = document.querySelector('[data-customer-nav="true"]');
     showPage('sales', customerButton || null);
