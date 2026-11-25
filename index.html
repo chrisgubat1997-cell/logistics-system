@@ -961,17 +961,19 @@
                                 <input id="acctRequestSearch" type="search" placeholder="Search request no. or requestor" aria-label="Search requests">
                                 <select id="acctRequestType" aria-label="Filter request type"><option value="">All types</option><option value="RFP">Request for Payment</option><option value="LIQUIDATION">Liquidation</option></select>
                                 <select id="acctRequestStatus" aria-label="Filter request status"><option value="">All statuses</option><option>Submitted</option><option>For Approval</option><option>For Accounting</option><option>Processing</option><option>For Payment</option><option>Completed</option><option>Returned</option><option>Rejected</option></select>
+                                <select id="acctSettlementFilter" aria-label="Filter liquidation status"><option value="">All liquidation states</option><option value="UNLIQUIDATED">Unliquidated</option><option value="PARTIALLY LIQUIDATED">Partially liquidated</option><option value="LIQUIDATED">Liquidated</option></select>
                                 <select id="acctRequestCompany" aria-label="Filter company"><option value="">All companies</option><option value="GREENMETAL">Greenmetal</option><option value="GREENLIGHT">Greenlight</option></select>
                             </div>
                         </div>
                         <div class="accounting-monitoring-table-wrap">
                             <table class="accounting-monitoring-table">
-                                <thead><tr><th>Request No.</th><th>Date</th><th>Requestor Name</th><th>Amount</th><th>Details / Purpose</th><th>SO Number</th><th>Project / Class</th><th>Department</th><th>Company</th><th>Type</th><th>Status</th></tr></thead>
-                                <tbody id="acctRequestRows"><tr><td colspan="11" class="accounting-monitoring-empty">Request records will appear here when the Accounting data connection is enabled.</td></tr></tbody>
+                                <thead><tr><th>Request No.</th><th>Date</th><th>Requestor Name</th><th>Amount</th><th>Details / Purpose</th><th>SO Number</th><th>Project / Class</th><th>Department</th><th>Company</th><th>Type</th><th>Status</th><th>Account</th></tr></thead>
+                                <tbody id="acctRequestRows"><tr><td colspan="12" class="accounting-monitoring-empty">Request records will appear here when the Accounting data connection is enabled.</td></tr></tbody>
                             </table>
                         </div>
                         <div class="accounting-monitoring-footer"><span id="acctRequestResultCount">0 records</span><span>Visible only to Accounting-authorized roles in this interface.</span></div>
                     </div>
+                    <section id="acctSelectedAccount" class="acct-selected-account" hidden aria-live="polite"></section>
                     <p class="accounting-monitoring-note">Access is enforced by the Apps Script API. Only ADMIN and ACCOUNTING roles can retrieve and update Accounting monitoring records.</p>
                 </section>
                 </div>
