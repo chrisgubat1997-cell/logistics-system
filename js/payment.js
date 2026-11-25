@@ -88,7 +88,7 @@ const CUSTOMER_CREDIT_TRANSACTION_STORAGE_KEYS = [
 ];
 
 
-const PAYMENT_DASHBOARD_API_URL = "https://script.google.com/macros/s/AKfycbwbIW5tP7VrPEMDpU1-uiAjJ0FNA3HRr94jnDL4Edqyl_7mOkKGNDOAEzfULQyZykNF/exec";
+const PAYMENT_DASHBOARD_API_URL = "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
 
 async function paymentDashboardAPI(action) {
     const response = await fetch(PAYMENT_DASHBOARD_API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: action, data: {} }) });
