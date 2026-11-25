@@ -1353,3 +1353,46 @@
         border-radius: 13px !important;
     }
 }
+
+
+/* TRUE CUSTOMER CREATION MODAL — keep the directory visible underneath */
+body.customer-form-modal-open { overflow: hidden !important; }
+#customerArea.customer-area-modal {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 12000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: none !important;
+    padding: 24px !important;
+    overflow: auto !important;
+    background: rgba(3, 16, 34, .64) !important;
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+}
+#customerArea.customer-area-modal .customer-page {
+    width: min(1080px, calc(100vw - 48px)) !important;
+    max-width: 1080px !important;
+    max-height: calc(100vh - 48px) !important;
+    min-height: 0 !important;
+    margin: auto !important;
+    padding: 22px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    background: #f5f7fb !important;
+    box-shadow: 0 24px 80px rgba(2, 8, 23, .36) !important;
+    animation: customerModalEnter 180ms ease-out both;
+}
+@media(max-width:700px) {
+    #customerArea.customer-area-modal { padding: 10px !important; }
+    #customerArea.customer-area-modal .customer-page {
+        width: calc(100vw - 20px) !important;
+        max-height: calc(100vh - 20px) !important;
+        padding: 14px !important;
+    }
+}
