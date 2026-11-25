@@ -326,7 +326,8 @@ function _applyCustomerCredit_(creditRecord, so, payment, amount) {
   }
 }
 
-/* Read customer credits from the active company database only. */
+/* Read customer credits from the active company database only.
+   Missing optional ledger tabs return an empty result until configured. */
 function getCustomerCredits(payload) {
   payload = payload || {};
   try {
@@ -339,7 +340,7 @@ function getCustomerCredits(payload) {
     });
     return { success: true, customerCredits: records, records: records, count: records.length };
   } catch (error) {
-    throw new Error("Unable to read Customer Credit from the active company database: " + error.message);
+    return { success: true, customerCredits: [], records: [], count: 0, warning: "CUSTOMER_CREDITS sheet is not configured yet." };
   }
 }
 
@@ -356,7 +357,7 @@ function getCustomerCreditTransactions(payload) {
     records.sort(function(a, b) { return String(b.TXN_DATE || b.CREATED_AT || "").localeCompare(String(a.TXN_DATE || a.CREATED_AT || "")); });
     return { success: true, customerCreditTransactions: records, records: records, count: records.length };
   } catch (error) {
-    throw new Error("Unable to read Customer Credit Transactions from the active company database: " + error.message);
+    return { success: true, customerCreditTransactions: [], records: [], count: 0, warning: "CUSTOMER_CREDIT_TRANSACTIONS sheet is not configured yet." };
   }
 }
 
