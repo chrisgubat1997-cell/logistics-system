@@ -16,7 +16,7 @@ const CONFIG = {
     "1hzv-55bHvUFVpwAFn9T6igSp6ePKvihaPfMomUj-GQQ",
 
   GREENMETAL_DATABASE_SPREADSHEET_ID:
-    "1Txaem4xthFohNU_ITQ20AJzPeNpPLIxgbLfcVojYbnQ",
+    "1hzv-55bHvUFVpwAFn9T6igSp6ePKvihaPfMomUj-GQQ",
 
   GREENLIGHT_DATABASE_SPREADSHEET_ID:
     "1aEtv37K3hQuR_MRRoljpc5RUwlrVPr6Xco4SIUKQqjg",
