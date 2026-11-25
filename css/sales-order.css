@@ -2301,3 +2301,28 @@
         min-width: 1080px !important;
     }
 }
+
+
+/* CUSTOMER DIRECTORY — full-width responsive table and primary action */
+#customer .customer-table-card { width:100%; max-width:100%; }
+#customer .customer-table-header { display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; }
+#customer .customer-table-title { flex:1 1 280px; min-width:220px; }
+#customer .customer-table-controls { display:flex; align-items:center; justify-content:flex-end; gap:10px; flex:0 1 auto; flex-wrap:wrap; }
+#customer .customer-table-wrapper { display:block; width:100%; max-width:100%; min-width:0; overflow-x:auto; overflow-y:visible; border:1px solid #dce4ee; border-radius:12px; background:#fff; box-shadow:0 2px 10px rgba(16,36,64,.035); }
+#customer .customer-table { width:100% !important; min-width:1080px; max-width:100%; table-layout:fixed; border-collapse:separate; border-spacing:0; }
+#customer .customer-table thead th { position:sticky; top:0; z-index:2; height:48px; padding:0 16px; background:#eaf2fc; color:#073b78; border-bottom:1px solid #d6e2f0; font-size:10px; font-weight:800; letter-spacing:.45px; white-space:nowrap; }
+#customer .customer-table tbody td { height:56px; padding:10px 16px; color:#344054; font-size:11.5px; line-height:1.45; border-bottom:1px solid #edf1f6; vertical-align:middle; white-space:normal; overflow-wrap:anywhere; }
+#customer .customer-table tbody tr:nth-child(even) { background:#f8fafd; }
+#customer .customer-table tbody tr:hover { background:#eef5ff; }
+#customer .customer-table tbody tr:last-child td { border-bottom:0; }
+#customer .customer-table th:nth-child(1), #customer .customer-table td:nth-child(1) { width:140px; }
+#customer .customer-table th:nth-child(2), #customer .customer-table td:nth-child(2) { width:25%; }
+#customer .customer-table th:nth-child(3), #customer .customer-table td:nth-child(3) { width:15%; }
+#customer .customer-table th:nth-child(4), #customer .customer-table td:nth-child(4) { width:110px; }
+#customer .customer-table th:nth-child(5), #customer .customer-table td:nth-child(5) { width:16%; }
+#customer .customer-table th:nth-child(6), #customer .customer-table td:nth-child(6) { width:95px; }
+#customer .customer-table th:nth-child(7), #customer .customer-table td:nth-child(7) { width:150px; }
+#customer .customer-new-button { min-height:40px; padding:0 16px; border:1px solid #073b78; border-radius:9px; background:#073b78; color:#fff; font:700 11px/1 inherit; cursor:pointer; white-space:nowrap; box-shadow:0 2px 5px rgba(7,59,120,.14); }
+#customer .customer-new-button:hover { background:#052b59; border-color:#052b59; }
+#customer .customer-new-button:focus-visible { outline:3px solid rgba(7,59,120,.2); outline-offset:2px; }
+@media(max-width:760px) { #customer .customer-table-header { align-items:stretch; } #customer .customer-table-controls { width:100%; justify-content:flex-start; } #customer .customer-search-wrapper { flex:1 1 180px; width:auto; } #customer .customer-new-button { flex:1 1 100%; } #customer .customer-directory-page { padding:16px; } }
