@@ -191,3 +191,16 @@ html[data-theme="dark"] .request-card-liquidation .request-card-action:hover{bac
 .accounting-monitoring-table td select{max-width:150px;min-width:115px;padding:6px 7px;border:1px solid #cbd5e1;border-radius:7px;background:#fff;color:#172033;font-size:11px}
 .accounting-monitoring-table td button{margin-left:5px;padding:6px 9px;border:0;border-radius:7px;background:#073b78;color:#fff;font-size:11px;font-weight:700;cursor:pointer}
 .accounting-monitoring-table td button:disabled{opacity:.55;cursor:wait}
+
+/* Accounting requestor account view and settlement monitoring */
+.acct-view-account{border:1px solid #cbd9e7;border-radius:7px;background:#f3f8fd;color:#174b78;padding:7px 9px;font-size:10px;font-weight:800;cursor:pointer;white-space:nowrap}
+.acct-selected-account{margin:16px 0;padding:16px;border:1px solid #d6e2ed;border-radius:12px;background:#f8fbff}
+.acct-account-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:13px}
+.acct-account-heading strong,.acct-account-heading small{display:block}.acct-account-heading strong{font-size:16px;color:#173b60}.acct-account-heading small{margin-top:3px;color:#718096;font-size:10px}
+.acct-account-heading button{border:1px solid #d5e0ea;border-radius:7px;background:white;padding:6px 10px;color:#41566d;cursor:pointer}
+.acct-account-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:13px}
+.acct-account-stats>div{padding:11px;border:1px solid #e0e8f0;border-radius:9px;background:#fff}
+.acct-account-stats span,.acct-account-stats strong{display:block}.acct-account-stats span{font-size:9px;color:#718096}.acct-account-stats strong{margin-top:4px;font-size:15px;color:#173b60}
+.acct-account-table{width:100%;border-collapse:collapse;background:#fff;font-size:10px}.acct-account-table th,.acct-account-table td{padding:9px 8px;border-bottom:1px solid #e8edf2;text-align:left}.acct-account-table th{background:#eef4fa;color:#52677e}
+html[data-theme="dark"] .acct-selected-account{background:#111d2d;border-color:#35465d}html[data-theme="dark"] .acct-account-stats>div,html[data-theme="dark"] .acct-account-table{background:#172438;border-color:#40516b}html[data-theme="dark"] .acct-account-heading strong,html[data-theme="dark"] .acct-account-stats strong{color:#e4ebf5}
+@media(max-width:700px){.acct-account-stats{grid-template-columns:1fr}.acct-account-table{min-width:650px}.acct-selected-account{overflow-x:auto}}
