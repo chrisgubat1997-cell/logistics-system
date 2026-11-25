@@ -1396,3 +1396,22 @@ body.customer-form-modal-open { overflow: hidden !important; }
         padding: 14px !important;
     }
 }
+
+
+/* Confine the New Customer overlay to the main content page; sidebar remains visible. */
+#customer.page { position: relative !important; isolation: isolate; }
+#customerArea.customer-area-modal {
+    position: absolute !important; inset: 0 !important; z-index: 50 !important;
+    width: 100% !important; height: 100% !important; min-height: 100% !important;
+    max-width: none !important; padding: 24px !important; overflow: auto !important;
+    box-sizing: border-box !important; display: flex !important;
+    align-items: center !important; justify-content: center !important;
+}
+#customerArea.customer-area-modal .customer-page {
+    width: min(1080px, 100%) !important; max-width: 1080px !important;
+    max-height: 100% !important; overflow-x: hidden !important; overflow-y: auto !important;
+}
+@media (max-width: 700px) {
+    #customerArea.customer-area-modal { padding: 10px !important; }
+    #customerArea.customer-area-modal .customer-page { max-height: 100% !important; }
+}
