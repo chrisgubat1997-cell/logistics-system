@@ -65,7 +65,7 @@ function helpFeedbackSubmit(payload) {
     if(!(mime.indexOf("image/")===0||mime==="application/pdf")) throw new Error("Only image and PDF attachments are accepted.");
     const bytes=Utilities.base64Decode(String(f.base64));
     if(bytes.length>3*1024*1024) throw new Error("Attachment exceeds the 3 MB limit.");
-    const root=DriveApp.getFolderById(CONFIG.REQUEST_CENTER_ATTACHMENTS_FOLDER_ID);
+    const root=DriveApp.getFolderById(CONFIG.HELP_FEEDBACK_ATTACHMENTS_FOLDER_ID);
     const folder=getOrCreateFolder(getOrCreateFolder(root,company),Utilities.formatDate(now,CONFIG.TIMEZONE||"Asia/Manila","yyyy"));
     const safeName=String(f.name||"feedback-attachment").replace(/[\\/:*?"<>|]/g,"_");
     attachmentUrl=folder.createFile(Utilities.newBlob(bytes,mime,safeName)).getUrl();
