@@ -7366,6 +7366,12 @@ window.addEventListener(
     window.openCustomerModule =
         openCustomerModule;
 
+    // Required by the + New Customer button mounted from index.html.
+    // sales-order.js is wrapped in a strict IIFE, so this handler must
+    // be explicitly exported to the window object.
+    window.openCustomerFromDirectory =
+        openCustomerFromDirectory;
+
    window.loadCustomerTable =
     loadCustomerTable;
 
