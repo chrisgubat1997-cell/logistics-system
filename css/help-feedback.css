@@ -21,3 +21,17 @@
 @media(max-width:600px){.hf-grid,.hf-form-grid{grid-template-columns:1fr}.hf-field.full{grid-column:auto}.helpfb{padding:14px}.hf-panel{padding:14px}}
 
 .hf-message{display:none;border-radius:9px;padding:10px 13px;margin:0 0 14px;font-size:13px;background:#eaf4ff;color:#174b7b}.hf-message.show{display:block}.hf-message.error{background:#fff0ef;color:#a22d25}.hf-subline{display:block;color:var(--text-secondary,#718096);margin-top:3px;font-size:11px}
+
+
+/* Centered fixed modal: content stays visible while the page behind it scrolls. */
+body.hf-modal-open{overflow:hidden}
+.hf-modal-layer{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(3,16,34,.62);backdrop-filter:blur(3px)}
+.hf-modal{width:min(980px,calc(100vw - 44px));max-height:calc(100vh - 44px);display:flex;flex-direction:column;overflow:hidden;background:var(--card-bg,#fff);color:var(--text-primary,#172536);border:1px solid var(--border-color,#e5eaf1);border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.3);animation:hfModalIn .18s ease-out}
+.hf-modal-head{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;border-bottom:1px solid var(--border-color,#e5eaf1);background:var(--card-bg,#fff)}
+.hf-modal-head h2{font-size:18px;font-weight:750;margin:0}
+.hf-modal-close{width:36px;height:36px;flex:0 0 36px;border:0;border-radius:9px;background:var(--surface-muted,#f1f4f8);color:inherit;font-size:26px;line-height:1;cursor:pointer}
+.hf-modal-body{overflow:auto;padding:20px 22px;overscroll-behavior:contain}
+.hf-modal-body .hf-actions{position:sticky;bottom:-20px;padding:12px 0 2px;background:var(--card-bg,#fff)}
+.hf-modal-body .hf-panel{border:0;padding:0;margin:0;box-shadow:none}
+@keyframes hfModalIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:600px){.hf-modal-layer{padding:10px}.hf-modal{width:100%;max-height:calc(100vh - 20px);border-radius:13px}.hf-modal-head{padding:14px 16px}.hf-modal-body{padding:16px}.hf-modal-body .hf-table{min-width:620px}}
