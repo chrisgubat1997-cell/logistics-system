@@ -855,7 +855,22 @@
 </div>
 
 <!-- HELP & FEEDBACK -->
-<div id="helpFeedback" class="page"><div id="helpFeedbackModule"></div></div>
+<div id="helpFeedback" class="page">
+    <div id="helpFeedbackModule">
+        <main class="helpfb">
+            <header class="helpfb-head"><div><h1>Help &amp; Feedback</h1><p>Report a system problem, share an idea, or raise a process concern.</p></div><span class="hf-status new">EMPLOYEE SUPPORT</span></header>
+            <div class="hf-local-note"><strong>Frontend stage only:</strong> submissions are saved only in this browser for demonstration. No Google Apps Script or shared database is connected yet.</div>
+            <div class="hf-grid">
+                <button class="hf-card" type="button" onclick="window.helpFeedbackOpen && window.helpFeedbackOpen('ERROR')"><span class="hf-icon">🐞</span><strong>Report an Error</strong><small>Report technical bugs, incorrect calculations, or buttons that do not work.</small></button>
+                <button class="hf-card" type="button" onclick="window.helpFeedbackOpen && window.helpFeedbackOpen('SUGGESTION')"><span class="hf-icon">💡</span><strong>Submit a Suggestion</strong><small>Recommend a feature, design change, or system improvement.</small></button>
+                <button class="hf-card" type="button" onclick="window.helpFeedbackOpen && window.helpFeedbackOpen('PROCESS')"><span class="hf-icon">🔄</span><strong>Report a Process Issue</strong><small>Tell us about a confusing, delayed, or inefficient workflow.</small></button>
+                <button class="hf-card" type="button" onclick="window.helpFeedbackOpen && window.helpFeedbackOpen('MY')"><span class="hf-icon">📋</span><strong>My Feedback</strong><small>Track the status of your submitted reports.</small></button>
+                <button class="hf-card" type="button" data-admin-only-feedback style="display:none" onclick="window.helpFeedbackOpen && window.helpFeedbackOpen('ADMIN')"><span class="hf-icon">🛠️</span><strong>Feedback Monitoring</strong><small>Review, assign, prioritize, and update employee feedback.</small></button>
+            </div>
+            <section class="hf-panel"><h2>My Recent Feedback</h2><div class="hf-empty">No feedback records yet. Choose an option above to get started.</div></section>
+        </main>
+    </div>
+</div>
 
 <!-- ABOUT LOGIS-TECH -->
 <div id="productivityCup" class="page"><div id="productivityCupModule"></div></div>
