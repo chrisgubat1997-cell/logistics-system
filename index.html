@@ -136,7 +136,6 @@
 
     <link rel="stylesheet" href="css/system-monitor.css?v=20261110-admin-monitor01">
     <link rel="stylesheet" href="css/so-monitoring.css?v=20261111-customer-36002">
-    <link rel="stylesheet" href="css/productivity-cup.css?v=20261118-01">
     <link rel="stylesheet" href="css/sidebar-navigation.css?v=20261124-05">
     <link rel="stylesheet" href="css/help-feedback.css?v=20261125-03">
 </head>
@@ -303,9 +302,6 @@
             <span class="sidebar-item-icon" aria-hidden="true">⚙️</span><span class="sidebar-item-label">Settings</span>
 
         </button>
-
-        <!-- PRODUCTIVITY CUP PROJECT -->
-        <button class="menu-btn" type="button" onclick="showPage('productivityCup', this)" title="Productivity Cup" aria-label="Productivity Cup"><span class="sidebar-item-icon" aria-hidden="true">🏆</span><span class="sidebar-item-label">Productivity Cup</span></button>
 
         <!-- ABOUT LOGIS-TECH -->
         <button class="menu-btn" type="button" onclick="showPage('about', this)" title="About LOGIS-TECH" aria-label="About LOGIS-TECH">
@@ -873,8 +869,6 @@
 </div>
 
 <!-- ABOUT LOGIS-TECH -->
-<div id="productivityCup" class="page"><div id="productivityCupModule"></div></div>
-
 <div id="about" class="page">
     <div id="aboutModule"></div>
 </div>
@@ -1349,7 +1343,6 @@ let reportModuleLoaded = false;
 
 let systemSettingsModuleLoaded = false;
 let aboutModuleLoaded = false;
-let productivityCupLoaded = false;
 
 
 
@@ -1424,7 +1417,6 @@ function showPage(pageId, button) {
         reports: '#4f46e5',
         settings: '#64748b',
         about: '#16865b',
-        productivityCup: '#ca8a04',
         messages: '#2563eb',
         profile: '#2563eb'
     };
@@ -1620,8 +1612,6 @@ if (
         loadSystemSettingsModule();
 
     }
-
-    if (pageId === 'productivityCup') loadProductivityCupModule();
 
     /* ABOUT LOGIS-TECH */
     if (pageId === 'about') {
@@ -3218,25 +3208,6 @@ async function loadReportModule() {
 
 
 /* =========================================================
-   LOAD PRODUCTIVITY CUP PAGE
-========================================================= */
-async function loadProductivityCupModule() {
-    const container = document.getElementById('productivityCupModule');
-    if (!container || productivityCupLoaded) return;
-    try {
-        const response = await fetch('pages/productivity-cup.html?v=20261118-01', { cache: 'no-store' });
-        if (!response.ok) throw new Error('HTTP ' + response.status + ' - ' + response.statusText);
-        const html = await response.text();
-        if (!html || !html.trim()) throw new Error('productivity-cup.html is empty.');
-        container.innerHTML = html;
-        productivityCupLoaded = true;
-    } catch (error) {
-        console.error('PRODUCTIVITY CUP LOAD ERROR:', error);
-        container.innerHTML = '<section class="pc-load-error"><h2>Unable to load Productivity Cup</h2><p>' + String(error.message || error) + '</p><small>Expected file: pages/productivity-cup.html</small></section>';
-    }
-}
-
-/* =========================================================
    LOAD ABOUT LOGIS-TECH PAGE
 ========================================================= */
 async function loadAboutModule() {
@@ -4192,7 +4163,6 @@ document.addEventListener(
             reports: '📈',
             settings: '⚙️',
             about: 'ⓘ',
-            productivityCup: '🏆'
         };
         const labelByPage = {
             dashboard: 'Dashboard',
@@ -4209,7 +4179,6 @@ document.addEventListener(
             reports: 'Reports',
             settings: 'Settings',
             about: 'About LOGIS-TECH',
-            productivityCup: 'Productivity Cup'
         };
 
         document.querySelectorAll('.sidebar .menu .menu-btn').forEach(function (button) {
@@ -4254,7 +4223,6 @@ document.addEventListener(
 })();
 </script>
 
-<script src="js/productivity-cup-presentation.js?v=20261118-present01"></script>
 <script src="js/help-feedback.js?v=20261125-05"></script>
 <script src="js/sidebar-navigation.js?v=20261124-06"></script>
 
