@@ -59,7 +59,28 @@ const REQUEST_CENTER_HEADERS_ = {
     "EXPENSE_DATE",
     "RECEIPT_NO",
     "DESCRIPTION",
-    "AMOUNT"
+    "AMOUNT",
+    "ATTACHMENT_NO"
+  ],
+
+  REQUEST_ATTACHMENTS: [
+    "ATTACHMENT_ID",
+    "ATTACHMENT_NO",
+    "REQUEST_ID",
+    "REQUEST_NO",
+    "LIQUIDATION_ID",
+    "LIQUIDATION_NO",
+    "COMPANY",
+    "DOCUMENT_TYPE",
+    "FILE_NAME",
+    "DRIVE_FILE_ID",
+    "FILE_URL",
+    "MIME_TYPE",
+    "FILE_SIZE",
+    "UPLOADED_BY",
+    "UPLOADER_NAME",
+    "UPLOADED_AT",
+    "STATUS"
   ]
 };
 
@@ -116,23 +137,34 @@ function setupRequestCenterDatabase() {
         sheet.autoResizeColumns(1, expectedHeaders.length);
       } else {
         const actualHeaders = sheet
-          .getRange(1, 1, 1, expectedHeaders.length)
+          .getRange(1, 1, 1, Math.max(sheet.getLastColumn(), expectedHeaders.length))
           .getDisplayValues()[0]
           .map(function(value) { return String(value).trim(); });
 
-        const mismatch = expectedHeaders.findIndex(function(header, index) {
-          return actualHeaders[index] !== header;
-        });
+        // Safe forward-only migration: add newly introduced trailing columns
+        // when all existing headers match the expected prefix.
+        const existingHeaderCount = sheet.getLastColumn();
+        const prefixMatches = actualHeaders.slice(0, Math.min(existingHeaderCount, expectedHeaders.length))
+          .every(function(header, index) {
+            return header === expectedHeaders[index];
+          });
 
-        if (mismatch !== -1) {
+        if (!prefixMatches || existingHeaderCount > expectedHeaders.length) {
           throw new Error(
             database.company + " / " + sheetName +
-            ": header mismatch at column " + (mismatch + 1) +
-            ". Expected " + expectedHeaders[mismatch] +
-            " but found " + (actualHeaders[mismatch] || "(blank)") +
-            ". No existing data was changed."
+            ": existing headers do not match the expected structure. " +
+            "No existing data was changed."
           );
         }
+
+        if (existingHeaderCount < expectedHeaders.length) {
+          const newHeaders = expectedHeaders.slice(existingHeaderCount);
+          sheet.getRange(1, existingHeaderCount + 1, 1, newHeaders.length)
+            .setValues([newHeaders])
+            .setFontWeight("bold");
+          sheet.autoResizeColumns(existingHeaderCount + 1, newHeaders.length);
+        }
+        sheet.setFrozenRows(1);
       }
 
       companyResult.sheets.push({
@@ -149,7 +181,7 @@ function setupRequestCenterDatabase() {
   Logger.log(JSON.stringify(results, null, 2));
   return {
     success: true,
-    message: "Request Center database sheets are ready. No attachment sheet was created.",
+    message: "Request Center database sheets are ready, including REQUEST_ATTACHMENTS.",
     results: results
   };
 }
