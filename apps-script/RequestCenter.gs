@@ -246,22 +246,37 @@ function requestCenterSubmitLiquidation(payload) {
 }
 
 function requestCenterGetAccountingRequests(payload) {
-  const actor = rcActor_(payload, ["ACCOUNTING"]);
+  const actor = rcActor_(payload, ["ADMIN","ACCOUNTING"]);
   const companies = actor.companyAccess.length ? actor.companyAccess : [actor.company];
   let records = [];
   companies.forEach(company => {
     const ss = rcDb_(company);
-    rcRows_(ss.getSheetByName(CONFIG.SHEETS.REQUESTS_MASTER)).forEach(r => records.push({
-      requestNo:r.REQUEST_NO, date:r.REQUEST_DATE, requestor:r.REQUESTOR_NAME,
-      amount:r.AMOUNT, details:r.DETAILS_PURPOSE, salesOrder:r.SO_NUMBER,
-      projectClass:r.PROJECT_CLASS, department:r.DEPARTMENT, company:r.COMPANY,
-      type:r.REQUEST_TYPE, status:r.STATUS, requestId:r.REQUEST_ID, recordType:"REQUEST"
-    }));
-    rcRows_(ss.getSheetByName(CONFIG.SHEETS.LIQUIDATION_MASTER)).forEach(r => records.push({
-      requestNo:r.LIQUIDATION_NO, date:r.LIQUIDATION_DATE, requestor:r.REQUESTOR_NAME,
-      amount:r.TOTAL_EXPENSES, details:"Liquidation for " + r.REQUEST_NO,
-      salesOrder:"", projectClass:"", department:r.DEPARTMENT, company:r.COMPANY,
-      type:"LIQUIDATION", status:r.STATUS, requestId:r.LIQUIDATION_ID, recordType:"LIQUIDATION"
+    const requests = rcRows_(ss.getSheetByName(CONFIG.SHEETS.REQUESTS_MASTER));
+    const liquidations = rcRows_(ss.getSheetByName(CONFIG.SHEETS.LIQUIDATION_MASTER));
+    requests.forEach(r => {
+      const isCA = String(r.REQUEST_TYPE || "").toUpperCase() === "CASH ADVANCE (CA)";
+      const approved = Number(r.APPROVED_AMOUNT || 0);
+      const related = liquidations.filter(l => String(l.REQUEST_ID) === String(r.REQUEST_ID) && !["REJECTED","CANCELLED"].includes(String(l.STATUS).toUpperCase()));
+      const liquidated = related.reduce((sum,l) => sum + Number(l.TOTAL_EXPENSES || 0), 0);
+      const remaining = isCA && String(r.RELEASED_DATE || "") ? Math.max(0, approved - liquidated) : 0;
+      let settlementStatus = "";
+      if (isCA && String(r.RELEASED_DATE || "")) settlementStatus = remaining <= 0 ? "LIQUIDATED" : liquidated > 0 ? "PARTIALLY LIQUIDATED" : "UNLIQUIDATED";
+      records.push({
+        requestNo:r.REQUEST_NO, date:r.REQUEST_DATE, requestor:r.REQUESTOR_NAME,
+        amount:r.AMOUNT, approvedAmount:approved, liquidatedAmount:liquidated,
+        remainingBalance:remaining, settlementStatus:settlementStatus,
+        details:r.DETAILS_PURPOSE, salesOrder:r.SO_NUMBER,
+        projectClass:r.PROJECT_CLASS, department:r.DEPARTMENT, company:r.COMPANY,
+        type:r.REQUEST_TYPE, status:r.STATUS, requestId:r.REQUEST_ID, recordType:"REQUEST"
+      });
+    });
+    liquidations.forEach(r => records.push({
+      requestNo:r.LIQUIDATION_NO, parentRequestNo:r.REQUEST_NO, date:r.LIQUIDATION_DATE,
+      requestor:r.REQUESTOR_NAME, amount:r.TOTAL_EXPENSES, approvedAmount:r.APPROVED_CA_AMOUNT,
+      liquidatedAmount:r.TOTAL_EXPENSES, remainingBalance:0, settlementStatus:"LIQUIDATION RECORD",
+      details:"Liquidation for " + r.REQUEST_NO, salesOrder:"", projectClass:"",
+      department:r.DEPARTMENT, company:r.COMPANY, type:"LIQUIDATION",
+      status:r.STATUS, requestId:r.LIQUIDATION_ID, recordType:"LIQUIDATION"
     }));
   });
   records.sort((a,b) => new Date(b.date || 0) - new Date(a.date || 0));
