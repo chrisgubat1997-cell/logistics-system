@@ -29,6 +29,10 @@ const CONFIG = {
   ROOT_FOLDER_ID:
     "1cR8UE70hO0s3vfq3-4WGBiApYi7VEspP",
 
+  // Dedicated Drive folder for Request Center uploads.
+  REQUEST_CENTER_ATTACHMENTS_FOLDER_ID:
+    "1PSNBPkiJbPJxHb61be2FMFbrEsG0b2M5",
+
 
   // =======================================================
   // DATABASE SHEETS
@@ -92,7 +96,8 @@ CUSTOMER_CREDIT_TRANSACTIONS: "CUSTOMER_CREDIT_TRANSACTIONS",
     PAYMENT: "05_PAYMENT",
     FLEET: "06_FLEET",
     REPORTS: "07_REPORTS",
-    SYSTEM: "08_SYSTEM"
+    SYSTEM: "08_SYSTEM",
+    REQUEST_CENTER_ATTACHMENTS: "09_REQUEST_CENTER_ATTACHMENTS"
 
   },
 
