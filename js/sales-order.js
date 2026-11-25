@@ -33,6 +33,8 @@ let selectedSO = null;
     let salesOrdersLoaded = false;
     let customerModuleLoaded = false;
     let customerReturnState = null;
+    let customerAreaOriginalParent = null;
+    let customerAreaOriginalNextSibling = null;
     const soDetailsCache = {};
     /* =====================================================
        INITIALIZE
@@ -5913,12 +5915,8 @@ function renderCustomerTableError(
 }  
 /* Open the existing customer creation form from Sales > Customer. */
 async function openCustomerFromDirectory() {
-    // Open the existing registration form from the dedicated Customer directory.
-    // The form is hosted by the Sales module; after save/cancel the existing
-    // return handler sends the user back to Sales > Customer.
+    // Keep the Customer directory visible behind the centered create modal.
     window.__returnToCustomerDirectory = true;
-    const customerButton = document.querySelector('[data-customer-nav="true"]');
-    showPage('sales', customerButton || null);
     await openCustomerModule();
 }
 
@@ -5956,11 +5954,22 @@ async function openCustomerModule() {
             currentSO: currentSO
         };
 
-        /* Show New Customer as its regular Sales Order section.
-           Only the Cancel action opens a confirmation modal. */
-        customerArea.classList.remove("customer-area-modal");
-        customerArea.removeAttribute("role");
-        customerArea.style.display = "block";
+        /* Render the existing customer form as a true viewport modal.
+           Move it out of the hidden Sales module/page so it can overlay
+           the Customer directory without navigating away from it. */
+        if (!customerAreaOriginalParent) {
+            customerAreaOriginalParent = customerArea.parentNode;
+            customerAreaOriginalNextSibling = customerArea.nextSibling;
+        }
+        if (customerArea.parentNode !== document.body) {
+            document.body.appendChild(customerArea);
+        }
+        customerArea.classList.add("customer-area-modal");
+        customerArea.setAttribute("role", "dialog");
+        customerArea.setAttribute("aria-modal", "true");
+        customerArea.setAttribute("aria-label", "Create New Customer");
+        document.body.classList.add("customer-form-modal-open");
+        customerArea.style.display = "flex";
         /* =============================================
            HIDE SALES ORDER LIST
         ============================================== */
@@ -6548,7 +6557,19 @@ function closeCustomerFromSalesOrder() {
         customerArea.style.display = "none";
         customerArea.classList.remove("customer-area-modal");
         customerArea.removeAttribute("role");
+        customerArea.removeAttribute("aria-modal");
+        customerArea.removeAttribute("aria-label");
         customerArea.innerHTML = "";
+        document.body.classList.remove("customer-form-modal-open");
+        if (customerAreaOriginalParent) {
+            if (customerAreaOriginalNextSibling && customerAreaOriginalNextSibling.parentNode === customerAreaOriginalParent) {
+                customerAreaOriginalParent.insertBefore(customerArea, customerAreaOriginalNextSibling);
+            } else {
+                customerAreaOriginalParent.appendChild(customerArea);
+            }
+            customerAreaOriginalParent = null;
+            customerAreaOriginalNextSibling = null;
+        }
     }
 
     /* Restore the exact section/view that was active before New Customer opened. */
