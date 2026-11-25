@@ -439,6 +439,15 @@ case "createPayment":
     case "requestCenterUpdateStatus":
       return requestCenterUpdateStatus(payload);
 
+    case "helpFeedbackSubmit":
+      return helpFeedbackSubmit(payload);
+
+    case "helpFeedbackGet":
+      return helpFeedbackGet(payload);
+
+    case "helpFeedbackUpdate":
+      return helpFeedbackUpdate(payload);
+
 
     /* =====================================================
        UNKNOWN ACTION
