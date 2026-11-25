@@ -905,16 +905,16 @@
                     </div>
                     <div class="request-my-work-grid">
                         <article class="request-list-panel">
-                            <div class="request-list-title"><div><h3>My Submitted Requests</h3><p>Payment Request, Cash Advance and Revolving Fund</p></div><span class="request-list-count">0</span></div>
-                            <div class="request-empty-state"><span class="request-empty-icon">▤</span><strong>No submitted requests yet</strong><p>Your requests will appear here after request submission and backend connection.</p></div>
+                            <div class="request-list-title"><div><h3>My Submitted Requests</h3><p>Payment Request, Cash Advance and Revolving Fund</p></div><span class="request-list-count" id="myRequestCount">0</span></div>
+                            <div class="request-empty-state" id="myRequestList"><span class="request-empty-icon">▤</span><strong>No submitted requests yet</strong><p>Your submitted requests will appear here.</p></div>
                         </article>
                         <article class="request-list-panel">
-                            <div class="request-list-title"><div><h3>My Cash Advances</h3><p>Personal CA balance and liquidation tracking</p></div><span class="request-list-count">0</span></div>
+                            <div class="request-list-title"><div><h3>My Cash Advances</h3><p>Personal CA balance and liquidation tracking</p></div><span class="request-list-count" id="myCaCount">0</span></div>
                             <div class="request-ca-summary">
-                                <div><span>Not Yet Liquidated</span><strong>₱0.00</strong></div>
-                                <div><span>Remaining Balance</span><strong>₱0.00</strong></div>
+                                <div><span>Not Yet Liquidated</span><strong id="myCaOutstanding">₱0.00</strong></div>
+                                <div><span>Remaining Balance</span><strong id="myCaBalance">₱0.00</strong></div>
                             </div>
-                            <div class="request-empty-state request-empty-compact"><strong>No cash advance records</strong><p>Only cash advances belonging to your account should appear in this list.</p></div>
+                            <div class="request-empty-state request-empty-compact" id="myCaList"><strong>No cash advance records</strong><p>Only approved and released cash advances belonging to your account appear here.</p></div>
                         </article>
                     </div>
                     <div class="request-display-note">Display preview: these are empty personal lists. Live request records, account-level filtering and accounting access controls will be connected to Apps Script later.</div>
@@ -3963,9 +3963,9 @@ document.addEventListener(
 <script src="js/sales-order.js?v=20261124-customer-directory01"></script>
 <script src="js/role-action-visibility.js?v=20261124-menu-visible01"></script>
 <script src="js/messages.js?v=20261109-sendstatus01"></script>
-<script src="js/request-center.js?v=20261124-01"></script>
-<script src="js/liquidation.js?v=20261124-02"></script>
-<script src="js/accounting-request-monitoring.js?v=20261124-workspace01"></script>
+<script src="js/request-center.js?v=20261125-live01"></script>
+<script src="js/liquidation.js?v=20261125-live01"></script>
+<script src="js/accounting-request-monitoring.js?v=20261125-live01"></script>
 <script src="js/system-maintenance.js?v=20261110-brand02"></script>
 <script src="js/system-monitor.js?v=20261110-admin-monitor03"></script>
 
