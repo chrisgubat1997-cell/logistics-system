@@ -1,7 +1,7 @@
 /* LOGIS-TECH JO Register. Server validates session, username and role for every request. */
 (function () {
   "use strict";
-  const API = "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+  const API = "https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
   let initialized = false;
   let orders = [];
   let selectedCard = "all";
