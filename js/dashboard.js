@@ -522,7 +522,7 @@
     }
 
     function updateProductionAccuracy(data) {
-        const ids = ["productionAccuracyRate","productionAccuracyRingValue","productionQtyReceived","productionQtyCompleted","productionQtyBalance","productionCompletionRate","productionAheadQty","productionOnTimeQty","productionDelayedQty","productionClassifiedTotal","productionAccuracyBasis","productionAccuracyNote"];
+        const ids = ["productionAccuracyRate","productionAccuracyRingValue","productionQtyReceived","productionQtyReceivedToDate","productionQtyCompleted","productionQtyBalance","productionCompletionRate","productionAheadQty","productionOnTimeQty","productionDelayedQty","productionClassifiedTotal","productionAccuracyBasis","productionAccuracyNote"];
         if (!data || data.success === false) {
             ids.forEach(function(id) { setText(id, "—"); });
             setText("productionAccuracyNote", data && data.message ? data.message : "Unable to load production accuracy. Check Apps Script deployment and access.");
@@ -540,6 +540,7 @@
         if (ring) ring.style.background = "conic-gradient(#16865B 0deg, #16865B " + (accuracy * 3.6) + "deg, #DDE7EF " + (accuracy * 3.6) + "deg, #DDE7EF 360deg)";
         setText("productionAccuracyBasis", fmt(data.onTimeQty) + " On Time / " + fmt(data.classifiedCompletedQty) + " classified completed");
         setText("productionQtyReceived", fmt(data.receivedThisMonth));
+        setText("productionQtyReceivedToDate", fmt(data.receivedToDate));
         setText("productionQtyCompleted", fmt(data.completedThisMonth));
         setText("productionQtyBalance", fmt(data.remainingBalance));
         setText("productionCompletionRate", pct(data.completionRate));
