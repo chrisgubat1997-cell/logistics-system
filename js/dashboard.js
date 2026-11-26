@@ -536,6 +536,8 @@
         const accuracy = Math.max(0, Math.min(100, n(data.onTimeAccuracy)));
         setText("productionAccuracyRate", pct(accuracy));
         setText("productionAccuracyRingValue", pct(accuracy));
+        const ring = document.getElementById("productionAccuracyRing");
+        if (ring) ring.style.background = "conic-gradient(#16865B 0deg, #16865B " + (accuracy * 3.6) + "deg, #DDE7EF " + (accuracy * 3.6) + "deg, #DDE7EF 360deg)";
         setText("productionAccuracyBasis", fmt(data.onTimeQty) + " On Time / " + fmt(data.classifiedCompletedQty) + " classified completed");
         setText("productionQtyReceived", fmt(data.receivedThisMonth));
         setText("productionQtyCompleted", fmt(data.completedThisMonth));
@@ -553,8 +555,11 @@
             setText(row[3], pct(percent));
         });
         const note = n(data.unclassifiedQty) > 0
-            ? fmt(data.unclassifiedQty) + " completed quantity has no RDD and is excluded from accuracy."
-            : "Accuracy excludes completed quantities without an applicable RDD. RDD is taken from the date saved when the completion was recorded.";
+            ? fmt(data.unclassifiedQty) + " completed quantity has no RDD and is excluded from accuracy. "
+            : "";
+        setText("productionAccuracyNote", note + (data.legacyBaselineIncluded
+            ? "Existing progress totals were imported using their last saved completion date; older split completion history may not be available. New updates record each quantity increase with its completion date and RDD."
+            : "New updates record each quantity increase with its completion date and RDD."));
         setText("productionAccuracyNote", note);
         renderProductionAccuracyTrend(Array.isArray(data.monthlyTrend) ? data.monthlyTrend : []);
     }
