@@ -72,7 +72,7 @@ function initializeReport() {
    LOAD ALL DATA
 ========================================================= */
 
-const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+const REPORT_API_URL = "https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
 async function reportApi(action) {
     const response = await fetch(REPORT_API_URL, {method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:action,data:{}})});
     if (!response.ok) throw new Error(action + " failed: HTTP " + response.status);
