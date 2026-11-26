@@ -13,7 +13,7 @@ async function loadFleetAnalyticsRecords(force=false){
     ).trim();
     if(!sessionToken) throw new Error("AUTH_REQUIRED: Session token not found. Please log out and log in again.");
 
-    const url="https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+    const url="https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
     const response=await fetch(url,{
         method:"POST",
         headers:{"Content-Type":"text/plain;charset=utf-8"},
