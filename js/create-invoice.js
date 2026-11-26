@@ -50,7 +50,7 @@ const SALES_ORDER_STORAGE_KEY =
 ====================================================== */
 
 const INVOICE_API_URL =
-    "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+    "https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
 
 /* Read the authenticated account on standalone pages and embedded views. */
 function getInvoiceSessionAccount() {
