@@ -142,8 +142,8 @@
                     result.message
                 )
                     ? (
-                        result.error ||
-                        result.message
+                        (result.error || result.message) +
+                        (result.diagnosticStep ? " [STEP: " + result.diagnosticStep + "]" : "")
                     )
                     : "Unknown API error."
             );
