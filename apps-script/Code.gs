@@ -290,6 +290,9 @@ case "deleteFleetRecord":
     case "getPlantMonitoringData":
       return getPlantMonitoringData(payload);
 
+    case "getProductionAccuracyDashboard":
+      return getProductionAccuracyDashboard(payload);
+
     case "savePlantItemProgress":
       return savePlantItemProgress(payload);
 
