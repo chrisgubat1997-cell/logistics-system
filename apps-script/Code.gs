@@ -365,6 +365,12 @@ case "deleteFleetRecord":
         payload
       );
 
+    case "updateCustomer":
+
+      return updateCustomer(
+        payload
+      );
+
 
 
     /* =====================================================
