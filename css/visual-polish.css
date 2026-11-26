@@ -1,0 +1,262 @@
+/* =========================================================
+   LOGIS-TECH — VISUAL POLISH / MOTION / FIT SYSTEM
+   Version: 20261126-visual-polish01
+   Presentation only. No workflow, data or permission changes.
+========================================================= */
+
+:root {
+  --visual-ease: cubic-bezier(.22, .68, 0, 1);
+  --visual-duration: 220ms;
+  --visual-radius: 12px;
+  --visual-border: var(--line, #dce6f1);
+  --visual-shadow: 0 2px 10px rgba(15, 35, 60, .045);
+  --visual-shadow-hover: 0 8px 22px rgba(15, 35, 60, .085);
+}
+
+/* Consistent, readable type without loading an external font dependency. */
+html, body, button, input, select, textarea {
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body { font-size: 13px; line-height: 1.5; }
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.22;
+  text-wrap: balance;
+}
+p, label, small, td, th, button, .btn {
+  overflow-wrap: anywhere;
+}
+.page-title, .so-page-title, .payment-page-title,
+.dashboard-header h1, .dashboard-page h1 {
+  line-height: 1.18;
+  letter-spacing: -.03em;
+}
+
+/* Logo marks: preserve the original proportions and prevent clipping/stretching. */
+.sidebar .logo,
+.sidebar .logo-brand,
+.dashboard-header-brand,
+.dashboard-header-brand > div {
+  min-width: 0;
+}
+.sidebar .sidebar-logo-mark,
+.dashboard-logo-image,
+.logo img,
+.company-logo,
+.brand-logo,
+.header-logo {
+  object-fit: contain !important;
+  object-position: center !important;
+  flex-shrink: 0;
+}
+.sidebar .sidebar-logo-mark {
+  width: 42px !important;
+  height: 42px !important;
+  padding: 3px !important;
+  border-radius: 10px !important;
+}
+.sidebar .logo-brand strong {
+  font-size: 13px !important;
+  line-height: 1.15 !important;
+  letter-spacing: .045em !important;
+  white-space: nowrap;
+}
+.sidebar .logo-brand span {
+  font-size: 9px !important;
+  line-height: 1.2 !important;
+  letter-spacing: .18em !important;
+}
+.dashboard-logo-image {
+  width: 52px !important;
+  height: 52px !important;
+  padding: 5px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid var(--visual-border);
+}
+
+/* Keep text and controls inside their own boxes. */
+.main, .content, .page, .page > div,
+.sales-order-module, .delivery-module, .jo-module,
+.plant-monitoring, .fleet-analytics-page, .fleet-data-entry,
+.invoicing-container, .payment-module, .report-page,
+.settings-page, .rf-module, .create-so-container,
+.create-dr-page, .invoice-page, .create-payment-page,
+.customer-page, .about-page, .dashboard-page {
+  min-width: 0;
+  box-sizing: border-box;
+}
+button, .btn, input[type="button"], input[type="submit"] {
+  min-height: 34px;
+  line-height: 1.25;
+  white-space: normal;
+  text-wrap: pretty;
+}
+input:not([type="checkbox"]):not([type="radio"]),
+select, textarea {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  line-height: 1.35;
+}
+label {
+  display: block;
+  line-height: 1.35;
+}
+table {
+  max-width: 100%;
+}
+th, td {
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+/* Calm, consistent surfaces across all operational modules. */
+.sales-order-module .so-page-header,
+.delivery-module .page-header,
+.jo-module .jo-header,
+.plant-monitoring .plant-header,
+.fleet-analytics-page .fleet-header,
+.fleet-data-entry .fde-header,
+.invoicing-container .invoicing-header,
+.payment-module .payment-page-header,
+.report-page .report-header,
+.settings-page .settings-header,
+.rf-module .rf-header,
+.create-so-container .create-so-header,
+.create-dr-page .dr-header,
+.invoice-page .invoice-header,
+.create-payment-page .create-payment-header,
+.customer-page .customer-header,
+.dashboard-page .dashboard-header {
+  min-width: 0;
+  gap: 14px;
+}
+.sales-order-module .so-summary-card,
+.sales-order-module .so-table-card,
+.delivery-module .delivery-summary-card,
+.delivery-module .section-card,
+.jo-module .jo-panel,
+.plant-monitoring .plant-panel,
+.fleet-analytics-page .analytics-card,
+.fleet-data-entry .fde-section,
+.invoicing-container .invoice-section,
+.payment-module .payment-section,
+.report-page .report-panel,
+.settings-page .settings-card,
+.rf-module .rf-panel,
+.create-so-container .section,
+.create-dr-page .dr-card,
+.invoice-page .invoice-card,
+.create-payment-page .create-payment-card,
+.customer-page .customer-section {
+  min-width: 0;
+  box-shadow: var(--visual-shadow);
+  transition: border-color var(--visual-duration) var(--visual-ease),
+              box-shadow var(--visual-duration) var(--visual-ease);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .sales-order-module .so-summary-card:hover,
+  .sales-order-module .so-table-card:hover,
+  .delivery-module .section-card:hover,
+  .jo-module .jo-panel:hover,
+  .plant-monitoring .plant-panel:hover,
+  .fleet-analytics-page .analytics-card:hover,
+  .fleet-data-entry .fde-section:hover,
+  .invoicing-container .invoice-section:hover,
+  .payment-module .payment-section:hover,
+  .report-page .report-panel:hover,
+  .settings-page .settings-card:hover,
+  .rf-module .rf-panel:hover,
+  .create-so-container .section:hover,
+  .create-dr-page .dr-card:hover,
+  .invoice-page .invoice-card:hover,
+  .create-payment-page .create-payment-card:hover,
+  .customer-page .customer-section:hover {
+    box-shadow: var(--visual-shadow-hover);
+  }
+}
+
+/* Smooth, restrained feedback. No continuous or attention-grabbing motion. */
+.page { animation: visualPageEnter 240ms var(--visual-ease) both !important; }
+@keyframes visualPageEnter {
+  from { opacity: 0; transform: translate3d(0, 4px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.sidebar .menu-btn,
+.sidebar .nav-group-toggle,
+.sidebar .nav-group-chevron,
+button, .btn, a,
+input, select, textarea {
+  transition-timing-function: var(--visual-ease);
+}
+.sidebar .menu-btn {
+  transition-property: background-color, color, border-color, box-shadow;
+  transition-duration: 180ms;
+}
+button:not(:disabled):active, .btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+button:disabled, .btn:disabled {
+  cursor: not-allowed;
+  opacity: .58;
+}
+
+/* Focus rings remain visible but visually quiet. */
+:focus-visible {
+  outline-offset: 2px;
+}
+
+/* Dashboard runs in its own iframe, so it receives the same visual rules here. */
+.dashboard-page {
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.dashboard-page .dashboard-header-brand {
+  align-items: center;
+  gap: 15px;
+  min-width: 0;
+}
+.dashboard-page .dashboard-header-brand h1 {
+  margin: 2px 0 5px;
+}
+.dashboard-page .dashboard-header-brand p {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.dashboard-page .dashboard-summary-card,
+.dashboard-page .dashboard-panel,
+.dashboard-page .dashboard-section,
+.dashboard-page .production-accuracy-panel {
+  min-width: 0;
+}
+
+/* Small screens: allow controls and brand lockups to wrap naturally. */
+@media (max-width: 760px) {
+  .sidebar .logo { gap: 9px !important; }
+  .sidebar .sidebar-logo-mark { width: 38px !important; height: 38px !important; }
+  .dashboard-page .dashboard-header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .dashboard-page .dashboard-header-brand {
+    align-items: flex-start;
+  }
+  .dashboard-logo-image {
+    width: 44px !important;
+    height: 44px !important;
+  }
+}
+
+/* Respect accessibility preferences and avoid animation on reduced-motion devices. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto !important; }
+  *, *::before, *::after {
+    animation: none !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
