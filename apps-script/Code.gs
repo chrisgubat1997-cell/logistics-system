@@ -355,6 +355,10 @@ case "deleteFleetRecord":
       );
 
 
+    case "diagnoseCustomerWebAppWrite":
+      return diagnoseCustomerWebAppWrite_(payload);
+
+
     case "createCustomer":
 
       return createCustomer(
