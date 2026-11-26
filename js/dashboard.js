@@ -531,7 +531,7 @@
             return;
         }
         const n = value => Number(value) || 0;
-        const fmt = value => formatNumber(n(value)) + " pcs";
+        const fmt = value => formatNumber(n(value)) + " Assy";
         const pct = value => n(value).toFixed(1) + "%";
         const accuracy = Math.max(0, Math.min(100, n(data.onTimeAccuracy)));
         setText("productionAccuracyRate", pct(accuracy));
@@ -575,7 +575,7 @@
         chart.innerHTML = months.map(function(item) {
             const a=Number(item.ahead)||0, o=Number(item.onTime)||0, d=Number(item.delayed)||0, total=a+o+d;
             const ah=a/max*100, oh=o/max*100, dh=d/max*100;
-            const tooltip=item.label+" "+item.year+" | Ahead: "+formatNumber(a)+" pcs ("+(total?a/total*100:0).toFixed(1)+"%) | On Time: "+formatNumber(o)+" pcs ("+(total?o/total*100:0).toFixed(1)+"%) | Delayed: "+formatNumber(d)+" pcs ("+(total?d/total*100:0).toFixed(1)+"%) | Total: "+formatNumber(total)+" pcs";
+            const tooltip=item.label+" "+item.year+" | Ahead: "+formatNumber(a)+" Assy ("+(total?a/total*100:0).toFixed(1)+"%) | On Time: "+formatNumber(o)+" Assy ("+(total?o/total*100:0).toFixed(1)+"%) | Delayed: "+formatNumber(d)+" Assy ("+(total?d/total*100:0).toFixed(1)+"%) | Total: "+formatNumber(total)+" Assy";
             return '<div class="production-trend-month" title="'+escapeHtml(tooltip)+'" aria-label="'+escapeHtml(tooltip)+'"><strong>'+formatNumber(total)+'</strong><div class="production-trend-stack"><i class="ahead" style="height:'+ah+'%"></i><i class="ontime" style="height:'+oh+'%"></i><i class="delayed" style="height:'+dh+'%"></i></div><span>'+escapeHtml(item.label)+'</span></div>';
         }).join("");
     }
