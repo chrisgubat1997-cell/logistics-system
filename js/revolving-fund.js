@@ -1,6 +1,6 @@
 /* LOGIS-TECH Revolving Fund frontend; Code.gs must implement the documented actions. */
 (function(){ "use strict";
-const API="https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+const API="https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
 let initialized=false, selectedCA=null, state={groups:[],transactions:[],cashAdvances:[],summary:{},currentGroup:null,viewingPending:true};
 const $=id=>document.getElementById(id), money=v=>new Intl.NumberFormat("en-PH",{style:"currency",currency:"PHP"}).format(Number(v)||0), safe=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function role(){try{const u=JSON.parse(localStorage.getItem("logitechUser")||"{}"),a=u.account||u.user||u;return String(a.role||a.ROLE||a.accountType||a.account_type||a.accounttype||a.type||"").trim().toUpperCase()}catch(e){return""}}
