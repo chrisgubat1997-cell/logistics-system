@@ -525,6 +525,50 @@
             <p class="dashboard-data-note">Sales Orders are posted to Production after JO coordination. Item-level completed, ongoing, on-hold and pending quantities are maintained in Plant Monitoring.</p>
         </div>
 
+        <!-- MONTHLY PRODUCTION PERFORMANCE -->
+        <section class="dashboard-panel production-accuracy-panel" data-role-scope="production">
+            <div class="dashboard-panel-header production-accuracy-header">
+                <div>
+                    <span class="panel-eyebrow">PLANT PERFORMANCE</span>
+                    <h2>Monthly Production Performance</h2>
+                    <p class="production-accuracy-subtitle">Production accuracy based on posted Sales Orders, completed quantities and applicable RDD.</p>
+                </div>
+                <div class="production-period-controls">
+                    <label for="productionAccuracyMonth">Month</label>
+                    <select id="productionAccuracyMonth" class="dashboard-period-select"></select>
+                    <label for="productionAccuracyYear">Year</label>
+                    <select id="productionAccuracyYear" class="dashboard-period-select"></select>
+                </div>
+            </div>
+            <div class="production-accuracy-hero">
+                <div>
+                    <span class="production-accuracy-kicker">ON-TIME PRODUCTION ACCURACY</span>
+                    <strong id="productionAccuracyRate">—</strong>
+                    <small id="productionAccuracyBasis">Waiting for production records</small>
+                </div>
+                <div class="production-accuracy-ring" id="productionAccuracyRing"><span id="productionAccuracyRingValue">—</span></div>
+            </div>
+            <div class="production-accuracy-metrics">
+                <div class="production-accuracy-metric"><span>Qty Received This Month</span><strong id="productionQtyReceived">—</strong><small>Posted Sales Orders</small></div>
+                <div class="production-accuracy-metric"><span>Completed This Month</span><strong id="productionQtyCompleted">—</strong><small>Recorded completion movements</small></div>
+                <div class="production-accuracy-metric balance"><span>Remaining Balance</span><strong id="productionQtyBalance">—</strong><small>All posted orders to date</small></div>
+                <div class="production-accuracy-metric"><span>Completion Rate</span><strong id="productionCompletionRate">—</strong><small>Cumulative completed / received</small></div>
+            </div>
+            <div class="production-accuracy-classification">
+                <div class="production-accuracy-section-title"><strong>Completed Quantity Classification</strong><span id="productionClassifiedTotal">—</span></div>
+                <div class="production-class-row ahead"><div><span>Ahead</span><strong id="productionAheadQty">—</strong></div><div class="production-class-track"><i id="productionAheadBar"></i></div><small id="productionAheadPct">—</small></div>
+                <div class="production-class-row ontime"><div><span>On Time</span><strong id="productionOnTimeQty">—</strong></div><div class="production-class-track"><i id="productionOnTimeBar"></i></div><small id="productionOnTimePct">—</small></div>
+                <div class="production-class-row delayed"><div><span>Delayed</span><strong id="productionDelayedQty">—</strong></div><div class="production-class-track"><i id="productionDelayedBar"></i></div><small id="productionDelayedPct">—</small></div>
+                <p class="production-accuracy-note" id="productionAccuracyNote">Accuracy excludes completed quantities without an applicable RDD.</p>
+            </div>
+            <div class="production-monthly-trend">
+                <div class="production-accuracy-section-title"><strong>Monthly Completion Trend</strong><span>Last 6 months</span></div>
+                <div id="productionAccuracyTrend" class="production-trend-chart"><div class="collections-empty">Loading monthly production trend…</div></div>
+                <div class="production-trend-legend"><span><i class="ahead"></i>Ahead</span><span><i class="ontime"></i>On Time</span><span><i class="delayed"></i>Delayed</span></div>
+            </div>
+            <p class="dashboard-data-note">Received quantity is counted by Production posting date. Remaining balance includes carry-over orders. Completion accuracy is classified using the RDD saved at the time the completed quantity was recorded.</p>
+        </section>
+
         <!-- =================================================
              DELIVERY PERFORMANCE
         ================================================== -->
