@@ -375,7 +375,7 @@ async function populateAnalyticsVehicleFilter() {
     const select = document.getElementById("vehicleFilter");
     if (!select) return;
     const previousValue = select.value || window.FleetAnalytics.filters.vehicle || "ALL";
-    const apiUrl = "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+    const apiUrl = "https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
 
     try {
         const savedUser = JSON.parse(localStorage.getItem("logitechUser") || "{}");
