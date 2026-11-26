@@ -3023,7 +3023,7 @@ body {
 .production-accuracy-ring{width:76px;height:76px;flex:0 0 76px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#16865B 0deg,#16865B 0deg,#DDE7EF 0deg);position:relative}
 .production-accuracy-ring:before{content:"";position:absolute;inset:7px;border-radius:50%;background:#fff}
 .production-accuracy-ring span{position:relative;z-index:1;font-size:12px;font-weight:850;color:#17365B}
-.production-accuracy-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.production-accuracy-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
 .production-accuracy-metric{display:flex;flex-direction:column;gap:4px;min-width:0;padding:12px;border:1px solid #E1E9F1;border-radius:10px;background:#fff}
 .production-accuracy-metric span{font-size:9px;font-weight:800;color:#687B91}
 .production-accuracy-metric strong{font-size:clamp(15px,1.6vw,21px);line-height:1.2;color:#123B69;overflow-wrap:anywhere}
