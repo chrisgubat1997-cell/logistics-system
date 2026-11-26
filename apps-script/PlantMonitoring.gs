@@ -160,11 +160,13 @@ function ensurePlantCompletionBaselines_(){
   const p=getPlantProgressSheet_(),b=getPlantCompletionBatchSheet_(),pv=p.getDataRange().getValues(),ph=plantProgressHeaderMap_(p),bv=b.getDataRange().getValues(),bh={};
   b.getRange(1,1,1,b.getLastColumn()).getValues()[0].forEach((v,i)=>{const k=String(v||"").trim().toUpperCase();if(k)bh[k]=i;});
   const logged={};for(let i=1;i<bv.length;i++){const id=String(bv[i][bh.SO_ITEM_ID]||"").trim();if(id)logged[id]=true;}
+  const soValues=getSheet(CONFIG.SHEETS.SALES_ORDERS).getDataRange().getValues(),soHeaders=soValues[0].map(v=>String(v||"").trim().toUpperCase()),soCol=soHeaders.indexOf("SO_NUMBER"),rddCol=soHeaders.indexOf("REQUIRED_DELIVERY_DATE"),rddBySO={};
+  for(let i=1;i<soValues.length;i++){const so=String(soValues[i][soCol]||"").trim();if(so)rddBySO[so]=rddCol>=0?plantDateKey_(soValues[i][rddCol]):"";}
   const rows=[],now=formatDateTime(new Date());
   for(let i=1;i<pv.length;i++){
     const row=pv[i],id=String(row[ph.SO_ITEM_ID]||"").trim(),qty=Number(row[ph.COMPLETED_QTY]||0);
     if(!id||qty<=0||logged[id])continue;
-    const date=plantDateKey_(ph.COMPLETED_DATE!=null?row[ph.COMPLETED_DATE]:""),so=String(row[ph.SO_NUMBER]||""),rdd=plantGetOrderRDD_(so).rdd||"";
+    const date=plantDateKey_(ph.COMPLETED_DATE!=null?row[ph.COMPLETED_DATE]:""),so=String(row[ph.SO_NUMBER]||""),rdd=rddBySO[so]||"";
     const data={BATCH_ID:"LEGACY-"+id,SO_ITEM_ID:id,SO_NUMBER:so,ITEM_NUMBER:String(row[ph.ITEM_NUMBER]||""),ITEM_NAME:String(row[ph.ITEM_NAME]||""),COMPLETED_QTY:qty,COMPLETED_DATE:date,RDD_AT_COMPLETION:rdd,CLASSIFICATION:plantCompletionClass_(date,rdd),BATCH_TYPE:"LEGACY_BASELINE",RECORDED_AT:now,RECORDED_BY:"LEGACY_IMPORT"};
     rows.push(PLANT_COMPLETION_HEADERS_.map(k=>data[k]===undefined?"":data[k]));logged[id]=true;
   }
