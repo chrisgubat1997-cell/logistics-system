@@ -1,5 +1,5 @@
 (function(){ "use strict";
-const API="https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+const API="https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
 function ready(fn){if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",fn);else fn();}
 function account(){try{const x=JSON.parse(localStorage.getItem("logitechUser")||"{}");return x.account||x.user||x.profile||x;}catch(e){return {};}}
 async function api(action,data){const a=account(),response=await fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action,data:Object.assign({sessionToken:a.sessionToken||a.session_token||""},data||{})})});const r=await response.json();if(!response.ok||r.success===false)throw new Error(r.message||r.error||"Accounting API failed.");return r;}
