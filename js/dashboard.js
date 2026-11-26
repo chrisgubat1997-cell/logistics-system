@@ -559,7 +559,7 @@
             ? fmt(data.unclassifiedQty) + " completed quantity has no RDD and is excluded from accuracy. "
             : "";
         setText("productionAccuracyNote", note + (data.legacyBaselineIncluded
-            ? "Existing progress totals were imported using their last saved completion date; older split completion history may not be available. New updates record each quantity increase with its completion date and RDD."
+            ? "Existing progress totals were imported using their last saved completion date (or last progress update date if missing); older split completion history may not be available. New updates record each quantity increase with its completion date and RDD."
             : "New updates record each quantity increase with its completion date and RDD."));
         renderProductionAccuracyTrend(Array.isArray(data.monthlyTrend) ? data.monthlyTrend : []);
     }
