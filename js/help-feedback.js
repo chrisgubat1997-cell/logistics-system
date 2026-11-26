@@ -1,7 +1,7 @@
 /* LOGIS-TECH Help & Feedback — shared Apps Script integration */
 (function(){
  "use strict";
- const API="https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+ const API="https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
  const ROOT_ID="helpFeedbackModule";
  const types=[
   {id:"ERROR",title:"Report an Error",desc:"Report technical bugs, incorrect calculations, or buttons that do not work.",icon:"🐞"},
