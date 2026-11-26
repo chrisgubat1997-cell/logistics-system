@@ -1,0 +1,283 @@
+/* =========================================================
+   LOGIS-TECH — CORPORATE INDUSTRIAL UI
+   Shared visual refinement for GEMCOR / Greenlight workflows.
+   Uses the active company palette from gemlight-theme.css.
+   Presentation only: no workflow, API, permission or data changes.
+   Version: 20261126-enterprise01
+========================================================= */
+
+:root {
+  --ui-radius: 14px;
+  --ui-radius-sm: 9px;
+  --ui-shadow: 0 3px 14px rgba(8, 35, 67, .055);
+  --ui-shadow-hover: 0 10px 26px rgba(8, 35, 67, .10);
+  --ui-space: clamp(14px, 1.8vw, 24px);
+}
+
+/* Corporate application canvas */
+body {
+  background: var(--app-bg, #f3f7fc) !important;
+  color: var(--ink, #172b45);
+}
+.main { min-width: 0; background: var(--app-bg, #f3f7fc) !important; }
+.content { padding: clamp(16px, 2vw, 26px) !important; }
+
+/* Navigation: industrial, calm and legible */
+.sidebar {
+  border-right: 1px solid rgba(255,255,255,.08);
+  box-shadow: 5px 0 24px rgba(5, 25, 48, .12) !important;
+}
+.sidebar .logo {
+  min-height: 76px;
+  gap: 10px;
+  padding: 16px 18px;
+}
+.sidebar .sidebar-logo-mark {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  flex: 0 0 36px;
+}
+.sidebar .logo-brand {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+  letter-spacing: .08em;
+}
+.sidebar .logo-brand strong {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 850;
+}
+.sidebar .logo-brand span {
+  margin: 4px 0 0;
+  color: rgba(255,255,255,.68);
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: .2em;
+}
+.sidebar .menu { margin-top: 14px; padding-inline: 10px; }
+.sidebar .menu-btn {
+  min-height: 40px;
+  margin-bottom: 4px;
+  padding: 9px 12px;
+  border-radius: 9px !important;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: .005em;
+}
+.sidebar .sidebar-item-icon {
+  width: 22px;
+  min-width: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  filter: saturate(.82);
+}
+.sidebar .menu-btn.active {
+  box-shadow: inset 3px 0 0 var(--brand-green, #a6ce39), 0 5px 14px rgba(0,0,0,.10) !important;
+}
+
+/* Header: clear company context and account actions */
+.topbar {
+  min-height: 64px;
+  height: auto;
+  padding: 10px clamp(16px, 2vw, 26px);
+  gap: 14px;
+  border-bottom: 1px solid var(--line, #dce6f1) !important;
+}
+.user-area { flex-wrap: wrap; gap: 8px; }
+#welcomeUser {
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: .055em;
+}
+.company-context {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 31px;
+  padding: 6px 11px;
+  border: 1px solid var(--line, #dce6f1);
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .09em;
+}
+.company-switch-btn {
+  min-height: 32px;
+  padding: 7px 12px !important;
+  border-radius: 8px !important;
+  font-size: 9px !important;
+  font-weight: 850 !important;
+  letter-spacing: .035em;
+}
+.profile-btn, .logout-btn {
+  min-height: 32px;
+  padding: 7px 11px !important;
+  border-radius: 8px !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .025em;
+}
+.global-so-search { max-width: min(340px, 32vw); }
+
+/* Shared cards and panels */
+.section,
+.dashboard-panel,
+.dashboard-summary-card,
+.dashboard-card,
+.kpi-card,
+.metric-card,
+.stat-card,
+.summary-card,
+.report-card,
+.report-panel,
+.chart-card,
+.fde-panel,
+.fde-card,
+.fleet-card,
+.analytics-card,
+.settings-card,
+.invoicing-card,
+.payment-card,
+.so-card,
+.dr-card,
+.table-card,
+.form-card,
+.customer-card,
+.vehicle-card,
+.jo-card,
+.message-panel,
+.rf-card {
+  border-radius: var(--ui-radius) !important;
+  border-color: var(--line, #dce6f1) !important;
+  box-shadow: var(--ui-shadow);
+}
+.dashboard-panel,
+.dashboard-summary-card { background: var(--surface, #fff); }
+.section:hover, .table-card:hover, .form-card:hover {
+  box-shadow: var(--ui-shadow-hover);
+}
+
+/* Consistent action hierarchy */
+button, .btn, input[type=button], input[type=submit] {
+  font-weight: 700;
+  letter-spacing: .005em;
+}
+button:focus-visible, a:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--brand-green, #a6ce39) 35%, transparent);
+  outline-offset: 2px;
+}
+.btn-primary, .primary-btn, .primary-button, .so-primary-btn,
+.payment-primary-button, button.primary, button[type=submit] {
+  border-radius: 8px;
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--brand-blue, #073b78) 15%, transparent);
+}
+
+/* Inputs: clear, consistent and accessible */
+input:not([type=checkbox]):not([type=radio]),
+select, textarea {
+  min-height: 35px;
+  border-radius: 8px;
+  background-color: var(--surface, #fff);
+}
+label { font-weight: 700; }
+
+/* Data tables: enterprise reporting style */
+table { border-collapse: separate; border-spacing: 0; }
+thead th, table thead th {
+  padding-top: 11px;
+  padding-bottom: 11px;
+  font-size: 9px;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+tbody td { vertical-align: middle; }
+tbody tr:last-child td { border-bottom-color: transparent; }
+
+/* Dashboard frame and common responsive behavior */
+.dashboard-frame {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+}
+@media (max-width: 1100px) {
+  .topbar { align-items: flex-start; }
+  .user-area { justify-content: flex-end; }
+}
+@media (max-width: 760px) {
+  .content { padding: 12px !important; }
+  .topbar { padding: 10px 12px; }
+  .user-area { justify-content: flex-start; }
+  .global-so-search { max-width: 100%; width: 100%; order: 5; }
+  .company-context { order: 1; }
+  #welcomeUser { order: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sidebar .menu-btn, .section, .table-card, .form-card {
+    transition: none !important;
+  }
+}
+
+/* Dashboard iframe uses the same company-aware design tokens. */
+.dashboard-page {
+  --dash-accent: var(--brand-blue, #073b78);
+  --dash-accent-deep: var(--brand-blue-deep, #052b59);
+  --dash-accent-soft: var(--brand-blue-soft, #e8f1fc);
+  --dash-green: var(--brand-green, #a6ce39);
+  color: var(--ink, #172b45);
+}
+.dashboard-page .dashboard-header {
+  padding: 18px 20px;
+  border: 1px solid var(--line, #dce6f1);
+  border-radius: 16px;
+  background: var(--surface, #fff);
+  box-shadow: var(--ui-shadow);
+}
+.dashboard-page .dashboard-eyebrow,
+.dashboard-page .panel-eyebrow {
+  color: var(--dash-green) !important;
+  font-weight: 850;
+  letter-spacing: .13em;
+}
+.dashboard-page .dashboard-header h1 {
+  color: var(--dash-accent-deep) !important;
+  letter-spacing: -.035em;
+}
+.dashboard-page .dashboard-summary-card,
+.dashboard-page .dashboard-panel {
+  border: 1px solid var(--line, #dce6f1);
+  border-radius: 14px;
+  box-shadow: var(--ui-shadow);
+}
+.dashboard-page .dashboard-summary-card:hover,
+.dashboard-page .dashboard-panel:hover {
+  box-shadow: var(--ui-shadow-hover);
+}
+.dashboard-page .dashboard-refresh-btn {
+  border-radius: 8px;
+  background: var(--dash-accent);
+  color: #fff;
+  font-weight: 800;
+}
+.dashboard-page .dashboard-period-select,
+.dashboard-page select {
+  border-radius: 8px;
+}
+html[data-company="GREENLIGHT"] .dashboard-page {
+  --dash-accent: #176b4a;
+  --dash-accent-deep: #104b36;
+  --dash-accent-soft: #e5f2ea;
+  --dash-green: #65a879;
+}
+html[data-company="GREENLIGHT"] .dashboard-page .dashboard-refresh-btn {
+  background: #176b4a;
+}
+html[data-theme="dark"] .dashboard-page .dashboard-header {
+  background: #151f30;
+  border-color: #2b3950;
+}
