@@ -3218,7 +3218,7 @@ async function loadAboutModule() {
     if (!container || aboutModuleLoaded) return;
 
     try {
-        const response = await fetch('pages/about.html?v=20261125-premium01', { cache: 'no-store' });
+        const response = await fetch('pages/about.html?v=20261126-industrial-motion01', { cache: 'no-store' });
         if (!response.ok) throw new Error('HTTP ' + response.status + ' - ' + response.statusText);
         const html = await response.text();
         if (!html || !html.trim()) throw new Error('about.html is empty.');
