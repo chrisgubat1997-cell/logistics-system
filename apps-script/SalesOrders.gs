@@ -1282,9 +1282,8 @@ const now =
       payload.salesEngineer ||
       payload.se ||
       "",
+      "", // JO is assigned later through the JO Register
 
-      payload.jobOrder ||
-      "",
 
       Number(
         payload.subtotal ||
