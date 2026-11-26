@@ -57,3 +57,59 @@ html[data-theme="dark"] .about-release-status{background:#392d1a;color:#f4d28e}
 @media(max-width:1000px){.about-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.about-stack{grid-template-columns:1fr}.about-stack-link{transform:rotate(90deg);justify-self:center}}
 @media(max-width:650px){.about-page{gap:12px}.about-hero{min-height:0;padding:20px;border-radius:16px}.about-hero-top{align-items:flex-start}.about-brand-label{font-size:7px}.about-status{font-size:7px;padding:7px}.about-logo-wrap{width:43px;height:43px}.about-hero-copy{margin-top:23px}.about-hero-foot{font-size:7px;flex-direction:column}.about-feature-grid,.about-bottom-grid{grid-template-columns:1fr}.about-stack{gap:7px}.about-footer{font-size:7px;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){.about-page *{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* =========================================================
+   INDUSTRIAL MOTION — electrical panel manufacturing
+   Subtle cable flow, cable-tray movement and panel indicators.
+========================================================= */
+.about-hero { min-height: 350px; }
+.about-hero-copy { position: relative; z-index: 2; max-width: 670px; }
+.about-industrial-scene {
+  position: absolute;
+  z-index: 0;
+  right: 1.5%;
+  bottom: 18px;
+  width: min(49%, 620px);
+  pointer-events: none;
+  opacity: .92;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 17%, #000 100%);
+}
+.about-industrial-svg { display: block; width: 100%; height: auto; overflow: visible; }
+.scene-cable { animation: cableFlow 5s linear infinite; }
+.scene-cable-two { animation-duration: 7s; animation-direction: reverse; opacity: .8; }
+.scene-led { animation: panelPulse 2.8s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.scene-cabinet-small { animation: cabinetFloat 6s ease-in-out infinite; }
+.scene-coil { animation: coilFloat 5.5s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.scene-tray { animation: trayShimmer 4.5s ease-in-out infinite; }
+.about-scene-caption {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-right: 7%;
+  color: rgba(231,243,255,.62);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .13em;
+  white-space: nowrap;
+}
+.about-scene-caption i { width: 4px; height: 4px; border-radius: 50%; background: #b9dc65; }
+@keyframes cableFlow { to { stroke-dashoffset: -110; } }
+@keyframes panelPulse { 0%,100% { opacity: .55; transform: scale(.85); } 50% { opacity: 1; transform: scale(1.2); } }
+@keyframes cabinetFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes coilFloat { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-4px) rotate(2deg); } }
+@keyframes trayShimmer { 0%,100% { opacity: .58; } 50% { opacity: .95; } }
+@media (max-width: 900px) {
+  .about-industrial-scene { right: -5%; width: 52%; opacity: .55; }
+  .about-hero-copy { max-width: 74%; }
+}
+@media (max-width: 650px) {
+  .about-hero { padding-bottom: 190px; }
+  .about-hero-copy { max-width: 100%; }
+  .about-industrial-scene { right: -7%; bottom: 8px; width: 96%; opacity: .78; }
+  .about-scene-caption { font-size: 6px; padding-right: 5%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .about-industrial-scene *, .about-industrial-scene { animation: none !important; }
+}
