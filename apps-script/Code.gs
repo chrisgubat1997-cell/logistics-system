@@ -316,6 +316,13 @@ case "deleteFleetRecord":
       );
 
 
+    case "updateSalesOrder":
+
+      return updateSalesOrder(
+        payload
+      );
+
+
     case "getSOTransactionDetails":
 
       return getSOTransactionDetails(
