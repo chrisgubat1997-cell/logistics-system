@@ -560,7 +560,6 @@
         setText("productionAccuracyNote", note + (data.legacyBaselineIncluded
             ? "Existing progress totals were imported using their last saved completion date; older split completion history may not be available. New updates record each quantity increase with its completion date and RDD."
             : "New updates record each quantity increase with its completion date and RDD."));
-        setText("productionAccuracyNote", note);
         renderProductionAccuracyTrend(Array.isArray(data.monthlyTrend) ? data.monthlyTrend : []);
     }
 
