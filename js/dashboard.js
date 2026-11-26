@@ -107,6 +107,7 @@
     function initializeDashboard() {
 
         updateDashboardDate();
+        initializeProductionAccuracyFilters();
         applyDashboardRoleVisibility();
         bindDashboardEvents();
         refreshDashboard();
@@ -129,6 +130,11 @@
             });
         }
 
+
+        ["productionAccuracyMonth", "productionAccuracyYear"].forEach(function (id) {
+            const control = document.getElementById(id);
+            if (control) control.addEventListener("change", function () { refreshDashboard(true); });
+        });
 
         const periodSelect =
             document.getElementById("salesOrderPeriod");
@@ -179,6 +185,7 @@
             applyDashboardRoleVisibility();
             updateSummaryCards(data);
             updateJOProductionOverview(data);
+            updateProductionAccuracy(data.productionAccuracy);
             updateCollectionsOverview(data);
             updateSalesOrderPerformance(data);
             updateDeliveryPerformance(data);
@@ -209,7 +216,8 @@
             ["salesOrders", "getSalesOrders"],
             ["deliveryReceipts", "getDeliveryReceipts"],
             ["invoices", "getInvoices"],
-            ["payments", "getPayments"]
+            ["payments", "getPayments"],
+            ["productionAccuracy", "getProductionAccuracyDashboard"]
         ];
 
         const results = await Promise.all(
@@ -227,9 +235,9 @@
                         },
                         body: JSON.stringify({
                             action: entry[1],
-                            data: {
-                                sessionToken: sessionToken
-                            }
+                            data: entry[0] === "productionAccuracy"
+                                ? Object.assign({ sessionToken: sessionToken }, getProductionAccuracyPeriod())
+                                : { sessionToken: sessionToken }
                         })
                     });
 
@@ -243,7 +251,7 @@
                         throw new Error(result.error || (entry[1] + " failed"));
                     }
 
-                    return [entry[0], normalizeDashboardRecords(result, entry[0])];
+                    return [entry[0], entry[0] === "productionAccuracy" ? result : normalizeDashboardRecords(result, entry[0])];
                 } catch (error) {
                     console.warn("Dashboard API request failed:", entry[1], error);
                     return [entry[0], null];
@@ -293,7 +301,8 @@
             deliveryReceipts: deliveryReceipts,
             invoices: invoices,
             payments: payments,
-            fleet: fleet
+            fleet: fleet,
+            productionAccuracy: apiData.productionAccuracy
         };
     }
 
@@ -481,6 +490,89 @@
     function isDashboardPostedToProduction(record) {
         const value = normalizeStatus(getDashboardField(record, DASHBOARD_POSTED_FIELDS));
         return ["posted", "yes", "true", "1", "sent"].includes(value);
+    }
+
+
+    function initializeProductionAccuracyFilters() {
+        const monthSelect = document.getElementById("productionAccuracyMonth");
+        const yearSelect = document.getElementById("productionAccuracyYear");
+        const now = new Date();
+        if (monthSelect && !monthSelect.options.length) {
+            monthSelect.innerHTML = Array.from({length:12}, function(_, i) {
+                const date = new Date(2020, i, 1);
+                return '<option value="' + (i + 1) + '">' + escapeHtml(date.toLocaleDateString("en-PH", {month:"long"})) + '</option>';
+            }).join("");
+        }
+        if (yearSelect && !yearSelect.options.length) {
+            const current = now.getFullYear();
+            yearSelect.innerHTML = Array.from({length:7}, function(_, i) {
+                const year = current - 3 + i;
+                return '<option value="' + year + '">' + year + '</option>';
+            }).join("");
+        }
+        if (monthSelect && !monthSelect.value) monthSelect.value = String(now.getMonth() + 1);
+        if (yearSelect && !yearSelect.value) yearSelect.value = String(now.getFullYear());
+    }
+
+    function getProductionAccuracyPeriod() {
+        return {
+            month: Number(document.getElementById("productionAccuracyMonth")?.value || new Date().getMonth() + 1),
+            year: Number(document.getElementById("productionAccuracyYear")?.value || new Date().getFullYear())
+        };
+    }
+
+    function updateProductionAccuracy(data) {
+        const ids = ["productionAccuracyRate","productionAccuracyRingValue","productionQtyReceived","productionQtyCompleted","productionQtyBalance","productionCompletionRate","productionAheadQty","productionOnTimeQty","productionDelayedQty","productionClassifiedTotal","productionAccuracyBasis","productionAccuracyNote"];
+        if (!data || data.success === false) {
+            ids.forEach(function(id) { setText(id, "—"); });
+            setText("productionAccuracyNote", data && data.message ? data.message : "Unable to load production accuracy. Check Apps Script deployment and access.");
+            const trend = document.getElementById("productionAccuracyTrend");
+            if (trend) trend.innerHTML = '<div class="collections-empty">Production data is currently unavailable.</div>';
+            return;
+        }
+        const n = value => Number(value) || 0;
+        const fmt = value => formatNumber(n(value)) + " pcs";
+        const pct = value => n(value).toFixed(1) + "%";
+        const accuracy = Math.max(0, Math.min(100, n(data.onTimeAccuracy)));
+        setText("productionAccuracyRate", pct(accuracy));
+        setText("productionAccuracyRingValue", pct(accuracy));
+        setText("productionAccuracyBasis", fmt(data.onTimeQty) + " On Time / " + fmt(data.classifiedCompletedQty) + " classified completed");
+        setText("productionQtyReceived", fmt(data.receivedThisMonth));
+        setText("productionQtyCompleted", fmt(data.completedThisMonth));
+        setText("productionQtyBalance", fmt(data.remainingBalance));
+        setText("productionCompletionRate", pct(data.completionRate));
+        setText("productionAheadQty", fmt(data.aheadQty));
+        setText("productionOnTimeQty", fmt(data.onTimeQty));
+        setText("productionDelayedQty", fmt(data.delayedQty));
+        setText("productionClassifiedTotal", fmt(data.classifiedCompletedQty) + " classified");
+        const denominator = Math.max(0.0001, n(data.aheadQty) + n(data.onTimeQty) + n(data.delayedQty));
+        [["Ahead",data.aheadQty,"productionAheadBar","productionAheadPct"],["On Time",data.onTimeQty,"productionOnTimeBar","productionOnTimePct"],["Delayed",data.delayedQty,"productionDelayedBar","productionDelayedPct"]].forEach(function(row) {
+            const value = n(row[1]), percent = value / denominator * 100;
+            const bar = document.getElementById(row[2]);
+            if (bar) bar.style.width = percent.toFixed(2) + "%";
+            setText(row[3], pct(percent));
+        });
+        const note = n(data.unclassifiedQty) > 0
+            ? fmt(data.unclassifiedQty) + " completed quantity has no RDD and is excluded from accuracy."
+            : "Accuracy excludes completed quantities without an applicable RDD. RDD is taken from the date saved when the completion was recorded.";
+        setText("productionAccuracyNote", note);
+        renderProductionAccuracyTrend(Array.isArray(data.monthlyTrend) ? data.monthlyTrend : []);
+    }
+
+    function renderProductionAccuracyTrend(months) {
+        const chart = document.getElementById("productionAccuracyTrend");
+        if (!chart) return;
+        if (!months.length) {
+            chart.innerHTML = '<div class="collections-empty">No monthly completion history yet.</div>';
+            return;
+        }
+        const max = Math.max(1, ...months.map(x => (Number(x.ahead)||0) + (Number(x.onTime)||0) + (Number(x.delayed)||0)));
+        chart.innerHTML = months.map(function(item) {
+            const a=Number(item.ahead)||0, o=Number(item.onTime)||0, d=Number(item.delayed)||0, total=a+o+d;
+            const ah=a/max*100, oh=o/max*100, dh=d/max*100;
+            const tooltip=item.label+" "+item.year+" | Ahead: "+formatNumber(a)+" pcs ("+(total?a/total*100:0).toFixed(1)+"%) | On Time: "+formatNumber(o)+" pcs ("+(total?o/total*100:0).toFixed(1)+"%) | Delayed: "+formatNumber(d)+" pcs ("+(total?d/total*100:0).toFixed(1)+"%) | Total: "+formatNumber(total)+" pcs";
+            return '<div class="production-trend-month" title="'+escapeHtml(tooltip)+'" aria-label="'+escapeHtml(tooltip)+'"><strong>'+formatNumber(total)+'</strong><div class="production-trend-stack"><i class="ahead" style="height:'+ah+'%"></i><i class="ontime" style="height:'+oh+'%"></i><i class="delayed" style="height:'+dh+'%"></i></div><span>'+escapeHtml(item.label)+'</span></div>';
+        }).join("");
     }
 
     function updateJOProductionOverview(data) {
