@@ -324,3 +324,71 @@ function generateCustomerId() {
   );
 
 }
+
+
+/* =========================================================
+   TEMPORARY WEB APP WRITE DIAGNOSTIC
+   Admin-only. Writes one test row then clears its contents.
+========================================================= */
+function diagnoseCustomerWebAppWrite_(payload) {
+  let step = "AUTHORIZE_ADMIN";
+  let sheet = null;
+  let testRow = 0;
+
+  try {
+    const admin = authorizeRole_(payload || {}, ["ADMIN"]);
+    const context = ACTIVE_COMPANY_CONTEXT_;
+    step = "OPEN_ACTIVE_DATABASE";
+    const ss = getDatabase();
+    sheet = ss.getSheetByName(CONFIG.SHEETS.CUSTOMERS);
+    if (!sheet) throw new Error("CUSTOMERS sheet not found.");
+
+    const protections = sheet.getProtections(SpreadsheetApp.ProtectionType.RANGE);
+    const protectionInfo = protections.map(function(p) {
+      return {
+        description: p.getDescription() || "",
+        range: p.getRange().getA1Notation(),
+        warningOnly: p.isWarningOnly()
+      };
+    });
+
+    step = "APPEND_DIAGNOSTIC_ROW";
+    testRow = sheet.getLastRow() + 1;
+    sheet.appendRow([
+      "__WEBAPP_WRITE_DIAGNOSTIC__",
+      "TEMPORARY TEST - SAFE TO CLEAR",
+      "", "", "", "", "", "", "TEST",
+      new Date(),
+      new Date()
+    ]);
+
+    step = "CLEAR_DIAGNOSTIC_ROW";
+    sheet.getRange(testRow, 1, 1, 11).clearContent();
+
+    return {
+      success: true,
+      message: "Web App write test succeeded; temporary row contents were cleared.",
+      company: context ? context.company : "",
+      spreadsheetId: context ? context.spreadsheetId : "",
+      spreadsheetName: ss.getName(),
+      sheetName: sheet.getName(),
+      testRow: testRow,
+      effectiveUser: Session.getEffectiveUser().getEmail(),
+      activeUser: Session.getActiveUser().getEmail(),
+      protectionCount: protectionInfo.length,
+      protections: protectionInfo
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      diagnosticStep: step,
+      company: ACTIVE_COMPANY_CONTEXT_ ? ACTIVE_COMPANY_CONTEXT_.company : "",
+      spreadsheetId: ACTIVE_COMPANY_CONTEXT_ ? ACTIVE_COMPANY_CONTEXT_.spreadsheetId : "",
+      effectiveUser: Session.getEffectiveUser().getEmail(),
+      activeUser: Session.getActiveUser().getEmail(),
+      testRow: testRow,
+      stack: error.stack || ""
+    };
+  }
+}
