@@ -12,47 +12,107 @@
       <span class="about-status"><i></i> SYSTEM OVERVIEW</span>
     </div>
     <div class="about-industrial-scene" aria-hidden="true">
-      <svg class="about-industrial-svg" viewBox="0 0 620 330" role="presentation">
+      <svg class="about-industrial-svg" viewBox="0 0 760 390" role="presentation">
         <defs>
-          <linearGradient id="cabinetFill" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stop-color="#f8fbff" stop-opacity=".2"/>
-            <stop offset="1" stop-color="#b9d8f5" stop-opacity=".04"/>
+          <linearGradient id="sceneCabinet" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#f3f8ff" stop-opacity=".24"/>
+            <stop offset=".55" stop-color="#c8e3ff" stop-opacity=".10"/>
+            <stop offset="1" stop-color="#7db8ed" stop-opacity=".04"/>
           </linearGradient>
+          <linearGradient id="sceneDoor" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#071f40" stop-opacity=".55"/>
+            <stop offset="1" stop-color="#0b3968" stop-opacity=".30"/>
+          </linearGradient>
+          <linearGradient id="sceneTray" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#d9edff" stop-opacity=".75"/>
+            <stop offset="1" stop-color="#85b9e8" stop-opacity=".35"/>
+          </linearGradient>
+          <filter id="sceneGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
         </defs>
-        <!-- Electrical panel cabinets -->
-        <g class="scene-cabinet">
-          <rect x="330" y="58" width="112" height="205" rx="8" fill="url(#cabinetFill)" stroke="#c9e4ff" stroke-opacity=".8" stroke-width="2"/>
-          <rect x="342" y="72" width="88" height="178" rx="4" fill="none" stroke="#c9e4ff" stroke-opacity=".4"/>
-          <path d="M352 91h68M352 102h68M352 113h68" stroke="#c9e4ff" stroke-opacity=".45"/>
-          <rect x="355" y="132" width="17" height="42" rx="2" fill="#c9e4ff" fill-opacity=".17" stroke="#d7ecff" stroke-opacity=".65"/>
-          <rect x="380" y="132" width="17" height="42" rx="2" fill="#c9e4ff" fill-opacity=".17" stroke="#d7ecff" stroke-opacity=".65"/>
-          <rect x="405" y="132" width="17" height="42" rx="2" fill="#c9e4ff" fill-opacity=".17" stroke="#d7ecff" stroke-opacity=".65"/>
-          <circle cx="415" cy="235" r="3.5" fill="#b9dc65" class="scene-led"/>
-          <path d="M421 181v35" stroke="#d7ecff" stroke-opacity=".55" stroke-width="2"/>
+
+        <!-- Main floor-mounted LV switchgear cabinet -->
+        <g class="scene-main-panel">
+          <rect x="405" y="38" width="205" height="292" rx="12" fill="#061d39" fill-opacity=".22" stroke="#cde7ff" stroke-opacity=".88" stroke-width="3"/>
+          <rect x="416" y="49" width="183" height="270" rx="8" fill="url(#sceneCabinet)" stroke="#e2f1ff" stroke-opacity=".35"/>
+          <rect x="429" y="62" width="157" height="242" rx="5" fill="url(#sceneDoor)" stroke="#d5eaff" stroke-opacity=".46"/>
+          <path d="M440 78h135M440 86h135" stroke="#d7eaff" stroke-opacity=".24" stroke-width="2"/>
+          <!-- Digital meter / HMI -->
+          <rect x="448" y="98" width="75" height="42" rx="4" fill="#071c36" fill-opacity=".72" stroke="#cbe5ff" stroke-opacity=".78"/>
+          <rect x="455" y="105" width="61" height="27" rx="2" fill="#173f61" stroke="#8fc9ff" stroke-opacity=".45"/>
+          <path d="M461 124l9-8 8 4 9-9 8 5 9-4" fill="none" stroke="#b9dc65" stroke-width="2"/>
+          <circle cx="565" cy="118" r="5" fill="#b9dc65" class="scene-led" filter="url(#sceneGlow)"/>
+          <!-- Breaker row -->
+          <g class="scene-breakers">
+            <rect x="447" y="157" width="39" height="66" rx="4" fill="#dceeff" fill-opacity=".14" stroke="#d6eaff" stroke-opacity=".7"/>
+            <rect x="493" y="157" width="39" height="66" rx="4" fill="#dceeff" fill-opacity=".14" stroke="#d6eaff" stroke-opacity=".7"/>
+            <rect x="539" y="157" width="39" height="66" rx="4" fill="#dceeff" fill-opacity=".14" stroke="#d6eaff" stroke-opacity=".7"/>
+            <path d="M456 170h21v27h-21zM502 170h21v27h-21zM548 170h21v27h-21z" fill="#a9cbe8" fill-opacity=".32" stroke="#e4f2ff" stroke-opacity=".5"/>
+            <path d="M466 198v12M512 198v12M558 198v12" stroke="#b9dc65" stroke-width="3" stroke-linecap="round"/>
+            <path d="M456 215h22M502 215h22M548 215h22" stroke="#d8ebfb" stroke-opacity=".5"/>
+          </g>
+          <!-- Busbar chamber and cable terminals -->
+          <rect x="447" y="237" width="131" height="53" rx="4" fill="#061c35" fill-opacity=".38" stroke="#d5eaff" stroke-opacity=".45"/>
+          <path d="M463 247v30M478 247v30M493 247v30M508 247v30M523 247v30M538 247v30M553 247v30" stroke="#8fc9ff" stroke-opacity=".7" stroke-width="4"/>
+          <path d="M460 279h101" stroke="#dcecff" stroke-opacity=".32"/>
+          <circle cx="570" cy="300" r="3" fill="#b9dc65"/>
+          <path d="M590 88v190" stroke="#d9ecff" stroke-opacity=".55" stroke-width="2"/>
+          <path d="M585 182h10" stroke="#d9ecff" stroke-opacity=".7" stroke-width="3"/>
+          <path d="M425 322h165" stroke="#cce5ff" stroke-opacity=".35" stroke-width="3"/>
+          <path d="M435 330h145" stroke="#071d39" stroke-opacity=".35" stroke-width="5"/>
         </g>
-        <g class="scene-cabinet scene-cabinet-small">
-          <rect x="458" y="92" width="76" height="171" rx="7" fill="url(#cabinetFill)" stroke="#c9e4ff" stroke-opacity=".65" stroke-width="2"/>
-          <rect x="468" y="105" width="56" height="145" rx="3" fill="none" stroke="#c9e4ff" stroke-opacity=".35"/>
-          <path d="M478 126h36M478 137h36M478 148h36" stroke="#c9e4ff" stroke-opacity=".4"/>
-          <circle cx="515" cy="232" r="3" fill="#b9dc65" class="scene-led"/>
+
+        <!-- Adjacent distribution / control panel -->
+        <g class="scene-side-panel">
+          <rect x="627" y="91" width="101" height="239" rx="9" fill="url(#sceneCabinet)" stroke="#cde7ff" stroke-opacity=".75" stroke-width="2.5"/>
+          <rect x="638" y="103" width="79" height="216" rx="5" fill="url(#sceneDoor)" stroke="#d5eaff" stroke-opacity=".35"/>
+          <rect x="649" y="119" width="57" height="48" rx="3" fill="#071c36" fill-opacity=".48" stroke="#cde7ff" stroke-opacity=".5"/>
+          <path d="M657 132h41M657 142h41M657 152h28" stroke="#cde7ff" stroke-opacity=".65" stroke-width="2"/>
+          <circle cx="665" cy="190" r="6" fill="#b9dc65" class="scene-led"/>
+          <circle cx="690" cy="190" r="6" fill="#8fc9ff" class="scene-led scene-led-delay"/>
+          <path d="M651 214h53M651 224h53M651 234h53" stroke="#d5eaff" stroke-opacity=".42" stroke-width="2"/>
+          <rect x="651" y="253" width="53" height="45" rx="3" fill="#071c36" fill-opacity=".35" stroke="#d5eaff" stroke-opacity=".35"/>
+          <path d="M661 263v24M674 263v24M687 263v24" stroke="#a8d3f5" stroke-opacity=".65" stroke-width="3"/>
         </g>
-        <!-- Cable tray with ladder rungs -->
-        <g class="scene-tray" fill="none" stroke="#c7e5ff" stroke-opacity=".8" stroke-width="3">
-          <path d="M35 215L315 215L350 190" />
-          <path d="M35 247L315 247L350 222" />
-          <path d="M52 215v32M82 215v32M112 215v32M142 215v32M172 215v32M202 215v32M232 215v32M262 215v32M292 215v32"/>
+
+        <!-- Cable ladder tray in perspective, with side rails and rungs -->
+        <g class="scene-tray" fill="none" stroke="url(#sceneTray)" stroke-width="4" stroke-linejoin="round">
+          <path d="M26 244L333 244L403 194"/>
+          <path d="M26 296L333 296L403 246"/>
+          <path d="M47 244L47 296M79 244L79 296M111 244L111 296M143 244L143 296M175 244L175 296M207 244L207 296M239 244L239 296M271 244L271 296M303 244L303 296M335 243L335 295"/>
+          <path d="M26 244L26 296M333 244L333 296" stroke-width="6"/>
         </g>
-        <!-- Animated cable runs -->
-        <path class="scene-cable scene-cable-one" d="M35 226C105 226 120 226 165 226S250 226 315 226L360 196" fill="none" stroke="#b9dc65" stroke-width="4" stroke-linecap="round" stroke-dasharray="10 12"/>
-        <path class="scene-cable scene-cable-two" d="M35 237C105 237 120 237 165 237S250 237 315 237L360 207" fill="none" stroke="#8fc9ff" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 14"/>
-        <!-- Cable coil -->
-        <g class="scene-coil" fill="none" stroke="#d7eaff" stroke-opacity=".7" stroke-width="3">
-          <ellipse cx="100" cy="164" rx="28" ry="10"/>
-          <ellipse cx="100" cy="154" rx="28" ry="10"/>
-          <path d="M72 154v10M128 154v10M72 164c0 7 56 7 56 0"/>
+        <!-- Three insulated power/control cable runs -->
+        <path class="scene-cable scene-cable-one" d="M31 256H329L397 207" fill="none" stroke="#b9dc65" stroke-width="5" stroke-linecap="round" stroke-dasharray="13 13"/>
+        <path class="scene-cable scene-cable-two" d="M31 270H329L397 221" fill="none" stroke="#8fc9ff" stroke-width="4" stroke-linecap="round" stroke-dasharray="9 13"/>
+        <path class="scene-cable scene-cable-three" d="M31 284H329L397 235" fill="none" stroke="#f0c879" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="8 15"/>
+
+        <!-- Cable drum and coiled wire -->
+        <g class="scene-coil">
+          <ellipse cx="116" cy="184" rx="45" ry="15" fill="#071e3a" fill-opacity=".16" stroke="#d9ecff" stroke-opacity=".8" stroke-width="3"/>
+          <path d="M71 184v24c0 9 20 16 45 16s45-7 45-16v-24" fill="#b8d9f5" fill-opacity=".10" stroke="#d9ecff" stroke-opacity=".75" stroke-width="3"/>
+          <ellipse cx="116" cy="208" rx="45" ry="15" fill="none" stroke="#d9ecff" stroke-opacity=".6" stroke-width="2"/>
+          <ellipse cx="116" cy="181" rx="34" ry="10" fill="none" stroke="#b9dc65" stroke-opacity=".9" stroke-width="3"/>
+          <ellipse cx="116" cy="177" rx="25" ry="7" fill="none" stroke="#8fc9ff" stroke-opacity=".8" stroke-width="2"/>
+          <path d="M81 183c4 13 66 18 71 0" fill="none" stroke="#d9ecff" stroke-opacity=".5" stroke-width="2"/>
         </g>
-        <g fill="#d7eaff" fill-opacity=".6">
-          <circle cx="285" cy="72" r="2"/><circle cx="304" cy="88" r="2"/><circle cx="270" cy="103" r="1.5"/>
+
+        <!-- Junction box / conduit connection -->
+        <g class="scene-junction">
+          <rect x="245" y="105" width="83" height="55" rx="6" fill="url(#sceneCabinet)" stroke="#cde7ff" stroke-opacity=".65" stroke-width="2"/>
+          <rect x="254" y="114" width="65" height="37" rx="3" fill="#071f40" fill-opacity=".28" stroke="#d8ebff" stroke-opacity=".35"/>
+          <circle cx="264" cy="132" r="3" fill="#b9dc65"/>
+          <path d="M275 124h33M275 134h33M275 144h24" stroke="#d7eaff" stroke-opacity=".58" stroke-width="2"/>
+          <path d="M286 160v34H211v47" fill="none" stroke="#d3e9ff" stroke-opacity=".6" stroke-width="4"/>
+        </g>
+
+        <!-- Subtle electrical energy points -->
+        <g fill="#d9ecff">
+          <circle cx="360" cy="80" r="2.5" opacity=".65"/>
+          <circle cx="380" cy="101" r="2" opacity=".45"/>
+          <circle cx="345" cy="120" r="2" opacity=".45"/>
         </g>
       </svg>
       <span class="about-scene-caption">PANEL BOARDS <i></i> CABLE TRAYS <i></i> ELECTRICAL WORKS</span>
