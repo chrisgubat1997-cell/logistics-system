@@ -288,6 +288,10 @@ async function initCreateDeliveryReceipt() {
     }
 }
 
+// Expose initializer so the main application can load this form inside its shell.
+window.initializeCreateDeliveryReceipt = initCreateDeliveryReceipt;
+
+
 
 /* =========================================================
    BUTTON SETUP
@@ -4032,6 +4036,16 @@ function goBackToMain() {
     closeWarningModal();
 
     closePreviewModal();
+
+    // When opened inside LOGIS-TECH, close only the in-app form.
+    // Keep the main shell, sidebar, and current Delivery page visible.
+    if (
+        window.__LOGISTECH_CREATE_DR_MODAL__ &&
+        typeof window.closeCreateDeliveryReceiptModal === "function"
+    ) {
+        window.closeCreateDeliveryReceiptModal();
+        return;
+    }
 
 
     /*
