@@ -373,8 +373,6 @@ function diagnoseCustomerWebAppWrite_(payload) {
       spreadsheetName: ss.getName(),
       sheetName: sheet.getName(),
       testRow: testRow,
-      effectiveUser: Session.getEffectiveUser().getEmail(),
-      activeUser: Session.getActiveUser().getEmail(),
       protectionCount: protectionInfo.length,
       protections: protectionInfo
     };
@@ -385,8 +383,6 @@ function diagnoseCustomerWebAppWrite_(payload) {
       diagnosticStep: step,
       company: ACTIVE_COMPANY_CONTEXT_ ? ACTIVE_COMPANY_CONTEXT_.company : "",
       spreadsheetId: ACTIVE_COMPANY_CONTEXT_ ? ACTIVE_COMPANY_CONTEXT_.spreadsheetId : "",
-      effectiveUser: Session.getEffectiveUser().getEmail(),
-      activeUser: Session.getActiveUser().getEmail(),
       testRow: testRow,
       stack: error.stack || ""
     };
