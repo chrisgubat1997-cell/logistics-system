@@ -252,6 +252,112 @@ diagnosticStep = "UPDATE_SYNC_VERSION";
 
 
 /* =========================================================
+   UPDATE CUSTOMER
+   Updates an existing customer using CUSTOMER_ID.
+========================================================= */
+
+function updateCustomer(payload) {
+  try {
+    payload = payload || {};
+
+    const customerId = String(
+      payload.customerId || payload.CUSTOMER_ID || ""
+    ).trim();
+
+    const clientName = String(
+      payload.clientName || payload.CLIENT_NAME || ""
+    ).trim();
+
+    if (!customerId) {
+      return { success: false, error: "Customer ID is required." };
+    }
+
+    if (!clientName) {
+      return { success: false, error: "Client Name is required." };
+    }
+
+    const sheet = getSheet(CONFIG.SHEETS.CUSTOMERS);
+    const lastRow = sheet.getLastRow();
+    const lastCol = sheet.getLastColumn();
+
+    if (lastRow < 2 || lastCol < 1) {
+      return { success: false, error: "Customer not found." };
+    }
+
+    const headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+    const idCol = headers.findIndex(function(header) {
+      return String(header).trim() === "CUSTOMER_ID";
+    });
+
+    if (idCol < 0) {
+      throw new Error("CUSTOMER_ID column not found.");
+    }
+
+    const ids = sheet.getRange(2, idCol + 1, lastRow - 1, 1).getValues();
+    let rowNumber = 0;
+
+    for (let i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]).trim() === customerId) {
+        rowNumber = i + 2;
+        break;
+      }
+    }
+
+    if (!rowNumber) {
+      return { success: false, error: "Customer not found: " + customerId };
+    }
+
+    const row = sheet.getRange(rowNumber, 1, 1, lastCol).getValues()[0];
+    const updates = {
+      CLIENT_NAME: clientName,
+      ATTENTION: payload.attention !== undefined ? payload.attention : payload.ATTENTION,
+      TIN: payload.tin !== undefined ? payload.tin : payload.TIN,
+      BILLING_ADDRESS: payload.billingAddress !== undefined ? payload.billingAddress : payload.BILLING_ADDRESS,
+      DELIVERY_ADDRESS: payload.deliveryAddress !== undefined ? payload.deliveryAddress : payload.DELIVERY_ADDRESS,
+      CONTACT_NUMBER: payload.contactNumber !== undefined ? payload.contactNumber : payload.CONTACT_NUMBER,
+      EMAIL: payload.email !== undefined ? payload.email : payload.EMAIL,
+      STATUS: payload.status !== undefined ? payload.status : payload.STATUS
+    };
+
+    Object.keys(updates).forEach(function(key) {
+      const col = headers.findIndex(function(header) {
+        return String(header).trim() === key;
+      });
+      if (col >= 0 && updates[key] !== undefined) {
+        row[col] = updates[key];
+      }
+    });
+
+    const updatedAtCol = headers.findIndex(function(header) {
+      return String(header).trim() === "UPDATED_AT";
+    });
+    if (updatedAtCol >= 0) {
+      row[updatedAtCol] = formatDateTime(new Date());
+    }
+
+    sheet.getRange(rowNumber, 1, 1, lastCol).setValues([row]);
+    touchSyncVersion();
+
+    const updatedCustomer = rowToObject(headers, row);
+    return {
+      success: true,
+      message: "Customer updated successfully.",
+      customerId: customerId,
+      customer: updatedCustomer
+    };
+
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      error: error.message,
+      stack: error.stack || ""
+    };
+  }
+}
+
+
+/* =========================================================
    GENERATE CUSTOMER ID
    FORMAT:
    CUST-2026-0001
