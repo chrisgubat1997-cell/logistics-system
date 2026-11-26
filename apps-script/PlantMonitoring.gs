@@ -166,7 +166,7 @@ function ensurePlantCompletionBaselines_(){
   for(let i=1;i<pv.length;i++){
     const row=pv[i],id=String(row[ph.SO_ITEM_ID]||"").trim(),qty=Number(row[ph.COMPLETED_QTY]||0);
     if(!id||qty<=0||logged[id])continue;
-    const date=plantDateKey_(ph.COMPLETED_DATE!=null?row[ph.COMPLETED_DATE]:""),so=String(row[ph.SO_NUMBER]||""),rdd=rddBySO[so]||"";
+    const date=plantDateKey_(ph.COMPLETED_DATE!=null?row[ph.COMPLETED_DATE]:"")||plantDateKey_(ph.UPDATED_AT!=null?row[ph.UPDATED_AT]:""),so=String(row[ph.SO_NUMBER]||""),rdd=rddBySO[so]||"";
     const data={BATCH_ID:"LEGACY-"+id,SO_ITEM_ID:id,SO_NUMBER:so,ITEM_NUMBER:String(row[ph.ITEM_NUMBER]||""),ITEM_NAME:String(row[ph.ITEM_NAME]||""),COMPLETED_QTY:qty,COMPLETED_DATE:date,RDD_AT_COMPLETION:rdd,CLASSIFICATION:plantCompletionClass_(date,rdd),BATCH_TYPE:"LEGACY_BASELINE",RECORDED_AT:now,RECORDED_BY:"LEGACY_IMPORT"};
     rows.push(PLANT_COMPLETION_HEADERS_.map(k=>data[k]===undefined?"":data[k]));logged[id]=true;
   }
