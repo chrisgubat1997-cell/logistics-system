@@ -851,7 +851,7 @@
 
     console.log(
         "IndexedDB:",
-        DB_NAME
+        getDatabaseName()
     );
 
     console.log(
