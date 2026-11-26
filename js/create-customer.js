@@ -69,6 +69,28 @@
         data = {}
     ) {
 
+        let sessionAccount = {};
+
+        try {
+            const savedAccount = JSON.parse(
+                localStorage.getItem("logitechUser") || "{}"
+            );
+            sessionAccount =
+                savedAccount.account ||
+                savedAccount.user ||
+                savedAccount;
+        } catch (error) {
+            console.warn("Unable to read LOGIS-TECH session account:", error);
+        }
+
+        const requestData = Object.assign({}, data || {}, {
+            sessionToken:
+                (data && (data.sessionToken || data.session_token)) ||
+                sessionAccount.sessionToken ||
+                sessionAccount.session_token ||
+                ""
+        });
+
         const response =
             await fetch(
                 CUSTOMER_API_URL,
@@ -87,7 +109,7 @@
                                 action,
 
                             data:
-                                data
+                                requestData
 
                         })
                 }
