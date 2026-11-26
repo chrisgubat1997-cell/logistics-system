@@ -151,7 +151,17 @@ function routeRequest(
   // Only public authentication/bootstrap actions bypass company context.
   const publicActions = ["ping", "login", "getSystemMaintenanceStatus"];
   if (publicActions.indexOf(String(action)) === -1) {
-    establishCompanyContext_(payload);
+    try {
+      establishCompanyContext_(payload);
+    } catch (contextError) {
+      console.error("COMPANY CONTEXT ERROR [" + action + "]:", contextError);
+      return {
+        success: false,
+        error: contextError.message,
+        diagnosticStep: "ESTABLISH_COMPANY_CONTEXT",
+        stack: contextError.stack || ""
+      };
+    }
   }
 
   // Maintenance mode: only authenticated ADMIN accounts may continue.
