@@ -104,6 +104,8 @@ function getCustomer(payload) {
 
 function createCustomer(payload) {
 
+  let diagnosticStep = "START_CREATE_CUSTOMER";
+
   try {
 
     payload = payload || {};
@@ -125,6 +127,7 @@ function createCustomer(payload) {
     }
 
 
+    diagnosticStep = "OPEN_CUSTOMERS_SHEET";
     const sheet =
       getSheet(CONFIG.SHEETS.CUSTOMERS);
 
@@ -133,6 +136,7 @@ function createCustomer(payload) {
       new Date();
 
 
+    diagnosticStep = "GENERATE_CUSTOMER_ID";
     const customerId =
       generateCustomerId();
 
@@ -189,6 +193,7 @@ function createCustomer(payload) {
     };
 
 
+    diagnosticStep = "APPEND_CUSTOMER_ROW";
     sheet.appendRow([
 
       customer.CUSTOMER_ID,
@@ -205,7 +210,8 @@ function createCustomer(payload) {
 
     ]);
 
-touchSyncVersion();
+diagnosticStep = "UPDATE_SYNC_VERSION";
+    touchSyncVersion();
 
     return {
 
@@ -234,7 +240,9 @@ touchSyncVersion();
       success: false,
 
       error:
-        error.message
+        error.message,
+      diagnosticStep: diagnosticStep,
+      stack: error.stack || ""
 
     };
 
