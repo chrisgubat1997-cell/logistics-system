@@ -624,8 +624,127 @@ function getLogisTechCurrentRole() {
             );
         }
 
-        window.location.href = CREATE_DELIVERY_RECEIPT_PAGE;
+        openCreateDeliveryReceiptModal();
     }
+
+    /* =====================================================
+       CREATE DELIVERY RECEIPT - IN-APP MODAL
+       Keeps the LOGIS-TECH shell and sidebar visible.
+    ===================================================== */
+
+    async function openCreateDeliveryReceiptModal() {
+        const deliveryPage = document.getElementById("delivery");
+        if (!deliveryPage) {
+            console.error("[Create DR] Delivery content page not found.");
+            return;
+        }
+
+        let overlay = document.getElementById("createDeliveryReceiptModal");
+        if (!overlay) {
+            overlay = document.createElement("section");
+            overlay.id = "createDeliveryReceiptModal";
+            overlay.setAttribute("role", "dialog");
+            overlay.setAttribute("aria-modal", "true");
+            overlay.setAttribute("aria-label", "Prepare Delivery Receipt");
+            overlay.style.cssText = [
+                "position:fixed", "inset:0", "z-index:10000",
+                "display:flex", "align-items:center", "justify-content:center",
+                "padding:18px", "background:rgba(15,23,42,.58)"
+            ].join(";");
+            overlay.innerHTML =
+                '<div class="create-dr-modal-panel" style="width:min(1500px,98vw);height:min(94vh,1000px);overflow:auto;background:#f4f6f9;border-radius:16px;box-shadow:0 24px 80px rgba(0,0,0,.28);position:relative;">' +
+                '<div style="padding:28px;text-align:center;color:#64748b;">Loading Prepare Delivery Receipt...</div>' +
+                '</div>';
+            deliveryPage.appendChild(overlay);
+        } else {
+            overlay.style.display = "flex";
+        }
+
+        window.__LOGISTECH_CREATE_DR_MODAL__ = true;
+        document.body.classList.add("create-dr-modal-open");
+
+        try {
+            const panel = overlay.querySelector(".create-dr-modal-panel");
+            const results = await Promise.all([
+                fetch(CREATE_DELIVERY_RECEIPT_PAGE, { cache: "no-store" }),
+                fetch("css/create-delivery-receipt.css?v=20261126-inapp01", { cache: "no-store" })
+            ]);
+            const pageResponse = results[0];
+            const cssResponse = results[1];
+
+            if (!pageResponse.ok) {
+                throw new Error("Unable to load Prepare Delivery Receipt page (HTTP " + pageResponse.status + ").");
+            }
+            if (!cssResponse.ok) {
+                throw new Error("Unable to load Prepare Delivery Receipt styles (HTTP " + cssResponse.status + ").");
+            }
+
+            const parsed = new DOMParser().parseFromString(await pageResponse.text(), "text/html");
+            if (!parsed.body) throw new Error("Invalid Prepare Delivery Receipt page.");
+
+            let style = document.getElementById("create-delivery-receipt-modal-styles");
+            if (!style) {
+                style = document.createElement("style");
+                style.id = "create-delivery-receipt-modal-styles";
+                document.head.appendChild(style);
+            }
+
+            let scopedCSS = await cssResponse.text();
+            scopedCSS = scopedCSS.replace(/(^|})\s*html\s*,\s*body\s*\{[^}]*\}/gi, "$1");
+            scopedCSS = scopedCSS.replace(/(^|})\s*html\s*\{[^}]*\}/gi, "$1");
+            scopedCSS = scopedCSS.replace(/(^|})\s*body\s*\{[^}]*\}/gi, "$1");
+            style.textContent = scopedCSS;
+
+            panel.innerHTML = parsed.body.innerHTML.replace(/<script[\s\S]*?<\/script>/gi, "");
+
+            let script = document.getElementById("create-delivery-receipt-modal-script");
+            if (!script || typeof window.initializeCreateDeliveryReceipt !== "function") {
+                if (script) script.remove();
+                script = document.createElement("script");
+                script.id = "create-delivery-receipt-modal-script";
+                script.src = "js/create-delivery-receipt.js?v=20261126-inapp01";
+                await new Promise((resolve, reject) => {
+                    script.onload = resolve;
+                    script.onerror = () => reject(new Error("Unable to load Prepare Delivery Receipt JavaScript."));
+                    document.body.appendChild(script);
+                });
+            }
+
+            if (typeof window.initializeCreateDeliveryReceipt !== "function") {
+                throw new Error("Prepare Delivery Receipt initializer is unavailable.");
+            }
+
+            await window.initializeCreateDeliveryReceipt();
+            panel.scrollTop = 0;
+        } catch (error) {
+            console.error("[Create DR] Modal failed:", error);
+            const panel = overlay.querySelector(".create-dr-modal-panel");
+            if (panel) {
+                panel.innerHTML =
+                    '<div style="padding:32px;color:#334155;">' +
+                    '<h2>Unable to Open Prepare Delivery Receipt</h2>' +
+                    '<p>' + (typeof escapeHTML === "function" ? escapeHTML(error.message) : String(error.message || error)) + '</p>' +
+                    '<button type="button" onclick="closeCreateDeliveryReceiptModal()">Close</button>' +
+                    '</div>';
+            }
+        }
+    }
+
+    function closeCreateDeliveryReceiptModal() {
+        const overlay = document.getElementById("createDeliveryReceiptModal");
+        if (overlay) overlay.remove();
+
+        const style = document.getElementById("create-delivery-receipt-modal-styles");
+        if (style) style.remove();
+
+        document.body.classList.remove("create-dr-modal-open");
+        window.__LOGISTECH_CREATE_DR_MODAL__ = false;
+
+        const prepareButton = document.getElementById("prepareDRButton");
+        if (prepareButton) prepareButton.focus();
+    }
+
+    window.closeCreateDeliveryReceiptModal = closeCreateDeliveryReceiptModal;
 
     /* =====================================================
        SUMMARY CARDS
