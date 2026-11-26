@@ -128,7 +128,7 @@
     <link rel="stylesheet" href="css/revolving-fund.css?v=20261109-font-small01">
     <link rel="stylesheet" href="css/messages.css?v=20261109-sendstatus01">
     <link rel="stylesheet" href="css/request-center.css?v=20261125-live02">
-    <link rel="stylesheet" href="css/about.css?v=20261126-industrial-motion01">
+    <link rel="stylesheet" href="css/about.css?v=20261126-industrial-motion02">
     <link rel="stylesheet" href="css/jo-register.css?v=20261109-font-small01">
     <link rel="stylesheet" href="css/plant-monitoring.css?v=20261124-05">
     <link rel="stylesheet" href="css/about-design-system.css?v=20261109-about-reference01">
@@ -3218,7 +3218,7 @@ async function loadAboutModule() {
     if (!container || aboutModuleLoaded) return;
 
     try {
-        const response = await fetch('pages/about.html?v=20261126-industrial-motion01', { cache: 'no-store' });
+        const response = await fetch('pages/about.html?v=20261126-industrial-motion02', { cache: 'no-store' });
         if (!response.ok) throw new Error('HTTP ' + response.status + ' - ' + response.statusText);
         const html = await response.text();
         if (!html || !html.trim()) throw new Error('about.html is empty.');
