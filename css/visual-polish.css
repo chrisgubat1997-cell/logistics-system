@@ -260,3 +260,127 @@ button:disabled, .btn:disabled {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* =========================================================
+   EDGE SPACING FIX — prevent headings and labels touching borders
+   Applied consistently to module header panels and common card headers.
+========================================================= */
+:where(
+  .sales-order-module .so-page-header,
+  .delivery-module .page-header,
+  .jo-module .jo-header,
+  .plant-monitoring .plant-header,
+  .fleet-analytics-page .fleet-header,
+  .fleet-data-entry .fde-header,
+  .invoicing-container .invoicing-header,
+  .payment-module .payment-page-header,
+  .report-page .report-header,
+  .settings-page .settings-header,
+  .rf-module .rf-header,
+  .create-so-container .create-so-header,
+  .create-dr-page .dr-header,
+  .invoice-page .invoice-header,
+  .create-payment-page .create-payment-header,
+  .customer-page .customer-header,
+  .dashboard-page .dashboard-header
+) {
+  box-sizing: border-box !important;
+  padding: 18px 22px !important;
+  min-height: 96px;
+  align-items: center;
+}
+:where(
+  .sales-order-module .so-page-header > *,
+  .delivery-module .page-header > *,
+  .jo-module .jo-header > *,
+  .plant-monitoring .plant-header > *,
+  .fleet-analytics-page .fleet-header > *,
+  .fleet-data-entry .fde-header > *,
+  .invoicing-container .invoicing-header > *,
+  .payment-module .payment-page-header > *,
+  .report-page .report-header > *,
+  .settings-page .settings-header > *,
+  .rf-module .rf-header > *,
+  .create-so-container .create-so-header > *,
+  .create-dr-page .dr-header > *,
+  .invoice-page .invoice-header > *,
+  .create-payment-page .create-payment-header > *,
+  .customer-page .customer-header > *
+) {
+  min-width: 0;
+}
+:where(
+  .jo-header h1, .so-page-header h1, .page-header h1,
+  .plant-header h1, .fleet-header h1, .fde-header h1,
+  .invoicing-header h1, .payment-page-header h1,
+  .report-header h1, .settings-header h1, .rf-header h1,
+  .create-so-header h1, .dr-header h1, .invoice-header h1,
+  .create-payment-header h1, .customer-header h1
+) {
+  margin-top: 2px !important;
+  margin-bottom: 7px !important;
+}
+:where(
+  .jo-header p, .so-page-header p, .page-header p,
+  .plant-header p, .fleet-header p, .fde-header p,
+  .invoicing-header p, .payment-page-header p,
+  .report-header p, .settings-header p, .rf-header p,
+  .create-so-header p, .dr-header p, .invoice-header p,
+  .create-payment-header p, .customer-header p
+) {
+  margin: 0 !important;
+  line-height: 1.55 !important;
+}
+:where(
+  .jo-toolbar, .so-table-header, .customer-table-header,
+  .delivery-module .delivery-toolbar,
+  .plant-monitoring .plant-panel-head,
+  .fleet-analytics-page .analytics-card-header,
+  .fleet-data-entry .fde-section-header,
+  .invoicing-container .section-header,
+  .payment-module .payment-section-header,
+  .report-page .report-panel-header,
+  .settings-page .card-header,
+  .rf-module .rf-panel-heading,
+  .create-so-container .section-header,
+  .create-dr-page .card-header,
+  .invoice-page .card-heading,
+  .create-payment-page .create-payment-card-header
+) {
+  box-sizing: border-box;
+  padding: 14px 18px !important;
+}
+:where(
+  .jo-stat, .so-summary-card, .delivery-summary-card,
+  .dashboard-summary-card, .kpi-card, .metric-card,
+  .stat-card, .summary-card, .report-stat-card
+) {
+  box-sizing: border-box;
+  padding: 16px 18px !important;
+}
+@media (max-width: 760px) {
+  :where(
+    .sales-order-module .so-page-header,
+    .delivery-module .page-header,
+    .jo-module .jo-header,
+    .plant-monitoring .plant-header,
+    .fleet-analytics-page .fleet-header,
+    .fleet-data-entry .fde-header,
+    .invoicing-container .invoicing-header,
+    .payment-module .payment-page-header,
+    .report-page .report-header,
+    .settings-page .settings-header,
+    .rf-module .rf-header,
+    .create-so-container .create-so-header,
+    .create-dr-page .dr-header,
+    .invoice-page .invoice-header,
+    .create-payment-page .create-payment-header,
+    .customer-page .customer-header,
+    .dashboard-page .dashboard-header
+  ) {
+    padding: 16px !important;
+    min-height: 0;
+  }
+  :where(.jo-toolbar, .jo-stat) { padding: 13px 14px !important; }
+}
