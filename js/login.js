@@ -65,7 +65,7 @@ document.addEventListener(
         ================================================= */
 
         const API_URL =
-            "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+            "https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
 
         // Check global maintenance before presenting the login interface.
         // Only ADMIN credentials can proceed while maintenance is enabled.
