@@ -166,3 +166,42 @@ html[data-theme="dark"] .about-release-status{background:#392d1a;color:#f4d28e}
   .scene-main-panel, .scene-side-panel, .scene-breakers,
   .scene-junction, .scene-cable-three { animation: none !important; }
 }
+
+
+/* Header protection: keep brand and status above the animated industrial artwork. */
+.about-hero-top {
+  position: relative;
+  z-index: 5;
+  min-height: 52px;
+}
+.about-brand,
+.about-status {
+  position: relative;
+  z-index: 6;
+}
+.about-status {
+  flex: 0 0 auto;
+  padding: 9px 14px;
+  background: rgba(5, 29, 59, .88);
+  border-color: rgba(218, 237, 255, .32);
+  box-shadow: 0 5px 16px rgba(0, 12, 32, .16);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+.about-industrial-scene {
+  z-index: 0;
+  pointer-events: none;
+}
+@media (max-width: 650px) {
+  .about-hero-top {
+    align-items: center;
+    gap: 10px;
+  }
+  .about-status {
+    max-width: 48%;
+    padding: 8px 10px;
+    font-size: 6.5px;
+    letter-spacing: .1em;
+  }
+}
