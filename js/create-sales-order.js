@@ -1892,14 +1892,6 @@ async function saveSO() {
         getValue(
             "soSE"
         );
-
-
-    const jobOrder =
-        getValue(
-            "jobOrder"
-        );
-
-
     /* SO NUMBER VALIDATION */
 
     if (
@@ -2226,10 +2218,6 @@ async function saveSO() {
 
         terms:
             terms,
-
-        jobOrder:
-            jobOrder,
-
         se:
             se,
 
