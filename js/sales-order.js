@@ -10,7 +10,7 @@
        CONFIGURATION
     ===================================================== */
     const SALES_ORDER_API_URL =
-        "https://script.google.com/macros/s/AKfycbwfVW5SWJUmhsuQPEolozrtOV6t_vKG2KGkovlNVDMJBcBQFy_loCVUflXMUHdZsPo6/exec";
+        "https://script.google.com/macros/s/AKfycbyC7CzJL5zRf607d9q_ru93UeAoeeZqkBZMDpKo-XQzKBrS6KKXRFQYMY7c8O9o9lrX/exec";
     const CREATE_SALES_ORDER_PAGE =
         "pages/create-sales-order.html";
     const API_MAX_RETRIES = 3;
