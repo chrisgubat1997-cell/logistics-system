@@ -4137,10 +4137,10 @@ document.addEventListener(
     function removeQuickViewSidebarEntries() {
         document.querySelectorAll('.sidebar .menu .menu-btn').forEach(function (button) {
             const action = button.getAttribute('onclick') || '';
-            const pageMatch = action.match(/showPage\\s*\\(\\s*['"]([^'"]+)['"]/i);
-            const label = (button.textContent || '').replace(/\\s+/g, ' ').trim();
+            const pageMatch = action.match(/showPage\s*\(\s*['"]([^'"]+)['"]/i);
+            const label = (button.textContent || '').replace(/\s+/g, ' ').trim();
             if ((pageMatch && pageMatch[1] === 'soMonitoring') ||
-                /360\\s*°?\\s*(view|quick\\s*view)|quick\\s*view|so\\s*monitoring/i.test(label)) {
+                /360\s*°?\s*(view|quick\s*view)|quick\s*view|so\s*monitoring/i.test(label)) {
                 button.remove();
             }
         });
