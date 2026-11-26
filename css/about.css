@@ -181,6 +181,9 @@ html[data-theme="dark"] .about-release-status{background:#392d1a;color:#f4d28e}
 }
 .about-status {
   flex: 0 0 auto;
+  align-self: flex-start;
+  transform: translateY(-14px);
+  margin-bottom: -14px;
   padding: 9px 14px;
   background: rgba(5, 29, 59, .88);
   border-color: rgba(218, 237, 255, .32);
