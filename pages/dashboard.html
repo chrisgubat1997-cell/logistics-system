@@ -10,11 +10,28 @@
 
     <title>LOGIS-TECH SYSTEM | Dashboard</title>
 
+    <script>
+    (function () {
+        try {
+            var account = JSON.parse(localStorage.getItem("logitechUser") || "{}");
+            var company = String(account.activeCompany || account.defaultCompany || "GREENMETAL").toUpperCase();
+            document.documentElement.setAttribute("data-company", company === "GREENLIGHT" ? "GREENLIGHT" : "GREENMETAL");
+            var settings = JSON.parse(localStorage.getItem("logitechSystemSettings") || "{}");
+            var theme = settings.theme || "light";
+            if (theme === "system") theme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+            document.documentElement.setAttribute("data-theme", theme === "dark" ? "dark" : "light");
+        } catch (error) {
+            document.documentElement.setAttribute("data-company", "GREENMETAL");
+        }
+    })();
+    </script>
+
     <link
         rel="stylesheet"
         href="../css/dashboard.css?v=20261126-production-accuracy02"
     >
     <link rel="stylesheet" href="../css/about-design-system.css?v=20261109-about-reference01">
+    <link rel="stylesheet" href="../css/enterprise-ui.css?v=20261126-enterprise01">
 </head>
 
 <body>
