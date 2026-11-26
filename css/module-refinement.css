@@ -1,0 +1,467 @@
+/* =========================================================
+   LOGIS-TECH — MODULE-BY-MODULE UI REFINEMENT
+   Corporate industrial visual system for GEMCOR / GREENLIGHT.
+   UI-only layer. Does not alter module workflows or data logic.
+   Version: 20261126-modules01
+========================================================= */
+
+:root {
+  --module-radius: 13px;
+  --module-radius-sm: 8px;
+  --module-border: #dfe7f0;
+  --module-surface: #fff;
+  --module-muted: #64748b;
+  --module-shadow: 0 3px 14px rgba(15, 35, 60, .055);
+  --module-shadow-hover: 0 9px 24px rgba(15, 35, 60, .09);
+  --module-accent: var(--primary, #073b78);
+  --module-accent-soft: var(--primary-light, #e8f1fc);
+  --module-focus: color-mix(in srgb, var(--brand-green, #a6ce39) 35%, transparent);
+}
+
+/* Shared page heading rhythm */
+.sales-order-module .so-page-header,
+.delivery-module .page-header,
+.jo-module .jo-header,
+.plant-monitoring .plant-header,
+.fleet-analytics-page .fleet-header,
+.fleet-data-entry .fde-header,
+.invoicing-container .invoicing-header,
+.payment-module .payment-page-header,
+.report-page .report-header,
+.settings-page .settings-header,
+.rf-module .rf-header,
+.create-so-container .create-so-header,
+.create-dr-page .dr-header,
+.invoice-page .invoice-header,
+.create-payment-page .create-payment-header,
+.customer-page .customer-header {
+  border-radius: var(--module-radius);
+  border: 1px solid var(--module-border);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+
+.sales-order-module .so-page-title,
+.delivery-module .page-header-text h1,
+.jo-module .jo-header h1,
+.plant-monitoring .plant-header h1,
+.fleet-analytics-page .fleet-title-text h1,
+.fde-header h1,
+.invoicing-container .header-title,
+.payment-module .payment-page-title,
+.report-page .report-title-area h1,
+.settings-page .settings-header h1,
+.rf-module .rf-title,
+.create-so-container .create-so-header h1,
+.create-dr-page .dr-title-area h1,
+.invoice-page .header-title h1,
+.create-payment-page .create-payment-title-area h1,
+.customer-page .customer-header h1 {
+  letter-spacing: -.025em;
+  font-weight: 800;
+}
+
+/* SALES ORDER — operational list and customer records */
+.sales-order-module .so-summary-grid,
+.sales-order-module .so-table-card,
+.sales-order-module .customer-table-card,
+.sales-order-module .so-details-view {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.sales-order-module .so-summary-card {
+  border: 1px solid var(--module-border);
+  border-radius: 11px;
+  box-shadow: none;
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.sales-order-module .so-summary-card:hover {
+  border-color: color-mix(in srgb, var(--module-accent) 28%, var(--module-border));
+  box-shadow: var(--module-shadow-hover);
+  transform: translateY(-1px);
+}
+.sales-order-module .so-table-header,
+.sales-order-module .customer-table-header {
+  border-bottom: 1px solid var(--module-border);
+  background: #fbfcfe;
+  border-radius: var(--module-radius) var(--module-radius) 0 0;
+}
+.sales-order-module .so-table thead th,
+.sales-order-module .customer-table thead th {
+  background: var(--module-accent-soft);
+  color: var(--module-accent);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+}
+.sales-order-module .so-search-input,
+.sales-order-module .customer-search-input,
+.sales-order-module .so-filter-select {
+  border-radius: var(--module-radius-sm);
+}
+
+/* DELIVERY — document preparation and dispatch */
+.delivery-module .delivery-summary-card,
+.delivery-module .section-card,
+.delivery-module .dr-selection-bar {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.delivery-module .section-title,
+.delivery-module .section-heading-row {
+  color: var(--ink, #172b45);
+}
+.delivery-module .delivery-toolbar {
+  border: 1px solid var(--module-border);
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+.delivery-module .delivery-search-box,
+.delivery-module .delivery-filter select {
+  border-radius: var(--module-radius-sm);
+}
+
+/* JO REGISTER — production release queue */
+.jo-module .jo-notice,
+.jo-module .jo-summary,
+.jo-module .jo-panel {
+  border-radius: var(--module-radius);
+  border: 1px solid var(--module-border);
+  box-shadow: var(--module-shadow);
+}
+.jo-module .jo-stat {
+  border-radius: 10px;
+  border: 1px solid var(--module-border);
+  background: var(--module-surface);
+}
+.jo-module .jo-toolbar,
+.jo-module .jo-filter-bar {
+  border-radius: 10px;
+  background: #fbfcfe;
+  border: 1px solid var(--module-border);
+}
+.jo-module .jo-table thead th {
+  background: var(--module-accent-soft);
+  color: var(--module-accent);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: 10px;
+}
+
+/* PLANT MONITORING — shop-floor progress */
+.plant-monitoring .plant-cards,
+.plant-monitoring .plant-panel,
+.plant-monitoring .plant-message {
+  border-radius: var(--module-radius);
+  border: 1px solid var(--module-border);
+  box-shadow: var(--module-shadow);
+}
+.plant-monitoring .plant-panel-head {
+  border-bottom: 1px solid var(--module-border);
+  background: #fbfcfe;
+  border-radius: var(--module-radius) var(--module-radius) 0 0;
+}
+.plant-monitoring .plant-table thead th {
+  background: var(--module-accent-soft);
+  color: var(--module-accent);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.plant-monitoring .plant-mode,
+.plant-monitoring .plant-refresh {
+  border-radius: 8px;
+}
+
+/* FLEET ANALYTICS — KPI and chart workspace */
+.fleet-analytics-page .fleet-filters,
+.fleet-analytics-page .analytics-section,
+.fleet-analytics-page .analytics-card,
+.fleet-analytics-page .kpi-card {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  box-shadow: var(--module-shadow);
+}
+.fleet-analytics-page .analytics-card-header {
+  border-bottom: 1px solid var(--module-border);
+}
+.fleet-analytics-page .analytics-tab {
+  border-radius: 8px;
+  font-weight: 750;
+}
+.fleet-analytics-page .kpi-card {
+  transition: box-shadow .18s ease, transform .18s ease;
+}
+.fleet-analytics-page .kpi-card:hover {
+  box-shadow: var(--module-shadow-hover);
+  transform: translateY(-1px);
+}
+
+/* FLEET DATA ENTRY — forms and encoded records */
+.fleet-data-entry .fde-section,
+.fleet-data-entry .fde-maint-monitor,
+.fleet-data-entry .fde-maint-request-list {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.fleet-data-entry .fde-section-header,
+.fleet-data-entry .fde-maint-monitor-header {
+  border-bottom: 1px solid var(--module-border);
+}
+.fleet-data-entry .fde-tab {
+  border-radius: 8px;
+  font-weight: 750;
+}
+.fleet-data-entry .fde-field input,
+.fleet-data-entry .fde-field select,
+.fleet-data-entry .fde-field textarea {
+  border-radius: var(--module-radius-sm);
+}
+
+/* INVOICING — receivables and invoice release */
+.invoicing-container .summary-card,
+.invoicing-container .invoice-section {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.invoicing-container .section-header,
+.invoicing-container .invoice-section > .section-title {
+  border-bottom: 1px solid var(--module-border);
+}
+.invoicing-container .invoiced-records-controls,
+.invoicing-container .invoice-release-toolbar {
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+.invoicing-container table thead th {
+  background: var(--module-accent-soft);
+  color: var(--module-accent);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: 10px;
+}
+
+/* PAYMENT — collection status and transaction history */
+.payment-module .payment-summary-card,
+.payment-module .payment-section {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.payment-module .payment-section-header {
+  border-bottom: 1px solid var(--module-border);
+}
+.payment-module .payment-search-box,
+.payment-module .payment-filter-bar {
+  border-radius: 10px;
+  background: #fbfcfe;
+}
+.payment-module .payment-table thead th {
+  background: var(--module-accent-soft);
+  color: var(--module-accent);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  font-size: 10px;
+}
+
+/* REPORTS — management review and analysis */
+.report-page .report-filter-bar,
+.report-page .report-section-heading,
+.report-page .report-panel,
+.report-page .report-stat-card {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.report-page .report-panel-header {
+  border-bottom: 1px solid var(--module-border);
+}
+.report-page .report-stat-card {
+  transition: box-shadow .18s ease, transform .18s ease;
+}
+.report-page .report-stat-card:hover {
+  box-shadow: var(--module-shadow-hover);
+  transform: translateY(-1px);
+}
+
+/* SETTINGS — clearly separated control areas */
+.settings-page .settings-card {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.settings-page .card-header {
+  border-bottom: 1px solid var(--module-border);
+}
+.settings-page .setting-row {
+  border-bottom: 1px solid #edf1f6;
+}
+.settings-page .action-btn {
+  border-radius: 8px;
+}
+
+/* REVOLVING FUND — liquidation and replenishment */
+.rf-module .rf-notice,
+.rf-module .rf-panel,
+.rf-module .rf-summary,
+.rf-module .rf-cards,
+.rf-module .rf-form {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.rf-module .rf-panel-heading,
+.rf-module .rf-section-intro {
+  border-bottom: 1px solid var(--module-border);
+}
+.rf-module .rf-tab {
+  border-radius: 8px;
+  font-weight: 750;
+}
+.rf-module .rf-table-wrap {
+  border: 1px solid var(--module-border);
+  border-radius: 10px;
+  overflow: auto;
+}
+
+/* CREATE FORMS — clear workflow sections */
+.create-so-container .section,
+.create-dr-page .dr-card,
+.invoice-page .invoice-card,
+.create-payment-page .create-payment-card,
+.customer-page .customer-section {
+  border: 1px solid var(--module-border);
+  border-radius: var(--module-radius);
+  background: var(--module-surface);
+  box-shadow: var(--module-shadow);
+}
+.create-so-container .section-header,
+.create-dr-page .card-header,
+.invoice-page .card-heading,
+.create-payment-page .create-payment-card-header {
+  border-bottom: 1px solid var(--module-border);
+}
+.create-so-container .form-group input,
+.create-so-container .form-group select,
+.create-so-container .form-group textarea,
+.create-dr-page .form-control,
+.invoice-page .form-group input,
+.invoice-page .form-group select,
+.invoice-page .form-group textarea,
+.create-payment-page .create-payment-field input,
+.customer-page .form-group input,
+.customer-page .form-group select,
+.customer-page .form-group textarea {
+  border-radius: var(--module-radius-sm);
+}
+.create-so-container .section-number,
+.create-dr-page .section-number,
+.invoice-page .section-label {
+  border-radius: 7px;
+}
+
+/* About and system identity */
+.about-page .about-hero,
+.about-page .about-feature-card,
+.about-page .about-stack-card,
+.about-page .about-info-card,
+.about-page .about-purpose-card,
+.about-page .about-release-card {
+  border-radius: var(--module-radius);
+}
+
+/* Company-aware accents: keep the same structure, change identity only. */
+html[data-company="GREENLIGHT"] {
+  --module-accent: #176b4a;
+  --module-accent-soft: #e5f2ea;
+}
+html[data-company="GREENMETAL"] {
+  --module-accent: #073b78;
+  --module-accent-soft: #e8f1fc;
+}
+html[data-company="GREENLIGHT"] .sales-order-module .so-table thead th,
+html[data-company="GREENLIGHT"] .delivery-module table thead th,
+html[data-company="GREENLIGHT"] .jo-module .jo-table thead th,
+html[data-company="GREENLIGHT"] .plant-monitoring .plant-table thead th,
+html[data-company="GREENLIGHT"] .invoicing-container table thead th,
+html[data-company="GREENLIGHT"] .payment-module .payment-table thead th {
+  background: #e5f2ea;
+  color: #104b36;
+}
+
+/* Focus states and reduced motion */
+.sales-order-module button:focus-visible,
+.delivery-module button:focus-visible,
+.jo-module button:focus-visible,
+.plant-monitoring button:focus-visible,
+.fleet-analytics-page button:focus-visible,
+.fleet-data-entry button:focus-visible,
+.invoicing-container button:focus-visible,
+.payment-module button:focus-visible,
+.report-page button:focus-visible,
+.settings-page button:focus-visible,
+.rf-module button:focus-visible,
+.create-so-container button:focus-visible,
+.create-dr-page button:focus-visible,
+.invoice-page button:focus-visible,
+.create-payment-page button:focus-visible,
+.customer-page button:focus-visible {
+  outline: 3px solid var(--module-focus);
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .sales-order-module .so-page-header,
+  .delivery-module .page-header,
+  .jo-module .jo-header,
+  .plant-monitoring .plant-header,
+  .fleet-analytics-page .fleet-header,
+  .fleet-data-entry .fde-header,
+  .invoicing-container .invoicing-header,
+  .payment-module .payment-page-header,
+  .report-page .report-header,
+  .settings-page .settings-header,
+  .rf-module .rf-header,
+  .create-so-container .create-so-header,
+  .create-dr-page .dr-header,
+  .invoice-page .invoice-header,
+  .create-payment-page .create-payment-header,
+  .customer-page .customer-header {
+    border-radius: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sales-order-module *,
+  .delivery-module *,
+  .jo-module *,
+  .plant-monitoring *,
+  .fleet-analytics-page *,
+  .fleet-data-entry *,
+  .invoicing-container *,
+  .payment-module *,
+  .report-page *,
+  .settings-page *,
+  .rf-module *,
+  .create-so-container *,
+  .create-dr-page *,
+  .invoice-page *,
+  .create-payment-page *,
+  .customer-page * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
